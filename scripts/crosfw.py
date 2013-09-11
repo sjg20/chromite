@@ -15,6 +15,8 @@ details.
 It can also flash SPI by writing a 'magic flasher' U-Boot with a payload
 to the board.
 
+Usage: crosfw [options]
+
 The script is normally run from within the U-Boot directory which is
 .../src/third_party/u-boot/files
 
@@ -145,25 +147,36 @@ verbose = False
 # since the naming is not always consistent.
 # x86 has a lot of boards, but to U-Boot they are all the same
 UBOARDS = {
-    'daisy': 'smdk5250',
-    'peach': 'smdk5420',
+    'daisy_spring': 'spring',
+    'daisy': 'snow',
+    #'peach': 'smdk5420',
+    'peach': 'peach-pit',
+    'peach_pit': 'peach-pit',
+    'peach_pi': 'peach-pi',
 }
 for b in ['alex', 'butterfly', 'emeraldlake2', 'link', 'lumpy', 'parrot',
-          'stout', 'stumpy']:
+          'stout', 'stumpy', 'panther']:
   UBOARDS[b] = 'coreboot-x86'
   UBOARDS['chromeos_%s' % b] = 'chromeos_coreboot'
 
 SOCS = {
-    'coreboot-x86': '',
+    'coreboot-x86': 'chromebook_',
     'chromeos_coreboot': '',
     'daisy': 'exynos5250-',
+    'peach_pi': 'exynos5800-',
     'peach': 'exynos5420-',
+    'norrin': 'tegra124-',
+    'nyan': 'tegra124-',
+    'nyan-big': 'tegra124-',
+    'seaboard': 'tegra20-',
 }
 
 DEFAULT_DTS = {
     'daisy': 'snow',
     'daisy_spring': 'spring',
     'peach_pit': 'peach-pit',
+    'peach_pi': 'peach-pi',
+    'peach': 'smdk5420',
 }
 
 OUT_DIR = '/tmp/crosfw'
@@ -173,6 +186,19 @@ if os.path.exists(rc_file):
   with open(rc_file) as fp:
     # pylint: disable=exec-used
     exec(compile(fp.read(), rc_file, 'exec'))
+
+compiler_paths = {
+#  'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
+  'linaro' : '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-',
+
+  # This has the bug-fix for rodata:
+  #'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-',
+  #'linaro' : '/usr/bin/arm-none-eabi-',
+
+  # For gurnard
+  #'linaro' : '/vol1/tools/arm/arm-2010q1/bin/arm-none-linux-gnueabi-gcc',
+  #'odroid' : '/opt/tools/arm-eabi-4.6/bin/*gcc',
+}
 
 
 def Log(msg):
@@ -222,25 +248,35 @@ def ParseCmdline(argv):
     The parsed options object
   """
   parser = commandline.ArgumentParser(description=__doc__)
+  parser.add_argument('-1', '--one-cpu', action='store_true',
+                      help='Run with a single CPU (-j1)')
   parser.add_argument('-a', '--cbfargs', action='append',
                       help='Pass extra arguments to cros_bundle_firmware')
   parser.add_argument('-b', '--board', type=str, default=default_board,
                       help='Select board to build (daisy/peach_pit/link)')
   parser.add_argument('-B', '--build', action='store_false', default=True,
                       help="Don't build U-Boot, just configure device tree")
+  parser.add_argument('-c', '--config-only', action='store_true', default=False,
+                      help='Build only the config (u-boot.cfg)')
   parser.add_argument('-C', '--console', action='store_false', default=True,
                       help='Permit console output')
-  parser.add_argument('-d', '--dt', default='seaboard',
+  parser.add_argument('-d', '--dt', default='default',
                       help='Select name of device tree file to use')
+  parser.add_argument('--dtb', type=str, default=None,
+                      help='Select a binary .dtb, passed to U-Boot as DEV_TREE_BIN')
   parser.add_argument('-D', '--nodefaults', dest='use_defaults',
                       action='store_false', default=True,
                       help="Don't select default filenames for those not given")
+  parser.add_argument('-e', '--efs', action='store_true', default=False,
+                      help='Enable early firmware selection')
   parser.add_argument('-F', '--flash', action='store_true', default=False,
                       help='Create magic flasher for SPI flash')
   parser.add_argument('-M', '--mmc', action='store_true', default=False,
                       help='Create magic flasher for eMMC')
   parser.add_argument('-i', '--incremental', action='store_true', default=False,
                       help="Don't reconfigure and clean")
+  parser.add_argument('-I', '--in-tree', action='store_true', default=False,
+                      help="Build in-tree")
   parser.add_argument('-k', '--kernel', action='store_true', default=False,
                       help='Send kernel to board also')
   parser.add_argument('-O', '--objdump', action='store_true', default=False,
@@ -254,15 +290,15 @@ def ParseCmdline(argv):
   parser.add_argument('-s', '--separate', action='store_false', default=True,
                       help='Link device tree into U-Boot, instead of separate')
   parser.add_argument('-S', '--secure', action='store_true', default=False,
-                      help='Use vboot_twostop secure boot')
+                      help='Use vboot_go_auto secure boot')
   parser.add_argument('--small', action='store_true', default=False,
                       help='Create Chrome OS small image')
   parser.add_argument('-t', '--trace', action='store_true', default=False,
                       help='Enable trace support')
   parser.add_argument('-V', '--verified', action='store_true', default=False,
                       help='Include Chrome OS verified boot components')
-  parser.add_argument('-w', '--write', action='store_false', default=True,
-                      help="Don't write image to board using usb/em100")
+  parser.add_argument('-w', '--write', action='store_true', default=False,
+                      help="Write image to board using usb/em100")
   parser.add_argument('-x', '--sdcard', action='store_true', default=False,
                       help='Write to SD card instead of USB/em100')
   parser.add_argument('-z', '--size', action='store_true', default=False,
@@ -283,13 +319,14 @@ def FindCompiler(gcc, cros_prefix):
     # Use the Chromium OS toolchain.
     prefix = cros_prefix
   else:
-    prefix = glob.glob('/opt/linaro/gcc-linaro-%s-linux-*/bin/*gcc' % gcc)
+    prefix = glob.glob('/opt/linaro/gcc-linaro*%s-linux-*/bin/*gcc' % gcc)
     if not prefix:
       cros_build_lib.Die("""Please install an %s toolchain for your machine.
 Install a Linaro toolchain from:
 https://launchpad.net/linaro-toolchain-binaries
 or see cros/commands/cros_chrome_sdk.py.""" % gcc)
     prefix = re.sub('gcc$', '', prefix[0])
+    #prefix = compiler_paths['linaro']
   return prefix
 
 
@@ -308,6 +345,7 @@ def SetupBuild(options):
   """
   # pylint: disable=global-statement
   global arch, board, compiler, family, outdir, smdk, uboard, vendor, verbose
+  global base_board
 
   if not verbose:
     verbose = options.verbose != 0
@@ -324,6 +362,12 @@ def SetupBuild(options):
   else:
     board = options.board
 
+  if board == 'cm_fx6':
+    options.dt = None
+    options.board = 'imx'
+  elif board == 'odroid':
+    options.dt = None
+
   # To allow this to be run from 'cros_sdk'
   if in_chroot:
     os.chdir(os.path.join(src_root, 'third_party', 'u-boot', 'files'))
@@ -333,8 +377,15 @@ def SetupBuild(options):
   if options.verified:
     base_board = 'chromeos_%s' % base_board
 
-  uboard = UBOARDS.get(base_board, base_board)
-  Log('U-Boot board is %s' % uboard)
+  uboard = UBOARDS.get(options.board)
+  if not uboard:
+    uboard = UBOARDS.get(base_board, base_board)
+  if options.verified:
+    if not uboard.startswith('chromeos_'):
+      uboard = 'chromeos_%s' % uboard
+    base_board = uboard
+    board = uboard
+  Log('U-Boot board is %s, base_board %s' % (uboard, base_board))
 
   # Pull out some information from the U-Boot boards config file
   family = None
@@ -353,22 +404,22 @@ def SetupBuild(options):
         fields = line.split()
         if not fields:
           continue
+	target = fields[6]
+        # Make sure this is the right target.
+        if target != uboard:
+          continue
+
         arch = fields[1]
         fields += [None, None, None]
         if board_format == PRE_KBUILD:
           smdk = fields[3]
           vendor = fields[4]
           family = fields[5]
-          target = fields[6]
         elif board_format in (PRE_KCONFIG, KCONFIG):
           smdk = fields[5]
           vendor = fields[4]
           family = fields[3]
-          target = fields[0]
 
-        # Make sure this is the right target.
-        if target == uboard:
-          break
   if not arch:
     cros_build_lib.Die("Selected board '%s' not found in boards.cfg." % board)
 
@@ -378,34 +429,52 @@ def SetupBuild(options):
     if in_chroot:
       compiler = 'i686-pc-linux-gnu-'
     else:
-      compiler = '/opt/i686/bin/i686-unknown-elf-'
+      #compiler = '/opt/i686/bin/i686-unknown-elf-'
+      #compiler = '/opt/i386-linux/bin/i386-linux-'
+      #compiler = '/opt/gcc-4.6.3-nolibc/x86_64-linux/bin/x86_64-linux-'
+      #compiler = 'x86_64-linux-gnu-'
+      compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/x86_64-linux/bin/x86_64-linux-'
+      #compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/i386-linux/bin/i386-linux-'
   elif arch == 'arm':
-    compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabi-')
+    compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabihf-')
   elif arch == 'aarch64':
     compiler = FindCompiler(arch, 'aarch64-cros-linux-gnu-')
     # U-Boot builds both arm and aarch64 with the 'arm' architecture.
     arch = 'arm'
   elif arch == 'sandbox':
     compiler = ''
+  elif arch == 'blackfin':
+    #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
+    compiler = '/opt/bfin/bfin-uclinux/bin/bfin-uclinux-'
+  elif arch == 'powerpc':
+    #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
+    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/powerpc-linux/bin/powerpc-linux-'
+  elif arch == 'mips':
+    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/mips-linux/bin/mips-linux-'
+  elif arch == 'arc':
+    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/arc-elf/bin/arc-elf-'
   else:
     cros_build_lib.Die("Selected arch '%s' not supported." % arch)
 
   if not options.build:
     options.incremental = True
 
-  cpus = multiprocessing.cpu_count()
+  cpus = options.one_cpu and 1 or multiprocessing.cpu_count()
 
-  outdir = os.path.join(OUT_DIR, uboard)
+  suffix = ''
   base = [
       'make',
+      #'-d',
       '-j%d' % cpus,
-      'O=%s' % outdir,
       'ARCH=%s' % arch,
       'CROSS_COMPILE=%s' % compiler,
       '--no-print-directory',
       'HOSTSTRIP=true',
       'DEV_TREE_SRC=%s-%s' % (family, options.dt),
       'QEMU_ARCH=']
+
+  if options.dtb:
+    base.append('DEV_TREE_BIN=%s' % options.dtb)
 
   if options.verbose < 2:
     base.append('-s')
@@ -417,6 +486,7 @@ def SetupBuild(options):
   if options.ro:
     base.append('CROS_RO=1')
     options.small = True
+    suffix = '-ro'
 
   if options.rw:
     base.append('CROS_RW=1')
@@ -424,8 +494,14 @@ def SetupBuild(options):
 
   if options.small:
     base.append('CROS_SMALL=1')
+    if not suffix:
+      suffix = '-sm'
   else:
     base.append('CROS_FULL=1')
+
+  outdir = os.path.join(OUT_DIR, uboard + suffix)
+  if not options.in_tree:
+    base.append('O=%s' % outdir)
 
   if options.verified:
     base += [
@@ -458,8 +534,8 @@ def SetupBuild(options):
                               input='#include <stdint.h>',
                               capture_output=True,
                               **kwargs)
-  if result.returncode == 0:
-    base.append('USE_STDINT=1')
+  #if options.verified and result.returncode == 0:
+    #base.append('USE_STDINT=1')
 
   base.append('BUILD_ROM=1')
   if options.trace:
@@ -497,6 +573,23 @@ def RunBuild(options, base, target, queue):
   """
   Log('U-Boot build flags: %s' % ' '.join(base))
 
+  # See if we need to reconfigure
+  files = ['%s/u-boot' % outdir]
+  if os.path.exists(files[0]):
+    if options.incremental:
+      cmd = ['find', 'configs/', '-cnewer', files[0]]
+      result = cros_build_lib.RunCommand(cmd, capture_output=True, **kwargs)
+      if result.output:
+        logging.warning('config/ dir has changed - dropping -i')
+        options.incremental = False
+
+    if options.incremental:
+      cmd = ['find', '.', '-name', 'Kconfig', '-and', '-cnewer', files[0]]
+      result = cros_build_lib.RunCommand(cmd, capture_output=True, **kwargs)
+      if result.output:
+        logging.warning('Kconfig file(s) changed - dropping -i')
+        options.incremental = False
+
   # Reconfigure U-Boot.
   if not options.incremental:
     # Ignore any error from this, some older U-Boots fail on this.
@@ -511,19 +604,22 @@ def RunBuild(options, base, target, queue):
     if result.returncode:
       print("cmd: '%s', output: '%s'" % (result.cmdstr, result.stdout))
       sys.exit(result.returncode)
+    elif result.output.strip(): #if options.verbose >= 1:
+      print(result.output)
 
   # Do the actual build.
   if options.build:
     result = cros_build_lib.run(base + [target], stdout=True,
                                 stderr=subprocess.STDOUT, **kwargs)
-    if result.returncode:
+    if result.returncode or 'warning' in result.output:
       # The build failed, so output the results to stderr.
-      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.stdout),
+      print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, result.output),
             file=sys.stderr)
       sys.exit(result.returncode)
+    elif result.output: # options.verbose >= 1:
+      print(result.output, file=sys.stderr)
 
-  files = ['%s/u-boot' % outdir]
-  spl = glob.glob('%s/spl/u-boot-spl' % outdir)
+  spl = glob.glob('%s/?pl/u-boot-?pl' % outdir)
   if spl:
     files += spl
   if options.size:
@@ -554,6 +650,8 @@ def WriteFirmware(options):
   Args:
     options: Command line options
   """
+  global base_board
+
   flash = []
   kernel = []
   run = []
@@ -562,11 +660,21 @@ def WriteFirmware(options):
   silent = []
   verbose_arg = []
   ro_uboot = []
+  imx = []
+  tz = []
 
   bl2 = ['--bl2', '%s/spl/%s-spl.bin' % (outdir, smdk)]
+  bl2 += ['--add-blob', 'bl2', '%s/spl/%s-spl.bin' % (outdir, smdk)]
+  bl2 += ['--add-blob', 'rom', 'board/google/chromebook_link/pci8086,0166.bin']
 
   if options.use_defaults:
-    bl1 = []
+    if base_board == 'odroid':
+      bl1 = ['--bl1', 'sd_fuse/hardkernel/bl1.bin.hardkernel']
+      #bl1 = ['--bl1', 'pit.bl1.bin']
+      bl2 = ['--add-blob', 'bl2', 'sd_fuse/hardkernel/bl2.bin.hardkernel']
+      tz = ['--add-blob', 'tz', 'sd_fuse/hardkernel/tzsw.bin.hardkernel']
+    else:
+      bl1 = []
     bmpblk = []
     ecro = []
     ecrw = []
@@ -597,6 +705,10 @@ def WriteFirmware(options):
   if port:
     servo = ['--servo', '%d' % port]
 
+  flash_method = family
+  if flash_method.startswith('tegra'):
+    flash_method = 'tegra'
+
   if options.flash:
     flash = ['-F', 'spi']
 
@@ -614,7 +726,7 @@ def WriteFirmware(options):
     verbose_arg = ['-v', '%s' % options.verbose]
 
   if options.secure:
-    secure += ['--bootsecure', '--bootcmd', 'vboot_twostop']
+    secure += ['--bootsecure', '--bootcmd', 'vboot_go_auto']
 
   if not options.verified:
     # Make a small image, without GBB, etc.
@@ -629,6 +741,9 @@ def WriteFirmware(options):
   if not options.run:
     run = ['--bootcmd', 'none']
 
+  coreboot = []
+  #coreboot = ['-C', '##/build/link/firmware/coreboot.rom.serial']
+  #coreboot += ['-K', '##/build/link/firmware/coreboot.rom.serial']
   if arch != 'sandbox' and not in_chroot and servo:
     if dest == 'usb':
       logging.warning('Image cannot be written to board')
@@ -645,13 +760,36 @@ def WriteFirmware(options):
     dest = ['-w', dest]
   else:
     dest = []
+  if not in_chroot or options.board == 'seaboard':
+    servo = ['--servo', 'none']
 
-  soc = SOCS.get(board)
+  soc = SOCS.get(options.board)
+  #print(soc, options.board)
+  if not soc:
+    soc = SOCS.get(board)
   if not soc:
     soc = SOCS.get(uboard, '')
-  dt_name = DEFAULT_DTS.get(options.board, options.board)
-  dts_file = 'board/%s/dts/%s%s.dts' % (vendor, soc, dt_name)
+  if options.board == 'panther':
+    soc = 'chromebox_'
+  #print('soc', soc, options.dt)
+  if options.dt is None:
+    dts_file = 'none'
+  elif options.dt == 'default':
+    dt_name = DEFAULT_DTS.get(options.board, options.board)
+    dts_file = 'board/%s/dts/%s%s.dts' % (vendor, soc, dt_name)
+    if not os.path.exists(dts_file):
+      dts_file = 'arch/%s/dts/%s%s.dts' % (arch, soc, dt_name)
+  else:
+    dts_file = '%s/arch/%s/dts/%s%s.dtb' % (outdir, arch, soc, options.dt)
+    if not os.path.exists(dts_file):
+      dts_file = '%s/arch/%s/dts/%s.dtb' % (outdir, arch, options.dt)
   Log('Device tree: %s' % dts_file)
+
+  if base_board == 'exynos5-dt':
+    args = ['fdtget', dts_file, '/flash/pre-boot', 'filename']
+    result = cros_build_lib.RunCommand(args, redirect_stdout=True, **kwargs)
+    bl1_name = result.output.strip()
+    bl1 = ['--bl1', 'board/%s/%s/%s' % (vendor, smdk, bl1_name)]
 
   if arch == 'sandbox':
     uboot_fname = '%s/u-boot' % outdir
@@ -665,17 +803,31 @@ def WriteFirmware(options):
     # a fresh RW U-Boot.
     logging.warning('Using standard U-Boot for RW')
     ro_uboot = ['--add-blob', 'ro-boot', uboot_fname]
-    uboot_fname = '##/build/%s/firmware/u-boot.bin' % options.board
+    #uboot_fname = '##/build/%s/firmware/u-boot.bin' % options.board
+    uboot_fname = os.path.join(OUT_DIR, uboard, 'u-boot.bin')
+
+#  sm_uboot_fname = '##/build/%s/firmware/u-boot-small.bin' % options.board
+  sm_uboot_fname = os.path.join(OUT_DIR, uboard + '-sm', 'u-boot.bin')
+  sm_uboot = ['--add-blob', 'sm-boot', sm_uboot_fname]
   cbf = ['%s/platform/dev/host/cros_bundle_firmware' % src_root,
          '-b', options.board,
-         '-d', dts_file,
          '-I', 'arch/%s/dts' % arch, '-I', 'cros/dts',
          '-u', uboot_fname,
          '-O', '%s/out' % outdir,
-         '-M', family]
+         '-M', flash_method]
+  if dts_file:
+    cbf += ['-d', dts_file]
+  dirname = os.path.dirname(uboot_fname)
+  if options.board == 'imx':
+    root, _ = os.path.splitext(uboot_fname)
+    imx = ['--add-blob', 'img', root + '.img',
+           '--add-blob', 'imx-cfg', os.path.join('board', vendor,
+                                                 base_board, 'imximage.cfg')]
+  spl = ['--add-blob', 'spl', os.path.join(dirname, 'spl', 'u-boot-spl.bin')]
 
   for other in [bl1, bl2, bmpblk, defaults, dest, ecro, ecrw, flash, kernel,
-                run, seabios, secure, servo, silent, verbose_arg, ro_uboot]:
+                run, seabios, secure, servo, silent, verbose_arg, ro_uboot,
+                sm_uboot, imx, tz, spl, coreboot]:
     if other:
       cbf += other
   if options.cbfargs:
