@@ -234,6 +234,8 @@ def ParseCmdline(argv):
   parser.add_argument('-D', '--nodefaults', dest='use_defaults',
                       action='store_false', default=True,
                       help="Don't select default filenames for those not given")
+  parser.add_argument('-e', '--efs', action='store_true', default=False,
+                      help='Enable early firmware selection')
   parser.add_argument('-F', '--flash', action='store_true', default=False,
                       help='Create magic flasher for SPI flash')
   parser.add_argument('-M', '--mmc', action='store_true', default=False,
@@ -391,11 +393,10 @@ def SetupBuild(options):
 
   cpus = multiprocessing.cpu_count()
 
-  outdir = os.path.join(OUT_DIR, uboard)
+  suffix = ''
   base = [
       'make',
       '-j%d' % cpus,
-      'O=%s' % outdir,
       'ARCH=%s' % arch,
       'CROSS_COMPILE=%s' % compiler,
       '--no-print-directory',
@@ -413,6 +414,7 @@ def SetupBuild(options):
   if options.ro:
     base.append('CROS_RO=1')
     options.small = True
+    suffix = '-ro'
 
   if options.rw:
     base.append('CROS_RW=1')
@@ -420,8 +422,13 @@ def SetupBuild(options):
 
   if options.small:
     base.append('CROS_SMALL=1')
+    if not suffix:
+      suffix = '-sm'
   else:
     base.append('CROS_FULL=1')
+
+  outdir = os.path.join(OUT_DIR, uboard + suffix)
+  base.append('O=%s' % outdir)
 
   if options.verified:
     base += [
@@ -591,6 +598,7 @@ def WriteFirmware(options):
     if options.small:
       logging.warning('Using standard U-Boot as flasher')
       flash += ['-U', '##/build/%s/firmware/u-boot.bin' % options.board]
+  flash += ['-U', '##/build/%s/firmware/u-boot.bin' % options.board]
 
   if options.mmc:
     flash = ['-F', 'sdmmc']
@@ -599,7 +607,7 @@ def WriteFirmware(options):
     verbose_arg = ['-v', '%s' % options.verbose]
 
   if options.secure:
-    secure += ['--bootsecure', '--bootcmd', 'vboot_twostop']
+    secure += ['--bootsecure', '--bootcmd', 'vboot_go_auto']
 
   if not options.verified:
     # Make a small image, without GBB, etc.
@@ -650,7 +658,12 @@ def WriteFirmware(options):
     # a fresh RW U-Boot.
     logging.warning('Using standard U-Boot for RW')
     ro_uboot = ['--add-blob', 'ro-boot', uboot_fname]
-    uboot_fname = '##/build/%s/firmware/u-boot.bin' % options.board
+    #uboot_fname = '##/build/%s/firmware/u-boot.bin' % options.board
+    uboot_fname = os.path.join(OUT_DIR, uboard, 'u-boot.bin')
+
+#  sm_uboot_fname = '##/build/%s/firmware/u-boot-small.bin' % options.board
+  sm_uboot_fname = os.path.join(OUT_DIR, uboard + '-sm', 'u-boot.bin')
+  sm_uboot = ['--add-blob', 'sm-boot', sm_uboot_fname]
   cbf = ['%s/platform/dev/host/cros_bundle_firmware' % src_root,
          '-b', options.board,
          '-d', dts_file,
@@ -660,7 +673,8 @@ def WriteFirmware(options):
          '-M', family]
 
   for other in [bl1, bl2, bmpblk, defaults, dest, ecro, ecrw, flash, kernel,
-                run, seabios, secure, servo, silent, verbose_arg, ro_uboot]:
+                run, seabios, secure, servo, silent, verbose_arg, ro_uboot,
+                sm_uboot]:
     if other:
       cbf += other
   if options.cbfargs:
