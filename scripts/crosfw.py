@@ -147,7 +147,8 @@ verbose = False
 # x86 has a lot of boards, but to U-Boot they are all the same
 UBOARDS = {
     'daisy': 'smdk5250',
-    'peach': 'smdk5420',
+    'peach': 'peach-pit',
+    'peach_pit': 'peach-pit',
 }
 for b in ['alex', 'butterfly', 'emeraldlake2', 'link', 'lumpy', 'parrot',
           'stout', 'stumpy']:
@@ -165,6 +166,7 @@ DEFAULT_DTS = {
     'daisy': 'snow',
     'daisy_spring': 'spring',
     'peach_pit': 'peach-pit',
+    'peach': 'smdk5420',
 }
 
 OUT_DIR = '/tmp/crosfw'
@@ -231,6 +233,8 @@ def ParseCmdline(argv):
                       help='Permit console output')
   parser.add_argument('-d', '--dt', default='seaboard',
                       help='Select name of device tree file to use')
+  parser.add_argument('--dtb', type='string', default=None,
+                      help='Select a binary .dtb, passed to U-Boot as DEV_TREE_BIN')
   parser.add_argument('-D', '--nodefaults', dest='use_defaults',
                       action='store_false', default=True,
                       help="Don't select default filenames for those not given")
@@ -311,6 +315,7 @@ def SetupBuild(options):
   """
   # pylint: disable=W0603
   global arch, board, compiler, family, outdir, smdk, uboard, vendor, verbose
+  global base_board
 
   if not verbose:
     verbose = options.verbose != 0
@@ -326,6 +331,10 @@ def SetupBuild(options):
     board = parts[0]
   else:
     board = options.board
+
+  if board == 'cm_fx6':
+    options.dt = None
+    options.board = 'imx'
 
   # To allow this to be run from 'cros_sdk'
   if in_chroot:
@@ -403,6 +412,9 @@ def SetupBuild(options):
       'HOSTSTRIP=true',
       'DEV_TREE_SRC=%s-%s' % (family, options.dt),
       'QEMU_ARCH=']
+
+  if options.dtb:
+    base.append('DEV_TREE_BIN=%s' % options.dtb)
 
   if options.verbose < 2:
     base.append('-s')
@@ -503,7 +515,8 @@ def RunBuild(options, base, target, queue):
   if not options.incremental:
     # Ignore any error from this, some older U-Boots fail on this.
     cros_build_lib.RunCommand(base + ['distclean'], **kwargs)
-    result = cros_build_lib.RunCommand(base + ['%s_config' % uboard], **kwargs)
+    result = cros_build_lib.RunCommand(base + ['%s_defconfig' % uboard],
+                                       redirect_stdout=True, **kwargs)
     if result.returncode:
       sys.exit()
 
@@ -554,6 +567,7 @@ def WriteFirmware(options):
   silent = []
   verbose_arg = []
   ro_uboot = []
+  imx = []
 
   bl2 = ['--bl2', '%s/spl/%s-spl.bin' % (outdir, smdk)]
 
@@ -642,9 +656,14 @@ def WriteFirmware(options):
   soc = SOCS.get(board)
   if not soc:
     soc = SOCS.get(uboard, '')
-  dt_name = DEFAULT_DTS.get(options.board, options.board)
-  dts_file = 'board/%s/dts/%s%s.dts' % (vendor, soc, dt_name)
-  Log('Device tree: %s' % dts_file)
+  if options.dt is None:
+    dts_file = 'none'
+  else:
+    dt_name = DEFAULT_DTS.get(options.board, options.board)
+    dts_file = 'board/%s/dts/%s%s.dts' % (vendor, soc, dt_name)
+    if not os.path.exists(dts_file):
+      dts_file = 'arch/%s/dts/%s%s.dts' % (arch, soc, dt_name)
+    Log('Device tree: %s' % dts_file)
 
   if arch == 'sandbox':
     uboot_fname = '%s/u-boot' % outdir
@@ -666,15 +685,23 @@ def WriteFirmware(options):
   sm_uboot = ['--add-blob', 'sm-boot', sm_uboot_fname]
   cbf = ['%s/platform/dev/host/cros_bundle_firmware' % src_root,
          '-b', options.board,
-         '-d', dts_file,
          '-I', 'arch/%s/dts' % arch, '-I', 'cros/dts',
          '-u', uboot_fname,
          '-O', '%s/out' % outdir,
          '-M', family]
+  if dts_file:
+    cbf += ['-d', dts_file]
+  if options.board == 'imx':
+    dirname = os.path.dirname(uboot_fname)
+    root, _ = os.path.splitext(uboot_fname)
+    imx = ['--add-blob', 'img', root + '.img',
+           '--add-blob', 'spl', os.path.join(dirname, 'spl', 'u-boot-spl.bin'),
+           '--add-blob', 'imx-cfg', os.path.join('board', vendor,
+                                                 base_board, 'imximage.cfg')]
 
   for other in [bl1, bl2, bmpblk, defaults, dest, ecro, ecrw, flash, kernel,
                 run, seabios, secure, servo, silent, verbose_arg, ro_uboot,
-                sm_uboot]:
+                sm_uboot, imx]:
     if other:
       cbf += other
   if options.cbfargs:
