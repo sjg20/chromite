@@ -146,26 +146,34 @@ verbose = False
 # since the naming is not always consistent.
 # x86 has a lot of boards, but to U-Boot they are all the same
 UBOARDS = {
-    'daisy': 'smdk5250',
+    'daisy': 'snow',
+    #'peach': 'smdk5420',
     'peach': 'peach-pit',
     'peach_pit': 'peach-pit',
+    'peach_pi': 'peach-pi',
 }
 for b in ['alex', 'butterfly', 'emeraldlake2', 'link', 'lumpy', 'parrot',
-          'stout', 'stumpy']:
+          'stout', 'stumpy', 'panther']:
   UBOARDS[b] = 'coreboot-x86'
   UBOARDS['chromeos_%s' % b] = 'chromeos_coreboot'
 
 SOCS = {
-    'coreboot-x86': '',
+    'coreboot-x86': 'chromebook_',
     'chromeos_coreboot': '',
     'daisy': 'exynos5250-',
+    'peach_pi': 'exynos5800-',
     'peach': 'exynos5420-',
+    'norrin': 'tegra124-',
+    'nyan': 'tegra124-',
+    'nyan-big': 'tegra124-',
+    'seaboard': 'tegra20-',
 }
 
 DEFAULT_DTS = {
     'daisy': 'snow',
     'daisy_spring': 'spring',
     'peach_pit': 'peach-pit',
+    'peach_pi': 'peach-pi',
     'peach': 'smdk5420',
 }
 
@@ -174,6 +182,11 @@ OUT_DIR = '/tmp/crosfw'
 rc_file = os.path.expanduser('~/.crosfwrc')
 if os.path.exists(rc_file):
   execfile(rc_file)
+
+compiler_paths = {
+  'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
+  'odroid' : '/opt/tools/arm-eabi-4.6/bin/*gcc',
+}
 
 
 def Log(msg):
@@ -335,6 +348,8 @@ def SetupBuild(options):
   if board == 'cm_fx6':
     options.dt = None
     options.board = 'imx'
+  elif board == 'odroid':
+    options.dt = None
 
   # To allow this to be run from 'cros_sdk'
   if in_chroot:
@@ -345,7 +360,9 @@ def SetupBuild(options):
   if options.verified:
     base_board = 'chromeos_%s' % base_board
 
-  uboard = UBOARDS.get(base_board, base_board)
+  uboard = UBOARDS.get(options.board)
+  if not uboard:
+    uboard = UBOARDS.get(base_board, base_board)
   Log('U-Boot board is %s' % uboard)
 
   # Pull out some information from the U-Boot boards config file
@@ -385,7 +402,9 @@ def SetupBuild(options):
     if in_chroot:
       compiler = 'i686-pc-linux-gnu-'
     else:
-      compiler = '/opt/i686/bin/i686-unknown-elf-'
+      #compiler = '/opt/i686/bin/i686-unknown-elf-'
+      #compiler = '/opt/i386-linux/bin/i386-linux-'
+      compiler = '/opt/gcc-4.6.3-nolibc/x86_64-linux/bin/x86_64-linux-'
   elif arch == 'arm':
     compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabi-')
   elif arch == 'aarch64':
@@ -476,6 +495,7 @@ def SetupBuild(options):
   if result.returncode == 0:
     base.append('USE_STDINT=1')
 
+  base.append('BUILD_ROM=1')
   if options.trace:
     base.append('FTRACE=1')
   if options.separate:
@@ -515,16 +535,21 @@ def RunBuild(options, base, target, queue):
   if not options.incremental:
     # Ignore any error from this, some older U-Boots fail on this.
     cros_build_lib.RunCommand(base + ['distclean'], **kwargs)
-    result = cros_build_lib.RunCommand(base + ['%s_defconfig' % uboard],
+    if os.path.exists('tools/genboardscfg.py'):
+      mtarget = 'defconfig'
+    else:
+      mtarget = 'config'
+    print(uboard, mtarget)
+    result = cros_build_lib.RunCommand(base + ['%s_%s' % (uboard, mtarget)],
                                        redirect_stdout=True, **kwargs)
     if result.returncode:
-      sys.exit()
+      sys.exit(result.returncode)
 
   # Do the actual build.
   if options.build:
     result = cros_build_lib.RunCommand(base + [target], **kwargs)
     if result.returncode:
-      sys.exit()
+      sys.exit(result.returncode)
 
   files = ['%s/u-boot' % outdir]
   spl = glob.glob('%s/spl/u-boot-spl' % outdir)
@@ -559,6 +584,8 @@ def WriteFirmware(options):
   Args:
     options: Command line options
   """
+  global base_board
+
   flash = []
   kernel = []
   run = []
@@ -568,11 +595,20 @@ def WriteFirmware(options):
   verbose_arg = []
   ro_uboot = []
   imx = []
+  tz = []
 
   bl2 = ['--bl2', '%s/spl/%s-spl.bin' % (outdir, smdk)]
+  bl2 += ['--add-blob', 'bl2', '%s/spl/%s-spl.bin' % (outdir, smdk)]
+  bl2 += ['--add-blob', 'rom', 'board/google/chromebook_link/pci8086,0166.bin']
 
   if options.use_defaults:
-    bl1 = []
+    if base_board == 'odroid':
+      bl1 = ['--bl1', 'sd_fuse/hardkernel/bl1.bin.hardkernel']
+      #bl1 = ['--bl1', 'pit.bl1.bin']
+      bl2 = ['--add-blob', 'bl2', 'sd_fuse/hardkernel/bl2.bin.hardkernel']
+      tz = ['--add-blob', 'tz', 'sd_fuse/hardkernel/tzsw.bin.hardkernel']
+    else:
+      bl1 = []
     bmpblk = []
     ecro = []
     ecrw = []
@@ -603,6 +639,10 @@ def WriteFirmware(options):
   if port:
     servo = ['--servo', '%d' % port]
 
+  flash_method = family
+  if flash_method.startswith('tegra'):
+    flash_method = 'tegra'
+
   if options.flash:
     flash = ['-F', 'spi']
 
@@ -612,7 +652,6 @@ def WriteFirmware(options):
     if options.small:
       logging.warning('Using standard U-Boot as flasher')
       flash += ['-U', '##/build/%s/firmware/u-boot.bin' % options.board]
-  flash += ['-U', '##/build/%s/firmware/u-boot.bin' % options.board]
 
   if options.mmc:
     flash = ['-F', 'sdmmc']
@@ -636,6 +675,9 @@ def WriteFirmware(options):
   if not options.run:
     run = ['--bootcmd', 'none']
 
+  coreboot = []
+  #coreboot = ['-C', '##/build/link/firmware/coreboot.rom.serial']
+  #coreboot += ['-K', '##/build/link/firmware/coreboot.rom.serial']
   if arch != 'sandbox' and not in_chroot and servo:
     if dest == 'usb':
       logging.warning('Image cannot be written to board')
@@ -652,18 +694,35 @@ def WriteFirmware(options):
     dest = ['-w', dest]
   else:
     dest = []
+  if not in_chroot or options.board == 'seaboard':
+    servo = ['--servo', 'none']
 
-  soc = SOCS.get(board)
+  soc = SOCS.get(options.board)
+  print(soc, options.board)
+  if not soc:
+    soc = SOCS.get(board)
   if not soc:
     soc = SOCS.get(uboard, '')
+  if options.board == 'panther':
+    soc = 'chromebox_'
   if options.dt is None:
     dts_file = 'none'
-  else:
+  elif options.dt == 'default':
     dt_name = DEFAULT_DTS.get(options.board, options.board)
     dts_file = 'board/%s/dts/%s%s.dts' % (vendor, soc, dt_name)
     if not os.path.exists(dts_file):
       dts_file = 'arch/%s/dts/%s%s.dts' % (arch, soc, dt_name)
-    Log('Device tree: %s' % dts_file)
+  else:
+    dts_file = '%s/arch/%s/dts/%s%s.dtb' % (outdir, arch, soc, options.dt)
+    if not os.path.exists(dts_file):
+      dts_file = '%s/arch/%s/dts/%s.dtb' % (outdir, arch, options.dt)
+  Log('Device tree: %s' % dts_file)
+
+  if base_board == 'exynos5-dt':
+    args = ['fdtget', dts_file, '/flash/pre-boot', 'filename']
+    result = cros_build_lib.RunCommand(args, redirect_stdout=True, **kwargs)
+    bl1_name = result.output.strip()
+    bl1 = ['--bl1', 'board/%s/%s/%s' % (vendor, smdk, bl1_name)]
 
   if arch == 'sandbox':
     uboot_fname = '%s/u-boot' % outdir
@@ -688,20 +747,20 @@ def WriteFirmware(options):
          '-I', 'arch/%s/dts' % arch, '-I', 'cros/dts',
          '-u', uboot_fname,
          '-O', '%s/out' % outdir,
-         '-M', family]
+         '-M', flash_method]
   if dts_file:
     cbf += ['-d', dts_file]
+  dirname = os.path.dirname(uboot_fname)
   if options.board == 'imx':
-    dirname = os.path.dirname(uboot_fname)
     root, _ = os.path.splitext(uboot_fname)
     imx = ['--add-blob', 'img', root + '.img',
-           '--add-blob', 'spl', os.path.join(dirname, 'spl', 'u-boot-spl.bin'),
            '--add-blob', 'imx-cfg', os.path.join('board', vendor,
                                                  base_board, 'imximage.cfg')]
+  spl = ['--add-blob', 'spl', os.path.join(dirname, 'spl', 'u-boot-spl.bin')]
 
   for other in [bl1, bl2, bmpblk, defaults, dest, ecro, ecrw, flash, kernel,
                 run, seabios, secure, servo, silent, verbose_arg, ro_uboot,
-                sm_uboot, imx]:
+                sm_uboot, imx, tz, spl, coreboot]:
     if other:
       cbf += other
   if options.cbfargs:
