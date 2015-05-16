@@ -259,6 +259,8 @@ def ParseCmdline(argv):
                       help='Create magic flasher for eMMC')
   parser.add_argument('-i', '--incremental', action='store_true', default=False,
                       help="Don't reconfigure and clean")
+  parser.add_argument('-I', '--in-tree', action='store_true', default=False,
+                      help="Build in-tree")
   parser.add_argument('-k', '--kernel', action='store_true', default=False,
                       help='Send kernel to board also')
   parser.add_argument('-O', '--objdump', action='store_true', default=False,
@@ -459,7 +461,8 @@ def SetupBuild(options):
     base.append('CROS_FULL=1')
 
   outdir = os.path.join(OUT_DIR, uboard + suffix)
-  base.append('O=%s' % outdir)
+  if not options.in_tree:
+    base.append('O=%s' % outdir)
 
   if options.verified:
     base += [
