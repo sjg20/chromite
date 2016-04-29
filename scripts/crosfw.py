@@ -146,6 +146,7 @@ verbose = False
 # since the naming is not always consistent.
 # x86 has a lot of boards, but to U-Boot they are all the same
 UBOARDS = {
+    'daisy_spring': 'spring',
     'daisy': 'snow',
     #'peach': 'smdk5420',
     'peach': 'peach-pit',
@@ -184,8 +185,14 @@ if os.path.exists(rc_file):
   execfile(rc_file)
 
 compiler_paths = {
-  'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
-  'odroid' : '/opt/tools/arm-eabi-4.6/bin/*gcc',
+  #'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
+
+  # This has the bug-fix for rodata:
+  'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-gcc',
+
+  # For gurnard
+  'linaro' : '/vol1/tools/arm/arm-2010q1/bin/arm-none-linux-gnueabi-gcc',
+  #'odroid' : '/opt/tools/arm-eabi-4.6/bin/*gcc',
 }
 
 
@@ -365,7 +372,11 @@ def SetupBuild(options):
   uboard = UBOARDS.get(options.board)
   if not uboard:
     uboard = UBOARDS.get(base_board, base_board)
-  Log('U-Boot board is %s' % uboard)
+  if options.verified:
+    uboard = 'chromeos_%s' % uboard
+    base_board = uboard
+    board = uboard
+  Log('U-Boot board is %s, base_board %s' % (uboard, base_board))
 
   # Pull out some information from the U-Boot boards config file
   family = None
@@ -424,6 +435,7 @@ def SetupBuild(options):
   cpus = multiprocessing.cpu_count()
 
   suffix = ''
+  #cpus = 1
   base = [
       'make',
       '-j%d' % cpus,
@@ -495,8 +507,8 @@ def SetupBuild(options):
                                      input='#include <stdint.h>',
                                      capture_output=True,
                                      **kwargs)
-  if result.returncode == 0:
-    base.append('USE_STDINT=1')
+  #if result.returncode == 0
+    #base.append('USE_STDINT=1')
 
   base.append('BUILD_ROM=1')
   if options.trace:
@@ -543,9 +555,11 @@ def RunBuild(options, base, target, queue):
     else:
       mtarget = 'config'
     print(uboard, mtarget)
-    result = cros_build_lib.RunCommand(base + ['%s_%s' % (uboard, mtarget)],
+    cmd = base + ['%s_%s' % (uboard, mtarget)]
+    result = cros_build_lib.RunCommand(cmd,
                                        redirect_stdout=True, **kwargs)
     if result.returncode:
+      print("cmd: '%s', output: '%s'" % (cmd, result.output))
       sys.exit(result.returncode)
 
   # Do the actual build.
