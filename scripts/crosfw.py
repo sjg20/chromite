@@ -191,7 +191,7 @@ compiler_paths = {
   'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-gcc',
 
   # For gurnard
-  'linaro' : '/vol1/tools/arm/arm-2010q1/bin/arm-none-linux-gnueabi-gcc',
+  #'linaro' : '/vol1/tools/arm/arm-2010q1/bin/arm-none-linux-gnueabi-gcc',
   #'odroid' : '/opt/tools/arm-eabi-4.6/bin/*gcc',
 }
 
