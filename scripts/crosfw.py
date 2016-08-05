@@ -15,6 +15,8 @@ details.
 It can also flash SPI by writing a 'magic flasher' U-Boot with a payload
 to the board.
 
+Usage: crosfw [options]
+
 The script is normally run from within the U-Boot directory which is
 .../src/third_party/u-boot/files
 
@@ -253,7 +255,7 @@ def ParseCmdline(argv):
                       help='Permit console output')
   parser.add_argument('-d', '--dt', default='seaboard',
                       help='Select name of device tree file to use')
-  parser.add_argument('--dtb', type='string', default=None,
+  parser.add_argument('--dtb', type=str, default=None,
                       help='Select a binary .dtb, passed to U-Boot as DEV_TREE_BIN')
   parser.add_argument('-D', '--nodefaults', dest='use_defaults',
                       action='store_false', default=True,
@@ -281,7 +283,7 @@ def ParseCmdline(argv):
   parser.add_argument('-s', '--separate', action='store_false', default=True,
                       help='Link device tree into U-Boot, instead of separate')
   parser.add_argument('-S', '--secure', action='store_true', default=False,
-                      help='Use vboot_twostop secure boot')
+                      help='Use vboot_go_auto secure boot')
   parser.add_argument('--small', action='store_true', default=False,
                       help='Create Chrome OS small image')
   parser.add_argument('-t', '--trace', action='store_true', default=False,
@@ -809,7 +811,7 @@ def main(argv):
   base = SetupBuild(options)
 
   with parallel.BackgroundTaskRunner(Dumper) as queue:
-    RunBuild(options, base, options.target, queue)
+    RunBuild(options, base, 'all', queue)
 
     if options.write:
       WriteFirmware(options)
