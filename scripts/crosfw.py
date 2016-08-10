@@ -420,6 +420,7 @@ def SetupBuild(options):
       #compiler = '/opt/i686/bin/i686-unknown-elf-'
       #compiler = '/opt/i386-linux/bin/i386-linux-'
       compiler = '/opt/gcc-4.6.3-nolibc/x86_64-linux/bin/x86_64-linux-'
+      #compiler = 'x86_64-linux-gnu-'
   elif arch == 'arm':
     compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabi-')
   elif arch == 'aarch64':
