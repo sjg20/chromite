@@ -190,7 +190,8 @@ compiler_paths = {
   #'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
 
   # This has the bug-fix for rodata:
-  'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-gcc',
+  #'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-gcc',
+  'linaro' : '//usr/bin/arm-none-eabi-',
 
   # For gurnard
   #'linaro' : '/vol1/tools/arm/arm-2010q1/bin/arm-none-linux-gnueabi-gcc',
@@ -321,6 +322,7 @@ Install a Linaro toolchain from:
 https://launchpad.net/linaro-toolchain-binaries
 or see cros/commands/cros_chrome_sdk.py.""")
     prefix = re.sub('gcc$', '', prefix[0])
+    prefix = '/usr/bin/arm-none-eabi-'
   return prefix
 
 
@@ -419,8 +421,9 @@ def SetupBuild(options):
     else:
       #compiler = '/opt/i686/bin/i686-unknown-elf-'
       #compiler = '/opt/i386-linux/bin/i386-linux-'
-      compiler = '/opt/gcc-4.6.3-nolibc/x86_64-linux/bin/x86_64-linux-'
+      #compiler = '/opt/gcc-4.6.3-nolibc/x86_64-linux/bin/x86_64-linux-'
       #compiler = 'x86_64-linux-gnu-'
+      compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/x86_64-linux/bin/x86_64-linux-'
   elif arch == 'arm':
     compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabi-')
   elif arch == 'aarch64':
@@ -441,6 +444,7 @@ def SetupBuild(options):
   #cpus = 1
   base = [
       'make',
+      #'-d',
       '-j%d' % cpus,
       'ARCH=%s' % arch,
       'CROSS_COMPILE=%s' % compiler,
@@ -812,7 +816,7 @@ def main(argv):
   base = SetupBuild(options)
 
   with parallel.BackgroundTaskRunner(Dumper) as queue:
-    RunBuild(options, base, 'all', queue)
+    RunBuild(options, base, options.target, queue)
 
     if options.write:
       WriteFirmware(options)
