@@ -187,11 +187,12 @@ if os.path.exists(rc_file):
   execfile(rc_file)
 
 compiler_paths = {
-  #'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
+#  'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
+  'linaro' : '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-',
 
   # This has the bug-fix for rodata:
   #'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-gcc',
-  'linaro' : '//usr/bin/arm-none-eabi-',
+  #'linaro' : '//usr/bin/arm-none-eabi-',
 
   # For gurnard
   #'linaro' : '/vol1/tools/arm/arm-2010q1/bin/arm-none-linux-gnueabi-gcc',
@@ -322,7 +323,7 @@ Install a Linaro toolchain from:
 https://launchpad.net/linaro-toolchain-binaries
 or see cros/commands/cros_chrome_sdk.py.""")
     prefix = re.sub('gcc$', '', prefix[0])
-    prefix = '/usr/bin/arm-none-eabi-'
+    prefix = compiler_paths['linaro']
   return prefix
 
 
