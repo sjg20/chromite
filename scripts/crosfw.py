@@ -253,6 +253,8 @@ def ParseCmdline(argv):
                       help='Select board to build (daisy/peach_pit/link)')
   parser.add_argument('-B', '--build', action='store_false', default=True,
                       help="Don't build U-Boot, just configure device tree")
+  parser.add_argument('-c', '--config-only', action='store_true', default=False,
+                      help='Build only the config (u-boot.cfg)')
   parser.add_argument('-C', '--console', action='store_false', default=True,
                       help='Permit console output')
   parser.add_argument('-d', '--dt', default='seaboard',
@@ -323,7 +325,7 @@ Install a Linaro toolchain from:
 https://launchpad.net/linaro-toolchain-binaries
 or see cros/commands/cros_chrome_sdk.py.""")
     prefix = re.sub('gcc$', '', prefix[0])
-    prefix = compiler_paths['linaro']
+    #prefix = compiler_paths['linaro']
   return prefix
 
 
