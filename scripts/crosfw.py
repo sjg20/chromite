@@ -189,11 +189,11 @@ if os.path.exists(rc_file):
 
 compiler_paths = {
 #  'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
-  'linaro' : '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-',
+  #'linaro' : '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-',
 
   # This has the bug-fix for rodata:
   #'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-gcc',
-  #'linaro' : '//usr/bin/arm-none-eabi-',
+  'linaro' : '/usr/bin/arm-none-eabi-',
 
   # For gurnard
   #'linaro' : '/vol1/tools/arm/arm-2010q1/bin/arm-none-linux-gnueabi-gcc',
@@ -258,7 +258,7 @@ def ParseCmdline(argv):
                       help='Build only the config (u-boot.cfg)')
   parser.add_argument('-C', '--console', action='store_false', default=True,
                       help='Permit console output')
-  parser.add_argument('-d', '--dt', default='seaboard',
+  parser.add_argument('-d', '--dt', default='default',
                       help='Select name of device tree file to use')
   parser.add_argument('--dtb', type=str, default=None,
                       help='Select a binary .dtb, passed to U-Boot as DEV_TREE_BIN')
@@ -433,6 +433,7 @@ def SetupBuild(options):
       #compiler = '/opt/gcc-4.6.3-nolibc/x86_64-linux/bin/x86_64-linux-'
       #compiler = 'x86_64-linux-gnu-'
       compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/x86_64-linux/bin/x86_64-linux-'
+      #compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/i386-linux/bin/i386-linux-'
   elif arch == 'arm':
     compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabi-')
   elif arch == 'aarch64':
@@ -441,6 +442,9 @@ def SetupBuild(options):
     arch = 'arm'
   elif arch == 'sandbox':
     compiler = ''
+  elif arch == 'blackfin':
+    #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
+    compiler = '/opt/bfin/bfin-uclinux/bin/bfin-uclinux-'
   else:
     cros_build_lib.Die("Selected arch '%s' not supported." % arch)
 
@@ -734,13 +738,14 @@ def WriteFirmware(options):
     servo = ['--servo', 'none']
 
   soc = SOCS.get(options.board)
-  print(soc, options.board)
+  #print(soc, options.board)
   if not soc:
     soc = SOCS.get(board)
   if not soc:
     soc = SOCS.get(uboard, '')
   if options.board == 'panther':
     soc = 'chromebox_'
+  #print('soc', soc, options.dt)
   if options.dt is None:
     dts_file = 'none'
   elif options.dt == 'default':
