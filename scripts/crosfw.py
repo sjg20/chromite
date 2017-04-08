@@ -189,11 +189,11 @@ if os.path.exists(rc_file):
 
 compiler_paths = {
 #  'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
-  #'linaro' : '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-',
+  'linaro' : '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-',
 
   # This has the bug-fix for rodata:
-  #'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-gcc',
-  'linaro' : '/usr/bin/arm-none-eabi-',
+  #'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-',
+  #'linaro' : '/usr/bin/arm-none-eabi-',
 
   # For gurnard
   #'linaro' : '/vol1/tools/arm/arm-2010q1/bin/arm-none-linux-gnueabi-gcc',
@@ -381,7 +381,8 @@ def SetupBuild(options):
   if not uboard:
     uboard = UBOARDS.get(base_board, base_board)
   if options.verified:
-    uboard = 'chromeos_%s' % uboard
+    if not uboard.startswith('chromeos_'):
+      uboard = 'chromeos_%s' % uboard
     base_board = uboard
     board = uboard
   Log('U-Boot board is %s, base_board %s' % (uboard, base_board))
@@ -441,10 +442,13 @@ def SetupBuild(options):
     # U-Boot builds both arm and aarch64 with the 'arm' architecture.
     arch = 'arm'
   elif arch == 'sandbox':
-    compiler = ''
+    compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/x86_64-linux/bin/x86_64-linux-'
   elif arch == 'blackfin':
     #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
     compiler = '/opt/bfin/bfin-uclinux/bin/bfin-uclinux-'
+  elif arch == 'powerpc':
+    #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
+    compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/powerpc-linux/bin/powerpc-linux-'
   else:
     cros_build_lib.Die("Selected arch '%s' not supported." % arch)
 
@@ -527,8 +531,8 @@ def SetupBuild(options):
                                      input='#include <stdint.h>',
                                      capture_output=True,
                                      **kwargs)
-  #if result.returncode == 0
-    #base.append('USE_STDINT=1')
+  if result.returncode == 0:
+    base.append('USE_STDINT=1')
 
   base.append('BUILD_ROM=1')
   if options.trace:
@@ -592,7 +596,7 @@ def RunBuild(options, base, target, queue):
       sys.exit(result.returncode)
 
   files = ['%s/u-boot' % outdir]
-  spl = glob.glob('%s/spl/u-boot-spl' % outdir)
+  spl = glob.glob('%s/?pl/u-boot-?pl' % outdir)
   if spl:
     files += spl
   if options.size:
