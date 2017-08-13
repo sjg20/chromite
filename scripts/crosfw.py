@@ -442,7 +442,7 @@ def SetupBuild(options):
     # U-Boot builds both arm and aarch64 with the 'arm' architecture.
     arch = 'arm'
   elif arch == 'sandbox':
-    compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/x86_64-linux/bin/x86_64-linux-'
+    compiler = ''
   elif arch == 'blackfin':
     #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
     compiler = '/opt/bfin/bfin-uclinux/bin/bfin-uclinux-'
