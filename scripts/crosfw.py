@@ -297,8 +297,8 @@ def ParseCmdline(argv):
                       help='Make cros_bundle_firmware verbose')
   parser.add_argument('-V', '--verified', action='store_true', default=False,
                       help='Include Chrome OS verified boot components')
-  parser.add_argument('-w', '--write', action='store_false', default=True,
-                      help="Don't write image to board using usb/em100")
+  parser.add_argument('-w', '--write', action='store_true', default=False,
+                      help="Write image to board using usb/em100")
   parser.add_argument('-x', '--sdcard', action='store_true', default=False,
                       help='Write to SD card instead of USB/em100')
   parser.add_argument('-z', '--size', action='store_true', default=False,
@@ -319,7 +319,7 @@ def FindCompiler(gcc, cros_prefix):
     # Use the Chromium OS toolchain.
     prefix = cros_prefix
   else:
-    prefix = glob.glob('/opt/linaro/gcc-linaro-%s-linux-*/bin/*gcc' % gcc)
+    prefix = glob.glob('/opt/linaro/gcc-linaro*%s-linux-*/bin/*gcc' % gcc)
     if not prefix:
       cros_build_lib.Die("""Please install an %s toolchain for your machine.
 Install a Linaro toolchain from:
@@ -404,22 +404,22 @@ def SetupBuild(options):
         fields = line.split()
         if not fields:
           continue
+	target = fields[6]
+        # Make sure this is the right target.
+        if target != uboard:
+          continue
+
         arch = fields[1]
         fields += [None, None, None]
         if board_format == PRE_KBUILD:
           smdk = fields[3]
           vendor = fields[4]
           family = fields[5]
-          target = fields[6]
         elif board_format in (PRE_KCONFIG, KCONFIG):
           smdk = fields[5]
           vendor = fields[4]
           family = fields[3]
-          target = fields[0]
 
-        # Make sure this is the right target.
-        if target == uboard:
-          break
   if not arch:
     cros_build_lib.Die("Selected board '%s' not found in boards.cfg." % board)
 
