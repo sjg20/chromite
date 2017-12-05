@@ -531,8 +531,8 @@ def SetupBuild(options):
                                      input='#include <stdint.h>',
                                      capture_output=True,
                                      **kwargs)
-  if result.returncode == 0:
-    base.append('USE_STDINT=1')
+  #if result.returncode == 0:
+    #base.append('USE_STDINT=1')
 
   base.append('BUILD_ROM=1')
   if options.trace:
