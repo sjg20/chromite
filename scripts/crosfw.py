@@ -248,6 +248,8 @@ def ParseCmdline(argv):
     The parsed options object
   """
   parser = commandline.ArgumentParser(description=__doc__)
+  parser.add_argument('-1', '--one-cpu', action='store_true',
+                      help='Run with a single CPU (-j1)')
   parser.add_argument('-a', '--cbfargs', action='append',
                       help='Pass extra arguments to cros_bundle_firmware')
   parser.add_argument('-b', '--board', type=str, default=default_board,
@@ -455,10 +457,9 @@ def SetupBuild(options):
   if not options.build:
     options.incremental = True
 
-  cpus = multiprocessing.cpu_count()
+  cpus = options.one_cpu and 1 or multiprocessing.cpu_count()
 
   suffix = ''
-  #cpus = 1
   base = [
       'make',
       #'-d',
@@ -591,7 +592,7 @@ def RunBuild(options, base, target, queue):
                                        combine_stdout_stderr=True, **kwargs)
     if result.returncode:
       # The build failed, so output the results to stderr.
-      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.output),
+      print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, result.output),
             file=sys.stderr)
       sys.exit(result.returncode)
 
