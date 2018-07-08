@@ -585,6 +585,8 @@ def RunBuild(options, base, target, queue):
     if result.returncode:
       print("cmd: '%s', output: '%s'" % (result.cmdstr, result.output))
       sys.exit(result.returncode)
+    elif options.verbose >= 1:
+      print(result.output)
 
   # Do the actual build.
   if options.build:
@@ -595,6 +597,8 @@ def RunBuild(options, base, target, queue):
       print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, result.output),
             file=sys.stderr)
       sys.exit(result.returncode)
+    elif options.verbose >= 1:
+      print(result.output)
 
   files = ['%s/u-boot' % outdir]
   spl = glob.glob('%s/?pl/u-boot-?pl' % outdir)
