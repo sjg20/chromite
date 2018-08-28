@@ -592,7 +592,7 @@ def RunBuild(options, base, target, queue):
   if options.build:
     result = cros_build_lib.RunCommand(base + [target], capture_output=True,
                                        combine_stdout_stderr=True, **kwargs)
-    if result.returncode:
+    if result.returncode or 'warning' in result.output:
       # The build failed, so output the results to stderr.
       print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, result.output),
             file=sys.stderr)
