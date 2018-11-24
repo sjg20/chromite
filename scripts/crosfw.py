@@ -450,7 +450,9 @@ def SetupBuild(options):
     compiler = '/opt/bfin/bfin-uclinux/bin/bfin-uclinux-'
   elif arch == 'powerpc':
     #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
-    compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/powerpc-linux/bin/powerpc-linux-'
+    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/powerpc-linux/bin/powerpc-linux-'
+  elif arch == 'mips':
+    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/mips-linux/bin/mips-linux-'
   else:
     cros_build_lib.Die("Selected arch '%s' not supported." % arch)
 
@@ -532,8 +534,8 @@ def SetupBuild(options):
                                      input='#include <stdint.h>',
                                      capture_output=True,
                                      **kwargs)
-  if options.verified and result.returncode == 0:
-    base.append('USE_STDINT=1')
+  #if options.verified and result.returncode == 0:
+    #base.append('USE_STDINT=1')
 
   base.append('BUILD_ROM=1')
   if options.trace:
@@ -585,7 +587,7 @@ def RunBuild(options, base, target, queue):
     if result.returncode:
       print("cmd: '%s', output: '%s'" % (result.cmdstr, result.output))
       sys.exit(result.returncode)
-    elif options.verbose >= 1:
+    elif result.output.strip(): #if options.verbose >= 1:
       print(result.output)
 
   # Do the actual build.
@@ -598,8 +600,8 @@ def RunBuild(options, base, target, queue):
       print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, result.output),
             file=sys.stderr)
       sys.exit(result.returncode)
-    elif options.verbose >= 1:
-      print(result.output)
+    elif result.output: # options.verbose >= 1:
+      print(result.output, file=sys.stderr)
 
   files = ['%s/u-boot' % outdir]
   spl = glob.glob('%s/?pl/u-boot-?pl' % outdir)
