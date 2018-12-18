@@ -575,6 +575,23 @@ def RunBuild(options, base, target, queue):
   """
   Log('U-Boot build flags: %s' % ' '.join(base))
 
+  # See if we need to reconfigure
+  files = ['%s/u-boot' % outdir]
+  if os.path.exists(files[0]):
+    if options.incremental:
+      cmd = ['find', 'configs/', '-cnewer', files[0]]
+      result = cros_build_lib.RunCommand(cmd, capture_output=True, **kwargs)
+      if result.output:
+        logging.warning('config/ dir has changed - dropping -i')
+        options.incremental = False
+
+    if options.incremental:
+      cmd = ['find', '.', '-name', 'Kconfig', '-and', '-cnewer', files[0]]
+      result = cros_build_lib.RunCommand(cmd, capture_output=True, **kwargs)
+      if result.output:
+        logging.warning('Kconfig file(s) changed - dropping -i')
+        options.incremental = False
+
   # Reconfigure U-Boot.
   if not options.incremental:
     # Ignore any error from this, some older U-Boots fail on this.
@@ -605,7 +622,6 @@ def RunBuild(options, base, target, queue):
     elif result.output: # options.verbose >= 1:
       print(result.output, file=sys.stderr)
 
-  files = ['%s/u-boot' % outdir]
   spl = glob.glob('%s/?pl/u-boot-?pl' % outdir)
   if spl:
     files += spl
