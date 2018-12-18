@@ -438,7 +438,7 @@ def SetupBuild(options):
       compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/x86_64-linux/bin/x86_64-linux-'
       #compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/i386-linux/bin/i386-linux-'
   elif arch == 'arm':
-    compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabi-')
+    compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabihf-')
   elif arch == 'aarch64':
     compiler = FindCompiler(arch, 'aarch64-cros-linux-gnu-')
     # U-Boot builds both arm and aarch64 with the 'arm' architecture.
@@ -453,6 +453,8 @@ def SetupBuild(options):
     compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/powerpc-linux/bin/powerpc-linux-'
   elif arch == 'mips':
     compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/mips-linux/bin/mips-linux-'
+  elif arch == 'arc':
+    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/arc-elf/bin/arc-elf-'
   else:
     cros_build_lib.Die("Selected arch '%s' not supported." % arch)
 
