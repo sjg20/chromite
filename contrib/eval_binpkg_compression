@@ -105,7 +105,7 @@ def run_stats(output, *args, **kwargs):
     data = dict((x, str(getattr(stats, x)))
                 for x in dir(stats) if x.startswith('ru_'))
     data['wall_clock'] = stop_time - start_time
-    with output.open('w') as fp:
+    with output.open('wb') as fp:
       json.dump(data, fp)
     # We forked above, so use _exit here.
     # pylint: disable=protected-access

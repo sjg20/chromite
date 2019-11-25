@@ -23,6 +23,7 @@ import os
 import re
 import sys
 import tokenize
+from typing import Optional
 
 import astroid
 
@@ -115,6 +116,80 @@ def _PylintrcConfig(config_file, section, opts):
     cfg.read_config_file()
     cfg.load_config_file()
     return cfg
+
+
+class EncodingChecker(pylint.checkers.BaseChecker):
+    """Various encoding enforcements."""
+
+    __implements__ = pylint.interfaces.IAstroidChecker
+
+    # pylint: disable=class-missing-docstring,multiple-statements
+    class _MessageR9150(object):
+        pass
+
+    # pylint: enable=class-missing-docstring,multiple-statements
+
+    name = "encoding_checker"
+    priority = -1
+    msgs = {
+        "R9150": (
+            "Missing explicit encoding='utf-8'",
+            ("encoding-missing"),
+            _MessageR9150,
+        ),
+    }
+    options = ()
+
+    def _check_call(
+        self,
+        node: astroid.Call,
+        encoding_idx: int,
+        mode_idx: Optional[int] = None,
+    ) -> None:
+        """Check |node| call that has an encoding & mode argument."""
+        mode = "r"
+        encoding = None
+
+        if len(node.args) >= encoding_idx + 1:
+            encoding = node.args[encoding_idx].value
+
+        if mode_idx is not None and len(node.args) >= mode_idx + 1:
+            mode = node.args[mode_idx].value
+
+        if node.keywords:
+            for kw in node.keywords:
+                if kw.arg == "mode":
+                    mode = kw.value.value
+                elif kw.arg == "encoding":
+                    encoding = kw.value.value
+
+        if "b" not in mode and encoding != "utf-8":
+            self.add_message("R9150", node=node, line=node.fromlineno)
+
+    def visit_call(self, node: astroid.Call) -> None:
+        """Check |node| call."""
+        # Check pathlib APIs.
+        pathlib_calls = {
+            # Path.open(mode='r', buffering=-1, encoding=None, ...
+            "open": (2, 0),
+        }
+        if (
+            isinstance(node.func, astroid.Attribute)
+            and node.func.attrname in pathlib_calls
+        ):
+            encoding_idx, mode_idx = pathlib_calls[node.func.attrname]
+            try:
+                for inode in node.func.infer():
+                    if (
+                        isinstance(inode, astroid.bases.BoundMethod)
+                        and inode.bound.pytype() == "pathlib.Path"
+                    ):
+                        self._check_call(node, encoding_idx, mode_idx)
+            except astroid.exceptions.InferenceError:
+                # If astroid couldn't guess the type, it will often throw errors
+                # instead of returning None.  We only care about code we can
+                # guess at with high confidence.
+                pass
 
 
 class DocStringChecker(pylint.checkers.BaseChecker):

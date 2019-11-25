@@ -40,9 +40,12 @@ def test_execute(monkeypatch, tmp_path):
             ]
         },
     )
-    parent_file = (test_elm_profiles["base"].full_path / "parent").open("a")
-    parent_file.write("elm-private:bar # elm-private:baz\n# elm-private:baz\n ")
-    parent_file.close()
+    with (test_elm_profiles["base"].full_path / "parent").open(
+        "a", encoding="utf-8"
+    ) as parent_file:
+        parent_file.write(
+            "elm-private:bar # elm-private:baz\n# elm-private:baz\n "
+        )
     elm_profiles_parents["base"].parent_profiles.append("elm-private:bar")
     overlay_elm_private.profiles = [
         elm_private_profiles["base"],

@@ -28,7 +28,7 @@ def test_execute(monkeypatch, tmp_path):
         make_defaults={"base": {"USE": "use -flag", "OTHER_KEY": "foo bar"}},
     )
     make_defaults_file = test_elm_profiles["base"].full_path / "make.defaults"
-    with make_defaults_file.open("a") as make_defaults_opened:
+    with make_defaults_file.open("a", encoding="utf-8") as make_defaults_opened:
         make_defaults_opened.write(
             'USE="${USE} -use abc" # USE="${USE} not_flag"'
         )

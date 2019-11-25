@@ -8,6 +8,8 @@ import collections
 import io
 import os
 
+import astroid
+
 from chromite.cli.cros import lint
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -1093,3 +1095,65 @@ class CommentCheckerTest(CheckerTestCase):
             self.results = []
             self.checker._visit_comment(0, comment)
             self.assertLintFailed(expected=("R9250",))
+
+
+class EncodingCheckerTest(CheckerTestCase):
+    """Tests for EncodingChecker"""
+
+    CHECKER = lint.EncodingChecker
+
+    @staticmethod
+    def _make_pathlib_node(code):
+        """Helper to construct a callable node."""
+        node = astroid.extract_node(
+            "from pathlib import Path\n" "p = Path()\n" f"{code} #@"
+        )
+        node.doc = code
+        return node
+
+    def _check_tests(self, tests, passes):
+        """Helper to run all the test cases."""
+        for test in tests:
+            node = self._make_pathlib_node(test)
+            self.results = []
+            self.checker.visit_call(node)
+            if passes:
+                self.assertLintPassed()
+            else:
+                self.assertLintFailed()
+
+    def testPathlibOpenGood(self):
+        """Verify we accept good Pathlib.Path.open() encoding."""
+        self._check_tests(
+            (
+                # Path.open(mode='r', buffering=-1, encoding=None, ...
+                "p.open('rb')",
+                "p.open(mode='rb')",
+                "p.open('wb')",
+                "p.open('r', -1, 'utf-8')",
+                "p.open(encoding='utf-8')",
+                "p.open(mode='r', encoding='utf-8')",
+                "p.open(encoding='utf-8', mode='r')",
+            ),
+            True,
+        )
+
+    def testPathlibOpenBad(self):
+        """Verify we reject bad Pathlib.Path.open() encoding."""
+        self._check_tests(
+            (
+                # Path.open(mode='r', buffering=-1, encoding=None, ...
+                "p.open()",
+                "p.open('r')",
+                "p.open('w')",
+                "p.open(mode='r')",
+                "p.open('r', -1)",
+                "p.open('r', -1, None)",
+                "p.open('r', -1, 'ascii')",
+                "p.open('r', -1, encoding=None)",
+                "p.open('r', -1, encoding='ascii')",
+                "p.open(mode='r', encoding='ascii')",
+                "p.open(encoding='ascii', mode='r')",
+            ),
+            False,
+        )

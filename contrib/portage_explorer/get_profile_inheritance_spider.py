@@ -24,7 +24,7 @@ def execute(output: spiderlib.SpiderOutput):
         for profile in overlay.profiles:
             parent_file = Path(constants.SOURCE_ROOT) / profile.path / "parent"
             if parent_file.exists():
-                for line in parent_file.open():
+                for line in parent_file.open(encoding="utf-8"):
                     line = line.split("#")[0].strip()
                     if line:
                         profile.parent_profiles.append(line)
