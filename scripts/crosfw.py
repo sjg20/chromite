@@ -431,34 +431,19 @@ def SetupBuild(options):
   vboot = os.path.join('build', board, 'usr')
   if arch == 'x86':
     family = 'em100'
-    if in_chroot:
+
+  if in_chroot:
+    if arch == 'x86':
       compiler = 'i686-pc-linux-gnu-'
-    else:
-      #compiler = '/opt/i686/bin/i686-unknown-elf-'
-      #compiler = '/opt/i386-linux/bin/i386-linux-'
-      #compiler = '/opt/gcc-4.6.3-nolibc/x86_64-linux/bin/x86_64-linux-'
-      #compiler = 'x86_64-linux-gnu-'
-      compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/x86_64-linux/bin/x86_64-linux-'
-      #compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/i386-linux/bin/i386-linux-'
-  elif arch == 'arm':
-    compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabihf-')
-  elif arch == 'aarch64':
-    compiler = FindCompiler(arch, 'aarch64-cros-linux-gnu-')
-    # U-Boot builds both arm and aarch64 with the 'arm' architecture.
-    arch = 'arm'
-  elif arch == 'sandbox':
-    compiler = ''
-  elif arch == 'blackfin':
-    #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
-    compiler = '/opt/bfin/bfin-uclinux/bin/bfin-uclinux-'
-  elif arch == 'powerpc':
-    #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
-    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/powerpc-linux/bin/powerpc-linux-'
-  elif arch == 'mips':
-    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/mips-linux/bin/mips-linux-'
-  elif arch == 'arc':
-    compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/arc-elf/bin/arc-elf-'
+    elif arch == 'arm':
+      compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabihf-')
+    elif arch == 'aarch64':
+      compiler = FindCompiler(arch, 'aarch64-cros-linux-gnu-')
   else:
+    result = cros_build_lib.run(['buildman', '-A', '--boards', options.board],
+                                capture_output=True, **kwargs)
+    compiler = result.output.strip()
+  if not compiler:
     cros_build_lib.Die("Selected arch '%s' not supported." % arch)
 
   if not options.build:
