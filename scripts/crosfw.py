@@ -444,8 +444,31 @@ def SetupBuild(options):
     result = cros_build_lib.run(['buildman', '-A', '--boards', options.board],
                                 capture_output=True, **kwargs)
     compiler = result.output.strip()
-  if not compiler:
-    cros_build_lib.Die("Selected arch '%s' not supported." % arch)
+    if compiler:
+      if arch == 'aarch64':
+        arch = 'arm'
+    else:
+      if arch == 'x86':
+          compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/i386-linux/bin/i386-linux-'
+      elif arch == 'arm':
+        compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabihf-')
+      elif arch == 'aarch64':
+        compiler = FindCompiler(arch, 'aarch64-cros-linux-gnu-')
+        # U-Boot builds both arm and aarch64 with the 'arm' architecture.
+        arch = 'arm'
+      elif arch == 'sandbox':
+        compiler = ''
+      elif arch == 'blackfin':
+        #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
+        compiler = '/opt/bfin/bfin-uclinux/bin/bfin-uclinux-'
+      elif arch == 'powerpc':
+        #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
+        compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/powerpc-linux/bin/powerpc-linux-'
+      elif arch == 'mips':
+        compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/mips-linux/bin/mips-linux-'
+      elif arch == 'arc':
+        compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/arc-elf/bin/arc-elf-'
+        cros_build_lib.Die("Selected arch '%s' not supported." % arch)
 
   if not options.build:
     options.incremental = True
