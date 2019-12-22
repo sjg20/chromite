@@ -191,8 +191,8 @@ if os.path.exists(rc_file):
     exec(compile(fp.read(), rc_file, 'exec'))
 
 compiler_paths = {
-#  'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
-  'linaro' : '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-',
+ 'linaro' : '/opt/linaro/gcc-linaro-arm-linux-*10*/bin/*gcc',
+  #'linaro' : '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/arm-unknown-linux-gnueabi/bin/arm-unknown-linux-gnueabi-',
 
   # This has the bug-fix for rodata:
   #'linaro' : '/opt/cross/bin/arm-linux-gnueabihf-',
