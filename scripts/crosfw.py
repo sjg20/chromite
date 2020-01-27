@@ -591,14 +591,14 @@ def RunBuild(options, base, target, queue):
   if os.path.exists(files[0]):
     if options.incremental:
       cmd = ['find', 'configs/', '-cnewer', files[0]]
-      result = cros_build_lib.RunCommand(cmd, capture_output=True, **kwargs)
+      result = cros_build_lib.run(cmd, capture_output=True, **kwargs)
       if result.output:
         logging.warning('config/ dir has changed - dropping -i')
         options.incremental = False
 
     if options.incremental:
       cmd = ['find', '.', '-name', 'Kconfig', '-and', '-cnewer', files[0]]
-      result = cros_build_lib.RunCommand(cmd, capture_output=True, **kwargs)
+      result = cros_build_lib.run(cmd, capture_output=True, **kwargs)
       if result.output:
         logging.warning('Kconfig file(s) changed - dropping -i')
         options.incremental = False
