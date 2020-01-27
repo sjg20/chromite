@@ -7,10 +7,11 @@
 Builds a firmware image for any board and writes it to the board. The image
 can be pure upstream or include Chrome OS components (-V). Some device
 tree parameters can be provided, including silent console (-C) and secure
-boot (-S). Use -i for a faster incremental build. The image is written to
-the board by default using USB/em100 (or sdcard with -x). Use -b to specify
-the board to build. Options can be added to ~/.crosfwrc - see the script for
-details.
+boot (-S).
+
+The image is written to the board by default using USB/em100 (or sdcard with
+-x). Use -b to specify the board to build. Options can be added to
+~/.crosfwrc - see the script for details.
 
 It can also flash SPI by writing a 'magic flasher' U-Boot with a payload
 to the board.
@@ -51,8 +52,6 @@ Mostly you can use the script inside and outside the chroot. The main
 limitation is that dut-control doesn't really work outside the chroot,
 so writing the image to the board over USB is not possible, nor can the
 board be automatically reset on x86 platforms.
-
-For an incremental build (faster), run with -i
 
 To get faster clean builds, install ccache, and create ~/.crosfwrc with
 this line:
@@ -252,8 +251,6 @@ def ParseCmdline(argv):
                       help='Run with a single CPU (-j1)')
   parser.add_argument('-a', '--cbfargs', action='append',
                       help='Pass extra arguments to cros_bundle_firmware')
-  parser.add_argument('-b', '--board', type=str, default=default_board,
-                      help='Select board to build (daisy/peach_pit/link)')
   parser.add_argument('-B', '--build', action='store_false', default=True,
                       help="Don't build U-Boot, just configure device tree")
   parser.add_argument('-c', '--config-only', action='store_true', default=False,
@@ -269,12 +266,12 @@ def ParseCmdline(argv):
                       help="Don't select default filenames for those not given")
   parser.add_argument('-e', '--efs', action='store_true', default=False,
                       help='Enable early firmware selection')
-  parser.add_argument('-F', '--flash', action='store_true', default=False,
-                      help='Create magic flasher for SPI flash')
+  parser.add_argument('-f', '--force-reconfig', action='store_true',
+		      default=False, help="Reconfigure before building")
+  parser.add_argument('-F', '--force-distclean', action='store_true',
+		      default=False, help="Reconfigure and clean")
   parser.add_argument('-M', '--mmc', action='store_true', default=False,
                       help='Create magic flasher for eMMC')
-  parser.add_argument('-i', '--incremental', action='store_true', default=False,
-                      help="Don't reconfigure and clean")
   parser.add_argument('-I', '--in-tree', action='store_true', default=False,
                       help="Build in-tree")
   parser.add_argument('-k', '--kernel', action='store_true', default=False,
@@ -295,6 +292,10 @@ def ParseCmdline(argv):
                       help='Create Chrome OS small image')
   parser.add_argument('-t', '--trace', action='store_true', default=False,
                       help='Enable trace support')
+  parser.add_argument('-T', '--target', type=str, default='all',
+                      help='Select target to build')
+  parser.add_argument('-v', '--verbose', type=int, default=0,
+                      help='Make cros_bundle_firmware verbose')
   parser.add_argument('-V', '--verified', action='store_true', default=False,
                       help='Include Chrome OS verified boot components')
   parser.add_argument('-w', '--write', action='store_true', default=False,
@@ -303,8 +304,8 @@ def ParseCmdline(argv):
                       help='Write to SD card instead of USB/em100')
   parser.add_argument('-z', '--size', action='store_true', default=False,
                       help='Display U-Boot image size')
-  parser.add_argument('target', nargs='?', default='all',
-                      help='The target to work on')
+  parser.add_argument('board', default='sandbox',
+                      help='Select board to build (daisy/peach_pit/link)')
   return parser.parse_args(argv)
 
 
@@ -464,9 +465,6 @@ def SetupBuild(options):
         compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/arc-elf/bin/arc-elf-'
         cros_build_lib.Die("Selected arch '%s' not supported." % arch)
 
-  if not options.build:
-    options.incremental = True
-
   cpus = options.one_cpu and 1 or multiprocessing.cpu_count()
 
   suffix = ''
@@ -551,12 +549,12 @@ def SetupBuild(options):
   if options.separate:
     base.append('DEV_TREE_SEPARATE=1')
 
-  if options.incremental:
+  if not options.force_reconfig:
     # Get the correct board for cros_write_firmware
     config_mk = '%s/include/autoconf.mk' % outdir
     if not os.path.exists(config_mk):
-      logging.warning('No build found for %s - dropping -i', board)
-      options.incremental = False
+      logging.warning('No build found for %s - adding -f', board)
+      options.force_reconfig = False
 
   config_mk = 'include/autoconf.mk'
   if os.path.exists(config_mk):
@@ -584,24 +582,27 @@ def RunBuild(options, base, target, queue):
   # See if we need to reconfigure
   files = ['%s/u-boot' % outdir]
   if os.path.exists(files[0]):
-    if options.incremental:
+    if not options.force_reconfig:
       cmd = ['find', 'configs/', '-cnewer', files[0]]
       result = cros_build_lib.run(cmd, capture_output=True, **kwargs)
       if result.output:
-        logging.warning('config/ dir has changed - dropping -i')
-        options.incremental = False
+        logging.warning('config/ dir has changed - adding -f')
+        options.force_reconfig = True
 
-    if options.incremental:
+    if not options.force_reconfig:
       cmd = ['find', '.', '-name', 'Kconfig', '-and', '-cnewer', files[0]]
       result = cros_build_lib.run(cmd, capture_output=True, **kwargs)
       if result.output:
-        logging.warning('Kconfig file(s) changed - dropping -i')
-        options.incremental = False
+        logging.warning('Kconfig file(s) changed - adding -f')
+        options.force_reconfig = True
 
-  # Reconfigure U-Boot.
-  if not options.incremental:
+  if options.force_distclean:
+    options.force_reconfig = True
     # Ignore any error from this, some older U-Boots fail on this.
     cros_build_lib.run(base + ['distclean'], **kwargs)
+
+  # Reconfigure U-Boot.
+  if options.force_reconfig:
     if os.path.exists('tools/genboardscfg.py'):
       mtarget = 'defconfig'
     else:
@@ -716,16 +717,6 @@ def WriteFirmware(options):
   flash_method = family
   if flash_method.startswith('tegra'):
     flash_method = 'tegra'
-
-  if options.flash:
-    flash = ['-F', 'spi']
-
-    # The small builds don't have the command line interpreter so cannot
-    # run the magic flasher script. So use the standard U-Boot in this
-    # case.
-    if options.small:
-      logging.warning('Using standard U-Boot as flasher')
-      flash += ['-U', '##/build/%s/firmware/u-boot.bin' % options.board]
 
   if options.mmc:
     flash = ['-F', 'sdmmc']
