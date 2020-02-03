@@ -560,8 +560,8 @@ def SetupBuild(options):
     # Get the correct board for cros_write_firmware
     config_mk = '%s/include/autoconf.mk' % outdir
     if not os.path.exists(config_mk):
-      logging.warning('No build found for %s - adding -f', board)
-      options.force_reconfig = False
+      logging.warning('No build found for %s - adding -F', board)
+      options.force_distclean = True
 
   config_mk = 'include/autoconf.mk'
   if os.path.exists(config_mk):
