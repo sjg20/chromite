@@ -25,7 +25,6 @@ import sys
 import tempfile
 import time
 from typing import List, Optional, Union
-import warnings
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -684,13 +683,9 @@ def run(
 
     if capture_output:
         if stdout is not None or stderr is not None:
-            # TODO(vapier): Switch from warning to error.
-            assert "PYTEST_CURRENT_TEST" not in os.environ
-            warnings.warn(
-                "run: capture_output may not be used with stdout/stderr"
+            raise ValueError(
+                "capture_output may not be used with stdout & stderr"
             )
-            # raise ValueError(
-            #     "capture_output may not be used with stdout & stderr")
         if stdout is None:
             stdout = True
         if stderr is None:
