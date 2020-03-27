@@ -405,7 +405,7 @@ def SetupBuild(options):
         fields = line.split()
         if not fields:
           continue
-	target = fields[6]
+        target = fields[6]
         # Make sure this is the right target.
         if target != uboard:
           continue
@@ -440,6 +440,7 @@ def SetupBuild(options):
                                 capture_output=True, **kwargs)
     compiler = result.output.strip()
     if compiler:
+      compiler = compiler.decode('utf-8')
       if arch == 'aarch64':
         arch = 'arm'
     else:
@@ -612,7 +613,7 @@ def RunBuild(options, base, target, queue):
     result = cros_build_lib.run(cmd, capture_output=True,
                                 stderr=subprocess.STDOUT, **kwargs)
     if result.returncode:
-      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.stdout))
+      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.output.decode('utf-8')))
       sys.exit(result.returncode)
     elif result.output.strip(): #if options.verbose >= 1:
       print(result.output)
@@ -621,10 +622,12 @@ def RunBuild(options, base, target, queue):
   if options.build:
     result = cros_build_lib.run(base + [target], capture_output=True,
                                 stderr=subprocess.STDOUT, input='', **kwargs)
-    if result.returncode or 'warning' in result.output:
+    if result.returncode or b'warning' in result.output:
       # The build failed, so output the results to stderr.
-      print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, result.output),
-            file=sys.stderr)
+      out = result.output.split(b'\n')
+      out = [s.decode('utf-8') for s in out]
+      out = '\n'.join(out)
+      print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, out), file=sys.stderr)
       sys.exit(result.returncode)
     elif result.output: # options.verbose >= 1:
       print(result.output, file=sys.stderr)
