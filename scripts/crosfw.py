@@ -612,25 +612,28 @@ def RunBuild(options, base, target, queue):
     cmd = base + ['%s_%s' % (uboard, mtarget)]
     result = cros_build_lib.run(cmd, stdout=True, stderr=subprocess.STDOUT,
                                 **kwargs)
+    out = result.output.strip().split(b'\n')
+    out = [s.decode('utf-8') for s in out]
+    out = '\n'.join(out)
     if result.returncode:
-      print("cmd: '%s', output: '%s'" % (result.cmdstr, result.output.decode('utf-8')))
+      print("cmd: '%s', output: '%s'" % (result.cmdstr, out))
       sys.exit(result.returncode)
     elif result.output.strip(): #if options.verbose >= 1:
-      print(result.output)
+      print(out)
 
   # Do the actual build.
   if options.build:
     result = cros_build_lib.run(base + [target], stdout=True,
                                 stderr=subprocess.STDOUT, input='', **kwargs)
+    out = result.output.strip().split(b'\n')
+    out = [s.decode('utf-8') for s in out]
+    out = '\n'.join(out)
     if result.returncode or b'warning' in result.output:
       # The build failed, so output the results to stderr.
-      out = result.output.split(b'\n')
-      out = [s.decode('utf-8') for s in out]
-      out = '\n'.join(out)
       print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, out), file=sys.stderr)
       sys.exit(result.returncode)
     elif result.output: # options.verbose >= 1:
-      print(result.output, file=sys.stderr)
+      print(out, file=sys.stderr)
 
   spl = glob.glob('%s/?pl/u-boot-?pl' % outdir)
   if spl:
