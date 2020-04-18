@@ -1169,12 +1169,12 @@ wheel: <
         if acl is not None:
             cmd += ["-a", acl]
 
-        with cros_build_lib.ContextManagerStack() as stack:
+        with contextlib.ExitStack() as stack:
             # Write the input into a tempfile if possible. This is needed so that
             # gsutil can retry failed requests.  We allow the input to be a string
             # or bytes regardless of the output encoding.
             if src_path == "-" and kwargs.get("input") is not None:
-                f = stack.Add(tempfile.NamedTemporaryFile, mode="wb")
+                f = stack.enter_context(tempfile.NamedTemporaryFile(mode="wb"))
                 data = kwargs["input"]
                 if isinstance(data, str):
                     data = data.encode("utf-8")
