@@ -294,8 +294,6 @@ def ParseCmdline(argv):
                       help='Enable trace support')
   parser.add_argument('-T', '--target', type=str, default='all',
                       help='Select target to build')
-  parser.add_argument('-v', '--verbose', type=int, default=0,
-                      help='Make cros_bundle_firmware verbose')
   parser.add_argument('-V', '--verified', action='store_true', default=False,
                       help='Include Chrome OS verified boot components')
   parser.add_argument('-w', '--write', action='store_true', default=False,
@@ -350,6 +348,7 @@ def SetupBuild(options):
 
   if not verbose:
     verbose = options.verbose != 0
+  verbose = False
 
   logging.getLogger().setLevel(options.verbose)
 
