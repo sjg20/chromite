@@ -246,7 +246,7 @@ def ParseCmdline(argv):
   Returns:
     The parsed options object
   """
-  parser = commandline.ArgumentParser(description=__doc__)
+  parser = commandline.ArgumentParser(description=__doc__, logging=False)
   parser.add_argument('-1', '--one-cpu', action='store_true',
                       help='Run with a single CPU (-j1)')
   parser.add_argument('-a', '--cbfargs', action='append',
@@ -294,6 +294,8 @@ def ParseCmdline(argv):
                       help='Enable trace support')
   parser.add_argument('-T', '--target', type=str, default='all',
                       help='Select target to build')
+  parser.add_argument('-v', '--verbose', type=int, default=0,
+                      help='Set verbosity level')
   parser.add_argument('-V', '--verified', action='store_true', default=False,
                       help='Include Chrome OS verified boot components')
   parser.add_argument('-w', '--write', action='store_true', default=False,
