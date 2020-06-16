@@ -276,10 +276,14 @@ def ParseCmdline(argv):
 		      default=False, help="Reconfigure and clean")
   parser.add_argument('-M', '--mmc', action='store_true', default=False,
                       help='Create magic flasher for eMMC')
+  parser.add_argument('-n', '--no-rom', action='store_true', default=False,
+                      help="Don't build the ROM")
   parser.add_argument('-I', '--in-tree', action='store_true', default=False,
                       help="Build in-tree")
   parser.add_argument('-k', '--kernel', action='store_true', default=False,
                       help='Send kernel to board also')
+  parser.add_argument('-o', '--old-toolchain', action='store_true',
+		      default=False, help='Use gcc4.9')
   parser.add_argument('-O', '--objdump', action='store_true', default=False,
                       help='Write disassembly output')
   parser.add_argument('-r', '--run', action='store_false', default=True,
@@ -440,10 +444,19 @@ def SetupBuild(options):
       compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabihf-')
     elif arch == 'aarch64':
       compiler = FindCompiler(arch, 'aarch64-cros-linux-gnu-')
+  elif options.old_toolchain:
+    print('Using old toolchain')
+    if arch == 'arm':
+#      compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/i386-linux/bin/i386-linux-'
+      #compiler = '/opt/linaro/gcc-linaro-6.3.1-2017.02-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-'
+      compiler = '/opt/linaro/gcc-linaro-5.5.0-2017.10-x86_64_arm-linux-gnueabi/bin/arm-linux-gnueabi-'
+    else:
+      cros_build_lib.Die("No old toolchain for '%s'." % arch)
   else:
     result = cros_build_lib.run(['buildman', '-A', '--boards', options.board],
                                 capture_output=True, **kwargs)
     compiler = result.output.strip()
+    #print('compiler', compiler)
     if compiler:
       compiler = compiler.decode('utf-8')
       if arch == 'aarch64':
@@ -549,8 +562,8 @@ def SetupBuild(options):
                               **kwargs)
   #if options.verified and result.returncode == 0:
     #base.append('USE_STDINT=1')
-
-  base.append('BUILD_ROM=1')
+  if not options.no_rom:
+    base.append('BUILD_ROM=1')
   if options.trace:
     base.append('FTRACE=1')
   if options.separate:
