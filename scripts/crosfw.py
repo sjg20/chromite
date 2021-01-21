@@ -459,7 +459,7 @@ def SetupBuild(options):
         arch = 'arm'
     else:
       if arch == 'x86':
-          compiler = '/home/sglass/.buildman-toolchains/gcc-7.3.0-nolibc/i386-linux/bin/i386-linux-'
+          compiler = '/home/sjg/.buildman-toolchains/gcc-9.2.0-nolibc/i386-linux/bin/i386-linux-'
           #compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/i386-linux/bin/i386-linux-'
       elif arch == 'arm':
         compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabihf-')
