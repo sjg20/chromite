@@ -210,6 +210,7 @@ class GnLintTests(LintTestCase):
                 CreateTestData("defines", "=", '"DEBUG-FLAG"'),
                 CreateTestData("defines", "=", '"-DTEST_VALUE=1"'),
                 CreateTestData("defines", "=", '"TEST-VALUE=1"'),
+                CreateTestData("defines", "=", '"USE_FLAG"'),
             ],
         )
 

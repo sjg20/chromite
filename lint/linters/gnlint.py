@@ -350,6 +350,15 @@ def GnLintDefines(gndata):
                         )
                     )
 
+                # Make sure the define style name is consistent.
+                if name.startswith("USE_") and "=" not in flag:
+                    issues.append(
+                        Issue(
+                            n.get("location"),
+                            f"incorrect style; flag should be {flag}=${{use...}}",
+                        )
+                    )
+
     issues = []
     WalkGn(CheckNode, gndata)
     return issues
