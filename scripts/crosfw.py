@@ -452,8 +452,9 @@ def SetupBuild(options):
     result = cros_build_lib.run(['buildman', '-A', '--boards', options.board],
                                 capture_output=True, **kwargs)
     compiler = result.output.strip()
-    #print('compiler', compiler)
-    if compiler:
+    if arch == 'sandbox':
+        compiler = ''
+    elif compiler:
       compiler = compiler.decode('utf-8')
       if arch == 'aarch64':
         arch = 'arm'
@@ -467,8 +468,6 @@ def SetupBuild(options):
         compiler = FindCompiler(arch, 'aarch64-cros-linux-gnu-')
         # U-Boot builds both arm and aarch64 with the 'arm' architecture.
         arch = 'arm'
-      elif arch == 'sandbox':
-        compiler = ''
       elif arch == 'blackfin':
         #compiler = '/home/sglass/.buildman-toolchains/gcc-4.6.3-nolibc/bfin-uclinux/bin/bfin-uclinux-'
         compiler = '/opt/bfin/bfin-uclinux/bin/bfin-uclinux-'
