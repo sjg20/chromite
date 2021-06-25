@@ -12,7 +12,6 @@ If given args those are passed to the chroot environment, and executed.
 """
 
 import argparse
-import ast
 import glob
 import logging
 import os
@@ -20,7 +19,6 @@ from pathlib import Path
 import pwd
 import random
 import re
-import resource
 import shlex
 import subprocess
 import sys
@@ -48,11 +46,6 @@ from chromite.utils import key_value_store
 
 # Which compression algos the SDK tarball uses.  We've used xz since 2012.
 COMPRESSION_PREFERENCE = ("xz",)
-
-# TODO(zbehan): Remove the dependency on these, reimplement them in python
-ENTER_CHROOT = [
-    os.path.join(constants.SOURCE_ROOT, "src/scripts/sdk_lib/enter_chroot.sh")
-]
 
 # Proxy simulator configuration.
 PROXY_HOST_IP = "192.168.240.1"
@@ -195,54 +188,6 @@ def FetchRemoteTarballs(storage_dir, urls):
         osutils.SafeUnlink(p)
 
     return tarball_dest
-
-
-def EnterChroot(
-    chroot: chroot_lib.Chroot,
-    chrome_root_mount,
-    working_dir,
-    additional_args,
-):
-    """Enters an existing SDK chroot"""
-    st = os.statvfs(os.path.join(chroot.path, "usr", "bin", "sudo"))
-    if st.f_flag & os.ST_NOSUID:
-        cros_build_lib.Die("chroot cannot be in a nosuid mount")
-
-    cmd = ENTER_CHROOT + chroot.get_enter_args(for_shell=True)
-    if chrome_root_mount:
-        cmd.extend(["--chrome_root_mount", chrome_root_mount])
-    if working_dir is not None:
-        cmd.extend(["--working_dir", working_dir])
-
-    if additional_args:
-        cmd.append("--")
-        cmd.extend(additional_args)
-
-    if "CHROMEOS_SUDO_RLIMITS" in os.environ:
-        _SetRlimits(os.environ.pop("CHROMEOS_SUDO_RLIMITS"))
-
-    # Some systems set the soft limit too low.  Bump it up to the hard limit.
-    # We don't override the hard limit because it's something the admins put
-    # in place and we want to respect such configs.  http://b/234353695
-    soft, hard = resource.getrlimit(resource.RLIMIT_NPROC)
-    if soft != resource.RLIM_INFINITY and soft < 4096:
-        if soft < hard or hard == resource.RLIM_INFINITY:
-            resource.setrlimit(resource.RLIMIT_NPROC, (hard, hard))
-
-    # ThinLTO opens lots of files at the same time.
-    # Set rlimit and vm.max_map_count to accommodate this.
-    file_limit = 262144
-    soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-    resource.setrlimit(
-        resource.RLIMIT_NOFILE, (max(soft, file_limit), max(hard, file_limit))
-    )
-    max_map_count = int(osutils.ReadFile("/proc/sys/vm/max_map_count"))
-    if max_map_count < file_limit:
-        logging.notice(
-            "Raising vm.max_map_count from %s to %s", max_map_count, file_limit
-        )
-        osutils.WriteFile("/proc/sys/vm/max_map_count", str(file_limit))
-    return cros_build_lib.dbg_run(cmd, check=False)
 
 
 def _ImageFileForChroot(chroot):
@@ -489,43 +434,6 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
     return snapshots
 
 
-# The rlimits we will lookup & pass down, in order.
-RLIMITS_TO_PASS = (
-    resource.RLIMIT_AS,
-    resource.RLIMIT_CORE,
-    resource.RLIMIT_CPU,
-    resource.RLIMIT_FSIZE,
-    resource.RLIMIT_MEMLOCK,
-    resource.RLIMIT_NICE,
-    resource.RLIMIT_NOFILE,
-    resource.RLIMIT_NPROC,
-    resource.RLIMIT_RSS,
-    resource.RLIMIT_STACK,
-)
-
-
-def _GetRlimits() -> str:
-    """Serialize current rlimits."""
-    return str(tuple(resource.getrlimit(x) for x in RLIMITS_TO_PASS))
-
-
-def _SetRlimits(limits: str) -> None:
-    """Deserialize rlimits."""
-    for rlim, limit in zip(RLIMITS_TO_PASS, ast.literal_eval(limits)):
-        cur_limit = resource.getrlimit(rlim)
-        if cur_limit != limit:
-            # Turn the number into a symbolic name for logging.
-            name = "RLIMIT_???"
-            for name, num in resource.__dict__.items():
-                if name.startswith("RLIMIT_") and num == rlim:
-                    break
-            logging.debug(
-                "Restoring user rlimit %s from %r to %r", name, cur_limit, limit
-            )
-
-            resource.setrlimit(rlim, limit)
-
-
 def _SudoCommand():
     """Get the 'sudo' command, along with all needed environment variables."""
 
@@ -545,7 +453,7 @@ def _SudoCommand():
     cmd += ["CHROMEOS_SUDO_PATH=%s" % os.environ.get("PATH", "")]
 
     # Pass along current rlimit settings so we can restore them.
-    cmd += [f"CHROMEOS_SUDO_RLIMITS={_GetRlimits()}"]
+    cmd += [f"CHROMEOS_SUDO_RLIMITS={cros_sdk_lib.ChrootEnteror.get_rlimits()}"]
 
     # Pass in the path to the depot_tools so that users can access them from
     # within the chroot.
@@ -1508,10 +1416,10 @@ snapshots will be unavailable)."""
             lock.read_lock()
             if not mounted:
                 cros_sdk_lib.MountChrootPaths(chroot.path, options.out_dir)
-            ret = EnterChroot(
+            ret = cros_sdk_lib.EnterChroot(
                 chroot,
-                options.chrome_root_mount,
-                options.working_dir,
-                options.commands,
+                chrome_root_mount=options.chrome_root_mount,
+                cwd=options.working_dir,
+                cmd=options.commands,
             )
             sys.exit(ret.returncode)

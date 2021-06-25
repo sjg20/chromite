@@ -4,6 +4,7 @@
 
 """Utilities for setting up and cleaning up the chroot environment."""
 
+import ast
 import collections
 import grp
 import logging
@@ -11,6 +12,7 @@ import os
 from pathlib import Path
 import pwd
 import re
+import resource
 import shutil
 import time
 from typing import List, Optional, Union
@@ -1240,3 +1242,151 @@ $ cros_sdk --delete%s
 def CreateChroot(*args, **kwargs):
     """Convenience method."""
     ChrootCreator(*args, **kwargs).run()
+
+
+class ChrootEnteror:
+    """Enters an existing chroot (and syncs state we care about)."""
+
+    ENTER_CHROOT = os.path.join(
+        constants.SOURCE_ROOT, "src/scripts/sdk_lib/enter_chroot.sh"
+    )
+
+    # The rlimits we will lookup & pass down, in order.
+    RLIMITS_TO_PASS = (
+        resource.RLIMIT_AS,
+        resource.RLIMIT_CORE,
+        resource.RLIMIT_CPU,
+        resource.RLIMIT_FSIZE,
+        resource.RLIMIT_MEMLOCK,
+        resource.RLIMIT_NICE,
+        resource.RLIMIT_NOFILE,
+        resource.RLIMIT_NPROC,
+        resource.RLIMIT_RSS,
+        resource.RLIMIT_STACK,
+    )
+
+    # We want a proc limit at least this small.
+    _RLIMIT_NPROC_MIN = 4096
+
+    # We want a file limit at least this small.
+    _RLIMIT_NOFILE_MIN = 262144
+
+    def __init__(
+        self,
+        chroot: "chroot_lib.Chroot",
+        chrome_root_mount: Optional[Path] = None,
+        cmd: Optional[List[str]] = None,
+        cwd: Optional[Path] = None,
+    ):
+        """Initialize.
+
+        Args:
+          chroot: Where the new chroot will be created.
+          chrome_root_mount: Where to mount |chrome_root| inside the chroot.
+          cmd: Program to run inside the chroot.
+          cwd: Directory to change to before running |additional_args|.
+        """
+        self.chroot = chroot
+        self.chrome_root_mount = chrome_root_mount
+        self.cmd = cmd
+        self.cwd = cwd
+
+    def _check_chroot(self) -> None:
+        """Verify the chroot is usable."""
+        st = os.statvfs(Path(self.chroot.path) / "usr" / "bin" / "sudo")
+        if st.f_flag & os.ST_NOSUID:
+            cros_build_lib.Die("chroot cannot be in a nosuid mount")
+
+    def _enter_chroot(
+        self, cmd: Optional[List[str]] = None, cwd: Optional[Path] = None
+    ) -> cros_build_lib.CompletedProcess:
+        """Enter the chroot."""
+        self._check_chroot()
+
+        if cmd is None:
+            cmd = self.cmd
+        if cwd is None:
+            cwd = self.cwd
+
+        wrapper = [self.ENTER_CHROOT] + self.chroot.get_enter_args(
+            for_shell=True
+        )
+        if self.chrome_root_mount:
+            wrapper += ["--chrome_root_mount", self.chrome_root_mount]
+        if cwd:
+            wrapper += ["--working_dir", cwd]
+
+        if cmd:
+            wrapper += ["--"] + self.cmd
+
+        return cros_build_lib.dbg_run(wrapper, check=False)
+
+    @classmethod
+    def get_rlimits(cls) -> str:
+        """Serialize current rlimits."""
+        return str(tuple(resource.getrlimit(x) for x in cls.RLIMITS_TO_PASS))
+
+    @classmethod
+    def set_rlimits(cls, limits: str) -> None:
+        """Deserialize rlimits."""
+        for rlim, limit in zip(cls.RLIMITS_TO_PASS, ast.literal_eval(limits)):
+            cur_limit = resource.getrlimit(rlim)
+            if cur_limit != limit:
+                # Turn the number into a symbolic name for logging.
+                name = "RLIMIT_???"
+                for name, num in resource.__dict__.items():
+                    if name.startswith("RLIMIT_") and num == rlim:
+                        break
+                logging.debug(
+                    "Restoring user rlimit %s from %r to %r",
+                    name,
+                    cur_limit,
+                    limit,
+                )
+
+                resource.setrlimit(rlim, limit)
+
+    def _setup_rlimit_nproc(self) -> None:
+        """Update process rlimits."""
+        # Some systems set the soft limit too low.  Bump it to the hard limit.
+        # We don't override the hard limit because it's something the admins put
+        # in place and we want to respect such configs.  http://b/234353695
+        soft, hard = resource.getrlimit(resource.RLIMIT_NPROC)
+        if soft != resource.RLIM_INFINITY and soft < self._RLIMIT_NPROC_MIN:
+            if soft < hard or hard == resource.RLIM_INFINITY:
+                resource.setrlimit(resource.RLIMIT_NPROC, (hard, hard))
+
+    def _setup_vm_max_map_count(self) -> None:
+        """Update OS limits as ThinLTO opens lots of files at the same time."""
+        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+        max_map_count = Path("/proc/sys/vm/max_map_count")
+        resource.setrlimit(
+            resource.RLIMIT_NOFILE,
+            (
+                max(soft, self._RLIMIT_NOFILE_MIN),
+                max(hard, self._RLIMIT_NOFILE_MIN),
+            ),
+        )
+        max_map_count = int(max_map_count.read_text(encoding="utf-8"))
+        if max_map_count < self._RLIMIT_NOFILE_MIN:
+            logging.notice(
+                "Raising vm.max_map_count from %s to %s",
+                max_map_count,
+                self._RLIMIT_NOFILE_MIN,
+            )
+            max_map_count.write_text(str(self._RLIMIT_NOFILE_MIN))
+
+    def run(
+        self, cmd: Optional[List[str]] = None, cwd: Optional[Path] = None
+    ) -> cros_build_lib.CompletedProcess:
+        """Enter the chroot."""
+        if "CHROMEOS_SUDO_RLIMITS" in os.environ:
+            self.set_rlimits(os.environ.pop("CHROMEOS_SUDO_RLIMITS"))
+        self._setup_rlimit_nproc()
+        self._setup_vm_max_map_count()
+        return self._enter_chroot(cmd=cmd, cwd=cwd)
+
+
+def EnterChroot(*args, **kwargs) -> cros_build_lib.CompletedProcess:
+    """Convenience method."""
+    return ChrootEnteror(*args, **kwargs).run()

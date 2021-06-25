@@ -6,6 +6,7 @@
 
 import os
 
+from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import cros_test_lib
@@ -1041,3 +1042,28 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
         self.creater.run(
             user=TEST_USER, uid=TEST_UID, group=TEST_GROUP, gid=TEST_GID
         )
+
+
+class ChrootEnterorTests(cros_test_lib.MockTempDirTestCase):
+    """ChrootEnteror tests."""
+
+    def setUp(self):
+        chroot_path = self.tempdir / "chroot"
+        self.chroot = chroot_lib.Chroot(
+            path=chroot_path, cache_dir=self.tempdir / "cache_dir"
+        )
+
+        sudo = chroot_path / "usr" / "bin" / "sudo"
+        osutils.Touch(sudo, makedirs=True, mode=0o7755)
+
+        self.enteror = cros_sdk_lib.ChrootEnteror(self.chroot)
+
+    def testRun(self):
+        """Verify run works."""
+        with self.PatchObject(cros_build_lib, "dbg_run"):
+            self.enteror.run()
+
+    def testHelperRun(self):
+        """Verify helper run API works."""
+        with self.PatchObject(cros_build_lib, "dbg_run"):
+            cros_sdk_lib.EnterChroot(self.chroot)
