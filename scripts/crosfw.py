@@ -270,6 +270,8 @@ def ParseCmdline(argv):
 		      default=False, help="Reconfigure before building")
   parser.add_argument('-F', '--force-distclean', action='store_true',
 		      default=False, help="Reconfigure and clean")
+  parser.add_argument('-L', '--no-lto', action='store_true',
+		      default=False, help="Disable LTO")
   parser.add_argument('-M', '--mmc', action='store_true', default=False,
                       help='Create magic flasher for eMMC')
   parser.add_argument('-n', '--no-rom', action='store_true', default=False,
@@ -460,7 +462,7 @@ def SetupBuild(options):
         arch = 'arm'
     else:
       if arch == 'x86':
-          compiler = '/home/sjg/.buildman-toolchains/gcc-9.2.0-nolibc/i386-linux/bin/i386-linux-'
+          compiler = '/home/sglass/.buildman-toolchains/gcc-9.2.0-nolibc/i386-linux/bin/i386-linux-'
           #compiler = '/home/sglass/.buildman-toolchains/gcc-4.9.0-nolibc/i386-linux/bin/i386-linux-'
       elif arch == 'arm':
         compiler = FindCompiler(arch, 'armv7a-cros-linux-gnueabihf-')
@@ -491,6 +493,7 @@ def SetupBuild(options):
       'CROSS_COMPILE=%s' % compiler,
       '--no-print-directory',
       'HOSTSTRIP=true',
+      'LTO_BUILD=%s' % ('n' if options.no_lto else ''),
       'DEV_TREE_SRC=%s-%s' % (family, options.dt),
       'QEMU_ARCH=']
 
