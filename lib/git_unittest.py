@@ -550,6 +550,7 @@ class RawDiffTest(cros_test_lib.MockTestCase):
 :100644 100644 9e5d11b... 806bf9b... R099\tchromeos-base/chromeos-chrome/chromeos-chrome-40.0.2197.0_rc-r1.ebuild\tchromeos-base/chromeos-chrome/chromeos-chrome-40.0.2197.2_rc-r1.ebuild
 :100644 100644 70d6e94... 821c642... M\tchromeos-base/chromeos-chrome/chromeos-chrome-9999.ebuild
 :100644 100644 be445f9... be445f9... R100\tchromeos-base/chromium-source/chromium-source-40.0.2197.0_rc-r1.ebuild\tchromeos-base/chromium-source/chromium-source-40.0.2197.2_rc-r1.ebuild
+:100644 100644 d02943a... 114bc47... M\tchromeos-base/chromeos-chrome/User Data.txt
 """
         result = cros_build_lib.CompletedProcess(stdout=diff_output)
         self.PatchObject(git, "RunGit", return_value=result)
@@ -567,6 +568,8 @@ class RawDiffTest(cros_test_lib.MockTestCase):
                     None,
                     "chromeos-base/chromeos-chrome/Manifest",
                     None,
+                    [],
+                    [],
                 ),
                 (
                     "100644",
@@ -579,6 +582,8 @@ class RawDiffTest(cros_test_lib.MockTestCase):
                     "chromeos-chrome-40.0.2197.0_rc-r1.ebuild",
                     "chromeos-base/chromeos-chrome/"
                     "chromeos-chrome-40.0.2197.2_rc-r1.ebuild",
+                    [],
+                    [],
                 ),
                 (
                     "100644",
@@ -589,6 +594,8 @@ class RawDiffTest(cros_test_lib.MockTestCase):
                     None,
                     "chromeos-base/chromeos-chrome/chromeos-chrome-9999.ebuild",
                     None,
+                    [],
+                    [],
                 ),
                 (
                     "100644",
@@ -601,6 +608,20 @@ class RawDiffTest(cros_test_lib.MockTestCase):
                     "chromium-source-40.0.2197.0_rc-r1.ebuild",
                     "chromeos-base/chromium-source/"
                     "chromium-source-40.0.2197.2_rc-r1.ebuild",
+                    [],
+                    [],
+                ),
+                (
+                    "100644",
+                    "100644",
+                    "d02943a",
+                    "114bc47",
+                    "M",
+                    None,
+                    "chromeos-base/chromeos-chrome/User Data.txt",
+                    None,
+                    [],
+                    [],
                 ),
             ],
         )
@@ -611,6 +632,112 @@ class RawDiffTest(cros_test_lib.MockTestCase):
         self.PatchObject(git, "RunGit", return_value=result)
         entries = git.RawDiff("foo", "bar")
         self.assertEqual([], entries)
+
+    def testMergeDiff(self):
+        """Verify a merge diff."""
+
+        diff_output = """
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM\tdesc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM\tfoo.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR\tfooey.c
+::100644 100644 100644 c238559 e0512aa 3814dac MM\tUser Data.txt
+"""
+        result = cros_build_lib.CompletedProcess(stdout=diff_output)
+        self.PatchObject(git, "RunGit", return_value=result)
+
+        entries = git.RawDiff("foo", "bar")
+        self.assertEqual(
+            entries,
+            [
+                (
+                    "100644",
+                    "100644",
+                    "fabadb8",
+                    "4866510",
+                    "MM",
+                    None,
+                    None,
+                    "desc.c",
+                    ["100644"],
+                    ["cc95eb0"],
+                ),
+                (
+                    "100755",
+                    "100755",
+                    "52b7a2d",
+                    "d2ac7d7",
+                    "RM",
+                    None,
+                    None,
+                    "foo.sh",
+                    ["100755"],
+                    ["6d1ac04"],
+                ),
+                (
+                    "100644",
+                    "100644",
+                    "e07d6c5",
+                    "ee91881",
+                    "RR",
+                    None,
+                    None,
+                    "fooey.c",
+                    ["100644"],
+                    ["9042e82"],
+                ),
+                (
+                    "100644",
+                    "100644",
+                    "c238559",
+                    "3814dac",
+                    "MM",
+                    None,
+                    None,
+                    "User Data.txt",
+                    ["100644"],
+                    ["e0512aa"],
+                ),
+            ],
+        )
+
+    def testMutipleMergeDiff(self):
+        """Verify a merge with more than 2 parents."""
+        diff_output = (
+            ":::::100644 100644 100644 100644 100644 100644"
+            " 074918267e36d09b990c69066f7dd21f7c7b4d55"
+            " 8514c07df3081c4b26144f92b0adc58b543dff55"
+            " ceedecec86cacf5687470d8543d0cfc9456df473"
+            " 7bb53f20d7fa362a5336924cdee739e0c0ffdb2c"
+            " 4b6c09ad33e6b255d86b8f7606075fbaa1be5c41"
+            " 6a216f484aaccc3a022ce3d4712f86f24265600d"
+            " MMMMM\tfile"
+        )
+        result = cros_build_lib.CompletedProcess(stdout=diff_output)
+        self.PatchObject(git, "RunGit", return_value=result)
+
+        entries = git.RawDiff("foo", "bar")
+        self.assertEqual(
+            entries,
+            [
+                (
+                    "100644",
+                    "100644",
+                    "074918267e36d09b990c69066f7dd21f7c7b4d55",
+                    "6a216f484aaccc3a022ce3d4712f86f24265600d",
+                    "MMMMM",
+                    None,
+                    None,
+                    "file",
+                    ["100644", "100644", "100644", "100644"],
+                    [
+                        "8514c07df3081c4b26144f92b0adc58b543dff55",
+                        "ceedecec86cacf5687470d8543d0cfc9456df473",
+                        "7bb53f20d7fa362a5336924cdee739e0c0ffdb2c",
+                        "4b6c09ad33e6b255d86b8f7606075fbaa1be5c41",
+                    ],
+                ),
+            ],
+        )
 
 
 class GitPushTest(cros_test_lib.RunCommandTestCase):

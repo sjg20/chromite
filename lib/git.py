@@ -15,7 +15,7 @@ from pathlib import Path
 import re
 import string
 import subprocess
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, NamedTuple, Optional, Union
 from xml import sax
 
 from chromite.lib import config_lib
@@ -1354,18 +1354,40 @@ def Commit(
     return GetChangeId(git_repo)
 
 
-_raw_diff_components = (
-    "src_mode",
-    "dst_mode",
-    "src_sha",
-    "dst_sha",
-    "status",
-    "score",
-    "src_file",
-    "dst_file",
-)
-# RawDiffEntry represents a line of raw formatted git diff output.
-RawDiffEntry = collections.namedtuple("RawDiffEntry", _raw_diff_components)
+class RawDiffEntry(NamedTuple):
+    """RawDiffEntry represents a line of raw formatted git diff output.
+
+    See https://git-scm.com/docs/diff-format for the details.
+    The diff could have more than two `scr_file`s, but we are ignoring that
+    because they do not show up in the current command `RawDiff` is using.
+
+    Attributes:
+        src_mode: Mode for "src".
+        dst_mode: Mode for "dst".
+        src_sha: SHA1 for "src"; 0{40} if creation or unmerged.
+        dst_sha: SHA1 for "dst"; 0{40} if deletion, unmerged or
+            "work tree out of sync with the index".
+        status: One or more letters showing the change status.
+        score: Similarity between the source and the target.
+        src_file: Path for "src".
+        dst_file: Path for "dst". Only exists for C or R.
+        extra_modes: Mode for the file in the other parent commits.
+            Only for merge commits.
+        extra_shas: SHA1 for the file in the other parent commits;
+            0{40} if creation or unmerged.
+            Only for merge commits.
+    """
+
+    src_mode: str
+    dst_mode: str
+    src_sha: str
+    dst_sha: str
+    status: str
+    score: Optional[str]
+    src_file: Optional[str]
+    dst_file: Optional[str]
+    extra_src_modes: List[str] = []
+    extra_src_shas: List[str] = []
 
 
 # This regular expression pulls apart a line of raw formatted git diff output.
@@ -1377,6 +1399,82 @@ DIFF_RE = re.compile(
 )
 
 
+def _match_merge_commit(line: str) -> RawDiffEntry:
+    """Return a RawDiffEntry object for a merge commit.
+
+    For merge commits the number of parents is not fixed,
+    so instead of regex we use a function to parse.
+    See https://git-scm.com/docs/diff-format#_diff_format_for_merges.
+
+    Args:
+        line: A line from the raw format `git diff`.
+
+    Returns:
+        A corresponding RawDiffEntry object.
+
+    Raises:
+        If the commit is ill-formated, ValueError is raised.
+    """
+
+    leading_colons = re.findall(r"^::+", line)
+    if not leading_colons:
+        # Not a merge commit, ill-formatted.
+        raise ValueError(f"Ill-formatted diff: {line}")
+    num_parents = len(leading_colons[0])
+
+    items = line[num_parents:].split(None, (num_parents + 1) * 2 + 1)
+
+    src_mode = items[0]
+    extra_src_modes = items[1:num_parents]
+    dst_mode = items[num_parents]
+
+    src_sha = items[num_parents + 1]
+    extra_src_sha = items[num_parents + 2 : 2 * num_parents + 1]
+    dst_sha = items[2 * num_parents + 1]
+
+    status = items[2 * num_parents + 2]
+    score = None
+
+    # By default, only dst path is shown.
+    src_file = None
+    dst_file = items[-1]
+
+    return RawDiffEntry(
+        src_mode,
+        dst_mode,
+        src_sha,
+        dst_sha,
+        status,
+        score,
+        src_file,
+        dst_file,
+        extra_src_modes,
+        extra_src_sha,
+    )
+
+
+def _match_commit(line: str) -> RawDiffEntry:
+    """Return a RawDiffEntry object for the given raw format diff.
+
+    Args:
+        line: A line from the raw format `git diff`.
+
+    Returns:
+        A corresponding RawDiffEntry object.
+
+    Raises:
+        If the commit is ill-formated, ValueError is raised.
+    """
+
+    # A regular expression is used to parse the normal commits.
+    match = DIFF_RE.match(line)
+    if match:
+        return RawDiffEntry(**match.groupdict())
+
+    # If the match failed, it falls back to the merge commit function.
+    return _match_merge_commit(line)
+
+
 def RawDiff(path, target):
     """Return the parsed raw format diff of target
 
@@ -1386,6 +1484,9 @@ def RawDiff(path, target):
 
     Returns:
       A list of RawDiffEntry's.
+
+    Raises:
+        If the diff is ill-formated, ValueError is raised.
     """
     entries = []
 
@@ -1393,10 +1494,8 @@ def RawDiff(path, target):
     diff = RunGit(path, cmd).stdout
     diff_lines = diff.strip().splitlines()
     for line in diff_lines:
-        match = DIFF_RE.match(line)
-        if not match:
-            raise GitException("Failed to parse diff output: %s" % line)
-        entries.append(RawDiffEntry(*match.group(*_raw_diff_components)))
+        raw_diff = _match_commit(line)
+        entries.append(raw_diff)
 
     return entries
 
