@@ -707,9 +707,9 @@ def main(argv):
     parser.add_argument(
         "--binary",
         default="",
-        help="full path to the binary being debuged."
+        help="full path to the binary being debugged."
         " This is only useful for simple chrome."
-        " An example is --bianry /home/out_falco/chrome.",
+        " An example is --binary /home/out_falco/chrome.",
     )
 
     options = parser.parse_args(argv)
