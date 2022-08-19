@@ -493,9 +493,11 @@ def SetupBuild(options):
       'CROSS_COMPILE=%s' % compiler,
       '--no-print-directory',
       'HOSTSTRIP=true',
-      'LTO_BUILD=%s' % ('n' if options.no_lto else ''),
       'DEV_TREE_SRC=%s-%s' % (family, options.dt),
       'QEMU_ARCH=']
+
+  if options.no_lto:
+    base.append('NO_LTO=1')
 
   if options.dtb:
     base.append('DEV_TREE_BIN=%s' % options.dtb)
