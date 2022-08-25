@@ -453,7 +453,7 @@ def SetupBuild(options):
   else:
     result = cros_build_lib.run(['buildman', '-A', '--boards', options.board],
                                 capture_output=True, **kwargs)
-    compiler = result.output.strip()
+    compiler = result.stdout.strip()
     if arch == 'sandbox':
         compiler = ''
     elif compiler:
@@ -605,14 +605,14 @@ def RunBuild(options, base, target, queue):
     if not options.force_reconfig:
       cmd = ['find', 'configs/', '-cnewer', files[0]]
       result = cros_build_lib.run(cmd, capture_output=True, **kwargs)
-      if result.output:
+      if result.stdout:
         logging.warning('config/ dir has changed - adding -f')
         options.force_reconfig = True
 
     if not options.force_reconfig:
       cmd = ['find', '.', '-name', 'Kconfig', '-and', '-cnewer', files[0]]
       result = cros_build_lib.run(cmd, capture_output=True, **kwargs)
-      if result.output:
+      if result.stdout:
         logging.warning('Kconfig file(s) changed - adding -f')
         options.force_reconfig = True
 
@@ -630,27 +630,27 @@ def RunBuild(options, base, target, queue):
     cmd = base + ['%s_%s' % (uboard, mtarget)]
     result = cros_build_lib.run(cmd, stdout=True, stderr=subprocess.STDOUT,
                                 **kwargs)
-    out = result.output.strip().split(b'\n')
+    out = result.stdout.strip().split(b'\n')
     out = [s.decode('utf-8') for s in out]
     out = '\n'.join(out)
     if result.returncode:
       print("cmd: '%s', output: '%s'" % (result.cmdstr, out))
       sys.exit(result.returncode)
-    elif result.output.strip(): #if options.verbose >= 1:
+    elif result.stdout.strip(): #if options.verbose >= 1:
       print(out)
 
   # Do the actual build.
   if options.build:
     result = cros_build_lib.run(base + [target], stdout=True,
                                 stderr=subprocess.STDOUT, input='', **kwargs)
-    out = result.output.strip().split(b'\n')
+    out = result.stdout.strip().split(b'\n')
     out = [s.decode('utf-8') for s in out]
     out = '\n'.join(out)
-    if result.returncode or b'warning' in result.output:
+    if result.returncode or b'warning' in result.stdout:
       # The build failed, so output the results to stderr.
       print("cmd: '%s'\noutput: '%s'" % (result.cmdstr, out), file=sys.stderr)
       sys.exit(result.returncode)
-    elif result.output: # options.verbose >= 1:
+    elif result.stdout: # options.verbose >= 1:
       print(out, file=sys.stderr)
 
   spl = glob.glob('%s/?pl/u-boot-?pl' % outdir)
@@ -812,7 +812,7 @@ def WriteFirmware(options):
   if base_board == 'exynos5-dt':
     args = ['fdtget', dts_file, '/flash/pre-boot', 'filename']
     result = cros_build_lib.RunCommand(args, redirect_stdout=True, **kwargs)
-    bl1_name = result.output.strip()
+    bl1_name = result.stdout.strip()
     bl1 = ['--bl1', 'board/%s/%s/%s' % (vendor, smdk, bl1_name)]
 
   if arch == 'sandbox':
