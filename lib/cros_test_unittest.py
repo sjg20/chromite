@@ -812,7 +812,7 @@ class CrOSTesterChromeTest(CrOSTesterBase):
         )
         # Ensure UI is stopped so the test can grab the GPU if needed.
         self.assertCommandContains(
-            ["ssh", "-p", "9222", "root@localhost", "--", "stop ui"]
+            ["ssh", "-p", "9222", "root@localhost", "--", "stop", "ui"]
         )
         # Ensure a user activity ping is sent to the device.
         self.assertCommandContains(

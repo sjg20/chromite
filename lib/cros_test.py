@@ -685,7 +685,7 @@ class CrOSTest(object):
 
     def _RunChromeTest(self):
         # Stop UI in case the test needs to grab GPU.
-        self._device.run("stop ui")
+        self._device.run(["stop", "ui"])
 
         # Send a user activity ping to powerd to light up the display.
         self._device.run(
