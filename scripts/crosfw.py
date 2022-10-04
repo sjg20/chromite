@@ -397,7 +397,7 @@ def SetupBuild(options):
 
   # Pull out some information from the U-Boot boards config file
   family = None
-  (PRE_KBUILD, PRE_KCONFIG, KCONFIG) = range(3)
+  (PRE_ALBERT, PRE_KBUILD, PRE_KCONFIG, KCONFIG) = range(4)
   if os.path.exists('MAINTAINERS'):
     board_format = PRE_KBUILD
   else:
@@ -406,13 +406,18 @@ def SetupBuild(options):
     for line in f:
       if 'genboardscfg' in line:
         board_format = KCONFIG
+      if '# Target' in line:
+        board_format = PRE_ALBERT
       if uboard in line:
         if line[0] == '#':
           continue
         fields = line.split()
         if not fields:
           continue
-        target = fields[6]
+        if board_format == PRE_ALBERT:
+          target = fields[0]
+        else:
+          target = fields[6]
         # Make sure this is the right target.
         if target != uboard:
           continue
