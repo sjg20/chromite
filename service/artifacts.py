@@ -443,7 +443,9 @@ def BundleImageZip(output_dir: str, image_dir: str) -> str:
     filename = "image.zip"
     zipfile = os.path.join(output_dir, filename)
     cros_build_lib.run(
-        ["zip", zipfile, "-r", "."], cwd=image_dir, capture_output=True
+        ["7za", "a", "-tzip", "-mm=Deflate", "-mx=1", "-mmt=on", zipfile, "."],
+        cwd=image_dir,
+        capture_output=True,
     )
     return filename
 
