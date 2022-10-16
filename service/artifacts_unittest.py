@@ -17,6 +17,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib import parallel
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib import sysroot_lib
@@ -498,6 +499,10 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         )
         osutils.Touch(self.sample_dlc_image, makedirs=True)
 
+        self.PatchObject(
+            parallel, "RunParallelSteps", lambda x, **kwargs: [a() for a in x]
+        )
+
     def testExtendBuildPaths(self):
         """Verifies that ExtendBuildPaths adds the correct elements."""
         self.assertEqual(
@@ -514,6 +519,7 @@ class GeneratePayloadsTest(cros_test_lib.MockTempDirTestCase):
         paygen_mock = self.PatchObject(
             paygen_payload_lib, "GenerateUpdatePayload", side_effect=bools
         )
+
         generated = artifacts.GenerateTestPayloads(
             self.target_image, self.tempdir, full=True
         )

@@ -18,6 +18,7 @@ from chromite.lib import autotest_util
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
+from chromite.lib import parallel
 from chromite.lib import portage_util
 from chromite.lib.paygen import partition_lib
 from chromite.lib.paygen import paygen_payload_lib
@@ -564,11 +565,23 @@ def GenerateTestPayloads(
     cros_prefix = "chromeos"
     minios_prefix = "minios"
     suffix = "dev.bin"
-    generated = []
 
-    if full:
+    # DLC constants.
+    dlc_prefix = "dlc"
+    dlc_id = "sample-dlc"
+    dlc_package = "package"
+    sample_dlc_image = os.path.join(
+        os.path.dirname(target_image_path),
+        dlc_prefix,
+        dlc_id,
+        dlc_package,
+        "dlc.img",
+    )
+
+    def _do_full():
         # Names for full payloads look something like this:
-        # [chromeos|minios]_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
+        # chromeos_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
+        generated = []
         cros_name = "_".join([cros_prefix, os_version, board, "full", suffix])
         cros_payload_path = os.path.join(archive_dir, cros_name)
         if paygen_payload_lib.GenerateUpdatePayload(
@@ -577,7 +590,12 @@ def GenerateTestPayloads(
             generated.extend(ExtendBinPaths(cros_payload_path))
         else:
             logging.info("CrOS full payload generation skipped.")
+        return generated
 
+    def _do_full_minios():
+        # Names for full payloads look something like this:
+        # minios_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
+        generated = []
         minios_name = "_".join(
             [minios_prefix, os_version, board, "full", suffix]
         )
@@ -588,11 +606,13 @@ def GenerateTestPayloads(
             generated.extend(ExtendBinPaths(minios_payload_path))
         else:
             logging.info("MiniOS full payload generation skipped.")
+        return generated
 
-    if delta:
+    def _do_delta():
         # Names for delta payloads look something like this:
-        # [chromeos|minios]_R37-5952.0.2014_06_12_2302-a1_R37-
+        # chromeos_R37-5952.0.2014_06_12_2302-a1_R37-
         # 5952.0.2014_06_12_2302-a1_link_delta_dev.bin
+        generated = []
         cros_name = "_".join(
             [cros_prefix, os_version, os_version, board, "delta", suffix]
         )
@@ -603,7 +623,13 @@ def GenerateTestPayloads(
             generated.extend(ExtendBinPaths(cros_payload_path))
         else:
             logging.info("CrOS delta payload generation skipped.")
+        return generated
 
+    def _do_delta_minios():
+        # Names for delta payloads look something like this:
+        # minios_R37-5952.0.2014_06_12_2302-a1_R37-
+        # 5952.0.2014_06_12_2302-a1_link_delta_dev.bin
+        generated = []
         minios_name = "_".join(
             [minios_prefix, os_version, os_version, board, "delta", suffix]
         )
@@ -617,79 +643,84 @@ def GenerateTestPayloads(
             generated.extend(ExtendBinPaths(minios_payload_path))
         else:
             logging.info("MiniOS delta payload generation skipped.")
+        return generated
 
-    if dlc and "dlc" in portage_util.GetBoardUseFlags(board):
-        dlc_prefix = "dlc"
-        dlc_id = "sample-dlc"
-        dlc_package = "package"
-        sample_dlc_image = os.path.join(
-            os.path.dirname(target_image_path),
-            dlc_prefix,
-            dlc_id,
-            dlc_package,
-            "dlc.img",
+    def _do_full_dlc():
+        # pylint: disable=line-too-long
+        # Names for full sample-dlc payloads look something like this:
+        # dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
+        # pylint: enable=line-too-long
+        generated = []
+        name = "_".join(
+            [
+                dlc_prefix,
+                dlc_id,
+                dlc_package,
+                os_version,
+                board,
+                "full",
+                suffix,
+            ]
         )
+        payload_path = os.path.join(archive_dir, name)
+        if paygen_payload_lib.GenerateUpdatePayload(
+            sample_dlc_image, payload_path
+        ):
+            generated.extend(ExtendBinPaths(payload_path))
+        else:
+            logging.info("DLC (%s) full payload generation skipped.", dlc_id)
+        return generated
 
-        if full:
-            # pylint: disable=line-too-long
-            # Names for full sample-dlc payloads look something like this:
-            # dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
-            # pylint: enable=line-too-long
-            name = "_".join(
-                [
-                    dlc_prefix,
-                    dlc_id,
-                    dlc_package,
-                    os_version,
-                    board,
-                    "full",
-                    suffix,
-                ]
-            )
-            payload_path = os.path.join(archive_dir, name)
-            if paygen_payload_lib.GenerateUpdatePayload(
-                sample_dlc_image, payload_path
-            ):
-                generated.extend(ExtendBinPaths(payload_path))
-            else:
-                logging.info(
-                    "DLC (%s) full payload generation skipped.", dlc_id
-                )
+    def _do_delta_dlc():
+        # Names for delta payloads look something like this:
+        # dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-
+        # 5952.0.2014_06_12_2302-a1_link_delta_dev.bin
+        generated = []
+        name = "_".join(
+            [
+                dlc_prefix,
+                dlc_id,
+                dlc_package,
+                os_version,
+                os_version,
+                board,
+                "delta",
+                suffix,
+            ]
+        )
+        payload_path = os.path.join(archive_dir, name)
+        if paygen_payload_lib.GenerateUpdatePayload(
+            sample_dlc_image, payload_path, src_image=sample_dlc_image
+        ):
+            generated.extend(ExtendBinPaths(payload_path))
+        else:
+            logging.info("DLC (%s) delta payload generation skipped.", dlc_id)
+        return generated
 
-        if delta:
-            # Names for delta payloads look something like this:
-            # dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_R37-
-            # 5952.0.2014_06_12_2302-a1_link_delta_dev.bin
-            name = "_".join(
-                [
-                    dlc_prefix,
-                    dlc_id,
-                    dlc_package,
-                    os_version,
-                    os_version,
-                    board,
-                    "delta",
-                    suffix,
-                ]
-            )
-            payload_path = os.path.join(archive_dir, name)
-            if paygen_payload_lib.GenerateUpdatePayload(
-                sample_dlc_image, payload_path, src_image=sample_dlc_image
-            ):
-                generated.extend(ExtendBinPaths(payload_path))
-            else:
-                logging.info(
-                    "DLC (%s) delta payload generation skipped.", dlc_id
-                )
-
-    if stateful:
-        generated.append(
+    def _do_stateful():
+        return [
             paygen_stateful_payload_lib.GenerateStatefulPayload(
                 target_image_path, archive_dir
             )
-        )
+        ]
 
-    return generated
+    steps = []
+    if full:
+        steps.append(_do_full)
+        steps.append(_do_full_minios)
+    if delta:
+        steps.append(_do_delta)
+        steps.append(_do_delta_minios)
+    if dlc and "dlc" in portage_util.GetBoardUseFlags(board):
+        if full:
+            steps.append(_do_full_dlc)
+        if delta:
+            steps.append(_do_delta_dlc)
+    if stateful:
+        steps.append(_do_stateful)
+
+    gen_files = parallel.RunParallelSteps(steps, return_values=True)
+    return [i for sl in gen_files for i in sl]
 
 
 def GenerateQuickProvisionPayloads(
