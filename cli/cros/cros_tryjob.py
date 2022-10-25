@@ -420,6 +420,28 @@ def VerifyOptions(options, site_config):
             if not cros_build_lib.BooleanPrompt(prompt=prompt, default=False):
                 cros_build_lib.Die("No confirmation.")
 
+    unsupported_tryjobs = []
+    for build_config in options.build_configs:
+        for suffix in ("-release", "-payloads", "-full"):
+            if suffix in build_config:
+                unsupported_tryjobs.append(build_config)
+                break
+    if unsupported_tryjobs:
+        unsupported_branch = False
+        if on_branch:
+            tokens = options.branch.split("-")
+            if tokens[0] in ("release", "stabilize", "firmware"):
+                version = tokens[-1].split(".")
+                major = int(version[0])
+                if major >= 15183:
+                    unsupported_branch = True
+        if not on_branch or unsupported_branch:
+            cros_build_lib.Die(
+                "`cros tryjob` is unsupported for %s on milestones >= 108, "
+                "please use `cros try`.",
+                ",".join(unsupported_tryjobs),
+            )
+
     # Ensure that production configs are only run with --production.
     if not (on_branch or options.production or options.where == CBUILDBOT):
         # We can't know if branched configs are tryjob safe.
