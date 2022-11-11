@@ -1023,7 +1023,10 @@ class ProgressWatcher(threading.Thread):
 
         # Using lsof to find out which process is writing to the target rootfs.
         cmd = ["lsof", "-t", self._target_root]
-        while not self._ShouldExit():
+        while True:
+            if self._ShouldExit():
+                return
+
             try:
                 pid = self._device.run(cmd, capture_output=True).stdout.strip()
                 if pid:
