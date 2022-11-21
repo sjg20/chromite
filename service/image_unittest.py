@@ -196,7 +196,7 @@ class BuildImageTest(
             )
             self.AssertLogsContain(logs, f"cros flash usb:// {base_image_path}")
             self.AssertLogsContain(
-                logs, f"cros flash YOUR_DEVICE_IP {base_image_path}"
+                logs, f"cros flash ${{DUT_IP}} {base_image_path}"
             )
             self.AssertLogsContain(
                 logs,
@@ -213,7 +213,7 @@ class BuildImageTest(
             )
             self.AssertLogsContain(logs, f"cros flash usb:// {dev_image_path}")
             self.AssertLogsContain(
-                logs, f"cros flash YOUR_DEVICE_IP {dev_image_path}"
+                logs, f"cros flash ${{DUT_IP}} {dev_image_path}"
             )
             self.AssertLogsContain(
                 logs,
@@ -229,7 +229,7 @@ class BuildImageTest(
             )
             self.AssertLogsContain(logs, f"cros flash usb:// {test_image_path}")
             self.AssertLogsContain(
-                logs, f"cros flash YOUR_DEVICE_IP {test_image_path}"
+                logs, f"cros flash ${{DUT_IP}} {test_image_path}"
             )
             self.AssertLogsContain(
                 logs,
