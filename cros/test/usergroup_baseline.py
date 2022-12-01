@@ -439,6 +439,11 @@ GROUP_BASELINE = dict(
             gid=299,
             users={"crosvm", "shadercached"},
         ),
+        GroupEntry(
+            group="mei-access",
+            gid=427,
+            users={"healthd_psr"}
+        ),
     )
 )
 
