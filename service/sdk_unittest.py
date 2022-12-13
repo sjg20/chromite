@@ -5,6 +5,7 @@
 """SDK service tests."""
 
 import os
+from pathlib import Path
 
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
@@ -12,6 +13,15 @@ from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.service import sdk
+
+
+class BuildSdkTarballTest(cros_test_lib.MockTestCase):
+    """Tests for BuildSdkTarball function."""
+
+    def testSuccess(self):
+        builder_lib = self.PatchObject(sdk.sdk_builder_lib, "BuildSdkTarball")
+        sdk.BuildSdkTarball(chroot_lib.Chroot("/test/chroot"))
+        builder_lib.assert_called_with(Path("/test/chroot/build/amd64-host"))
 
 
 class CreateArgumentsTest(cros_test_lib.MockTestCase):
@@ -70,10 +80,25 @@ class CreateBinhostCLsTest(cros_test_lib.RunCommandTestCase):
             partial_mock.ListRegex("upload_prebuilts"),
             side_effect=fake_run,
         )
-        cls = sdk.CreateBinhostCLs(
-            "unittest", "2022-02-22", "gs://unittest/createbinhostcls"
+
+        def mock_rev(_filename, _data, report=None, *_args, **_kwargs):
+            if report is None:
+                return
+            report.setdefault("created_cls", []).append("sdk_version/18")
+
+        self.PatchObject(
+            sdk.upload_prebuilts, "RevGitFile", side_effect=mock_rev
         )
-        self.assertEqual(cls, ["the_cl", "https://crrev.com/another/42"])
+
+        cls = sdk.CreateBinhostCLs(
+            prepend_version="unittest",
+            version="2022.02.22",
+            upload_location="gs://unittest/createbinhostcls",
+            sdk_tarball_template="2022/02/%(target)s-2022.02.22.tar.xz",
+        )
+        self.assertEqual(
+            cls, ["the_cl", "https://crrev.com/another/42", "sdk_version/18"]
+        )
 
 
 class UpdateArgumentsTest(cros_test_lib.TestCase):

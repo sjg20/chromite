@@ -26,16 +26,6 @@ from chromite.scripts import upload_prebuilts
 # incremented for major format changes.
 PACKAGE_MANIFEST_VERSION = "1"
 
-# Paths excluded when packaging SDK artifacts. These are relative to the target
-# build root where SDK packages are being installed (e.g. /build/amd64-host).
-PACKAGE_EXCLUDED_PATHS = (
-    "usr/lib/debug",
-    "usr/lib64/debug",
-    constants.AUTOTEST_BUILD_PATH,
-    "packages",
-    "tmp",
-)
-
 # Names of various packaged artifacts.
 SDK_TARBALL_NAME = "built-sdk.tar.xz"
 
@@ -164,7 +154,7 @@ class SDKPackageStage(
         CreateTarball(
             board_location,
             tarball_location,
-            exclude_paths=PACKAGE_EXCLUDED_PATHS,
+            exclude_paths=constants.SDK_PACKAGE_EXCLUDED_PATHS,
         )
         self.UploadArtifact(tarball_location, strict=True, archive=True)
 

@@ -11,6 +11,7 @@ from chromite.api import controller
 from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_build_lib
 from chromite.service import sdk
 
@@ -26,6 +27,25 @@ def _CLUris(_input_proto, output_proto, _config):
         "https://crrev.com/fakecl/1",
         "https://crrev.com/fakecl/2",
     ]
+
+
+def _BuildSdkTarballResponse(_input_proto, output_proto, _config):
+    """Populate a fake BuildSdkTarballResponse."""
+    output_proto.sdk_tarball_path.path = "/fake/sdk/tarball.tar.gz"
+    output_proto.sdk_tarball_path.location = common_pb2.Path.OUTSIDE
+
+
+@faux.success(_BuildSdkTarballResponse)
+@validate.require("chroot")
+@validate.validation_complete
+def BuildSdkTarball(
+    input_proto: "BuildSdkTarballRequest",
+    output_proto: "BuildSdkTarballResponse",
+    _config: "api_config.ApiConfig",
+) -> None:
+    chroot = controller_util.ParseChroot(input_proto.chroot)
+    output_proto.sdk_tarball_path.path = str(sdk.BuildSdkTarball(chroot))
+    output_proto.sdk_tarball_path.location = common_pb2.Path.OUTSIDE
 
 
 @faux.success(_ChrootVersionResponse)
@@ -180,7 +200,9 @@ def BuildPrebuilts(input_proto, _output_proto, _config):
 
 @faux.success(_CLUris)
 @faux.empty_error
-@validate.require("prepend_version", "version", "upload_location")
+@validate.require(
+    "prepend_version", "version", "upload_location", "sdk_tarball_template"
+)
 @validate.validation_complete
 def CreateBinhostCLs(
     input_proto: "CreateBinhostCLsRequest",
@@ -192,8 +214,9 @@ def CreateBinhostCLs(
         input_proto.prepend_version,
         input_proto.version,
         input_proto.upload_location,
+        input_proto.sdk_tarball_template,
     )
-    output_proto.cls = uris
+    output_proto.cls.extend(uris)
 
 
 @faux.all_empty

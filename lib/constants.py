@@ -360,6 +360,16 @@ ALL_TARGET_PACKAGES = (
     TARGET_OS_FACTORY_SHIM_PKG,
 )
 
+# Paths excluded when packaging SDK artifacts. These are relative to the target
+# build root where SDK packages are being installed (e.g. /build/amd64-host).
+SDK_PACKAGE_EXCLUDED_PATHS = (
+    "usr/lib/debug",
+    "usr/lib64/debug",
+    AUTOTEST_BUILD_PATH,
+    "packages",
+    "tmp",
+)
+
 # Portage category and package name for Chrome.
 CHROME_CN = "chromeos-base"
 CHROME_PN = "chromeos-chrome"

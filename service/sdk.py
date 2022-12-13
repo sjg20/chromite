@@ -7,6 +7,7 @@
 import json
 import logging
 import os
+from pathlib import Path
 import tempfile
 from typing import List, Optional, TYPE_CHECKING
 import uuid
@@ -15,6 +16,8 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import osutils
+from chromite.lib import sdk_builder_lib
+from chromite.scripts import upload_prebuilts
 
 
 if TYPE_CHECKING:
@@ -470,8 +473,24 @@ def BuildPrebuilts(chroot: "chroot_lib.Chroot", board: str = ""):
     )
 
 
+def BuildSdkTarball(chroot: "chroot_lib.Chroot") -> Path:
+    """Create a tarball previously built (e.g. by BuildPrebuilts) SDK.
+
+    Args:
+        chroot: The chroot that contains the built SDK.
+
+    Returns:
+        The path at which the SDK tarball has been created.
+    """
+    sdk_path = Path(chroot.path) / "build/amd64-host"
+    return sdk_builder_lib.BuildSdkTarball(sdk_path)
+
+
 def CreateBinhostCLs(
-    prepend_version: str, version: str, upload_location: str
+    prepend_version: str,
+    version: str,
+    upload_location: str,
+    sdk_tarball_template: str,
 ) -> List[str]:
     """Create CLs that update the binhost to point at uploaded prebuilts.
 
@@ -480,12 +499,15 @@ def CreateBinhostCLs(
     Args:
         prepend_version: String to prepend to version.
         version: The SDK version string.
-        upload_location: prefix of the upload path (e.g. 'gs://bucket')
+        upload_location: Prefix of the upload path (e.g. 'gs://bucket')
+        sdk_tarball_template: Template for the path to the SDK tarball.
+            This will be stored in SDK_VERSION_FILE, and looks something
+            like '2022/12/%(target)s-2022.12.11.185558.tar.xz'.
 
     Returns:
         List of URIs of the created CLs.
     """
-    with tempfile.NamedTemporaryFile() as report:
+    with tempfile.NamedTemporaryFile() as report_file:
         cros_build_lib.run(
             [
                 os.path.join(constants.CHROMITE_BIN_DIR, "upload_prebuilts"),
@@ -508,11 +530,21 @@ def CreateBinhostCLs(
                 "--binhost-conf-dir",
                 constants.PUBLIC_BINHOST_CONF_DIR,
                 "--output",
-                report.name,
+                report_file.name,
             ],
             check=True,
         )
-        return json.load(report.file)["created_cls"]
+        report = json.load(report_file.file)
+        sdk_settings = {
+            "SDK_LATEST_VERSION": version,
+            "TC_PATH": sdk_tarball_template,
+        }
+        # Note: dryrun=True prevents the change from being automatically
+        # submitted. We only want to create the change, not submit it.
+        upload_prebuilts.RevGitFile(
+            constants.SDK_VERSION_FILE, sdk_settings, report=report, dryrun=True
+        )
+        return report["created_cls"]
 
 
 def UploadPrebuiltPackages(
@@ -521,13 +553,13 @@ def UploadPrebuiltPackages(
     version: str,
     upload_location: str,
 ):
-    """Uploads prebuilt packages (such as built by BuildSdkPrebuilts).
+    """Uploads prebuilt packages (such as built by BuildPrebuilts).
 
     Args:
         chroot: The chroot that contains the packages to upload.
         prepend_version: String to prepend to version.
         version: The SDK version string.
-        upload_location: prefix of the upload path (e.g. 'gs://bucket')
+        upload_location: Prefix of the upload path (e.g. 'gs://bucket')
     """
     cros_build_lib.run(
         [
