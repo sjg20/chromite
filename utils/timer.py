@@ -51,6 +51,11 @@ class Timer(object):
         self.end = 0.0
         self.delta = 0.0
 
+    @property
+    def timedelta(self):
+        """Convenience method for getting a timedelta object."""
+        return datetime.timedelta(seconds=self.delta)
+
     def __add__(self, other):
         if not isinstance(other, Timer):
             raise NotImplementedError(f"Cannot add {type(other)} to Timer")
@@ -79,9 +84,7 @@ class Timer(object):
 
     def __str__(self):
         name = f"{self.name}: " if self.name else ""
-        return (
-            f"{name}{pformat.timedelta(datetime.timedelta(seconds=self.delta))}"
-        )
+        return f"{name}{pformat.timedelta(self.timedelta)}"
 
 
 def timed(

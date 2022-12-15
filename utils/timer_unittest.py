@@ -34,6 +34,7 @@ def test_timer_delta(caplog):
         pass
     assert re.search(f"{DELTA}[0-9]*s", caplog.text) is not None
     assert t.delta == DELTA
+    assert t.timedelta.total_seconds() == DELTA
 
 
 def test_timer_average():
@@ -79,7 +80,7 @@ def test_timer_decorator_with_exception_calls_output():
     # The decorated function.
     @timer.timer(name, output_fn)
     def timed_fn():
-        raise Exception('test exception')
+        raise Exception("test exception")
 
     # Run the function to trigger the test.
     with pytest.raises(Exception):
