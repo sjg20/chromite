@@ -9,6 +9,7 @@ from collections import defaultdict
 import os
 from pathlib import Path
 from typing import Dict, List, NamedTuple, Text
+from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib.parser import package_info
@@ -501,3 +502,29 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
         parses = mbl._fetch_iwyu_lints()
 
         self.assertCountEqual(parses, expected_findings)
+
+
+class TestEmergeAndUploadLints(cros_test_lib.RunCommandTestCase):
+    """Unit tests for emerge_and_upload_lints"""
+
+    def setUp(self):
+        self.rc.AddCmdResult(
+            [
+                "lint_package",
+                "--fetch-only",
+                "--json",
+                "--no-clippy",
+                "--no-golint",
+            ],
+            stdout="linting output",
+        )
+
+    @mock.patch.object(toolchain.gs.GSContext, "CreateWithContents")
+    def testEmergeAndUploadLints(self, copy_mock):
+        used_gs_path = toolchain.emerge_and_upload_lints("atlas", 9999)
+        target_gs_path = (
+            "gs://chromeos-toolchain-artifacts/code-health/9999/atlas.json"
+        )
+
+        self.assertEqual(used_gs_path, target_gs_path)
+        copy_mock.assert_called_with(target_gs_path, b"linting output")

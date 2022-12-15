@@ -381,6 +381,21 @@ LINTER_CODES = {
 }
 
 
+@validate.require("sysroot.build_target.name")
+@validate.require("start_time")
+@validate.validation_complete
+def EmergeAndUploadLints(
+    input_proto: toolchain_pb2.DashboardLintRequest,
+    output_proto: toolchain_pb2.DashboardLintResponse,
+    _config,
+):
+    """Lints all platform2 packages and uploads lints to GS"""
+    board = input_proto.sysroot.build_target.name
+    output_proto.gs_path = toolchain.emerge_and_upload_lints(
+        board, input_proto.start_time
+    )
+
+
 @faux.all_empty
 @validate.exists("sysroot.path")
 @validate.require("packages")
@@ -393,7 +408,7 @@ def EmergeWithLinting(
     """Emerge packages with linter features enabled and retrieves all findings.
 
     Args:
-        input_proto: The nput proto with package and sysroot info.
+        input_proto: The input proto with package and sysroot info.
         output_proto: The output proto where findings are stored.
         _config: The API call config (unused).
     """

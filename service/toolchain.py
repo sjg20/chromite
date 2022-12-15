@@ -13,6 +13,7 @@ from typing import Dict, Iterable, List, NamedTuple, Set, Text, Tuple
 
 from chromite.lib import chroot_util
 from chromite.lib import cros_build_lib
+from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
@@ -65,6 +66,36 @@ class LinterFinding(NamedTuple):
     locations: Tuple[CodeLocation]
     linter: str
     suggested_fixes: Tuple[SuggestedFix]
+
+
+def emerge_and_upload_lints(board: str, start_time: int) -> str:
+    """Lints all platform2 packages, returns the GS bucket uploaded to."""
+    cros_build_lib.run(
+        ["build_packages", "--board", board],
+        extra_env={"WITH_TIDY": "tricium"},
+    )
+
+    lints_fname = f"{board}.json"
+    gs_file = (
+        f"gs://chromeos-toolchain-artifacts/code-health/{start_time}/"
+        f"{lints_fname}"
+    )
+    logging.info("Uploading lints to %s", gs_file)
+
+    lints_result = cros_build_lib.run(
+        [
+            "lint_package",
+            "--fetch-only",
+            "--json",
+            "--no-clippy",
+            "--no-golint",
+        ],
+        stdout=True,
+    )
+
+    ctx = gs.GSContext()
+    ctx.CreateWithContents(gs_file, lints_result.stdout)
+    return gs_file
 
 
 class BuildLinter:
