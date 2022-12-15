@@ -1,7 +1,6 @@
 # Copyright 2022 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """cros clean-outdated-pkgs purges outdated and unsatisfiable packages."""
 
 import itertools
@@ -23,6 +22,7 @@ from chromite.scripts import cros_setup_toolchains
 
 
 IGNORED_REPOSITORIES = frozenset(["crossdev"])
+
 
 # TODO: better detect all packages that are part of "system profile" or are
 # otherwise crucial, and must never be removed, like bash, portage or awk.
