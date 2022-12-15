@@ -14,6 +14,7 @@ from typing import List, Optional, TYPE_CHECKING, Union
 from chromite.lib import binpkg
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import portage_util
@@ -440,7 +441,7 @@ def ReadDevInstallFilesToCreatePackageIndex(
         package_path,
         devinstall_package_list,
         package_index_path,
-        upload_uri,
+        ConvertGsUploadUri(upload_uri),
         upload_path,
     )
 
@@ -450,6 +451,21 @@ def ReadDevInstallFilesToCreatePackageIndex(
     )
 
     return upload_targets_list
+
+
+def ConvertGsUploadUri(upload_uri: str) -> str:
+    """Convert a GS URI to the equivalent https:// URI.
+
+    Args:
+        upload_uri: The base URI provided (could be GS, https, or really any
+            format).
+
+    Returns:
+        A new https URL if a gs URI was provided and original URI otherwise.
+    """
+    if not gs.PathIsGs(upload_uri):
+        return upload_uri
+    return gs.GsUrlToHttp(upload_uri)
 
 
 def CreateFilteredPackageIndex(

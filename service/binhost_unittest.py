@@ -8,11 +8,14 @@ import os
 from pathlib import Path
 import time
 
+import pytest
+
 from chromite.lib import binpkg
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
+from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel_unittest
 from chromite.lib import portage_util
@@ -525,3 +528,23 @@ virtual/python-enum34-1
                 }
             ],
         )
+
+
+@pytest.mark.parametrize(
+    "uri,expected",
+    [
+        ("gs://garbage", f"{gs.PUBLIC_BASE_HTTPS_URL}garbage"),
+        (
+            "gs://chromeos-dev-installer",
+            f"{gs.PUBLIC_BASE_HTTPS_URL}chromeos-dev-installer",
+        ),
+        ("https://google.com", "https://google.com"),
+        (
+            f"{gs.PUBLIC_BASE_HTTPS_URL}chromeos-dev-installer",
+            f"{gs.PUBLIC_BASE_HTTPS_URL}chromeos-dev-installer",
+        ),
+    ],
+)
+def test_convert_gs_upload_uri(uri, expected):
+    """Ensure we're converting gs:// URIs to https:// in an expected way."""
+    assert binhost.ConvertGsUploadUri(uri) == expected
