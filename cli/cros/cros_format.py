@@ -213,6 +213,9 @@ Supported file names: %s
         " ".join(sorted(itertools.chain(*_FILENAME_PATTERNS_TOOL_MAP))),
     )
 
+    # Override base class property to use path filter options.
+    use_filter_options = True
+
     @classmethod
     def AddParser(cls, parser):
         super().AddParser(parser)
@@ -271,6 +274,11 @@ Supported file names: %s
                 files.append(f)
         if syms:
             logging.info("Ignoring symlinks: %s", syms)
+
+        files = self.options.filter.filter(files)
+        if not files:
+            logging.warning("All files are excluded.  Doing nothing.")
+            return 0
 
         tool_map = _BreakoutFilesByTool(files)
         dispatcher = functools.partial(

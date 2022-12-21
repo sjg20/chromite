@@ -28,6 +28,7 @@ from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import terminal
 from chromite.utils import attrs_freezer
+from chromite.utils import path_filter
 
 
 # TODO(build): Convert this to enum module.
@@ -664,6 +665,20 @@ class FilteringOption(Option):
         parser.AddParsedArg(self, opt, [str(v) for v in value])
 
 
+class _PathFilterAction(argparse.Action):
+    """Setup a path filter."""
+
+    def __init__(self, option_strings, dest, **kwargs):
+        if "nargs" in kwargs:
+            raise ValueError("nargs is not supported for filter action")
+        super().__init__(option_strings, dest, nargs=1, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if getattr(namespace, self.dest, None) is None:
+            setattr(namespace, self.dest, path_filter.PathFilter([]))
+        getattr(namespace, self.dest).rules.extend(values)
+
+
 class ColoredFormatter(logging.Formatter):
     """A logging formatter that can color the messages."""
 
@@ -739,6 +754,8 @@ class BaseParser(object):
                 If False, or caching is not given, then no --cache-dir option
                 will be added.
             dryrun: Whether to make --dry-run available.
+            filter: If given, set up a filter for --include and --exclude paths.
+                The resulting filter is in opts.filter.
         """
         self.debug_enabled = False
         self.caching_group = None
@@ -757,6 +774,7 @@ class BaseParser(object):
         )
         self.caching = kwargs.get("caching", False)
         self.dryrun_enabled = kwargs.get("dryrun", False)
+        self.filter_enabled = kwargs.get("filter", False)
         self._cros_defaults = {}
 
     @staticmethod
@@ -769,6 +787,7 @@ class BaseParser(object):
             "manual_debug",
             "caching",
             "dryrun",
+            "filter",
         ]
         for key in parser_keys:
             kwarg_dict.pop(key, None)
@@ -864,6 +883,34 @@ class BaseParser(object):
                 dest="dryrun",
                 action="store_true",
                 help=argparse.SUPPRESS,
+            )
+        if self.filter_enabled:
+            filter_group = self.add_argument_group(
+                "Path filter options",
+                "Filter file paths based on PATTERN (see man 3 fnmatch). "
+                "If multiple --exclude and --include rules are specified, "
+                "the first that matches takes effect. "
+                "If no rules are matched, the path is included by default. "
+                "PATTERNS apply to the full path of the file. "
+                "For example --exclude='*.py' matches a/foo.py and bar.py; "
+                "--exclude=BUILD matches BUILD but not a/BUILD.",
+            )
+            filter_group.add_argument(
+                "--exclude",
+                metavar="PATTERN",
+                action=_PathFilterAction,
+                dest="filter",
+                type=path_filter.exclude,
+                default=path_filter.PathFilter([]),
+                help="Exclude files matching PATTERN.",
+            )
+            filter_group.add_argument(
+                "--include",
+                metavar="PATTERN",
+                action=_PathFilterAction,
+                dest="filter",
+                type=path_filter.include,
+                help="Include files matching PATTERN.",
             )
 
     def SetupLogging(self, opts):

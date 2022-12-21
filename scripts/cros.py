@@ -48,6 +48,7 @@ def GetOptions(cmd_name=None):
                 epilog=epilog,
                 caching=class_def.use_caching_options,
                 dryrun=class_def.use_dryrun_options,
+                filter=class_def.use_filter_options,
                 formatter_class=argparse.RawDescriptionHelpFormatter,
             )
             class_def.AddParser(sub_parser)

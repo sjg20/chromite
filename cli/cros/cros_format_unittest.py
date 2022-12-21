@@ -21,7 +21,7 @@ class FormatCommandTest(cros_test_lib.TestCase):
 
     def setUp(self):
         # Set up default options for tests to play with for running cros format.
-        self.parser = commandline.ArgumentParser()
+        self.parser = commandline.ArgumentParser(filter=True)
         cros_format.FormatCommand.AddParser(self.parser)
         self.options = self.parser.parse_args([])
 
@@ -55,7 +55,7 @@ class FormatCommandTempDirTests(cros_test_lib.TempDirTestCase):
 
     def setUp(self):
         # Set up default parser for tests to play with for running cros format.
-        self.parser = commandline.ArgumentParser()
+        self.parser = commandline.ArgumentParser(filter=True)
         cros_format.FormatCommand.AddParser(self.parser)
 
     def testCliOneFile(self):

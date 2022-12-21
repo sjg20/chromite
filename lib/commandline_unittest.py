@@ -568,6 +568,25 @@ class CacheTest(cros_test_lib.MockTempDirTestCase):
         )
 
 
+class PathFilterTest(cros_test_lib.TestCase):
+    """Test path filter with --exclude, --include."""
+
+    def testFilter(self):
+        """Tests basic filtering."""
+        parser = commandline.ArgumentParser(filter=True)
+        options = parser.parse_args(["--include=a.out", "--exclude=*.out"])
+        self.assertEqual(options.filter.filter(["a.out", "b.out"]), ["a.out"])
+
+    def testFilterWithoutOptions(self):
+        """Tests filtering when no flags are passed."""
+        parser = commandline.ArgumentParser(filter=True)
+        options = parser.parse_args([])
+        self.assertIsNotNone(options.filter)
+        self.assertEqual(
+            options.filter.filter(["a.out", "b.out"]), ["a.out", "b.out"]
+        )
+
+
 class ParseArgsTest(cros_test_lib.TestCase):
     """Test parse_args behavior of our custom argument parsing classes."""
 

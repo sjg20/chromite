@@ -133,6 +133,9 @@ class CliCommand(object):
     # Whether command uses dry-run options.
     use_dryrun_options = False
 
+    # Indicates whether command uses filter related commandline options.
+    use_filter_options = False
+
     def __init__(self, options):
         self.options = options
 
