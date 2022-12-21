@@ -22,6 +22,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import gs_unittest
 from chromite.lib import osutils
+from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 
 
@@ -303,6 +304,7 @@ class RunThroughTest(
         self.rc_mock = cros_test_lib.RunCommandMock()
         self.rc_mock.SetDefaultCmdResult()
         self.StartPatcher(self.rc_mock)
+        self.StartPatcher(parallel_unittest.ParallelMock())
 
         self.sdk_mock = self.StartPatcher(
             SDKFetcherMock(external_mocks=[self.rc_mock])
@@ -477,19 +479,6 @@ class RunThroughTest(
                 self.assertExists(ctx.key_map[c].path)
             for c in [constants.IMAGE_SCRIPTS_TAR, constants.CHROME_ENV_TAR]:
                 self.assertFalse(c in ctx.key_map)
-
-    def testExceptionDuringUpdateTarball(self):
-        """Tests that an exception thrown in _UpdateTarball is surfaced.
-
-        _UpdateTarball is ran across multiple threads. This test ensures an
-        exception raised in one of those threads is surfaced to the caller.
-        """
-        self.SetupCommandMock()
-        with mock.patch.object(
-            cache.CacheReference, "SetDefault", side_effect=ValueError("uh oh")
-        ):
-            with self.assertRaises(ValueError):
-                self.cmd_mock.inst.Run()
 
     @staticmethod
     def FindInPath(paths, endswith):

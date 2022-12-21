@@ -13,11 +13,9 @@ import json
 import logging
 import os
 from pathlib import Path
-import queue
 import re
 import stat
 import textwrap
-import threading
 
 from chromite.third_party.gn_helpers import gn_helpers
 
@@ -31,6 +29,7 @@ from chromite.lib import cros_build_lib
 from chromite.lib import gclient
 from chromite.lib import gs
 from chromite.lib import osutils
+from chromite.lib import parallel
 from chromite.lib import path_util
 from chromite.lib import portage_util
 from chromite.utils import memoize
@@ -270,35 +269,31 @@ class SDKFetcher(object):
 
         os.environ["PATH"] += f":{ref.path}"
 
-    def _UpdateTarball(self, ref_queue):
-        """Worker function to fetch tarballs.
+    def _UpdateTarball(self, key, url, ref):
+        """Worker function to fetch a tarball.
 
         Args:
-            ref_queue: A queue.PriorityQueue of tuples containing (pri, cache
-                key, GS url, cache.CacheReference)
+            key: Key for the tarball's entry in the cache.
+            url: GS URL to fetch the tarball from.
+            ref: cache.CacheReference of the tarball's entry in the cache.
         """
-        while True:
+        with osutils.TempDir(
+            base_dir=self.tarball_cache.staging_dir
+        ) as tempdir:
+            local_path = os.path.join(tempdir, os.path.basename(url))
+            Log("SDK: Fetching %s", url, silent=self.silent)
             try:
-                _, key, url, ref = ref_queue.get(block=False)
-            except queue.Empty:
-                return
-            with osutils.TempDir(
-                base_dir=self.tarball_cache.staging_dir
-            ) as tempdir:
-                local_path = os.path.join(tempdir, os.path.basename(url))
-                Log("SDK: Fetching %s", url, silent=self.silent)
-                try:
-                    self.gs_ctx.Copy(url, tempdir, debug_level=logging.DEBUG)
-                    ref.SetDefault(local_path, lock=True)
-                except gs.GSNoSuchKey:
-                    if key == constants.TEST_IMAGE_TAR:
-                        logging.warning(
-                            "No VM available for board %s. Please try a different "
-                            "board, e.g. amd64-generic.",
-                            self.board,
-                        )
-                    else:
-                        raise
+                self.gs_ctx.Copy(url, tempdir, debug_level=logging.DEBUG)
+                ref.SetDefault(local_path, lock=True)
+            except gs.GSNoSuchKey:
+                if key == constants.TEST_IMAGE_TAR:
+                    logging.warning(
+                        "No VM available for board %s. Please try a different "
+                        "board, e.g. amd64-generic.",
+                        self.board,
+                    )
+                else:
+                    raise
 
     def _UpdateCacheSymlink(self, ref, source_path):
         """Adds a symlink to the cache pointing at the given source.
@@ -960,23 +955,32 @@ class SDKFetcher(object):
         fetch_urls.update(
             (t, os.path.join(version_base, t)) for t in components
         )
-        ref_queue = queue.PriorityQueue()
+        inputs_list = []
         try:
             for key, url in fetch_urls.items():
                 tarball_cache_key = self._GetTarballCacheKey(key, url)
                 tarball_ref = self.tarball_cache.Lookup(tarball_cache_key)
                 key_map[tarball_cache_key] = tarball_ref
                 tarball_ref.Acquire()
-                # Starting with the larger components first when fetching the SDK helps
-                # ensure we don't save them for a single thread at the very end while
-                # the remaining threads sit idle.
+                # Starting with the larger components first when fetching the
+                # SDK helps ensure we don't save them for a single thread at the
+                # very end while the remaining threads sit idle. Put the VM
+                # image first (if we're downloading it), then the sysroot, then
+                # everything else.
                 if not tarball_ref.Exists(lock=True):
-                    pri = 3
+                    input_arg = (key, url, tarball_ref)
                     if key == constants.TEST_IMAGE_TAR:
-                        pri = 1
+                        inputs_list.insert(0, input_arg)
                     elif key == constants.CHROME_SYSROOT_TAR:
-                        pri = 2
-                    ref_queue.put((pri, key, url, tarball_ref))
+                        if (
+                            inputs_list
+                            and inputs_list[0][0] == constants.TEST_IMAGE_TAR
+                        ):
+                            inputs_list.insert(1, input_arg)
+                        else:
+                            inputs_list.insert(0, input_arg)
+                    else:
+                        inputs_list.append(input_arg)
 
                 # Create a symlink in a separate cache dir that points to the tarball
                 # component. Since the tarball cache is keyed based off of GS URLs,
@@ -998,19 +1002,9 @@ class SDKFetcher(object):
                 if not link_ref.Exists(lock=True):
                     self._UpdateCacheSymlink(link_ref, tarball_ref.path)
 
-            if not ref_queue.empty():
-                num_threads = 2
-                threads = []
-                for _ in range(num_threads):
-                    threads.append(
-                        threading.Thread(
-                            target=self._UpdateTarball, args=[ref_queue]
-                        )
-                    )
-                for t in threads:
-                    t.start()
-                for t in threads:
-                    t.join()
+            parallel.RunTasksInProcessPool(
+                self._UpdateTarball, inputs_list, processes=2
+            )
 
             self._FinalizePackages(version)
             ctx_version = version
