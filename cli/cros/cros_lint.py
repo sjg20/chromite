@@ -10,6 +10,7 @@ import itertools
 import logging
 import os
 from pathlib import Path
+import stat
 from typing import Union
 
 from chromite.cli import command
@@ -397,6 +398,25 @@ def _WhitespaceLintFile(path, _output_format, _debug, _relaxed: bool):
     return result
 
 
+def _NonExecLintFile(path, _output_format, _debug, _relaxed: bool):
+    """Check file permissions on |path| are -x."""
+    result = cros_build_lib.CompletedProcess(
+        f'stat(internal) "{path}"', returncode=0
+    )
+
+    # Ignore symlinks.
+    st = os.lstat(path)
+    if stat.S_ISREG(st.st_mode):
+        mode = stat.S_IMODE(st.st_mode)
+        if mode & 0o111:
+            result.returncode = 1
+            logging.notice(
+                "%s: file should not be executable; chmod -x to fix", path
+            )
+
+    return result
+
+
 def _BreakoutDataByTool(map_to_return, path):
     """Maps a tool method to the content of the |path|."""
     # Detect by content of the file itself.
@@ -427,22 +447,29 @@ def _BreakoutDataByTool(map_to_return, path):
 _EXT_TOOL_MAP = {
     # Note these are defined to keep in line with cpplint.py. Technically, we
     # could include additional ones, but cpplint.py would just filter them out.
-    frozenset({".cc", ".cpp", ".h"}): (_CpplintFile,),
-    frozenset({".conf", ".conf.in"}): (_ConfLintFile,),
-    frozenset({".json"}): (_JsonLintFile,),
+    frozenset({".cc", ".cpp", ".h"}): (_CpplintFile, _NonExecLintFile),
+    frozenset({".conf", ".conf.in"}): (_ConfLintFile, _NonExecLintFile),
+    frozenset({".json"}): (_JsonLintFile, _NonExecLintFile),
     frozenset({".py"}): (_PylintFile, _PyisortFile),
-    frozenset({".go"}): (_GolintFile,),
+    frozenset({".go"}): (_GolintFile, _NonExecLintFile),
     frozenset({".sh"}): (_ShellLintFile,),
-    frozenset({".ebuild", ".eclass", ".bashrc"}): (_GentooShellLintFile,),
-    frozenset({".md"}): (_MarkdownLintFile,),
-    frozenset({".policy"}): (_SeccompPolicyLintFile, _WhitespaceLintFile),
-    frozenset({".te"}): (_WhitespaceLintFile,),
+    frozenset({".ebuild", ".eclass", ".bashrc"}): (
+        _GentooShellLintFile,
+        _NonExecLintFile,
+    ),
+    frozenset({".md"}): (_MarkdownLintFile, _NonExecLintFile),
+    frozenset({".policy"}): (
+        _SeccompPolicyLintFile,
+        _WhitespaceLintFile,
+        _NonExecLintFile,
+    ),
+    frozenset({".te"}): (_WhitespaceLintFile, _NonExecLintFile),
 }
 
 # Map known filenames to a tool function.
 _FILENAME_PATTERNS_TOOL_MAP = {
-    frozenset({"DIR_METADATA"}): (_DirMdLintFile,),
-    frozenset({"OWNERS*"}): (_OwnersLintFile,),
+    frozenset({"DIR_METADATA"}): (_DirMdLintFile, _NonExecLintFile),
+    frozenset({"OWNERS*"}): (_OwnersLintFile, _NonExecLintFile),
 }
 
 
