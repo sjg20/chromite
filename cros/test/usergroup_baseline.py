@@ -399,7 +399,9 @@ GROUP_BASELINE = dict(
             users={"traced", "traced-probes", "chronos", "crosvm"},
         ),
         GroupEntry(
-            group="traced-consumer", gid=20164, users={"traced", "chronos"}
+            group="traced-consumer",
+            gid=20164,
+            users={"traced", "chronos", "debugd"},
         ),
         GroupEntry(group="vpn", gid=20174, users={"vpn", "shill"}),
         GroupEntry(group="nogroup", gid=65533),
