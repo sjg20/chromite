@@ -118,7 +118,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
         self.assertCommandContains(
             [
                 "-cpu",
-                "SandyBridge,-invpcid,-tsc-deadline,check",
+                "Haswell-noTSX,-invpcid,-tsc-deadline,check",
             ]
         )
         self.assertCommandContains(
@@ -168,7 +168,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
         self.assertCommandContains(
             [
                 "-cpu",
-                "SandyBridge,-invpcid,-tsc-deadline,check,vmx=on",
+                "Haswell-noTSX,-invpcid,-tsc-deadline,check,vmx=on",
             ]
         )
 
