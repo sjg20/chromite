@@ -486,19 +486,13 @@ class PartialFileReader(ReaderBase):
 
     def run(self):
         """Runs the reading and compression."""
-        cmd = [
-            "dd",
-            "status=none",
-            f"if={self._image}",
-            f"ibs={self._BLOCK_SIZE}",
-            f"skip={int(self._offset/self._BLOCK_SIZE)}",
-            f"count={int(self._length/self._BLOCK_SIZE)}",
-            "|",
-            *self._compression_command,
-        ]
-
+        data = osutils.ReadFile(
+            self._image, mode="rb", size=self._length, seek=self._offset
+        )
         try:
-            cros_build_lib.run(" ".join(cmd), stdout=self._Source(), shell=True)
+            cros_build_lib.run(
+                self._compression_command, input=data, stdout=self._Source()
+            )
         finally:
             self._CloseSource()
 
