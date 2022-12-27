@@ -218,21 +218,50 @@ class TestReaderBase(cros_test_lib.MockTestCase):
             self.assertEqual(fp.read(), "helloworld")
 
 
-class PartialFileReaderTest(cros_test_lib.RunCommandTestCase):
+class PartialFileReaderTest(cros_test_lib.TempDirTestCase):
     """Tests PartialFileReader class."""
 
-    def testRun(self):
-        """Tests the main run() function."""
-        with device_imager.PartialFileReader(
-            "/foo", 512 * 2, 512, ["/usr/bin/pigz"]
-        ) as pfr:
-            pass
+    def testRunCat(self):
+        """Tests the main run() function with cat."""
+        # Create a data file to read.  Pick a stride that doesn't repeat at the
+        # same offsets that we're reading.
+        # pylint: disable=range-builtin-not-iterating
+        data = bytes(range(250)) * 512
+        path = self.tempdir / "foo.bin"
+        path.write_bytes(data)
 
-        self.assertCommandCalled(
-            "dd status=none if=/foo ibs=512 skip=2 count=1 | /usr/bin/pigz",
-            stdout=pfr._Source(),
-            shell=True,
-        )
+        # Use cat so we get the same data back out that we passed in to verify
+        # the reading offsets work correctly.
+        with device_imager.PartialFileReader(
+            path, 512 * 2, 512, ["cat"]
+        ) as pfr:
+            # We read more data than should be available to make sure we don't
+            # write too many bytes.
+            out_data = os.read(pfr.Target(), 1024)
+        assert out_data == data[1024 : 1024 + 512]
+
+        # Make sure the source has been close.
+        self.assertNotExists(GetFdPath(pfr._Source()))
+
+    def testRunShrinker(self):
+        """Tests the main run() function with a "compressor"."""
+        # Create a data file to read.  Pick a stride that doesn't repeat at the
+        # same offsets that we're reading.
+        # pylint: disable=range-builtin-not-iterating
+        data = bytes(range(250)) * 512
+        path = self.tempdir / "foo.bin"
+        path.write_bytes(data)
+
+        with device_imager.PartialFileReader(
+            path, 512 * 2, 512, ["tail", "-c289"]
+        ) as pfr:
+            # We read more data than should be available to make sure we don't
+            # write too many bytes.
+            out_data = os.read(pfr.Target(), 1024)
+        assert len(out_data) == 289
+        # The sum is a poor man's crc/hash, but should be good enough for our
+        # purposes in this test.
+        assert sum(out_data) == 32499
 
         # Make sure the source has been close.
         self.assertNotExists(GetFdPath(pfr._Source()))
