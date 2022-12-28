@@ -137,7 +137,7 @@ class LoopbackPartitions(object):
                     "Adding partitions failed; dumping log & retrying"
                 )
                 cros_build_lib.run(["sync"])
-                cros_build_lib.run(["dmesg"])
+                cros_build_lib.run(["dmesg", "-T"])
                 cmd = ["partx", "-u", self.dev]
                 cros_build_lib.sudo_run(cmd)
 
