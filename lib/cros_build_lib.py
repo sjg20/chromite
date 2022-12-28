@@ -1773,41 +1773,6 @@ def iflatten_instance(iterable, terminate_on_kls=(str, bytes)):
                 yield subitem
 
 
-def SafeRun(functors, combine_exceptions=False):
-    """Executes a list of functors, continuing on exceptions.
-
-    Args:
-      functors: An iterable of functors to call.
-      combine_exceptions: If set, and multiple exceptions are encountered,
-        SafeRun will raise a RuntimeError containing a list of all the exceptions.
-        If only one exception is encountered, then the default behavior of
-        re-raising the original exception with unmodified stack trace will be
-        kept.
-
-    Raises:
-      The first exception encountered, with corresponding backtrace, unless
-      |combine_exceptions| is specified and there is more than one exception
-      encountered, in which case a RuntimeError containing a list of all the
-      exceptions that were encountered is raised.
-    """
-    errors = []
-
-    for f in functors:
-        try:
-            f()
-        except Exception as e:
-            # Append the exception object and the traceback.
-            errors.append((e, sys.exc_info()[2]))
-
-    if errors:
-        if len(errors) == 1 or not combine_exceptions:
-            # To preserve the traceback.
-            inst, tb = errors[0]
-            raise inst.with_traceback(tb)
-        else:
-            raise RuntimeError([e[0] for e in errors])
-
-
 def UserDateTimeFormat(timeval=None):
     """Format a date meant to be viewed by a user
 

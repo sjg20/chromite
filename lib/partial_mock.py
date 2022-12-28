@@ -12,6 +12,7 @@ from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
+from chromite.utils import memoize
 
 
 def _PredicateSplit(func, iterable):
@@ -576,7 +577,7 @@ class PartialMock(object):
             )
             if self._tempdir_obj is not None:
                 tasks += [self._tempdir_obj.Cleanup]
-            cros_build_lib.SafeRun(tasks)
+            memoize.SafeRun(tasks)
         finally:
             self.started = False
             self.tempdir, self._tempdir_obj = None, None

@@ -1013,7 +1013,7 @@ class SDKFetcher(object):
             yield self.SDKContext(ctx_version, target_tc, key_map)
         finally:
             # TODO(rcui): Move to using cros_build_lib.ContextManagerStack()
-            cros_build_lib.SafeRun(ref.Release for ref in key_map.values())
+            memoize.SafeRun(ref.Release for ref in key_map.values())
 
 
 class GomaError(Exception):

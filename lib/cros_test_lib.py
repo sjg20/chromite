@@ -26,6 +26,7 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import terminal
 from chromite.lib import timeout_util
+from chromite.utils import memoize
 from chromite.utils import outcap
 
 
@@ -583,7 +584,7 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
         os.umask(self.__saved_umask__)
 
         try:
-            cros_build_lib.SafeRun(
+            memoize.SafeRun(
                 [p.stop for p in self.__global_config_patchers__]
                 + [mock.patch.stopall]
             )
@@ -1219,7 +1220,7 @@ class MockTestCase(TestCase):
     def tearDown(self):
         # We can't just run stopall() by itself, and need to stop our patchers
         # manually since stopall() doesn't handle repatching.
-        cros_build_lib.SafeRun(
+        memoize.SafeRun(
             [p.stop for p in reversed(self._patchers)] + [mock.patch.stopall]
         )
 
