@@ -50,6 +50,7 @@ class TestImageTest(cros_test_lib.MockTempDirTestCase):
         self.PatchObject(
             image_lib.LoopbackPartitions, "_Unmount", autospec=True
         )
+        self.PatchObject(image_lib.LoopbackPartitions, "Attach", autospec=True)
 
 
 class FindImageTest(TestImageTest):

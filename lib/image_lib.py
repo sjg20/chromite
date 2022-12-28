@@ -12,6 +12,7 @@ import logging
 import os
 from pathlib import Path
 import re
+import stat
 from typing import Dict, List, Optional, Set, Tuple, Union
 
 from chromite.lib import chromeos_version
@@ -23,6 +24,8 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import retry_util
 from chromite.lib import signing
+from chromite.lib import timeout_util
+from chromite.utils import c_blkpg
 
 
 # security_check: pass_config mapping.
@@ -116,20 +119,14 @@ class LoopbackPartitions(object):
         dev = ret.stdout.strip()
 
         # Delete existing partitions.
-        cmd = ["partx", "-d", dev]
-        cros_build_lib.dbg_run(cmd, check=False, capture_output=True)
+        cls._DeletePartitions(dev)
 
         # Sync before we start to add partitions.
         osutils.sync_storage()
 
         # Add missing partitions.
-        cmd = ["partx", "-a", dev]
-        ret = cros_build_lib.dbg_run(cmd, check=False)
-        if ret.returncode:
-            logging.warning("Adding partitions failed; dumping log & retrying")
-            osutils.sync_storage()
-            cros_build_lib.run(["dmesg", "-T"])
-            cros_build_lib.run(["partx", "-u", dev])
+        gpt_table = GetImageDiskPartitionInfo(path)
+        cls._AddPartitions(dev, gpt_table)
 
         return dev
 
@@ -170,6 +167,131 @@ class LoopbackPartitions(object):
         except:
             self.close()
             raise
+
+    @staticmethod
+    def _CheckNodeIsLoopback(path: Union[str, os.PathLike]) -> Tuple[int, int]:
+        """Verify |path| is a loopback device node."""
+        st = os.stat(path)
+        if not stat.S_ISBLK(st.st_mode):
+            raise ValueError(f"{path}: path is not a block device")
+
+        # If we ever want to extend the API to taking a file as a reference,
+        # be aware of diff between st_dev & st_rdev.
+        major = os.major(st.st_rdev)
+        minor = os.minor(st.st_rdev)
+        if major != 7:
+            raise ValueError(
+                f"{path}: expecting loop device with major 7, "
+                f"not {major}:{minor}"
+            )
+
+        return (major, minor)
+
+    def DeletePartitions(self):
+        """Clear out existing registered partitions."""
+        self._DeletePartitions(self.path)
+
+    @classmethod
+    def _DeletePartitions(cls, path: Union[str, os.PathLike]):
+        """Clear out existing registered partitions."""
+        major, minor = cls._CheckNodeIsLoopback(path)
+
+        # Check the partitions the kernel knows of.
+        logging.debug("%s: Clearing registered partitions", path)
+        sysfs_dev = Path(f"/sys/dev/block/{major}:{minor}")
+        expecting = []
+        with osutils.OpenContext(path) as fd:
+            for part_dir in sysfs_dev.glob(f"loop{minor}p*"):
+                try:
+                    part_id = (
+                        (part_dir / "partition")
+                        .read_text(encoding="utf-8")
+                        .strip()
+                    )
+                except FileNotFoundError:
+                    # If the partition file doesn't exist, then this subdir
+                    # isn't a partition we have to remove.
+                    continue
+                logging.debug("Removing partition %s", part_id)
+                part_id = int(part_id)
+                try:
+                    c_blkpg.delete_partition(fd, part_id)
+                    expecting.append(part_id)
+                except OSError as e:
+                    logging.warning(
+                        "deleting partition %s (part_id=%s) failed: %s",
+                        path,
+                        part_id,
+                        e,
+                    )
+
+        # Wait for the nodes to be cleaned up from /dev.
+        for part_id in expecting:
+            path = cls.ConstructPartitionDevName(minor, part_id)
+            try:
+                timeout_util.WaitForReturnTrue(
+                    lambda: not path.exists(), 3, period=0.1
+                )
+            except timeout_util.TimeoutError:
+                logging.warning(
+                    "%s: timeout waiting for device node to be cleaned up", path
+                )
+
+    def AddPartitions(self):
+        """Update registered partitions using parsed GPT."""
+        self._AddPartitions(self.path, self._gpt_table)
+
+    @classmethod
+    def _AddPartitions(cls, path: Union[str, os.PathLike], gpt_table):
+        """Update registered partitions using parsed GPT."""
+        major, minor = cls._CheckNodeIsLoopback(path)
+
+        # Check the partitions the kernel knows of.
+        logging.debug("%s: Registering partitions", path)
+        sysfs_dev = Path(f"/sys/dev/block/{major}:{minor}")
+        expecting = []
+        with osutils.OpenContext(path) as fd:
+            for part in gpt_table:
+                sys_part = sysfs_dev / f"loop{minor}p{part.number}"
+                if sys_part.exists():
+                    logging.debug(
+                        "partition %s already exists; skipping", part.number
+                    )
+                    continue
+                try:
+                    c_blkpg.add_partition(
+                        fd, part.number, part.start, part.size
+                    )
+                    expecting.append(part.number)
+                except OSError as e:
+                    logging.warning(
+                        "adding partition %s (part_id=%s) failed: %s",
+                        path,
+                        part.number,
+                        e,
+                    )
+
+        # Wait for the nodes to appear in /dev.
+        for part_id in expecting:
+            path = cls.ConstructPartitionDevName(minor, part_id)
+            try:
+                timeout_util.WaitForReturnTrue(path.exists, 3, period=0.1)
+            except timeout_util.TimeoutError:
+                logging.warning(
+                    "%s: timeout waiting for device node to show up", path
+                )
+
+    @staticmethod
+    def ConstructPartitionDevName(
+        loopnum: Union[str, int], part_id: Union[str, int]
+    ) -> Path:
+        """Return the loopback device for a partition.
+
+        Args:
+            loopnum: The loopback device number.
+            part_id: Partition number.
+        """
+        return Path("/dev") / f"loop{loopnum}p{part_id}"
 
     def GetPartitionDevName(self, part_id: Union[str, int]):
         """Return the loopback device for a partition.
@@ -345,8 +467,7 @@ class LoopbackPartitions(object):
         """Detach |path| loopback device."""
         cros_build_lib.AssertRootUser()
 
-        cmd = ["partx", "-d", path]
-        cros_build_lib.dbg_run(cmd, capture_output=True, check=False)
+        cls._DeletePartitions(path)
         result = cros_build_lib.run(["losetup", "--detach", path], check=False)
         return result.returncode == 0
 
