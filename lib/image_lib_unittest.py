@@ -126,6 +126,10 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
 
         self.PatchObject(osutils, "Which", side_effect=fake_which)
 
+        # Patch osutils.IsRootUser() to pretend running as root so we attempt to
+        # do all the setup directly instead of falling back to our sudo helper.
+        self.PatchObject(osutils, "IsRootUser", return_value=True)
+
     def testContextManager(self):
         """Test using the loopback class as a context manager."""
         with image_lib.LoopbackPartitions(FAKE_PATH) as lb:

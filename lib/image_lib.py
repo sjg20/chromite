@@ -7,6 +7,7 @@
 import collections
 import errno
 import glob
+import json
 import logging
 import os
 from pathlib import Path
@@ -97,47 +98,63 @@ class LoopbackPartitions(object):
         """
         self._gpt_table = GetImageDiskPartitionInfo(self.path)
 
+    @classmethod
+    def attach_image(cls, path: Union[str, os.PathLike]) -> str:
+        """Attach |path| disk image and return the loopback path."""
+        cros_build_lib.AssertRootUser()
+
+        # Sync the image file before we mount it as loop device.
+        osutils.sync_storage(path, filesystem=True)
+
+        # Mount the image in the first available loop device.
+        cmd = ["losetup", "--show", "-f", path]
+        ret = cros_build_lib.dbg_run(
+            cmd,
+            capture_output=True,
+            encoding="utf-8",
+        )
+        dev = ret.stdout.strip()
+
+        # Delete existing partitions.
+        cmd = ["partx", "-d", dev]
+        cros_build_lib.dbg_run(cmd, check=False, capture_output=True)
+
+        # Sync before we start to add partitions.
+        osutils.sync_storage()
+
+        # Add missing partitions.
+        cmd = ["partx", "-a", dev]
+        ret = cros_build_lib.dbg_run(cmd, check=False)
+        if ret.returncode:
+            logging.warning("Adding partitions failed; dumping log & retrying")
+            osutils.sync_storage()
+            cros_build_lib.run(["dmesg", "-T"])
+            cros_build_lib.run(["partx", "-u", dev])
+
+        return dev
+
     def Attach(self):
         """Initialize the loopback device.
 
         This is a separate function for test mocking purposes.
         """
         try:
-            # Sync the image file before we mount it as loop device.
-            osutils.sync_storage(self.path, filesystem=True)
-
-            # Mount the image in the first available loop device.
-            cmd = ["losetup", "--show", "-f", self.path]
-            ret = cros_build_lib.sudo_run(
-                cmd,
-                debug_level=logging.DEBUG,
-                capture_output=True,
-                encoding="utf-8",
-            )
-            self.dev = ret.stdout.strip()
-
-            # Delete existing partitions.
-            cmd = ["partx", "-d", self.dev]
-            cros_build_lib.sudo_run(
-                cmd, debug_level=logging.DEBUG, check=False, capture_output=True
-            )
-
-            # Sync before we start to add partitions.
-            osutils.sync_storage()
-
-            # Add missing partitions.
-            cmd = ["partx", "-a", self.dev]
-            ret = cros_build_lib.sudo_run(
-                cmd, debug_level=logging.DEBUG, check=False
-            )
-            if ret.returncode:
-                logging.warning(
-                    "Adding partitions failed; dumping log & retrying"
+            if osutils.IsRootUser():
+                self.dev = self.attach_image(self.path)
+            else:
+                result = cros_build_lib.sudo_run(
+                    [
+                        os.path.join(
+                            constants.CHROMITE_SCRIPTS_DIR, "cros_losetup"
+                        ),
+                        "attach",
+                        self.path,
+                    ],
+                    debug_level=logging.DEBUG,
+                    stdout=True,
                 )
-                osutils.sync_storage()
-                cros_build_lib.run(["dmesg", "-T"])
-                cmd = ["partx", "-u", self.dev]
-                cros_build_lib.sudo_run(cmd)
+                data = json.loads(result.stdout)
+                self.dev = data["path"]
 
             part_devs = glob.glob(self.dev + "p*")
             if not part_devs:
@@ -323,6 +340,16 @@ class LoopbackPartitions(object):
         self._mounted.remove(part)
         self._to_be_rmdir.add(dest_number)
 
+    @classmethod
+    def detach_loopback(cls, path: Union[str, os.PathLike]) -> bool:
+        """Detach |path| loopback device."""
+        cros_build_lib.AssertRootUser()
+
+        cmd = ["partx", "-d", path]
+        cros_build_lib.dbg_run(cmd, capture_output=True, check=False)
+        result = cros_build_lib.run(["losetup", "--detach", path], check=False)
+        return result.returncode == 0
+
     def close(self):
         if self.dev:
             for part in list(self._mounted):
@@ -342,11 +369,19 @@ class LoopbackPartitions(object):
                     sleep=1,
                 )
             self._to_be_rmdir = set()
-            cmd = ["partx", "-d", self.dev]
-            cros_build_lib.sudo_run(
-                cmd, debug_level=logging.DEBUG, capture_output=True, check=False
-            )
-            cros_build_lib.sudo_run(["losetup", "--detach", self.dev])
+            if osutils.IsRootUser():
+                self.detach_loopback(self.dev)
+            else:
+                cros_build_lib.sudo_run(
+                    [
+                        os.path.join(
+                            constants.CHROMITE_SCRIPTS_DIR, "cros_losetup"
+                        ),
+                        "detach",
+                        self.dev,
+                    ],
+                    debug_level=logging.DEBUG,
+                )
             self.dev = None
             self.parts = {}
             self._gpt_table = None
