@@ -89,7 +89,6 @@ class LoopbackPartitions(object):
         self._symlinks = set()
 
         self._InitGpt()
-        self._InitLoopback()
 
     def _InitGpt(self):
         """Initialize the GPT info.
@@ -98,7 +97,7 @@ class LoopbackPartitions(object):
         """
         self._gpt_table = GetImageDiskPartitionInfo(self.path)
 
-    def _InitLoopback(self):
+    def Attach(self):
         """Initialize the loopback device.
 
         This is a separate function for test mocking purposes.
@@ -357,6 +356,7 @@ class LoopbackPartitions(object):
                 self._destination_created = False
 
     def __enter__(self):
+        self.Attach()
         if self.part_ids:
             self.Mount(self.part_ids, self.mount_opts)
         return self

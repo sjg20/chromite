@@ -34,9 +34,8 @@ class CalculateRootfsHashMock(imagefile.CalculateRootfsHash):
     def __init__(self, image, kern_cmdline, calc_dm_args=None, calc_conf=None):
         self.image = image
         self.kern_cmdline = kern_cmdline
-        self._file = tempfile.NamedTemporaryFile(
-            delete=False
-        )  # pylint: disable=consider-using-with
+        # pylint: disable=consider-using-with
+        self._file = tempfile.NamedTemporaryFile(delete=False)
         if not calc_dm_args:
             calc_dm_args = "1 vroot none ro 1,0 800 verity alg=sha1"
         self.calculated_dm_config = kernel_cmdline.DmConfig(calc_dm_args)
@@ -193,6 +192,7 @@ class TestSignImage(cros_test_lib.RunCommandTempDirTestCase):
         self.image = image_lib_unittest.LoopbackPartitionsMock(
             "outfile", self.tempdir
         )
+        self.image.Attach()
         self.PatchObject(
             image_lib, "LoopbackPartitions", return_value=self.image
         )
@@ -376,6 +376,7 @@ class TestSignUefiBinaries(cros_test_lib.RunCommandTempDirTestCase):
         self.image = image_lib_unittest.LoopbackPartitionsMock(
             "meh", self.tempdir
         )
+        self.image.Attach()
         self.PatchObject(
             imagefile,
             "_PathForVbootSigningScripts",
@@ -444,6 +445,7 @@ class TestCalculateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
         self.image = image_lib_unittest.LoopbackPartitionsMock(
             "outfile", self.tempdir
         )
+        self.image.Attach()
         self.PatchObject(
             image_lib, "LoopbackPartitions", return_value=self.image
         )
@@ -577,6 +579,7 @@ class TestClearResignFlag(cros_test_lib.MockTempDirTestCase):
         self.image = image_lib_unittest.LoopbackPartitionsMock(
             "outfile", self.tempdir
         )
+        self.image.Attach()
 
     def testUnlinksFile(self):
         self.PatchObject(os.path, "exists", return_value=True)
@@ -604,6 +607,7 @@ class TestUpdateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
         self.image = image_lib_unittest.LoopbackPartitionsMock(
             "outfile", self.tempdir
         )
+        self.image.Attach()
         self.root_hash = CalculateRootfsHashMock("meh", SAMPLE_KERNEL_CONFIG)
         self.PatchObject(
             imagefile, "CalculateRootfsHash", return_value=self.root_hash
@@ -735,6 +739,7 @@ class TestUpdateStatefulVblock(cros_test_lib.RunCommandTempDirTestCase):
         self.image = image_lib_unittest.LoopbackPartitionsMock(
             "outfile", self.tempdir
         )
+        self.image.Attach()
 
     def testSimple(self):
         """Test the normal path"""
@@ -836,6 +841,7 @@ class TestUpdateRecoveryKernelHash(cros_test_lib.RunCommandTempDirTestCase):
         self.image = image_lib_unittest.LoopbackPartitionsMock(
             "outfile", self.tempdir
         )
+        self.image.Attach()
         self.ukc = self.PatchObject(imagefile, "_UpdateKernelConfig")
 
     def testSimple(self):
@@ -902,6 +908,7 @@ class TestUpdateLegacyBootloader(cros_test_lib.RunCommandTempDirTestCase):
         self.image = image_lib_unittest.LoopbackPartitionsMock(
             "outfile", self.tempdir
         )
+        self.image.Attach()
 
     def _CreateCfgFiles(self, syslinux, efiboot):
         """Create the directory structure for testing UpdateLegacyBootLoader."""
@@ -1109,6 +1116,7 @@ class TestDumpConfig(cros_test_lib.MockTestCase):
     def testSimple(self):
         """Test the normal case."""
         image = image_lib_unittest.LoopbackPartitionsMock("outfile")
+        image.Attach()
         self.PatchObject(image_lib, "LoopbackPartitions", return_value=image)
         gkc = self.PatchObject(
             imagefile, "GetKernelConfig", return_value="Config"

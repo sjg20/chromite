@@ -63,14 +63,17 @@ FAKE_DATE_STRING = "2022_07_20_203326"
 class LoopbackPartitionsMock(image_lib.LoopbackPartitions):
     """Mocked loopback partition class to use in unit tests."""
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.enable_rw_called = set()
+        self.disable_rw_called = set()
+
     def _InitGpt(self):
         """Initialize the GPT info."""
         self._gpt_table = LOOP_PARTITION_INFO
 
-    def _InitLoopback(self):
+    def Attach(self):
         """Initialize the loopback device."""
-        self.enable_rw_called = set()
-        self.disable_rw_called = set()
         self.dev = LOOP_DEV
         if not self.destination:
             self.destination = osutils.TempDir()
@@ -179,6 +182,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
     def testManual(self):
         """Test using the loopback class closed manually."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH)
+        lb.Attach()
         self.rc_mock.assertCommandContains(
             ["losetup", "--show", "-f", FAKE_PATH]
         )
@@ -196,6 +200,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
     def gcFunc(self):
         """This function isolates a local variable so it'll be garbage collected."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH)
+        lb.Attach()
         self.rc_mock.assertCommandContains(
             ["losetup", "--show", "-f", FAKE_PATH]
         )
@@ -219,6 +224,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
     def testMountUnmount(self):
         """Test Mount() and Unmount() entry points."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH, destination=self.tempdir)
+        lb.Attach()
         # Mount four partitions.
         lb.Mount((1, 3, "ROOT-B", "ROOT-C"))
         for p in (1, 3, 5, 7):
@@ -269,6 +275,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
     def testMountingMountedPartReturnsName(self):
         """Test that Mount returns the directory name even when already mounted."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH, destination=self.tempdir)
+        lb.Attach()
         dirname = "%s/dir-%d" % (self.tempdir, lb._gpt_table[0].number)
         # First make sure we get the directory name when we actually mount.
         self.assertEqual(dirname, lb._Mount(lb._gpt_table[0], ("ro",)))
@@ -279,6 +286,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
     def testRemountCallsMount(self):
         """Test that Mount returns the directory name even when already mounted."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH, destination=self.tempdir)
+        lb.Attach()
         devname = "%sp%d" % (LOOP_DEV, lb._gpt_table[0].number)
         dirname = "%s/dir-%d" % (self.tempdir, lb._gpt_table[0].number)
         # First make sure we get the directory name when we actually mount.
@@ -311,6 +319,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
     def testGetPartitionDevName(self):
         """Test GetPartitionDevName()."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH)
+        lb.Attach()
         for part in LOOP_PARTITION_INFO:
             self.assertEqual(
                 "%sp%d" % (LOOP_DEV, part.number),
@@ -326,6 +335,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
     def test_GetMountPointAndSymlink(self):
         """Test _GetMountPointAndSymlink()."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH, destination=self.tempdir)
+        lb.Attach()
         for part in LOOP_PARTITION_INFO:
             expected = [
                 os.path.join(lb.destination, "dir-%s" % n)
@@ -348,6 +358,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
         self.PatchObject(image_lib, "IsExt2Image", side_effect=ext_mock)
 
         lb = image_lib.LoopbackPartitions(FAKE_PATH, destination=self.tempdir)
+        lb.Attach()
         # We expect that only the partitions in FS_PARTITIONS are ext2.
         self.assertEqual(
             [part.number in FS_PARTITIONS for part in LOOP_PARTITION_INFO],
