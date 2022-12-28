@@ -960,6 +960,7 @@ def _CheckForKnownBadLicenses(cpf, licenses):
             "chromeos-base/monotype-fonts",
             "chromeos-base/qc7180-modem-firmware",
             "chromeos-base/sc7280-modem-firmware",
+            "chromeos-base/modem-logger-sc",
             "chromeos-base/modem-fw-dlc",
             "dev-embedded/meta-embedded-toolkit",
             "media-libs/a630-fw",
