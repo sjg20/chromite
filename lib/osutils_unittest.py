@@ -1736,3 +1736,61 @@ class TestNonRootUserCheck(cros_test_lib.MockTestCase):
     def testIsNonRootUserforNonRoot(self):
         """Verify IsNonRootUser returns Test"""
         self.assertTrue(osutils.IsNonRootUser())
+
+
+class TestSyncStorage(cros_test_lib.TestCase):
+    """Test sync_storage helper."""
+
+    def testNoArgs(self):
+        """Verify default behavior."""
+        assert osutils.sync_storage()
+
+    def testSudo(self):
+        """Verify sudo behavior."""
+        assert osutils.sync_storage(sudo=True)
+        assert osutils.sync_storage(Path.cwd(), sudo=True)
+
+    def testPath(self):
+        """Verify with path."""
+        assert osutils.sync_storage(Path.cwd())
+
+    def testMissingPath(self):
+        """Verify with path that doesn't work."""
+        assert not osutils.sync_storage("alskdjfalskdjflasjdflasjdf")
+
+    def testPathData(self):
+        """Verify syncing path data."""
+        assert osutils.sync_storage(".", data_only=True)
+
+    def testPathDataNoPath(self):
+        """Verify syncing data w/out path."""
+        with self.assertRaises(ValueError):
+            osutils.sync_storage(data_only=True)
+
+    def testPathFilesystem(self):
+        """Verify syncing path filesystem."""
+        assert osutils.sync_storage(".", filesystem=True)
+
+
+class TestMockCmdSyncStorage(cros_test_lib.RunCommandTestCase):
+    """Test sync_storage helper with a mock run command."""
+
+    def testSync(self):
+        """Verify basic `sync` call."""
+        assert osutils.sync_storage(sudo=True)
+        self.rc.assertCommandContains(["sync"])
+
+    def testSyncData(self):
+        """Verify basic `sync` call."""
+        assert osutils.sync_storage(".", data_only=True, sudo=True)
+        self.rc.assertCommandContains(["sync", "--data", "."])
+
+    def testSyncFilesystem(self):
+        """Verify basic `sync` call."""
+        assert osutils.sync_storage(".", filesystem=True, sudo=True)
+        self.rc.assertCommandContains(["sync", "--file-system", "."])
+
+    def testSyncFile(self):
+        """Verify basic `sync` call."""
+        assert osutils.sync_storage(".", sudo=True)
+        self.rc.assertCommandContains(["sync", "."])

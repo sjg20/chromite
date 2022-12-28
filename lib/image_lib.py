@@ -104,8 +104,7 @@ class LoopbackPartitions(object):
         """
         try:
             # Sync the image file before we mount it as loop device.
-            cmd = ["sync", "-f", self.path]
-            cros_build_lib.run(cmd, debug_level=logging.DEBUG, check=False)
+            osutils.sync_storage(self.path, filesystem=True)
 
             # Mount the image in the first available loop device.
             cmd = ["losetup", "--show", "-f", self.path]
@@ -124,7 +123,7 @@ class LoopbackPartitions(object):
             )
 
             # Sync before we start to add partitions.
-            cros_build_lib.run(["sync"])
+            osutils.sync_storage()
 
             # Add missing partitions.
             cmd = ["partx", "-a", self.dev]
@@ -135,7 +134,7 @@ class LoopbackPartitions(object):
                 logging.warning(
                     "Adding partitions failed; dumping log & retrying"
                 )
-                cros_build_lib.run(["sync"])
+                osutils.sync_storage()
                 cros_build_lib.run(["dmesg", "-T"])
                 cmd = ["partx", "-u", self.dev]
                 cros_build_lib.sudo_run(cmd)

@@ -254,9 +254,7 @@ class USBImager(object):
         cros_build_lib.sudo_run(
             ["partx", "-u", device], debug_level=self.debug_level
         )
-        cros_build_lib.sudo_run(
-            ["sync", "-d", device], debug_level=self.debug_level
-        )
+        osutils.sync_storage(device, data_only=True, sudo=True)
 
     def _GetImagePath(self):
         """Returns the image path to use."""

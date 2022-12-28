@@ -1919,3 +1919,47 @@ def IsRootUser() -> bool:
 def IsNonRootUser() -> bool:
     """Returns True if user doesn't have root privileges."""
     return not IsRootUser()
+
+
+def sync_storage(
+    path: Optional[Union[str, os.PathLike]] = None,
+    data_only: Optional[bool] = False,
+    filesystem: Optional[bool] = False,
+    sudo: Optional[bool] = False,
+) -> bool:
+    """Sync file data or storage.
+
+    This is directly related to the `sync` command.
+
+    Args:
+        path: Path to use for reference when syncing.
+        data_only: Whether to sync file data only and ignore metadata.
+        filesystem: If True, sync the filesystem the path lives on, otherwise
+            sync the file data itself.
+        sudo: Whether to run the command via sudo.
+
+    Returns:
+        Whether the sync worked.
+
+    Raises:
+        ValueError: Only one of data_only & filesystem may be used.
+        ValueError: data_only requires a path.
+    """
+    if IsRootUser() or not path:
+        sudo = False
+
+    if data_only:
+        if filesystem:
+            raise ValueError("data_only & filesystem are exclusive")
+        if not path:
+            raise ValueError("data_only=True requires a path")
+
+    cmd = ["sync"]
+    if data_only:
+        cmd += ["--data"]
+    if filesystem:
+        cmd += ["--file-system"]
+    if path:
+        cmd += [path]
+    run = cros_build_lib.sudo_run if sudo else cros_build_lib.run
+    return run(cmd, check=False, debug_level=logging.DEBUG).returncode == 0
