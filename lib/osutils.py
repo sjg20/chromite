@@ -1954,12 +1954,39 @@ def sync_storage(
         if not path:
             raise ValueError("data_only=True requires a path")
 
-    cmd = ["sync"]
-    if data_only:
-        cmd += ["--data"]
-    if filesystem:
-        cmd += ["--file-system"]
+    # If sudo, have to use sync command for now.
+    if sudo:
+        cmd = ["sync"]
+        if data_only:
+            cmd += ["--data"]
+        if filesystem:
+            cmd += ["--file-system"]
+        if path:
+            cmd += [path]
+        result = cros_build_lib.sudo_run(
+            cmd, check=False, debug_level=logging.DEBUG
+        )
+        return result.returncode == 0
+
+    # If not sudo, run code directly.
+    libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
     if path:
-        cmd += [path]
-    run = cros_build_lib.sudo_run if sudo else cros_build_lib.run
-    return run(cmd, check=False, debug_level=logging.DEBUG).returncode == 0
+        fd = None
+        try:
+            with OpenContext(path) as fd:
+                if data_only:
+                    logging.debug("%s: syncing data only (no metadata)", path)
+                    ret = libc.fdatasync(fd) == 0
+                elif filesystem:
+                    logging.debug("%s: syncing underlying filesystem", path)
+                    ret = libc.syncfs(fd) == 0
+                else:
+                    logging.debug("%s: syncing file & its metadata", path)
+                    ret = libc.fsync(fd) == 0
+        except FileNotFoundError:
+            return False
+    else:
+        # This is expensive, so log at a higher level.
+        logging.info("syncing all data & filesystems & hardware in the system")
+        ret = libc.sync() == 0
+    return ret

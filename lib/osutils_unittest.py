@@ -5,6 +5,7 @@
 """Unittests for the osutils.py module (imagine that!)."""
 
 import collections
+import ctypes
 import filecmp
 import glob
 import grp
@@ -1777,8 +1778,9 @@ class TestMockCmdSyncStorage(cros_test_lib.RunCommandTestCase):
 
     def testSync(self):
         """Verify basic `sync` call."""
+        assert osutils.sync_storage()
         assert osutils.sync_storage(sudo=True)
-        self.rc.assertCommandContains(["sync"])
+        self.assertEqual(self.rc.call_count, 0)
 
     def testSyncData(self):
         """Verify basic `sync` call."""
@@ -1794,3 +1796,35 @@ class TestMockCmdSyncStorage(cros_test_lib.RunCommandTestCase):
         """Verify basic `sync` call."""
         assert osutils.sync_storage(".", sudo=True)
         self.rc.assertCommandContains(["sync", "."])
+
+
+class TestMockSyncStorage(cros_test_lib.TestCase):
+    """Test sync_storage helper with a mock C library."""
+
+    def testSync(self):
+        """Verify we call libc.sync()."""
+        m = mock.MagicMock()
+        with mock.patch.object(ctypes, "CDLL", return_value=m):
+            osutils.sync_storage()
+        m.sync.assert_called_once()
+
+    def testFDataSync(self):
+        """Verify we call libc.fdatasync()."""
+        m = mock.MagicMock()
+        with mock.patch.object(ctypes, "CDLL", return_value=m):
+            osutils.sync_storage(".", data_only=True)
+        m.fdatasync.assert_called_once()
+
+    def testSyncfs(self):
+        """Verify we call libc.syncfs()."""
+        m = mock.MagicMock()
+        with mock.patch.object(ctypes, "CDLL", return_value=m):
+            osutils.sync_storage(".", filesystem=True)
+        m.syncfs.assert_called_once()
+
+    def testFsync(self):
+        """Verify we call libc.fsync()."""
+        m = mock.MagicMock()
+        with mock.patch.object(ctypes, "CDLL", return_value=m):
+            osutils.sync_storage(".")
+        m.fsync.assert_called_once()
