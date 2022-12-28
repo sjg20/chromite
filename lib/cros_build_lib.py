@@ -946,7 +946,9 @@ def run(
         estr = str(e)
         if e.errno == errno.EACCES:
             estr += "; does the program need `chmod a+x`?"
-        raise RunCommandError(estr, CompletedProcess(args=cmd), exception=e)
+        raise RunCommandError(
+            estr, CompletedProcess(args=cmd), exception=e
+        ) from e
     finally:
         if proc is not None:
             # Ensure the process is dead.
