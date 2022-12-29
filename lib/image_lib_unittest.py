@@ -23,6 +23,7 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
 from chromite.lib import retry_util
+from chromite.utils import c_loop
 
 
 # pylint: disable=protected-access
@@ -122,6 +123,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
         self.delpart_mock = self.PatchObject(
             image_lib.LoopbackPartitions, "_DeletePartitions"
         )
+        self.detach_mock = self.PatchObject(c_loop, "detach")
 
         def fake_which(val, *_arg, **_kwargs):
             return val
@@ -141,13 +143,11 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
             self.delpart_mock.assert_called_once()
             self.delpart_mock.reset_mock()
             self.addpart_mock.assert_called_once()
-            self.rc_mock.assertCommandContains(
-                ["losetup", "--detach", LOOP_DEV], expected=False
-            )
+            self.detach_mock.assert_not_called()
             self.assertEqual(lb.parts, LOOP_PARTS_DICT)
             self.assertEqual(lb._gpt_table, LOOP_PARTITION_INFO)
         self.delpart_mock.assert_called_once()
-        self.rc_mock.assertCommandContains(["losetup", "--detach", LOOP_DEV])
+        self.detach_mock.assert_called_once()
 
     def testContextManagerWithMounts(self):
         """Test using the loopback class as a context manager with mounts."""
@@ -177,15 +177,13 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
             self.delpart_mock.assert_called_once()
             self.delpart_mock.reset_mock()
             self.addpart_mock.assert_called_once()
-            self.rc_mock.assertCommandContains(
-                ["losetup", "--detach", LOOP_DEV], expected=False
-            )
+            self.detach_mock.assert_not_called()
             self.assertEqual(lb.parts, LOOP_PARTS_DICT)
             self.assertEqual(lb._gpt_table, LOOP_PARTITION_INFO)
             self.assertEqual(expected_calls, syml.call_args_list)
             self.assertEqual(expected_mounts, lb._mounted)
         self.delpart_mock.assert_called_once()
-        self.rc_mock.assertCommandContains(["losetup", "--detach", LOOP_DEV])
+        self.detach_mock.assert_called_once()
 
     def testManual(self):
         """Test using the loopback class closed manually."""
@@ -197,14 +195,12 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
         self.delpart_mock.assert_called_once()
         self.delpart_mock.reset_mock()
         self.addpart_mock.assert_called_once()
-        self.rc_mock.assertCommandContains(
-            ["losetup", "--detach", LOOP_DEV], expected=False
-        )
+        self.detach_mock.assert_not_called()
         self.assertEqual(lb.parts, LOOP_PARTS_DICT)
         self.assertEqual(lb._gpt_table, LOOP_PARTITION_INFO)
         lb.close()
         self.delpart_mock.assert_called_once()
-        self.rc_mock.assertCommandContains(["losetup", "--detach", LOOP_DEV])
+        self.detach_mock.assert_called_once()
 
     def gcFunc(self):
         """This function isolates a local variable so it'll be garbage collected."""
@@ -216,9 +212,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
         self.delpart_mock.assert_called_once()
         self.delpart_mock.reset_mock()
         self.addpart_mock.assert_called_once()
-        self.rc_mock.assertCommandContains(
-            ["losetup", "--detach", LOOP_DEV], expected=False
-        )
+        self.detach_mock.assert_not_called()
         self.assertEqual(lb.parts, LOOP_PARTS_DICT)
         self.assertEqual(lb._gpt_table, LOOP_PARTITION_INFO)
 
@@ -229,7 +223,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
         # loopback object.
         gc.collect()
         self.delpart_mock.assert_called_once()
-        self.rc_mock.assertCommandContains(["losetup", "--detach", LOOP_DEV])
+        self.detach_mock.assert_called_once()
 
     def testMountUnmount(self):
         """Test Mount() and Unmount() entry points."""

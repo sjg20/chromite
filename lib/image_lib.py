@@ -25,6 +25,7 @@ from chromite.lib import retry_util
 from chromite.lib import signing
 from chromite.lib import timeout_util
 from chromite.utils import c_blkpg
+from chromite.utils import c_loop
 
 
 # security_check: pass_config mapping.
@@ -464,8 +465,18 @@ class LoopbackPartitions(object):
         cros_build_lib.AssertRootUser()
 
         cls._DeletePartitions(path)
-        result = cros_build_lib.run(["losetup", "--detach", path], check=False)
-        return result.returncode == 0
+
+        logging.debug("%s: Detaching loop device", path)
+        try:
+            c_loop.detach(path)
+        except OSError as e:
+            # If it's already detached, there's nothing to do.
+            if e.errno == errno.ENXIO:
+                logging.debug("%s: Device already detached", path)
+            else:
+                raise
+
+        return True
 
     def close(self):
         if self.dev:
