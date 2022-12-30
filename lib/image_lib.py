@@ -121,9 +121,6 @@ class LoopbackPartitions(object):
         # Delete existing partitions.
         cls._DeletePartitions(dev)
 
-        # Sync before we start to add partitions.
-        osutils.sync_storage()
-
         # Add missing partitions.
         gpt_table = GetImageDiskPartitionInfo(path)
         cls._AddPartitions(dev, gpt_table)
