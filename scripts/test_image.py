@@ -28,8 +28,7 @@ def ParseArgs(args):
     parser.add_argument(
         "image",
         type="path",
-        help="Image directory (or file) with mount_image.sh and "
-        "umount_image.sh",
+        help="Image directory or file to test",
     )
 
     parser.add_argument(
