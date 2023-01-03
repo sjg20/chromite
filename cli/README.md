@@ -41,6 +41,12 @@ which can be used with `type='custom_type_name'`.
     BuildTarget instance.
 *   date: Parse the argument as a Y-m-d formatted date.
 *   path: Expands ~/ paths and then standardizes to the real path.
+*   path_exists: Expands ~/ paths and standardizes to the real path,
+    then checks that the path exists.
+*   file_exists: Expands ~/ paths and standardizes to the real path,
+    then checks that the path exists and is a file.
+*   dir_exists: Expands ~/ paths and standardizes to the real path,
+    then checks that the path exists and is a directory.
 *   gs_path: Processes all known GS urls and provides the equivalent gs:// url.
 *   local_or_gs_path: Processes the argument as a 'path' or a 'gs_path',
     as needed.

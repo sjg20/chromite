@@ -1038,3 +1038,99 @@ class DeprecatedActionTest(cros_test_lib.MockTestCase):
         self.assertEqual(self.dep_store_expected, opts.dep_store)
         self.assertTrue(opts.dep_store_true)
         self.assertEqual(self.dep_append_expected, opts.dep_append)
+
+
+class PathExistsTest(cros_test_lib.TempDirTestCase):
+    """Test type=path_exists, dir_exists, and file_exists functionality."""
+
+    def setUp(self):
+        cros_test_lib.CreateOnDiskHierarchy(
+            self.tempdir,
+            (
+                "directory/file1",
+                "directory/file2",
+                "directory/file3",
+                "other/",
+            ),
+        )
+        self.dir_path = self.tempdir / "directory"
+        self.file_path = self.dir_path / "file1"
+        self.link_path = self.tempdir / "other" / "link"
+        osutils.SafeSymlink(self.file_path, self.link_path)
+
+    def _ParsePathExists(self, path):
+        parser = commandline.ArgumentParser()
+        parser.add_argument("--path", type="path_exists")
+        return parser.parse_args(["--path", str(path)])
+
+    def _ParseDirectoryExists(self, path):
+        parser = commandline.ArgumentParser()
+        parser.add_argument("--dir", type="dir_exists")
+        return parser.parse_args(["--dir", str(path)])
+
+    def _ParseFileExists(self, path):
+        parser = commandline.ArgumentParser()
+        parser.add_argument("--file", type="file_exists")
+        return parser.parse_args(["--file", str(path)])
+
+    def testExistingPath(self):
+        """Test that the path exists."""
+        options = self._ParsePathExists(self.file_path)
+        self.assertEqual(options.path, self.file_path)
+
+    def testExistingSymlinkPath(self):
+        """Test that a path with symlink exists."""
+        options = self._ParsePathExists(self.link_path)
+        self.assertEqual(options.path, self.file_path)
+        self.assertNotEqual(options.path, self.link_path)
+
+    def testMultipleExistingPaths(self):
+        """Test that action='append' can be used with type='path_exists'."""
+        parser = commandline.ArgumentParser()
+        parser.add_argument("--path", action="append", type="path_exists")
+        options = parser.parse_args(
+            [
+                "--path",
+                str(self.file_path),
+                "--path",
+                str(self.dir_path / "file2"),
+                "--path",
+                str(self.dir_path / "file3"),
+            ]
+        )
+        self.assertEqual(len(options.path), 3)
+        self.assertIn(self.file_path, options.path)
+
+    def testExistingFile(self):
+        """Test that the path exists and is a file."""
+        options = self._ParseFileExists(self.file_path)
+        self.assertEqual(options.file, self.file_path)
+
+    def testExistingDirectory(self):
+        """Test that the path exists and is a directory."""
+        options = self._ParseDirectoryExists(self.dir_path)
+        self.assertEqual(options.dir, self.dir_path)
+
+    def testNonExistingPath(self):
+        """Test that an error occurs when the path does not exist."""
+        self.assertRaises2(SystemExit, self._ParsePathExists, "no/such/path")
+
+    def testNonExistingDirectory(self):
+        """Test that an error occurs when a directory path does not exist."""
+        self.assertRaises2(
+            SystemExit, self._ParseDirectoryExists, "no/such/directory/"
+        )
+
+    def testNonExistingFile(self):
+        """Test that an error occurs when a file path does not exist."""
+        self.assertRaises2(SystemExit, self._ParseFileExists, "no/such/file")
+
+    def testExistingPathIsNotDirectory(self):
+        """Test that an error occurs when an existing path is not a directory."""
+        self.assertRaises2(
+            SystemExit, self._ParseDirectoryExists, self.file_path
+        )
+
+    def testExistingPathIsNotFile(self):
+        """Test that an error occurs when an existing path is not a file."""
+        self.assertRaises2(SystemExit, self._ParseFileExists, self.dir_path)

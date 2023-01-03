@@ -15,6 +15,7 @@ import functools
 import logging
 import optparse  # pylint: disable=deprecated-module
 import os
+from pathlib import Path
 import signal
 import sys
 from typing import List, NamedTuple, Optional
@@ -518,12 +519,55 @@ class _SplitExtendAction(argparse.Action):
         getattr(namespace, self.dest).extend(values.split())
 
 
+def ExistingPath(value: str) -> Path:
+    """Expands ~/ paths and standardizes to the real path.
+
+    Checks that the path exists.
+    """
+    ret = osutils.ExpandPath(value)
+    path = Path(ret)
+    if not path.exists():
+        msg = f"Path does not exist: {value}"
+        logging.error(msg)
+        raise ValueError(msg)
+    return path
+
+
+def ExistingDirectory(value: str) -> Path:
+    """Expands ~/ paths and standardizes to the real path.
+
+    Checks that the path exists and is a file.
+    """
+    path = ExistingPath(value)
+    if not path.is_dir():
+        msg = f"Path is not a directory: {value}"
+        logging.error(msg)
+        raise ValueError(msg)
+    return path
+
+
+def ExistingFile(value: str) -> Path:
+    """Expands ~/ paths and standardizes to the real path.
+
+    Checks that the path exists and is a directory.
+    """
+    path = ExistingPath(value)
+    if not path.is_file():
+        msg = f"Path is not a file: {value}"
+        logging.error(msg)
+        raise ValueError(msg)
+    return path
+
+
 VALID_TYPES = {
     "ab_url": NormalizeAbUrl,
     "bool": ParseBool,
     "cipd": ValidateCipdURL,
     "date": ParseDate,
     "path": osutils.ExpandPath,
+    "path_exists": ExistingPath,
+    "dir_exists": ExistingDirectory,
+    "file_exists": ExistingFile,
     "gs_path": NormalizeGSPath,
     "local_or_gs_path": NormalizeLocalOrGSPath,
     "path_or_uri": NormalizeUri,
