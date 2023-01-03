@@ -33,9 +33,6 @@ NOT_APPLICABLE = "N/A"
 WORLD_TARGET = "world"
 UPGRADED = "Upgraded"
 
-# Arches we care about -- we actively develop/support/ship.
-STANDARD_BOARD_ARCHS = set(("amd64", "arm"))
-
 # Files that we authored.
 CROS_AUTHORED_FILES = {"OWNERS", "README.md"}
 
@@ -1857,36 +1854,6 @@ class Upgrader(object):
             # Stable source must be on branch.
             self._CheckStableRepoOnBranch()
 
-    def CheckBoardList(self, boards):
-        """Validate list of specified |boards| before running any of them."""
-
-        # If this is an upgrade run (i.e. --upgrade was specified), then in
-        # almost all cases we want all our supported architectures to be covered.
-        if self._IsInUpgradeMode():
-            board_archs = set()
-            for board in boards:
-                board_archs.add(Upgrader._FindBoardArch(board))
-
-            if not STANDARD_BOARD_ARCHS.issubset(board_archs):
-                # Only proceed if user acknowledges.
-                oper.Warning(
-                    "You have selected boards for archs %r, which does not"
-                    " cover all standard archs %r"
-                    % (sorted(board_archs), sorted(STANDARD_BOARD_ARCHS))
-                )
-                oper.Warning(
-                    "If you continue with this upgrade you may break"
-                    " builds for architectures not covered by your\n"
-                    "boards.  Continue only if you have a reason to limit"
-                    " this upgrade to these specific architectures.\n"
-                )
-                if not cros_build_lib.BooleanPrompt(
-                    prompt="Do you want to continue anyway?", default=False
-                ):
-                    raise RuntimeError(
-                        "Missing one or more of the standard archs"
-                    )
-
     def RunBoard(self, board):
         """Runs the upgrader based on the supplied options and arguments.
 
@@ -2225,12 +2192,6 @@ def main(argv):
         if board != Upgrader.HOST_BOARD and not _BoardIsSetUp(board):
             parser.print_usage()
             oper.Die("You must setup the %s board first." % board)
-
-    # If --board and --upgrade are given then in almost all cases
-    # the user should cover all architectures.
-    if options.board:
-        non_host_boards = [b for b in boards if b != Upgrader.HOST_BOARD]
-        upgrader.CheckBoardList(non_host_boards)
 
     passed = True
     try:

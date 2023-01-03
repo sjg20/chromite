@@ -3458,7 +3458,6 @@ class MainTest(CpuTestBase):
     def testFlowUpgradeOneBoard(self):
         """Test main flow for basic one-board upgrade."""
         self.PatchObject(cpu.Upgrader, "PreRunChecks")
-        self.PatchObject(cpu.Upgrader, "CheckBoardList")
         self.PatchObject(cpu, "_BoardIsSetUp", return_value=True)
         self.PatchObject(cpu.Upgrader, "PrepareToRun")
         self.PatchObject(cpu.Upgrader, "RunBoard")
@@ -3472,7 +3471,6 @@ class MainTest(CpuTestBase):
     def testFlowUpgradeTwoBoards(self):
         """Test main flow for two-board upgrade."""
         self.PatchObject(cpu.Upgrader, "PreRunChecks")
-        self.PatchObject(cpu.Upgrader, "CheckBoardList")
         self.PatchObject(cpu, "_BoardIsSetUp", return_value=True)
         self.PatchObject(cpu.Upgrader, "PrepareToRun")
         self.PatchObject(cpu.Upgrader, "RunBoard")
@@ -3492,7 +3490,6 @@ class MainTest(CpuTestBase):
     def testFlowUpgradeTwoBoardsAndHost(self):
         """Test main flow for two-board and host upgrade."""
         self.PatchObject(cpu.Upgrader, "PreRunChecks")
-        self.PatchObject(cpu.Upgrader, "CheckBoardList")
         self.PatchObject(cpu, "_BoardIsSetUp", return_value=True)
         self.PatchObject(cpu.Upgrader, "PrepareToRun")
         self.PatchObject(cpu.Upgrader, "RunBoard")
