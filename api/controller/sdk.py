@@ -175,7 +175,7 @@ def RestoreSnapshot(input_proto, _output_proto, _config):
 def BuildPrebuilts(input_proto, _output_proto, _config):
     """Builds the binary packages that comprise the Chromium OS SDK."""
     chroot = controller_util.ParseChroot(input_proto.chroot)
-    sdk.BuildPrebuilts(chroot)
+    sdk.BuildPrebuilts(chroot, board=input_proto.build_target.name)
 
 
 @faux.success(_CLUris)

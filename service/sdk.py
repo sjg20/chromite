@@ -451,14 +451,18 @@ def _EnsureSnapshottableState(
         res.check_returncode()
 
 
-def BuildPrebuilts(chroot: "chroot_lib.Chroot"):
-    """Builds the binary packages that comprise the Chromium OS SDK.
+def BuildPrebuilts(chroot: "chroot_lib.Chroot", board: str = ""):
+    """Builds the binary packages that compose the Chromium OS SDK.
 
     Args:
         chroot: The chroot in which to run the build.
+        board: The name of the SDK build target to build packages for.
     """
+    cmd = ["./build_sdk_board"]
+    if board:
+        cmd.append(f"--board={board}")
     cros_build_lib.run(
-        ["./build_sdk_board"],
+        cmd,
         enter_chroot=True,
         extra_env=chroot.env,
         chroot_args=chroot.get_enter_args(),
