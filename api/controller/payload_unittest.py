@@ -63,7 +63,6 @@ class PayloadApiTests(
         )
 
         self.result = payload_pb2.GenerationResponse(
-            success=True,
             local_path="/tmp/aohiwdadoi/delta.bin",
             remote_uri="gs://something",
         )
