@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1a\x63hromite/api/payload.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"h\n\x05\x42uild\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x0e\n\x06\x62ucket\x18\x03 \x01(\t\x12\x0f\n\x07\x63hannel\x18\x04 \x01(\t\"\x91\x01\n\x08\x44LCImage\x12\"\n\x05\x62uild\x18\x01 \x01(\x0b\x32\x13.chromite.api.Build\x12\x0e\n\x06\x64lc_id\x18\x02 \x01(\t\x12\x13\n\x0b\x64lc_package\x18\x03 \x01(\t\x12\x11\n\tdlc_image\x18\x04 \x01(\t\x12)\n\nimage_type\x18\x05 \x01(\x0e\x32\x15.chromiumos.ImageType\"i\n\x0bSignedImage\x12\"\n\x05\x62uild\x18\x01 \x01(\x0b\x32\x13.chromite.api.Build\x12)\n\nimage_type\x18\x02 \x01(\x0e\x32\x15.chromiumos.ImageType\x12\x0b\n\x03key\x18\x03 \x01(\t\"q\n\rUnsignedImage\x12\"\n\x05\x62uild\x18\x01 \x01(\x0b\x32\x13.chromite.api.Build\x12)\n\nimage_type\x18\x02 \x01(\x0e\x32\x15.chromiumos.ImageType\x12\x11\n\tmilestone\x18\x03 \x01(\t\"\x8a\x04\n\x11GenerationRequest\x12\x15\n\x0b\x66ull_update\x18\x01 \x01(\x08H\x00\x12\x35\n\x10src_signed_image\x18\x02 \x01(\x0b\x32\x19.chromite.api.SignedImageH\x00\x12\x39\n\x12src_unsigned_image\x18\x03 \x01(\x0b\x32\x1b.chromite.api.UnsignedImageH\x00\x12/\n\rsrc_dlc_image\x18\n \x01(\x0b\x32\x16.chromite.api.DLCImageH\x00\x12\x35\n\x10tgt_signed_image\x18\x04 \x01(\x0b\x32\x19.chromite.api.SignedImageH\x01\x12\x39\n\x12tgt_unsigned_image\x18\x05 \x01(\x0b\x32\x1b.chromite.api.UnsignedImageH\x01\x12/\n\rtgt_dlc_image\x18\x0b \x01(\x0b\x32\x16.chromite.api.DLCImageH\x01\x12\x0e\n\x06\x62ucket\x18\x06 \x01(\t\x12\x0e\n\x06verify\x18\x07 \x01(\x08\x12\x0e\n\x06keyset\x18\x08 \x01(\t\x12\x0e\n\x06\x64ryrun\x18\t \x01(\x08\x12\"\n\x06\x63hroot\x18\x0c \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x0e\n\x06minios\x18\r \x01(\x08\x42\x11\n\x0fsrc_image_oneofB\x11\n\x0ftgt_image_oneof\"\xd2\x01\n\x12GenerationResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x12\x12\n\nlocal_path\x18\x02 \x01(\t\x12\x12\n\nremote_uri\x18\x03 \x01(\t\x12\x46\n\x0e\x66\x61ilure_reason\x18\x04 \x01(\x0e\x32..chromite.api.GenerationResponse.FailureReason\";\n\rFailureReason\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x19\n\x15NOT_MINIOS_COMPATIBLE\x10\x01\x32w\n\x0ePayloadService\x12T\n\x0fGeneratePayload\x12\x1f.chromite.api.GenerationRequest\x1a .chromite.api.GenerationResponse\x1a\x0f\xc2\xed\x1a\x0b\n\x07payload\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x1a\x63hromite/api/payload.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\"h\n\x05\x42uild\x12-\n\x0c\x62uild_target\x18\x01 \x01(\x0b\x32\x17.chromiumos.BuildTarget\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x0e\n\x06\x62ucket\x18\x03 \x01(\t\x12\x0f\n\x07\x63hannel\x18\x04 \x01(\t\"\x91\x01\n\x08\x44LCImage\x12\"\n\x05\x62uild\x18\x01 \x01(\x0b\x32\x13.chromite.api.Build\x12\x0e\n\x06\x64lc_id\x18\x02 \x01(\t\x12\x13\n\x0b\x64lc_package\x18\x03 \x01(\t\x12\x11\n\tdlc_image\x18\x04 \x01(\t\x12)\n\nimage_type\x18\x05 \x01(\x0e\x32\x15.chromiumos.ImageType\"i\n\x0bSignedImage\x12\"\n\x05\x62uild\x18\x01 \x01(\x0b\x32\x13.chromite.api.Build\x12)\n\nimage_type\x18\x02 \x01(\x0e\x32\x15.chromiumos.ImageType\x12\x0b\n\x03key\x18\x03 \x01(\t\"q\n\rUnsignedImage\x12\"\n\x05\x62uild\x18\x01 \x01(\x0b\x32\x13.chromite.api.Build\x12)\n\nimage_type\x18\x02 \x01(\x0e\x32\x15.chromiumos.ImageType\x12\x11\n\tmilestone\x18\x03 \x01(\t\"\x8a\x04\n\x11GenerationRequest\x12\x15\n\x0b\x66ull_update\x18\x01 \x01(\x08H\x00\x12\x35\n\x10src_signed_image\x18\x02 \x01(\x0b\x32\x19.chromite.api.SignedImageH\x00\x12\x39\n\x12src_unsigned_image\x18\x03 \x01(\x0b\x32\x1b.chromite.api.UnsignedImageH\x00\x12/\n\rsrc_dlc_image\x18\n \x01(\x0b\x32\x16.chromite.api.DLCImageH\x00\x12\x35\n\x10tgt_signed_image\x18\x04 \x01(\x0b\x32\x19.chromite.api.SignedImageH\x01\x12\x39\n\x12tgt_unsigned_image\x18\x05 \x01(\x0b\x32\x1b.chromite.api.UnsignedImageH\x01\x12/\n\rtgt_dlc_image\x18\x0b \x01(\x0b\x32\x16.chromite.api.DLCImageH\x01\x12\x0e\n\x06\x62ucket\x18\x06 \x01(\t\x12\x0e\n\x06verify\x18\x07 \x01(\x08\x12\x0e\n\x06keyset\x18\x08 \x01(\t\x12\x0e\n\x06\x64ryrun\x18\t \x01(\x08\x12\"\n\x06\x63hroot\x18\x0c \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x0e\n\x06minios\x18\r \x01(\x08\x42\x11\n\x0fsrc_image_oneofB\x11\n\x0ftgt_image_oneof\"\xd0\x01\n\x12GenerationResponse\x12\x12\n\nlocal_path\x18\x02 \x01(\t\x12\x12\n\nremote_uri\x18\x03 \x01(\t\x12\x46\n\x0e\x66\x61ilure_reason\x18\x04 \x01(\x0e\x32..chromite.api.GenerationResponse.FailureReason\";\n\rFailureReason\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x19\n\x15NOT_MINIOS_COMPATIBLE\x10\x01J\x04\x08\x01\x10\x02R\x07success2w\n\x0ePayloadService\x12T\n\x0fGeneratePayload\x12\x1f.chromite.api.GenerationRequest\x1a .chromite.api.GenerationResponse\x1a\x0f\xc2\xed\x1a\x0b\n\x07payload\x10\x01\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,chromiumos_dot_common__pb2.DESCRIPTOR,])
 
@@ -47,8 +47,8 @@ _GENERATIONRESPONSE_FAILUREREASON = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1252,
-  serialized_end=1311,
+  serialized_start=1235,
+  serialized_end=1294,
 )
 _sym_db.RegisterEnumDescriptor(_GENERATIONRESPONSE_FAILUREREASON)
 
@@ -393,28 +393,21 @@ _GENERATIONRESPONSE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='success', full_name='chromite.api.GenerationResponse.success', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='local_path', full_name='chromite.api.GenerationResponse.local_path', index=1,
+      name='local_path', full_name='chromite.api.GenerationResponse.local_path', index=0,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='remote_uri', full_name='chromite.api.GenerationResponse.remote_uri', index=2,
+      name='remote_uri', full_name='chromite.api.GenerationResponse.remote_uri', index=1,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='failure_reason', full_name='chromite.api.GenerationResponse.failure_reason', index=3,
+      name='failure_reason', full_name='chromite.api.GenerationResponse.failure_reason', index=2,
       number=4, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -434,7 +427,7 @@ _GENERATIONRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=1101,
-  serialized_end=1311,
+  serialized_end=1309,
 )
 
 _BUILD.fields_by_name['build_target'].message_type = chromiumos_dot_common__pb2._BUILDTARGET
@@ -534,8 +527,8 @@ _PAYLOADSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=b'\302\355\032\013\n\007payload\020\001',
   create_key=_descriptor._internal_create_key,
-  serialized_start=1313,
-  serialized_end=1432,
+  serialized_start=1311,
+  serialized_end=1430,
   methods=[
   _descriptor.MethodDescriptor(
     name='GeneratePayload',
