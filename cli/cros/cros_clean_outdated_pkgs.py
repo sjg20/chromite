@@ -370,23 +370,22 @@ class CleanOutdatedCommand(command.CliCommand):
             logging.notice("No packages to purge")
             return
 
-        emerge_unmerge_cmd = [
-            portage_util._GetSysrootTool("emerge", board=board)
+        unmerge_cmd = [
+            cros_build_lib.GetSysrootToolPath(
+                build_target_lib.get_default_sysroot_path(board), "qmerge"
+            ),
+            "--unmerge",
+            "--quiet",
         ]
 
-        emerge_unmerge_cmd += ["--jobs", str(os.cpu_count()), "--rage-clean"]
+        if not self.options.ask:
+            unmerge_cmd += ["--yes"]
 
-        if not pkgs:
-            logging.notice("No packages to purge")
-            return
-
-        if self.options.ask:
-            emerge_unmerge_cmd += ["--ask"]
-
-        emerge_unmerge_cmd += pkgs
+        pkgs = [f"={pkg}" for pkg in pkgs]
+        unmerge_cmd += pkgs
 
         try:
-            cros_build_lib.sudo_run(emerge_unmerge_cmd)
+            cros_build_lib.sudo_run(unmerge_cmd)
         except cros_build_lib.RunCommandError as e:
             cros_build_lib.Die(e)
 
