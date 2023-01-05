@@ -349,19 +349,6 @@ class BuildLinter:
                     )
                     diagnostics.update(new_diagnostics)
 
-        # FIXME(b:229769929): We temporarily support tidy lints in the proper
-        # artifacts directory as well as in /tmp until we are done migrating
-        # everything out of /tmp. Once we finish we can delete the block below:
-        try:
-            for filename in os.listdir(BuildLinter.TIDY_BASE_DIR):
-                if filename.endswith(".json"):
-                    new_diagnostics = self._fetch_tidy_lints_from_json(
-                        BuildLinter.TIDY_BASE_DIR / filename
-                    )
-                    diagnostics.update(new_diagnostics)
-        except (FileNotFoundError, IsADirectoryError):
-            pass
-
         return diagnostics
 
     def _fetch_tidy_lints_from_json(
