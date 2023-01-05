@@ -19,10 +19,10 @@ from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.lib.parser import pms_dependency
 from chromite.scripts import cros_setup_toolchains
+from chromite.utils import pms
 
 
 IGNORED_REPOSITORIES = frozenset(["crossdev"])
-
 
 # TODO: better detect all packages that are part of "system profile" or are
 # otherwise crucial, and must never be removed, like bash, portage or awk.
@@ -368,9 +368,60 @@ class CleanOutdatedCommand(command.CliCommand):
         except cros_build_lib.RunCommandError as e:
             cros_build_lib.Die(e)
 
+    def ensure_pkg_min_version(
+        self,
+        portage_db: portage_util.PortageDB,
+        pkg_cp: str,
+        min_version: str,
+    ):
+        """Upgrade |pkg_cp| to |min_version|; exit the program if failed."""
+
+        def pkg_is_at_min_version():
+            for pkg in portage_db.InstalledPackages():
+                if pkg.package_info.cp == pkg_cp:
+                    if pms.version_ge(pkg.package_info.version, min_version):
+                        return True
+            return False
+
+        if pkg_is_at_min_version():
+            return
+
+        upgrade_pkg_cmd = [
+            "emerge",
+            "--update",
+            "--quiet",
+            f">={pkg_cp}-{min_version}",
+        ]
+        try:
+            cros_build_lib.sudo_run(upgrade_pkg_cmd)
+        except cros_build_lib.RunCommandError:
+            cros_build_lib.Die(
+                "Failed to upgrade %s to version >= %s. Try `repo sync`.",
+                pkg_cp,
+                min_version,
+            )
+
+        if pkg_is_at_min_version():
+            return
+
+        cros_build_lib.Die(
+            "Failed to upgrade %s to version >= %s. Try `repo sync`.",
+            pkg_cp,
+            min_version,
+        )
+
     def Run(self):
         """Perform the command."""
         commandline.RunInsideChroot(self)
+
+        # Require qmerge from app-portage/portage-utils version >= 0.94.4.
+        self.ensure_pkg_min_version(
+            portage_util.PortageDB(
+                build_target_lib.get_default_sysroot_path(None)
+            ),
+            "app-portage/portage-utils",
+            "0.94.4",
+        )
 
         if self.options.host:
             root_path = build_target_lib.get_default_sysroot_path(None)
