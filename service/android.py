@@ -46,6 +46,8 @@ ANDROID_PACKAGE_TO_BUILD_TARGETS = {
     },
     ANDROID_RVC_PACKAGE: {
         "APPS_TARGET": "apps",
+        "ARM64_TARGET": "cheets_arm64-user",
+        "X86_64_TARGET": "cheets_x86_64-user",
         "ARM64_USERDEBUG_TARGET": "cheets_arm64-userdebug",
         "X86_64_USERDEBUG_TARGET": "cheets_x86_64-userdebug",
     },
@@ -100,6 +102,12 @@ ARTIFACTS_TO_COPY = {
         # org.chromium.cts.helpers.apk contains helpers needed for CTS.  It is
         # installed on the board, but not into the VM.
         "apps": "org.chromium.arc.cachebuilder.jar",
+        "cheets_arm64-user": (
+            r"(\.zip|/XkbToKcmConverter" r"|/org.chromium.arc.cts.helpers.apk)$"
+        ),
+        "cheets_x86_64-user": (
+            r"(\.zip|/XkbToKcmConverter" r"|/org.chromium.arc.cts.helpers.apk)$"
+        ),
         "cheets_arm64-userdebug": (
             r"(\.zip|/XkbToKcmConverter" r"|/org.chromium.arc.cts.helpers.apk)$"
         ),
