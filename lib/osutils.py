@@ -1347,6 +1347,10 @@ def UmountDir(path, lazy=True, sudo=True, cleanup=True):
     else:
         runcmd = cros_build_lib.run
 
+    # Canonicalize the path first, because `umount` will soon no longer resolve
+    # symlinks. See b/226186168.
+    path = Path(path).resolve()
+
     cmd = ["umount", "-d", path]
     if lazy:
         cmd += ["-l"]
