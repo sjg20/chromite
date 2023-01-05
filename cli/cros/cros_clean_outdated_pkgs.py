@@ -333,17 +333,36 @@ class CleanOutdatedCommand(command.CliCommand):
 
         return conflicted_pkgs
 
-    def purge_packages(self, board: Optional[str], pkgs: Set[str]):
+    def filter_packages_to_purge(
+        self, board: Optional[str], pkgs: Set[str]
+    ) -> Set[str]:
         if not board:
             # Only filter system packages for SDK.
+            pkgs_before = len(pkgs)
             for ignored_pkg in SYSTEM_PACKAGES:
                 pkgs = [pkg for pkg in pkgs if ignored_pkg not in pkg]
+            pkgs_after = len(pkgs)
+            if pkgs_before > pkgs_after:
+                logging.notice(
+                    "%s outdated system-critical packages were not deleted",
+                    pkgs_before - pkgs_after,
+                )
 
         if not self.options.chrome_packages:
             # Filter out Chrome packages, if asked, for both SDK and DUT.
+            pkgs_before = len(pkgs)
             for chrome_pkg in CHROME_PACKAGES:
                 pkgs = [pkg for pkg in pkgs if chrome_pkg not in pkg]
 
+            pkgs_after = len(pkgs)
+            if pkgs_before > pkgs_after:
+                logging.notice(
+                    "%s outdated Chrome packages were not deleted",
+                    pkgs_before - pkgs_after,
+                )
+        return pkgs
+
+    def purge_packages(self, board: Optional[str], pkgs: Set[str]):
         if not pkgs:
             logging.notice("No packages to purge")
             return
@@ -430,15 +449,17 @@ class CleanOutdatedCommand(command.CliCommand):
             outdated_pkgs = self.find_outdated_packages(
                 None, db.InstalledPackages()
             )
-            if not outdated_pkgs:
-                logging.notice("No packages to purge")
-            else:
+            outdated_pkgs = self.filter_packages_to_purge(None, outdated_pkgs)
+            if outdated_pkgs:
                 self.purge_packages(board=None, pkgs=outdated_pkgs)
 
             if outdated_pkgs or self.options.force_slot_fix:
                 logging.notice("Looking for unsatisfiable packages.")
                 slot_conflict_pkgs = self.find_slot_conflicted_packages(
                     root_path, None, db.InstalledPackages()
+                )
+                slot_conflict_pkgs = self.filter_packages_to_purge(
+                    None, slot_conflict_pkgs
                 )
                 if slot_conflict_pkgs:
                     logging.notice(
@@ -456,9 +477,10 @@ class CleanOutdatedCommand(command.CliCommand):
             outdated_pkgs = self.find_outdated_packages(
                 self.options.board, db.InstalledPackages()
             )
-            if not outdated_pkgs:
-                logging.notice("No packages to purge")
-            else:
+            outdated_pkgs = self.filter_packages_to_purge(
+                self.options.board, outdated_pkgs
+            )
+            if outdated_pkgs:
                 self.purge_packages(
                     board=self.options.board, pkgs=outdated_pkgs
                 )
@@ -467,6 +489,9 @@ class CleanOutdatedCommand(command.CliCommand):
                 logging.notice("Looking for unsatisfiable packages.")
                 slot_conflict_pkgs = self.find_slot_conflicted_packages(
                     root_path, self.options.board, db.InstalledPackages()
+                )
+                slot_conflict_pkgs = self.filter_packages_to_purge(
+                    self.options.board, slot_conflict_pkgs
                 )
                 if slot_conflict_pkgs:
                     logging.notice(
