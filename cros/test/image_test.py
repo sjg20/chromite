@@ -31,6 +31,7 @@ import magic  # pylint: disable=import-error
 
 # pylint: disable=ungrouped-imports
 from chromite.cros.test import usergroup_baseline
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_test_lib
 from chromite.lib import osutils
@@ -1228,3 +1229,51 @@ class TmpfilesdTest(image_test_lib.ImageTestCase):
                 success = False
 
         self.assertTrue(success)
+
+
+class FactoryScriptTest(image_test_lib.ImageTestCase):
+    """Verifies the image can be loaded by the factory scripts.
+
+    Some factory scripts parse files in the image. This test aims to detect if
+    there's any format change in the image that breaks the factory scripts.
+
+    Please contact
+    https://chromium.googlesource.com/chromiumos/platform/factory/+/main/DIR_METADATA
+    or
+    chromeos-factoy-eng@google.com
+    if this test fails in CQ.
+    """
+
+    FINALIZE_BUNDLE = os.path.join(
+        constants.SOURCE_ROOT, "src/platform/factory/bin/finalize_bundle"
+    )
+
+    def TestFinalizeBundle_ExtractFirmwareInfo(self):
+        root = Path(image_test_lib.ROOT_A)
+
+        # Skip the test for:
+        # 1. The project is too old that doesn't have cros-config
+        # 2. The project is too new that its firmware is not ready yet
+        if self._board and not portage_util.PortageqHasVersion(
+            "chromeos-base/chromeos-config", self._board
+        ):
+            logging.info(
+                "Board %s doesn't have chromeos-config. Skip the test.",
+                self._board,
+            )
+            return
+
+        fw_update = root / "usr/sbin/chromeos-firmwareupdate"
+        if not fw_update.exists():
+            logging.info(
+                "The image doesn't have firmware updater. Skip the test."
+            )
+            return
+
+        cmd = [
+            self.FINALIZE_BUNDLE,
+            "fake_manifest.yaml",
+            "--extract-firmware-info",
+            root,
+        ]
+        cros_build_lib.run(cmd)
