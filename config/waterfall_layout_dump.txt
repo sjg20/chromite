@@ -138,6 +138,7 @@
     brya-hibernate-release
     brya-kernelnext-release
     brya-lvm-stateful-release
+    brya-manatee-kernelnext-release
     brya-manatee-release
     brya-nopkvm-release
     brya-pkvm-release
@@ -422,6 +423,11 @@
   brya-lvm-stateful-payloads-tryjob
   brya-lvm-stateful-release-tryjob
   brya-manatee-full-tryjob
+  brya-manatee-kernelnext-full-tryjob
+  brya-manatee-kernelnext-llvm-next-toolchain-tryjob
+  brya-manatee-kernelnext-llvm-toolchain-tryjob
+  brya-manatee-kernelnext-payloads-tryjob
+  brya-manatee-kernelnext-release-tryjob
   brya-manatee-llvm-next-toolchain-tryjob
   brya-manatee-llvm-toolchain-tryjob
   brya-manatee-payloads-tryjob
@@ -977,6 +983,7 @@
     brya-hibernate-release-tryjob
     brya-kernelnext-release-tryjob
     brya-lvm-stateful-release-tryjob
+    brya-manatee-kernelnext-release-tryjob
     brya-manatee-release-tryjob
     brya-nopkvm-release-tryjob
     brya-pkvm-release-tryjob
