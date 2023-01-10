@@ -14,6 +14,7 @@ import re
 import stat
 from typing import Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
+from chromite.lib import cgpt
 from chromite.lib import chromeos_version
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -874,45 +875,6 @@ def _ParseParted(lines):
     return ret
 
 
-def _ParseCgpt(lines):
-    """Returns partition information from `cgpt show` output."""
-    #   start        size    part  contents
-    # 1921024     2097152       1  Label: "STATE"
-    #                              Type: Linux data
-    #                              UUID: EEBD83BE-397E-BD44-878B-0DDDD5A5C510
-    #   20480       32768       2  Label: "KERN-A"
-    #                              Type: ChromeOS kernel
-    #                              UUID: 7007C2F3-08E5-AB40-A4BC-FF5B01F5460D
-    #                              Attr: priority=15 tries=15 successful=1
-    start_pattern = re.compile(r'''\s+(\d+)\s+(\d+)\s+(\d+)\s+Label: "(.+)"''')
-    ret = []
-    line_no = 0
-    while line_no < len(lines):
-        line = lines[line_no]
-        line_no += 1
-        m = start_pattern.match(line)
-        if not m:
-            continue
-
-        start, size, number, label = m.groups()
-        number = int(number)
-        start = int(start) * 512
-        size = int(size) * 512
-
-        ret.append(
-            PartitionInfo(
-                number=number,
-                start=start,
-                size=size,
-                name=label,
-                file_system="",
-                flags="",
-            )
-        )
-
-    return ret
-
-
 def GetImageDiskPartitionInfo(image_path):
     """Returns the disk partition table of an image.
 
@@ -923,9 +885,17 @@ def GetImageDiskPartitionInfo(image_path):
       A list of ParitionInfo items.
     """
     if cros_build_lib.IsInsideChroot():
-        # Inside chroot, use `cgpt`.
-        cmd = ["cgpt", "show", image_path]
-        func = _ParseCgpt
+        disk = cgpt.Disk.FromImage(image_path)
+        return [
+            PartitionInfo(
+                number=p.part_num,
+                start=p.start * 512,
+                size=p.size * 512,
+                name=p.label,
+                flags=p.attr,
+            )
+            for p in disk.partitions.values()
+        ]
     else:
         # Outside chroot, use `parted`. Parted 3.2 and earlier has a bug where it
         # will complain that partitions are overlapping even when they are not. It
@@ -948,18 +918,17 @@ def GetImageDiskPartitionInfo(image_path):
             "B",
             "print",
         ]
-        func = _ParseParted
 
-    # The 'I' input tells parted to ignore its supposed concern about overlapping
-    # partitions. Cgpt simply ignores the input.
-    lines = cros_build_lib.dbg_run(
-        cmd,
-        extra_env={"PATH": "/sbin:%s" % os.environ["PATH"], "LC_ALL": "C"},
-        capture_output=True,
-        encoding="utf-8",
-        input=b"I",
-    ).stdout.splitlines()
-    return func(lines)
+        # The 'I' input tells parted to ignore its supposed concern about
+        # overlapping partitions. Cgpt simply ignores the input.
+        lines = cros_build_lib.dbg_run(
+            cmd,
+            extra_env={"PATH": "/sbin:%s" % os.environ["PATH"], "LC_ALL": "C"},
+            capture_output=True,
+            encoding="utf-8",
+            input=b"I",
+        ).stdout.splitlines()
+        return _ParseParted(lines)
 
 
 def GetImagesToBuild(image_types: List[str]) -> Set[str]:

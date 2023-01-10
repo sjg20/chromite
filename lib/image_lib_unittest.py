@@ -576,51 +576,60 @@ class GetImageDiskPartitionInfoTests(cros_test_lib.RunCommandTestCase):
 1:2260729856B:2271215615B:10485760B:ext2:STATE:msftdata;
 """
 
-    SAMPLE_CGPT = """
+    SAMPLE_CGPT = """\
        start        size    part  contents
            0           1          PMBR (Boot GUID: 88FB7EB8-2B3F-B943-B933-\
 EEC571FFB6E1)
            1           1          Pri GPT header
            2          32          Pri GPT table
      1921024     2097152       1  Label: "STATE"
-                                  Type: Linux data
+                                  Type: 0FC63DAF-8483-4772-8E79-3D69D8477DE4
                                   UUID: EEBD83BE-397E-BD44-878B-0DDDD5A5C510
+                                  Attr: [0]
        20480       32768       2  Label: "KERN-A"
-                                  Type: ChromeOS kernel
+                                  Type: FE3A2A5D-4F32-41A7-B725-ACCC3285A309
                                   UUID: 7007C2F3-08E5-AB40-A4BC-FF5B01F5460D
-                                  Attr: priority=15 tries=15 successful=1
+                                  Attr: [101]
      1101824      819200       3  Label: "ROOT-A"
-                                  Type: ChromeOS rootfs
+                                  Type: 3CB8E202-3B7E-47DD-8A3C-7FF2A13CFCEC
                                   UUID: F4C5C3AD-027F-894B-80CD-3DEC57932948
+                                  Attr: [0]
        53248       32768       4  Label: "KERN-B"
-                                  Type: ChromeOS kernel
+                                  Type: FE3A2A5D-4F32-41A7-B725-ACCC3285A309
                                   UUID: C85FB478-404C-8741-ADB8-11312A35880D
-                                  Attr: priority=0 tries=0 successful=0
+                                  Attr: [0]
       282624      819200       5  Label: "ROOT-B"
-                                  Type: ChromeOS rootfs
+                                  Type: 3CB8E202-3B7E-47DD-8A3C-7FF2A13CFCEC
                                   UUID: A99F4231-1EC3-C542-AC0C-DF3729F5DB07
+                                  Attr: [0]
        16448           1       6  Label: "KERN-C"
-                                  Type: ChromeOS kernel
+                                  Type: FE3A2A5D-4F32-41A7-B725-ACCC3285A309
                                   UUID: 81F0E336-FAC9-174D-A08C-864FE627B637
-                                  Attr: priority=0 tries=0 successful=0
+                                  Attr: [0]
        16449           1       7  Label: "ROOT-C"
-                                  Type: ChromeOS rootfs
+                                  Type: 3CB8E202-3B7E-47DD-8A3C-7FF2A13CFCEC
                                   UUID: 9E127FCA-30C1-044E-A5F2-DF74E6932692
+                                  Attr: [0]
        86016       32768       8  Label: "OEM"
-                                  Type: Linux data
+                                  Type: 0FC63DAF-8483-4772-8E79-3D69D8477DE4
                                   UUID: 72986347-A37C-684F-9A19-4DBAF41C55A9
+                                  Attr: [0]
        16450           1       9  Label: "reserved"
-                                  Type: ChromeOS reserved
+                                  Type: 2E0A753D-9E48-43B0-8337-B15192CB1B5E
                                   UUID: BA85A0A7-1850-964D-8EF8-6707AC106C3A
+                                  Attr: [0]
        16451           1      10  Label: "reserved"
-                                  Type: ChromeOS reserved
+                                  Type: 2E0A753D-9E48-43B0-8337-B15192CB1B5E
                                   UUID: 16C9EC9B-50FA-DD46-98DC-F781360817B4
+                                  Attr: [0]
           64       16384      11  Label: "RWFW"
-                                  Type: ChromeOS firmware
+                                  Type: CAB6E88E-ABF3-4102-A07A-D4BB9BE3C1D3
                                   UUID: BE8AECB9-4F78-7C44-8F23-5A9273B7EC8F
+                                  Attr: [0]
       249856       32768      12  Label: "EFI-SYSTEM"
-                                  Type: EFI System Partition
+                                  Type: C12A7328-F81F-11D2-BA4B-00A0C93EC93B
                                   UUID: 88FB7EB8-2B3F-B943-B933-EEC571FFB6E1
+                                  Attr: [0]
      4050847          32          Sec GPT table
      4050879           1          Sec GPT header
 """
