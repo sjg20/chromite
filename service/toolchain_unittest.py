@@ -253,6 +253,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                 ),
                 linter="clang_tidy",
                 suggested_fixes=tuple(),
+                package=package_info.parse("cat/pkg"),
             ),
             toolchain.LinterFinding(
                 name="lint2",
@@ -262,6 +263,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                 ),
                 linter="clang_tidy",
                 suggested_fixes=tuple(),
+                package=package_info.parse("cat/pkg"),
             ),
             toolchain.LinterFinding(
                 name="lint3",
@@ -271,6 +273,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                 ),
                 linter="clang_tidy",
                 suggested_fixes=tuple(),
+                package=package_info.parse("cat/pkg"),
             ),
             toolchain.LinterFinding(
                 name="lint4",
@@ -280,6 +283,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                 ),
                 linter="clang_tidy",
                 suggested_fixes=tuple(),
+                package=package_info.parse("cat/pkg"),
             ),
         ]
 
@@ -315,11 +319,11 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
         mbl = MockBuildLinter(self.tempdir)
 
         artifacts = [
-            MockArtifact("clang-tidy", "pkg", "a.json", "content"),
-            MockArtifact("clang-tidy", "pkg", "b.json", "content"),
-            MockArtifact("clang-tidy", "pkg", "c.json", "content"),
-            MockArtifact("clang-tidy", "pkg", "d.json", "content"),
-            MockArtifact("clang-tidy", "pkg", "e.out", "content"),
+            MockArtifact("clang-tidy", "cat/pkg", "a.json", "content"),
+            MockArtifact("clang-tidy", "cat/pkg", "b.json", "content"),
+            MockArtifact("clang-tidy", "cat/pkg", "c.json", "content"),
+            MockArtifact("clang-tidy", "cat/pkg", "d.json", "content"),
+            MockArtifact("clang-tidy", "cat/pkg", "e.out", "content"),
         ]
 
         for artifact in artifacts:
@@ -344,7 +348,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
         artifacts = [
             MockArtifact(
                 "iwyu",
-                "pkg",
+                "cat/pkg",
                 "iwyu.out",
                 (
                     "\n".join(
@@ -371,7 +375,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
             ),
             MockArtifact(
                 "iwyu",
-                "pkg",
+                "cat/pkg",
                 "duplicate.out",
                 (
                     "\n".join(
@@ -394,7 +398,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                     )
                 ),
             ),
-            MockArtifact("IWYU", "pkg", "empty.out", ""),
+            MockArtifact("IWYU", "cat/pkg", "empty.out", ""),
         ]
 
         expected_findings = [
@@ -429,6 +433,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                 ),
                 linter="iwyu",
                 suggested_fixes=tuple(),
+                package=package_info.parse("cat/pkg"),
             ),
             toolchain.LinterFinding(
                 name="add",
@@ -461,6 +466,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                 ),
                 linter="iwyu",
                 suggested_fixes=tuple(),
+                package=package_info.parse("cat/pkg"),
             ),
             toolchain.LinterFinding(
                 name="remove",
@@ -492,6 +498,7 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                 ),
                 linter="iwyu",
                 suggested_fixes=tuple(),
+                package=package_info.parse("cat/pkg"),
             ),
         ]
 

@@ -460,6 +460,7 @@ def EmergeWithLinting(
                 message=finding.message,
                 locations=locations,
                 linter=LINTER_CODES[finding.linter],
+                package=finding.package,
             )
         )
 

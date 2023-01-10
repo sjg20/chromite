@@ -66,6 +66,7 @@ class LinterFinding(NamedTuple):
     locations: Tuple[CodeLocation]
     linter: str
     suggested_fixes: Tuple[SuggestedFix]
+    package: package_info.PackageInfo
 
 
 def emerge_and_upload_lints(board: str, start_time: int) -> str:
@@ -363,6 +364,7 @@ class BuildLinter:
                     suggested_fixes=(),
                     # FIXME(b/244362509): Extend more details support to Rust
                     name="",
+                    package=None,
                 )
             )
         return findings_tuples
@@ -372,18 +374,20 @@ class BuildLinter:
         cros_build_lib.AssertInsideChroot()
 
         diagnostics = set()
-        for files in self._fetch_from_linting_artifacts("clang-tidy").values():
+        for package_atom, files in self._fetch_from_linting_artifacts(
+            "clang-tidy"
+        ).items():
             for filepath in files:
                 if filepath.endswith(".json"):
                     new_diagnostics = self._fetch_tidy_lints_from_json(
-                        Path(filepath)
+                        Path(filepath), package_atom
                     )
                     diagnostics.update(new_diagnostics)
 
         return diagnostics
 
     def _fetch_tidy_lints_from_json(
-        self, json_path: Path
+        self, json_path: Path, package_atom: Text
     ) -> Set[LinterFinding]:
         """Fetches Tidy findings for the invocation described by the json."""
         invocation_result = tricium_clang_tidy.parse_tidy_invocation(json_path)
@@ -401,12 +405,16 @@ class BuildLinter:
                 meta.stdstreams,
             )
         findings = tricium_clang_tidy.filter_tidy_lints(None, None, findings)
-        return self._parse_tidy_diagnostics(findings)
+        return self._parse_tidy_diagnostics(findings, package_atom)
 
     def _parse_tidy_diagnostics(
-        self, diagnostics: List["tricium_clang_tidy.TidyDiagnostic"]
+        self,
+        diagnostics: List["tricium_clang_tidy.TidyDiagnostic"],
+        package_atom: Text,
     ) -> Set[LinterFinding]:
         """Parse diagnostics created by Clang Tidy into LinterFindings objects."""
+
+        package = package_info.parse(package_atom)
         findings = set()
         for diag in diagnostics:
             filepath = self._clean_file_path(diag.file_path)
@@ -454,6 +462,7 @@ class BuildLinter:
                 locations=tuple(locations),
                 suggested_fixes=tuple(suggested_fixes),
                 linter="clang_tidy",
+                package=package,
             )
             findings.add(finding)
         return findings
@@ -463,13 +472,18 @@ class BuildLinter:
         cros_build_lib.AssertInsideChroot()
 
         findings = []
-        for files in self._fetch_from_linting_artifacts("go_lint").values():
-            findings.extend(list(self._parse_golint_files(files)))
+        for package_atom, files in self._fetch_from_linting_artifacts(
+            "go_lint"
+        ).items():
+            findings.extend(list(self._parse_golint_files(files, package_atom)))
 
         return findings
 
-    def _parse_golint_files(self, files: List[Text]) -> Iterable[LinterFinding]:
+    def _parse_golint_files(
+        self, files: List[Text], package_atom: Text
+    ) -> Iterable[LinterFinding]:
         """Parse files in the given directory for Golint lints."""
+        package = package_info.parse(package_atom)
         packages_seen = set()
 
         # Sort files based on the timestamp appended to the file name
@@ -519,6 +533,7 @@ class BuildLinter:
                     # FIXME(b/244362509): Extend more details support to Golang
                     name="",
                     suggested_fixes=(),
+                    package=package,
                 )
 
             packages_seen.add(package_name)
@@ -528,13 +543,19 @@ class BuildLinter:
         cros_build_lib.AssertInsideChroot()
 
         findings = []
-        for files in self._fetch_from_linting_artifacts("iwyu").values():
-            findings.extend(list(self._parse_iwyu_files(files)))
+        for package_atom, files in self._fetch_from_linting_artifacts(
+            "iwyu"
+        ).items():
+            findings.extend(list(self._parse_iwyu_files(files, package_atom)))
 
         return findings
 
-    def _parse_iwyu_files(self, files: List[Text]) -> Iterable[LinterFinding]:
+    def _parse_iwyu_files(
+        self, files: List[Text], package_atom: Text
+    ) -> Iterable[LinterFinding]:
         """Parse files in the given directory for Golint lints."""
+        package = package_info.parse(package_atom)
+
         add_mode_pattern = re.compile(
             # "/mnt/host/source/src/path/to/file.c should add these lines:"
             r"(?P<file_path>.+) should add these lines:$"
@@ -632,6 +653,7 @@ class BuildLinter:
                             linter="iwyu",
                             name=mode,
                             suggested_fixes=(),
+                            package=package,
                         )
                     )
 
