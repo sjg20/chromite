@@ -36,9 +36,9 @@ class TestImageTest(cros_test_lib.MockTempDirTestCase):
             input="label: dos",
         )
         fake_partitions = (
-            image_lib.PartitionInfo(1, 0, 0, 0, "fs", "STATE", "flag"),
-            image_lib.PartitionInfo(2, 0, 0, 0, "fs", "KERN-A", "flag"),
-            image_lib.PartitionInfo(3, 0, 0, 0, "fs", "ROOT-A", "flag"),
+            image_lib.PartitionInfo(1, 0, 0, "fs", "STATE", "flag"),
+            image_lib.PartitionInfo(2, 0, 0, "fs", "KERN-A", "flag"),
+            image_lib.PartitionInfo(3, 0, 0, "fs", "ROOT-A", "flag"),
         )
         self.PatchObject(
             image_lib,

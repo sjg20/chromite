@@ -30,9 +30,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
         self.PatchObject(
             osutils.TempDir, "__enter__", return_value=self.tempdir
         )
-        fake_partitions = (
-            image_lib.PartitionInfo(3, 0, 4, 4, "fs", "STATE", ""),
-        )
+        fake_partitions = (image_lib.PartitionInfo(3, 0, 4, "fs", "STATE", ""),)
         self.PatchObject(
             image_lib, "GetImageDiskPartitionInfo", return_value=fake_partitions
         )
@@ -63,9 +61,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
         self.PatchObject(
             osutils.TempDir, "__enter__", return_value=self.tempdir
         )
-        fake_partitions = (
-            image_lib.PartitionInfo(3, 0, 4, 4, "fs", "STATE", ""),
-        )
+        fake_partitions = (image_lib.PartitionInfo(3, 0, 4, "fs", "STATE", ""),)
         self.PatchObject(
             image_lib, "GetImageDiskPartitionInfo", return_value=fake_partitions
         )
@@ -96,9 +92,7 @@ class GenerateStatefulPayloadTest(cros_test_lib.RunCommandTempDirTestCase):
         self.PatchObject(
             osutils.TempDir, "__enter__", return_value=self.tempdir
         )
-        fake_partitions = (
-            image_lib.PartitionInfo(3, 0, 4, 4, "fs", "STATE", ""),
-        )
+        fake_partitions = (image_lib.PartitionInfo(3, 0, 4, "fs", "STATE", ""),)
         self.PatchObject(
             image_lib, "GetImageDiskPartitionInfo", return_value=fake_partitions
         )

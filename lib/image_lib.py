@@ -811,7 +811,7 @@ class SecurityTestConfig(object):
 
 PartitionInfo = collections.namedtuple(
     "PartitionInfo",
-    ["number", "start", "end", "size", "file_system", "name", "flags"],
+    ["number", "start", "size", "file_system", "name", "flags"],
 )
 
 
@@ -836,11 +836,14 @@ def _ParseParted(lines):
     for line in lines:
         match = pattern.match(line)
         if match:
-            d = dict(zip(PartitionInfo._fields, match.group(1).split(":")))
+            values = match.group(1).split(":")
+            # Kick out the end field.
+            values.pop(2)
+            d = dict(zip(PartitionInfo._fields, values))
             # Disregard any non-numeric partition number (e.g. the file path).
             if d["number"].isdigit():
                 d["number"] = int(d["number"])
-                for key in ["start", "end", "size"]:
+                for key in ["start", "size"]:
                     d[key] = int(d[key][:-1])
                 ret.append(PartitionInfo(**d))
     return ret
@@ -870,13 +873,11 @@ def _ParseCgpt(lines):
         number = int(number)
         start = int(start) * 512
         size = int(size) * 512
-        end = start + size
 
         ret.append(
             PartitionInfo(
                 number=number,
                 start=start,
-                end=end,
                 size=size,
                 name=label,
                 file_system="",

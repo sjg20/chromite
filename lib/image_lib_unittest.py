@@ -36,18 +36,18 @@ FAKE_PATH = "/imaginary/file"
 LOOP_DEV = "/dev/loop9999"
 LOOP_PART_COUNT = 12
 LOOP_PARTITION_INFO = [
-    image_lib.PartitionInfo(1, 2928640, 2957311, 28672, "", "STATE", ""),
-    image_lib.PartitionInfo(2, 20480, 53247, 32768, "", "KERN-A", ""),
-    image_lib.PartitionInfo(3, 286720, 2928639, 2641920, "", "ROOT-A", ""),
-    image_lib.PartitionInfo(4, 53248, 86015, 32768, "", "KERN-B", ""),
-    image_lib.PartitionInfo(5, 282624, 286719, 4096, "", "ROOT-B", ""),
-    image_lib.PartitionInfo(6, 16448, 16448, 1, "", "KERN-C", ""),
-    image_lib.PartitionInfo(7, 16449, 16449, 1, "", "ROOT-C", ""),
-    image_lib.PartitionInfo(8, 86016, 118783, 32768, "", "OEM", ""),
-    image_lib.PartitionInfo(9, 16450, 16450, 1, "", "reserved", ""),
-    image_lib.PartitionInfo(10, 16451, 16451, 1, "", "reserved", ""),
-    image_lib.PartitionInfo(11, 64, 16447, 16384, "", "RWFW", ""),
-    image_lib.PartitionInfo(12, 249856, 282623, 32768, "", "EFI-SYSTEM", ""),
+    image_lib.PartitionInfo(1, 2928640, 28672, "", "STATE", ""),
+    image_lib.PartitionInfo(2, 20480, 32768, "", "KERN-A", ""),
+    image_lib.PartitionInfo(3, 286720, 2641920, "", "ROOT-A", ""),
+    image_lib.PartitionInfo(4, 53248, 32768, "", "KERN-B", ""),
+    image_lib.PartitionInfo(5, 282624, 4096, "", "ROOT-B", ""),
+    image_lib.PartitionInfo(6, 16448, 1, "", "KERN-C", ""),
+    image_lib.PartitionInfo(7, 16449, 1, "", "ROOT-C", ""),
+    image_lib.PartitionInfo(8, 86016, 32768, "", "OEM", ""),
+    image_lib.PartitionInfo(9, 16450, 1, "", "reserved", ""),
+    image_lib.PartitionInfo(10, 16451, 1, "", "reserved", ""),
+    image_lib.PartitionInfo(11, 64, 16384, "", "RWFW", ""),
+    image_lib.PartitionInfo(12, 249856, 32768, "", "EFI-SYSTEM", ""),
 ]
 LOOP_PARTS_DICT = {
     p.number: "%sp%d" % (LOOP_DEV, p.number) for p in LOOP_PARTITION_INFO
