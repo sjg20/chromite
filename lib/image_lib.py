@@ -4,7 +4,6 @@
 
 """Utilities for manipulating ChromeOS images."""
 
-import collections
 import errno
 import glob
 import json
@@ -13,7 +12,7 @@ import os
 from pathlib import Path
 import re
 import stat
-from typing import Dict, List, Optional, Set, Tuple, Union
+from typing import Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
 from chromite.lib import chromeos_version
 from chromite.lib import constants
@@ -809,10 +808,25 @@ class SecurityTestConfig(object):
         return cros_build_lib.run(cmd, *args, **kwargs)
 
 
-PartitionInfo = collections.namedtuple(
-    "PartitionInfo",
-    ["number", "start", "size", "file_system", "name", "flags"],
-)
+class PartitionInfo(NamedTuple):
+    """A single GPT partition entry."""
+
+    # The partition number.  Must be within the range [1,256] (Linux limit).
+    # NB: The number has no relationship to the order on disk.  The first
+    # partition on the disk (i.e. the one with the smallest start) can have
+    # any partition number.
+    number: int
+    # The offset of the start of the partition, in bytes.
+    start: int
+    # The size of the partition, in bytes.
+    size: int
+    # Filesystem type, if known.  e.g. ext2 ext4 fat16
+    file_system: str = ""
+    # Partition label/name.  May not exceed 36 Unicode characters.
+    name: str = ""
+    # Human readable set of attribute flags.  The format is not stable, so
+    # it should not be relied upon for parsing, only for showing to users.
+    flags: str = ""
 
 
 def _ParseParted(lines):
