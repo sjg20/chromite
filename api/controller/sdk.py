@@ -21,11 +21,11 @@ def _ChrootVersionResponse(_input_proto, output_proto, _config):
     output_proto.version.version = 168
 
 
-def _CLUris(_input_proto, output_proto, _config):
-    """Add fake CL URIs to a successful response."""
+def _BinhostCLs(_input_proto, output_proto, _config):
+    """Add fake CL identifiers to a successful response."""
     output_proto.cls = [
-        "https://crrev.com/fakecl/1",
-        "https://crrev.com/fakecl/2",
+        "fakecl:1",
+        "fakecl:2",
     ]
 
 
@@ -198,7 +198,7 @@ def BuildPrebuilts(input_proto, _output_proto, _config):
     sdk.BuildPrebuilts(chroot, board=input_proto.build_target.name)
 
 
-@faux.success(_CLUris)
+@faux.success(_BinhostCLs)
 @faux.empty_error
 @validate.require(
     "prepend_version", "version", "upload_location", "sdk_tarball_template"
@@ -210,13 +210,14 @@ def CreateBinhostCLs(
     _config: "api_config.ApiConfig",
 ) -> None:
     """Create CLs to update the binhost to point at uploaded prebuilts."""
-    uris = sdk.CreateBinhostCLs(
-        input_proto.prepend_version,
-        input_proto.version,
-        input_proto.upload_location,
-        input_proto.sdk_tarball_template,
+    output_proto.cls.extend(
+        sdk.CreateBinhostCLs(
+            input_proto.prepend_version,
+            input_proto.version,
+            input_proto.upload_location,
+            input_proto.sdk_tarball_template,
+        )
     )
-    output_proto.cls.extend(uris)
 
 
 @faux.all_empty

@@ -505,7 +505,7 @@ def CreateBinhostCLs(
             like '2022/12/%(target)s-2022.12.11.185558.tar.xz'.
 
     Returns:
-        List of URIs of the created CLs.
+        List of created CLs (in str:num format).
     """
     with tempfile.NamedTemporaryFile() as report_file:
         cros_build_lib.run(
