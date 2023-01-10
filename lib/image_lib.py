@@ -723,7 +723,7 @@ def _ParseParted(lines):
             if d["number"].isdigit():
                 d["number"] = int(d["number"])
                 for key in ["start", "end", "size"]:
-                    d[key] = float(d[key][:-1])
+                    d[key] = int(d[key][:-1])
                 ret.append(PartitionInfo(**d))
     return ret
 
