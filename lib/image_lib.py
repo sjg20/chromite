@@ -792,6 +792,9 @@ def GetImageDiskPartitionInfo(image_path):
         # before it was removed.
         # Work around this by telling parted to ignore this "failure" interactively.
         # Yes, the three dashes are correct, and yes, it _is_ weird.
+        # TODO(build): Change -m to --json once Parted 3.5 (released Apr 2022)
+        # is available "everywhere".  That probably means once our baseline
+        # Ubuntu LTS supports it.
         cmd = [
             "parted",
             "---pretend-input-tty",
