@@ -120,11 +120,16 @@ class LoopbackPartitions(object):
         dev = ret.stdout.strip()
 
         # Delete existing partitions.
-        cls._DeletePartitions(dev)
+        try:
+            cls._DeletePartitions(dev)
 
-        # Add missing partitions.
-        gpt_table = GetImageDiskPartitionInfo(path)
-        cls._AddPartitions(dev, gpt_table)
+            # Add missing partitions.
+            gpt_table = GetImageDiskPartitionInfo(path)
+            cls._AddPartitions(dev, gpt_table)
+        except:
+            # If we crash, free the loopback device so we don't leak it.
+            c_loop.detach(dev)
+            raise
 
         return dev
 
