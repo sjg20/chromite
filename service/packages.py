@@ -1160,6 +1160,42 @@ def uprev_ti50_emulator(_build_targets, refs, _chroot):
     return result
 
 
+@uprevs_versioned_package("chromeos-base/ec-devutils")
+@uprevs_versioned_package("chromeos-base/ec-utils")
+@uprevs_versioned_package("chromeos-base/ec-utils-test")
+def uprev_ecutils(_build_targets, refs, _chroot):
+    """Updates ec-utils ebuilds to latest revision
+
+    ec-utils is not versioned. We are updating to the latest commit on the main
+    branch.
+
+    See: uprev_versioned_package.
+
+    Returns:
+        UprevVersionedPackageResult: The result of updating ec-utils ebuilds.
+    """
+    overlay = os.path.join(
+        constants.SOURCE_ROOT, constants.CHROMIUMOS_OVERLAY_DIR
+    )
+    repo_path = os.path.join(constants.SOURCE_ROOT, "src", "platform", "ec")
+    manifest = git.ManifestCheckout.Cached(repo_path)
+
+    uprev_manager = uprev_lib.UprevOverlayManager([overlay], manifest)
+    uprev_manager.uprev(
+        package_list=[
+            "chromeos-base/ec-devutils",
+            "chromeos-base/ec-utils",
+            "chromeos-base/ec-utils-test",
+        ],
+        force=True,
+    )
+
+    updated_files = uprev_manager.modified_ebuilds
+    result = uprev_lib.UprevVersionedPackageResult()
+    result.add_result(refs[0].revision, updated_files)
+    return result
+
+
 def get_best_visible(
     atom: str, build_target: Optional["build_target_lib.BuildTarget"] = None
 ) -> package_info.PackageInfo:
