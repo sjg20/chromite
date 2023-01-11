@@ -540,6 +540,11 @@ class TriciumClangTidyTests(cros_test_lib.MockTestCase):
 
         desired_env = dict(os.environ)
         desired_env["WITH_TIDY"] = "tricium"
+        # cros_build_lib.run adds LC_MESSAGES to the environment by default, so
+        # it is always in the actual env. It isn't guaranteed to be set in the
+        # ambient environment, so desired_env doesn't always have it, causing
+        # flakes. Explicitly set it to make sure it matches.
+        desired_env["LC_MESSAGES"] = "C"
         run_mock.assertCommandContains(
             ["ebuild-${board}", "/path/to/the.ebuild", "clean", "compile"],
             env=desired_env,
