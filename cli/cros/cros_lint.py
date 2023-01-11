@@ -464,6 +464,21 @@ _EXT_TOOL_MAP = {
         _NonExecLintFile,
     ),
     frozenset({".te"}): (_WhitespaceLintFile, _NonExecLintFile),
+    frozenset(
+        {
+            ".grd",
+            ".htm",
+            ".html",
+            ".ini",
+            ".jpeg",
+            ".jpg",
+            ".png",
+            ".svg",
+            ".txt",
+            ".xml",
+            ".xtb",
+        }
+    ): (_NonExecLintFile,),
 }
 
 # Map known filenames to a tool function.
