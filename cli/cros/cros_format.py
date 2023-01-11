@@ -44,7 +44,7 @@ _EXT_TOOL_MAP = {
     frozenset({".star"}): (formatters.star.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
-    frozenset({".xml"}): (formatters.xml.Data,),
+    frozenset({".grd", ".xml", ".xtb"}): (formatters.xml.Data,),
     # TODO(build): Switch .toml to rustfmt when available.
     # https://github.com/rust-lang/rustfmt/issues/4091
     frozenset({".cfg", ".conf", ".ini", ".rules", ".toml", ".txt"}): (
