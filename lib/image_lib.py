@@ -836,9 +836,6 @@ class PartitionInfo(NamedTuple):
     file_system: str = ""
     # Partition label/name.  May not exceed 36 Unicode characters.
     name: str = ""
-    # Human readable set of attribute flags.  The format is not stable, so
-    # it should not be relied upon for parsing, only for showing to users.
-    flags: str = ""
 
 
 def _ParseParted(lines):
@@ -866,6 +863,8 @@ def _ParseParted(lines):
             # Kick out the end field.
             values.pop(2)
             d = dict(zip(PartitionInfo._fields, values))
+            # Kick out the flags field.
+            values.pop()
             # Disregard any non-numeric partition number (e.g. the file path).
             if d["number"].isdigit():
                 d["number"] = int(d["number"])
@@ -892,7 +891,6 @@ def GetImageDiskPartitionInfo(image_path):
                 start=p.start * 512,
                 size=p.size * 512,
                 name=p.label,
-                flags=p.attr,
             )
             for p in disk.partitions.values()
         ]

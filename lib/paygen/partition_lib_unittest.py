@@ -63,8 +63,8 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
         part_a = os.path.join(self.tempdir, "a.bin")
 
         fake_partitions = (
-            image_lib.PartitionInfo(1, 0, 4, "fs", "PART-A", ""),
-            image_lib.PartitionInfo(2, 4, 4, "fs", "PART-B", ""),
+            image_lib.PartitionInfo(1, 0, 4, "fs", "PART-A"),
+            image_lib.PartitionInfo(2, 4, 4, "fs", "PART-B"),
         )
         self.PatchObject(
             image_lib, "GetImageDiskPartitionInfo", return_value=fake_partitions

@@ -18,7 +18,7 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
     """Tests Builder."""
 
     FAKE_PARTITIONS = (
-        image_lib.PartitionInfo(9, 10, 512 * 4, "fs", "MINIOS-A", ""),
+        image_lib.PartitionInfo(9, 10, 512 * 4, "fs", "MINIOS-A"),
     )
 
     def setUp(self):
