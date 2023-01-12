@@ -264,11 +264,13 @@ class CalculateRootfsHash(object):
         self.image = image
         self.cmd_line = cmd_line
         loop_rootfs = image.GetPartitionDevName("ROOT-A")
-        self._file = (
-            tempfile.NamedTemporaryFile(  # pylint: disable=consider-using-with
-                dir=image.destination, delete=False
-            )
+
+        # pylint: disable=consider-using-with
+        self._file = tempfile.NamedTemporaryFile(
+            dir=image.destination, delete=False
         )
+        # pylint: enable=consider-using-with
+
         dm_config = cmd_line.GetDmConfig()
         if not dm_config:
             logging.warning(
