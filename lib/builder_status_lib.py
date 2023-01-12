@@ -549,7 +549,7 @@ class SlaveBuilderStatus(object):
             try:
                 build = buildbucket_client.GetBuild(buildbucket_id)
                 status = common_pb2.Status.Name(build.status)
-                url = "{}{}".format(constants.CHROMEOS_MILO_HOST, build.id)
+                url = f"{constants.CHROMEOS_MILO_HOST}{build.id}"
             except buildbucket_v2.BuildbucketResponseException as e:
                 # If we have a temporary issue accessing the build status from the
                 # Buildbucket, log the error and continue with other builds.
