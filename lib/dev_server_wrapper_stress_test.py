@@ -19,7 +19,7 @@ _ITERATIONS = 10000
 def main(_argv):
     logging.getLogger().setLevel(logging.DEBUG)
     for i in range(_ITERATIONS):
-        print("Iteration {}".format(i))
+        print(f"Iteration {i}")
         wrapper = dev_server_wrapper.DevServerWrapper()
         print("Starting")
         wrapper.Start()
