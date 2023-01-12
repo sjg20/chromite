@@ -9,9 +9,10 @@ import logging
 import os
 from pathlib import Path
 import tempfile
-from typing import List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING
 import uuid
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
@@ -586,3 +587,51 @@ def UploadPrebuiltPackages(
         ],
         check=True,
     )
+
+
+def BuildSdkToolchain(
+    chroot: "chroot_lib.Chroot",
+    extra_env: Optional[Dict[str, str]] = None,
+) -> List[common_pb2.Path]:
+    """Build cross-compiler toolchain packages for the SDK.
+
+    Args:
+        chroot: The chroot in which the build is being run.
+        extra_env: Any extra env vars to pass into cros_setup_toolchains.
+
+    Returns:
+        List of generated filepaths.
+    """
+    toolchain_dir = os.path.join(chroot.path, constants.SDK_TOOLCHAINS_OUTPUT)
+
+    def _SetupToolchains(flags: List[str], include_extra_env: bool):
+        """Run the cros_setup_toolchains binary."""
+        cmd = ["cros_setup_toolchains"] + flags
+        cros_build_lib.sudo_run(
+            cmd,
+            extra_env=extra_env if include_extra_env else None,
+            enter_chroot=True,
+        )
+
+    _SetupToolchains(["--nousepkg"], True)
+    osutils.RmDir(
+        os.path.join(chroot.path, constants.SDK_TOOLCHAINS_OUTPUT),
+        ignore_missing=True,
+        sudo=True,
+    )
+    _SetupToolchains(
+        [
+            "--debug",
+            "--create-packages",
+            "--output-dir",
+            os.path.join("/", constants.SDK_TOOLCHAINS_OUTPUT),
+        ],
+        False,
+    )
+    return [
+        common_pb2.Path(
+            path=os.path.join("/", constants.SDK_TOOLCHAINS_OUTPUT, filename),
+            location=common_pb2.Path.INSIDE,
+        )
+        for filename in os.listdir(toolchain_dir)
+    ]

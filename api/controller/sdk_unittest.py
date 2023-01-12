@@ -4,11 +4,16 @@
 
 """SDK tests."""
 
+import os
+from typing import List, Optional
 from unittest import mock
 
 from chromite.api import api_config
+from chromite.api.controller import controller_util
 from chromite.api.controller import sdk as sdk_controller
 from chromite.api.gen.chromite.api import sdk_pb2
+from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.service import sdk as sdk_service
@@ -293,4 +298,105 @@ class SdkUpdateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
             build_source=True,
             toolchain_targets=targets,
             toolchain_changed=False,
+        )
+
+
+class BuildSdkToolchainTest(
+    cros_test_lib.MockTestCase, api_config.ApiConfigMixin
+):
+    """Test the SdkService/BuildSdkToolchain endpoint."""
+
+    def setUp(self):
+        """Set up the test case."""
+        self._chroot_path = "/path/to/chroot"
+        self._response = sdk_pb2.BuildSdkToolchainResponse()
+        self._generated_filenames = (
+            "armv7a-cros-linux-gnueabihf.tar.xz",
+            "x86_64-cros-linux-gnu.tar.xz",
+        )
+        self._paths_for_generated_files = [
+            common_pb2.Path(
+                path=os.path.join(constants.SDK_TOOLCHAINS_OUTPUT, fname),
+                location=common_pb2.Path.Location.INSIDE,
+            )
+            for fname in self._generated_filenames
+        ]
+
+    def _NewRequest(
+        self,
+        chroot_path: Optional[str] = None,
+        use_flags: Optional[List[str]] = None,
+    ) -> sdk_pb2.BuildSdkToolchainRequest:
+        """Return a new BuildSdkToolchainRequest message."""
+        request = sdk_pb2.BuildSdkToolchainRequest()
+        if chroot_path:
+            request.chroot.path = chroot_path
+        if use_flags:
+            request.use_flags.extend(
+                common_pb2.UseFlag(flag=flag) for flag in use_flags
+            )
+        return request
+
+    def _NewResponse(
+        self, generated_filenames: Optional[List[str]] = None
+    ) -> sdk_pb2.BuildSdkToolchainResponse:
+        """Return a new BuildSdkToolchainResponse message."""
+        response = sdk_pb2.BuildSdkToolchainResponse()
+        if generated_filenames:
+            response.generated_files.extend(
+                common_pb2.Path(
+                    path=os.path.join(constants.SDK_TOOLCHAINS_OUTPUT, fname),
+                    location=common_pb2.Path.Location.INSIDE,
+                )
+                for fname in generated_filenames
+            )
+        return response
+
+    def testValidateOnly(self):
+        """Check that a validate only call does not execute any logic."""
+        impl_patch = self.PatchObject(sdk_service, "BuildSdkToolchain")
+        sdk_controller.BuildSdkToolchain(
+            self._NewRequest(), self._NewResponse(), self.validate_only_config
+        )
+        impl_patch.assert_not_called()
+
+    def testSuccess(self):
+        """Check that a normal call defers to the SDK service as expected."""
+        impl_patch = self.PatchObject(sdk_service, "BuildSdkToolchain")
+        request = self._NewRequest(use_flags=[])
+        response = self._NewResponse()
+        sdk_controller.BuildSdkToolchain(
+            request,
+            response,
+            self.api_config,
+        )
+        # Can't use assert_called_with, since the chroot objects are equal but
+        # not identical.
+        impl_patch.assert_called_once()
+        self.assertEqual(
+            impl_patch.call_args.args[0],
+            controller_util.ParseChroot(request.chroot),
+        )
+        self.assertEqual(impl_patch.call_args.kwargs["extra_env"], {})
+
+    def testSuccessWithUseFlags(self):
+        """Check that a call with USE flags works as expected."""
+        impl_patch = self.PatchObject(sdk_service, "BuildSdkToolchain")
+        request = self._NewRequest(use_flags=["llvm-next", "another-flag"])
+        response = self._NewResponse()
+        sdk_controller.BuildSdkToolchain(
+            request,
+            response,
+            self.api_config,
+        )
+        # Can't use assert_called_with, since the chroot objects are equal but
+        # not identical.
+        impl_patch.assert_called_once()
+        self.assertEqual(
+            impl_patch.call_args.args[0],
+            controller_util.ParseChroot(request.chroot),
+        )
+        self.assertEqual(
+            impl_patch.call_args.kwargs["extra_env"],
+            {"USE": "llvm-next another-flag"},
         )

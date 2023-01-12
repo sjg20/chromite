@@ -5,7 +5,7 @@
 """SDK chroot operations."""
 
 import os
-from typing import Union
+from typing import Dict, Union
 
 from chromite.api import controller
 from chromite.api import faux
@@ -193,7 +193,7 @@ def RestoreSnapshot(input_proto, _output_proto, _config):
 @faux.all_empty
 @validate.validation_complete
 def BuildPrebuilts(input_proto, _output_proto, _config):
-    """Builds the binary packages that comprise the Chromium OS SDK."""
+    """Build the binary packages that comprise the Chromium OS SDK."""
     chroot = controller_util.ParseChroot(input_proto.chroot)
     sdk.BuildPrebuilts(chroot, board=input_proto.build_target.name)
 
@@ -224,10 +224,23 @@ def CreateBinhostCLs(
 @validate.require("prepend_version", "version", "upload_location")
 @validate.validation_complete
 def UploadPrebuiltPackages(input_proto, _output_proto, _config):
-    """Uploads prebuilt packages."""
+    """Upload prebuilt packages."""
     sdk.UploadPrebuiltPackages(
         controller_util.ParseChroot(input_proto.chroot),
         input_proto.prepend_version,
         input_proto.version,
         input_proto.upload_location,
     )
+
+
+@faux.all_empty
+@validate.require("chroot")
+@validate.validation_complete
+def BuildSdkToolchain(input_proto, output_proto, _config):
+    """Build cross-compiler packages for the SDK."""
+    chroot = controller_util.ParseChroot(input_proto.chroot)
+    extra_env: Dict[str, str] = {}
+    if input_proto.use_flags:
+        extra_env["USE"] = " ".join(use.flag for use in input_proto.use_flags)
+    generated_files = sdk.BuildSdkToolchain(chroot, extra_env=extra_env)
+    output_proto.generated_files.extend(generated_files)

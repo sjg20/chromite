@@ -6,8 +6,11 @@
 
 import os
 from pathlib import Path
+from typing import List
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -250,3 +253,115 @@ class SnapshotTest(cros_test_lib.RunCommandTestCase):
         token = sdk.CreateSnapshot()
         sdk.RestoreSnapshot(token)
         self.assertCommandContains(["--snapshot-restore", token])
+
+
+class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
+    """Test the implementation of BuildSdkToolchain()."""
+
+    _chroot_path = "/test/chroot"
+    _filenames_to_find = ["foo.tar.gz", "bar.txt"]
+
+    @staticmethod
+    def _Chroot() -> chroot_lib.Chroot:
+        """Return a mock chroot for testing."""
+        return chroot_lib.Chroot(BuildSdkToolchainTest._chroot_path)
+
+    @staticmethod
+    def _ExpectedFoundFiles() -> List[common_pb2.Path]:
+        return [
+            common_pb2.Path(
+                path=os.path.join(
+                    "/",
+                    constants.SDK_TOOLCHAINS_OUTPUT,
+                    filename,
+                ),
+                location=common_pb2.Path.INSIDE,
+            )
+            for filename in BuildSdkToolchainTest._filenames_to_find
+        ]
+
+    def testSuccess(self):
+        """Check that a standard call performs expected logic.
+
+        Look for the following behavior:
+        1. Call `cros_setup_toolchain --nousepkg`
+        2. Clear any existing files in the output dir
+        3. Call `cros_setup_toolchain --debug --create-packages --output-dir`
+        4. Return any generated filepaths
+        """
+        # Arrange
+        output_dir = os.path.join(
+            self._chroot_path, constants.SDK_TOOLCHAINS_OUTPUT
+        )
+        rmdir_patch = self.PatchObject(osutils, "RmDir")
+        listdir_patch = self.PatchObject(os, "listdir")
+        listdir_patch.return_value = self._filenames_to_find
+
+        # Act
+        found_files = sdk.BuildSdkToolchain(self._Chroot())
+
+        # Assert
+        self.assertCommandCalled(
+            ["sudo", "--", "cros_setup_toolchains", "--nousepkg"],
+            enter_chroot=True,
+        )
+        rmdir_patch.assert_any_call(output_dir, ignore_missing=True, sudo=True)
+        self.assertCommandCalled(
+            [
+                "sudo",
+                "--",
+                "cros_setup_toolchains",
+                "--debug",
+                "--create-packages",
+                "--output-dir",
+                os.path.join("/", constants.SDK_TOOLCHAINS_OUTPUT),
+            ],
+            enter_chroot=True,
+        )
+        self.assertEqual(found_files, self._ExpectedFoundFiles())
+
+    def testSuccessWithUseFlags(self):
+        """Check that a standard call with USE flags performs expected logic.
+
+        The call to `cros_setup_toolchain --nousepkg` should use the USE flag.
+        However, the call to `cros_setup_toolchain ... --create-packages ...`
+        should NOT use the USE flag.
+        """
+        # Arrange
+        output_dir = os.path.join(
+            self._chroot_path, constants.SDK_TOOLCHAINS_OUTPUT
+        )
+        rmdir_patch = self.PatchObject(osutils, "RmDir")
+        listdir_patch = self.PatchObject(os, "listdir")
+        listdir_patch.return_value = self._filenames_to_find
+
+        # Act
+        found_files = sdk.BuildSdkToolchain(
+            self._Chroot(), extra_env={"USE": "llvm-next"}
+        )
+
+        # Assert
+        self.assertCommandCalled(
+            [
+                "sudo",
+                "USE=llvm-next",
+                "--",
+                "cros_setup_toolchains",
+                "--nousepkg",
+            ],
+            enter_chroot=True,
+        )
+        rmdir_patch.assert_any_call(output_dir, ignore_missing=True, sudo=True)
+        self.assertCommandCalled(
+            [
+                "sudo",
+                "--",
+                "cros_setup_toolchains",
+                "--debug",
+                "--create-packages",
+                "--output-dir",
+                os.path.join("/", constants.SDK_TOOLCHAINS_OUTPUT),
+            ],
+            enter_chroot=True,
+        )
+        self.assertEqual(found_files, self._ExpectedFoundFiles())
