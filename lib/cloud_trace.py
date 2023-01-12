@@ -322,9 +322,7 @@ class SpanStack(object):
             return ""
         span_postfix = "/%s" % self.spans[-1].spanId if self.spans else ""
         enabled = "1" if self.enabled else "0"
-        return "{trace_id}{span_postfix};o={enabled}".format(
-            trace_id=self.traceId, span_postfix=span_postfix, enabled=enabled
-        )
+        return f"{self.traceId}{span_postfix};o={enabled}"
 
     @contextlib.contextmanager
     def EnvironmentContext(self):

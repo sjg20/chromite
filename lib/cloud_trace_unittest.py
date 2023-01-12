@@ -107,7 +107,7 @@ class CloudTraceContextTest(cros_test_lib.MockTestCase):
     def testCloudTraceContextPattern(self):
         """Tests that the regex matches an example context."""
         trace_id = "deadbeef12345678deadbeef12345678"
-        global_context = "{trace_id}/0;o=1".format(trace_id=trace_id)
+        global_context = f"{trace_id}/0;o=1"
         self.assertTrue(
             bool(
                 cloud_trace.SpanStack.CLOUD_TRACE_CONTEXT_PATTERN.match(
@@ -125,7 +125,7 @@ class CloudTraceContextTest(cros_test_lib.MockTestCase):
     def testInitReadsEnvironment(self):
         """Tests that SpanStack reads the enivornment on init."""
         trace_id = "deadbeef12345678deadbeef12345678"
-        global_context = "{trace_id}/0;o=1".format(trace_id=trace_id)
+        global_context = f"{trace_id}/0;o=1"
         old_env = self.env.get(cloud_trace.SpanStack.CLOUD_TRACE_CONTEXT_ENV)
         try:
             self.env[
@@ -143,9 +143,7 @@ class CloudTraceContextTest(cros_test_lib.MockTestCase):
     def testEnvironmentContextManager(self):
         """Tests that the environment context manager works."""
         trace_id = "deadbeef12345678deadbeef12345678"
-        stack = cloud_trace.SpanStack(
-            global_context="{trace_id}/0;o=1".format(trace_id=trace_id)
-        )
+        stack = cloud_trace.SpanStack(global_context=f"{trace_id}/0;o=1")
 
         old_env = self.env.get(cloud_trace.SpanStack.CLOUD_TRACE_CONTEXT_ENV)
         with stack.EnvironmentContext():
