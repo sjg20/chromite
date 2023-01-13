@@ -375,8 +375,7 @@ def get_parser() -> commandline.ArgumentParser:
     # This option; 1) starts goma, 2) builds packages (expecting that goma is
     # used), then 3) stops goma explicitly.
     # 4) is a request from the goma team, so that stats/logs can be taken.
-    # Note: GOMA_DIR and GOMA_SERVICE_ACCOUNT_JSON_FILE are expected to be passed
-    # via env var.
+    # Note: GOMA_DIR is expected to be passed via env var.
     #
     # In local dev env cases, compiler_proxy is expected to keep running.
     # In such a case;

@@ -23,12 +23,10 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
 
     def setUp(self):
         self.goma_dir = self.tempdir / "goma"
-        self.goma_client_json = self.tempdir / "goma_client.json"
         self.chroot_dir = self.tempdir / "chroot"
         self.chroot_tmp = self.chroot_dir / "tmp"
         self.log_dir = self.chroot_tmp / "log_dir"
 
-        self.goma_client_json.touch()
         osutils.SafeMakedirs(self.goma_dir)
         osutils.SafeMakedirs(self.chroot_tmp)
 
@@ -39,7 +37,6 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
 
         goma = goma_lib.Goma(
             self.goma_dir,
-            self.goma_client_json,
             chroot_dir=self.chroot_dir,
             log_dir=self.log_dir,
             stats_filename=stats_filename,
@@ -87,7 +84,6 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
         goma_approach = goma_lib.GomaApproach("foo", "bar", True)
         goma = goma_lib.Goma(
             self.goma_dir,
-            self.goma_client_json,
             chroot_dir=self.chroot_dir,
             goma_approach=goma_approach,
         )
@@ -101,7 +97,7 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
     def testInvalidArg(self):
         """Test invalid Goma input arguments."""
         with self.assertRaises(ValueError):
-            goma_lib.Goma(Path("some/path"), self.goma_client_json)
+            goma_lib.Goma(Path("some/path"))
         with self.assertRaises(ValueError):
             goma_lib.Goma(self.goma_dir, Path("some/path/goma_client.json"))
 

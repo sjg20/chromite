@@ -1229,7 +1229,6 @@ class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
             {
                 "GOMA_DIR": "goma/path",
                 "GOMA_TMP_DIR": "goma/tmp/dir",
-                "GOMA_SERVICE_ACCOUNT_JSON_FILE": "goma_account.json",
                 "GLOG_log_dir": "glog/log/dir",
             }
         )
@@ -1237,7 +1236,6 @@ class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
         with sysroot.RemoteExecution(use_goma=True, use_remoteexec=False):
             self.goma_mock.assert_called_once_with(
                 Path("goma/path"),
-                "goma_account.json",
                 "goma/tmp/dir",
                 stage_name="BuildPackages",
                 log_dir="glog/log/dir",
@@ -1253,7 +1251,6 @@ class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
         with sysroot.RemoteExecution(use_goma=True, use_remoteexec=False):
             self.goma_mock.assert_called_once_with(
                 Path("home/goma"),
-                None,
                 None,
                 stage_name="BuildPackages",
                 log_dir=None,
@@ -1321,7 +1318,6 @@ class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
                 "RECLIENT_DIR": "reclient/path",
                 "REPROXY_CFG": "reclient_cfg",
                 "GOMA_DIR": "goma/path",
-                "GOMA_SERVICE_ACCOUNT_JSON_FILE": "goma_account.json",
             }
         )
 

@@ -132,7 +132,6 @@ def ParseGomaConfig(goma_message, chroot_path):
 
     return goma_lib.Goma(
         goma_message.goma_dir,
-        goma_message.goma_client_json,
         stage_name="BuildAPI",
         chromeos_goma_dir=chromeos_goma_dir,
         chroot_dir=chroot_path,

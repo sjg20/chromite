@@ -224,19 +224,14 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
 
     def testSimpleChromeWorkflowTest(self):
         goma_test_dir = os.path.join(self.tempdir, "goma_test_dir")
-        goma_test_json_string = os.path.join(
-            self.tempdir, "goma_json_string.txt"
-        )
         chromeos_goma_dir = os.path.join(self.tempdir, "chromeos_goma_dir")
         goma_config = common_pb2.GomaConfig(
-            goma_dir=goma_test_dir, goma_client_json=goma_test_json_string
+            goma_dir=goma_test_dir,
         )
         osutils.SafeMakedirs(goma_test_dir)
         osutils.SafeMakedirs(chromeos_goma_dir)
-        osutils.Touch(goma_test_json_string)
         goma = goma_lib.Goma(
             goma_config.goma_dir,
-            goma_config.goma_client_json,
             stage_name="BuildApiTestSimpleChrome",
             chromeos_goma_dir=chromeos_goma_dir,
         )

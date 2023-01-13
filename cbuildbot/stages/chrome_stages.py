@@ -413,7 +413,6 @@ class TestSimpleChromeWorkflowStage(
                 )
                 goma = goma_lib.Goma(
                     self._run.options.goma_dir,
-                    self._run.options.goma_client_json,
                     stage_name=self.StageNamePrefix()
                     if use_goma_deps_cache
                     else None,

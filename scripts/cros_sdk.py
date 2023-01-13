@@ -200,7 +200,6 @@ def EnterChroot(
     chrome_root,
     chrome_root_mount,
     goma_dir,
-    goma_client_json,
     reclient_dir,
     reproxy_cfg_file,
     working_dir,
@@ -218,8 +217,6 @@ def EnterChroot(
         cmd.extend(["--chrome_root_mount", chrome_root_mount])
     if goma_dir:
         cmd.extend(["--goma_dir", goma_dir])
-    if goma_client_json:
-        cmd.extend(["--goma_client_json", goma_client_json])
     if reclient_dir:
         cmd.extend(["--reclient_dir", reclient_dir])
     if reproxy_cfg_file:
@@ -878,12 +875,6 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
         help="Goma installed directory to mount into the chroot.",
     )
     parser.add_argument(
-        "--goma_client_json",
-        type="path",
-        help="Service account json file to use goma on bot. "
-        "Mounted into the chroot.",
-    )
-    parser.add_argument(
         "--reclient-dir",
         type="path",
         help="Reclient installed directory to mount into the chroot.",
@@ -1500,7 +1491,6 @@ snapshots will be unavailable)."""
                 options.chrome_root,
                 options.chrome_root_mount,
                 options.goma_dir,
-                options.goma_client_json,
                 options.reclient_dir,
                 options.reproxy_cfg_file,
                 options.working_dir,

@@ -222,7 +222,7 @@ REEXEC_API_VERSION = "%i.%i" % (REEXEC_API_MAJOR, REEXEC_API_MINOR)
 REEXEC_API_MASTER_BUILD_ID = 3
 # Support --git-cache-dir
 REEXEC_API_GIT_CACHE_DIR = 4
-# Support --goma_dir and --goma_client_json
+# Support --goma_dir
 REEXEC_API_GOMA = 5
 # Support --ts-mon-task-num
 REEXEC_API_TSMON_TASK_NUM = 6

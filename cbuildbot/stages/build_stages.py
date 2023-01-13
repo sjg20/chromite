@@ -765,7 +765,6 @@ class BuildPackagesStage(
         )
         goma = goma_lib.Goma(
             self._run.options.goma_dir,
-            self._run.options.goma_client_json,
             stage_name=self.StageNamePrefix() if use_goma_deps_cache else None,
             chromeos_goma_dir=self._run.options.chromeos_goma_dir,
             goma_approach=goma_approach,
@@ -784,10 +783,6 @@ class BuildPackagesStage(
         # Mount goma directory and service account json file (if necessary)
         # into chroot.
         chroot_args = ["--goma_dir", str(goma.chromeos_goma_dir)]
-        if goma.goma_client_json:
-            chroot_args.extend(
-                ["--goma_client_json", str(goma.goma_client_json)]
-            )
         return chroot_args
 
     def PerformStage(self):

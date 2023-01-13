@@ -7,7 +7,6 @@
 import contextlib
 import os
 from pathlib import Path
-import tempfile
 from unittest import mock
 
 from chromite.third_party.infra_libs.buildbucket.proto import (
@@ -564,11 +563,9 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
         )
         self._Prepare("amd64-generic-full")
         # Set stub dir name to enable goma.
-        with osutils.TempDir() as goma_dir, tempfile.NamedTemporaryFile() as temp_goma_client_json:
+        with osutils.TempDir() as goma_dir:
             goma_dir = Path(goma_dir)
-            goma_client_json = Path(temp_goma_client_json.name)
             self._run.options.goma_dir = goma_dir
-            self._run.options.goma_client_json = goma_client_json
             self._run.options.chromeos_goma_dir = goma_dir
 
             stage = self.ConstructStage()
@@ -577,8 +574,6 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
                 [
                     "--goma_dir",
                     str(goma_dir),
-                    "--goma_client_json",
-                    str(goma_client_json),
                 ],
                 chroot_args,
             )
@@ -587,27 +582,6 @@ EC (RW) version: reef_v1.1.5909-bd1f0c9
                 portage_env.get("GOMA_DIR", ""), os.path.expanduser("~/goma")
             )
             self.assertEqual(portage_env.get("USE_GOMA", ""), "true")
-            self.assertEqual(
-                "/creds/service_accounts/service-account-goma-client.json",
-                portage_env.get("GOMA_SERVICE_ACCOUNT_JSON_FILE", ""),
-            )
-
-    def testGomaWithMissingCertFile(self):
-        self.PatchObject(
-            build_stages.BuildPackagesStage,
-            "_ShouldEnableGoma",
-            return_value=True,
-        )
-        self._Prepare("amd64-generic-full")
-        # Set stub dir name to enable goma.
-        with osutils.TempDir() as goma_dir:
-            self._run.options.goma_dir = goma_dir
-            self._run.options.goma_client_json = "stub-goma-client-json-path"
-            self._run.options.chromeos_goma_dir = goma_dir
-
-            stage = self.ConstructStage()
-            with self.assertRaisesRegex(ValueError, "json file is missing"):
-                stage._SetupGomaIfNecessary()
 
     def testGomaOnBotWithoutCertFile(self):
         self.PatchObject(

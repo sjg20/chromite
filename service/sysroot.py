@@ -1467,7 +1467,6 @@ def RemoteExecution(use_goma: bool, use_remoteexec: bool) -> Iterator[None]:
     """
     goma_dir = Path(os.environ.get("GOMA_DIR", Path.home() / "goma"))
     goma_tmp_dir = os.environ.get("GOMA_TMP_DIR")
-    goma_service_json = os.environ.get("GOMA_SERVICE_ACCOUNT_JSON_FILE")
     glog_log_dir = os.environ.get("GLOG_log_dir")
     reclient_dir = os.environ.get("RECLIENT_DIR")
     reproxy_cfg_file = os.environ.get("REPROXY_CFG")
@@ -1484,7 +1483,6 @@ def RemoteExecution(use_goma: bool, use_remoteexec: bool) -> Iterator[None]:
             logging.info("Starting goma compiler_proxy.")
             goma_instance = goma_lib.Goma(
                 goma_dir,
-                goma_service_json,
                 goma_tmp_dir,
                 stage_name="BuildPackages",
                 log_dir=glog_log_dir,

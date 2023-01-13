@@ -349,7 +349,6 @@ def SimpleChromeWorkflowTest(input_proto, _output_proto, _config):
         chromeos_goma_dir = input_proto.goma_config.chromeos_goma_dir or None
         goma = goma_lib.Goma(
             input_proto.goma_config.goma_dir,
-            input_proto.goma_config.goma_client_json,
             stage_name="BuildApiTestSimpleChrome",
             chromeos_goma_dir=chromeos_goma_dir,
         )

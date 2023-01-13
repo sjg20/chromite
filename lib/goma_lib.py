@@ -87,7 +87,6 @@ class Goma(object):
     def __init__(
         self,
         goma_dir: Union[str, os.PathLike],
-        goma_client_json: Optional[Union[str, os.PathLike]] = None,
         goma_tmp_dir: Optional[Union[str, os.PathLike]] = None,
         stage_name: Optional[str] = None,
         chromeos_goma_dir: Optional[Union[str, os.PathLike]] = None,
@@ -105,9 +104,6 @@ class Goma(object):
         Args:
           goma_dir: Path to the Goma client used for simplechrome (outside of
             chroot).
-          goma_client_json: Path to the service account json file to use goma. On
-            bots, if this is not specified use service account in GCE metadata.
-            On local, this is optional, and can be set to None.
           goma_tmp_dir: Path to the GOMA_TMP_DIR to be passed to goma programs. If
             given, it is used. If not given, creates a directory under /tmp in the
             chroot, expecting that the directory is removed in the next run's clean
@@ -132,15 +128,11 @@ class Goma(object):
             directory.
 
         Raises:
-          ValueError if 1) |goma_dir| does not point to a directory, 2)
-          |goma_client_json| is given, but it does not point to a file, or 3)
+          ValueError if 1) |goma_dir| does not point to a directory, or 2)
           if |goma_tmp_dir| is given but it does not point to a directory.
         """
         # Sanity checks of given paths.
         goma_dir = Path(goma_dir)
-
-        if goma_client_json:
-            goma_client_json = Path(goma_client_json)
 
         if goma_tmp_dir:
             goma_tmp_dir = Path(goma_tmp_dir)
@@ -163,12 +155,6 @@ class Goma(object):
         if not goma_dir.is_dir():
             raise ValueError(f"goma_dir does not point a directory: {goma_dir}")
 
-        # If goma_client_json file is provided, it must be an existing file.
-        if goma_client_json and not goma_client_json.is_file():
-            raise ValueError(
-                f"Goma client json file is missing: {goma_client_json}"
-            )
-
         # If goma_tmp_dir is provided, it must be an existing directory.
         if goma_tmp_dir and not goma_tmp_dir.is_dir():
             raise ValueError(
@@ -188,7 +174,6 @@ class Goma(object):
                 f"{self.chromeos_goma_dir}"
             )
 
-        self.goma_client_json = goma_client_json
         if stage_name:
             self.goma_cache = goma_dir / "goma_cache" / stage_name
             osutils.SafeMakedirs(self.goma_cache)
@@ -277,12 +262,7 @@ class Goma(object):
 
         self._AddCommonExtraEnv(result)
 
-        # TODO(crbug.com/1359171): drop goma_client_json support
-        if self.goma_client_json:
-            result["GOMA_SERVICE_ACCOUNT_JSON_FILE"] = str(
-                self.goma_client_json
-            )
-        elif cros_build_lib.HostIsCIBuilder():
+        if cros_build_lib.HostIsCIBuilder():
             result["GOMA_GCE_SERVICE_ACCOUNT"] = "default"
             result["GCE_METADATA_HOST"] = os.environ.get(
                 "GCE_METADATA_HOST", ""
@@ -301,7 +281,7 @@ class Goma(object):
 
     def GetChrootExtraEnv(self):
         """Extra env vars set to use goma inside chroot."""
-        # Note: GOMA_DIR and GOMA_SERVICE_ACCOUNT_JSON_FILE in chroot is hardcoded.
+        # Note: GOMA_DIR in chroot is hardcoded.
         # Please see also enter_chroot.sh.
         goma_dir = Path.home() / "goma"
         result = dict(
@@ -313,12 +293,7 @@ class Goma(object):
 
         self._AddCommonExtraEnv(result)
 
-        # TODO(crbug.com/1359171): drop goma_client_json support
-        if self.goma_client_json:
-            result[
-                "GOMA_SERVICE_ACCOUNT_JSON_FILE"
-            ] = "/creds/service_accounts/service-account-goma-client.json"
-        elif cros_build_lib.HostIsCIBuilder():
+        if cros_build_lib.HostIsCIBuilder():
             result["GOMA_GCE_SERVICE_ACCOUNT"] = "default"
 
         if self.goma_cache:
