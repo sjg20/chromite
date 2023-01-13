@@ -111,14 +111,15 @@ def FetchRemoteTarballs(storage_dir, urls):
     """Fetches a tarball given by url, and place it in |storage_dir|.
 
     Args:
-      storage_dir: Path where to save the tarball.
-      urls: List of URLs to try to download. Download will stop on first success.
+        storage_dir: Path where to save the tarball.
+        urls: List of URLs to try to download. Download will stop on first
+            success.
 
     Returns:
-      Full path to the downloaded file.
+        Full path to the downloaded file.
 
     Raises:
-      ValueError: None of the URLs worked.
+        ValueError: None of the URLs worked.
     """
     # Note we track content length ourselves since certain versions of curl
     # fail if asked to resume a complete file.
@@ -264,10 +265,10 @@ def _ImageFileForChroot(chroot):
     filename that would be used.
 
     Args:
-      chroot: Path to the chroot.
+        chroot: Path to the chroot.
 
     Returns:
-      Path to an image file that would be associated with chroot.
+        Path to an image file that would be associated with chroot.
     """
     return chroot.rstrip("/") + ".img"
 
@@ -276,16 +277,16 @@ def CreateChrootSnapshot(snapshot_name, chroot_vg, chroot_lv):
     """Create a snapshot for the specified chroot VG/LV.
 
     Args:
-      snapshot_name: The name of the new snapshot.
-      chroot_vg: The name of the VG containing the origin LV.
-      chroot_lv: The name of the origin LV.
+        snapshot_name: The name of the new snapshot.
+        chroot_vg: The name of the VG containing the origin LV.
+        chroot_lv: The name of the origin LV.
 
     Returns:
-      True if the snapshot was created, or False if a snapshot with the same
-      name already exists.
+        True if the snapshot was created, or False if a snapshot with the same
+        name already exists.
 
     Raises:
-      SystemExit: The lvcreate command failed.
+        SystemExit: The lvcreate command failed.
     """
     if snapshot_name in ListChrootSnapshots(chroot_vg, chroot_lv):
         logging.error(
@@ -322,12 +323,12 @@ def DeleteChrootSnapshot(snapshot_name, chroot_vg, chroot_lv):
     and internal thinpool LV cannot be deleted with this function.
 
     Args:
-      snapshot_name: The name of the snapshot to delete.
-      chroot_vg: The name of the VG containing the origin LV.
-      chroot_lv: The name of the origin LV.
+        snapshot_name: The name of the snapshot to delete.
+        chroot_vg: The name of the VG containing the origin LV.
+        chroot_lv: The name of the origin LV.
 
     Raises:
-      SystemExit: The lvremove command failed.
+        SystemExit: The lvremove command failed.
     """
     if snapshot_name in (
         cros_sdk_lib.CHROOT_LV_NAME,
@@ -365,17 +366,18 @@ def RestoreChrootSnapshot(snapshot_name, chroot_vg, chroot_lv):
     unmounted after this function returns.
 
     Args:
-      snapshot_name: The name of the snapshot to restore.  This snapshot will no
-          longer be accessible at its original name after this function finishes.
-      chroot_vg: The VG containing the chroot LV and snapshot LV.
-      chroot_lv: The name of the original chroot LV.
+        snapshot_name: The name of the snapshot to restore. This snapshot will
+            no longer be accessible at its original name after this function
+            finishes.
+        chroot_vg: The VG containing the chroot LV and snapshot LV.
+        chroot_lv: The name of the original chroot LV.
 
     Returns:
-      True if the chroot was restored to the requested snapshot, or False if
-      the snapshot wasn't found or isn't valid.
+        True if the chroot was restored to the requested snapshot, or False if
+        the snapshot wasn't found or isn't valid.
 
     Raises:
-      SystemExit: Any of the LVM commands failed.
+        SystemExit: Any of the LVM commands failed.
     """
     valid_snapshots = ListChrootSnapshots(chroot_vg, chroot_lv)
     if (
@@ -406,8 +408,8 @@ def RestoreChrootSnapshot(snapshot_name, chroot_vg, chroot_lv):
             cros_build_lib.dbg_run(cmd, capture_output=True)
         except cros_build_lib.RunCommandError as e:
             cros_build_lib.Die(
-                "Failed to rename %s to chroot and failed to restore %s back to "
-                "chroot!\n%s",
+                "Failed to rename %s to chroot and failed to restore %s back "
+                "to chroot!\n%s",
                 snapshot_name,
                 backup_chroot_name,
                 e,
@@ -421,15 +423,15 @@ def RestoreChrootSnapshot(snapshot_name, chroot_vg, chroot_lv):
 
     # Some versions of LVM set snapshots to be skipped at auto-activate time.
     # Other versions don't have this flag at all.  We run lvchange to try
-    # disabling auto-skip and activating the volume, but ignore errors.  Versions
+    # disabling auto-skip and activating the volume, but ignore errors. Versions
     # that don't have the flag should be auto-activated.
     chroot_lv_path = "%s/%s" % (chroot_vg, chroot_lv)
     cmd = ["lvchange", "-kn", chroot_lv_path]
     cros_build_lib.run(cmd, print_cmd=False, capture_output=True, check=False)
 
     # Activate the LV in case the lvchange above was needed.  Activating an LV
-    # that is already active shouldn't do anything, so this is safe to run even if
-    # the -kn wasn't needed.
+    # that is already active shouldn't do anything, so this is safe to run even
+    # if the -kn wasn't needed.
     cmd = ["lvchange", "-ay", chroot_lv_path]
     cros_build_lib.dbg_run(cmd, capture_output=True)
 
@@ -451,14 +453,14 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
     """Return all snapshots in |chroot_vg| regardless of origin volume.
 
     Args:
-      chroot_vg: The name of the VG containing the chroot.
-      chroot_lv: The name of the chroot LV.
+        chroot_vg: The name of the VG containing the chroot.
+        chroot_lv: The name of the chroot LV.
 
     Returns:
-      A (possibly-empty) list of snapshot LVs found in |chroot_vg|.
+        A (possibly-empty) list of snapshot LVs found in |chroot_vg|.
 
     Raises:
-      SystemExit: The lvs command failed.
+        SystemExit: The lvs command failed.
     """
     if not chroot_vg or not chroot_lv:
         return []
@@ -482,9 +484,9 @@ def ListChrootSnapshots(chroot_vg, chroot_lv):
         raise SystemExit("Running %r failed!" % cmd)
 
     # Once the thin origin volume has been deleted, there's no way to tell a
-    # snapshot apart from any other volume.  Since this VG is created and managed
-    # by cros_sdk, we'll assume that all volumes that share the same thin pool are
-    # valid snapshots.
+    # snapshot apart from any other volume. Since this VG is created and managed
+    # by cros_sdk, we'll assume that all volumes that share the same thin pool
+    # are valid snapshots.
     snapshots = []
     snapshot_attrs = re.compile(r"^V.....t.{2,}")  # Matches a thin volume.
     for line in result.stdout.splitlines():
@@ -548,10 +550,11 @@ def _SudoCommand():
         if value is not None:
             cmd += ["%s=%s" % (key, value)]
 
-    # We keep PATH not for the chroot but for the re-exec & for programs we might
-    # run before we chroot into the SDK.  The process that enters the SDK itself
-    # will take care of initializing PATH to the right value then.  But we can't
-    # override the system's default PATH for root as that will hide /sbin.
+    # We keep PATH not for the chroot but for the re-exec & for programs we
+    # might run before we chroot into the SDK.  The process that enters the SDK
+    # itself will take care of initializing PATH to the right value then.  But
+    # we can't override the system's default PATH for root as that will hide
+    # /sbin.
     cmd += ["CHROMEOS_SUDO_PATH=%s" % os.environ.get("PATH", "")]
 
     # Pass along current rlimit settings so we can restore them.
@@ -568,8 +571,8 @@ def _ReportMissing(missing):
     """Report missing utilities, then exit.
 
     Args:
-      missing: List of missing utilities, as returned by
-               osutils.FindMissingBinaries.  If non-empty, will not return.
+        missing: List of missing utilities, as returned by
+            osutils.FindMissingBinaries.  If non-empty, will not return.
     """
 
     if missing:
@@ -610,7 +613,7 @@ def _ProxySimSetup(options):
         ("proxy_ftp_module", "mod_proxy_ftp.so"),
     ]
 
-    # Find the apache module directory, and make sure it has the modules we need.
+    # Find the apache module directory and make sure it has the modules we need.
     module_dirs = {}
     for g in PROXY_APACHE_MODULE_GLOBS:
         for _, so in apache_modules:
@@ -620,12 +623,13 @@ def _ProxySimSetup(options):
         if len(modules_found) == len(apache_modules):
             break
     else:
-        # Appease cros lint, which doesn't understand that this else block will not
-        # fall through to the subsequent code which relies on apache_module_path.
+        # Appease cros lint, which doesn't understand that this else block will
+        # not fall through to the subsequent code which relies on
+        # apache_module_path.
         apache_module_path = None
         raise SystemExit(
-            "Could not find apache module path containing all required modules: %s"
-            % ", ".join(so for mod, so in apache_modules)
+            "Could not find apache module path containing all required "
+            "modules: %s" % ", ".join(so for mod, so in apache_modules)
         )
 
     def check_add_module(name):
@@ -646,9 +650,9 @@ def _ProxySimSetup(options):
     veth_guest = "%s-guest" % PROXY_VETH_PREFIX
 
     # Set up locks to sync the net namespace setup.  We need the child to create
-    # the net ns first, and then have the parent assign the guest end of the veth
-    # interface to the child's new network namespace & bring up the proxy.  Only
-    # then can the child move forward and rely on the network being up.
+    # the net ns first, and then have the parent assign the guest end of the
+    # veth interface to the child's new network namespace & bring up the proxy.
+    # Only then can the child move forward and rely on the network being up.
     ns_create_lock = locking.PipeLock()
     ns_setup_lock = locking.PipeLock()
 
@@ -894,12 +898,12 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
         dest="chroot_upgrade",
         action="store_false",
         default=True,
-        help="Skip automatic SDK and toolchain upgrade when entering the chroot. "
-        "Never guaranteed to work, especially as ToT moves forward.",
+        help="Skip automatic SDK and toolchain upgrade when entering the "
+        "chroot. Never guaranteed to work, especially as ToT moves forward.",
     )
 
     # Use type=str instead of type='path' to prevent the given path from being
-    # transfered to absolute path automatically.
+    # transferred to absolute path automatically.
     parser.add_argument(
         "--working-dir",
         type=str,
@@ -1170,7 +1174,8 @@ def main(argv):
 
     # If there is an existing chroot image and we're not removing it then force
     # use_image on.  This ensures that people don't have to remember to pass
-    # --use-image after a reboot to avoid losing access to their existing chroot.
+    # --use-image after a reboot to avoid losing access to their existing
+    # chroot.
     chroot_exists = cros_sdk_lib.IsChrootReady(options.chroot)
     img_path = _ImageFileForChroot(options.chroot)
     if (
@@ -1226,8 +1231,8 @@ def main(argv):
     # Make sure we will download if we plan to create.
     options.download |= options.create
 
-    # Anything that needs to manipulate the main chroot mount or communicate with
-    # LVM needs to be done here before we enter the new namespaces.
+    # Anything that needs to manipulate the main chroot mount or communicate
+    # with LVM needs to be done here before we enter the new namespaces.
 
     # If deleting, do it regardless of the use_image flag so that a
     # previously-created loopback chroot can also be cleaned up.
@@ -1253,10 +1258,10 @@ def main(argv):
             logging.notice("Deleting chroot.")
             cros_sdk_lib.CleanupChrootMount(options.chroot, delete=True)
 
-    # If cleanup was requested, we have to do it while we're still in the original
-    # namespace.  Since cleaning up the mount will interfere with any other
-    # commands, we exit here.  The check above should have made sure that no other
-    # action was requested, anyway.
+    # If cleanup was requested, we have to do it while we're still in the
+    # original namespace.  Since cleaning up the mount will interfere with any
+    # other commands, we exit here.  The check above should have made sure that
+    # no other action was requested, anyway.
     if options.unmount:
         # Set a timeout of 300 seconds when getting the lock.
         with locking.FileLock(
@@ -1269,13 +1274,14 @@ def main(argv):
                     "Acquiring write_lock on %s failed: %s", lock_path, e
                 )
                 logging.warning(
-                    "Continuing with CleanupChroot(%s), which will umount the tree.",
+                    "Continuing with CleanupChroot(%s), which will umount the "
+                    "tree.",
                     options.chroot,
                 )
-            # We can call CleanupChroot (which calls cros_sdk_lib.CleanupChrootMount)
-            # even if we don't get the lock because it will attempt to unmount the
-            # tree and will print diagnostic information from 'fuser', 'lsof', and
-            # 'ps'.
+            # We can call CleanupChroot (which calls
+            # cros_sdk_lib.CleanupChrootMount) even if we don't get the lock
+            # because it will attempt to unmount the tree and will print
+            # diagnostic information from 'fuser', 'lsof', and 'ps'.
             cros_sdk_lib.CleanupChrootMount(options.chroot, delete=False)
             sys.exit(0)
 
@@ -1318,16 +1324,17 @@ snapshots will be unavailable)."""
                     "Unable to find VG/LV for chroot %s", options.chroot
                 )
 
-            # Delete snapshot before creating a new one.  This allows the user to
-            # throw out old state, create a new snapshot, and enter the chroot in a
-            # single call to cros_sdk.  Since restore involves deleting, also do it
-            # before creating.
+            # Delete snapshot before creating a new one. This allows the user to
+            # throw out old state, create a new snapshot, and enter the chroot
+            # in a single call to cros_sdk. Since restore involves deleting,
+            # also do it before creating.
             if options.snapshot_restore:
                 lock.write_lock()
                 valid_snapshots = ListChrootSnapshots(chroot_vg, chroot_lv)
                 if options.snapshot_restore not in valid_snapshots:
                     cros_build_lib.Die(
-                        "%s is not a valid snapshot to restore to. Valid snapshots: %s",
+                        "%s is not a valid snapshot to restore to. "
+                        "Valid snapshots: %s",
                         options.snapshot_restore,
                         ", ".join(valid_snapshots),
                     )
@@ -1341,12 +1348,12 @@ snapshots will be unavailable)."""
                         "Unable to mount restored snapshot onto chroot."
                     )
 
-            # Use a read lock for snapshot delete and create even though they modify
-            # the filesystem, because they don't modify the mounted chroot itself.
-            # The underlying LVM commands take their own locks, so conflicting
-            # concurrent operations here may crash cros_sdk, but won't corrupt the
-            # chroot image.  This tradeoff seems worth it to allow snapshot
-            # operations on chroots that have a process inside.
+            # Use a read lock for snapshot delete and create even though they
+            # modify the filesystem, because they don't modify the mounted
+            # chroot itself. The underlying LVM commands take their own locks,
+            # so conflicting concurrent operations here may crash cros_sdk, but
+            # won't corrupt the chroot image.  This tradeoff seems worth it to
+            # allow snapshot operations on chroots that have a process inside.
             if options.snapshot_delete:
                 lock.read_lock()
                 DeleteChrootSnapshot(
@@ -1397,8 +1404,8 @@ snapshots will be unavailable)."""
                 os._exit(0)  # pylint: disable=protected-access
             os.waitpid(pid, 0)
 
-    # Enter a new set of namespaces.  Everything after here cannot directly affect
-    # the hosts's mounts or alter LVM volumes.
+    # Enter a new set of namespaces.  Everything after here cannot directly
+    # affect the hosts's mounts or alter LVM volumes.
     namespaces.SimpleUnshare(net=options.ns_net, pid=options.ns_pid)
 
     if options.snapshot_list:
@@ -1443,11 +1450,12 @@ snapshots will be unavailable)."""
                 "all instances so this upgrade can finish." % src
             )
             if not os.path.exists(src):
-                # Note that while waiting for the write lock, src may've vanished;
-                # it's a rare race during the upgrade process that's a byproduct
-                # of us avoiding taking a write lock to do the src check.  If we
-                # took a write lock for that check, it would effectively limit
-                # all cros_sdk for a chroot to a single instance.
+                # Note that while waiting for the write lock, src may've
+                # vanished; it's a rare race during the upgrade process that's a
+                # byproduct of us avoiding taking a write lock to do the src
+                # check.  If we took a write lock for that check, it would
+                # effectively limit all cros_sdk for a chroot to a single
+                # instance.
                 osutils.SafeMakedirsNonRoot(target)
             elif not os.path.exists(target):
                 # Upgrade occurred, but a reversion, or something whacky
@@ -1462,9 +1470,9 @@ snapshots will be unavailable)."""
         mounted = False
         if options.create:
             lock.write_lock()
-            # Recheck if the chroot is set up here before creating to make sure we
-            # account for whatever the various delete/unmount/remount steps above
-            # have done.
+            # Recheck if the chroot is set up here before creating to make sure
+            # we account for whatever the various delete/unmount/remount steps
+            # above have done.
             if cros_sdk_lib.IsChrootReady(options.chroot):
                 logging.debug("Chroot already exists.  Skipping creation.")
             else:
