@@ -461,7 +461,7 @@ def _BreadthFirstSearch(to_visit, children, visited_key=lambda x: x):
 
     Args:
       to_visit: the starting nodes
-      children: a function which takes a node and returns the nodes adjacent to it
+      children: a function which takes a node and returns the adjacent nodes
       visited_key: a function for deduplicating node visits. Defaults to the
         identity function (lambda x: x)
 
@@ -481,7 +481,7 @@ def _BreadthFirstSearch(to_visit, children, visited_key=lambda x: x):
 
 
 class ActionDeps(_ActionSearchQuery):
-    """List CLs matching a query, and all transitive dependencies of those CLs"""
+    """List CLs matching a query, and transitive dependencies of those CLs."""
 
     COMMAND = "deps"
 
@@ -528,8 +528,8 @@ class ActionDeps(_ActionSearchQuery):
             # TODO(phobbs) this should maybe catch network errors.
             changes = querier(dep.ToGerritQueryText(), helper=helper)
 
-            # Handle empty results.  If we found a commit that was pushed directly
-            # (e.g. a bot commit), then gerrit won't know about it.
+            # Handle empty results.  If we found a commit that was pushed
+            # directly (e.g. a bot commit), then gerrit won't know about it.
             if not changes:
                 if required:
                     logging.error(
@@ -539,11 +539,12 @@ class ActionDeps(_ActionSearchQuery):
                     )
                 continue
 
-            # Our query might have matched more than one result.  This can come up
-            # when CQ-DEPEND uses a Gerrit Change-Id, but that Change-Id shows up
-            # across multiple repos/branches.  We blindly check all of them in the
-            # hopes that all open ones are what the user wants, but then again the
-            # CQ-DEPEND syntax itself is unable to differentiate.  *shrug*
+            # Our query might have matched more than one result. This can come
+            # up when CQ-DEPEND uses a Gerrit Change-Id, but that Change-Id
+            # shows up across multiple repos/branches. We blindly check all of
+            # them in the hopes that all open ones are what the user wants, but
+            # then again the CQ-DEPEND syntax itself is unable to differentiate.
+            # *shrug*
             if len(changes) > 1:
                 logging.warning(
                     "CL %s has an ambiguous CQ dependency %s",
@@ -1063,9 +1064,9 @@ class ActionCherryPick(UserAction):
 class ActionReview(_ActionSimpleParallelCLs):
     """Review CLs with multiple settings
 
-    The label option supports extended/multiple syntax for easy use.  The --label
-    option may be specified multiple times (as settings are merges), and multiple
-    labels are allowed in a single argument.  Each label has the form:
+    The label option supports extended/multiple syntax for easy use. The --label
+    option may be specified multiple times (as settings are merges), and
+    multiple labels are allowed in a single argument.  Each label has the form:
       <long or short name><=+-><value>
 
     Common arguments:
@@ -1236,8 +1237,8 @@ class ActionConfig(UserAction):
     @staticmethod
     def __call__(opts):
         """Implement the action."""
-        # For now, this is a place holder for raising visibility for the config file
-        # and its associated help text documentation.
+        # For now, this is a place holder for raising visibility for the config
+        # file and its associated help text documentation.
         opts.parser.parse_args(["config", "--help"])
 
 
@@ -1517,8 +1518,8 @@ def main(argv):
 
     config = Config()
     if subargs:
-        # If the action is an alias to an expanded value, we need to mutate the argv
-        # and reparse things.
+        # If the action is an alias to an expanded value, we need to mutate the
+        # argv and reparse things.
         action = config.expand_alias(subargs[0])
         if action != subargs[0]:
             pos = argv.index(subargs[0])

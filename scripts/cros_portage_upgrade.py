@@ -208,9 +208,10 @@ class Upgrader(object):
     def _SaveStatusOnStableRepo(self):
         """Get the 'git status' for everything in |self._stable_repo|.
 
-        The results are saved in a dict at self._stable_repo_status where each key
-        is a file path rooted at |self._stable_repo|, and the value is the status
-        for that file as returned by 'git status -s'.  (e.g. 'A' for 'Added').
+        The results are saved in a dict at self._stable_repo_status where each
+        key is a file path rooted at |self._stable_repo|, and the value is the
+        status for that file as returned by 'git status -s'. (e.g. 'A' for
+        'Added').
         """
         result = self._RunGit(self._stable_repo, ["status", "-s"], stdout=True)
         if result.returncode == 0:
@@ -222,7 +223,8 @@ class Upgrader(object):
                 linesplit = line.split()
                 (status, path) = linesplit[0], linesplit[1]
                 if status == "R":
-                    # Handle a rename as separate 'D' and 'A' statuses.  Example line:
+                    # Handle a rename as separate 'D' and 'A' statuses.
+                    # Example line:
                     # R path/to/foo-1.ebuild -> path/to/foo-2.ebuild
                     statuses[path] = "D"
                     statuses[linesplit[3]] = "A"
@@ -397,8 +399,8 @@ class Upgrader(object):
     def _RunGit(self, cwd, command, stdout=None, stderr=None):
         """Runs git |command| (a list of command tokens) in |cwd|.
 
-        This leverages the cros_build_lib.run function.  The |stdout| and |stderr|
-        arguments are passed to that function.
+        This leverages the cros_build_lib.run function. The |stdout| and
+        |stderr| arguments are passed to that function.
 
         Returns a Result object as documented by cros_build_lib.run.
         Most usefully, the result object has a .stdout attribute containing
@@ -446,9 +448,9 @@ class Upgrader(object):
 
         if portdir is not None:
             envvars["PORTDIR"] = portdir
-            # Since we are clearing PORTDIR, we also have to clear PORTDIR_OVERLAY
-            # as most of those repos refer to the "normal" PORTDIR and will dump a
-            # lot of warnings if it can't be found.
+            # Since we are clearing PORTDIR, we also have to clear
+            # PORTDIR_OVERLAY as most of those repos refer to the "normal"
+            # PORTDIR and will dump a lot of warnings if it can't be found.
             envvars["PORTDIR_OVERLAY"] = portdir
         if portage_configroot is not None:
             envvars["PORTAGE_CONFIGROOT"] = portage_configroot
@@ -477,7 +479,8 @@ class Upgrader(object):
             portage_configroot=self._emptydir,
         )
 
-        # Point equery to the upstream source to get latest version for keywords.
+        # Point equery to the upstream source to get latest version for
+        # keywords.
         equery = ["equery", "which", pkg]
         cmd_result = cros_build_lib.run(
             equery,
@@ -599,7 +602,7 @@ class Upgrader(object):
 
         Essentially, this verifies that the upgraded ebuild in portage-stable
         is indeed the one being picked up, rather than some other ebuild with
-        the same version in another overlay.  Unless |was_overwrite| (see below).
+        the same version in another overlay. Unless |was_overwrite| (see below).
 
         If |was_overwrite| then this upgrade was an overwrite of an existing
         package version (via --force) and it is possible the previous package
@@ -645,13 +648,15 @@ class Upgrader(object):
         """Return eclass that must be upgraded for this |cpv|."""
         # Try to detect two cases:
         # 1) The upgraded package uses an eclass not in local source, yet.
-        # 2) The upgraded package needs one or more eclasses to also be upgraded.
+        # 2) The upgraded package needs one or more eclasses to be upgraded too.
 
         # Use the output of 'equery which'.
-        # If a needed eclass cannot be found, then the output will have lines like:
+        # If a needed eclass cannot be found, then the output will have lines
+        # like:
         # * ERROR: app-admin/eselect-1.2.15 failed (depend phase):
         # *   bash-completion-r1.eclass could not be found by inherit()
 
+        # pylint: disable=line-too-long
         # If a needed eclass must be upgraded, the output might have the eclass
         # in the call stack (... used for long paths):
         # * Call stack:
@@ -662,6 +667,7 @@ class Upgrader(object):
         # *           vim.eclass, line   40:  Called die
         # * The specific snippet of code:
         # *       die "Unknown EAPI ${EAPI}"
+        # pylint: enable=line-too-long
 
         envvars = self._GenPortageEnvvars(self._curr_arch, unstable_ok=True)
 
@@ -917,8 +923,9 @@ class Upgrader(object):
         # Gather status details for this package
         if pinfo.cpv_cmp_upstream is None:
             # No upstream cpv to compare to (although this might include a
-            # a restriction to only stable upstream versions).  This is concerning
-            # if the package is coming from 'portage' or 'portage-stable' overlays.
+            # restriction to only stable upstream versions). This is concerning
+            # if the package is coming from 'portage' or 'portage-stable'
+            # overlays.
             if locally_patched and pinfo.latest_upstream_cpv is None:
                 state = utable.UpgradeTable.STATE_LOCAL_ONLY
             elif not cpv:
@@ -956,8 +963,9 @@ class Upgrader(object):
             utable.UpgradeTable.STATE_NEEDS_UPGRADE: " -> %s" % upstream_cpv,
             utable.UpgradeTable.STATE_NEEDS_UPGRADE_AND_PATCHED: " <-> %s"
             % upstream_cpv,
-            utable.UpgradeTable.STATE_NEEDS_UPGRADE_AND_DUPLICATED: " (locally duplicated) <-> %s"
-            % upstream_cpv,
+            utable.UpgradeTable.STATE_NEEDS_UPGRADE_AND_DUPLICATED: (
+                " (locally duplicated) <-> %s" % upstream_cpv
+            ),
             utable.UpgradeTable.STATE_PATCHED: " <- %s" % upstream_cpv,
             utable.UpgradeTable.STATE_DUPLICATED: " (locally duplicated)",
             utable.UpgradeTable.STATE_CURRENT: " (current)",
@@ -1036,8 +1044,8 @@ class Upgrader(object):
             catpkg, unstable_ok=True
         )
 
-        # The upstream version can be either latest stable or latest overall,
-        # or specified explicitly by the user at the command line.  In the latter
+        # The upstream version can be either latest stable or latest overall, or
+        # specified explicitly by the user at the command line. In the latter
         # case, 'upstream_cpv' will already be set.
         if not pinfo.upstream_cpv:
             if not self._unstable_ok:
@@ -1049,7 +1057,8 @@ class Upgrader(object):
         pinfo.cpv_cmp_upstream = None
         pinfo.upgraded_cpv = None
         if pinfo.upstream_cpv:
-            # cpv_cmp_upstream values: 0 = current, >0 = outdated, <0 = futuristic!
+            # cpv_cmp_upstream values:
+            #   0 = current, >0 = outdated, <0 = futuristic!
             pinfo.cpv_cmp_upstream = Upgrader._CmpCpv(pinfo.upstream_cpv, cpv)
 
             # Determine whether upgrade of this package is requested.
@@ -1086,8 +1095,9 @@ class Upgrader(object):
             )
 
         if pinfo.upgraded_cpv:
-            # Deal with keywords now.  We always run this logic as we sometimes will
-            # stabilizing keywords other than just our own (the unsupported arches).
+            # Deal with keywords now. We always run this logic as we sometimes
+            # will stabilizing keywords other than just our own (the unsupported
+            # arches).
             self._SetUpgradedMaskBits(pinfo)
             ebuild_path = Upgrader._GetEbuildPathFromCpv(pinfo.upgraded_cpv)
             self._StabilizeEbuild(os.path.join(self._stable_repo, ebuild_path))
@@ -1101,7 +1111,7 @@ class Upgrader(object):
         return bool(pinfo.upgraded_cpv)
 
     def _UpdateCategories(self, pinfo):
-        """Update profiles/categories to include category in |pinfo|, if needed."""
+        """Update profiles/categories to include category in |pinfo|."""
 
         if pinfo.category not in self._stable_repo_categories:
             self._stable_repo_categories.add(pinfo.category)
@@ -1143,7 +1153,7 @@ class Upgrader(object):
         return sorted(pkgs)
 
     def _CreateCommitMessage(self, upgrade_lines, remaining_lines=None):
-        """Create appropriate git commit message for upgrades in |upgrade_lines|."""
+        """Create appropriate commit message for upgrades in |upgrade_lines|."""
         message = None
         upgrade_pkgs = self._ExtractUpgradedPkgs(upgrade_lines)
         upgrade_count = len(upgrade_pkgs)
@@ -1161,15 +1171,15 @@ class Upgrader(object):
             # Keep previous remaining lines verbatim.
             message += "\n%s\n" % "\n".join(remaining_lines)
         else:
-            # The space before <fill-in> (at least for TEST=) fails pre-submit check,
-            # which is the intention here.
+            # The space before <fill-in> (at least for TEST=) fails pre-submit
+            # check, which is the intention here.
             message += "\nBUG= <fill-in>"
             message += "\nTEST= <fill-in>"
 
         return message
 
     def _AmendCommitMessage(self, upgrade_lines):
-        """Create git commit message combining |upgrade_lines| with last commit."""
+        """Create commit message combining |upgrade_lines| with last commit."""
         # First get the body of the last commit message.
         git_cmd = ["show", "-s", "--format=%b"]
         result = self._RunGit(self._stable_repo, git_cmd, stdout=True)
@@ -1273,10 +1283,11 @@ class Upgrader(object):
                     self._upgrade_cnt += 1
                     upgrades_this_run = True
 
-            # The verification of upgrades needs to happen after upgrades are done.
-            # The reason is that it cannot be guaranteed that pinfolist is ordered
-            # such that dependencies are satisified after each individual upgrade,
-            # because one or more of the packages may only exist upstream.
+            # The verification of upgrades needs to happen after upgrades are
+            # done. The reason is that it cannot be guaranteed that pinfolist is
+            # ordered such that dependencies are satisified after each
+            # individual upgrade, because one or more of the packages may only
+            # exist upstream.
             for pinfo in pinfolist:
                 if pinfo.upgraded_cpv:
                     self._VerifyPackageUpgrade(pinfo)
@@ -1287,8 +1298,8 @@ class Upgrader(object):
                 self._GiveEmergeResults(pinfolist)
 
             if self._IsInUpgradeMode():
-                # If there were any ebuilds staged before running this script, then
-                # make sure they were targeted in pinfolist.  If not, abort.
+                # If there were any ebuilds staged before running this script,
+                # then make sure they were targeted in pinfolist. If not, abort.
                 self._CheckStagedUpgrades(pinfolist)
         except RuntimeError as ex:
             oper.Error(str(ex))
@@ -1298,18 +1309,19 @@ class Upgrader(object):
                 " cd %s; git reset --hard; cd -"
                 % (self._stable_repo, self._stable_repo)
             )
-            # Allow the changes to stay staged so that the user can attempt to address
-            # the issue (perhaps an edit to package.mask is required, or another
-            # package must also be upgraded).
+            # Allow the changes to stay staged so that the user can attempt to
+            # address the issue (perhaps an edit to package.mask is required, or
+            # another package must also be upgraded).
 
     def _CheckStagedUpgrades(self, pinfolist):
         """Raise RuntimeError if staged upgrades are not also in |pinfolist|."""
-        # This deals with the situation where a previous upgrade run staged one or
-        # more package upgrades, but did not commit them because it found an error
-        # of some kind.  This is ok, as long as subsequent runs continue to request
-        # an upgrade of that package again (presumably with the problem fixed).
-        # However, if a subsequent run does not mention that package then it should
-        # abort.  The user must reset those staged changes first.
+        # This deals with the situation where a previous upgrade run staged one
+        # or more package upgrades, but did not commit them because it found an
+        # error of some kind.  This is ok, as long as subsequent runs continue
+        # to request an upgrade of that package again (presumably with the
+        # problem fixed). However, if a subsequent run does not mention that
+        # package then it should abort.  The user must reset those staged
+        # changes first.
 
         if self._stable_repo_status:
             err_msgs = []
@@ -1324,7 +1336,8 @@ class Upgrader(object):
                 (_overlay, cat, pn, _pv) = self._SplitEBuildPath(ebuild)
                 package = "%s/%s" % (cat, pn)
 
-                # As long as this package is involved in an upgrade this is fine.
+                # As long as this package is involved in an upgrade this is
+                # fine.
                 matching_pinfos = [
                     pi for pi in pinfolist if pi.package == package
                 ]
@@ -1342,7 +1355,7 @@ class Upgrader(object):
                 )
 
     def _GenParallelEmergeArgv(self, args):
-        """Creates an argv for parallel_emerge using current options and |args|."""
+        """Create argv for parallel_emerge using current options and |args|."""
         argv = ["--emptytree", "--pretend"]
         if self._curr_board and self._curr_board != self.HOST_BOARD:
             argv.append("--board=%s" % self._curr_board)
@@ -1495,9 +1508,9 @@ class Upgrader(object):
     def _ResolveAndVerifyArgs(self, args, upgrade_mode):
         """Resolve |args| to full pkgs, and check validity of each.
 
-        Each argument will be resolved to a full category/packagename, if possible,
-        by looking in both the local overlays and the upstream overlay.  Any
-        argument that cannot be resolved will raise a RuntimeError.
+        Each argument will be resolved to a full category/packagename, if
+        possible, by looking in both the local overlays and the upstream
+        overlay. Any argument that cannot be resolved will raise a RuntimeError.
 
         Arguments that specify a specific version of a package are only
         allowed when |upgrade_mode| is True.
@@ -1522,8 +1535,8 @@ class Upgrader(object):
             pinfo = PInfo(user_arg=arg)
 
             if arg == WORLD_TARGET:
-                # The 'world' target is a special case.  Consider it a valid target
-                # locally, but not an upstream package.
+                # The 'world' target is a special case. Consider it a valid
+                # target locally, but not an upstream package.
                 pinfo.package = arg
                 pinfo.package_name = arg
                 pinfo.category = None
@@ -1539,27 +1552,29 @@ class Upgrader(object):
                         '"%s".' % arg
                     )
 
-                # Local cpv search ignores version in argument, if any.  If version is
-                # in argument, though, it *must* be found upstream.
+                # Local cpv search ignores version in argument, if any. If
+                # version is in argument, though, it *must* be found upstream.
                 local_arg = catpkg if catpkg else arg
 
                 local_cpv = self._FindCurrentCPV(local_arg)
                 upstream_cpv = self._FindUpstreamCPV(arg, self._unstable_ok)
 
-                # Old-style virtual packages will resolve to their target packages,
-                # which we do not want here because if the package 'virtual/foo' was
-                # specified at the command line we want to try upgrading the actual
-                # 'virtual/foo' package, not whatever package equery resolves it to.
-                # This only matters when 'virtual/foo' is currently an old-style
-                # virtual but a new-style virtual for it exists upstream which we
-                # want to upgrade to.  For new-style virtuals, equery will resolve
+                # Old-style virtual packages will resolve to their target
+                # packages, which we do not want here because if the package
+                # 'virtual/foo' was specified at the command line we want to try
+                # upgrading the actual 'virtual/foo' package, not whatever
+                # package equery resolves it to. This only matters when
+                # 'virtual/foo' is currently an old-style virtual but a
+                # new-style virtual for it exists upstream which we want to
+                # upgrade to.  For new-style virtuals, equery will resolve
                 # 'virtual/foo' to 'virtual/foo', which is fine.
                 if arg.startswith("virtual/"):
                     if local_cpv and not local_cpv.startswith("virtual/"):
                         local_cpv = None
 
                 if not upstream_cpv and upgrade_mode:
-                    # See if --unstable-ok is required for this upstream version.
+                    # See if --unstable-ok is required for this upstream
+                    # version.
                     if not self._unstable_ok and self._FindUpstreamCPV(
                         arg, True
                     ):
@@ -1576,8 +1591,8 @@ class Upgrader(object):
                 any_cpv = local_cpv if local_cpv else upstream_cpv
                 if not any_cpv:
                     msg = (
-                        'Unable to resolve "%s" as a package either local or upstream.'
-                        % arg
+                        f'Unable to resolve "{arg}" as a package either local '
+                        "or upstream."
                     )
                     if arg.find("/") < 0:
                         msg = (
@@ -1662,8 +1677,8 @@ class Upgrader(object):
                     % self._upstream
                 )
             else:
-                # Recheck the pathway; it's possible in switching off alternates,
-                # this was converted down to a depth=1 repo.
+                # Recheck the pathway; it's possible in switching off
+                # alternates, this was converted down to a depth=1 repo.
 
                 oper.Notice(
                     "Updating previously created upstream cache at %s."
@@ -1780,8 +1795,9 @@ class Upgrader(object):
                     # This package has been upgraded for this arch.
                     upgraded_versarch.setdefault(upgraded_ver, []).append(arch)
 
-                    # Save the overlay this package is originally from, if the overlay
-                    # is not a Portage overlay (e.g. chromiumos-overlay).
+                    # Save the overlay this package is originally from, if the
+                    # overlay is not a Portage overlay (e.g.
+                    # chromiumos-overlay).
                     ovrly_col = utable.UpgradeTable.COL_OVERLAY
                     ovrly_col = utable.UpgradeTable.GetColumnName(
                         ovrly_col, arch
@@ -1819,8 +1835,9 @@ class Upgrader(object):
                 " but message needs edit BY YOU:\n"
                 " cd %s; git commit --amend; cd -" % self._stable_repo
             )
-            # See if any upgraded packages are in non-portage overlays now, meaning
-            # they probably require a patch and should not go into portage-stable.
+            # See if any upgraded packages are in non-portage overlays now,
+            # meaning they probably require a patch and should not go into
+            # portage-stable.
             if pkg_overlays:
                 lines = ["%s [%s]" % (p, pkg_overlays[p]) for p in pkg_overlays]
                 oper.Warning(
@@ -1860,9 +1877,10 @@ class Upgrader(object):
         Currently just lists all package dependencies in pre-order along with
         potential upgrades.
         """
-        # Preserve status report for entire stable repo (output of 'git status -s').
+        # Preserve status report for entire stable repo (output of
+        # 'git status -s').
         self._SaveStatusOnStableRepo()
-        # Read contents of profiles/categories for later checks
+        # Read contents of profiles/categories for later checks.
         self._LoadStableRepoCategories()
 
         self._porttree = None
@@ -1886,8 +1904,8 @@ class Upgrader(object):
                 pi for pi in target_pinfolist if not pi.cpv
             ]
             if not upgrade_mode and upstream_only_pinfolist:
-                # This means that not all arguments were found in local source, which is
-                # only allowed in upgrade mode.
+                # This means that not all arguments were found in local source,
+                # which is only allowed in upgrade mode.
                 msg = (
                     "The following packages were not found in current overlays"
                     " (but they do exist upstream):\n%s"

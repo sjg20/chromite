@@ -88,8 +88,8 @@ def main(argv):
             parser = GetOptions(namespace.help_subcommand)
             parser.parse_args([namespace.help_subcommand, "--help"])
 
-        # The user has selected a subcommand now, so get the full parser after we
-        # import the single subcommand.
+        # The user has selected a subcommand now, so get the full parser after
+        # we import the single subcommand.
         parser = GetOptions(namespace.subcommand)
         namespace = parser.parse_args(argv)
         namespace.command_class.ProcessOptions(parser, namespace)
