@@ -255,9 +255,9 @@ class Crossdev(object):
         """Calls crossdev to initialize a cross target.
 
         Args:
-          targets: The dict of targets to initialize using crossdev.
-          usepkg: Copies the commandline opts.
-          config_only: Just update.
+            targets: The dict of targets to initialize using crossdev.
+            usepkg: Copies the commandline opts.
+            config_only: Just update.
         """
         configured_targets = cls._CACHE.setdefault("configured_targets", [])
         started_targets = set()
@@ -281,10 +281,10 @@ class Crossdev(object):
         """Calls crossdev to initialize a cross target.
 
         Args:
-          target_name: The name of the target to initialize.
-          target: The target info for initializing.
-          usepkg: Copies the commandline opts.
-          config_only: Just update.
+            target_name: The name of the target to initialize.
+            target: The target info for initializing.
+            usepkg: Copies the commandline opts.
+            config_only: Just update.
         """
         configured_targets = cls._CACHE.setdefault("configured_targets", [])
         cmdbase = ["crossdev", "--show-fail-log"]
@@ -373,11 +373,11 @@ def GetInstalledPackageVersions(atom, root="/"):
     """Extracts the list of current versions of a target, package pair.
 
     Args:
-      atom: The atom to operate on (e.g. sys-devel/gcc)
-      root: The root to check for installed packages.
+        atom: The atom to operate on (e.g. sys-devel/gcc)
+        root: The root to check for installed packages.
 
     Returns:
-      The list of versions of the package currently installed.
+        The list of versions of the package currently installed.
     """
     versions = []
     for pkg in PortageTrees(root)["vartree"].dbapi.match(atom, use_cache=0):
@@ -390,12 +390,12 @@ def GetStablePackageVersion(atom, installed, root="/"):
     """Extracts the current stable version for a given package.
 
     Args:
-      atom: The target/package to operate on e.g. i686-cros-linux-gnu/gcc
-      installed: Whether we want installed packages or ebuilds
-      root: The root to use when querying packages.
+        atom: The target/package to operate on e.g. i686-cros-linux-gnu/gcc
+        installed: Whether we want installed packages or ebuilds
+        root: The root to use when querying packages.
 
     Returns:
-      A string containing the latest version.
+        A string containing the latest version.
     """
     pkgtype = "vartree" if installed else "porttree"
     cpv = portage.best(
@@ -410,14 +410,14 @@ def VersionListToNumeric(target, package, versions, installed, root="/"):
     Resolving means replacing PACKAGE_STABLE with the actual number.
 
     Args:
-      target: The target to operate on (e.g. i686-cros-linux-gnu)
-      package: The target/package to operate on (e.g. gcc)
-      versions: List of versions to resolve
-      installed: Query installed packages
-      root: The install root to use; ignored if |installed| is False.
+        target: The target to operate on (e.g. i686-cros-linux-gnu)
+        package: The target/package to operate on (e.g. gcc)
+        versions: List of versions to resolve
+        installed: Query installed packages
+        root: The install root to use; ignored if |installed| is False.
 
     Returns:
-      List of purely numeric versions equivalent to argument
+        List of purely numeric versions equivalent to argument
     """
     resolved = []
     atom = GetPortagePackage(target, package)
@@ -443,11 +443,11 @@ def GetDesiredPackageVersions(target, package):
     mean 'unstable' in most cases.
 
     Args:
-      target: The target to operate on (e.g. i686-cros-linux-gnu)
-      package: The target/package to operate on (e.g. gcc)
+        target: The target to operate on (e.g. i686-cros-linux-gnu)
+        package: The target/package to operate on (e.g. gcc)
 
     Returns:
-      A list composed of either a version string, PACKAGE_STABLE
+        A list composed of either a version string, PACKAGE_STABLE
     """
     if package in GetTargetPackages(target):
         return [PACKAGE_STABLE]
@@ -463,10 +463,10 @@ def TargetIsInitialized(target):
     preferred, because all packages can be updated in a single pass.
 
     Args:
-      target: The target to operate on (e.g. i686-cros-linux-gnu)
+        target: The target to operate on (e.g. i686-cros-linux-gnu)
 
     Returns:
-      True if |target| is completely initialized, else False
+        True if |target| is completely initialized, else False
     """
     # Check if packages for the given target all have a proper version.
     try:
@@ -490,7 +490,7 @@ def RemovePackageMask(target):
     The pre-existing package.mask files can mess with the keywords.
 
     Args:
-      target: The target to operate on (e.g. i686-cros-linux-gnu)
+        target: The target to operate on (e.g. i686-cros-linux-gnu)
     """
     maskfile = os.path.join("/etc/portage/package.mask", "cross-" + target)
     osutils.SafeUnlink(maskfile)
@@ -505,7 +505,7 @@ def RebuildLibtool(root="/"):
     most likely be compiled against the previous version of gcc.
 
     Args:
-      root: The install root where we want libtool rebuilt.
+        root: The install root where we want libtool rebuilt.
     """
     needs_update = False
     with open(os.path.join(root, "usr/bin/libtool")) as f:
@@ -542,9 +542,9 @@ def UpdateTargets(targets, usepkg, root="/"):
     """Determines which packages need update/unmerge and defers to portage.
 
     Args:
-      targets: The list of targets to update
-      usepkg: Copies the commandline option
-      root: The install root in which we want packages updated.
+        targets: The list of targets to update
+        usepkg: Copies the commandline option
+        root: The install root in which we want packages updated.
     """
     # For each target, we do two things. Figure out the list of updates,
     # and figure out the appropriate keywords/masks. Crossdev will initialize
@@ -558,7 +558,8 @@ def UpdateTargets(targets, usepkg, root="/"):
     for target in targets:
         is_post_cross_target = target.endswith("-post-cross")
         logging.debug("Updating target %s", target)
-        # Record the highest needed version for each target, for masking purposes.
+        # Record the highest needed version for each target, for masking
+        # purposes.
         RemovePackageMask(target)
         for package in GetTargetPackages(target):
             # Portage name for the package
@@ -610,8 +611,8 @@ def CleanTargets(targets, root="/"):
     """Unmerges old packages that are assumed unnecessary.
 
     Args:
-      targets: The list of targets to clean up.
-      root: The install root in which we want packages cleaned up.
+        targets: The list of targets to clean up.
+        root: The install root in which we want packages cleaned up.
     """
     unmergemap = {}
     for target in targets:
@@ -622,12 +623,12 @@ def CleanTargets(targets, root="/"):
             current = GetInstalledPackageVersions(pkg, root=root)
             desired = GetDesiredPackageVersions(target, package)
             # NOTE: This refers to installed packages (vartree) rather than the
-            # Portage version (porttree and/or bintree) when determining the current
-            # version. While this isn't the most accurate thing to do, it is probably
-            # a good simple compromise, which should have the desired result of
-            # uninstalling everything but the latest installed version. In
-            # particular, using the bintree (--usebinpkg) requires a non-trivial
-            # binhost sync and is probably more complex than useful.
+            # Portage version (porttree and/or bintree) when determining the
+            # current version. While this isn't the most accurate thing to do,
+            # it is probably a good simple compromise, which should have the
+            # desired result of uninstalling everything but the latest installed
+            # version. In particular, using the bintree (--usebinpkg) requires a
+            # non-trivial binhost sync and is probably more complex than useful.
             desired_num = VersionListToNumeric(target, package, desired, True)
             if not set(desired_num).issubset(current):
                 logging.warning(
@@ -658,8 +659,8 @@ def SelectActiveToolchains(targets, root="/"):
     """Runs gcc-config and binutils-config to select the desired.
 
     Args:
-      targets: The targets to select
-      root: The root where we want to select toolchain versions.
+        targets: The targets to select
+        root: The root where we want to select toolchain versions.
     """
     for package in ["gcc", "binutils"]:
         for target in targets:
@@ -678,7 +679,8 @@ def SelectActiveToolchains(targets, root="/"):
             desired = portage.versions.pkgsplit("%s-%s" % (package, desired))[1]
 
             if target.startswith("host"):
-                # *-config is the only tool treating host identically (by tuple).
+                # *-config is the only tool treating host identically (by
+                # tuple).
                 target = toolchain.GetHostTuple()
 
             # And finally, attach target to it.
@@ -697,7 +699,8 @@ def SelectActiveToolchains(targets, root="/"):
             )
             current = result.stdout.splitlines()[0]
 
-            # Do not reconfig when the current is live or nothing needs to be done.
+            # Do not reconfig when the current is live or nothing needs to be
+            # done.
             extra_env = {"ROOT": root} if root != "/" else None
             if current != desired and current != "9999":
                 cmd = [package + "-config", desired]
@@ -710,10 +713,10 @@ def ExpandTargets(targets_wanted):
     This will expand 'all' and 'sdk' into the respective toolchain tuples.
 
     Args:
-      targets_wanted: The targets specified by the user.
+        targets_wanted: The targets specified by the user.
 
     Returns:
-      Dictionary of concrete targets and their toolchain tuples.
+        Dictionary of concrete targets and their toolchain tuples.
     """
     targets_wanted = set(targets_wanted)
     if targets_wanted == set(["boards"]):
@@ -747,13 +750,13 @@ def UpdateToolchains(
     """Performs all steps to create a synchronized toolchain enviroment.
 
     Args:
-      usepkg: Use prebuilt packages
-      deleteold: Unmerge deprecated packages
-      hostonly: Only setup the host toolchain
-      reconfig: Reload crossdev config and reselect toolchains
-      targets_wanted: All the targets to update
-      boards_wanted: Load targets from these boards
-      root: The root in which to install the toolchains.
+        usepkg: Use prebuilt packages
+        deleteold: Unmerge deprecated packages
+        hostonly: Only setup the host toolchain
+        reconfig: Reload crossdev config and reselect toolchains
+        targets_wanted: All the targets to update
+        boards_wanted: Load targets from these boards
+        root: The root in which to install the toolchains.
     """
     targets, crossdev_targets, reconfig_targets = {}, {}, {}
     if not hostonly:
@@ -785,9 +788,10 @@ def UpdateToolchains(
         # Those that were not initialized may need a config update.
         Crossdev.UpdateTargets(reconfig_targets, usepkg, config_only=True)
 
-        # If we're building a subset of toolchains for a board, we might not have
-        # all the tuples that the packages expect.  We don't define the "full" set
-        # of tuples currently other than "whatever the full sdk has normally".
+        # If we're building a subset of toolchains for a board, we might not
+        # have all the tuples that the packages expect.  We don't define the
+        # "full" set of tuples currently other than "whatever the full sdk has
+        # normally".
         if usepkg or set(("all", "sdk")) & targets_wanted:
             # Since we have cross-compilers now, we can update these packages.
             targets["host-post-cross"] = {}
@@ -815,7 +819,7 @@ def ShowConfig(name):
     """Show the toolchain tuples used by |name|
 
     Args:
-      name: The board name to query.
+        name: The board name to query.
     """
     toolchains = toolchain.GetToolchainsForBoard(name)
     # Make sure we display the default toolchain first.
@@ -836,9 +840,9 @@ def GeneratePathWrapper(root, wrappath, path):
     just executes another program with its full path.
 
     Args:
-      root: The root tree to generate scripts inside of
-      wrappath: The full path (inside |root|) to create the wrapper
-      path: The target program which this wrapper will execute
+        root: The root tree to generate scripts inside of
+        wrappath: The full path (inside |root|) to create the wrapper
+        path: The target program which this wrapper will execute
     """
     replacements = {
         "path": path,
@@ -846,9 +850,9 @@ def GeneratePathWrapper(root, wrappath, path):
     }
 
     # Do not use exec here, because exec invokes script with absolute path in
-    # argv0. Keeping relativeness allows us to remove abs path from compile result
-    # and leads directory independent build cache sharing in some distributed
-    # build system.
+    # argv0. Keeping relativeness allows us to remove abs path from compile
+    # result and leads directory independent build cache sharing in some
+    # distributed build system.
     wrapper = (
         """#!/bin/sh
 basedir=$(dirname "$0")
@@ -873,8 +877,8 @@ def FixClangXXWrapper(root, path):
     elf executable. The executable distinguishes between clang and clang++ based
     on argv[0].
 
-    When invoked through the LdsoWrapper, argv[0] always contains the path to the
-    executable elf file, making clang/clang++ invocations indistinguishable.
+    When invoked through the LdsoWrapper, argv[0] always contains the path to
+    the executable elf file, making clang/clang++ invocations indistinguishable.
 
     This function detects if the elf executable being wrapped is clang-X.Y, and
     fixes wrappers/symlinks as necessary so that clang++ will work correctly.
@@ -892,8 +896,8 @@ def FixClangXXWrapper(root, path):
     both clang-7 and clang-7.0 cases for now. (https://crbug.com/837889)
 
     Args:
-      root: The root tree to generate scripts / symlinks inside of
-      path: The target elf for which LdsoWrapper was created
+        root: The root tree to generate scripts / symlinks inside of
+        path: The target elf for which LdsoWrapper was created
     """
     if re.match(r"/usr/bin/clang-\d+(\.\d+)*$", path):
         logging.info("fixing clang++ invocation for %s", path)
@@ -919,10 +923,10 @@ def FileIsCrosSdkElf(elf):
     is a 64bit LSB x86_64 ELF.  That is the native type of cros_sdk.
 
     Args:
-      elf: The file to check
+        elf: The file to check
 
     Returns:
-      True if we think |elf| is a native ELF
+        True if we think |elf| is a native ELF
     """
     with open(elf, "rb") as f:
         data = f.read(20)
@@ -947,11 +951,11 @@ def IsPathPackagable(ptype, path):
        native docs should work fine for the most part (`man gcc`)
 
     Args:
-      ptype: A string describing the path type (i.e. 'file' or 'dir' or 'sym')
-      path: The full path to inspect
+        ptype: A string describing the path type (i.e. 'file' or 'dir' or 'sym')
+        path: The full path to inspect
 
     Returns:
-      True if we want to include this path in the package
+        True if we want to include this path in the package
     """
     return not (
         ptype in ("dir",)
@@ -965,11 +969,11 @@ def ReadlinkRoot(path, root):
     """Like os.readlink(), but relative to a |root|
 
     Args:
-      path: The symlink to read
-      root: The path to use for resolving absolute symlinks
+        path: The symlink to read
+        root: The path to use for resolving absolute symlinks
 
     Returns:
-      A fully resolved symlink path
+        A fully resolved symlink path
     """
     while os.path.islink(root + path):
         path = os.path.join(os.path.dirname(path), os.readlink(root + path))
@@ -982,12 +986,12 @@ def _GetFilesForTarget(target, root="/"):
     This does not cover ELF dependencies.
 
     Args:
-      target: The toolchain target name
-      root: The root path to pull all packages from
+        target: The toolchain target name
+        root: The root path to pull all packages from
 
     Returns:
-      A tuple of a set of all packable paths, and a set of all paths which
-      are also native ELFs
+        A tuple of a set of all packable paths, and a set of all paths which
+        are also native ELFs
     """
     paths = set()
     elfs = set()
@@ -1010,14 +1014,13 @@ def _GetFilesForTarget(target, root="/"):
             continue
 
         # Use armv7a-cros-linux-gnueabi/compiler-rt for
-        # armv7a-cros-linux-gnueabihf/compiler-rt.
-        # Currently the armv7a-cros-linux-gnueabi is actually
-        # the same as armv7a-cros-linux-gnueabihf with different names.
-        # Because of that, for compiler-rt, it generates the same binary in
-        # the same location. To avoid the installation conflict, we do not
-        # install anything for 'armv7a-cros-linux-gnueabihf'. This would cause
-        # problem if other people try to use standalone armv7a-cros-linux-gnueabihf
-        # toolchain.
+        # armv7a-cros-linux-gnueabihf/compiler-rt. Currently the
+        # armv7a-cros-linux-gnueabi is actually the same as
+        # armv7a-cros-linux-gnueabihf with different names. Because of that, for
+        # compiler-rt, it generates the same binary in the same location. To
+        # avoid the installation conflict, we do not install anything for
+        # 'armv7a-cros-linux-gnueabihf'. This would cause problem if other
+        # people try to use standalone armv7a-cros-linux-gnueabihf toolchain.
         if "compiler-rt" in pkg and "armv7a-cros-linux-gnueabi" in target:
             atom = GetPortagePackage(target, pkg)
             cat, pn = atom.split("/")
@@ -1067,12 +1070,12 @@ def _BuildInitialPackageRoot(
     This also wraps up executable ELFs with helper scripts.
 
     Args:
-      output_dir: The output directory to store files
-      paths: All the files to include
-      elfs: All the files which are ELFs (a subset of |paths|)
-      ldpaths: A dict of static ldpath information
-      path_rewrite_func: User callback to rewrite paths in output_dir
-      root: The root path to pull all packages/files from
+        output_dir: The output directory to store files
+        paths: All the files to include
+        elfs: All the files which are ELFs (a subset of |paths|)
+        ldpaths: A dict of static ldpath information
+        path_rewrite_func: User callback to rewrite paths in output_dir
+        root: The root path to pull all packages/files from
     """
     # Link in all the files.
     sym_paths = {}
@@ -1090,8 +1093,8 @@ def _BuildInitialPackageRoot(
             if os.path.sep in tgt:
                 sym_paths[lddtree.normpath(ReadlinkRoot(src, root))] = new_path
 
-                # Rewrite absolute links to relative and then generate the symlink
-                # ourselves.  All other symlinks can be hardlinked below.
+                # Rewrite absolute links to relative and then generate the
+                # symlink ourselves. All other symlinks can be hardlinked below.
                 if tgt[0] == "/":
                     tgt = os.path.relpath(tgt, os.path.dirname(new_path))
                     os.symlink(tgt, dst)
@@ -1114,11 +1117,12 @@ def _BuildInitialPackageRoot(
         logging.debug("Parsed elf %s data: %s", elf, e)
         interp = e["interp"]
 
-        # TODO(crbug.com/917193): Drop this hack once libopcodes linkage is fixed.
+        # TODO(b/187786323): Drop this hack once libopcodes linkage is fixed.
         if os.path.basename(elf).startswith("libopcodes-"):
             continue
 
-        # Copy all the dependencies before we copy the program & generate wrappers.
+        # Copy all the dependencies before we copy the program & generate
+        # wrappers.
         for lib, lib_data in e["libs"].items():
             src = path = lib_data["path"]
             if path is None:
@@ -1130,7 +1134,8 @@ def _BuildInitialPackageRoot(
                 continue
             donelibs.add(path)
 
-            # Die if we try to normalize different source libs with the same basename.
+            # Die if we try to normalize different source libs with the same
+            # basename.
             if lib in basenamelibs:
                 logging.error(
                     "Multiple sources detected for %s:\n  new: %s\n  old: %s",
@@ -1180,11 +1185,11 @@ def _EnvdGetVar(envd, var):
     """Given a Gentoo env.d file, extract a var from it
 
     Args:
-      envd: The env.d file to load (may be a glob path)
-      var: The var to extract
+        envd: The env.d file to load (may be a glob path)
+        var: The var to extract
 
     Returns:
-      The value of |var|
+        The value of |var|
     """
     envds = glob.glob(envd)
     assert len(envds) == 1, "%s: should have exactly 1 env.d file" % envd
@@ -1319,8 +1324,8 @@ def _ProcessDistroCleanups(target, output_dir):
     """Clean up the tree and remove all distro-specific requirements
 
     Args:
-      target: The toolchain target name
-      output_dir: The output directory to clean up
+        target: The toolchain target name
+        output_dir: The output directory to clean up
     """
     _ProcessBinutilsConfig(target, output_dir)
     gcc_path = _ProcessGccConfig(target, output_dir)
@@ -1339,10 +1344,10 @@ def CreatePackagableRoot(target, output_dir, ldpaths, root="/"):
     a tarball can easily be generated from the result.
 
     Args:
-      target: The target to create a packagable root from
-      output_dir: The output directory to place all the files
-      ldpaths: A dict of static ldpath information
-      root: The root path to pull all packages/files from
+        target: The target to create a packagable root from
+        output_dir: The output directory to place all the files
+        ldpaths: A dict of static ldpath information
+        root: The root path to pull all packages/files from
     """
     # Find all the files owned by the packages for this target.
     paths, elfs = _GetFilesForTarget(target, root=root)
@@ -1352,7 +1357,7 @@ def CreatePackagableRoot(target, output_dir, ldpaths, root="/"):
     def MoveUsrBinToBin(path):
         """Move /usr/bin to /bin so people can just use that toplevel dir
 
-        Note we do not apply this to clang or rust - there is correlation between
+        Note we do not apply this to clang or rust; there is correlation between
         clang's search path for libraries / inclusion and its installation path.
         """
         NO_MOVE_PATTERNS = ("clang", "rust", "cargo", "sysroot_wrapper")
@@ -1386,9 +1391,9 @@ def CreatePackages(targets_wanted, output_dir, root="/"):
     Tarballs (one per target) will be created in $PWD.
 
     Args:
-      targets_wanted: The targets to package up.
-      output_dir: The directory to put the packages in.
-      root: The root path to pull all packages/files from.
+        targets_wanted: The targets to package up.
+        output_dir: The directory to put the packages in.
+        root: The root path to pull all packages/files from.
     """
     logging.info("Writing tarballs to %s", output_dir)
     osutils.SafeMakedirs(output_dir)
@@ -1398,10 +1403,11 @@ def CreatePackages(targets_wanted, output_dir, root="/"):
     with osutils.TempDir(prefix="create-packages") as tempdir:
         logging.debug("Using tempdir: %s", tempdir)
 
-        # We have to split the root generation from the compression stages.  This is
-        # because we hardlink in all the files (to avoid overhead of reading/writing
-        # the copies multiple times).  But tar gets angry if a file's hardlink count
-        # changes from when it starts reading a file to when it finishes.
+        # We have to split the root generation from the compression stages.
+        # This is because we hardlink in all the files (to avoid overhead of
+        # reading/writing the copies multiple times).  But tar gets angry if a
+        # file's hardlink count changes from when it starts reading a file to
+        # when it finishes.
         with parallel.BackgroundTaskRunner(CreatePackagableRoot) as queue:
             for target in targets:
                 output_target_dir = os.path.join(tempdir, target)
