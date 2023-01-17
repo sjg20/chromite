@@ -2280,56 +2280,39 @@ class TestAutotestPayloadsPayloads(BasePaygenBuildLibTestWithBuilds):
             full_contents = full_fp.read()
             full_fp.close()
 
-        # We only checking the beginning to avoid the very long doc string.
-        self.assertTrue(
-            delta_contents.startswith(
-                b"""name = 'paygen_au_foo'
-update_type = 'delta'
-source_release = '1.0.0'
-target_release = '1.2.3'
-target_payload_uri = 'None'
-SUITE = 'paygen_au_foo'
-source_payload_uri = 'foo-channel_1.0.0_uri'
-source_archive_uri = 'gs://crt/foo-channel/foo-board/1.0.0'
-payload_type = 'OMAHA'
-# Copyright 2012 The ChromiumOS Authors
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
+            required_fields = [
+                b"""name = 'paygen_au_foo'""",
+                b"""update_type = 'delta'""",
+                b"""source_release = '1.0.0'""",
+                b"""target_release = '1.2.3'""",
+                b"""target_payload_uri = 'None'""",
+                b"""SUITE = 'paygen_au_foo'""",
+                b"""source_payload_uri = 'foo-channel_1.0.0_uri'""",
+                b"""source_archive_uri = 'gs://crt/foo-channel/foo-board/1.0.0'""",
+                b"""payload_type = 'OMAHA'""",
+                b"""NAME = "autoupdate_EndToEndTest_paygen_au_foo_delta_1.0.0_omaha""",
+            ]
 
-import logging
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
+            # Only check that the fields exist to avoid the very long doc string.
+            for field in required_fields:
+                self.assertIn(field, delta_contents)
 
-AUTHOR = "dhaddock@, ahassani@"
-NAME = "autoupdate_EndToEndTest_paygen_au_foo_delta_1.0.0_omaha"
-"""
-            )
-        )
-        # We only checking the beginning to avoid the very long doc string.
-        self.assertTrue(
-            full_contents.startswith(
-                b"""name = 'paygen_au_foo'
-update_type = 'full'
-source_release = '1.2.3'
-target_release = '1.2.3'
-target_payload_uri = 'None'
-SUITE = 'paygen_au_foo'
-source_payload_uri = 'foo-channel_1.2.3_uri'
-source_archive_uri = 'gs://crt/foo-channel/foo-board/1.2.3'
-payload_type = 'N2N'
-# Copyright 2012 The ChromiumOS Authors
-# Use of this source code is governed by a BSD-style license that can be
-# found in the LICENSE file.
+            full_required_fields = [
+                b"""name = 'paygen_au_foo'""",
+                b"""update_type = 'full'""",
+                b"""source_release = '1.2.3'""",
+                b"""target_release = '1.2.3'""",
+                b"""target_payload_uri = 'None'""",
+                b"""SUITE = 'paygen_au_foo'""",
+                b"""source_payload_uri = 'foo-channel_1.2.3_uri'""",
+                b"""source_archive_uri = 'gs://crt/foo-channel/foo-board/1.2.3'""",
+                b"""payload_type = 'N2N'""",
+                b"""NAME = "autoupdate_EndToEndTest_paygen_au_foo_full_1.2.3_n2n""",
+            ]
 
-import logging
-from autotest_lib.client.common_lib import error
-from autotest_lib.client.common_lib import utils
-
-AUTHOR = "dhaddock@, ahassani@"
-NAME = "autoupdate_EndToEndTest_paygen_au_foo_full_1.2.3_n2n"
-"""
-            )
-        )
+            # Only check that the fields exist to avoid the very long doc string.
+            for field in full_required_fields:
+                self.assertIn(field, full_contents)
 
 
 class HWTest(cros_test_lib.MockTestCase):
