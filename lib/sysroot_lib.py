@@ -20,7 +20,6 @@ from typing import (
     Union,
 )
 
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import locking
@@ -294,14 +293,6 @@ class Profile(object):
 
     def __eq__(self, other):
         return self.name == other.name
-
-    @property
-    def as_protobuf(self):
-        return common_pb2.Profile(name=self._name)
-
-    @classmethod
-    def from_protobuf(cls, message):
-        return cls(name=message.name)
 
 
 class Sysroot(object):

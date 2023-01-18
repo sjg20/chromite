@@ -6,7 +6,6 @@
 
 import os
 
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib.build_target_lib import BuildTarget
@@ -65,21 +64,3 @@ class BuildTargetTest(cros_test_lib.TempDirTestCase):
         path1 = "some/path"
         result = build_target.full_path(path1, "/abc", "def", "/g/h/i")
         self.assertEqual(result, "/build/board/some/path/abc/def/g/h/i")
-
-    def testConversion(self):
-        """Test protobuf conversion methods."""
-
-        build_target = BuildTarget(name="board")
-        build_target_with_profile = BuildTarget("board", profile="profile")
-        proto = common_pb2.BuildTarget(name="board")
-        profile_proto = common_pb2.Profile(name="profile")
-
-        # Profile is moving to sysroot_lib.Profile.
-        self.assertEqual(proto, build_target.as_protobuf)
-        self.assertEqual(proto, build_target_with_profile.as_protobuf)
-        self.assertEqual(build_target, BuildTarget.from_protobuf(proto))
-
-        self.assertEqual(common_pb2.Profile(), build_target.profile_protobuf)
-        self.assertEqual(
-            profile_proto, build_target_with_profile.profile_protobuf
-        )

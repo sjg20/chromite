@@ -8,8 +8,6 @@ import os
 import re
 from typing import Optional
 
-from chromite.api.gen.chromiumos import common_pb2
-
 
 class Error(Exception):
     """Base module error class."""
@@ -58,18 +56,6 @@ class BuildTarget(object):
     @property
     def name(self):
         return self._name
-
-    @property
-    def as_protobuf(self):
-        return common_pb2.BuildTarget(name=self.name or "")
-
-    @classmethod
-    def from_protobuf(cls, message):
-        return cls(name=message.name)
-
-    @property
-    def profile_protobuf(self):
-        return common_pb2.Profile(name=self.profile)
 
     def full_path(self, *args):
         """Turn a sysroot-relative path into an absolute path."""

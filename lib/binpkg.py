@@ -20,7 +20,6 @@ from typing import List
 import urllib.error
 import urllib.request
 
-from chromite.api.gen.chromiumos import common_pb2
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
@@ -362,7 +361,7 @@ class PackageIndexInfo(object):
     def __eq__(self, other):
         """Check equality."""
         # BuildTarget is in the process of dropping Profile and root (which
-        # properly belong to the Sysroot, not the BuildTarget.  As such, they are
+        # properly belong to the Sysroot, not the BuildTarget. As such, they are
         # handled separately here.
         return (
             self.snapshot_sha == other.snapshot_sha
@@ -370,39 +369,6 @@ class PackageIndexInfo(object):
             and self.build_target.name == other.build_target.name
             and self.profile == other.profile
             and self.location == other.location
-        )
-
-    @property
-    def as_protobuf(self):
-        """Return a chromiumos.PackageIndexInfo protobuf."""
-        return common_pb2.PackageIndexInfo(
-            snapshot_sha=self.snapshot_sha,
-            snapshot_number=self.snapshot_number,
-            build_target=self.build_target.as_protobuf,
-            profile=self.profile.as_protobuf,
-            location=self.location,
-        )
-
-    @classmethod
-    def from_protobuf(
-        cls, message: common_pb2.PackageIndexInfo
-    ) -> "PackageIndexInfo":
-        """Return a PackageIndexInfo object for the given PackageIndexInfo protobuf.
-
-        Args:
-            message: The protobuf to parse
-
-        Returns:
-            The parsed instance.
-        """
-        return cls(
-            snapshot_sha=message.snapshot_sha,
-            snapshot_number=message.snapshot_number,
-            build_target=build_target_lib.BuildTarget.from_protobuf(
-                message.build_target
-            ),
-            profile=sysroot_lib.Profile.from_protobuf(message.profile),
-            location=message.location,
         )
 
 
