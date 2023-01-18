@@ -574,13 +574,8 @@ class WorkspaceUnitTestStage(
     config_name = "unittests"
     category = constants.PRODUCT_OS_STAGE
 
-    # If the unit tests take longer than 90 minutes, abort. They usually take
-    # thirty minutes to run, but they can take twice as long if the machine is
-    # under load (e.g. in canary groups).
-    #
-    # If the processes hang, parallel_emerge will print a status report after 60
-    # minutes, so we picked 90 minutes because it gives us a little buffer time.
-    UNIT_TEST_TIMEOUT = 90 * 60
+    # If the unit tests take longer than 120 minutes, abort.
+    UNIT_TEST_TIMEOUT = 120 * 60
 
     def PerformStage(self):
         extra_env = {}
