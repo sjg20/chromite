@@ -9,10 +9,10 @@ from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import build_target_lib
+from chromite.lib import chroot_lib
 from chromite.lib import cros_test_lib
-from chromite.lib.chroot_lib import Chroot
+from chromite.lib import sysroot_lib
 from chromite.lib.parser import package_info
-from chromite.lib.sysroot_lib import Sysroot
 
 
 class ParseChrootTest(cros_test_lib.MockTestCase):
@@ -38,7 +38,7 @@ class ParseChrootTest(cros_test_lib.MockTestCase):
             env={"use_flags": use_flags, "features": features},
         )
 
-        expected = Chroot(
+        expected = chroot_lib.Chroot(
             path=path,
             cache_dir=cache_dir,
             chrome_root=chrome_root,
@@ -61,7 +61,7 @@ class ParseSysrootTest(cros_test_lib.MockTestCase):
         """test successful handling case."""
         path = "/build/rare_pokemon"
         sysroot_message = sysroot_pb2.Sysroot(path=path)
-        expected = Sysroot(path=path)
+        expected = sysroot_lib.Sysroot(path=path)
         result = controller_util.ParseSysroot(sysroot_message)
         self.assertEqual(expected, result)
 
@@ -222,7 +222,7 @@ def test_retrieve_package_log_paths():
         package_info.parse("foo/bar%d-1.0-r1" % num) for num in range(1, 4)
     ]
     output_proto = sysroot_pb2.InstallPackagesResponse()
-    target_sysroot = Sysroot(path="/path/to/sysroot")
+    target_sysroot = sysroot_lib.Sysroot(path="/path/to/sysroot")
     controller_util.retrieve_package_log_paths(
         packages, output_proto, target_sysroot
     )
