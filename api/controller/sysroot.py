@@ -14,7 +14,6 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.api.metrics import deserialize_metrics_log
-from chromite.lib import binpkg
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
@@ -175,7 +174,7 @@ def Create(input_proto, output_proto, _config):
         input_proto.build_target, input_proto.profile
     )
     package_indexes = [
-        binpkg.PackageIndexInfo.from_protobuf(x)
+        controller_util.deserialize_package_index_info(x)
         for x in input_proto.package_indexes
     ]
     run_configs = sysroot.SetupBoardRunConfig(
@@ -306,7 +305,7 @@ def InstallPackages(input_proto, output_proto, _config):
     ]
 
     package_indexes = [
-        binpkg.PackageIndexInfo.from_protobuf(x)
+        controller_util.deserialize_package_index_info(x)
         for x in input_proto.package_indexes
     ]
 

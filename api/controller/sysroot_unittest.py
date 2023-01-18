@@ -14,7 +14,6 @@ from chromite.api.controller import controller_util
 from chromite.api.controller import sysroot as sysroot_controller
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
-from chromite.lib import binpkg
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -183,7 +182,7 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         rc_patch.assert_called_with(
             force=force,
             package_indexes=[
-                binpkg.PackageIndexInfo.from_protobuf(x)
+                controller_util.deserialize_package_index_info(x)
                 for x in package_indexes
             ],
             upgrade_chroot=upgrade_chroot,
@@ -840,7 +839,7 @@ class InstallPackagesTest(
             install_debug_symbols=True,
             packages=[],
             package_indexes=[
-                binpkg.PackageIndexInfo.from_protobuf(x)
+                controller_util.deserialize_package_index_info(x)
                 for x in package_indexes
             ],
             use_flags=[],
