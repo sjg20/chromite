@@ -8,6 +8,7 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import binpkg
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import cros_test_lib
@@ -227,3 +228,29 @@ def test_retrieve_package_log_paths():
         packages, output_proto, target_sysroot
     )
     assert len(output_proto.failed_package_data) == 3
+
+
+def test_package_index_info():
+    """Quick check converting to/from protobuf works."""
+    sha = "SHA"
+    number = 5
+    build_target_name = "build_target"
+    profile_name = "profile"
+    location = "location"
+
+    msg = common_pb2.PackageIndexInfo()
+    msg.snapshot_sha = sha
+    msg.snapshot_number = number
+    msg.build_target.name = build_target_name
+    msg.profile.name = profile_name
+    msg.location = location
+
+    obj = binpkg.PackageIndexInfo(
+        snapshot_sha=sha,
+        snapshot_number=number,
+        build_target=build_target_lib.BuildTarget(name=build_target_name),
+        profile=sysroot_lib.Profile(name=profile_name),
+        location=location,
+    )
+
+    assert obj == controller_util.deserialize_package_index_info(msg)

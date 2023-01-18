@@ -12,6 +12,7 @@ from typing import Iterable, Optional, TYPE_CHECKING, Union
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import binpkg
 from chromite.lib import build_target_lib
 from chromite.lib import chroot_lib
 from chromite.lib import constants
@@ -181,6 +182,24 @@ def ParseBuildTargets(repeated_build_target_field):
         AssertionError: When the field contains non-BuildTarget messages.
     """
     return [ParseBuildTarget(target) for target in repeated_build_target_field]
+
+
+def deserialize_profile(profile: common_pb2.Profile) -> sysroot_lib.Profile:
+    """Deserialize a portage profile message to a Profile object."""
+    return sysroot_lib.Profile(profile.name)
+
+
+def deserialize_package_index_info(
+    message: common_pb2.PackageIndexInfo,
+) -> binpkg.PackageIndexInfo:
+    """Deserialize a PackageIndexInfo message to an object."""
+    return binpkg.PackageIndexInfo(
+        snapshot_sha=message.snapshot_sha,
+        snapshot_number=message.snapshot_number,
+        build_target=ParseBuildTarget(message.build_target),
+        profile=deserialize_profile(message.profile),
+        location=message.location,
+    )
 
 
 def serialize_package_info(
