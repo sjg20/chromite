@@ -39,7 +39,7 @@ def ParseCipdUri(uri):
         raise ValueError("wrong scheme: ", o.scheme)
     if ":" not in o.path:
         raise ValueError("version not specified")
-    pkgpath, version = o.path.rsplit(":", 1)
+    pkgpath, version = o.path.split(":", 1)
     return (o.netloc + pkgpath, version)
 
 
