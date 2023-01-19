@@ -11,8 +11,6 @@ from pathlib import Path
 import pprint
 from typing import Dict, List, Optional, Tuple
 
-from chromite.lib import osutils
-
 
 ZERO_COVERAGE_EXEC_COUNT = 0
 ZERO_COVERAGE_START_COL = 1
@@ -345,7 +343,7 @@ def GatherPathMapping(search_directory: str) -> Optional[List]:
             path_to_file = os.path.join(dirpath, f)
             if os.path.basename(path_to_file) != "src_to_build_dest_map.json":
                 continue
-            data = json.loads(osutils.ReadFile(path_to_file))
+            data = json.loads(Path(path_to_file).read_text(encoding="utf-8"))
             _ValidatePathMappingEntryList(data)
             temp.extend(data["mapping"])
 
@@ -550,7 +548,7 @@ def GetLlvmJsonCoverageDataIfValid(path_to_file: str):
 
         # Attempt to parse as json. It's fine for this to fail,
         # it means we can't manipulate it rather than an actual error.
-        data = json.loads(osutils.ReadFile(path_to_file))
+        data = json.loads(Path(path_to_file).read_text(encoding="utf-8"))
 
         # Validate the file structure is:
         # { data: [...], type: "..", version: "..." }.
@@ -593,7 +591,7 @@ def GetZeroCoverageDirectories(
             f"Coverage boards ownership json does not exists {owners_path}"
         )
 
-    content = osutils.ReadFile(owners_path)
+    content = owners_path.read_text(encoding="utf-8")
     owners_json = json.loads(content)
     if not owners_json:
         raise ValueError(f"Could not read board ownership json {owners_path}")
