@@ -260,34 +260,38 @@ class UprevECUtilsTest(cros_test_lib.MockTestCase):
             "UprevOverlayManager",
             return_value=mock_overlay_mgr,
         )
-        cpv = package_info.SplitCPV("chromeos-base/ec-utils", strict=False)
-        assert cpv is not None
-        build_targets = [build_target_lib.BuildTarget("foo")]
-        refs = [
-            GitRef(
-                path="/platform/ec",
-                ref="main",
-                revision="123",
+
+        for package in [
+            "chromeos-base/ec-devutils",
+            "chromeos-base/ec-utils",
+            "chromeos-base/ec-utils-test",
+        ]:
+            cpv = package_info.SplitCPV(package, strict=False)
+            assert cpv is not None
+            build_targets = [build_target_lib.BuildTarget("foo")]
+            refs = [
+                GitRef(
+                    path="/platform/ec",
+                    ref="main",
+                    revision="123",
+                )
+            ]
+            chroot = Chroot()
+
+            result = packages.uprev_versioned_package(
+                cpv, build_targets, refs, chroot
             )
-        ]
-        chroot = Chroot()
 
-        result = packages.uprev_versioned_package(
-            cpv, build_targets, refs, chroot
-        )
+            self.assertEqual(1, len(result.modified))
+            self.assertEqual("123", result.modified[0].new_version)
+            self.assertListEqual(result.modified[0].files, ["file1", "file2"])
 
-        self.assertEqual(1, len(result.modified))
-        self.assertEqual("123", result.modified[0].new_version)
-        self.assertListEqual(result.modified[0].files, ["file1", "file2"])
-
-        mock_overlay_mgr.uprev.assert_called_once_with(
-            package_list=[
-                "chromeos-base/ec-devutils",
-                "chromeos-base/ec-utils",
-                "chromeos-base/ec-utils-test",
-            ],
-            force=True,
-        )
+            mock_overlay_mgr.uprev.assert_called_with(
+                package_list=[
+                    package,
+                ],
+                force=True,
+            )
 
 
 class UprevBuildTargetsTest(cros_test_lib.RunCommandTestCase):
