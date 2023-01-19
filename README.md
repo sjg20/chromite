@@ -109,6 +109,10 @@ This folder contains smaller, generic utility functionality that is not tied to
 any specific entities in the codebase that would make them more at home in a lib
 module.
 
+Code must not import modules outside of utils/ as this directory is intended to
+be standalone & isolated. This restriction does *not* apply to unittest modules.
+Those may freely use Chromite APIs (e.g. chromite.lib.*).
+
 ### chromite/infra
 
 This folder contains the chromite-specific infra repos.
