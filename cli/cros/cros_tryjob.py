@@ -426,16 +426,28 @@ def VerifyOptions(options, site_config):
             if suffix in build_config:
                 unsupported_tryjobs.append(build_config)
                 break
+
+    # The user may have specified a --version but not a --branch, need to check
+    # both to determine `cros tryjob` support.
+    specified_version = None
+    if options.passthrough:
+        for i, val in enumerate(options.passthrough):
+            if val.startswith("--version"):
+                if "=" in val:
+                    specified_version = val.split("=", 1)[-1]
+                else:
+                    specified_version = options.passthrough[i + 1]
     if unsupported_tryjobs:
         unsupported_branch = False
-        if on_branch:
+        version = specified_version
+        if not version and on_branch:
             tokens = options.branch.split("-")
             if tokens[0] in ("release", "stabilize", "firmware"):
-                version = tokens[-1].split(".")
-                major = int(version[0])
-                if major >= 15183:
-                    unsupported_branch = True
-        if not on_branch or unsupported_branch:
+                version = tokens[-1]
+        if version:
+            if int(version.split(".")[0]) >= 15183:
+                unsupported_branch = True
+        if (not on_branch and not specified_version) or unsupported_branch:
             cros_build_lib.Die(
                 "`cros tryjob` is unsupported for %s on milestones >= 108, "
                 "please use `cros try`.",
