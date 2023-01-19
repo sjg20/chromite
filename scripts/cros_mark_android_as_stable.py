@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""This module uprevs Android for cbuildbot.
+"""This script performs an Android uprev.
 
 After calling, it prints out a JSON representing the result, with the new
 Android version atom string included. A caller could then use this atom with
@@ -23,7 +23,6 @@ import json
 import logging
 import os
 
-from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -78,50 +77,6 @@ def FindAndroidCandidates(package_dir):
         logging.warning("Missing stable ebuild for %s", package_dir)
 
     return portage_util.BestEBuild(unstable_ebuilds), stable_ebuilds
-
-
-def PrintUprevMetadata(build_branch, stable_candidate, new_ebuild):
-    """Shows metadata on buildbot page at UprevAndroid step.
-
-    Args:
-      build_branch: The branch of Android builds.
-      stable_candidate: The existing stable ebuild.
-      new_ebuild: The newly written ebuild.
-    """
-    # Examples:
-    # "android-container-pi revved 6461825-r1 -> 6468247-r1"
-    # "android-container-pi revved 6461825-r1 -> 6461825-r2 (ebuild update only)"
-    msg = "%s revved %s -> %s" % (
-        stable_candidate.pkgname,
-        stable_candidate.version,
-        new_ebuild.version,
-    )
-
-    old_android = stable_candidate.version_no_rev
-    new_android = new_ebuild.version_no_rev
-
-    if old_android == new_android:
-        msg += " (ebuild update only)"
-    else:
-        ab_link = (
-            "https://android-build.googleplex.com"
-            "/builds/%s/branches/%s/cls?end=%s"
-            % (new_android, build_branch, old_android)
-        )
-        cbuildbot_alerts.PrintBuildbotLink("Android changelog", ab_link)
-
-    cbuildbot_alerts.PrintBuildbotStepText(msg)
-    cbuildbot_alerts.PrintKitchenSetBuildProperty(
-        "android_uprev",
-        json.dumps(
-            {
-                "branch": build_branch,
-                "new": new_ebuild.version,
-                "old": stable_candidate.version,
-                "pkgname": stable_candidate.pkgname,
-            }
-        ),
-    )
 
 
 def FindDataCollectorArtifacts(
@@ -321,16 +276,8 @@ def MarkAndroidEBuildAsStable(
     if IsTheNewEBuildRedundant(new_ebuild, stable_candidate):
         msg = "Previous ebuild with same version found and ebuild is redundant."
         logging.info(msg)
-        cbuildbot_alerts.PrintBuildbotStepText(
-            "%s %s not revved"
-            % (stable_candidate.pkgname, stable_candidate.version)
-        )
         osutils.SafeUnlink(new_ebuild_path)
         return None
-
-    # PFQ runs should always be able to find a stable candidate.
-    if stable_candidate:
-        PrintUprevMetadata(build_branch, stable_candidate, new_ebuild)
 
     files_to_add = [new_ebuild_path]
     files_to_remove = []
@@ -419,7 +366,6 @@ def GetParser():
 
 
 def main(argv):
-    cbuildbot_alerts.EnableBuildbotMarkers()
     parser = GetParser()
     options = parser.parse_args(argv)
     options.Freeze()
