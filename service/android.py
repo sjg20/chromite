@@ -644,16 +644,64 @@ def ReadLKGB(android_package_dir: str) -> dict:
 _RUNTIME_ARTIFACTS_BUCKET_URL = "gs://chromeos-arc-images/runtime_artifacts"
 
 
+def FindDataCollectorArtifacts(
+    android_package: str,
+    android_version: str,
+    version_reference: str,
+    runtime_artifacts_bucket_url: Optional[str] = _RUNTIME_ARTIFACTS_BUCKET_URL,
+) -> dict:
+    r"""Finds and includes into variables artifacts from arc.DataCollector.
+
+    This is used from UpdateDataCollectorArtifacts in order to check the
+    particular version.
+
+    Args:
+      android_package: android package name. Used as folder to locate the cache.
+      android_version: The \d+ build id of Android.
+      version_reference: which version to use as a reference. Could be '${PV}'
+          in case version of data collector artifacts matches the Android
+          version or direct version in case of override.
+      runtime_artifacts_bucket_url: root of runtime artifacts
+
+    Returns:
+      dictionary with filled ebuild variables. This dictionary is empty in case
+      no artifacts are found.
+    """
+    gs_context = gs.GSContext()
+    variables = {}
+
+    buckets = ["ureadahead_pack_host", "gms_core_cache", "tts_cache"]
+    archs = ["arm", "arm64", "x86", "x86_64"]
+    build_types = ["user", "userdebug"]
+
+    for bucket in buckets:
+        for arch in archs:
+            for build_type in build_types:
+                # TODO(b/255854925): remove path without |android_package|.
+                # |android_package| is required to separate artifacts for bertha
+                # and cheets.
+                root_paths = [
+                    f"{runtime_artifacts_bucket_url}/{android_package}/{bucket}_{arch}_{build_type}",
+                    f"{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}",
+                ]
+
+                for _, root_path in enumerate(root_paths):
+                    path = f"{root_path}_{android_version}.tar"
+                    if gs_context.Exists(path):
+                        variables[
+                            (f"{arch}_{build_type}_{bucket}").upper()
+                        ] = f"{root_path}_{version_reference}.tar"
+                        break
+
+    return variables
+
+
 def FindRuntimeArtifactsPin(
     android_package: str,
     milestone: str,
     runtime_artifacts_bucket_url: Optional[str] = _RUNTIME_ARTIFACTS_BUCKET_URL,
 ) -> Optional[str]:
     """Finds the runtime artifacts pin for given package/milestone, if present.
-
-    TODO(b/258558620): The code here is intentionally duplicated from
-    cros_mark_android_as_stable.py to maximize cherry-pick-ability. Refactor
-    away dupe code on main branch.
 
     Args:
         android_package: The Android package.

@@ -15,6 +15,23 @@ from chromite.lib import osutils
 from chromite.service import android
 
 
+_STAT_OUTPUT = """%s:
+    Creation time:    Sat, 23 Aug 2014 06:53:20 GMT
+    Content-Language: en
+    Content-Length:   74
+    Content-Type:   application/octet-stream
+    Hash (crc32c):    BBPMPA==
+    Hash (md5):   ms+qSYvgI9SjXn8tW/5UpQ==
+    ETag:     CNCgocbmqMACEAE=
+    Generation:   1408776800850000
+    Metageneration:   1
+"""
+
+
+def _RaiseGSNoSuchKey(*_args, **_kwargs):
+    raise gs.GSNoSuchKey("file does not exist")
+
+
 class ArtifactsConfigTest(cros_test_lib.TestCase):
     """Tests to ensure artifacts configs are properly written."""
 
@@ -69,18 +86,6 @@ class GetAndroidEbuildTargetsForPackageTest(cros_test_lib.TestCase):
 
 class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     """Tests using a mocked GS bucket containing Android build artifacts."""
-
-    STAT_OUTPUT = """%s:
-        Creation time:    Sat, 23 Aug 2014 06:53:20 GMT
-        Content-Language: en
-        Content-Length:   74
-        Content-Type:   application/octet-stream
-        Hash (crc32c):    BBPMPA==
-        Hash (md5):   ms+qSYvgI9SjXn8tW/5UpQ==
-        ETag:     CNCgocbmqMACEAE=
-        Generation:   1408776800850000
-        Metageneration:   1
-      """
 
     def setUp(self):
         """Setup vars and create mock dir."""
@@ -151,9 +156,6 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
     def mockOneTargetVersion(self, branch, target, version, valid):
         """Mock GS responses for one (target, version). See setupMockTarget."""
 
-        def _RaiseGSNoSuchKey(*_args, **_kwargs):
-            raise gs.GSNoSuchKey("file does not exist")
-
         src_url = f"{self.bucket_url}/{branch}-linux-{target}/{version}"
         if not valid:
             self.gs_mock.AddCmdResult(
@@ -192,7 +194,7 @@ class MockAndroidBuildArtifactsTest(cros_test_lib.MockTempDirTestCase):
         for src_file in src_filelist:
             self.gs_mock.AddCmdResult(
                 ["stat", "--", src_file],
-                stdout=(self.STAT_OUTPUT) % src_url,
+                stdout=_STAT_OUTPUT % src_url,
             )
 
         # Show nothing in destination.
@@ -414,3 +416,137 @@ class LKGBTest(cros_test_lib.TempDirTestCase):
                 runtime_artifacts_pin="runtime-artifacts-pin",
             ),
         )
+
+
+class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
+    """Tests runtime artifacts functions."""
+
+    def setUp(self):
+        self.android_package = "android-package"
+        self.android_branch = "android-branch"
+        self.runtime_artifacts_bucket_url = "gs://r"
+        self.milestone = "99"
+
+        self.gs_mock = self.StartPatcher(gs_unittest.GSContextMock())
+
+    def setupMockRuntimeDataBuild(self, android_version):
+        """Helper to mock a build for runtime data."""
+
+        archs = ["arm", "arm64", "x86", "x86_64"]
+        build_types = ["user", "userdebug"]
+        runtime_datas = ["gms_core_cache", "ureadahead_pack_host", "tts_cache"]
+
+        for arch in archs:
+            for build_type in build_types:
+                for runtime_data in runtime_datas:
+                    paths = [
+                        (
+                            f"{self.runtime_artifacts_bucket_url}/{self.android_package}/"
+                            f"{runtime_data}_{arch}_{build_type}_{android_version}.tar"
+                        ),
+                        (
+                            f"{self.runtime_artifacts_bucket_url}/"
+                            f"{runtime_data}_{arch}_{build_type}_{android_version}.tar"
+                        ),
+                    ]
+                    for _, path in enumerate(paths):
+                        self.gs_mock.AddCmdResult(
+                            ["stat", "--", path], side_effect=_RaiseGSNoSuchKey
+                        )
+
+    def setupMockRuntimeArtifactsPin(self, pin_version):
+        """Helper to mock a runtime artifacts pin on GS."""
+        pin_paths = [
+            (
+                f"{self.runtime_artifacts_bucket_url}/"
+                f"{self.android_package}/M{self.milestone}_pin_version"
+            ),
+            (
+                f"{self.runtime_artifacts_bucket_url}/"
+                f"{self.android_branch}_pin_version"
+            ),
+        ]
+        for _, pin_path in enumerate(pin_paths):
+            if pin_version:
+                self.gs_mock.AddCmdResult(
+                    ["stat", "--", pin_path], stdout=_STAT_OUTPUT % pin_path
+                )
+                self.gs_mock.AddCmdResult(["cat", pin_path], stdout=pin_version)
+            else:
+                self.gs_mock.AddCmdResult(
+                    ["stat", "--", pin_path], side_effect=_RaiseGSNoSuchKey
+                )
+
+    def testFindDataCollectorArtifacts(self):
+        android_version = "100"
+        # Mock by default runtime artifacts are not found.
+        self.setupMockRuntimeDataBuild(android_version)
+
+        # Override few as existing.
+        path1 = "gs://r/ureadahead_pack_host_x86_64_user_100.tar"
+        path2 = "gs://r/gms_core_cache_arm_userdebug_100.tar"
+        path3 = "gs://r/tts_cache_arm64_user_100.tar"
+
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", path1], stdout=_STAT_OUTPUT % path1
+        )
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", path2], stdout=_STAT_OUTPUT % path2
+        )
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", path3], stdout=_STAT_OUTPUT % path3
+        )
+
+        variables = android.FindDataCollectorArtifacts(
+            self.android_package,
+            android_version,
+            "${PV}",
+            self.runtime_artifacts_bucket_url,
+        )
+
+        expectation1 = "gs://r/ureadahead_pack_host_x86_64_user_${PV}.tar"
+        expectation2 = "gs://r/gms_core_cache_arm_userdebug_${PV}.tar"
+        expectation3 = "gs://r/tts_cache_arm64_user_${PV}.tar"
+
+        self.assertDictEqual(
+            variables,
+            {
+                "X86_64_USER_UREADAHEAD_PACK_HOST": expectation1,
+                "ARM_USERDEBUG_GMS_CORE_CACHE": expectation2,
+                "ARM64_USER_TTS_CACHE": expectation3,
+            },
+        )
+
+    def testFindDataCollectorArtifactsNotExist(self):
+        android_version = "100"
+        # Mock by default runtime artifacts are not found.
+        self.setupMockRuntimeDataBuild(android_version)
+
+        variables = android.FindDataCollectorArtifacts(
+            self.android_package,
+            android_version,
+            "${PV}",
+            self.runtime_artifacts_bucket_url,
+        )
+
+        self.assertDictEqual(variables, {})
+
+    def testFindRuntimeArtifactsPin(self):
+        self.setupMockRuntimeArtifactsPin("pin-version")
+
+        pin_version = android.FindRuntimeArtifactsPin(
+            self.android_package,
+            self.milestone,
+            self.runtime_artifacts_bucket_url,
+        )
+        self.assertEqual(pin_version, "pin-version")
+
+    def testFindRuntimeArtifactsPinNotExist(self):
+        self.setupMockRuntimeArtifactsPin(None)
+
+        pin_version = android.FindRuntimeArtifactsPin(
+            self.android_package,
+            self.milestone,
+            self.runtime_artifacts_bucket_url,
+        )
+        self.assertIsNone(pin_version)
