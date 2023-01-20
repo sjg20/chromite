@@ -152,12 +152,13 @@ class DeviceImager(object):
         if self._clear_tpm_owner:
             self._device.ClearTpmOwner()
 
-        if not self._no_reboot:
+        if self._disable_verification:
+            # DisableRootfsVerification internally invokes Reboot().
+            self._device.DisableRootfsVerification()
+            self._VerifyBootExpectations()
+        elif not self._no_reboot:
             self._Reboot()
             self._VerifyBootExpectations()
-
-        if self._disable_verification:
-            self._device.DisableRootfsVerification()
 
     def _LocateImage(self):
         """Locates the path to the final image(s) that need to be installed.
