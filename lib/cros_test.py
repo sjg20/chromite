@@ -34,7 +34,7 @@ class CrOSTest(object):
         """Initialize CrOSTest.
 
         Args:
-          opts: command line options.
+            opts: command line options.
         """
         self.start_time = datetime.datetime.utcnow()
 
@@ -170,9 +170,9 @@ class CrOSTest(object):
                 path_util.DetermineCheckout().type
                 != path_util.CHECKOUT_TYPE_REPO
             ):
-                # Try flashing to the full version of the board used in the Simple
-                # Chrome SDK if it's present in the cache. Otherwise default to using
-                # latest.
+                # Try flashing to the full version of the board used in the
+                # Simple Chrome SDK if it's present in the cache. Otherwise
+                # default to using latest.
                 cache = self.cache_dir or path_util.GetCacheDir()
                 version = (
                     cros_chrome_sdk.SDKFetcher.GetCachedFullVersion(
@@ -192,18 +192,20 @@ class CrOSTest(object):
                     )
 
         # Only considers skipping flashing if it's NOT for lacros-chrome tests
-        # because at this time, automated/CI tests can't assume that ash-chrome is
-        # left in a clean state and lacros-chrome depends on ash-chrome.
+        # because at this time, automated/CI tests can't assume that ash-chrome
+        # is left in a clean state and lacros-chrome depends on ash-chrome.
         if not self.deploy_lacros and xbuddy.LATEST not in flash_path:
-            # Skip the flash if the device is already running the requested version.
+            # Skip the flash if the device is already running the requested
+            # version.
             device_version = self._device.remote.version
-            # Split on the first "-" when comparing versions since xbuddy requires
-            # the RX- prefix, but the device may not advertise it.
+            # Split on the first "-" when comparing versions since xbuddy
+            # requires the RX- prefix, but the device may not advertise it.
             if version == device_version or (
                 "-" in version and version.split("-", 1)[1] == device_version
             ):
                 logging.info(
-                    "Skipping the flash. Device running %s when %s was requested",
+                    "Skipping the flash. Device running %s when %s was "
+                    "requested",
                     device_version,
                     flash_path,
                 )
@@ -246,8 +248,8 @@ class CrOSTest(object):
         """Deploy lacros-chrome or ash-chrome.
 
         Args:
-          build_dir: str the build dir contains chrome binary.
-          is_lacros: bool whether it's lacros or ash.
+            build_dir: str the build dir contains chrome binary.
+            is_lacros: bool whether it's lacros or ash.
         """
         deploy_cmd = [
             "deploy_chrome",
@@ -269,9 +271,10 @@ class CrOSTest(object):
             deploy_cmd += ["--cache-dir", self.cache_dir]
 
         if is_lacros:
-            # By default, deploying lacros-chrome modifies the /etc/chrome_dev.conf
-            # file, which is desired behavior for local development, however, a
-            # modified config file interferes with automated testing.
+            # By default, deploying lacros-chrome modifies the
+            # /etc/chrome_dev.conf file, which is desired behavior for local
+            # development, however, a modified config file interferes with
+            # automated testing.
             deploy_cmd += [
                 "--lacros",
                 "--nostrip",
@@ -314,11 +317,11 @@ class CrOSTest(object):
         """Deploy files in copy_paths to device.
 
         Args:
-          host_src_dir: Source dir on the host that files in |copy_paths| are
-                        relative to.
-          remote_target_dir: Target dir on the remote device that the files in
-                             |copy_paths| are copied to.
-          copy_paths: A list of chrome_utils.Path of files to be copied.
+            host_src_dir: Source dir on the host that files in |copy_paths| are
+                relative to.
+            remote_target_dir: Target dir on the remote device that the files in
+                |copy_paths| are copied to.
+            copy_paths: A list of chrome_utils.Path of files to be copied.
         """
         # The rsync connection can occasionally crash during the transfer, so
         # retry in the hope that it's transient.
@@ -353,7 +356,7 @@ class CrOSTest(object):
         """Run catapult tests matching a pattern using run_tests.
 
         Returns:
-          cros_build_lib.CompletedProcess object.
+            cros_build_lib.CompletedProcess object.
         """
 
         browser = "system-guest" if self.guest else "system"
@@ -371,7 +374,7 @@ class CrOSTest(object):
         """Run an autotest using test_that.
 
         Returns:
-          cros_build_lib.CompletedProcess object.
+            cros_build_lib.CompletedProcess object.
         """
         cmd = ["test_that"]
         if self._device.board:
@@ -403,7 +406,7 @@ class CrOSTest(object):
         """Run Tast tests.
 
         Returns:
-          cros_build_lib.CompletedProcess object.
+            cros_build_lib.CompletedProcess object.
         """
         # Try using the Tast binaries that the SimpleChrome SDK downloads
         # automatically.
@@ -417,8 +420,8 @@ class CrOSTest(object):
             cmd = [os.path.join(tast_bin_dir, "tast")]
             need_chroot = False
         else:
-            # Silently fall back to using the chroot if there's no SimpleChrome SDK
-            # present.
+            # Silently fall back to using the chroot if there's no SimpleChrome
+            # SDK present.
             cmd = ["tast"]
             need_chroot = True
 
@@ -439,8 +442,8 @@ class CrOSTest(object):
         if "!informational" in self.tast[0]:
             cmd += ["-failfortests"]
         if not need_chroot:
-            # The test runner needs to be pointed to the location of the test files
-            # when we're using those in the SimpleChrome cache.
+            # The test runner needs to be pointed to the location of the test
+            # files when we're using those in the SimpleChrome cache.
             remote_runner_path = os.path.join(
                 tast_bin_dir, "remote_test_runner"
             )
@@ -475,9 +478,9 @@ class CrOSTest(object):
                 private_key,
                 "-maxtestfailures=3",
             ]
-            # Tast may make calls to gsutil during the tests. If we're outside the
-            # chroot, we may not have gsutil on PATH. So push chromite's copy of
-            # gsutil onto path during the test.
+            # Tast may make calls to gsutil during the tests. If we're outside
+            # the chroot, we may not have gsutil on PATH. So push chromite's
+            # copy of gsutil onto path during the test.
             gsutil_dir = constants.CHROMITE_SCRIPTS_DIR
             extra_env = {"PATH": os.environ.get("PATH", "") + ":" + gsutil_dir}
 
@@ -500,11 +503,11 @@ class CrOSTest(object):
             self._device.should_start_vm
             and "tast_vm" not in self.tast_extra_use_flags
         ):
-            # The 'tast_vm' flag is needed when running Tast tests on VMs. Note that
-            # this check is only true if we're handling VM start-up/tear-down
-            # ourselves for the duration of the test. If the caller has already
-            # launched a VM themselves and has pointed the '--device' arg at it, this
-            # check will be false.
+            # The 'tast_vm' flag is needed when running Tast tests on VMs. Note
+            # that this check is only true if we're handling VM
+            # start-up/tear-down ourselves for the duration of the test. If the
+            # caller has already launched a VM themselves and has pointed the
+            # '--device' arg at it, this check will be false.
             self.tast_extra_use_flags.append("tast_vm")
         if self.tast_extra_use_flags:
             cmd += ["-extrauseflags=%s" % ",".join(self.tast_extra_use_flags)]
@@ -543,7 +546,7 @@ class CrOSTest(object):
         default, vm_sanity.
 
         Returns:
-          Command execution return code.
+            Command execution return code.
         """
         if self.remote_cmd:
             result = self._RunDeviceCmd()
@@ -580,7 +583,7 @@ class CrOSTest(object):
         """Tells the VM to save its image on shutdown if the test failed.
 
         Args:
-          result: A cros_build_lib.CompletedProcess object from a test run.
+            result: A cros_build_lib.CompletedProcess object from a test run.
         """
         if (
             not self._device.should_start_vm
@@ -599,9 +602,9 @@ class CrOSTest(object):
         osutils.SafeMakedirs(self.results_dest_dir)
         for src in self.results_src:
             logging.info("Fetching %s to %s", src, self.results_dest_dir)
-            # Don't raise an error if the filepath doesn't exist on the device since
-            # some log/crash directories are only created under certain conditions.
-            # e.g. When a user logs in.
+            # Don't raise an error if the filepath doesn't exist on the device
+            # since some log/crash directories are only created under certain
+            # conditions. e.g. When a user logs in.
             self._device.remote.CopyFromDevice(
                 src=src,
                 dest=self.results_dest_dir,
@@ -617,7 +620,7 @@ class CrOSTest(object):
         self.cwd, run the command in self.args, and cleanup.
 
         Returns:
-          cros_build_lib.CompletedProcess object.
+            cros_build_lib.CompletedProcess object.
         """
         DEST_BASE = "/usr/local/cros_test"
         files = FileList(self.files, self.files_from)
@@ -654,8 +657,8 @@ class CrOSTest(object):
                 ["cp", "-L", "-r", "/root/.ssh/", "/home/chronos/user/"]
             )
             if files:
-                # The trailing ':' after the user also changes the group to the user's
-                # primary group.
+                # The trailing ':' after the user also changes the group to the
+                # user's primary group.
                 self._device.run(["chown", "-R", "chronos:", DEST_BASE])
 
         user = "chronos" if self.as_chronos else None
@@ -714,10 +717,10 @@ def ParseCommandLine(argv):
     """Parse the command line.
 
     Args:
-      argv: Command arguments.
+        argv: Command arguments.
 
     Returns:
-      List of parsed options for CrOSTest.
+        List of parsed options for CrOSTest.
     """
 
     parser = vm.VM.GetParser()
@@ -1048,11 +1051,11 @@ def FileList(files, files_from):
     """Get list of files from command line args --files and --files-from.
 
     Args:
-      files: files specified directly on the command line.
-      files_from: files specified in a file.
+        files: files specified directly on the command line.
+        files_from: files specified in a file.
 
     Returns:
-      Contents of files_from if it exists, otherwise files.
+        Contents of files_from if it exists, otherwise files.
     """
     if files_from and os.path.isfile(files_from):
         with open(files_from) as f:

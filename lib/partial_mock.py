@@ -19,14 +19,14 @@ def _PredicateSplit(func, iterable):
     """Splits an iterable into two groups based on a predicate return value.
 
     Args:
-      func: A functor that takes an item as its argument and returns a boolean
-        value indicating which group the item belongs.
-      iterable: The collection to split.
+        func: A functor that takes an item as its argument and returns a boolean
+            value indicating which group the item belongs.
+        iterable: The collection to split.
 
     Returns:
-      A tuple containing two lists, the first containing items that func()
-      returned True for, and the second containing items that func() returned
-      False for.
+        A tuple containing two lists, the first containing items that func()
+        returned True for, and the second containing items that func() returned
+        False for.
     """
     trues, falses = [], []
     for x in iterable:
@@ -59,7 +59,7 @@ class In(Comparator):
         """Initialize.
 
         Args:
-          key: Any thing that could be in a list or a key in a dict
+            key: Any thing that could be in a list or a key in a dict
         """
         Comparator.__init__(self)
         self._key = key
@@ -81,7 +81,7 @@ class InOrder(Comparator):
         """Constructor.
 
         Args:
-          items: A list of things that could be in a list or a key in a dict
+            items: A list of things that could be in a list or a key in a dict
         """
         super().__init__()
         self.items = items
@@ -90,10 +90,10 @@ class InOrder(Comparator):
         """Checks if args' item matches all expected items in sequence.
 
         Args:
-          arg: parameter list.
+            arg: parameter list.
 
         Returns:
-          True if all expected items are matched.
+            True if all expected items are matched.
         """
         items = list(self.items)
         to_match = items.pop(0)
@@ -115,8 +115,8 @@ class Regex(Comparator):
         """Initialize.
 
         Args:
-          pattern: is the regular expression to search for
-          flags: passed to re.compile function as the second argument
+            pattern: is the regular expression to search for
+            flags: passed to re.compile function as the second argument
         """
         Comparator.__init__(self)
         self.pattern = pattern
@@ -176,8 +176,7 @@ class HasString(str):
     It is used for mock.assert_called_with(). Note that it is not a Comparator.
 
     Examples:
-      some_mock.assert_called_with(
-          partial_mock.HasString('need_this_keyword'))
+        some_mock.assert_called_with(partial_mock.HasString('required_keyword'))
     """
 
     def __eq__(self, target):
@@ -188,10 +187,8 @@ def _RecursiveCompare(lhs, rhs):
     """Compare parameter specs recursively.
 
     Args:
-      lhs: Left Hand Side parameter spec to compare.
-      rhs: Right Hand Side parameter spec to compare.
-      equality: In the case of comparing Comparator objects, True means we call
-        the Equals() function.  We call Match() if set to False (default).
+        lhs: Left Hand Side parameter spec to compare.
+        rhs: Right Hand Side parameter spec to compare.
     """
     if isinstance(lhs, Comparator):
         return lhs.Match(rhs)
@@ -211,9 +208,9 @@ def ListContains(small, big, strict=False):
     """Looks for a sublist within a bigger list.
 
     Args:
-      small: The sublist or string to search for.
-      big: The list to search in.
-      strict: If True, all items in list must be adjacent.
+        small: The sublist or string to search for.
+        big: The list to search in.
+        strict: If True, all items in list must be adjacent.
     """
     if strict:
         for i in range(len(big) - len(small) + 1):
@@ -236,8 +233,8 @@ def DictContains(small, big):
     """Looks for a subset within a dictionary.
 
     Args:
-      small: The sub-dict to search for.
-      big: The dict to search in.
+        small: The sub-dict to search for.
+        big: The dict to search in.
     """
     for k, v in small.items():
         if k not in big or not _RecursiveCompare(v, big[k]):
@@ -267,7 +264,7 @@ class MockedCallResults(object):
         """Initialize.
 
         Args:
-          name: The name given to the mock.  Will be used in debug output.
+            name: The name given to the mock.  Will be used in debug output.
         """
         self.name = name
         self.mocked_calls = []
@@ -286,25 +283,26 @@ class MockedCallResults(object):
         """Record the internal results of a given partial mock call.
 
         Args:
-          args: A list containing the positional args an invocation must have for
-            it to match the internal result.  The list can contain instances of
-            meta-args (such as IgnoreArg, Regex, In, etc.).  Positional argument
-            matching is always *strict*, meaning extra positional arguments in
-            the invocation are not allowed.
-          result: The internal result that will be matched for the command
-            invocation specified.
-          kwargs: A dictionary containing the keyword args an invocation must have
-            for it to match the internal result.  The dictionary can contain
-            instances of meta-args (such as IgnoreArg, Regex, In, etc.).  Keyword
-            argument matching is by default *strict*, but can be modified by the
-            |strict| argument.
-          side_effect: A functor that gets called every time a partially mocked
-            function is invoked.  The arguments the partial mock is invoked with are
-            passed to the functor.  This is similar to how side effects work for
-            mocks.
-          strict: Specifies whether keyword are matched strictly.  With strict
-            matching turned on, any keyword args a partial mock is invoked with that
-            are not specified in |kwargs| will cause the match to fail.
+            args: A list containing the positional args an invocation must have
+                forZ it to match the internal result.  The list can contain
+                instances of meta-args (such as IgnoreArg, Regex, In, etc.).
+                Positional argument matching is always *strict*, meaning extra
+                positional arguments in the invocation are not allowed.
+            result: The internal result that will be matched for the command
+                invocation specified.
+            kwargs: A dictionary containing the keyword args an invocation must
+                have for it to match the internal result.  The dictionary can
+                contain instances of meta-args (such as IgnoreArg, Regex, In,
+                etc.).  Keyword argument matching is by default *strict*, but
+                can be modified by the |strict| argument.
+            side_effect: A functor that gets called every time a partially
+                mocked function is invoked.  The arguments the partial mock is
+                invoked with are passed to the functor.  This is similar to how
+                side effects work for mocks.
+            strict: Specifies whether keyword are matched strictly.  With strict
+                matching turned on, any keyword args a partial mock is invoked
+                with that are not specified in |kwargs| will cause the match to
+                fail.
         """
         self.AssertArgs(args, kwargs)
         if kwargs is None:
@@ -334,26 +332,26 @@ class MockedCallResults(object):
         """Set the default result for an unmatched partial mock call.
 
         Args:
-          result: See AddResultsForParams.
-          side_effect: See AddResultsForParams.
+            result: See AddResultsForParams.
+            side_effect: See AddResultsForParams.
         """
         self.default_result, self.default_side_effect = result, side_effect
 
     def LookupResult(self, args, kwargs=None, hook_args=None, hook_kwargs=None):
-        """For a given mocked function call lookup the recorded internal results.
+        """For a given mocked function call get the recorded internal results.
 
         Args:
-          args: A list containing positional args the function was called with.
-          kwargs: A dict containing keyword args the function was called with.
-          hook_args: A list of positional args to call the hook with.
-          hook_kwargs: A dict of key/value args to call the hook with.
+            args: List containing positional args the function was called with.
+            kwargs: A dict containing keyword args the function was called with.
+            hook_args: A list of positional args to call the hook with.
+            hook_kwargs: A dict of key/value args to call the hook with.
 
         Returns:
-          The recorded result for the invocation.
+            The recorded result for the invocation.
 
         Raises:
-          AssertionError when the call is not mocked, or when there is more
-          than one mock that matches.
+            AssertionError when the call is not mocked, or when there is more
+            than one mock that matches.
         """
 
         def filter_fn(mc):
@@ -412,35 +410,36 @@ class PartialMock(object):
     and re-implementing the side effect (return value, state modification) logic
     in the test.  It is also useful for creating re-usable mocks.
 
-    Methods mocked out will retain the same spec as their original, but will still
-    be bound to this class rather than the mocked class.  In the example below,
-    this is why the mocked print function has an extra |inst| argument after the
-    first |self| argument.
+    Methods mocked out will retain the same spec as their original, but will
+    still be bound to this class rather than the mocked class.  In the example
+    below, this is why the mocked print function has an extra |inst| argument
+    after the first |self| argument.
 
     Examples:
-      # Defined in chromite/lib/foo.py.
-      class SomeClass(object):
-        def print(self, msg):
-          ...
-        def write(self, fd, msg):
-          ...
+        # Defined in chromite/lib/foo.py.
+        class SomeClass(object):
+            def print(self, msg):
+                ...
+            def write(self, fd, msg):
+                ...
 
-      # Defined in chromite/lib/foo_unittest.py.
-      class SomeClassMock(partial_mock.PartialMock):
-        TARGET = 'chromite.lib.foo.SomeClass'
-        ATTRS = ('print',)
+        # Defined in chromite/lib/foo_unittest.py.
+        class SomeClassMock(partial_mock.PartialMock):
+            TARGET = 'chromite.lib.foo.SomeClass'
+            ATTRS = ('print',)
 
-        # NB: |self| refers to the instance of |SomeClassMock| while |inst| refers
-        # to the instance of |SomeClass|.  This allows access to state in either.
+        # NB: |self| refers to the instance of |SomeClassMock| while |inst|
+        # refers to the instance of |SomeClass|.  This allows access to state in
+        # either.
         def print(self, inst, msg):
-          ...
+            ...
 
     Attributes:
-      TARGET: The import spec for the target object to be (partially) mocked.
-          This is like the target argument to mock.patch().
-      ATTRS: A tuple of attributes on |TARGET| to mock out.  Each attribute must
-          be defined with a corresponding signature.  You may mock out as many or
-          few attributes as needed (hence, "partial mock").
+        TARGET: The import spec for the target object to be (partially) mocked.
+            This is like the target argument to mock.patch().
+        ATTRS: A tuple of attributes on |TARGET| to mock out.  Each attribute
+            must be defined with a corresponding signature.  You may mock out as
+            many or few attributes as needed (hence, "partial mock").
     """
 
     # The import spec for the object being mocked.
@@ -452,10 +451,10 @@ class PartialMock(object):
         """Initialize.
 
         Args:
-          create_tempdir: If set to True, the partial mock will create its own
-            temporary directory when start() is called, and will set self.tempdir to
-            the path of the directory.  The directory is deleted when stop() is
-            called.
+            create_tempdir: If set to True, the partial mock will create its own
+                temporary directory when start() is called, and will set
+                self.tempdir to the path of the directory.  The directory is
+                deleted when stop() is called.
         """
         self.backup = {}
         self.patchers = {}
@@ -631,11 +630,11 @@ class PartialCmdMock(PartialMock):
         """Specify the default command result if no command is matched.
 
         Args:
-          returncode: See AddCmdResult.
-          stdout: See AddCmdResult.
-          stderr: See AddCmdResult.
-          side_effect: See MockedCallResults.AddResultForParams
-          mock_attr: Which attributes's mock is being referenced.
+            returncode: See AddCmdResult.
+            stdout: See AddCmdResult.
+            stderr: See AddCmdResult.
+            side_effect: See MockedCallResults.AddResultForParams
+            mock_attr: Which attributes's mock is being referenced.
         """
         result = cros_build_lib.CompletedProcess(
             returncode=returncode, stdout=stdout, stderr=stderr
@@ -657,14 +656,14 @@ class PartialCmdMock(PartialMock):
         """Specify the result to simulate for a given command.
 
         Args:
-          cmd: The command string or list to record a result for.
-          returncode: The returncode of the command (on the command line).
-          stdout: The stdout output of the command.
-          stderr: The stderr output of the command.
-          kwargs: Keyword arguments that the function needs to be invoked with.
-          strict: Defaults to False.  See MockedCallResults.AddResultForParams.
-          side_effect: See MockedCallResults.AddResultForParams
-          mock_attr: Which attributes's mock is being referenced.
+            cmd: The command string or list to record a result for.
+            returncode: The returncode of the command (on the command line).
+            stdout: The stdout output of the command.
+            stderr: The stderr output of the command.
+            kwargs: Keyword arguments the function needs to be invoked with.
+            strict: Defaults to False. See MockedCallResults.AddResultForParams.
+            side_effect: See MockedCallResults.AddResultForParams
+            mock_attr: Which attributes's mock is being referenced.
         """
         result = cros_build_lib.CompletedProcess(
             returncode=returncode, stdout=stdout, stderr=stderr
@@ -682,11 +681,11 @@ class PartialCmdMock(PartialMock):
         """Verify that at least one command contains the specified args.
 
         Args:
-          args: Set of expected command-line arguments.
-          cmd_arg_index: The index of the command list in the positional call_args.
-            Defaults to the last positional argument.
-          kwargs: Set of expected keyword arguments.
-          mock_attr: Which attributes's mock is being referenced.
+            args: Set of expected command-line arguments.
+            cmd_arg_index: The index of the command list in the positional
+                call_args. Defaults to the last positional argument.
+            kwargs: Set of expected keyword arguments.
+            mock_attr: Which attributes's mock is being referenced.
         """
         for call_args, call_kwargs in self.patched[mock_attr].call_args_list:
             if ListContains(
@@ -705,11 +704,11 @@ class PartialCmdMock(PartialMock):
         specified arguments on the command line.
 
         Args:
-          args: Set of expected command-line arguments.
-          expected: If False, instead verify that none of the run calls
-              contained the specified arguments.
-          **kwargs: Set of expected keyword arguments.
-          mock_attr: Which attributes's mock is being referenced.
+            args: Set of expected command-line arguments.
+            expected: If False, instead verify that none of the run calls
+                contained the specified arguments.
+            **kwargs: Set of expected keyword arguments.
+            mock_attr: Which attributes's mock is being referenced.
         """
         if bool(expected) != self.CommandContains(args, **kwargs):
             if expected:
@@ -728,9 +727,9 @@ class PartialCmdMock(PartialMock):
         matches the specified command line and misc-arguments.
 
         Args:
-          args: Set of expected command-line arguments.
-          mock_attr: Which attributes's mock is being referenced.
-          **kwargs: Set of expected keyword arguments.
+            args: Set of expected command-line arguments.
+            mock_attr: Which attributes's mock is being referenced.
+            **kwargs: Set of expected keyword arguments.
         """
         call = mock.call(args, **kwargs)
         patched = self.patched[mock_attr]
