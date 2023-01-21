@@ -52,8 +52,8 @@ class ChromiteLoader(importlib.abc.Loader):
     """
 
     def __init__(self):
-        # When trying to load the chromite dir from disk, we'll get called again,
-        # so make sure to disable our logic to avoid an infinite loop.
+        # When trying to load the chromite dir from disk, we'll get called
+        # again, so make sure to disable our logic to avoid an infinite loop.
         self.loading = False
 
     # pylint: disable=unused-argument
@@ -124,10 +124,10 @@ def FindTarget(target):
     $ ln -s ../chromite/scripts/wrapper.py foo; ./foo
 
     Args:
-      target: Path to the script we're trying to run.
+        target: Path to the script we're trying to run.
 
     Returns:
-      The module main functor.
+        The module main functor.
     """
     # We assume/require the script we're wrapping ends in a .py.
     full_path = target + ".py"

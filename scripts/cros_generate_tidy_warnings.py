@@ -58,8 +58,8 @@ class GenerateTidyWarnings(object):
         """Initialize
 
         Args:
-          warnings_dir: Path to warnings directory.
-          options: Parsed options.
+            warnings_dir: Path to warnings directory.
+            options: Parsed options.
         """
         self.warnings_dir = warnings_dir
         self.options = options
