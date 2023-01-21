@@ -33,7 +33,9 @@ def execute(output: spiderlib.SpiderOutput):
             )
             if not md5_cache_path.exists():
                 continue
-            store_data = key_value_store.LoadData(md5_cache_path.read_text())
+            store_data = key_value_store.LoadData(
+                md5_cache_path.read_text(encoding="utf-8")
+            )
             ebuild.eapi = int(store_data.get("EAPI", 0))
             ebuild.description = store_data.get("DESCRIPTION", "")
             ebuild.homepage = store_data.get("HOMEPAGE", "")

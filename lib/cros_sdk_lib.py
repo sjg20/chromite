@@ -992,7 +992,7 @@ class ChrootCreator:
             gid = pwd.getpwnam(user).pw_gid
 
         path = self.chroot_path / "etc" / "passwd"
-        lines = path.read_text().splitlines()
+        lines = path.read_text(encoding="utf-8").splitlines()
 
         # Make sure the user isn't one the existing reserved ones.
         for line in lines:
@@ -1045,7 +1045,7 @@ class ChrootCreator:
             group = grp.getgrgid(gid).gr_name
 
         path = self.chroot_path / "etc" / "group"
-        lines = path.read_text().splitlines()
+        lines = path.read_text(encoding="utf-8").splitlines()
 
         # Make sure the group isn't one the existing reserved ones.
         # Add the user to all the existing ones too.
@@ -1081,7 +1081,7 @@ class ChrootCreator:
 
         bash_profile = home / ".bash_profile"
         osutils.Touch(bash_profile)
-        data = bash_profile.read_text().rstrip()
+        data = bash_profile.read_text(encoding="utf-8").rstrip()
         if data:
             data += "\n\n"
         # Automatically change to scripts directory.
@@ -1155,7 +1155,7 @@ PORTAGE_USERNAME="{user}"
         # http://crosbug.com/20378
         localegen = etc_dir / "locale.gen"
         osutils.Touch(localegen)
-        data = localegen.read_text().rstrip()
+        data = localegen.read_text(encoding="utf-8").rstrip()
         if data:
             data += "\n\n"
         localegen.write_text(data + "en_US.UTF-8 UTF-8\n")

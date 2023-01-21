@@ -125,7 +125,10 @@ def create_repo(opts: argparse.Namespace, repo: Path):
         "+refs/meta/config:refs/remotes/origin/meta-config",
     )
     config.set("remote.origin.push", "HEAD:refs/meta/config")
-    if head.read_text().strip() != "ref: refs/heads/meta-config":
+    if (
+        head.read_text(encoding="utf-8").strip()
+        != "ref: refs/heads/meta-config"
+    ):
         result = run(
             ["git", "fetch", "-q", "origin"],
             cwd=path,

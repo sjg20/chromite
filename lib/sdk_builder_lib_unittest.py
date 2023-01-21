@@ -98,7 +98,9 @@ class CreateTarballForSdkTest(cros_test_lib.TempDirTestCase):
         t.mkdir(parents=True)
         cmd = ["tar", "-C", str(t), "-xJf", str(tarball_path)]
         cros_build_lib.run(cmd)
-        self.assertEqual((t / "bin/example").read_text(), "example file\n")
+        self.assertEqual(
+            (t / "bin/example").read_text(encoding="utf-8"), "example file\n"
+        )
         self.assertEqual((t / "bin/example").stat().st_mode & 0o755, 0o755)
         self.assertTrue((t / "usr/lib").exists())
         self.assertFalse((t / "tmp/tempfile").exists())

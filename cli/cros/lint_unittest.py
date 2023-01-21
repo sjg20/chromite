@@ -1157,3 +1157,28 @@ class EncodingCheckerTest(CheckerTestCase):
             ),
             False,
         )
+
+    def testPathlibReadTextGood(self):
+        """Verify we accept good Pathlib.Path.read_text() encoding."""
+        self._check_tests(
+            (
+                # Path.read_text(encoding=None, ...
+                "p.read_text(encoding='utf-8')",
+                "p.read_text('utf-8')",
+            ),
+            True,
+        )
+
+    def testPathlibReadTextBad(self):
+        """Verify we reject bad Pathlib.Path.read_text() encoding."""
+        self._check_tests(
+            (
+                # Path.read_text(encoding=None, ...
+                "p.read_text()",
+                "p.read_text(encoding=None)",
+                "p.read_text(encoding='ascii')",
+                "p.read_text(None)",
+                "p.read_text('ascii')",
+            ),
+            False,
+        )

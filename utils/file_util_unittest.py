@@ -39,7 +39,7 @@ class OpenTests(cros_test_lib.TempDirTestCase):
             fp.write("foo")
         with file_util.Open(path, mode="r") as fp:
             self.assertEqual("foo", fp.read())
-        self.assertEqual("foo", path.read_text())
+        self.assertEqual("foo", path.read_text(encoding="utf-8"))
 
     def testEncoding(self):
         """Verify we pass kwargs down."""

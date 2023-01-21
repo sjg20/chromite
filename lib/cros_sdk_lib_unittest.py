@@ -993,11 +993,11 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
         self.assertEqual(st.st_gid, TEST_GID)
 
         # Check the user/group accounts.
-        db = (self.chroot_path / "etc" / "passwd").read_text()
+        db = (self.chroot_path / "etc" / "passwd").read_text(encoding="utf-8")
         self.assertStartsWith(db, f"{TEST_USER}:x:{TEST_UID}:{TEST_GID}:")
         # Make sure Python None didn't leak in.
         self.assertNotIn("None", db)
-        db = (self.chroot_path / "etc" / "group").read_text()
+        db = (self.chroot_path / "etc" / "group").read_text(encoding="utf-8")
         self.assertStartsWith(db, f"{TEST_GROUP}:x:{TEST_GID}:{TEST_USER}")
         # Make sure Python None didn't leak in.
         self.assertNotIn("None", db)
@@ -1007,13 +1007,16 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
         self.assertExists(etc / "mtab")
         self.assertIn(
             f'PORTAGE_USERNAME="{TEST_USER}"',
-            (etc / "env.d" / "99chromiumos").read_text(),
+            (etc / "env.d" / "99chromiumos").read_text(encoding="utf-8"),
         )
         self.assertEqual(
             "/mnt/host/source/chromite/sdk/etc/bash_completion.d/cros",
             os.readlink(etc / "bash_completion.d" / "cros"),
         )
-        self.assertIn("en_US.UTF-8 UTF-8", (etc / "locale.gen").read_text())
+        self.assertIn(
+            "en_US.UTF-8 UTF-8",
+            (etc / "locale.gen").read_text(encoding="utf-8"),
+        )
 
     def testExistingCompatGroup(self):
         """Verify running with an existing, but matching, group works."""
