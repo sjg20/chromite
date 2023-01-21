@@ -1140,6 +1140,42 @@ class EncodingCheckerTest(CheckerTestCase):
             True,
         )
 
+    def testOpenGood(self):
+        """Verify we accept good open() encoding."""
+        self._check_tests(
+            (
+                # open(file, mode='r', buffering=-1, encoding=None, ...
+                "open('f', 'rb')",
+                "open('f', mode='rb')",
+                "open('f', 'wb')",
+                "open('f', 'r', -1, 'utf-8')",
+                "open('f', encoding='utf-8')",
+                "open('f', mode='r', encoding='utf-8')",
+                "open('f', encoding='utf-8', mode='r')",
+            ),
+            True,
+        )
+
+    def testOpenBad(self):
+        """Verify we reject bad open() encoding."""
+        self._check_tests(
+            (
+                # open(file, mode='r', buffering=-1, encoding=None, ...
+                "open('f')",
+                "open('f', 'r')",
+                "open('f', 'w')",
+                "open('f', mode='r')",
+                "open('f', 'r', -1)",
+                "open('f', 'r', -1, None)",
+                "open('f', 'r', -1, 'ascii')",
+                "open('f', 'r', -1, encoding=None)",
+                "open('f', 'r', -1, encoding='ascii')",
+                "open('f', mode='r', encoding='ascii')",
+                "open('f', encoding='ascii', mode='r')",
+            ),
+            False,
+        )
+
     def testPathlibOpenGood(self):
         """Verify we accept good Pathlib.Path.open() encoding."""
         self._check_tests(

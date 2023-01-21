@@ -200,6 +200,11 @@ class EncodingChecker(pylint.checkers.BaseChecker):
 
     def visit_call(self, node: astroid.Call) -> None:
         """Check |node| call."""
+        # Check open() calls.
+        # open(file, mode='r', buffering=-1, encoding=None, ...
+        if isinstance(node.func, astroid.Name) and node.func.name == "open":
+            self._check_call(node, 3, 1)
+
         # Check pathlib APIs.
         pathlib_calls = {
             # Path.open(mode='r', buffering=-1, encoding=None, ...
