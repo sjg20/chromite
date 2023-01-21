@@ -592,17 +592,26 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
         if not os.path.exists(dlc_source_path):
             continue
 
-        dlc_dest_path = os.path.join(output_dir, dlc_dir)
-        os.mkdir(dlc_dest_path)
-
+        dlc_dest_path = os.path.join(os.path.join(output_dir, dlc_dir))
         ret.append(dlc_dest_path)
+        dlc_data_dest_path = os.path.join(
+            output_dir, dlc_lib.DLC_TMP_META_DIR, dlc_dir
+        )
+        ret.append(dlc_data_dest_path)
+        try:
+            os.makedirs(dlc_dest_path)
+            os.makedirs(dlc_data_dest_path)
+        except FileExistsError:
+            pass
 
         # Only archive DLC images, all other uncompressed files/data should not
         # be uploaded into archives.
         dlc_re = (
             f"({dlc_lib.DLC_ID_RE}/{dlc_lib.DLC_PACKAGE}/{dlc_lib.DLC_IMAGE})"
         )
+        dlc_data_re = f"({dlc_lib.DLC_ID_RE}/{dlc_lib.DLC_PACKAGE})/{dlc_lib.DLC_TMP_META_DIR}/{dlc_lib.IMAGELOADER_JSON}"
         pat = f"/{dlc_build_dir}/{dlc_re}$"
+        pat_data = f"/{dlc_build_dir}/{dlc_data_re}$"
         for path in osutils.DirectoryIterator(dlc_source_path):
             if not path.is_file():
                 continue
@@ -614,6 +623,16 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
                 )
                 os.makedirs(os.path.dirname(img_path))
                 shutil.copyfile(path, img_path)
+
+            m = re.search(pat_data, str(path))
+            if m:
+                data_path = os.path.join(
+                    dlc_data_dest_path,
+                    m.group(1),
+                    dlc_lib.IMAGELOADER_JSON,
+                )
+                os.makedirs(os.path.dirname(data_path))
+                shutil.copyfile(path, data_path)
 
     # Empty list returns `None`.
     return ret or None

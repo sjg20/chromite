@@ -774,6 +774,7 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
         dlc_package: str = dlc_lib.DLC_PACKAGE,
         dlc_artifact: str = dlc_lib.DLC_IMAGE,
         dlc_build_dir: str = dlc_lib.DLC_BUILD_DIR,
+        metadata: bool = True,
     ):
         """Touches the DLC artifact with the given args.
 
@@ -782,12 +783,24 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
             dlc_package: The DLC package.
             dlc_artifact: The DLC artifact.
             dlc_build_dir: The DLC build dir.
+            metadata: True to create metadata.
         """
         build_dir = os.path.join(self.tempdir, dlc_build_dir)
         osutils.Touch(
             os.path.join(build_dir, dlc_id, dlc_package, dlc_artifact),
             makedirs=True,
         )
+        if metadata:
+            osutils.Touch(
+                os.path.join(
+                    build_dir,
+                    dlc_id,
+                    dlc_package,
+                    dlc_lib.DLC_TMP_META_DIR,
+                    dlc_lib.IMAGELOADER_JSON,
+                ),
+                makedirs=True,
+            )
 
     def testOnlyLegacyDLCs(self):
         """Test copy of DLC artifacts for legacy."""
@@ -810,8 +823,9 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
             dlc_bad_artifact_with_dir, dlc_artifact="some-dir/some-file"
         )
 
-        dst_paths = image.copy_dlc_image(self.tempdir, self.tempdir)
-        self.assertEqual(len(dst_paths), 1)
+        output_path = os.path.join(self.tempdir, "_output")
+        dst_paths = image.copy_dlc_image(self.tempdir, output_path)
+        self.assertEqual(len(dst_paths), 2)
         # pylint: disable=unsubscriptable-object
         path = dst_paths[0]
         self.assertEqual(sorted(os.listdir(path)), list(good_dlc_ids))
@@ -893,7 +907,7 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
         )
 
         dst_paths = image.copy_dlc_image(self.tempdir, self.tempdir)
-        self.assertEqual(len(dst_paths), 1)
+        self.assertEqual(len(dst_paths), 2)
         # pylint: disable=unsubscriptable-object
         path = dst_paths[0]
         self.assertEqual(sorted(os.listdir(path)), list(good_dlc_ids))
@@ -982,15 +996,40 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
         )
 
         dst_paths = image.copy_dlc_image(self.tempdir, self.tempdir)
-        self.assertEqual(len(dst_paths), 2)
+        self.assertEqual(len(dst_paths), 4)
         # pylint: disable=unsubscriptable-object
         path0 = dst_paths[0]
         self.assertEqual(sorted(os.listdir(path0)), list(good_dlc_ids))
         self.assertEqual(os.path.basename(path0), dlc_lib.DLC_DIR)
         # pylint: disable=unsubscriptable-object
-        path1 = dst_paths[1]
+        path1 = dst_paths[2]
         self.assertEqual(sorted(os.listdir(path1)), list(good_dlc_ids))
         self.assertEqual(os.path.basename(path1), dlc_lib.DLC_DIR_SCALED)
+
+        for data_path in (dst_paths[1], dst_paths[3]):
+            for dlc_id in good_dlc_ids:
+                self.assertTrue(
+                    os.path.exists(
+                        os.path.join(
+                            data_path,
+                            dlc_id,
+                            dlc_lib.DLC_PACKAGE,
+                            dlc_lib.IMAGELOADER_JSON,
+                        )
+                    )
+                )
+
+            # Even bad ones that have metadata should copy over.
+            self.assertFalse(
+                os.path.exists(
+                    os.path.join(
+                        data_path,
+                        dlc_bad_id,
+                        dlc_lib.DLC_PACKAGE,
+                        dlc_lib.IMAGELOADER_JSON,
+                    )
+                )
+            )
 
         for path in (path0, path1):
             for dlc_id in good_dlc_ids:
