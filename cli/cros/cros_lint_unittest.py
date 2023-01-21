@@ -58,7 +58,7 @@ def test_non_exec(tmp_path):
 
     # Create a data file.
     path = tmp_path / "foo.txt"
-    path.write_text("")
+    path.write_text("", encoding="utf-8")
 
     # -x data files are OK.
     path.chmod(0o644)

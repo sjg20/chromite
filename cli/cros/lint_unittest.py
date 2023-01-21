@@ -1182,3 +1182,28 @@ class EncodingCheckerTest(CheckerTestCase):
             ),
             False,
         )
+
+    def testPathlibWriteTextGood(self):
+        """Verify we accept good Pathlib.Path.write_text() encoding."""
+        self._check_tests(
+            (
+                # Path.write_text(data, encoding=None, ...
+                "p.write_text('', encoding='utf-8')",
+                "p.write_text('', 'utf-8')",
+            ),
+            True,
+        )
+
+    def testPathlibWriteTextBad(self):
+        """Verify we reject bad Pathlib.Path.write_text() encoding."""
+        self._check_tests(
+            (
+                # Path.write_text(data, encoding=None, ...
+                "p.write_text('')",
+                "p.write_text('', encoding=None)",
+                "p.write_text('', encoding='ascii')",
+                "p.write_text('', None)",
+                "p.write_text('', 'ascii')",
+            ),
+            False,
+        )

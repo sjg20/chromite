@@ -947,8 +947,12 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
                 ),
             ),
         )
-        (tar_dir / "etc/passwd").write_text("root:x:0:0:Root:/root:/bin/bash\n")
-        (tar_dir / "etc/group").write_text("root::0\nusers::100\n")
+        (tar_dir / "etc/passwd").write_text(
+            "root:x:0:0:Root:/root:/bin/bash\n", encoding="utf-8"
+        )
+        (tar_dir / "etc/group").write_text(
+            "root::0\nusers::100\n", encoding="utf-8"
+        )
         osutils.Touch(tar_dir / self.creater.DEFAULT_TZ, makedirs=True)
         cros_build_lib.CreateTarball(self.sdk_tarball, tar_dir)
 

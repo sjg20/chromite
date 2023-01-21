@@ -174,6 +174,8 @@ class EncodingChecker(pylint.checkers.BaseChecker):
             "open": (2, 0),
             # Path.read_text(encoding=None, ...
             "read_text": (0, None),
+            # Path.write_text(data, encoding=None, ...
+            "write_text": (1, None),
         }
         if (
             isinstance(node.func, astroid.Attribute)

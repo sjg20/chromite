@@ -50,7 +50,7 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     def testAllocateExistingFile(self):
         """Verify we can allocate an existing file of a certain length."""
         file = self.tempdir / "foo"
-        file.write_text("abcd")
+        file.write_text("abcd", encoding="utf-8")
 
         size = 1234
         osutils.AllocateFile(file, size)

@@ -75,7 +75,7 @@ class FormatCommandTempDirTests(cros_test_lib.TempDirTestCase):
     def testDiffFile(self):
         """Check behavior with --diff file."""
         file = self.tempdir / "foo.txt"
-        file.write_text(" ")
+        file.write_text(" ", encoding="utf-8")
         opts = self.parser.parse_args(["--diff", str(file)])
         cmd = cros_format.FormatCommand(opts)
         self.assertEqual(1, cmd.Run())
@@ -84,7 +84,7 @@ class FormatCommandTempDirTests(cros_test_lib.TempDirTestCase):
     def testCheckFile(self):
         """Check behavior with --check file."""
         file = self.tempdir / "foo.txt"
-        file.write_text(" ")
+        file.write_text(" ", encoding="utf-8")
         for arg in ("-n", "--dry-run", "--check"):
             opts = self.parser.parse_args([arg, str(file)])
             cmd = cros_format.FormatCommand(opts)
@@ -94,7 +94,7 @@ class FormatCommandTempDirTests(cros_test_lib.TempDirTestCase):
     def testStdoutFile(self):
         """Check behavior with --stdout file."""
         file = self.tempdir / "foo.txt"
-        file.write_text(" ")
+        file.write_text(" ", encoding="utf-8")
         opts = self.parser.parse_args(["--stdout", str(file)])
         cmd = cros_format.FormatCommand(opts)
         self.assertEqual(1, cmd.Run())
@@ -103,7 +103,7 @@ class FormatCommandTempDirTests(cros_test_lib.TempDirTestCase):
     def testInplaceFile(self):
         """Check behavior with --inplace file."""
         file = self.tempdir / "foo.txt"
-        file.write_text(" ")
+        file.write_text(" ", encoding="utf-8")
         opts = self.parser.parse_args([str(file)])
         cmd = cros_format.FormatCommand(opts)
         self.assertEqual(0, cmd.Run())

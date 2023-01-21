@@ -80,9 +80,13 @@ class CreateTarballForSdkTest(cros_test_lib.TempDirTestCase):
         tarball_path = self.tempdir / "src/sdk.tar.xz"
         for x in ["bin", "tmp", "usr/lib", "usr/lib/debug"]:
             (board_location / x).mkdir(parents=True)
-        (board_location / "bin/example").write_text("example file\n")
+        (board_location / "bin/example").write_text(
+            "example file\n", encoding="utf-8"
+        )
         (board_location / "bin/example").chmod(0o755)
-        (board_location / "tmp/tempfile").write_text("temp file\n")
+        (board_location / "tmp/tempfile").write_text(
+            "temp file\n", encoding="utf-8"
+        )
         (board_location / "usr/lib/debug/libxyz.so.dwp").write_bytes(
             b"\1\2\3\0"
         )

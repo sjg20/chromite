@@ -71,7 +71,9 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
         """Create a script at |path|."""
         path.parent.mkdir(parents=True, exist_ok=True)
         path = path.with_suffix(".py")
-        path.write_text('def main(argv):\n  print("hi", argv)\n')
+        path.write_text(
+            'def main(argv):\n  print("hi", argv)\n', encoding="utf-8"
+        )
         if wrapper is None:
             wrapper = path.with_suffix("")
         wrapper.symlink_to(self.wrapper)
@@ -158,7 +160,9 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
         prog = self.chromite_dir / "subdir" / "prog_unittest"
         prog.parent.mkdir(parents=True, exist_ok=True)
         path = prog.with_suffix(".py")
-        path.write_text('import sys; print("hi", sys.argv[1:])\n')
+        path.write_text(
+            'import sys; print("hi", sys.argv[1:])\n', encoding="utf-8"
+        )
         prog.symlink_to(self.wrapper)
         self._run_tests(prog)
 
@@ -168,7 +172,7 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
         prog.parent.mkdir(parents=True, exist_ok=True)
         prog.symlink_to(self.wrapper)
         prog.with_suffix(".py").write_text(
-            'import sys; print("hi", sys.argv[1:])\n'
+            'import sys; print("hi", sys.argv[1:])\n', encoding="utf-8"
         )
         self._run_tests(prog)
 
@@ -190,7 +194,7 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
         prog = self.scripts_dir / "prog"
         prog.symlink_to(self.wrapper)
         # Script has syntax errors and cannot be imported.
-        prog.with_suffix(".py").write_text("}")
+        prog.with_suffix(".py").write_text("}", encoding="utf-8")
         self._run_tests(prog, verify=verify, check=False)
 
     def testDashes(self):

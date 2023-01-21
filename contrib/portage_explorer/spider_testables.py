@@ -160,7 +160,8 @@ def create_ebuilds(
             f"BDEPEND={metadata.bdepend}\n"
             f"{pdepend_text}"
             f"IUSE={metadata.iuse}\n"
-            f"_eclasses_={metadata.inherit}"
+            f"_eclasses_={metadata.inherit}",
+            encoding="utf-8",
         )
         ebuild_path = (
             test_overlay.path.relative_to(tmp_path) / package.relative_path
@@ -215,7 +216,7 @@ def create_eclasses(
     populated_eclasses = []
     for eclass in eclasses:
         eclass_path = eclass_folder / f"{eclass}.eclass"
-        eclass_path.write_text("")
+        eclass_path.write_text("", encoding="utf-8")
         unpopulated_eclasses.append(
             spiderlib.Eclass(eclass_path.relative_to(tmp_path), eclass)
         )

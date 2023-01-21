@@ -1007,7 +1007,7 @@ class ChrootCreator:
         line = f"{user}:x:{uid}:{gid}:ChromeOS Developer:{home}:/bin/bash"
         logging.debug("%s: adding user: %s", path, line)
         lines.insert(0, line)
-        path.write_text("\n".join(lines) + "\n")
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
         home = self.chroot_path / home[1:]
         self.init_user_home(home, uid, gid)
@@ -1068,7 +1068,7 @@ class ChrootCreator:
         line = f"{group}:x:{gid}:{user}"
         logging.debug("%s: adding group: %s", path, line)
         lines.insert(0, line)
-        path.write_text("\n".join(lines) + "\n")
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     def init_user_home(self, home: Path, uid: int, gid: int):
         """Initialize the user's /home dir."""
@@ -1086,7 +1086,7 @@ class ChrootCreator:
             data += "\n\n"
         # Automatically change to scripts directory.
         data += 'cd "${CHROOT_CWD:-${HOME}/chromiumos/src/scripts}"\n\n'
-        bash_profile.write_text(data)
+        bash_profile.write_text(data, encoding="utf-8")
 
         osutils.Chown(home, user=uid, group=gid, recursive=True)
 
@@ -1132,7 +1132,8 @@ class ChrootCreator:
 PATH="{constants.CHROOT_SOURCE_ROOT}/chromite/bin:/mnt/host/depot_tools"
 CROS_WORKON_SRCROOT="{constants.CHROOT_SOURCE_ROOT}"
 PORTAGE_USERNAME="{user}"
-"""
+""",
+            encoding="utf-8",
         )
 
         profile_d = etc_dir / "profile.d"
@@ -1158,7 +1159,7 @@ PORTAGE_USERNAME="{user}"
         data = localegen.read_text(encoding="utf-8").rstrip()
         if data:
             data += "\n\n"
-        localegen.write_text(data + "en_US.UTF-8 UTF-8\n")
+        localegen.write_text(data + "en_US.UTF-8 UTF-8\n", encoding="utf-8")
 
     def print_success_summary(self):
         """Show a summary of the chroot to the user."""
