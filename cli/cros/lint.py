@@ -863,8 +863,8 @@ class SourceChecker(pylint.checkers.BaseChecker):
     MSG_ARGS = "offset:%(offset)i: {%(line)s}"
     msgs = {
         "R9200": (
-            'Shebang should be "#!/usr/bin/env python2" or '
-            '"#!/usr/bin/env python3" or "#!/usr/bin/env python"',
+            'Shebang should be "#!/usr/bin/env python3" or '
+            '"#!/usr/bin/env python"',
             ("bad-shebang"),
             _MessageR9200,
         ),
