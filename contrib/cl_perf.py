@@ -740,28 +740,26 @@ class Test:
             build_proto_json_path = (
                 self.test_state_dir / task_id / "build.proto.json"
             )
-            return build_proto_json_path.read_text().rstrip()
+            return build_proto_json_path.read_text(encoding="utf-8").rstrip()
         except FileNotFoundError:
             return None
 
     def SaveToDisk(self) -> None:
         """Stores Test state to disk, which can be read later during processing."""
-        os.makedirs(self.test_state_dir)
+        state_dir = Path(self.test_state_dir)
+        state_dir.mkdir(parents=True, exist_ok=True)
 
-        properties_path = Path(
-            os.path.join(self.test_state_dir, _FILENAME_TEST_PROPERTIES)
+        (state_dir / _FILENAME_TEST_PROPERTIES).write_text(
+            pformat.json(self._properties), encoding="utf-8"
         )
-        properties_path.write_text(pformat.json(self._properties))
 
-        tested_jobs_path = Path(
-            os.path.join(self.test_state_dir, _FILENAME_TESTED_JOBS)
+        (state_dir / _FILENAME_TESTED_JOBS).write_text(
+            pformat.json(self.tested_jobs), encoding="utf-8"
         )
-        tested_jobs_path.write_text(pformat.json(self.tested_jobs))
 
-        baseline_jobs_path = Path(
-            os.path.join(self.test_state_dir, _FILENAME_BASELINE_JOBS)
+        (state_dir / _FILENAME_BASELINE_JOBS).write_text(
+            pformat.json(self.baseline_jobs), encoding="utf-8"
         )
-        baseline_jobs_path.write_text(pformat.json(self.baseline_jobs))
 
 
 def SetupLaunchParser(parser) -> None:
