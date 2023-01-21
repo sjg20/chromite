@@ -180,7 +180,7 @@ class BuildResult(object):
 
     @property
     def all_built(self) -> bool:
-        """Check that all of the images that were meant to be built were built."""
+        """Check that all the images that were meant to be built were built."""
         return not self._unbuilt_image_types
 
     @property
@@ -200,16 +200,16 @@ class BuildResult(object):
     def run_success(self) -> bool:
         """Check if the build was successful.
 
-        True when the build ran, returned a zero return code, and no failed packages
-        were parsed.
+        True when the build ran, returned a zero return code, and no failed
+        packages were parsed.
         """
         return self.return_code == 0 and not self.failed_packages
 
     def add_image(self, image_type: str, image_path: Path):
         """Add an image to the result.
 
-        Record the image path by the image name, and remove the image type from the
-        un-built image list.
+        Record the image path by the image name, and remove the image type from
+        the un-built image list.
         """
         if image_path and image_path.exists():
             self.images[image_type] = image_path
@@ -580,7 +580,8 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
         output_dir: Folder destination for DLC images folder.
 
     Returns:
-      A list of folder paths after move or None if the source path doesn't exist
+        A list of folder paths after move or None if the source path doesn't
+        exist.
     """
     ret = []
     for (dlc_build_dir, dlc_dir) in (
@@ -596,8 +597,8 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
 
         ret.append(dlc_dest_path)
 
-        # Only archive DLC images, all other uncompressed files/data should not be
-        # uploaded into archives.
+        # Only archive DLC images, all other uncompressed files/data should not
+        # be uploaded into archives.
         dlc_re = (
             f"({dlc_lib.DLC_ID_RE}/{dlc_lib.DLC_PACKAGE}/{dlc_lib.DLC_IMAGE})"
         )

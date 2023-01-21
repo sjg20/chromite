@@ -78,7 +78,7 @@ def BuildFirmwareArchive(
     sysroot: "sysroot_lib.Sysroot",
     output_directory: str,
 ) -> Optional[str]:
-    """Build firmware_from_source.tar.bz2 in chroot's sysroot firmware directory.
+    """Build firmware_from_source.tar.bz2 in sysroot's firmware directory.
 
     Args:
         chroot: The chroot to be used.
@@ -629,8 +629,10 @@ def GenerateTestPayloads(
         )
 
         if full:
+            # pylint: disable=line-too-long
             # Names for full sample-dlc payloads look something like this:
             # dlc_sample-dlc_package_R37-5952.0.2014_06_12_2302-a1_link_full_dev.bin
+            # pylint: enable=line-too-long
             name = "_".join(
                 [
                     dlc_prefix,

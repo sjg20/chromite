@@ -68,8 +68,8 @@ class SetupBoardTest(cros_test_lib.MockTestCase):
     def testFullRun(self):
         """Test a regular full run.
 
-        This method just checks that it's trying to create the sysroot and install
-        the toolchain by default.
+        This method just checks that it's trying to create the sysroot and
+        install the toolchain by default.
         """
         target_sysroot = sysroot_lib.Sysroot("/build/board")
         create_mock = self.PatchObject(
@@ -137,7 +137,8 @@ class CreateTest(cros_test_lib.RunCommandTempDirTestCase):
         self.PatchObject(sysroot, "_InstallPortageConfigs")
 
         # Make sure we have a board we haven't setup to avoid triggering the
-        # existing sysroot logic. That is entirely unrelated to the chroot update.
+        # existing sysroot logic. That is entirely unrelated to the chroot
+        # update.
         target = self.unbuilt_target
 
         # Test no update case.
@@ -566,11 +567,10 @@ class BuildPackagesRunConfigTest(
         # Test base install packages and their reverse dependency packages
         # but skipping cros workon packages and their reverse dependencies.
         instance = sysroot.BuildPackagesRunConfig(workon=False)
-        test_emerge_output = (
-            "[binary N] test/package1 ... to /build/sysroot/\n"
-            "[ebuild r U] chromeos-base/tast-build-deps ... to /build/sysroot/\n"
-            "[binary U] chromeos-base/chromeos-chrome ... /build/sysroot/"
-        )
+        test_emerge_output = """\
+[binary N] test/package1 ... to /build/sysroot/
+[ebuild r U] chromeos-base/tast-build-deps ... to /build/sysroot/
+[binary U] chromeos-base/chromeos-chrome ... /build/sysroot/"""
         self.rc.AddCmdResult(
             partial_mock.ListRegex(
                 f"parallel_emerge --sysroot={test_sysroot.path}"
@@ -659,10 +659,10 @@ class BuildPackagesTest(
 
     def setUp(self):
         # Currently just used to keep the parallel emerge status file from being
-        # created in the chroot. This probably isn't strictly necessary, but since
-        # we can otherwise run this test without a chroot existing at all and
-        # without touching the chroot folder, it's better to keep it out of there
-        # all together.
+        # created in the chroot. This probably isn't strictly necessary, but
+        # since we can otherwise run this test without a chroot existing at all
+        # and without touching the chroot folder, it's better to keep it out of
+        # there all together.
         self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=True)
 
         self.board = "board"
@@ -706,9 +706,9 @@ class BuildPackagesTest(
         with cros_test_lib.LoggingCapturer() as logs:
             sysroot.BuildPackages(self.target, self.sysroot, config)
 
-            # The rest of the command's args we test in BuildPackagesRunConfigTest,
-            # so just make sure we're calling the right command and pass the args not
-            # handled by the run config.
+            # The rest of the command's args we test in
+            # BuildPackagesRunConfigTest, so just make sure we're calling the
+            # right command and pass the args not handled by the run config.
             self.assertCommandContains(self.base_command)
             self.assertCommandContains(
                 [
@@ -758,7 +758,7 @@ class BuildPackagesTest(
         sysroot.BuildPackages(self.target, self.sysroot, config)
 
     def testInstallDebugSymbols(self):
-        """Test that cros_install_debug_syms is called with the expected args."""
+        """Test cros_install_debug_syms is called with the expected args."""
         config = sysroot.BuildPackagesRunConfig(install_debug_symbols=True)
 
         with cros_test_lib.LoggingCapturer() as logs:
@@ -820,8 +820,8 @@ STACK CFI 1234
         """Create a symbol file using content with minimum size."""
         osutils.SafeMakedirs(os.path.dirname(filename))
 
-        # If a file size is given, force that to be the minimum file size. Create
-        # a sparse file so large files are practical.
+        # If a file size is given, force that to be the minimum file size.
+        # Create a sparse file so large files are practical.
         with open(filename, "w+b") as f:
             f.truncate(size)
             f.seek(0)
@@ -865,9 +865,9 @@ STACK CFI 1234
         )
 
         # Construct the expected symbol files. Note that the SymbolFileTuple
-        # field source_file_name is the full path to where a symbol file was found,
-        # while relative_path is the relative path (from the search) where
-        # it is created in the output directory.
+        # field source_file_name is the full path to where a symbol file was
+        # found, while relative_path is the relative path (from the search)
+        # where it is created in the output directory.
         expected_symbol_files = [
             sysroot.SymbolFileTuple(
                 source_file_name=os.path.join(input_dir, "a/b/c/file1.sym"),
@@ -897,7 +897,8 @@ STACK CFI 1234
         # contents, and on failure shows the full contents.
         self.assertEqual(symbol_files, expected_symbol_files)
 
-        # Verify that the files in output_dir match the SymbolFile relative_paths.
+        # Verify that the files in output_dir match the SymbolFile
+        # relative_paths.
         files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
         files_in_output_dir.sort()
         symbol_file_relative_paths = [obj.relative_path for obj in symbol_files]
@@ -977,7 +978,8 @@ STACK CFI 1234
             symbol_file_source_file_names, expected_symbol_file_source_names
         )
 
-        # Verify that the files in output_dir match the SymbolFile relative_paths.
+        # Verify that the files in output_dir match the SymbolFile
+        # relative_paths.
         files_in_output_dir = self.getFilesWithRelativeDir(output_dir)
         files_in_output_dir.sort()
         symbol_file_relative_paths = [obj.relative_path for obj in symbol_files]
@@ -1004,8 +1006,8 @@ STACK CFI 1234
             "fileD.txt",
         ]
         for filename in files_in_tarball:
-            # we don't care about file contents, so we are using createSymbolFile
-            # for files whether they end with .sym or not.
+            # we don't care about file contents, so we are using
+            # createSymbolFile for files whether they end with .sym or not.
             self.createSymbolFile(os.path.join(tarball_dir, filename))
         temp_tarball_file_path = os.path.join(self.tempdir, "symfiles.tar")
         cros_build_lib.CreateTarball(temp_tarball_file_path, tarball_dir)
@@ -1042,7 +1044,8 @@ STACK CFI 1234
         self.createSymbolFile(os.path.join(input_dir, "a_file.txt"))
 
         # Call sysroot.GatherSymbolFiles with full paths to files, some of which
-        # don't end in .sym, verify that only .sym files get copied to output_dir.
+        # don't end in .sym, verify that only .sym files get copied to
+        # output_dir.
         symbol_files = list(
             sysroot.GatherSymbolFiles(
                 tar_tmp_dir,
@@ -1055,9 +1058,9 @@ STACK CFI 1234
         )
 
         # Construct the expected symbol files. Note that the SymbolFileTuple
-        # field source_file_name is the full path to where a symbol file was found,
-        # while relative_path is the relative path (from the search) where
-        # it is created in the output directory.
+        # field source_file_name is the full path to where a symbol file was
+        # found, while relative_path is the relative path (from the search)
+        # where it is created in the output directory.
         expected_symbol_files = [
             sysroot.SymbolFileTuple(
                 source_file_name=os.path.join(input_dir, "a_file.sym"),
@@ -1091,7 +1094,7 @@ class GenerateBreakpadSymbolsTest(cros_test_lib.MockTempDirTestCase):
         osutils.SafeMakedirs(self.chroot_dir)
 
     def test_generateBreakpadSymbols(self):
-        """Verify that calling the service layer invokes the script as expected."""
+        """Verify calling the service layer invokes the script as expected."""
         chroot = chroot_lib.Chroot(self.chroot_dir)
         build_target = build_target_lib.BuildTarget("board")
         self.PatchObject(cros_build_lib, "run")
@@ -1327,7 +1330,7 @@ class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
         self.goma_mock.assert_not_called()
 
     def testNoRemoteExecNoEnv(self):
-        """Test the case where no remoteexec is requested without env variable."""
+        """Test case where no remoteexec is requested without env variable."""
         with sysroot.RemoteExecution(use_goma=False, use_remoteexec=False):
             pass
         self.remoteexec_mock.assert_not_called()

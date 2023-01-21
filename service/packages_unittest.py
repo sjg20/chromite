@@ -387,8 +387,8 @@ class PatchEbuildVarsTest(cros_test_lib.MockTestCase):
         ):
             expected_calls.append(mock.call(line))
 
-        # Note that the var name partially matches the ebuild var and hence it has
-        # to be ignored.
+        # Note that the var name partially matches the ebuild var and hence it
+        # has to be ignored.
         packages.patch_ebuild_vars(
             self.ebuild_path, {"AFDO": self.new_var_value}
         )
@@ -427,7 +427,7 @@ class UprevsVersionedPackageTest(cros_test_lib.MockTestCase):
         cpv = package_info.SplitCPV("category/package", strict=False)
         packages.uprev_versioned_package(cpv, [], [], Chroot())
 
-        # TODO(crbug/1065172): Invalid assertion that had previously been mocked.
+        # TODO(crbug/1065172): Invalid assertion that was previously mocked.
         # patch.assert_called()
 
     def test_unregistered_package(self):
@@ -495,7 +495,7 @@ class UprevEbuildFromPinTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertCommandContains(["ebuild", "manifest"])
 
     def test_uprev_ebuild_same_version(self):
-        """Tests uprev of ebuild with version path when the version has not changed.
+        """Tests uprev of ebuild with version path with unchanged version.
 
         This should result in bumping the revision number.
         """
@@ -630,9 +630,9 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
             json.dumps({"chromeos": {"configs": [{"a": 3, "b": 2}]}}),
         )
 
-        # Public config only contains the 'a' field. Note that the value of 'a' is
-        # 1 in the public config; it will get updated to 3 when the private config
-        # is replicated.
+        # Public config only contains the 'a' field. Note that the value of 'a'
+        # is 1 in the public config; it will get updated to 3 when the private
+        # config is replicated.
         self.public_config_path = os.path.join(
             self.public_package_root, "files", "build_config.json"
         )
@@ -669,8 +669,8 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
     def _write_generated_c_files(self, *_args, **_kwargs):
         """Write fake generated C files to the public output dir.
 
-        Note that this function accepts args and kwargs so it can be used as a side
-        effect.
+        Note that this function accepts args and kwargs so it can be used as a
+        side effect.
         """
         output_dir = os.path.join(self.public_package_root, "files")
         self.WriteTempFile(os.path.join(output_dir, "config.c"), "")
@@ -680,8 +680,8 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
     def _write_incorrect_generated_c_files(self, *_args, **_kwargs):
         """Similar to _write_generated_c_files, with an expected file missing.
 
-        Note that this function accepts args and kwargs so it can be used as a side
-        effect.
+        Note that this function accepts args and kwargs so it can be used as a
+        side effect.
         """
         output_dir = os.path.join(self.public_package_root, "files")
         self.WriteTempFile(os.path.join(output_dir, "config.c"), "")
@@ -738,8 +738,9 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertEqual(result.modified[0].files, expected_modified_files)
         self.assertEqual(result.modified[0].new_version, "123")
 
-        # The update from the private build_config.json was copied to the public.
-        # Note that only the 'a' field is present, as per destination_fields.
+        # The update from the private build_config.json was copied to the
+        # public. Note that only the 'a' field is present, as per
+        # destination_fields.
         self.assertEqual(
             json.loads(self.ReadTempFile(self.public_config_path)),
             {"chromeos": {"configs": [{"a": 3}]}},
@@ -747,8 +748,8 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
 
     def test_replicate_private_config_no_build_config(self):
         """If there is no build config, don't generate C files."""
-        # Modify the replication config to write to "other_config.json" instead of
-        # "build_config.json"
+        # Modify the replication config to write to "other_config.json" instead
+        # of "build_config.json"
         modified_destination_path = self.public_config_path.replace(
             "build_config", "other_config"
         )
@@ -885,7 +886,7 @@ class ReplicatePrivateConfigTest(cros_test_lib.RunCommandTempDirTestCase):
             )
 
     def test_replicate_private_config_wrong_git_ref_path(self):
-        """An error is thrown if the git ref doesn't point to a private overlay."""
+        """Git ref that doesn't point to a private overlay throws error."""
         with self.assertRaisesRegex(
             ValueError, "ref.path must match the pattern"
         ):
@@ -964,9 +965,9 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
             osutils, "SourceEnvironment", return_value=FakeEnvironment
         )
 
-        # Clear the LRU cache for the function. We mock the function that provides
-        # the data this function processes to produce its result, so we need to
-        # clear it manually.
+        # Clear the LRU cache for the function. We mock the function that
+        # provides the data this function processes to produce its result, so we
+        # need to clear it manually.
         packages.determine_android_package.cache_clear()
 
     def test_determine_android_version(self):
@@ -975,7 +976,7 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
         self.assertEqual(version, "4717008")
 
     def test_determine_android_version_when_not_present(self):
-        """Tests that a None is returned for version when android is not present."""
+        """Test None is returned for version when android is not present."""
         package_result = ["chromeos-base/update_engine-0.0.3-r3408"]
         self.PatchObject(
             portage_util, "GetPackageDependencies", return_value=package_result
@@ -989,7 +990,7 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
         self.assertEqual(branch, "3")
 
     def test_determine_android_branch_64bit_targets(self):
-        """Tests that a valid android branch is returned with only 64bit targets."""
+        """Tests a valid android branch is returned with only 64bit targets."""
         self.PatchObject(
             osutils,
             "SourceEnvironment",
@@ -999,7 +1000,7 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
         self.assertEqual(branch, "3")
 
     def test_determine_android_branch_when_not_present(self):
-        """Tests that a None is returned for branch when android is not present."""
+        """Tests a None is returned for branch when android is not present."""
         package_result = ["chromeos-base/update_engine-0.0.3-r3408"]
         self.PatchObject(
             portage_util, "GetPackageDependencies", return_value=package_result
@@ -1013,7 +1014,7 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
         self.assertEqual(target, "cheets")
 
     def test_determine_android_target_when_not_present(self):
-        """Tests that a None is returned for target when android is not present."""
+        """Tests a None is returned for target when android is not present."""
         package_result = ["chromeos-base/update_engine-0.0.3-r3408"]
         self.PatchObject(
             portage_util, "GetPackageDependencies", return_value=package_result
@@ -1023,8 +1024,8 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
 
     def test_determine_android_version_handle_exception(self):
         """Tests handling RunCommandError inside determine_android_version."""
-        # Mock what happens when portage returns that bubbles up (via RunCommand)
-        # inside portage_util.GetPackageDependencies.
+        # Mock what happens when portage returns that bubbles up (via
+        # RunCommand) inside portage_util.GetPackageDependencies.
         self.PatchObject(
             portage_util,
             "GetPackageDependencies",
@@ -1035,8 +1036,8 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
 
     def test_determine_android_package_handle_exception(self):
         """Tests handling RunCommandError inside determine_android_package."""
-        # Mock what happens when portage returns that bubbles up (via RunCommand)
-        # inside portage_util.GetPackageDependencies.
+        # Mock what happens when portage returns that bubbles up (via
+        # RunCommand) inside portage_util.GetPackageDependencies.
         self.PatchObject(
             portage_util,
             "GetPackageDependencies",
@@ -1046,9 +1047,9 @@ class AndroidVersionsTest(cros_test_lib.MockTestCase):
         self.assertEqual(target, None)
 
     def test_determine_android_package_callers_handle_exception(self):
-        """Tests handling RunCommandError by determine_android_package callers."""
-        # Mock what happens when portage returns that bubbles up (via RunCommand)
-        # inside portage_util.GetPackageDependencies.
+        """Tests RunCommandError caught by determine_android_package callers."""
+        # Mock what happens when portage returns that bubbles up (via
+        # RunCommand) inside portage_util.GetPackageDependencies.
         self.PatchObject(
             portage_util,
             "GetPackageDependencies",
@@ -1109,6 +1110,7 @@ class GetAllFirmwareVersionsTest(cros_test_lib.RunCommandTempDirTestCase):
 
     def setUp(self):
         self.board = "test-board"
+        # pylint: disable=line-too-long
         self.rc.SetDefaultCmdResult(
             stdout="""
 
@@ -1181,6 +1183,7 @@ fe5d699f2e9e4a7de031497953313dbd *./models/snappy/setvars.sh
 79aabd7cd8a215a54234c53d7bb2e6fb *./vpd
 """
         )
+        # pylint: enable=line-too-long
 
     def test_get_firmware_versions(self):
         """Tests get_firmware_versions with mocked output."""
@@ -1256,6 +1259,7 @@ class GetFirmwareVersionsTest(cros_test_lib.RunCommandTempDirTestCase):
 
     def setUp(self):
         self.board = "test-board"
+        # pylint: disable=line-too-long
         self.rc.SetDefaultCmdResult(
             stdout="""
 
@@ -1284,6 +1288,7 @@ c98ca54db130886142ad582a58e90ddc *./common.sh
 312e8ee6122057f2a246d7bcf1572f49 *./vpd
 """
         )
+        # pylint: enable=line-too-long
 
     def test_get_firmware_versions(self):
         """Tests get_firmware_versions with mocked output."""
@@ -1500,8 +1505,8 @@ class ChromeVersionsTest(cros_test_lib.MockTestCase):
         self.assertEqual(int(version_numbers[0]), 78)
 
     def test_determine_chrome_version_handle_exception(self):
-        # Mock what happens when portage throws an exception that bubbles up (via
-        # RunCommand)inside portage_util.PortageqBestVisible.
+        # Mock what happens when portage throws an exception that bubbles up
+        # (via RunCommand)inside portage_util.PortageqBestVisible.
         self.PatchObject(
             portage_util,
             "PortageqBestVisible",
@@ -1520,8 +1525,8 @@ class PlatformVersionsTest(cros_test_lib.MockTestCase):
         # The returned platform version is something like 12603.0.0.
         version_string_list = platform_version.split(".")
         self.assertEqual(len(version_string_list), 3)
-        # We don't want to check an exact version, but the first number should be
-        # non-zero.
+        # We don't want to check an exact version, but the first number should
+        # be non-zero.
         self.assertGreaterEqual(int(version_string_list[0]), 1)
 
     def test_determine_milestone_version(self):
@@ -1540,7 +1545,7 @@ class PlatformVersionsTest(cros_test_lib.MockTestCase):
         self.assertGreaterEqual(int(milestone_version), 1)
 
     def test_versions_based_on_mock(self):
-        # Create a test version_info object, and than mock VersionInfo.from_repo
+        # Create a test version_info object, and then mock VersionInfo.from_repo
         # return it.
         test_platform_version = "12575.0.0"
         test_chrome_branch = "75"
@@ -1825,7 +1830,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
         self.assertFalse(result.local_uprev)
 
     def test_needs_none(self):
-        """Verify not building any of the chrome packages prevents needing it."""
+        """Verify not building any chrome packages prevents needing it."""
         graph = self._build_graph(with_chrome=False, with_followers=False)
         self.PatchObject(
             depgraph, "get_sysroot_dependency_graph", return_value=graph

@@ -130,10 +130,10 @@ class PayloadConfig(object):
             paygen_payload_lib.PayloadGenerationSkippedException: If paygen was
                 skipped for any reason.
         """
-        # Leave the generated artifact local. This is ok because if we're testing
-        # it's likely we want the artifact anyway, and in production this is ran on
-        # single shot bots in the context of an overlayfs and will get cleaned up
-        # anyway.
+        # Leave the generated artifact local. This is ok because if we're
+        # testing it's likely we want the artifact anyway, and in production
+        # this is ran on single shot bots in the context of an overlayfs and
+        # will get cleaned up anyway.
         with chroot_util.TempDirInChroot(delete=False) as temp_dir:
             signer = paygen_payload_lib.PaygenSigner(
                 work_dir=temp_dir, payload_build=self.payload.build

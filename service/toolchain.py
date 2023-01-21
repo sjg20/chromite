@@ -112,8 +112,8 @@ class BuildLinter:
         r"(?P<file_path>[^\s]+\.go):(?P<line>\d+):\d+:\s+(?P<message>.*)"
     )
     # FIXME(b/195056381): default git-repo should be replaced with logic in
-    # build_linters recipe to detect the repo path for applied patches.
-    # As of 2021/5/1 only platform2 is supported so this value works temporarily.
+    # build_linters recipe to detect the repo path for applied patches. As of
+    # 2021/5/1 only platform2 is supported so this value works temporarily.
     GIT_REPO_PATH = "/mnt/host/source/src/platform2/"
 
     def __init__(
@@ -214,7 +214,7 @@ class BuildLinter:
         use_golint: bool = True,
         use_iwyu: bool = False,
     ) -> List[LinterFinding]:
-        """Fetch lints from clippy and tidy after previously emerging with linting.
+        """Fetch clippy and tidy lints after previously emerging with linting.
 
         Args:
             use_clippy: whether or not to look for lints from Cargo Clippy
@@ -246,8 +246,8 @@ class BuildLinter:
         osutils.RmDir(BuildLinter.TIDY_BASE_DIR, ignore_missing=True, sudo=True)
         osutils.SafeMakedirs(BuildLinter.TIDY_BASE_DIR, 0o777, sudo=True)
 
-        # rm any existing temporary portage files from builds of affected packages:
-        # this is required to make sure lints are always regenerated
+        # rm any existing temporary portage files from builds of affected
+        # packages: this is required to make sure lints are always regenerated
         for package in self.package_atoms:
             cache_files_dir = f"{self.sysroot}/var/cache/portage/{package}"
             osutils.RmDir(cache_files_dir, ignore_missing=True, sudo=True)
@@ -304,9 +304,11 @@ class BuildLinter:
         # where we want to see that:
         #   *  line number = 21
         #   *  lines added = 4
+        # pylint: disable=line-too-long
         position_pattern = re.compile(
             r"^@@ -\d+(?:,\d+)? \+(?P<line_num>\d+)(?:,(?P<lines_added>\d+))? @@"
         )
+        # pylint: enable=line-too-long
 
         for git_repo, git_hash in git_repos.items():
             cmd = f"git -C {git_repo} diff -U0 {git_hash}^...{git_hash}"
@@ -350,7 +352,7 @@ class BuildLinter:
                         filepath=location.file_path,
                         line_start=location.line_start,
                         line_end=location.line_end,
-                        # FIXME(b/244362509): Extend more details support to Rust
+                        # FIXME(b/244362509): Extend more detail support to Rust
                         contents="",
                         col_start=None,
                         col_end=None,
@@ -412,7 +414,7 @@ class BuildLinter:
         diagnostics: List["tricium_clang_tidy.TidyDiagnostic"],
         package_atom: Text,
     ) -> Set[LinterFinding]:
-        """Parse diagnostics created by Clang Tidy into LinterFindings objects."""
+        """Parse diagnostics from Clang Tidy into LinterFindings objects."""
 
         package = package_info.parse(package_atom)
         findings = set()
@@ -712,7 +714,7 @@ class BuildLinter:
         return re.sub(r"(.*/)?[^/]+/work/[^/]+/+", "", file_path)
 
     def _get_git_repo_paths(self) -> Iterable[str]:
-        """Gets the Git repo paths needed for performing differential linting."""
+        """Get the Git repo paths needed for performing differential linting."""
         repo_paths = []
         package_names = [pkg_info.package for pkg_info in self.packages]
         ebuild_paths = portage_util.FindEbuildsForPackages(
@@ -741,7 +743,8 @@ class BuildLinter:
     def is_package_platform2(self, package_atom: Text) -> bool:
         """Returns whether or not a package is part of platform2.
 
-        This is done by inspecting the output of ebuild $(equery w <package>) info.
+        This is done by inspecting the output of
+        `ebuild $(equery w <package>) info`.
         """
         cros_build_lib.AssertInsideChroot()
 

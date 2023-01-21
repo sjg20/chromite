@@ -95,7 +95,8 @@ def GenerateSourcePathMapping(
         and not board
         and sysroot_path != build_target_lib.get_sdk_sysroot_path()
     ):
-        # Get the board name from the sysroot path unless it's the SDK's sysroot.
+        # Get the board name from the sysroot path unless it's the SDK's
+        # sysroot.
         board = os.path.basename(sysroot_path)
 
     # We should definitely have a sysroot at this point.
@@ -273,9 +274,9 @@ def DetermineToolchainSourcePaths() -> List[str]:
     A package is a 'toolchain package' if it is listed as a direct dependency
     of virtual/toolchain-packages. This function deliberately does not return
     deeper transitive dependencies so that only direct changes to toolchain
-    packages trigger the expensive full re-compilation required to test toolchain
-    changes. Eclasses & overlays are not returned as relevant paths for the same
-    reason.
+    packages trigger the expensive full re-compilation required to test
+    toolchain changes. Eclasses & overlays are not returned as relevant paths
+    for the same reason.
 
     Returned paths are relative to the root of the project checkout.
 

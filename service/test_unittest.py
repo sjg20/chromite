@@ -213,8 +213,8 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
 
         self.chrome_sdk_run_mock = self.PatchObject(commands.ChromeSDK, "Run")
 
-        # SimpleChromeTest workflow creates directories based on objects that are
-        # mocked for this test, so patch osutils.WriteFile
+        # SimpleChromeTest workflow creates directories based on objects that
+        # are mocked for this test, so patch osutils.WriteFile
         self.write_mock = self.PatchObject(osutils, "WriteFile")
 
         self.PatchObject(
@@ -240,9 +240,9 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
         osutils.SafeMakedirs(mock_goma_log_dir)
         goma.goma_log_dir = mock_goma_log_dir
 
-        # For this test, we avoid running test._VerifySDKEnvironment because use of
-        # other mocks prevent creating the SDK dir that _VerifySDKEnvironment checks
-        # for
+        # For this test, we avoid running test._VerifySDKEnvironment because use
+        # of other mocks prevent creating the SDK dir that _VerifySDKEnvironment
+        # checks for
         self.PatchObject(test, "_VerifySDKEnvironment")
 
         self.PatchObject(os.path, "exists", return_value=True)
@@ -310,7 +310,7 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
         )
 
         # Verify goma mock was started and stopped.
-        # TODO(crbug/1065172): Invalid assertions that had previously been mocked.
+        # TODO(crbug/1065172): Invalid assertions that were previously mocked.
         # self.goma_mock.Start.assert_called_once()
         # self.goma_mock.Stop.assert_called_once()
 
@@ -696,7 +696,7 @@ class GatherCodeCoverageLlvmJsonFileTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testWritesCombinedFileToOutputDir(self):
-        """Test that all contents of valid files are combined into the output."""
+        """Test all contents of valid files are combined into the output."""
 
         input_dir = os.path.join(self.tempdir, "input")
         self.writeCodeCoverageLlvm(

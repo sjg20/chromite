@@ -299,7 +299,8 @@ def IsBuildIdValid(
         # contain the exact same artifacts.
         if len(subpaths) > 1:
             logging.warning(
-                "Directory [%s] contains more than one subpath, using the first one.",
+                "Directory [%s] contains more than one subpath, using the "
+                "first one.",
                 build_id_path,
             )
 
@@ -350,7 +351,8 @@ def GetLatestBuild(
         base_path = os.path.join(bucket_url, build_dir)
         build_ids = []
         for gs_result in gs_context.List(base_path):
-            # Remove trailing slashes and get the base name, which is the build_id.
+            # Remove trailing slashes and get the base name, which is the
+            # build_id.
             build_id = os.path.basename(gs_result.url.rstrip("/"))
             if not build_id.isdigit():
                 logging.warning(
@@ -447,8 +449,8 @@ def CopyToArcBucket(
                 needs_copy = True
                 retry_count = 2
 
-                # Retry in case race condition when several boards trying to copy the
-                # same resource
+                # Retry in case race condition when several boards trying to
+                # copy the same resource
                 while True:
                     # Check a pre-existing file with the original source.
                     if gs_context.Exists(arc_path):
@@ -466,13 +468,16 @@ def CopyToArcBucket(
                             )
                             needs_copy = False
 
-                    # Copy if necessary, and set the ACL unconditionally.
-                    # The Stat() call above doesn't verify the ACL is correct and
-                    # the ChangeACL should be relatively cheap compared to the copy.
-                    # This covers the following caes:
+                    # Copy if necessary, and set the ACL unconditionally. The
+                    # Stat() call above doesn't verify the ACL is correct and
+                    # the ChangeACL should be relatively cheap compared to the
+                    # copy.
+                    # This covers the following case:
                     # - handling an interrupted copy from a previous run.
-                    # - rerunning the copy in case one of the googlestorage_acl_X.txt
-                    #   files changes (e.g. we add a new variant which reuses a build).
+                    # - rerunning the copy in case one of the
+                    #       googlestorage_acl_X.txt
+                    #   files changes (e.g. we add a new variant which reuses a
+                    #       build).
                     if needs_copy:
                         logging.info(
                             "Copying %s -> %s (acl %s)",
@@ -617,7 +622,8 @@ def ReadLKGB(android_package_dir: str) -> dict:
         An LKGB object from the file; see LKGB().
 
     Raises:
-        MissingLKGBError: If the LKGB file is not found under android_package_dir.
+        MissingLKGBError: If the LKGB file is not found under
+            |android_package_dir|.
         InvalidLKGBError: If the LKGB file contains invalid content.
     """
     path = os.path.join(android_package_dir, _LKGB_JSON)

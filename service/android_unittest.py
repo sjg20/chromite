@@ -19,7 +19,7 @@ class ArtifactsConfigTest(cros_test_lib.TestCase):
     """Tests to ensure artifacts configs are properly written."""
 
     def testAllTargetsAreConfigured(self):
-        """Ensure artifact patterns are configured for all packages and targets."""
+        """Ensure artifact patterns are configured for all pkgs and targets."""
         self.assertSetEqual(
             set(android.ARTIFACTS_TO_COPY),
             set(android.ANDROID_PACKAGE_TO_BUILD_TARGETS),

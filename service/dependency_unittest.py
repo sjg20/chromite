@@ -188,7 +188,7 @@ def test_generate_source_path_mapping_sdk(monkeypatch):
 
 
 def test_generate_source_path_mapping_sdk_only():
-    """Test GenerateSourcePathMapping raises errors when sdk not only argument."""
+    """Test GenerateSourcePathMapping argument handling when setting sdk."""
     # Board.
     with pytest.raises(AssertionError):
         dependency.GenerateSourcePathMapping(

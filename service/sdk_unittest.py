@@ -246,7 +246,7 @@ class SnapshotTest(cros_test_lib.RunCommandTestCase):
         self.assertCommandContains(["--snapshot-create"])
 
     def testRestoreMatchesCreate(self):
-        """Test that the token restored snapshot name matches the created name."""
+        """Test the token restored snapshot name matches the created name."""
         token = sdk.CreateSnapshot()
         sdk.RestoreSnapshot(token)
         self.assertCommandContains(["--snapshot-restore", token])

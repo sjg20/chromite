@@ -71,7 +71,7 @@ class BundleAutotestFilesTest(cros_test_lib.MockTempDirTestCase):
         )
         osutils.SafeMakedirs(ab_path)
 
-        # Makes all of the individual calls to build out each of the tarballs work
+        # Makes all the individual calls to build out each of the tarballs work
         # nicely with a single patch.
         self.PatchObject(
             autotest_util.AutotestTarballBuilder,
@@ -293,7 +293,8 @@ class BundleEBuildLogsTarballTest(cros_test_lib.TempDirTestCase):
         log_files_root = os.path.join(
             log_parent_dir, "%s/tmp/portage/logs" % board
         )
-        # Generate a representative set of log files produced by a typical build.
+        # Generate a representative set of log files produced by a typical
+        # build.
         cros_test_lib.CreateOnDiskHierarchy(log_files_root, log_files)
 
         archive_dir = self.tempdir
@@ -345,7 +346,8 @@ class BundleChromeOSConfigTest(cros_test_lib.MockTempDirTestCase):
         config_files_root = os.path.join(
             config_parent_dir, "%s/usr/share/chromeos-config" % self.board
         )
-        # Generate a representative set of config files produced by a typical build.
+        # Generate a representative set of config files produced by a typical
+        # build.
         cros_test_lib.CreateOnDiskHierarchy(config_files_root, config_files)
 
         # Write a payload to the config.yaml file.
@@ -366,7 +368,7 @@ class BundleChromeOSConfigTest(cros_test_lib.MockTempDirTestCase):
             self.assertEqual(test_config_payload, json.load(f))
 
     def testNoChromeOSConfigFound(self):
-        """Verifies that None is returned when no ChromeOS config file is found."""
+        """Verifies None is returned when no ChromeOS config file is found."""
         self.assertIsNone(
             artifacts.BundleChromeOSConfig(
                 self.chroot, self.sysroot, self.archive_dir
@@ -407,8 +409,8 @@ class BuildFirmwareArchiveTest(cros_test_lib.TempDirTestCase):
 
     def testBuildFirmwareArchive(self):
         """Verifies that firmware archiver includes proper files"""
-        # Assorted set of file names, some of which are supposed to be included in
-        # the archive.
+        # Assorted set of file names, some of which are supposed to be included
+        # in the archive.
         fw_files = (
             "dts/emeraldlake2.dts",
             "image-link.rw.bin",
@@ -1067,8 +1069,8 @@ class GenerateCpeExportTest(cros_test_lib.RunCommandTempDirTestCase):
 
         self.assertEqual(self.result_file, result.report)
         self.assertEqual(self.warnings_file, result.warnings)
-        # We cannot assert that self.result_file exists and check contents since we
-        # are mocking  cros_extract_deps, but we verified the args to
+        # We cannot assert that self.result_file exists and check contents since
+        # we are mocking  cros_extract_deps, but we verified the args to
         # cros_extract_deps.
         self.assertFileContents(self.warnings_file, warnings)
 

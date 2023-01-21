@@ -190,8 +190,8 @@ class BuildImageTest(
             self.AssertLogsContain(
                 logs,
                 (
-                    f"{image._IMAGE_TYPE_DESCRIPTION[constants.BASE_IMAGE_BIN]} image "
-                    f"created as {constants.BASE_IMAGE_BIN}"
+                    f"{image._IMAGE_TYPE_DESCRIPTION[constants.BASE_IMAGE_BIN]}"
+                    f" image created as {constants.BASE_IMAGE_BIN}"
                 ),
             )
             self.AssertLogsContain(logs, f"cros flash usb:// {base_image_path}")
@@ -207,8 +207,8 @@ class BuildImageTest(
             self.AssertLogsContain(
                 logs,
                 (
-                    f"{image._IMAGE_TYPE_DESCRIPTION[constants.DEV_IMAGE_BIN]} image "
-                    f"created as {constants.DEV_IMAGE_BIN}"
+                    f"{image._IMAGE_TYPE_DESCRIPTION[constants.DEV_IMAGE_BIN]} "
+                    f"image created as {constants.DEV_IMAGE_BIN}"
                 ),
             )
             self.AssertLogsContain(logs, f"cros flash usb:// {dev_image_path}")
@@ -223,8 +223,8 @@ class BuildImageTest(
             self.AssertLogsContain(
                 logs,
                 (
-                    f"{image._IMAGE_TYPE_DESCRIPTION[constants.TEST_IMAGE_BIN]} image "
-                    f"created as {constants.TEST_IMAGE_BIN}"
+                    f"{image._IMAGE_TYPE_DESCRIPTION[constants.TEST_IMAGE_BIN]}"
+                    f" image created as {constants.TEST_IMAGE_BIN}"
                 ),
             )
             self.AssertLogsContain(logs, f"cros flash usb:// {test_image_path}")
@@ -536,8 +536,8 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
             self.board, self.outside_result_dir, image_dir=self.image_dir_inside
         )
 
-        # Inside chroot shouldn't need to do any path manipulations, so we should
-        # see exactly what we called it with.
+        # Inside chroot shouldn't need to do any path manipulations, so we
+        # should see exactly what we called it with.
         self.assertCommandContains(
             [
                 "--board",
@@ -601,7 +601,7 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
         osutils.SafeMakedirs(self.output_dir)
 
     def test(self):
-        """create_factory_image_zip calls cbuildbot/commands with correct args."""
+        """create_factory_image_zip calls cbuildbot/commands correctly."""
         version = "1.2.3.4"
         output_file = image.create_factory_image_zip(
             self.chroot,
@@ -778,10 +778,10 @@ class TestCopyDlcImages(cros_test_lib.MockTempDirTestCase):
         """Touches the DLC artifact with the given args.
 
         Args:
-          dlc_id: The DLC ID.
-          dlc_package: The DLC package.
-          dlc_artifact: The DLC artifact.
-          dlc_build_dir: The DLC build dir.
+            dlc_id: The DLC ID.
+            dlc_package: The DLC package.
+            dlc_artifact: The DLC artifact.
+            dlc_build_dir: The DLC build dir.
         """
         build_dir = os.path.join(self.tempdir, dlc_build_dir)
         osutils.Touch(

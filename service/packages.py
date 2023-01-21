@@ -209,8 +209,8 @@ def uprev_android(
 
     # cros_mark_android_as_stable prints the uprev result to stdout as JSON in a
     # single line. We only take the last line from stdout to make sure no junk
-    # output is included (e.g. messages from bashrc scripts that run upon entering
-    # the chroot.)
+    # output is included (e.g. messages from bashrc scripts that run upon
+    # entering the chroot.)
     output = json.loads(result.stdout.strip().splitlines()[-1])
 
     if not output["revved"]:
@@ -253,9 +253,9 @@ def uprev_android_lkgb(
     This is the PUpr handler for Android packages, triggered whenever the
     corresponding LKGB file is being updated.
 
-    PUpr for Android does not test the uprev change in CQ; instead we run separate
-    jobs to test new Android versions, and we write the latest vetted version to
-    the LKGB file. Find the design at go/android-uprev-recipes.
+    PUpr for Android does not test the uprev change in CQ; instead we run
+    separate jobs to test new Android versions, and we write the latest vetted
+    version to the LKGB file. Find the design at go/android-uprev-recipes.
 
     Args:
         android_package: The Android package to uprev.
@@ -280,7 +280,8 @@ def uprev_android_lkgb(
     if not uprev_result.revved:
         return result
 
-    # cros_mark_android_as_stable returns paths relative to |android.OVERLAY_DIR|.
+    # cros_mark_android_as_stable returns paths relative to
+    # |android.OVERLAY_DIR|.
     result.add_result(
         android_version,
         [
@@ -443,7 +444,8 @@ def uprev_igt_gpu_tools(_build_targets, refs, _chroot):
     See: uprev_versioned_package.
 
     Returns:
-      UprevVersionedPackageResult: The result of updating igt-gpu-tools ebuilds.
+        UprevVersionedPackageResult: The result of updating igt-gpu-tools
+            ebuilds.
     """
     overlay = os.path.join(
         constants.SOURCE_ROOT, constants.CHROMIUMOS_OVERLAY_DIR
@@ -665,8 +667,8 @@ def uprev_lacros(_build_targets, refs, chroot):
     """Updates lacros ebuilds.
 
     Version to uprev to is gathered from the QA qualified version tracking file
-    stored in chromium/src/chrome/LACROS_QA_QUALIFIED_VERSION. Uprev is triggered
-    on modification of this file across all chromium/src branches.
+    stored in chromium/src/chrome/LACROS_QA_QUALIFIED_VERSION. Uprev is
+    triggered on modification of this file across all chromium/src branches.
 
     See: uprev_versioned_package.
     """
@@ -694,9 +696,9 @@ def uprev_lacros_in_parallel(
 ) -> "uprev_lib.UprevVersionedPackageResult":
     """Updates lacros ebuilds in parallel with ash-chrome.
 
-    This handler is going to be used temporarily while lacros transitions to being
-    uprevved atomically with ash-chrome. Unlike a standalone lacros uprev, this
-    handler will not need to look at the QA qualified file. Rather, it will
+    This handler is going to be used temporarily while lacros transitions to
+    being uprevved atomically with ash-chrome. Unlike a standalone lacros uprev,
+    this handler will not need to look at the QA qualified file. Rather, it will
     function identical to ash-chrome using git tags.
 
     See: uprev_versioned_package.
@@ -822,8 +824,8 @@ def uprev_chrome_from_ref(build_targets, refs, _chroot):
 
     See: uprev_versioned_package.
     """
-    # Determine the version from the refs (tags), i.e. the chrome versions are the
-    # tag names.
+    # Determine the version from the refs (tags), i.e. the chrome versions are
+    # the tag names.
     chrome_version = uprev_lib.get_version_from_refs(refs)
     logging.debug("Chrome version determined from refs: %s", chrome_version)
 
@@ -936,10 +938,10 @@ def _generate_platform_c_files(
     """
     # Generate the platform C files from the build config. Note that it would be
     # more intuitive to generate the platform C files from the platform config;
-    # however, cros_config_schema does not allow this, because the platform config
-    # payload is not always valid input. For example, if a property is both
-    # 'required' and 'build-only', it will fail schema validation. Thus, use the
-    # build config, and use '-f' to filter.
+    # however, cros_config_schema does not allow this, because the platform
+    # config payload is not always valid input. For example, if a property is
+    # both 'required' and 'build-only', it will fail schema validation. Thus,
+    # use the build config, and use '-f' to filter.
     build_config_path = [
         rule.destination_path
         for rule in replication_config.file_replication_rules
@@ -1031,7 +1033,7 @@ def _get_private_overlay_package_root(ref: uprev_lib.GitRef, package: str):
 
 @uprevs_versioned_package("chromeos-base/chromeos-config-bsp")
 def replicate_private_config(_build_targets, refs, chroot):
-    """Replicate a private cros_config change to the corresponding public config.
+    """Replicate private cros_config change to the corresponding public config.
 
     See uprev_versioned_package for args
     """
@@ -1063,10 +1065,10 @@ def replicate_private_config(_build_targets, refs, chroot):
         for rule in replication_config.file_replication_rules
     ]
 
-    # The generated platform C files are not easily filtered by replication rules,
-    # i.e. JSON / proto filtering can be described by a FieldMask, arbitrary C
-    # files cannot. Therefore, replicate and filter the JSON payloads, and then
-    # generate filtered C files from the JSON payload.
+    # The generated platform C files are not easily filtered by replication
+    # rules, i.e. JSON / proto filtering can be described by a FieldMask,
+    # arbitrary C files cannot. Therefore, replicate and filter the JSON
+    # payloads, and then generate filtered C files from the JSON payload.
     modified_files.extend(
         _generate_platform_c_files(replication_config, chroot)
     )
@@ -1164,8 +1166,8 @@ def uprev_ti50_emulator(_build_targets, refs, _chroot):
 def uprev_ecdevutils(_build_targets, refs, _chroot):
     """Updates ec-devutils ebuilds to latest revision
 
-    ec-devutils is not versioned. We are updating to the latest commit on the main
-    branch.
+    ec-devutils is not versioned. We are updating to the latest commit on the
+    main branch.
 
     See: uprev_versioned_package.
 
@@ -1228,13 +1230,14 @@ def uprev_ecutils(_build_targets, refs, _chroot):
 def uprev_ecutilstest(_build_targets, refs, _chroot):
     """Updates ec-utils-test ebuilds to latest revision
 
-    ec-utils-test is not versioned. We are updating to the latest commit on the main
-    branch.
+    ec-utils-test is not versioned. We are updating to the latest commit on the
+    main branch.
 
     See: uprev_versioned_package.
 
     Returns:
-        UprevVersionedPackageResult: The result of updating ec-utils-test ebuilds.
+        UprevVersionedPackageResult: The result of updating ec-utils-test
+            ebuilds.
     """
     overlay = os.path.join(
         constants.SOURCE_ROOT, constants.CHROMIUMOS_OVERLAY_DIR
@@ -1346,8 +1349,8 @@ def needs_chrome_source(
 
     local_uprev = builds_chrome and revbump_chrome([build_target])
 
-    # When we are compiling source set False since we do not use prebuilts.
-    # When not compiling from source, start with True, i.e. we have every prebuilt
+    # When we are compiling source set False since we do not use prebuilts. When
+    # not compiling from source, start with True, i.e. we have every prebuilt
     # we've checked for up to this point.
     has_chrome_prebuilt = not compile_source
     has_follower_prebuilts = not compile_source
@@ -1379,8 +1382,9 @@ def needs_chrome_source(
             has_follower_prebuilts &= prebuilt
             if not prebuilt:
                 pkgs_needing_prebuilts.append(pkg)
-    # Postcondition: has_chrome_prebuilt and has_follower_prebuilts now correctly
-    # reflect whether we actually have the corresponding prebuilts for the build.
+    # Postcondition: has_chrome_prebuilt and has_follower_prebuilts now
+    # correctly reflect whether we actually have the corresponding prebuilts for
+    # the build.
 
     needs_chrome = builds_chrome and not has_chrome_prebuilt
     needs_follower = (

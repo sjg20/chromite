@@ -52,7 +52,7 @@ class PackageName(NamedTuple):
 
 
 class PackageIdentifier(NamedTuple):
-    """Container class akin to chromite.observability.PackageIdentifier proto."""
+    """Container class like chromite.observability.PackageIdentifier proto."""
 
     package_name: PackageName
     package_version: PackageVersion
@@ -112,10 +112,10 @@ def get_installed_package_data(
 
     results = {}
     installed_package_files = []
-    # We mount the stateful partition in all cases because the stateful partition
-    # contains the package db that we need. We do this once and get installed
-    # packages once for all image types, regardless of whether we care about
-    # what's installed on the stateful partition.
+    # We mount the stateful partition in all cases because the stateful
+    # partition contains the package db that we need. We do this once and get
+    # installed packages once for all image types, regardless of whether we care
+    # about what's installed on the stateful partition.
     with osutils.TempDir() as temp_dir:
         with image_lib.LoopbackPartitions(
             image_path, destination=temp_dir
@@ -144,10 +144,10 @@ def get_installed_package_data(
                 )
             )
 
-            # Now that we have the set of installed packages for the image, we mount
-            # each relevant partition that we want to check and calculate the size of
-            # the installed package on the partition (if the package is installed on
-            # that partition).
+            # Now that we have the set of installed packages for the image, we
+            # mount each relevant partition that we want to check and calculate
+            # the size of the installed package on the partition (if the package
+            # is installed on that partition).
             for partition in _SUPPORTED_ISCP_PARTITIONS[image_type]:
                 package_install_path = (
                     _STATEFUL_PARTITION_INSTALL_PATH
@@ -175,7 +175,7 @@ def get_package_details_for_partition(
         Tuple[portage_util.InstalledPackage, Iterable[Tuple[str, str]]]
     ],
 ) -> Dict[PackageIdentifier, portage_util.PackageSizes]:
-    """Retrieve package size and format name details for a given set of packages.
+    """Retrieve package size and format name details for |pkgs|.
 
     Args:
         installation_path: The path to the partition's root that the package's

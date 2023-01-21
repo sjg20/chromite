@@ -151,7 +151,7 @@ class SetBinhostTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testSetBinhostMaxURIsRemoveOldest(self):
-        """Setbinhost appends only maximum number of uris and removes in FIFO order."""
+        """Setbinhost appends only maximum # uris and removes in FIFO order."""
         binhost.SetBinhost(
             "coral", "BINHOST_KEY", "gs://prebuilts1", max_uris=1
         )
@@ -285,7 +285,7 @@ CPV: package/prebuilt_b
         self.assertEqual(actual, expected)
 
     def testGetPrebuiltsFilesWithDebugSymbols(self):
-        """GetPrebuiltsFiles returns debug symbols archive if specified in index."""
+        """GetPrebuiltsFiles returns debug symbols archive if set in index."""
         packages_content = """\
 ARCH: amd64
 URI: gs://foo_prebuilts
@@ -325,9 +325,9 @@ CPV: package/prebuilt
     def testPrebuiltsDeduplication(self):
         """GetPrebuiltsFiles returns all archives for all packages."""
         now = int(time.time())
-        # As of time of writing it checks for no older than 2 weeks. We just need
-        # to be newer than that, but older than the new time, so just knock off a
-        # few seconds.
+        # As of time of writing it checks for no older than 2 weeks. We just
+        # need to be newer than that, but older than the new time, so just knock
+        # off a few seconds.
         old_time = now - 5
 
         packages_content = f"""\
@@ -515,7 +515,8 @@ virtual/python-enum34-1
             "target/",
         )
 
-        # We need to verify that a file was created at self.devinstall_package_list
+        # We need to verify that a file was created at
+        # self.devinstall_package_list
         actual = binpkg.GrabLocalPackageIndex(self.upload_dir)
         self.assertEqual(actual.header["URI"], "gs://chromeos-prebuilt")
         self.assertEqual(int(actual.header["TTL"]), 60 * 60 * 24 * 365)

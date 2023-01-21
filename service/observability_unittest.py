@@ -43,7 +43,7 @@ def test_parse_package_name__full_with_mmpe():
 
 
 def test_parse_package_name__full_with_mmp():
-    """Test version parsing for standard 3-part version number with no suffix."""
+    """Test version parsing for standard 3-part version number."""
     py_pkg_info = package_info.parse("dev-lang/python-3.6.15-r2")
     py_identifier = observability.parse_package_name(py_pkg_info)
 
@@ -112,8 +112,8 @@ def make_portage_db(
 ):
     """Construct an artificial, ephemeral Portage package database on-disk.
 
-    Useful for testing behavior of ISCP methods which require a usable Portage DB
-    to provide portage_util.InstalledPackage objects and all the trimmings
+    Useful for testing behavior of ISCP methods which require a usable Portage
+    DB to provide portage_util.InstalledPackage objects and all the trimmings
     therein.
 
     Args:
@@ -208,7 +208,7 @@ def test_get_package_details_for_partition__rootfs(tmp_path):
 
 
 def test_get_package_details_for_partition__stateful(tmp_path):
-    """Test PortageDB reads & size calculation for non-standard (stateful) db."""
+    """Test PortageDB reads & size calculation for non-standard db."""
     pkgs = {
         "dev-lang": ["python-3.6.15-r2", "rust-1.58.1-r1"],
         "chromeos-base": [
@@ -260,8 +260,8 @@ def test_get_package_details_for_partition__bad_install_path(tmp_path):
     assert len(result) == 4
     for expected in expected_packages:
         assert expected in result
-        # Since a bad path was provided, we expect all packages to report back as
-        # have 0 bytes on the provided partition.
+        # Since a bad path was provided, we expect all packages to report back
+        # as have 0 bytes on the provided partition.
         # TODO(zland): make this mechanism a little less brittle?
         assert result[expected] == (0, 0)
 

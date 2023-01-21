@@ -127,10 +127,11 @@ def _ValidateBinhostMaxURIs(max_uris: int) -> None:
     """Validates that the max_uris is greater or equalt to 1.
 
     Args:
-      max_uris: Maximum number of uris that we need to store in Binhost conf file.
+        max_uris: Maximum number of uris that we need to store in Binhost conf
+            file.
 
     Raises:
-      InvalidMaxUris: If max_uris is None or less than or equal to zero.
+        InvalidMaxUris: If max_uris is None or less than or equal to zero.
     """
     if max_uris is None or max_uris <= 0:
         raise InvalidMaxUris(
@@ -237,11 +238,11 @@ def _get_current_uris(
     If the file does not exist, then it returns an empty list.
 
     Args:
-      conf_file_path: Path to the conf file.
-      key: Expected binhost key.
+        conf_file_path: Path to the conf file.
+        key: Expected binhost key.
 
     Returns:
-      List of the current values for the key.
+        List of the current values for the key.
     """
     kvs = key_value_store.LoadFile(str(conf_file_path), ignore_missing=True)
     value = kvs.get(key)
@@ -253,9 +254,10 @@ def SetBinhost(
 ) -> str:
     """Set binhost configuration for the given build target.
 
-    A binhost is effectively a key (Portage env variable) pointing to a set of URLs
-    that contains binaries. The configuration is set in .conf files at static
-    directories on a build target by build target (and host by host) basis.
+    A binhost is effectively a key (Portage env variable) pointing to a set of
+    URLs that contains binaries. The configuration is set in .conf files at
+    static directories on a build target by build target (and host by host)
+    basis.
 
     This function updates the .conf file by updating the url list.
     The list is updated in the FIFO order.

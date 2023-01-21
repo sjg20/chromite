@@ -353,9 +353,9 @@ class BuildPackagesRunConfig(object):
         metrics_prefix = "service.sysroot.GetForceLocalBuildPackages"
 
         if "virtual/target-os-test" in packages:
-            # chromeos-ssh-testkeys may generate ssh keys if the right USE flag is
-            # set. We force rebuilding this package from source every time, so that
-            # consecutive builds don't share ssh keys.
+            # chromeos-ssh-testkeys may generate ssh keys if the right USE flag
+            # is set. We force rebuilding this package from source every time,
+            # so that consecutive builds don't share ssh keys.
             force_local_build_packages.add(
                 "chromeos-base/chromeos-ssh-testkeys"
             )
@@ -364,9 +364,10 @@ class BuildPackagesRunConfig(object):
         if self.workon:
             cros_workon_packages = _GetCrosWorkonPackages(sysroot_path)
 
-            # Any package that directly depends on an active cros_workon package also
-            # needs to be rebuilt in order to be correctly built against the current
-            # set of changes a user may have made to the cros_workon package.
+            # Any package that directly depends on an active cros_workon package
+            # also needs to be rebuilt in order to be correctly built against
+            # the current set of changes a user may have made to the cros_workon
+            # package.
             if cros_workon_packages:
                 force_local_build_packages.update(cros_workon_packages)
 
@@ -380,22 +381,22 @@ class BuildPackagesRunConfig(object):
                         )
                     ]
                 logging.info(
-                    "The following packages depend directly on an active cros_workon "
-                    "package and will be rebuilt: %s",
+                    "The following packages depend directly on an active "
+                    "cros_workon package and will be rebuilt: %s",
                     " ".join(reverse_dependencies),
                 )
                 force_local_build_packages.update(reverse_dependencies)
 
-        # Determine base install packages and reverse dependencies if incremental
-        # build (--withdevdeps) and clean build (--cleanbuild) is not specified or
-        # the sysroot path exists.
+        # Determine base install packages and reverse dependencies if
+        # incremental build (--withdevdeps) and clean build (--cleanbuild) is
+        # not specified or the sysroot path exists.
         if self.is_incremental and (
             not self.clean_build or sysroot_path.exists()
         ):
             logging.info("Starting reverse dependency calculations...")
 
-            # Temporarily modify the emerge flags so we can calculate the revdeps on
-            # the modified packages.
+            # Temporarily modify the emerge flags so we can calculate the
+            # revdeps on the modified packages.
             sim_emerge_flags = self.GetEmergeFlags()
             sim_emerge_flags.extend(
                 [
@@ -406,12 +407,12 @@ class BuildPackagesRunConfig(object):
                 ]
             )
 
-            # cros-workon packages are always going to be force reinstalled, so we
-            # add the forced reinstall behavior to the modified package calculation.
-            # This is necessary to include when a user has already installed a 9999
-            # ebuild and is now reinstalling that package with additional local
-            # changes, because otherwise the modified package calculation would not
-            # see that a 'new' package is being installed.
+            # cros-workon packages are always going to be force reinstalled, so
+            # we add the forced reinstall behavior to the modified package
+            # calculation. This is necessary to include when a user has already
+            # installed a 9999 ebuild and is now reinstalling that package with
+            # additional local changes, because otherwise the modified package
+            # calculation would not see that a 'new' package is being installed.
             if cros_workon_packages:
                 sim_emerge_flags.extend(
                     [
@@ -646,16 +647,16 @@ def _create_sysroot(
     """Create a sysroot to use.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      build_target: The build target used for these artifacts.
-      output_dir: The path to write artifacts to.
-      package_list: List of packages to use.
-      deps_only: Whether to pass --deps-only.
-      output_file: Name of the archive to output.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        build_target: The build target used for these artifacts.
+        output_dir: The path to write artifacts to.
+        package_list: List of packages to use.
+        deps_only: Whether to pass --deps-only.
+        output_file: Name of the archive to output.
 
     Returns:
-      Path to the sysroot tar file.
+        Path to the sysroot tar file.
     """
     with chroot.tempdir() as tempdir:
         outdir = chroot.chroot_path(tempdir)
@@ -722,13 +723,13 @@ def CreateFuzzerSysroot(
     """Create a sysroot for fuzzer builders.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      build_target: The build target used for these artifacts.
-      output_dir: The path to write artifacts to.
+        chroot: The chroot class used for these artifacts.
+        sysroot_class: The sysroot class used for these artifacts.
+        build_target: The build target used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      Path to the sysroot tar file.
+        Path to the sysroot tar file.
     """
     return _create_sysroot(
         chroot,
@@ -813,7 +814,8 @@ def InstallToolchain(
     # Dependencies: Portage configs and wrappers have been installed.
     if run_configs.init_board_pkgs:
         logging.info("Updating toolchain.")
-        # Use the local packages if we're doing a local only build or usepkg is set.
+        # Use the local packages if we're doing a local only build or usepkg is
+        # set.
         local_init = run_configs.usepkg or run_configs.local_build
         _InstallToolchain(sysroot, target, local_init=local_init)
 
@@ -852,17 +854,17 @@ def BuildPackages(
         )
         logging.info("PORTAGE_BINHOST: %s", portage_binhost)
 
-        # Before running any emerge operations, regenerate the Portage dependency
-        # cache in parallel.
+        # Before running any emerge operations, regenerate the Portage
+        # dependency cache in parallel.
         logging.info("Rebuilding Portage cache.")
         with metrics_lib.timer(f"{metrics_prefix}.RegenPortageCache"):
             portage_util.RegenDependencyCache(
                 sysroot=sysroot.path, jobs=run_configs.jobs
             )
 
-        # Clean out any stale binpkgs we've accumulated. This is done immediately
-        # after regenerating the cache in case ebuilds have been removed (e.g. from
-        # a revert).
+        # Clean out any stale binpkgs we've accumulated. This is done
+        # immediately after regenerating the cache in case ebuilds have been
+        # removed (e.g. from a revert).
         if run_configs.eclean:
             _CleanStaleBinpkgs(sysroot.path)
 
@@ -903,8 +905,8 @@ def BuildPackages(
         if run_configs.install_debug_symbols:
             logging.info("Fetching the debug symbols.")
             try:
-                # TODO(xcl): Convert to directly importing and calling a Python lib
-                # instead of calling a binary.
+                # TODO(xcl): Convert to directly importing and calling a Python
+                #   lib instead of calling a binary.
                 cros_build_lib.run(
                     [
                         Path(constants.CHROMITE_BIN_DIR)
@@ -1007,8 +1009,9 @@ def _GetBaseInstallPackages(
     for line in result.stdout.splitlines():
         if "to /build/" in line and any(x in line for x in include_patterns):
             # Use regex to get substrings that matches a
-            # '[ebuild ...] <some characters> ' pattern. The second matching group
-            # returns the $CATEGORY/$PACKAGE from a line of the emerge output.
+            # '[ebuild ...] <some characters> ' pattern. The second matching
+            # group returns the $CATEGORY/$PACKAGE from a line of the emerge
+            # output.
             m = pattern.search(line)
             if m:
                 packages.add(m.group(2))
@@ -1321,7 +1324,7 @@ def GenerateBreakpadSymbols(
         debug: Include extra debugging output.
     """
     # The firmware directory contains elf symbols that we have trouble parsing
-    # and that don't help with breakpad debugging (see https://crbug.com/213670).
+    # and that don't help with breakpad debugging (see crbug.com/213670).
     exclude_dirs = ["firmware"]
 
     cmd = ["cros_generate_breakpad_symbols"]
@@ -1353,11 +1356,11 @@ def GatherSymbolFiles(
     destdir. A path to a tarball will result in the tarball being unpacked and
     examined. A path to a directory will result in the directory being searched
     for .sym files. The generator yields SymbolFileTuple objects that contain
-    symbol file references which are valid after this exits. Those files may exist
-    externally, or be created in the tempdir (when expanding tarballs). Typical
-    usage in the BuildAPI will be for the .sym files to exist under a directory
-    such as /build/<board>/usr/lib/debug/breakpad so that the path to a sym file
-    will always be unique.
+    symbol file references which are valid after this exits. Those files may
+    exist externally, or be created in the tempdir (when expanding tarballs).
+    Typical usage in the BuildAPI will be for the .sym files to exist under a
+    directory such as /build/<board>/usr/lib/debug/breakpad so that the path to
+    a sym file will always be unique.
     Note: the caller must clean up the tempdir.
     Note: this function is recursive for tar files.
 
@@ -1390,8 +1393,8 @@ def GatherSymbolFiles(
             for root, _, files in os.walk(p):
                 for f in files:
                     if f.endswith(".sym"):
-                        # If p is '/tmp/foo' and filename is '/tmp/foo/bar/bar.sym',
-                        # relative_path = 'bar/bar.sym'
+                        # If p is '/tmp/foo' and filename is
+                        # '/tmp/foo/bar/bar.sym', relative_path = 'bar/bar.sym'
                         filename = os.path.join(root, f)
                         relative_path = filename[len(p) :].lstrip("/")
                         try:
@@ -1399,8 +1402,8 @@ def GatherSymbolFiles(
                                 filename, os.path.join(destdir, relative_path)
                             )
                         except IOError:
-                            # Handles pre-3.3 Python where we may need to make the target
-                            # path's dirname before copying.
+                            # Handles pre-3.3 Python where we may need to make
+                            # the target path's dirname before copying.
                             os.makedirs(
                                 os.path.join(
                                     destdir, os.path.dirname(relative_path)
@@ -1418,16 +1421,17 @@ def GatherSymbolFiles(
             tardir = tempfile.mkdtemp(dir=tempdir)
             cache.Untar(os.path.realpath(p), tardir)
             for sym in GatherSymbolFiles(tardir, destdir, [tardir]):
-                # The SymbolFileTuple is generated from [tardir], but we want the
-                # source_file_name (which informational) to reflect the tar path
-                # plus the relative path after the file is untarred.
-                # Thus, something like /botpath/some/path/tmp22dl33sa/dir1/fileB.sym
-                # (where the tardir is /botpath/some/path/tmp22dl33sa)
-                # has a resulting path /botpath/some/path/symfiles.tar/dir1/fileB.sym
+                # The SymbolFileTuple is generated from [tardir], but we want
+                # the source_file_name (which informational) to reflect the tar
+                # path plus the relative path after the file is untarred. Thus,
+                # something like /botpath/some/path/tmp22dl33sa/dir1/fileB.sym
+                # (where the tardir is /botpath/some/path/tmp22dl33sa) has a
+                # resulting path /botpath/some/path/symfiles.tar/dir1/fileB.sym
                 # When we call GatherSymbolFiles with [tardir] as the argument,
                 # the os.path.isdir case above will walk the tar contents,
-                # processing only .sym. Non-sym files within the tar file will be
-                # ignored (even tar files within tar files, which we don't expect).
+                # processing only .sym. Non-sym files within the tar file will
+                # be ignored (even tar files within tar files, which we don't
+                # expect).
                 new_source_file_name = sym.source_file_name.replace(tardir, p)
                 yield SymbolFileTuple(
                     relative_path=sym.relative_path,
@@ -1435,13 +1439,13 @@ def GatherSymbolFiles(
                 )
 
         elif os.path.isfile(p):
-            # Path p is a file. This code path is only executed when a full file path
-            # is one of the elements in the 'paths' argument. When a directory is an
-            # element of the 'paths' argument, we walk the tree (above) and process
-            # each file. When a tarball is an element of the 'paths' argument, we
-            # untar it into a directory and recurse with the temp tardir as the
-            # directory, so that tarfile contents are processed (above) in the os.walk
-            # of the directory.
+            # Path p is a file. This code path is only executed when a full file
+            # path is one of the elements in the 'paths' argument. When a
+            # directory is an element of the 'paths' argument, we walk the tree
+            # (above) and process each file. When a tarball is an element of the
+            # 'paths' argument, we untar it into a directory and recurse with
+            # the temp tardir as the directory, so that tarfile contents are
+            # processed (above) in the os.walk of the directory.
             if p.endswith(".sym"):
                 shutil.copy(p, destdir)
                 yield SymbolFileTuple(

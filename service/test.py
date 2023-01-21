@@ -469,12 +469,11 @@ def BundleCodeCoverageGolang(
     Works for host and board packages.
 
     Args:
-      chroot: The chroot class used for these artifacts.
-      sysroot_class: The sysroot class used for these artifacts.
-      output_dir: The path to write artifacts to.
+        chroot: The chroot class used for these artifacts.
+        output_dir: The path to write artifacts to.
 
     Returns:
-      A string path to the output code_coverage.tar.xz artifact, or None.
+        A string path to the output code_coverage.tar.xz artifact, or None.
     """
     # Gather host code coverage
     # Builder sets build target to Brya, code coverage currently only
@@ -594,7 +593,8 @@ def _BundleCodeCoverageLlvmJson(
     try:
         base_path = chroot.full_path(sysroot_class.path)
 
-        # Gather all LLVM compiler generated coverage data into single coverage.json
+        # Gather all LLVM compiler generated coverage data into single
+        # coverage.json
         coverage_dir = os.path.join(base_path, "build/coverage_data")
         llvm_generated_cov_json = GatherCodeCoverageLlvmJsonFile(coverage_dir)
 
@@ -623,9 +623,11 @@ def _BundleCodeCoverageLlvmJson(
         # Generate zero coverage for all src files, excluding those which are
         # already present in cleaned_cov_json.
         files_with_cov = code_coverage_util.ExtractFilenames(cleaned_cov_json)
+        # pylint: disable=line-too-long
         zero_coverage_json = code_coverage_util.GenerateZeroCoverageLlvm(
-            # TODO(b/227649725): Input path_to_src_directories and language specific
-            # src_file_extensions and exclude_line_prefixes from GetArtifact API
+            # TODO(b/227649725): Input path_to_src_directories and language
+            # specific src_file_extensions and exclude_line_prefixes from
+            # GetArtifact API
             path_to_src_directories=code_coverage_util.GetZeroCoverageDirectories(
                 build_target=build_target,
                 src_prefix_path=constants.SOURCE_ROOT,
@@ -641,6 +643,7 @@ def _BundleCodeCoverageLlvmJson(
             exclude_files_suffixes=constants.ZERO_COVERAGE_EXCLUDE_FILES_SUFFIXES,
             src_prefix_path=constants.SOURCE_ROOT,
         )
+        # pylint: enable=line-too-long
 
         code_coverage_util.LogLlvmCoverageJsonInformation(
             zero_coverage_json, "Zero coverage files:"
@@ -738,14 +741,14 @@ def GatherCodeCoverageGolang(
 ) -> [(str, Union[bytes, str])]:
     """Locate Golang code coverage files in |path|.
 
-     This function locates all the Golang code coverage files and
-     returns a list of their file paths.
+    This function locates all the Golang code coverage files and
+    returns a list of their file paths.
 
     Args:
-      path: The input path to walk.
+        path: The input path to walk.
 
     Returns:
-      List of tuple (file_name, Go code coverage file contents)
+        List of tuple (file_name, Go code coverage file contents)
     """
     coverage_data = []
     if not os.path.exists(path):
