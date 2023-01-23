@@ -10,11 +10,31 @@ from typing import Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import git
+
+
+def _find_pyproject_toml(
+    path: Optional[Union[str, os.PathLike]] = None
+) -> Path:
+    """Locate pyproject.toml to use with |path|."""
+    if path:
+        project_root = git.FindGitTopLevel(path)
+        for dir_path in Path(path).resolve().parents:
+            config_path = dir_path / "pyproject.toml"
+            try:
+                if "[tool.black]" in config_path.read_text(encoding="utf-8"):
+                    return config_path
+            except FileNotFoundError:
+                pass
+
+            if dir_path == project_root:
+                break
+
+    return Path(constants.CHROMITE_DIR) / "pyproject.toml"
 
 
 def Data(
     data: str,
-    # pylint: disable=unused-argument
     path: Optional[Union[str, os.PathLike]] = None,
 ) -> str:
     """Format python |data|.
@@ -43,11 +63,10 @@ def Data(
         encoding="utf-8",
     )
 
-    config_path = Path(constants.CHROMITE_DIR) / "pyproject.toml"
     result = cros_build_lib.run(
         [
             Path(constants.CHROMITE_SCRIPTS_DIR) / "black",
-            f"--config={config_path}",
+            f"--config={_find_pyproject_toml(path)}",
             "-",
         ],
         input=result.stdout,
