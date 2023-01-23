@@ -191,20 +191,6 @@ def _PylintFile(path, output_format, debug, _relaxed: bool):
     return _ToolRunCommand(cmd, debug, extra_env=extra_env)
 
 
-def _PyisortFile(path, _output_format, debug, _relaxed: bool):
-    """Returns result of running isort on |path|."""
-    isort = os.path.join(constants.CHROMITE_SCRIPTS_DIR, "isort")
-    cfg = _GetIsortCfg(path)
-    base_cmd = [isort, f"--settings-file={cfg}"]
-    cmd = base_cmd + ["--diff", "--check"]
-    cmd.append(path)
-    base_cmd.append(path)
-    result = _ToolRunCommand(cmd, debug)
-    if result.returncode:
-        logging.notice("To fix, run:\n%s", cros_build_lib.CmdToStr(base_cmd))
-    return result
-
-
 def _GolintFile(path, _, debug, _relaxed: bool):
     """Returns result of running golint on |path|."""
     # Try using golint if it exists.
@@ -450,7 +436,7 @@ _EXT_TOOL_MAP = {
     frozenset({".cc", ".cpp", ".h"}): (_CpplintFile, _NonExecLintFile),
     frozenset({".conf", ".conf.in"}): (_ConfLintFile, _NonExecLintFile),
     frozenset({".json"}): (_JsonLintFile, _NonExecLintFile),
-    frozenset({".py"}): (_PylintFile, _PyisortFile),
+    frozenset({".py"}): (_PylintFile,),
     frozenset({".go"}): (_GolintFile, _NonExecLintFile),
     frozenset({".sh"}): (_ShellLintFile,),
     frozenset({".ebuild", ".eclass", ".bashrc"}): (
