@@ -4,17 +4,24 @@
 
 """Python formatter."""
 
+import os
 from pathlib import Path
+from typing import Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 
 
-def Data(data: str) -> str:
+def Data(
+    data: str,
+    # pylint: disable=unused-argument
+    path: Optional[Union[str, os.PathLike]] = None,
+) -> str:
     """Format python |data|.
 
     Args:
         data: The file content to lint.
+        path: The file name for diagnostics/configs/etc...
 
     Returns:
         Formatted data.

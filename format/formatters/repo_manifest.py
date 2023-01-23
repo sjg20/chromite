@@ -26,8 +26,9 @@ See the files in our manifest repos for living examples.
 
 import collections
 import io
+import os
 import re
-from typing import List
+from typing import List, Optional, Union
 from xml.dom import minidom
 
 
@@ -146,11 +147,16 @@ def _sort_children(nodes: List[minidom.Node]) -> List[minidom.Node]:
     yield from flush()
 
 
-def Data(data: str) -> str:
+def Data(
+    data: str,
+    # pylint: disable=unused-argument
+    path: Optional[Union[str, os.PathLike]] = None,
+) -> str:
     """Format |data|.
 
     Args:
         data: The file content to lint.
+        path: The file name for diagnostics/configs/etc...
 
     Returns:
         Formatted data.

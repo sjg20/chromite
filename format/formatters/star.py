@@ -6,6 +6,7 @@
 
 import functools
 import os
+from typing import Optional, Union
 
 from chromite.lib import cipd
 from chromite.lib import cros_build_lib
@@ -22,15 +23,22 @@ def _find_buildifier() -> str:
     return os.path.join(path, "buildifier")
 
 
-def Data(data: str, *, type_="default") -> str:
+def Data(
+    data: str,
+    # pylint: disable=unused-argument
+    path: Optional[Union[str, os.PathLike]] = None,
+    *,
+    type_: str = "default",
+) -> str:
     """Format starlark |data|.
 
     Args:
-      data: The file content to lint.
-      type_: The type of the starlark file.
+        data: The file content to lint.
+        path: The file name for diagnostics/configs/etc...
+        type_: The type of the starlark file.
 
     Returns:
-      Formatted data.
+        Formatted data.
     """
     result = cros_build_lib.run(
         [_find_buildifier(), f"--type={type_}"],

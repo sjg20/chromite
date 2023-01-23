@@ -6,6 +6,7 @@
 
 import functools
 import os
+from typing import Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -20,11 +21,16 @@ def _find_gn() -> str:
         return os.path.join(constants.DEFAULT_CHROOT_PATH, "usr", "bin", "gn")
 
 
-def Data(data: str) -> str:
+def Data(
+    data: str,
+    # pylint: disable=unused-argument
+    path: Optional[Union[str, os.PathLike]] = None,
+) -> str:
     """Format GN |data|.
 
     Args:
         data: The file content to lint.
+        path: The file name for diagnostics/configs/etc...
 
     Returns:
         Formatted data.

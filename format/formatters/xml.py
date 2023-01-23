@@ -7,17 +7,24 @@
 Not all XML files are formatted the same unfortunately.
 """
 
+import os
+from typing import Optional, Union
 from xml.etree import ElementTree
 
 from chromite.format.formatters import repo_manifest
 from chromite.format.formatters import whitespace
 
 
-def Data(data: str) -> str:
+def Data(
+    data: str,
+    # pylint: disable=unused-argument
+    path: Optional[Union[str, os.PathLike]] = None,
+) -> str:
     """Format XML |data|.
 
     Args:
         data: The file content to lint.
+        path: The file name for diagnostics/configs/etc...
 
     Returns:
         Formatted data.

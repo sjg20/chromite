@@ -4,14 +4,22 @@
 
 """Provides utility for formatting Go files."""
 
+import os
+from typing import Optional, Union
+
 from chromite.lib import cros_build_lib
 
 
-def Data(data: str) -> str:
+def Data(
+    data: str,
+    # pylint: disable=unused-argument
+    path: Optional[Union[str, os.PathLike]] = None,
+) -> str:
     """Format Go |data|.
 
     Args:
         data: The file content to format.
+        path: The file name for diagnostics/configs/etc...
 
     Returns:
         Formatted data.

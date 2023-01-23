@@ -5,15 +5,22 @@
 """Provides utility for formatting JSON."""
 
 import json
+import os
+from typing import Optional, Union
 
 from chromite.utils import pformat
 
 
-def Data(data: str) -> str:
+def Data(
+    data: str,
+    # pylint: disable=unused-argument
+    path: Optional[Union[str, os.PathLike]] = None,
+) -> str:
     """Clean up basic whitespace problems in |data|.
 
     Args:
         data: The file content to lint.
+        path: The file name for diagnostics/configs/etc...
 
     Returns:
         Formatted data.
