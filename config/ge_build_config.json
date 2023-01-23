@@ -212,20 +212,6 @@
       "rubik_target_milestone": 108
     },
     {
-      "name": "hades",
-      "configs": [
-        {
-          "builder": "RELEASE",
-          "experimental": true,
-          "leader_board": true,
-          "board_group": "",
-          "arch": "X86_INTERNAL"
-        }
-      ],
-      "rubik_target_milestone": 108,
-      "stable_target_milestone": 125
-    },
-    {
       "name": "majolica",
       "configs": [
         {
