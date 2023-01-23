@@ -15,7 +15,6 @@ from chromite.lib import cros_build_lib
 
 def Data(
     data: str,
-    # pylint: disable=unused-argument
     path: Optional[Union[str, os.PathLike]] = None,
 ) -> str:
     """Format C & C++ |data|.
@@ -28,7 +27,7 @@ def Data(
         Formatted data.
     """
     result = cros_build_lib.run(
-        ["clang-format", "--style=file"],
+        ["clang-format", "--style=file", f"--assume-filename={path}"],
         capture_output=True,
         input=data,
         encoding="utf-8",
