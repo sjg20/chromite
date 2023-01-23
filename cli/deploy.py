@@ -162,7 +162,8 @@ print(json.dumps(pkg_info))
 
     def __init__(self, sysroot):
         self.sysroot = sysroot
-        # Members containing the sysroot (binpkg) and target (installed) package DB.
+        # Members containing the sysroot (binpkg) and target (installed) package
+        # DB.
         self.target_db = None
         self.binpkgs_db = None
         # Members for managing the dependency resolution work queue.
@@ -217,9 +218,9 @@ print(json.dumps(pkg_info))
         require_installed = False
 
         # Versioned blockers should be updated, but only if already installed.
-        # These are often used for forcing cascaded updates of multiple packages,
-        # so we're treating them as ordinary constraints with hopes that it'll lead
-        # to the desired result.
+        # These are often used for forcing cascaded updates of multiple
+        # packages, so we're treating them as ordinary constraints with hopes
+        # that it'll lead to the desired result.
         if cp.startswith("!"):
             cp = cp.lstrip("!")
             require_installed = True
@@ -251,10 +252,10 @@ print(json.dumps(pkg_info))
         """Resolves and returns a list of dependencies from a dependency string.
 
         This parses a dependency string and returns a list of package names and
-        slots. Other atom qualifiers (version, sub-slot, block) are ignored. When
-        resolving disjunctive deps, we include all choices that are fully present
-        in |installed_db|. If none is present, we choose an arbitrary one that is
-        available.
+        slots. Other atom qualifiers (version, sub-slot, block) are ignored.
+        When resolving disjunctive deps, we include all choices that are fully
+        present in |installed_db|. If none is present, we choose an arbitrary
+        one that is available.
 
         Args:
             dep_str: A raw dependency string.
@@ -294,8 +295,8 @@ print(json.dumps(pkg_info))
 
                 # Handle sub-deps of a disjunctive expression.
                 if disjunct:
-                    # Make the first available choice the default, for use in case that
-                    # no option is installed.
+                    # Make the first available choice the default, for use in
+                    # case that no option is installed.
                     if (
                         not default_deps
                         and avail_db is not None
@@ -306,7 +307,8 @@ print(json.dumps(pkg_info))
                     ):
                         default_deps = sub_deps
 
-                    # If not all sub-deps are installed, then don't consider them.
+                    # If not all sub-deps are installed, then don't consider
+                    # them.
                     if not all(
                         cls._InDB(cp, slot, installed_db)
                         for cp, slot in sub_deps
@@ -434,7 +436,7 @@ print(json.dumps(pkg_info))
             raise self.VartreeError(str(e))
 
     def _InitBinpkgDB(self, process_rdeps):
-        """Initializes a dictionary of binary packages for updating the target."""
+        """Initializes a dictionary of binpkgs for updating the target."""
         # Get build root trees; portage indexes require a trailing '/'.
         build_root = os.path.join(self.sysroot, "")
         trees = portage.create_trees(
@@ -462,7 +464,7 @@ print(json.dumps(pkg_info))
         self.listed = set()
 
     def _EnqDep(self, dep, listed, optional):
-        """Enqueues a dependency if not seen before or if turned non-optional."""
+        """Enqueues a dependency if not seen before or if set non-optional."""
         if dep in self.seen and (optional or not self.seen[dep]):
             return False
 
@@ -475,8 +477,8 @@ print(json.dumps(pkg_info))
     def _DeqDep(self):
         """Dequeues and returns a dependency, its listed and optional flags.
 
-        This returns listed packages first, if any are present, to ensure that we
-        correctly mark them as such when they are first being processed.
+        This returns listed packages first, if any are present, to ensure that
+        we correctly mark them as such when they are first being processed.
         """
         if self.listed:
             dep = self.listed.pop()
@@ -493,10 +495,10 @@ print(json.dumps(pkg_info))
 
         This is breaking |cpv_pattern| into its C, P and V components, each of
         which may or may not be present or contain wildcards. It then scans the
-        binpkgs database to find all atoms that match these components, returning a
-        list of CP and slot qualifier. When the pattern does not specify a version,
-        or when a CP has only one slot in the binpkgs database, we omit the slot
-        qualifier in the result.
+        binpkgs database to find all atoms that match these components,
+        returning a list of CP and slot qualifier. When the pattern does not
+        specify a version, or when a CP has only one slot in the binpkgs
+        database, we omit the slot qualifier in the result.
 
         Args:
             cpv_pattern: A CPV pattern, potentially partial and/or having
@@ -513,8 +515,8 @@ print(json.dumps(pkg_info))
             if not fnmatch.fnmatchcase(cp, cp_pattern):
                 continue
 
-            # If no version attribute was given or there's only one slot, omit the
-            # slot qualifier.
+            # If no version attribute was given or there's only one slot, omit
+            # the slot qualifier.
             if not attrs.version or len(cp_slots) == 1:
                 matches.append((cp, None))
             else:
@@ -646,7 +648,7 @@ print(json.dumps(pkg_info))
             logging.debug("%d dep(s) already seen", num_already_seen)
 
     def _ComputeInstalls(self, process_rdeps, process_rev_rdeps):
-        """Returns a dictionary of packages that need to be installed on the target.
+        """Returns a dict of packages that need to be installed on the target.
 
         Args:
             process_rdeps: Whether to trace forward dependencies.
@@ -724,7 +726,7 @@ print(json.dumps(pkg_info))
         sorted_installs = []
 
         def SortFrom(cp):
-            """Traverses dependencies recursively, emitting nodes in reverse order."""
+            """Traverses deps recursively, emitting nodes in reverse order."""
             cpv, slot, _, _ = installs[cp]
             if cpv in curr_path:
                 raise ValueError(
@@ -817,7 +819,8 @@ print(json.dumps(pkg_info))
             if pkg == "@installed":
                 if not update:
                     raise ValueError(
-                        "Must check installed packages when updating all of them."
+                        "Must check installed packages when updating all of "
+                        "them."
                     )
                 self._EnqInstalledPkgs()
             else:
@@ -878,9 +881,9 @@ def _Emerge(device, pkg_paths, root, extra_args=None):
 
     pkgroot = os.path.join(device.work_dir, "packages")
     portage_tmpdir = os.path.join(device.work_dir, "portage-tmp")
-    # Clean out the dirs first if we had a previous emerge on the device so as to
-    # free up space for this emerge.  The last emerge gets implicitly cleaned up
-    # when the device connection deletes its work_dir.
+    # Clean out the dirs first if we had a previous emerge on the device so as
+    # to free up space for this emerge.  The last emerge gets implicitly cleaned
+    # up when the device connection deletes its work_dir.
     device.run(
         f"cd {device.work_dir} && "
         f"rm -rf packages portage-tmp && "
@@ -921,8 +924,8 @@ def _Emerge(device, pkg_paths, root, extra_args=None):
         "CONFIG_PROTECT": "-*",
     }
 
-    # --ignore-built-slot-operator-deps because we don't rebuild everything.
-    # It can cause errors, but that's expected with cros deploy since it's just a
+    # --ignore-built-slot-operator-deps because we don't rebuild everything. It
+    # can cause errors, but that's expected with cros deploy since it's just a
     # best effort to prevent developers avoid rebuilding an image every time.
     cmd = [
         "emerge",
@@ -975,8 +978,8 @@ def _RestoreSELinuxContext(device, pkgpath, root):
     """Restore SELinux context for files in a given package.
 
     This reads the tarball from pkgpath, and calls restorecon on device to
-    restore SELinux context for files listed in the tarball, assuming those files
-    are installed to /
+    restore SELinux context for files listed in the tarball, assuming those
+    files are installed to /
 
     Args:
         device: a ChromiumOSDevice object
@@ -1289,8 +1292,8 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
         )
 
         # TODO(kimjae): Make this generic so it recomputes all the DLCs + copies
-        # over a fresh list of dm-verity digests instead of appending and keeping
-        # the stale digests when developers are testing.
+        #   over a fresh list of dm-verity digests instead of appending and
+        #   keeping the stale digests when developers are testing.
 
         # Copy the LoadPin dm-verity digests to device.
         loadpin = dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS
@@ -1441,8 +1444,8 @@ def Deploy(
 
             sysroot = build_target_lib.get_default_sysroot_path(board)
 
-            # Don't bother trying to clean for unmerges.  We won't use the local db,
-            # and it just slows things down for the user.
+            # Don't bother trying to clean for unmerges.  We won't use the local
+            # db, and it just slows things down for the user.
             if emerge and clean_binpkg:
                 logging.notice(
                     "Cleaning outdated binary packages from %s", sysroot
@@ -1480,8 +1483,9 @@ def Deploy(
                     cp = package_info.SplitCPV(package).cp
                     if cp in all_workon and cp not in worked_on_cps:
                         logging.warning(
-                            "Are you intentionally deploying unmodified packages, or did "
-                            "you forget to run `cros workon --board=$BOARD start %s`?",
+                            "Are you intentionally deploying unmodified "
+                            "packages, or did you forget to run "
+                            "`cros workon --board=$BOARD start %s`?",
                             cp,
                         )
 
@@ -1521,10 +1525,11 @@ def Deploy(
             if device.IsSELinuxAvailable():
                 if sum(x.count("selinux-policy") for x in pkgs):
                     logging.warning(
-                        "Deploying SELinux policy will not take effect until reboot. "
-                        "SELinux policy is loaded by init. Also, changing the security "
-                        "contexts (labels) of a file will require building a new image "
-                        "and flashing the image onto the device."
+                        "Deploying SELinux policy will not take effect until "
+                        "reboot. SELinux policy is loaded by init. Also, "
+                        "changing the security contexts (labels) of a file "
+                        "will require building a new image and flashing the "
+                        "image onto the device."
                     )
 
             # This message is read by BrilloDeployOperation.

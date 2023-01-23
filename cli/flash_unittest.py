@@ -143,7 +143,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
         )
 
     def testUsbImagerOperationCalled(self):
-        """Test that flash.UsbImagerOperation is called when log level <= NOTICE."""
+        """Test flash.UsbImagerOperation is called when log level <= NOTICE."""
         expected_cmd = [
             "dd",
             "if=foo",
@@ -217,7 +217,7 @@ class UsbImagerOperationTest(cros_test_lib.RunCommandTestCase):
         self.assertEqual(pid, expected_pid)
 
     def testGetDDPidNotFound(self):
-        """Check that -1 is returned for _GetDDPid() if the pids aren't valid."""
+        """Check -1 is returned for _GetDDPid() if the pids aren't valid."""
         expected_pid = -1
         op = flash.UsbImagerOperation("foo")
         self.PatchObject(osutils, "IsChildProcess", return_value=False)
@@ -255,8 +255,8 @@ class FlashUtilTest(cros_test_lib.MockTempDirTestCase):
             osutils.Touch(file_c)
             osutils.Touch(os.path.join(self.tempdir, "d"))
 
-            # Multiple images available, we should ask the user to select the right
-            # image.
+            # Multiple images available, we should ask the user to select the
+            # right image.
             with self.PatchObject(cros_build_lib, "GetChoice", return_value=2):
                 self.assertEqual(
                     file_c, flash._ChooseImageFromDirectory(self.tempdir)

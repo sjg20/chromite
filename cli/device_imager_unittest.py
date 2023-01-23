@@ -185,11 +185,11 @@ class TestReaderBase(cros_test_lib.MockTestCase):
             self.assertExists(GetFdPath(r.Target()))
             self.assertExists(GetFdPath(r._Source()))
 
-            # Per crbug.com/1196702 it seems like some other process gets the file
-            # descriptor right after we close it and by the time we check its
-            # existence, it is still there and this can flake. So it might be better
-            # to make sure this is checked properly through real paths and not
-            # symlinks.
+            # Per crbug.com/1196702 it seems like some other process gets the
+            # file descriptor right after we close it and by the time we check
+            # its existence, it is still there and this can flake. So it might
+            # be better to make sure this is checked properly through real paths
+            # and not symlinks.
             path = GetFdPath(r._Source())
             old_path = os.path.realpath(path)
             r._CloseSource()
@@ -329,8 +329,8 @@ class RawPartitionUpdaterTest(cros_test_lib.MockTempDirTestCase):
     def test_RunFullImage(self, run_mock, close_mock, _, name_mock):
         """Test main Run() function for full image.
 
-        This function should parts of the source image and write it into the device
-        using proper compression programs.
+        This function should parts of the source image and write it into the
+        device using proper compression programs.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
@@ -619,8 +619,8 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
     def test_Run(self, copy_mock, postinst_mock, pw_mock):
         """Test main Run() function.
 
-        This function should parts of the source image and write it into the device
-        using proper compression programs.
+        This function should parts of the source image and write it into the
+        device using proper compression programs.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
@@ -666,7 +666,7 @@ class RootfsUpdaterTest(cros_test_lib.MockTestCase):
             )._RunPostInst()
 
     def test_RunPostInstOnCurrentRoot(self):
-        """Test _RunPostInst() on current root (used for reverting an update)."""
+        """Test _RunPostInst() on current root; used for reverting an update."""
         root_dev = "/dev/mmcblk0p5"
         self.rsh_mock.AddCmdResult([self.path_env, "/postinst", root_dev])
 

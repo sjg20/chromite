@@ -5,9 +5,9 @@
 """Module that contains meta-logic related to CLI commands.
 
 This module contains two important definitions used by all commands:
-  CliCommand: The parent class of all CLI commands.
-  command_decorator: Decorator that must be used to ensure that the command
-    shows up in |_commands| and is discoverable.
+    CliCommand: The parent class of all CLI commands.
+    command_decorator: Decorator that must be used to ensure that the command
+        shows up in |_commands| and is discoverable.
 
 Commands can be either imported directly or looked up using this module's
 ListCommands() function.
@@ -34,9 +34,9 @@ _commands = dict()
 def UseProgressBar():
     """Determine whether the progress bar is to be used or not.
 
-    We only want the progress bar to display for the brillo commands which operate
-    at logging level NOTICE. If the user wants to see the noisy output, then they
-    can execute the command at logging level INFO or DEBUG.
+    We only want the progress bar to display for the brillo commands which
+    operate at logging level NOTICE. If the user wants to see the noisy output,
+    then they can execute the command at logging level INFO or DEBUG.
     """
     return logging.getLogger().getEffectiveLevel() == logging.NOTICE
 
@@ -44,9 +44,9 @@ def UseProgressBar():
 def ImportCommand(name):
     """Directly import the specified subcommand.
 
-    This method imports the module which must contain the single subcommand.  When
-    the module is loaded, the declared command (those that use command_decorator)
-    will automatically get added to |_commands|.
+    This method imports the module which must contain the single subcommand.
+    When the module is loaded, the declared command (those that use
+    command_decorator) will automatically get added to |_commands|.
 
     Args:
         name: The subcommand to load.
@@ -74,8 +74,8 @@ def ListCommands():
     though we'd only ever run a single one), and to avoid 3rd party module usage
     in one subcommand breaking all other subcommands (not a great solution).
     """
-    # Filenames use underscores due to python naming limitations, but subcommands
-    # use dashes as they're easier for humans to type.
+    # Filenames use underscores due to python naming limitations, but
+    # subcommands use dashes as they're easier for humans to type.
     # Strip off the leading "cros_" and the trailing ".py".
     return set(
         x[5:-3].replace("_", "-")
@@ -200,7 +200,7 @@ class CliCommand(object):
         """Hook to get the argv for reexecution inside the chroot.
 
         By default, return the same args used to execute it in the first place.
-        Hook allows commands to translate specific arguments, i.e. change paths to
-        chroot paths.
+        Hook allows commands to translate specific arguments, i.e. change paths
+        to chroot paths.
         """
         return sys.argv[:]

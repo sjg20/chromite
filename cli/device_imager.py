@@ -60,9 +60,9 @@ class Partition(enum.Enum):
 class DeviceImager(object):
     """A class to flash a Chromium OS device.
 
-    This utility uses parallelism as much as possible to achieve its goal as fast
-    as possible. For example, it uses parallel compressors, parallel transfers,
-    and simultaneous pipes.
+    This utility uses parallelism as much as possible to achieve its goal as
+    fast as possible. For example, it uses parallel compressors, parallel
+    transfers, and simultaneous pipes.
     """
 
     # The parameters of the kernel and rootfs's two main partitions.
@@ -164,23 +164,24 @@ class DeviceImager(object):
         """Locates the path to the final image(s) that need to be installed.
 
         If the paths is local, the image should be the Chromium OS GPT image
-        (e.g. chromiumos_test_image.bin). If the path is remote, it should be the
-        remote directory where we can find the quick-provision and stateful update
-        files (e.g. gs://chromeos-image-archive/eve-release/R90-x.x.x).
+        (e.g. chromiumos_test_image.bin). If the path is remote, it should be
+        the remote directory where we can find the quick-provision and stateful
+        update files (e.g. gs://chromeos-image-archive/eve-release/R90-x.x.x).
 
-        NOTE: At this point there is no caching involved. Hence we always download
-        the partition payloads or extract them from the Chromium OS image.
+        NOTE: At this point there is no caching involved. Hence we always
+        download the partition payloads or extract them from the Chromium OS
+        image.
         """
         if os.path.isfile(self._image):
             self._image_type = ImageType.FULL
             return
 
         # TODO(b/172212406): We could potentially also allow this by searching
-        # through the directory to see whether we have quick-provision and stateful
-        # payloads. This only makes sense when a user has their workstation at home
-        # and doesn't want to incur the bandwidth cost of downloading the same
-        # image multiple times. For that, they can simply download the GPT image
-        # image first and flash that instead.
+        # through the directory to see whether we have quick-provision and
+        # stateful payloads. This only makes sense when a user has their
+        # workstation at home and doesn't want to incur the bandwidth cost of
+        # downloading the same image multiple times. For that, they can simply
+        # download the GPT image image first and flash that instead.
         if os.path.isdir(self._image):
             raise ValueError(
                 f"{self._image}: input must be a disk image, not a directory."
@@ -188,7 +189,8 @@ class DeviceImager(object):
 
         if gs.PathIsGs(self._image):
             # TODO(b/172212406): Check whether it is a directory. If it wasn't a
-            # directory download the image into some temp location and use it instead.
+            # directory download the image into some temp location and use it
+            # instead.
             self._image_type = ImageType.REMOTE_DIRECTORY
             return
 
@@ -318,8 +320,8 @@ class DeviceImager(object):
                 )
                 updaters.append(minios_updater)
 
-        # Retry the partitions updates that failed, in case a transient error (like
-        # SSH drop, etc) caused the error.
+        # Retry the partitions updates that failed, in case a transient error
+        # (like SSH drop, etc) caused the error.
         num_retries = 1
         try:
             retry_util.RetryException(
@@ -330,7 +332,8 @@ class DeviceImager(object):
                 halt_on_error=True,
             )
         except Exception:
-            # If one of the partitions failed to be installed, revert all partitions.
+            # If one of the partitions failed to be installed, revert all
+            # partitions.
             parallel.RunParallelSteps(x.Revert for x in updaters)
             raise
 
@@ -363,10 +366,10 @@ class DeviceImager(object):
 class ReaderBase(threading.Thread):
     """The base class for reading different inputs and writing into output.
 
-    This class extends threading.Thread, so it will be run on its own thread. Also
-    it can be used as a context manager. Internally, it opens necessary files for
-    writing to and reading from. This class cannot be instantiated, it needs to be
-    sub-classed first to provide necessary function implementations.
+    This class extends threading.Thread, so it will be run on its own thread.
+    Also it can be used as a context manager. Internally, it opens necessary
+    files for writing to and reading from. This class cannot be instantiated, it
+    needs to be sub-classed first to provide necessary function implementations.
     """
 
     def __init__(self, use_named_pipes: bool = False):
@@ -392,8 +395,8 @@ class ReaderBase(threading.Thread):
     def __enter__(self):
         """Enters the context manager"""
         if self._use_named_pipes:
-            # There is no need for the temp file, we only need its path. So the named
-            # pipe is created after this temp file is deleted.
+            # There is no need for the temp file, we only need its path. So the
+            # named pipe is created after this temp file is deleted.
             with tempfile.NamedTemporaryFile(
                 prefix="chromite-device-imager"
             ) as fp:
@@ -420,9 +423,9 @@ class ReaderBase(threading.Thread):
     def _CloseSource(self):
         """Closes the source pipe.
 
-        Sub-classes should use this function to close the pipe after they are done
-        writing into it. Failure to do so may result reader of the data to hang
-        indefinitely.
+        Sub-classes should use this function to close the pipe after they are
+        done writing into it. Failure to do so may result reader of the data to
+        hang indefinitely.
         """
         if not self._use_named_pipes:
             os.close(self._pipe_source)
@@ -437,8 +440,8 @@ class ReaderBase(threading.Thread):
     def CloseTarget(self):
         """Closes the target pipe.
 
-        Users of this class should use this function to close the pipe after they
-        are done reading from it.
+        Users of this class should use this function to close the pipe after
+        they are done reading from it.
         """
         if self._use_named_pipes:
             os.remove(self._pipe_target)
@@ -450,17 +453,17 @@ class PartialFileReader(ReaderBase):
     """A class to read specific offset and length from a file and compress it.
 
     This class can be used to read from specific location and length in a file
-    (e.g. A partition in a GPT image). Then it compresses the input and writes it
-    out (to a pipe). Look at the base class for more information.
+    (e.g. A partition in a GPT image). Then it compresses the input and writes
+    it out (to a pipe). Look at the base class for more information.
     """
 
     # The offset of different partitions in a Chromium OS image does not always
-    # align to larger values like 4096. It seems that 512 is the maximum value to
-    # be divisible by partition offsets. This size should not be increased just
-    # for 'performance reasons'. Since we are doing everything in parallel, in
-    # practice there is not much difference between this and larger block sizes as
-    # parallelism hides the possible extra latency provided by smaller block
-    # sizes.
+    # align to larger values like 4096. It seems that 512 is the maximum value
+    # to be divisible by partition offsets. This size should not be increased
+    # just for 'performance reasons'. Since we are doing everything in parallel,
+    # in practice there is not much difference between this and larger block
+    # sizes as parallelism hides the possible extra latency provided by smaller
+    # block sizes.
     _BLOCK_SIZE = 512
 
     def __init__(
@@ -499,7 +502,7 @@ class PartialFileReader(ReaderBase):
 
 
 class GsFileCopier(ReaderBase):
-    """A class for downloading gzip compressed file from GS bucket into a pipe."""
+    """A class to download gzip compressed file from GS bucket into a pipe."""
 
     def __init__(self, image: str):
         """Initializes the class.
@@ -526,7 +529,7 @@ class PartitionUpdaterBase(object):
     """
 
     def __init__(self, device, image: str, image_type, target: str):
-        """Initializes this base class with values that most sub-classes will need.
+        """Initializes this base class with the most commonly needed values.
 
         Args:
             device: The ChromiumOSDevice to be updated.
@@ -563,7 +566,7 @@ class PartitionUpdaterBase(object):
     def Revert(self):
         """Reverts the partition update.
 
-        Sub-classes need to implement this function to provide revert capability.
+        Subclasses need to implement this function to provide revert capability.
         """
         raise NotImplementedError("Sub-classes need to implement this.")
 
@@ -668,8 +671,8 @@ class RawPartitionUpdater(PartitionUpdaterBase):
     def _OptimizePartLocation(self, offset: int, length: int):
         """Optimizes the offset and length of the partition.
 
-        Subclasses can override this to provide better offset/length than what is
-        defined in the PGT partition layout.
+        Subclasses can override this to provide better offset/length than what
+        is defined in the PGT partition layout.
 
         Args:
             offset: The offset (in bytes) of the partition in the image.
@@ -751,11 +754,11 @@ class RootfsUpdater(RawPartitionUpdater):
     def _OptimizePartLocation(self, offset: int, length: int):
         """Optimizes the size of the root partition of the image.
 
-        Normally the file system does not occupy the entire partition. Furthermore
-        we don't need the verity hash tree at the end of the root file system
-        because postinst will recreate it. This function reads the (approximate)
-        superblock of the ext4 partition and extracts the actual file system size in
-        the root partition.
+        Normally the file system does not occupy the entire partition.
+        Furthermore we don't need the verity hash tree at the end of the root
+        file system because postinst will recreate it. This function reads the
+        (approximate) superblock of the ext4 partition and extracts the actual
+        file system size in the root partition.
         """
         superblock_size = 4096 * 2
         with open(self._image, "rb") as r:
@@ -806,8 +809,8 @@ class RootfsUpdater(RawPartitionUpdater):
         """Reverts the root update install."""
         logging.info("Reverting the rootfs partition update.")
         if self._ran_postinst:
-            # We don't have to do anything for revert if we haven't changed the kernel
-            # priorities yet.
+            # We don't have to do anything for revert if we haven't changed the
+            # kernel priorities yet.
             self._RunPostInst(on_target=False)
 
 
@@ -945,7 +948,7 @@ class StatefulUpdater(PartitionUpdaterBase):
         self._clobber_stateful = clobber_stateful
 
     def _Run(self):
-        """Reads/Downloads the stateful updates and writes it into the device."""
+        """Read/Download the stateful updates and write it into the device."""
         if self._image_type == ImageType.FULL:
             generator_cls = StatefulPayloadGenerator
         elif self._image_type == ImageType.REMOTE_DIRECTORY:
@@ -1009,10 +1012,10 @@ class ProgressWatcher(threading.Thread):
     def run(self):
         """Monitors the progress of the target root partitions' update.
 
-        This is done by periodically, reading the fd position of the process that is
-        writing into the target partition and reporting it back. Then the position
-        is divided by the size of the block device to report an approximate
-        progress.
+        This is done by periodically, reading the fd position of the process
+        that is writing into the target partition and reporting it back. Then
+        the position is divided by the size of the block device to report
+        approximate progress.
         """
         cmd = ["blockdev", "--getsize64", self._target_root]
         output = self._device.run(cmd, capture_output=True).stdout.strip()
@@ -1032,9 +1035,9 @@ class ProgressWatcher(threading.Thread):
             finally:
                 time.sleep(1)
 
-        # Now that we know which process is writing to it, we can look the fdinfo of
-        # stdout of that process to get its offset. We're assuming there will be no
-        # seek, which is correct.
+        # Now that we know which process is writing to it, we can look the
+        # fdinfo of stdout of that process to get its offset. We're assuming
+        # there will be no seek, which is correct.
         cmd = ["cat", f"/proc/{pid}/fdinfo/1"]
         while not self._ShouldExit():
             try:
@@ -1077,7 +1080,8 @@ class DeviceImagerOperation(operation.ProgressBarOperation):
         if re.findall(r"Postinstall completed", output):
             self._progress += (1.0 - self._progress) / 2
 
-        # While waiting for reboot, each time, move half of the remaining progress.
+        # While waiting for reboot, each time, move half of the remaining
+        # progress.
         if re.findall(r"Unable to get new boot_id", output):
             self._progress += (1.0 - self._progress) / 2
 

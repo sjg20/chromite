@@ -240,10 +240,10 @@ class USBImager(object):
                 < logging.NOTICE,
             )
 
-        # dd likely didn't put the backup GPT in the last block. sfdisk fixes this
-        # up for us with a 'write' command, so we have a standards-conforming GPT.
-        # Ignore errors because sfdisk (util-linux < v2.32) isn't always happy to
-        # fix GPT correctness issues.
+        # dd likely didn't put the backup GPT in the last block. sfdisk fixes
+        # this up for us with a 'write' command, so we have a
+        # standards-conforming GPT. Ignore errors because sfdisk (util-linux <
+        # v2.32) isn't always happy to fix GPT correctness issues.
         cros_build_lib.sudo_run(
             ["sfdisk", device],
             input="write\n",
@@ -261,11 +261,11 @@ class USBImager(object):
         image_path = None
         if os.path.isfile(self.image):
             if not self.yes and not _IsFilePathGPTDiskImage(self.image):
-                # TODO(wnwen): Open the tarball and if there is just one file in it,
-                #     use that instead. Existing code in upload_symbols.py.
+                # TODO(wnwen): Open the tarball and if there is just one file in
+                #   it, use that instead. Existing code in upload_symbols.py.
                 if cros_build_lib.BooleanPrompt(
-                    prolog="The given image file is not a valid disk image. Perhaps "
-                    "you forgot to untar it.",
+                    prolog="The given image file is not a valid disk image. "
+                    "Perhaps you forgot to untar it.",
                     prompt="Terminate the current flash process?",
                 ):
                     raise FlashError("Update terminated by user.")
@@ -319,8 +319,8 @@ class USBImager(object):
         image_size_bytes = os.path.getsize(image_path)
         if device_size_bytes < image_size_bytes:
             raise FlashError(
-                "Removable device %s has less storage (%d) than the image size (%d)."
-                % (device, device_size_bytes, image_size_bytes)
+                "Removable device %s has less storage (%d) than the image size "
+                "(%d)." % (device, device_size_bytes, image_size_bytes)
             )
 
         try:
@@ -423,7 +423,8 @@ def Flash(
         ds_wrapper.DevServerWrapper.WipeStaticDirectory()
     ds_wrapper.DevServerWrapper.CreateStaticDirectory()
 
-    # The user may not have specified a source image, use version as the default.
+    # The user may not have specified a source image, use version as the
+    # default.
     image = image or version
     if not device or device.scheme == commandline.DEVICE_SCHEME_SSH:
         if device:
