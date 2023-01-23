@@ -232,6 +232,23 @@ class EncodingChecker(pylint.checkers.BaseChecker):
                 # guess at with high confidence.
                 pass
 
+        # Check gzip.open() calls.
+        # NB: The default mode is binary, not text, e.g. "r" == "rb".
+        # gzip.open(file, mode='r', compresslevel=0, encoding=None, ...
+        if (
+            isinstance(node.func, astroid.Attribute)
+            and node.func.attrname == "open"
+            and isinstance(node.func.expr, astroid.Name)
+            and node.func.expr.name == "gzip"
+        ):
+            try:
+                mode, encoding = self._extract_mode_encoding(node, 3, 1)
+            except _EncodingExtractError:
+                return
+
+            if "t" in mode and encoding != "utf-8":
+                self.add_message("R9150", node=node, line=node.fromlineno)
+
 
 class DocStringChecker(pylint.checkers.BaseChecker):
     """PyLint AST based checker to verify PEP 257 compliance

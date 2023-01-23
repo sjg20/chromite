@@ -1106,7 +1106,10 @@ class EncodingCheckerTest(CheckerTestCase):
     def _make_pathlib_node(code):
         """Helper to construct a callable node."""
         node = astroid.extract_node(
-            "from pathlib import Path\n" "p = Path()\n" f"{code} #@"
+            "import gzip\n"
+            "from pathlib import Path\n"
+            "p = Path()\n"
+            f"{code} #@"
         )
         node.doc = code
         return node
@@ -1136,6 +1139,7 @@ class EncodingCheckerTest(CheckerTestCase):
                 "open('f', mode=None)",
                 "enc = 'ascii'\nopen('f', 'rb', -1, enc)",
                 "enc = 'ascii'\nopen('f', 'rb', encoding=enc)",
+                "mode = 'rt'\ngzip.open('f', mode)",
             ),
             True,
         )
@@ -1172,6 +1176,44 @@ class EncodingCheckerTest(CheckerTestCase):
                 "open('f', 'r', -1, encoding='ascii')",
                 "open('f', mode='r', encoding='ascii')",
                 "open('f', encoding='ascii', mode='r')",
+            ),
+            False,
+        )
+
+    def testGzipOpenGood(self):
+        """Verify we accept good gzip.open() encoding."""
+        self._check_tests(
+            (
+                # gzip.open(file, mode='r', compresslevel=0, encoding=None, ...
+                "gzip.open('f')",
+                "gzip.open('f', 'r')",
+                "gzip.open('f', 'rb')",
+                "gzip.open('f', mode='r')",
+                "gzip.open('f', mode='rb')",
+                "gzip.open('f', 'w')",
+                "gzip.open('f', 'wb')",
+                "gzip.open('f', 'rt', -1, 'utf-8')",
+                "gzip.open('f', mode='rt', encoding='utf-8')",
+                "gzip.open('f', encoding='utf-8', mode='rt')",
+            ),
+            True,
+        )
+
+    def testGzipOpenBad(self):
+        """Verify we reject bad gzip.open() encoding."""
+        self._check_tests(
+            (
+                # gzip.open(file, mode='r', compresslevel=0, encoding=None, ...
+                "gzip.open('f', 'rt')",
+                "gzip.open('f', 'wt')",
+                "gzip.open('f', mode='rt')",
+                "gzip.open('f', 'rt', -1)",
+                "gzip.open('f', 'rt', -1, None)",
+                "gzip.open('f', 'rt', -1, 'ascii')",
+                "gzip.open('f', 'rt', -1, encoding=None)",
+                "gzip.open('f', 'rt', -1, encoding='ascii')",
+                "gzip.open('f', mode='rt', encoding='ascii')",
+                "gzip.open('f', encoding='ascii', mode='rt')",
             ),
             False,
         )

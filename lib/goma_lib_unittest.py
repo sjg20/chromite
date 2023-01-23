@@ -317,7 +317,7 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
         # Verify content of ninja_log file.
         ninjalog_path = os.path.join(self.dest_dir, ninjalog_filename)
 
-        with gzip.open(ninjalog_path, "rt") as gzip_file:
+        with gzip.open(ninjalog_path, "rt", encoding="utf-8") as gzip_file:
             ninja_log_content = gzip_file.read()
 
         content, eof, metadata_json = ninja_log_content.split("\n", 3)
