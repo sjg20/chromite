@@ -14,6 +14,7 @@ import os
 import re
 import string
 import subprocess
+from typing import List, Optional, Union
 from xml import sax
 
 from chromite.lib import config_lib
@@ -760,7 +761,9 @@ class ManifestCheckout(Manifest):
         return obj
 
 
-def RunGit(git_repo, cmd, **kwargs):
+def RunGit(
+    git_repo: Optional[Union[str, os.PathLike]], cmd: List[str], **kwargs
+) -> cros_build_lib.CompletedProcess:
     """Wrapper for git commands.
 
     This suppresses print_cmd, and suppresses output by default.  Git
@@ -769,7 +772,8 @@ def RunGit(git_repo, cmd, **kwargs):
     and being able to throw useful errors for it).
 
     Args:
-      git_repo: Pathway to the git repo to operate on.
+      git_repo: Pathway to the git repo to operate on.  If None, the cwd is
+          used.
       cmd: A sequence of the git subcommand to run.  The 'git' prefix is
         added automatically.  If you wished to run 'git remote update',
         this would be ['remote', 'update'] for example.
