@@ -204,8 +204,8 @@ class CopyPathInTest(cros_test_lib.TempDirTestCase):
         with field_handler.copy_paths_in(message, self.dest_dir, delete=True):
             self.assertEqual(self.source_file1, message.path.path)
 
-        # It should not be deleting the file when it doesn't need to copy it even
-        # with delete=True.
+        # It should not be deleting the file when it doesn't need to copy it
+        # even with delete=True.
         self.assertExists(self.source_file1)
 
     def test_prefix_inside(self):

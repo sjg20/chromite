@@ -369,8 +369,9 @@ class RouterTest(
         )
         self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
 
-        # Patch the chroot tempdir method to return a tempdir with our subprocess
-        # tempdir so the output file will be in the expected location.
+        # Patch the chroot tempdir method to return a tempdir with our
+        # subprocess tempdir so the output file will be in the expected
+        # location.
         tempdir = osutils.TempDir()
         original = tempdir.tempdir
         tempdir.tempdir = self.subprocess_tempdir
@@ -381,7 +382,8 @@ class RouterTest(
 
         # Set the command side effect to write out our expected output to the
         # output file for the inside the chroot reexecution of the endpoint.
-        # This lets us make sure the logic moving everything out works as intended.
+        # This lets us make sure the logic moving everything out works as
+        # intended.
         self.rc.SetDefaultCmdResult(
             side_effect=self._writeChrootCallOutput(
                 content=expected_output_msg.SerializeToString(), mode="wb"
@@ -424,7 +426,8 @@ class RouterTest(
 
         # Set the command side effect to write out our expected output to the
         # output file for the inside the chroot reexecution of the endpoint.
-        # This lets us make sure the logic moving everything out works as intended.
+        # This lets us make sure the logic moving everything out works as
+        # intended.
         self.rc.SetDefaultCmdResult(
             side_effect=self._writeChrootCallOutput(
                 content=expected_output_msg.SerializeToString(), mode="wb"

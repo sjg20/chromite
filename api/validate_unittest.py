@@ -564,7 +564,7 @@ class ValidateOnlyTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
         def impl(_input_proto, _output_proto, _config):
             self.fail("Incorrectly allowed method to execute.")
 
-        # We will get an assertion error unless validate_only prevents the function
-        # from being called.
+        # We will get an assertion error unless validate_only prevents the
+        # function from being called.
         with self.assertRaises(AssertionError):
             impl(common_pb2.Chroot(), common_pb2.Chroot(), self.api_config)

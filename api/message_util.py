@@ -33,10 +33,6 @@ class Error(Exception):
     """Base error class for the module."""
 
 
-class InvalidHandlerError(Error):
-    """Raised when a message handler has no input/output argument when needed."""
-
-
 class InvalidInputFileError(Error):
     """Raised when the input file cannot be read."""
 
@@ -160,9 +156,9 @@ class MessageHandler(object):
 
     The class is fairly tightly coupled to the build api, but we currently have
     no other projected use cases for this, so it's handy. In particular, if we
-    scrap the "maintain the same input/output/config serialization when reexecing
-    inside the chroot" convention, this implementation is much less useful and
-    can be fairly trivially generalized.
+    scrap the "maintain the same input/output/config serialization when
+    reexecing inside the chroot" convention, this implementation is much less
+    useful and can be fairly trivially generalized.
 
     The instance's path is the primary path the message handler was built for.
     For the Build API, this means one of the input/output/config arguments. In
@@ -252,7 +248,8 @@ class MessageHandler(object):
             path: An optional override of the instance's path.
 
         Raises:
-            InvalidOutputFileError: When no path given, or it cannot be written to.
+            InvalidOutputFileError: When no path given, or the path cannot be
+                written to.
         """
         if not path and not self.path:
             raise InvalidOutputFileError("No output file has been specified.")

@@ -65,7 +65,8 @@ class MessageHandlerTest(cros_test_lib.TempDirTestCase):
         """Test binary serialization/deserialization."""
         msg_path = os.path.join(self.tempdir, "proto")
 
-        # Use the message handler configured in the module to avoid config drift.
+        # Use the message handler configured in the module to avoid config
+        # drift.
         handler = message_util.get_message_handler(
             msg_path, message_util.FORMAT_BINARY
         )
@@ -88,7 +89,8 @@ class MessageHandlerTest(cros_test_lib.TempDirTestCase):
         """Test json serialization/deserialization."""
         msg_path = os.path.join(self.tempdir, "proto")
 
-        # Use the message handler configured in the module to avoid config drift.
+        # Use the message handler configured in the module to avoid config
+        # drift.
         handler = message_util.get_message_handler(
             msg_path, message_util.FORMAT_JSON
         )

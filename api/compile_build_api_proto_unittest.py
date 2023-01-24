@@ -18,14 +18,14 @@ def test_versions_match():
     version of the library we're using (in chromite/third_party). For now, that
     means we're checking equality.
 
-    TODO: Investigate whether, e.g. 1.2.0 ~= 1.2.3, and we only need to check the
-      major and minor components.
-    TODO: Investigate using protobuf.__version__ instead of hard coding a version
-      in compile_build_api_proto.
+    TODO: Investigate whether, e.g. 1.2.0 ~= 1.2.3, and we only need to check
+        the major and minor components.
+    TODO: Investigate using protobuf.__version__ instead of hard coding a
+        version in compile_build_api_proto.
     """
     assert compile_build_api_proto.PROTOC_VERSION == protobuf.__version__, (
-        "The protobuf library or compile_build_api_proto.PROTOC_VERSION has been "
-        "updated, but the other has not. They must be updated together."
+        "The protobuf library or compile_build_api_proto.PROTOC_VERSION has "
+        "been updated, but the other has not. They must be updated together."
     )
 
 

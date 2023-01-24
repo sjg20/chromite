@@ -42,8 +42,8 @@ class ChrootHandler(object):
 
     def handle(self, message, recurse=True) -> Optional["chroot_lib.Chroot"]:
         """Parse a message for a chroot field."""
-        # Find the Chroot field. Search for the field by type to prevent it being
-        # tied to a naming convention.
+        # Find the Chroot field. Search for the field by type to prevent it
+        # being tied to a naming convention.
         for descriptor in message.DESCRIPTOR.fields:
             field = getattr(message, descriptor.name)
             if isinstance(field, common_pb2.Chroot):
@@ -52,9 +52,9 @@ class ChrootHandler(object):
                     message.ClearField(descriptor.name)
                 return self.parse_chroot(chroot)
 
-        # Recurse down one level. This is handy for meta-endpoints that use another
-        # endpoint's request to produce data for or about the second endpoint.
-        # e.g. PackageService/NeedsChromeSource.
+        # Recurse down one level. This is handy for meta-endpoints that use
+        # another endpoint's request to produce data for or about the second
+        # endpoint. e.g. PackageService/NeedsChromeSource.
         if recurse:
             for descriptor in message.DESCRIPTOR.fields:
                 field = getattr(message, descriptor.name)
@@ -165,7 +165,8 @@ class PathHandler(object):
             # Already in the correct location, nothing to do.
             return
 
-        # Create a tempdir for the copied file if we're cleaning it up afterwords.
+        # Create a tempdir for the copied file if we're cleaning it up
+        # afterwords.
         if self.delete:
             self.tempdir = osutils.TempDir(base_dir=self.destination)
             destination = self.tempdir.tempdir

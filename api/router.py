@@ -83,7 +83,7 @@ class UnknownMethodError(Error):
 
 
 class MethodNotFoundError(Error):
-    """The method's implementation cannot be found in the service's controller."""
+    """The method's implementation cannot be found in the controller."""
 
 
 class Router(object):
@@ -179,8 +179,8 @@ class Router(object):
 
             if not module_name:
                 raise ControllerModuleNotDefinedError(
-                    "The module must be defined in the service definition: %s.%s"
-                    % (proto_module, service_name)
+                    "The module must be defined in the service definition: "
+                    f"{proto_module}.{service_name}"
                 )
 
             self._services[svc.full_name] = (svc, module_name)
@@ -386,7 +386,8 @@ class Router(object):
             # Parse remoteexec.
             chroot.remoteexec = field_handler.handle_remoteexec(input_msg)
 
-            # Build inside-chroot paths for the input, output, and config messages.
+            # Build inside-chroot paths for the input, output, and config
+            # messages.
             new_input = os.path.join(tempdir, self.REEXEC_INPUT_FILE)
             chroot_input = "/%s" % os.path.relpath(new_input, chroot.path)
             new_output = os.path.join(tempdir, self.REEXEC_OUTPUT_FILE)
@@ -442,7 +443,7 @@ class Router(object):
             output_handler.read_into(output_msg, path=new_output)
             field_handler.extract_results(input_msg, output_msg, chroot)
 
-            # Write out all of the response formats.
+            # Write out all the response formats.
             for handler in output_handlers:
                 handler.write_from(output_msg)
 
@@ -501,7 +502,7 @@ def RegisterServices(router: Router):
 
 
 def GetRouter():
-    """Get a router that has had all of the services registered."""
+    """Get a router that has had all the services registered."""
     router = Router()
     RegisterServices(router)
 

@@ -195,7 +195,7 @@ def _GenerateFiles(
 
 
 def _InstallMissingInits(directory: Path):
-    """Add any __init__.py files not present in the generated protobuf folders."""
+    """Add missing __init__.py files in the generated protobuf folders."""
     logging.info("Adding missing __init__.py files in %s.", directory)
     # glob ** returns only directories.
     for current in directory.rglob("**"):
@@ -218,8 +218,8 @@ def _PostprocessFiles(directory: Path, protoc_version: ProtocVersion):
     # "\(^google.protobuf[^ ]*\)" matches the module we're importing from.
     #   - \( and \) are for groups in sed.
     #   - ^google.protobuf prevents changing the import for protobuf's files.
-    #   - [^ ] = Not a space. The [:space:] character set is too broad, but would
-    #       technically work too.
+    #   - [^ ] = Not a space. The [:space:] character set is too broad, but
+    #       would technically work too.
     find = r"^from \([^ ]*\) import \([^ ]*\)_pb2 as \([^ ]*\)$"
     # Substitute: 'from chromite.api.gen[_sdk].x import y_pb2 as x_dot_y_pb2'.
     if protoc_version is ProtocVersion.SDK:
@@ -300,17 +300,17 @@ def GetParser():
         dest="protoc_version",
         action="append_const",
         const=ProtocVersion.CHROMITE,
-        help="Generate only the chromite bindings. Generates all by default. The "
-        "chromite bindings are compatible with the version of protobuf in "
-        "chromite/third_party.",
+        help="Generate only the chromite bindings. Generates all by default. "
+        "The chromite bindings are compatible with the version of protobuf "
+        "in chromite/third_party.",
     )
     standard_group.add_argument(
         "--sdk",
         dest="protoc_version",
         action="append_const",
         const=ProtocVersion.SDK,
-        help="Generate only the SDK bindings. Generates all by default. The SDK "
-        "bindings are compiled by protoc in the SDK, and is compatible "
+        help="Generate only the SDK bindings. Generates all by default. The "
+        "SDK bindings are compiled by protoc in the SDK, and is compatible "
         "with the version of protobuf in the SDK (i.e. the one installed by "
         "the ebuild).",
     )
@@ -332,8 +332,8 @@ def GetParser():
         dest="dest_protoc",
         default=ProtocVersion.CHROMITE,
         const=ProtocVersion.SDK,
-        help="Generate the SDK version of the protos in --destination instead of "
-        "the chromite version.",
+        help="Generate the SDK version of the protos in --destination instead "
+        "of the chromite version.",
     )
     dest_group.add_argument(
         "--all-proto",
