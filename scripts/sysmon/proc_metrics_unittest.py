@@ -212,6 +212,15 @@ class TestProcMetrics(cros_test_lib.TestCase):
                     name="downloader",
                     cmdline=["./downloader", "-credential-file", "..."],
                 ),
+                _mock_process(
+                    name="cipd", cmdline=["cipd", "ensure", "-root", "..."]
+                ),
+                _mock_process(
+                    name="podman", cmdline=["podman", "run", "image:tag"]
+                ),
+                _mock_process(
+                    name="podman", cmdline=["podman", "pull", "image:tag"]
+                ),
             ]
             proc_metrics.collect_proc_info()
 
@@ -219,6 +228,7 @@ class TestProcMetrics(cros_test_lib.TestCase):
         calls = []
         calls.extend(_expected_calls_for("autoserv"))
         calls.extend(_expected_calls_for("cache-downloader"))
+        calls.extend(_expected_calls_for("cipd"))
         calls.extend(_expected_calls_for("common-tls"))
         calls.extend(_expected_calls_for("curl"))
         calls.extend(_expected_calls_for("dnsmasq"))
@@ -231,6 +241,8 @@ class TestProcMetrics(cros_test_lib.TestCase):
         calls.extend(_expected_calls_for("labservice"))
         calls.extend(_expected_calls_for("lxc-attach"))
         calls.extend(_expected_calls_for("lxc-start"))
+        calls.extend(_expected_calls_for("podman-pull"))
+        calls.extend(_expected_calls_for("podman-run"))
         calls.extend(_expected_calls_for("sshd"))
         calls.extend(_expected_calls_for("swarming_bot"))
         calls.extend(_expected_calls_for("sysmon"))

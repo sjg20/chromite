@@ -39,6 +39,7 @@ class _ProcessMetricsCollector(object):
                 "cache-downloader",
                 test_func=partial(_is_process_name, "downloader"),
             ),
+            _ProcessMetric("cipd", test_func=partial(_is_process_name, "cipd")),
             _ProcessMetric(
                 "common-tls", test_func=partial(_is_process_name, "common-tls")
             ),
@@ -71,6 +72,10 @@ class _ProcessMetricsCollector(object):
             _ProcessMetric(
                 "lxc-start", test_func=partial(_is_process_name, "lxc-start")
             ),
+            _ProcessMetric(
+                "podman-pull", test_func=partial(_is_podman, "pull")
+            ),
+            _ProcessMetric("podman-run", test_func=partial(_is_podman, "run")),
             _ProcessMetric("sshd", test_func=partial(_is_process_name, "sshd")),
             _ProcessMetric("swarming_bot", test_func=_is_swarming_bot),
             _ProcessMetric(
@@ -204,3 +209,15 @@ def _is_tko_proxy(proc):
         and cmdline[0].split("/")[-1] == "cloud_sql_proxy"
         and cmdline[2] == "-instances=google.com:chromeos-lab:us-central1:tko"
     )
+
+
+def _is_podman(subcmd, proc):
+    """Return whiter proc is a podman process.
+
+    A podman pull process is like
+    'podman pull image:tag'
+    A podman run process is like
+    'podman run --option ... image:tag'
+    """
+    cmdline = proc.cmdline()
+    return proc.name() == "podman" and cmdline[1] == subcmd
