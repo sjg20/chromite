@@ -4,6 +4,8 @@
 
 """This module tests the cros format command."""
 
+from pathlib import Path
+
 from chromite.cli.cros import cros_format
 from chromite.format import formatters
 from chromite.lib import commandline
@@ -40,7 +42,7 @@ class FormatCommandTest(cros_test_lib.TestCase):
 
     def testCliNoMatchedFiles(self):
         """Check cros format handling with no matched files."""
-        self.options.files = ["foo"]
+        self.options.files = [Path("foo")]
         cmd = cros_format.FormatCommand(self.options)
         self.assertEqual(0, cmd.Run())
 
@@ -58,6 +60,15 @@ class FormatCommandTempDirTests(cros_test_lib.TempDirTestCase):
         file = self.tempdir / "foo.txt"
         osutils.Touch(file)
         opts = self.parser.parse_args([str(file)])
+        cmd = cros_format.FormatCommand(opts)
+        self.assertEqual(0, cmd.Run())
+
+    def testCliDir(self):
+        """Test the CLI expands directories when given one."""
+        files = [self.tempdir / "foo.txt", self.tempdir / "bar.txt"]
+        for file in files:
+            osutils.Touch(file)
+        opts = self.parser.parse_args([str(self.tempdir)])
         cmd = cros_format.FormatCommand(opts)
         self.assertEqual(0, cmd.Run())
 

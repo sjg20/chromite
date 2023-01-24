@@ -13,6 +13,7 @@ import functools
 import itertools
 import logging
 import os
+from pathlib import Path
 import re
 from typing import Callable, Union
 
@@ -20,6 +21,7 @@ from chromite.cli import command
 from chromite.format import formatters
 from chromite.lib import osutils
 from chromite.lib import parallel
+from chromite.lib import path_util
 from chromite.utils.parser import shebang
 
 
@@ -127,7 +129,7 @@ def _BreakoutFilesByTool(files):
 
     for f in files:
         # Skip if excluded.
-        if any(x.search(f) for x in _EXCLUDED_FILE_REGEX):
+        if any(x.search(str(f)) for x in _EXCLUDED_FILE_REGEX):
             continue
 
         extension = os.path.splitext(f)[1]
@@ -237,7 +239,15 @@ Supported file names: %s
             action="store_true",
             help="Format files inplace (default)",
         )
-        parser.add_argument("files", help="Files to format", nargs="*")
+        parser.add_argument(
+            "files",
+            nargs="*",
+            type=Path,
+            help=(
+                "Files to format.  Directories will be expanded, and if in a "
+                "git repository, the .gitignore will be respected."
+            ),
+        )
 
     def Run(self):
         files = self.options.files
@@ -251,7 +261,7 @@ Supported file names: %s
         # Ignore symlinks.
         files = []
         syms = []
-        for f in self.options.files:
+        for f in path_util.ExpandDirectories(self.options.files):
             if os.path.islink(f):
                 syms.append(f)
             else:
