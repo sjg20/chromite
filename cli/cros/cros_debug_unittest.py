@@ -112,7 +112,7 @@ class DebugRunThroughTest(cros_test_lib.MockTempDirTestCase):
         self.assertFalse(self.cmd_mock.patched["_DebugRunningProcess"].called)
 
     def testNoRunningProcess(self):
-        """Test that command starts a new process to debug if no process running."""
+        """Test command starts a new process to debug if no process running."""
         self.SetupCommandMock([self.DEVICE, "--exe", self.EXE])
         self.PatchObject(self.device_mock, "GetRunningPids", return_value=[])
         self.cmd_mock.inst.Run()

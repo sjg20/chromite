@@ -90,7 +90,8 @@ Examples:
         # be listed together, e.g. `cros workon start -b eve package` will
         # not parse as you might expect. This has been addressed in python
         # 3.7 with intermixed parsing (ArgumentParse.parse_intermixed_args).
-        # See: https://docs.python.org/3/library/argparse.html#intermixed-parsing
+        # See:
+        # https://docs.python.org/3/library/argparse.html#intermixed-parsing
         # TODO: Add support for intermixed parsing when we are on 3.7.
         parser.add_argument(
             "action", choices=[a[0] for a in _ACTIONS], help="Action to run."
@@ -107,7 +108,8 @@ Examples:
             "--board",
             "--build-target",
             dest="build_target_name",
-            help="The name of the build target whose package is being worked on.",
+            help="The name of the build target whose package is being worked "
+            "on.",
         )
         target_group.add_argument(
             "--host",

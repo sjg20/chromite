@@ -59,7 +59,8 @@ To just build a single package:
             # If nothing is explicitly set, use the default board.
             self.board = cros_build_lib.GetDefaultBoard()
 
-        # Set sysroot and friendly name. The latter is None if building for host.
+        # Set sysroot and friendly name. The latter is None if building for
+        # host.
         self.sysroot = build_target_lib.get_default_sysroot_path(self.board)
 
     @classmethod

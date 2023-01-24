@@ -65,7 +65,8 @@ class CrosFlashTest(
         flash_args, flash_kwargs = self.flash_mock.call_args
         self.assertEqual(device, flash_args[0].hostname)
         self.assertEqual(image, flash_args[1])
-        # `cros flash` default options. Must match the configuration in AddParser().
+        # `cros flash` default options. Must match the configuration in
+        # AddParser().
         expected_kwargs = {
             "board": None,
             "version": "latest",

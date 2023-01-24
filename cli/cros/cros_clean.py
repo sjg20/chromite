@@ -148,8 +148,8 @@ class CleanCommand(command.CliCommand):
             "--sdk-path",
             type="path",
             default=constants.DEFAULT_CHROOT_PATH,
-            help="The sdk (chroot) path. This only needs to be provided if your "
-            "chroot is not in the default location.",
+            help="The sdk (chroot) path. This only needs to be provided if "
+            "your chroot is not in the default location.",
         )
 
     def __init__(self, options):

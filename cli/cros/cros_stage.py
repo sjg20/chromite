@@ -58,8 +58,8 @@ class StageCommand(command.CliCommand):
     """Remotely stages an image onto a MobLab device or into Google Storage.
 
     The image to be staged may be a local custom image built in the chroot or an
-    official image in Google Storage. The test binaries will always come from the
-    local build root regardless of the image source.
+    official image in Google Storage. The test binaries will always come from
+    the local build root regardless of the image source.
 
     This script generates/copies the update payloads and test binaries required.
     It then stages them on the Moblab's devserver or copies them into the
@@ -98,8 +98,8 @@ NOTES:
             default="latest",
             help="Path to image we want to "
             "stage. If a local path, it should be in the format of "
-            "/.../.../board/build/<image>.bin . If a Google Storage path it should"
-            "be in the format of "
+            "/.../.../board/build/<image>.bin . If a Google Storage path it "
+            "should be in the format of "
             "gs://<bucket-name>/<board>-<builder type>/<build name>",
         )
         parser.add_argument(
@@ -124,8 +124,8 @@ NOTES:
             "--boto_file",
             dest="boto_file",
             default=None,
-            help="Path to boto file to use when uploading to Google Storage. If "
-            "none the default chroot boto file is used.",
+            help="Path to boto file to use when uploading to Google Storage. "
+            "If none the default chroot boto file is used.",
         )
 
     def __init__(self, options):
@@ -174,7 +174,7 @@ NOTES:
             Name the image will be staged as.
 
         Raises:
-            CustomImageStagingException: If the image name supplied is not valid.
+            CustomImageStagingException: If the image name supplied is invalid.
         """
         realpath = osutils.ExpandPath(image)
         if not realpath.endswith(".bin"):
@@ -183,8 +183,8 @@ NOTES:
             )
         build_name = os.path.basename(os.path.dirname(realpath))
         # Custom builds are name with the suffix of '-a1' but the build itself
-        # is missing this suffix in its filesystem. Therefore lets rename the build
-        # name to match the name inside the build.
+        # is missing this suffix in its filesystem. Therefore lets rename the
+        # build name to match the name inside the build.
         if build_name.endswith("-a1"):
             build_name = build_name[: -len("-a1")]
 
@@ -201,14 +201,14 @@ NOTES:
         the image path.
 
         Args:
-            image: GS Url to the image we want to stage. It should be in the format
-                gs://<bucket-name>/<board>-<builder type>/<build name>
+            image: GS Url to the image we want to stage. It should be in the
+                format: gs://<bucket-name>/<board>-<builder type>/<build name>
 
         Returns:
             Name the image will be staged as.
 
         Raises:
-            CustomImageStagingException: If the image name supplied is not valid.
+            CustomImageStagingException: If the image name supplied is invalid.
         """
         match = GSURLRegexHelper(image)
         if not match:
@@ -260,8 +260,8 @@ NOTES:
         """Stage the generated payloads and test bits on a moblab device.
 
         Args:
-            tempdir: Temporary Directory that contains the generated payloads and
-                test bits.
+            tempdir: Temporary Directory that contains the generated payloads
+                and test bits.
         """
         with remote_access.ChromiumOSDeviceHandler(
             self.options.remote
@@ -272,7 +272,8 @@ NOTES:
                     os.path.join(tempdir, f), self.stage_directory, mode="rsync"
                 )
             device.run(["chown", "-R", "moblab:moblab", MOBLAB_TMP_DIR])
-            # Delete this image from the Devserver in case it was previously staged.
+            # Delete this image from the Devserver in case it was previously
+            # staged.
             device.run(
                 [
                     "rm",
@@ -283,8 +284,8 @@ NOTES:
             stage_url = DEVSERVER_STAGE_URL % dict(
                 moblab=self.options.remote, staged_dir=self.stage_directory
             )
-            # Stage the image from the moblab, as port 8080 might not be reachable
-            # from the developer's system.
+            # Stage the image from the moblab, as port 8080 might not be
+            # reachable from the developer's system.
             res = device.run(
                 ["curl", "--fail", cros_build_lib.ShellQuote(stage_url)],
                 check=False,
@@ -300,11 +301,11 @@ NOTES:
             device.run(["rm", "-rf", self.stage_directory])
 
     def _StageOnGS(self, tempdir):
-        """Stage the generated payloads and test bits into a Google Storage bucket.
+        """Stage the generated payloads and test bits into a GS bucket.
 
         Args:
-            tempdir: Temporary Directory that contains the generated payloads and
-                test bits.
+            tempdir: Temporary Directory that contains the generated payloads
+                and test bits.
         """
         gs_context = gs.GSContext(boto_file=self.options.boto_file)
         for f in os.listdir(tempdir):

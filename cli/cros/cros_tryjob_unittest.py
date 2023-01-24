@@ -702,8 +702,8 @@ class TryjobTestVerifyOptions(TryjobTest):
     def testUnknownConfig(self):
         """Test option verification with production configs on branches."""
 
-        # We have no way of knowing if the config is production or not on a branch,
-        # so don't prompt at all
+        # We have no way of knowing if the config is production or not on a
+        # branch, so don't prompt at all
         self.SetupCommandMock(["bogus-config"])
 
         with self.assertRaises(PromptException):
@@ -714,8 +714,8 @@ class TryjobTestVerifyOptions(TryjobTest):
     def testBranchUnknownConfig(self):
         """Test option verification with production configs on branches."""
 
-        # We have no way of knowing if the config is production or not on a branch,
-        # so don't prompt at all
+        # We have no way of knowing if the config is production or not on a
+        # branch, so don't prompt at all
         self.SetupCommandMock(
             [
                 "--branch",
@@ -735,8 +735,8 @@ class TryjobTestVerifyOptions(TryjobTest):
     def testBranchProductionUnknownConfig(self):
         """Test option verification with production configs on branches."""
 
-        # We have no way of knowing if the config is production or not on a branch,
-        # so don't prompt at all
+        # We have no way of knowing if the config is production or not on a
+        # branch, so don't prompt at all
         self.SetupCommandMock(
             ["--branch", "old_branch", "--production", "bogus-config"]
         )
@@ -746,8 +746,8 @@ class TryjobTestVerifyOptions(TryjobTest):
     def testBranchProductionConfigTryjob(self):
         """Test option verification with production configs on branches."""
 
-        # We have no way of knowing if the config is production or not on a branch,
-        # so don't prompt at all
+        # We have no way of knowing if the config is production or not on a
+        # branch, so don't prompt at all
         self.SetupCommandMock(
             [
                 "--branch",
@@ -811,7 +811,8 @@ class TryjobTestVerifyOptions(TryjobTest):
         self.SetupCommandMock(
             [
                 "--hwtest_dut_dimensions",
-                "label-board:foo-board label-model:foo-model label-pol:foo-typo",
+                "label-board:foo-board label-model:foo-model "
+                "label-pol:foo-typo",
             ]
         )
 
@@ -827,7 +828,7 @@ class TryjobTestVerifyOptions(TryjobTest):
         cros_tryjob.VerifyOptions(self.cmd_mock.inst.options, self.site_config)
 
     def testRemoteProductionBranchProductionConfig(self):
-        """Test a production job on a branch for a production config wo/confirm."""
+        """Test a production job on a branch for a prod config wo/confirm."""
         self.SetupCommandMock(
             ["--production", "--branch", "foo", "eve-release"]
         )
@@ -877,8 +878,8 @@ class TryjobTestVerifyOptions(TryjobTest):
 
     def test108NonRelease(self):
         """Test that the tool fails for an unsupported release branch."""
-        # We have no way of knowing if the config is production or not on a branch,
-        # so don't prompt at all
+        # We have no way of knowing if the config is production or not on a
+        # branch, so don't prompt at all
         self.SetupCommandMock(
             [
                 "--branch",

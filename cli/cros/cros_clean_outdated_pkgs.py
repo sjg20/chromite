@@ -207,7 +207,8 @@ class CleanOutdatedCommand(command.CliCommand):
 
             def anyof_reduce_gatherer(choices: List[str]) -> str:
                 """Reduce func for dep parser to gather dependencies."""
-                # If there is a slotless dep -> pick it, so it can be ignored later.
+                # If there is a slotless dep -> pick it, so it can be ignored
+                # later.
                 if not choices:
                     logging.fatal(
                         "anyof_reduce called on empty list: %s", choices
@@ -217,7 +218,8 @@ class CleanOutdatedCommand(command.CliCommand):
                     if not has_slot_dep(choice):
                         return choice
 
-                # If all deps have slots -> return all of them, so they can be processed.
+                # If all deps have slots -> return all of them, so they can be
+                # processed.
                 return tuple(choices)
 
             parsed_deps = pms_dependency.parse(depend).reduce(
@@ -555,10 +557,10 @@ class CleanOutdatedCommand(command.CliCommand):
         """,
         )  # TODO: should this flag only apply to DUT?
         parser.epilog = """
-    cros clean-outdated-pkgs purges packages that do not have an ebuild with the same
-    version, then fixes slot conflicts.
-    Subsequent build_packages will reinstall these packages without conflicts.
+cros clean-outdated-pkgs purges packages that do not have an ebuild with the
+same version, then fixes slot conflicts.
+Subsequent build_packages will reinstall these packages without conflicts.
 
-    WARNING: outdated packages that were emerged manually will be permanently
-    removed.
-    """
+WARNING: outdated packages that were emerged manually will be permanently
+removed.
+"""

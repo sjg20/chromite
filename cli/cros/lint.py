@@ -85,13 +85,14 @@ class DocStringSectionDetails(object):
 def _PylintrcConfig(config_file, section, opts):
     """Read specific pylintrc settings.
 
-    This is a bit hacky.  The pylint framework doesn't allow us to access options
-    outside of a Checker's own namespace (self.name), and multiple linters may not
-    have the same name/options values (since they get globally registered).  So we
-    have to re-read the registered config file and pull out the value we want.
+    This is a bit hacky. The pylint framework doesn't allow us to access options
+    outside a Checker's own namespace (self.name), and multiple linters may not
+    have the same name/options values (since they get globally registered). So
+    we have to re-read the registered config file and pull out the value we
+    want.
 
-    The other option would be to force people to duplicate settings in the config
-    files and that's worse.  e.g.
+    The other option would be to force people to duplicate settings in the
+    config files and that's worse.  e.g.
     [format]
     indent-string = '  '
     [doc_string_checker]
@@ -460,9 +461,9 @@ class DocStringChecker(pylint.checkers.BaseChecker):
         if lines[0] == "":
             self.add_message("C9009", node=node, line=node.fromlineno)
 
-        # We only check the first line for extra quotes because the grammar halts
-        # when it sees the next set of triple quotes (which means extra trailing
-        # quotes are not part of the docstring).
+        # We only check the first line for extra quotes because the grammar
+        # halts when it sees the next set of triple quotes (which means extra
+        # trailing quotes are not part of the docstring).
         if lines[0].startswith('"'):
             self.add_message("C9018", node=node, line=node.fromlineno)
 
@@ -624,16 +625,18 @@ class DocStringChecker(pylint.checkers.BaseChecker):
             # See if we can detect incorrect behavior.
             section = l.split(":", 1)[0]
 
-            # Remember whether we're currently in the Args: section so we don't treat
-            # named arguments as sections (e.g. a function has a "returns" arg).  Use
-            # the indentation level to detect the start of the next section.
+            # Remember whether we're currently in the Args: section so we don't
+            # treat named arguments as sections (e.g. a function has a "returns"
+            # arg).  Use the indentation level to detect the start of the next
+            # section.
             if in_args_section:
                 in_args_section = indent_len < line_indent_len
 
             if not in_args_section:
-                # We only parse known invalid & valid sections here.  This avoids
-                # picking up things that look like sections but aren't (e.g. "Note:"
-                # lines), and avoids running checks on sections we don't yet support.
+                # We only parse known invalid & valid sections here.  This
+                # avoids picking up things that look like sections but aren't
+                # (e.g. "Note:" lines), and avoids running checks on sections we
+                # don't yet support.
                 if section.lower() in invalid_sections_map:
                     margs["section"] = invalid_sections_map[section.lower()]
                     self.add_message(
@@ -663,8 +666,8 @@ class DocStringChecker(pylint.checkers.BaseChecker):
                             name=section, header=line, lineno=lineno
                         )
 
-                # Detect whether we're in the Args section once we've processed the Args
-                # section itself.
+                # Detect whether we're in the Args section once we've processed
+                # the Args section itself.
                 in_args_section = section in ("Args", "Attributes")
 
             if l == "" and last_section:
@@ -710,8 +713,8 @@ class DocStringChecker(pylint.checkers.BaseChecker):
                     "C9007", node=node, line=node.fromlineno, args=margs
                 )
 
-            # Verify blank line before it.  We use -2 because lineno counts from one,
-            # but lines is a zero-based list.
+            # Verify blank line before it.  We use -2 because lineno counts from
+            # one, but lines is a zero-based list.
             if lines[lineno - 2] != "":
                 self.add_message(
                     "C9006", node=node, line=node.fromlineno, args=margs
@@ -756,8 +759,8 @@ class DocStringChecker(pylint.checkers.BaseChecker):
                         },
                     )
 
-            # If none of the lines were indented at the exact level, then something
-            # is amiss like they're all incorrectly offset.
+            # If none of the lines were indented at the exact level, then
+            # something is amiss like they're all incorrectly offset.
             if first_item_margs and not saw_exact:
                 self.add_message(
                     "C9015",
@@ -957,7 +960,8 @@ class SourceChecker(pylint.checkers.BaseChecker):
         stream.seek(0)
         encoding = stream.readline()
 
-        # If the first line is the shebang, then the encoding is the second line.
+        # If the first line is the shebang, then the encoding is the second
+        # line.
         if encoding[0:2] == b"#!":
             encoding = stream.readline()
 

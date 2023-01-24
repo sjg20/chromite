@@ -134,7 +134,7 @@ def _ToolRunCommand(cmd, debug, **kwargs):
 
 
 def _ConfLintFile(path, output_format, debug, relaxed: bool):
-    """Determine the applicable .conf syntax and call the appropriate handler."""
+    """Determine applicable .conf syntax and call the appropriate handler."""
     ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
     if not os.path.isfile(path):
         return ret
@@ -161,7 +161,8 @@ def _ConfLintFile(path, output_format, debug, relaxed: bool):
 
             if not tokens_to_find:
                 logging.warning(
-                    "Found upstart .conf in a directory other than init or upstart."
+                    "Found upstart .conf in a directory other than init or "
+                    "upstart."
                 )
                 return _UpstartLintFile(path, output_format, debug, relaxed)
     return ret
@@ -565,8 +566,9 @@ Supported file names: %s
         if syms:
             logging.info("Ignoring symlinks: %s", syms)
 
-        # Ignore generated files.  Some tools can do this for us, but not all, and
-        # it'd be faster if we just never spawned the tools in the first place.
+        # Ignore generated files.  Some tools can do this for us, but not all,
+        # and it'd be faster if we just never spawned the tools in the first
+        # place.
         files = [x for x in files if not x.endswith("_pb2.py")]
 
         tool_map = _BreakoutFilesByTool(files)

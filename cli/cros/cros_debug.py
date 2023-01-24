@@ -76,7 +76,8 @@ To debug a process by its pid:
             "--list",
             action="store_true",
             default=False,
-            help="List running processes of the executable on the target device.",
+            help="List running processes of the executable on the target "
+            "device.",
         )
         parser.add_argument(
             "--exe", help="Full path of the executable on the target device."
@@ -103,7 +104,7 @@ To debug a process by its pid:
             parser.error("--exe must have a full pathname.")
 
     def _ListProcesses(self, device, pids):
-        """Provided with a list of pids, print out information of the processes."""
+        """Print out information of the processes in |pids|."""
         if not pids:
             logging.info(
                 "No running process of %s on device %s",
@@ -195,7 +196,8 @@ To debug a process by its pid:
             logging.debug("Executable path is %s", self.exe)
             if not device.IsFileExecutable(self.exe):
                 cros_build_lib.Die(
-                    'File path "%s" does not exist or is not executable on device %s',
+                    'File path "%s" does not exist or is not executable on '
+                    "device %s",
                     self.exe,
                     self.ssh_hostname,
                 )
@@ -211,8 +213,8 @@ To debug a process by its pid:
                 choices = ["Start a new process under GDB"]
                 choices.extend(pids)
                 idx = cros_build_lib.GetChoice(
-                    "Please select the process pid to debug (select [0] to start a "
-                    "new process):",
+                    "Please select the process pid to debug (select [0] to "
+                    "start a new process):",
                     choices,
                 )
                 if idx == 0:

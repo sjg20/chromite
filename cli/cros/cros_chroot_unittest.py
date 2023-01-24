@@ -58,8 +58,8 @@ class ChrootTest(cros_test_lib.MockTestCase):
         """Tests that logging level is passed to cros_sdk script."""
         self.SetupCommandMock(["ls"])
         self.cmd_mock.inst.options.log_level = "notice"
-        # Pretend that we are outside the chroot so the logging level gets passed as
-        # an argument to cros_sdk.
+        # Pretend that we are outside the chroot so the logging level gets
+        # passed as an argument to cros_sdk.
         self.mock_inside.return_value = False
         self.cmd_mock.inst.Run()
 

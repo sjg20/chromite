@@ -98,8 +98,10 @@ def _DependencyMockCtx(f):
         if not self.entered:
             try:
                 self.entered = True
-                # Temporarily disable outer GSContext mock before starting our mock.
-                # TODO(rcui): Generalize this attribute and include in partial_mock.py.
+                # Temporarily disable outer GSContext mock before starting our
+                # mock.
+                # TODO(rcui): Generalize this attribute and include in
+                #   partial_mock.py.
                 for emock in self.external_mocks:
                     emock.stop()
 
@@ -189,9 +191,9 @@ class SDKFetcherMock(partial_mock.PartialMock):
 
     @_DependencyMockCtx
     def _UpdateTarball(self, inst, *args, **kwargs):
-        # The mocks here can fall off in the middle of the test unreliably, likely
-        # due to a race condition when running _UpdateTarball across multiple
-        # threads. So lock around the mocks to avoid.
+        # The mocks here can fall off in the middle of the test unreliably,
+        # likely due to a race condition when running _UpdateTarball across
+        # multiple threads. So lock around the mocks to avoid.
         with self.tarball_fetch_lock:
             with mock.patch.object(
                 gs.GSContext, "Copy", autospec=True, side_effect=_GSCopyMock
@@ -282,8 +284,8 @@ class RunThroughTest(
             cmd_args += ["--board", SDKFetcherMock.BOARD]
         if extra_args:
             cmd_args.extend(extra_args)
-        # --no-shell drops gni files in //build/args/chromeos/.
-        # reclient configs are also dropped here regardless of --no-shell or not.
+        # --no-shell drops gni files in //build/args/chromeos/. reclient configs
+        # are also dropped here regardless of --no-shell or not.
         osutils.SafeMakedirs(
             os.path.join(self.chrome_root, "src", "build", "args", "chromeos")
         )
@@ -469,7 +471,7 @@ class RunThroughTest(
             self.AssertLogsContain(logs, "Goma:")
 
     def testSpecificComponent(self):
-        """Tests that SDKFetcher.Prepare() handles |components| param properly."""
+        """Verify SDKFetcher.Prepare() handles |components| param properly."""
         sdk = cros_chrome_sdk.SDKFetcher(
             os.path.join(self.tempdir), SDKFetcherMock.BOARD
         )
@@ -627,7 +629,7 @@ class RunThroughTest(
 
     @mock.patch("chromite.lib.gclient.LoadGclientFile")
     def testInternalGclientSpec(self, mock_gclient_load):
-        """Verify that the SDK exits with an error if the gclient spec is wrong."""
+        """Verify the SDK exits with an error if the gclient spec is wrong."""
         self.SetupCommandMock(extra_args=["--internal"])
 
         # Simple Chrome should exit with an error if "--internal" is passed and
@@ -642,7 +644,8 @@ class RunThroughTest(
         with self.assertRaises(cros_build_lib.DieSystemExit):
             self.cmd_mock.inst.Run()
 
-        # With "checkout_src_internal" set, Simple Chrome should run without error.
+        # With "checkout_src_internal" set, Simple Chrome should run without
+        # error.
         mock_gclient_load.return_value = [
             {
                 "url": "https://chromium.googlesource.com/chromium/src.git",
@@ -714,8 +717,8 @@ class RunThroughTest(
         ]:
             _CreateLink(qemu_share, "seavgabios", bios)
 
-        # Move the seabios/seavgabios directories into the seabios package, which
-        # breaks the links.
+        # Move the seabios/seavgabios directories into the seabios package,
+        # which breaks the links.
         for bios_dir in ["seabios", "seavgabios"]:
             shutil.move(
                 os.path.join(qemu_share, bios_dir),
@@ -729,7 +732,7 @@ class RunThroughTest(
         _VerifyLinks(broken=False)
 
     def testSymlinkCache(self):
-        """Ensures the symlink cache contains valid links to the tarball cache."""
+        """Verify the symlink cache contains valid tarball cache links."""
         self.SetupCommandMock()
         self.cmd_mock.inst.Run()
 
@@ -795,8 +798,8 @@ class RunThroughTest(
             self.assertExists(toolchain_dir_1)
             self.assertNotExists(toolchain_dir_2)
 
-        # Prepare the cache with 'toolchain_url_2' and make sure the active symlink
-        # points to it and that 'toolchain_url_1' is still present.
+        # Prepare the cache with 'toolchain_url_2' and make sure the active
+        # symlink points to it and that 'toolchain_url_1' is still present.
         self.sdk_mock.tarball_cache_key_map = {
             sdk.TARGET_TOOLCHAIN_KEY: toolchain_url_2
         }
@@ -989,7 +992,7 @@ class VersionTest(
         self.AssertLogsContain(logs, "LATEST--1.0.0", inverted=True)
 
     def testFallbackVersions(self):
-        """Test full version calculation with various fallback version counts."""
+        """Test full version calculation with various fallback versions."""
         self._SetupMissingVersions()
         for version in range(6):
             self.sdk.fallback_versions = version
@@ -1021,7 +1024,8 @@ class VersionTest(
         self.assertEqual(
             self.FULL_VERSION, self.sdk.GetFullVersion(self.VERSION)
         )
-        # Test that we access the cache on the next call, rather than checking GS.
+        # Test that we access the cache on the next call, rather than checking
+        # GS.
         self.gs_mock.AddCmdResult(
             partial_mock.ListRegex("cat .*/LATEST-%s" % self.VERSION),
             side_effect=RaiseException,
@@ -1083,8 +1087,8 @@ class VersionTest(
             stderr=self.CAT_ERROR,
             returncode=1,
         )
-        # Set any other query to return a valid version, but we don't expect that
-        # to occur for non canary versions.
+        # Set any other query to return a valid version, but we don't expect
+        # that to occur for non canary versions.
         self.gs_mock.SetDefaultCmdResult(stdout=self.FULL_VERSION_NON_CANARY)
         self.assertRaises(
             cros_chrome_sdk.MissingSDK,
@@ -1093,7 +1097,7 @@ class VersionTest(
         )
 
     def testDefaultEnvBadBoard(self):
-        """We don't use the version in the environment if board doesn't match."""
+        """Verify skips version in the environment if board doesn't match."""
         os.environ[cros_chrome_sdk.SDKFetcher.SDK_VERSION_ENV] = self.VERSION
         self.assertNotEqual(self.VERSION, self.sdk_mock.VERSION)
         self.assertEqual(self.sdk.GetDefaultVersion(), None)

@@ -45,13 +45,14 @@ For more information of cros build usage:
             "packages",
             help="Packages to install. You can specify "
             "[category/]package[:slot] or the path to the binary package. "
-            "Use @installed to update all installed packages (requires --update).",
+            "Use @installed to update all installed packages (requires "
+            "--update).",
             nargs="+",
         )
         parser.add_argument(
             "--board",
-            help="The board to use. By default it is automatically detected. You "
-            "can override the detected board with this option.",
+            help="The board to use. By default it is automatically detected. "
+            "You can override the detected board with this option.",
         )
         parser.add_argument(
             "--no-strip",
@@ -59,8 +60,8 @@ For more information of cros build usage:
             action="store_false",
             default=True,
             help="Do not run strip_package to filter out preset paths in the "
-            "package. Stripping removes debug symbol files and reduces the size "
-            "of the package significantly. Defaults to always strip.",
+            "package. Stripping removes debug symbol files and reduces the "
+            "size of the package significantly. Defaults to always strip.",
         )
         parser.add_argument(
             "--unmerge",

@@ -205,17 +205,17 @@ class SDKFetcher(object):
     def _HasInternalConfig(self):
         """Determines if the SDK we need is provided by an internal builder.
 
-        A given board can have a public and/or an internal builder that publishes
-        its Simple Chrome SDK. e.g. "amd64-generic" only has a public builder,
-        "scarlet" only has an internal builder, "octopus" has both. So if we haven't
-        explicitly passed "--use-external-config", we need to figure out if we want
-        to use a public or internal builder.
+        A given board can have a public and/or an internal builder that
+        publishes its Simple Chrome SDK. e.g. "amd64-generic" only has a public
+        builder, "scarlet" only has an internal builder, "octopus" has both. So
+        if we haven't explicitly passed "--use-external-config", we need to
+        figure out if we want to use a public or internal builder.
 
         The configs inside gs://chromeos-build-release-console are the proper
-        source of truth for what boards have public or internal builders. However,
-        the ACLs on that bucket make it difficult for some folk to inspect it. So
-        we instead simply assume that everything but the "*-generic" boards have
-        internal configs.
+        source of truth for what boards have public or internal builders.
+        However, the ACLs on that bucket make it difficult for some folk to
+        inspect it. So we instead simply assume that everything but the
+        "*-generic" boards have internal configs.
 
         TODO(b/241964080): Inspect gs://chromeos-build-release-console here
             instead if/when ACLs on that bucket are opened up.
@@ -315,7 +315,7 @@ class SDKFetcher(object):
             ref.SetDefault(link_name_path, lock=True)
 
     def _GetBuildReport(self, version):
-        """Return build_report.json (in the form of a dict) for a given version."""
+        """Return build_report.json (as a dict) for a given version."""
         raw_json = None
         version_base = self._GetVersionGSBase(version)
         report_path = os.path.join(version_base, constants.BUILD_REPORT_JSON)
@@ -333,9 +333,10 @@ class SDKFetcher(object):
                         encoding="utf-8",
                     )
                 except (gs.GSNoSuchKey, gs.GSCommandError):
-                    # Make this fatal once we stop using metadata.json from old cbuildbot
-                    # builders. (GSCommandError gets thrown instead of GSNoSuchKey for
-                    # anonymous users, e.g. Chrome's public bots.)
+                    # Make this fatal once we stop using metadata.json from old
+                    # cbuildbot builders. (GSCommandError gets thrown instead of
+                    # GSNoSuchKey for anonymous users, e.g. Chrome's public
+                    # bots.)
                     return
                 ref.AssignText(raw_json)
 
@@ -528,8 +529,8 @@ class SDKFetcher(object):
         tarball_cache = cache.TarballCache(tarball_cache_path)
         tarball_cache.DeleteStale(datetime.timedelta(days=max_age_days))
 
-        # Now clean up any links in the symlink cache that are dangling due to the
-        # removal of items above.
+        # Now clean up any links in the symlink cache that are dangling due to
+        # the removal of items above.
         symlink_cache_path = os.path.join(
             cache_dir, COMMAND_NAME, cls.SYMLINK_CACHE
         )
@@ -595,7 +596,8 @@ class SDKFetcher(object):
             chroot-2018.10.23.171742/packages/app-emulation/qemu-3.0.0.tbz2
         """
         if not version or not key:
-            # A version and key is needed to locate the package in Google Storage.
+            # A version and key is needed to locate the package in Google
+            # Storage.
             return None
         package_version = self._GetManifest(version)["packages"][key][0][0]
         return gs.GetGsURL(
@@ -632,8 +634,8 @@ class SDKFetcher(object):
     def _CreateSeabiosFWSymlinks(self, version):
         """Create Seabios firmware symlinks.
 
-        tarballs/<board>+<version>+app-emulation/qemu/usr/share/qemu/ has a number
-        of broken symlinks, for example: bios.bin -> ../seabios/bios.bin
+        tarballs/<board>+<version>+app-emulation/qemu/usr/share/qemu/ has a
+        number of broken symlinks, for example: bios.bin -> ../seabios/bios.bin
         bios.bin is in the seabios package at <cache>/seabios/usr/share/seabios/
         To resolve these symlinks, we create symlinks from
         <cache>+sys-firmware/seabios/usr/share/* to
@@ -789,10 +791,11 @@ class SDKFetcher(object):
         return target, target != current
 
     def GetFullVersion(self, version):
-        """Add the release branch and build number to a ChromeOS platform version.
+        """Get the full ChromeOS version.
 
-        This will specify where you can get the latest build for the given version
-        for the current board.
+        Add the release branch and build number to a ChromeOS platform version.
+        This will specify where you can get the latest build for the given
+        version for the current board.
 
         Args:
             version: A ChromeOS platform number of the form XXXX.XX.XX, i.e.,
@@ -854,8 +857,8 @@ class SDKFetcher(object):
         """Ensures the components of an SDK exist and are read-locked.
 
         For a given SDK version, pulls down missing components, and provides a
-        context where the components are read-locked, which prevents the cache from
-        deleting them during its purge operations.
+        context where the components are read-locked, which prevents the cache
+        from deleting them during its purge operations.
 
         If both target_tc and toolchain_url arguments are provided, then this
         does not download metadata.json for the given version. Otherwise, this
@@ -893,9 +896,10 @@ class SDKFetcher(object):
         self._InstallZstdFromCipd()
 
         if not target_tc or not toolchain_url:
-            # Look-up the toolchain data in both metadata.json and build_report.json.
-            # We can stop using metadata.json once no one needs to build Simple Chrome
-            # using artifacts released from a cbuildbot build. Likely ~2023.
+            # Look-up the toolchain data in both metadata.json and
+            # build_report.json. We can stop using metadata.json once no one
+            # needs to build Simple Chrome using artifacts released from a
+            # cbuildbot build. Likely ~2023.
             metadata = self._GetMetadata(version)
             build_report = self._GetBuildReport(version)
             if not target_tc:
@@ -982,18 +986,18 @@ class SDKFetcher(object):
                     else:
                         inputs_list.append(input_arg)
 
-                # Create a symlink in a separate cache dir that points to the tarball
-                # component. Since the tarball cache is keyed based off of GS URLs,
-                # these symlinks can be used to identify tarball components without
-                # knowing the GS URL. This can safely be done before actually fetching
-                # the SDK components.
+                # Create a symlink in a separate cache dir that points to the
+                # tarball component. Since the tarball cache is keyed based off
+                # of GS URLs, these symlinks can be used to identify tarball
+                # components without knowing the GS URL. This can safely be done
+                # before actually fetching the SDK components.
                 link_name = self._GetLinkNameForComponent(version, key)
                 link_ref = self.symlink_cache.Lookup(link_name)
                 key_map[key] = link_ref
                 link_ref.Acquire()
-                # If the link exists but points to the wrong tarball, we might be
-                # overriding a component via --toolchain-url or --target-tc. In that
-                # case, just clobber the symlink and recreate it.
+                # If the link exists but points to the wrong tarball, we might
+                # be overriding a component via --toolchain-url or --target-tc.
+                # In that case, just clobber the symlink and recreate it.
                 if (
                     link_ref.Exists()
                     and osutils.ExpandPath(link_ref.path) != tarball_ref.path
@@ -1119,8 +1123,8 @@ class ChromeSDKCommand(command.CliCommand):
         parser.add_argument(
             "--chrome-src",
             type="path",
-            help="Specifies the location of a Chrome src/ directory.  Required if "
-            "not running from a Chrome checkout.",
+            help="Specifies the location of a Chrome src/ directory.  Required "
+            "if not running from a Chrome checkout.",
         )
         parser.add_argument(
             "--cwd",
@@ -1145,39 +1149,39 @@ class ChromeSDKCommand(command.CliCommand):
             "--official",
             action="store_true",
             default=False,
-            help="Enables the official build level of optimization. This removes "
-            "development conveniences like runtime stack traces, and should "
-            "be used for performance testing rather than debugging.",
+            help="Enables the official build level of optimization. This "
+            "removes development conveniences like runtime stack traces, and "
+            "should be used for performance testing rather than debugging.",
         )
         parser.add_argument(
             "--use-external-config",
             action="store_true",
             default=False,
-            help="Use the external configuration for the specified board, even if "
-            "an internal configuration is avalable.",
+            help="Use the external configuration for the specified board, even "
+            "if an internal configuration is avalable.",
         )
         parser.add_argument(
             "--sdk-path",
             type="local_or_gs_path",
-            help="Provides a path, whether a local directory or a gs:// path, to "
-            "pull SDK components from.",
+            help="Provides a path, whether a local directory or a gs:// path, "
+            "to pull SDK components from.",
         )
         parser.add_argument(
             "--toolchain-path",
             type="local_or_gs_path",
-            help="Provides a path, whether a local directory or a gs:// path, to "
-            "pull toolchain components from.",
+            help="Provides a path, whether a local directory or a gs:// path, "
+            "to pull toolchain components from.",
         )
         parser.add_argument(
             "--no-shell",
             action="store_false",
             default=True,
             dest="use_shell",
-            help="Skips the interactive shell. When this arg is passed, the needed "
-            "toolchain will still be downloaded. However, no //out* dir will "
-            "automatically be created. The args.gn file will instead be "
-            "downloaded at a shareable location in //%s, and the SDK will "
-            "simply exit after that." % cls._BUILD_ARGS_DIR,
+            help="Skips the interactive shell. When this arg is passed, the "
+            "needed toolchain will still be downloaded. However, no //out* "
+            "dir will automatically be created. The args.gn file will "
+            "instead be downloaded at a shareable location in //%s, and the "
+            "SDK will simply exit after that." % cls._BUILD_ARGS_DIR,
         )
         parser.add_argument(
             "--gn-extra-args",
@@ -1228,21 +1232,21 @@ class ChromeSDKCommand(command.CliCommand):
             "--version",
             default=None,
             type=cls.ValidateVersion,
-            help="Specify the SDK version to use. This can be a platform version "
-            "ending in .0.0, e.g. 1234.0.0, in which case the full version "
-            "will be extracted from the corresponding LATEST file for the "
-            "specified board. If no LATEST file exists, an older version "
-            "will be used if available. Alternatively, a full version may be "
-            "specified, e.g. R56-1234.0.0, in which case that exact version "
-            "will be used. Defaults to using the version specified in the "
-            "CHROMEOS_LKGM file in the chromium checkout.",
+            help="Specify the SDK version to use. This can be a platform "
+            "version ending in .0.0, e.g. 1234.0.0, in which case the full "
+            "version will be extracted from the corresponding LATEST file "
+            "for the specified board. If no LATEST file exists, an older "
+            "version will be used if available. Alternatively, a full "
+            "version may be specified, e.g. R56-1234.0.0, in which case that "
+            "exact version will be used. Defaults to using the version "
+            "specified in the CHROMEOS_LKGM file in the chromium checkout.",
         )
         parser.add_argument(
             "--fallback-versions",
             type=int,
             default=SDKFetcher.VERSIONS_TO_CONSIDER,
-            help="The number of recent LATEST files to consider in the case that "
-            "the specified version is missing.",
+            help="The number of recent LATEST files to consider in the case "
+            "that the specified version is missing.",
         )
         parser.add_argument(
             "cmd",
@@ -1273,10 +1277,10 @@ class ChromeSDKCommand(command.CliCommand):
             "--is-lacros",
             action="store_true",
             default=False,
-            help="Whether it is Lacros-Chrome build or not. This is temporarily "
-            "added to work around a Lacros CrOS toolchain bug due to version "
-            "skew, and should be removed once Lacros is swiched to use "
-            "Chromium toolchain: crbug.com/1275386.",
+            help="Whether it is Lacros-Chrome build or not. This is "
+            "temporarily added to work around a Lacros CrOS toolchain bug "
+            "due to version skew, and should be removed once Lacros is "
+            "swiched to use Chromium toolchain: crbug.com/1275386.",
         )
         parser.caching_group.add_argument(
             "--clear-sdk-cache",
@@ -1317,8 +1321,8 @@ class ChromeSDKCommand(command.CliCommand):
 
         if options.is_lacros and not options.version:
             parser.error(
-                "Must specify --version for --is-lacros because Lacros-Chrome build "
-                "does not use the CHROMEOS_LKGM version for compilation"
+                "Must specify --version for --is-lacros because Lacros-Chrome "
+                "build does not use the CHROMEOS_LKGM version for compilation"
             )
 
         src_path = options.chrome_src or os.getcwd()
@@ -1348,8 +1352,9 @@ class ChromeSDKCommand(command.CliCommand):
     def _CreatePS1(board, version, chroot=None):
         """Returns PS1 string that sets commandline and xterm window caption.
 
-        If a chroot path is set, then indicate we are using the sysroot from there
-        instead of the stock sysroot by prepending an asterisk to the version.
+        If a chroot path is set, then indicate we are using the sysroot from
+        there instead of the stock sysroot by prepending an asterisk to the
+        version.
 
         Args:
             board: The SDK board.
@@ -1381,6 +1386,7 @@ class ChromeSDKCommand(command.CliCommand):
         # If the board is a generic family, generate -crostoolchain.gni files,
         # too, which is used by Lacros build.
         if board.endswith("-generic"):
+            # pylint: disable=line-too-long
             toolchain_key_pattern = re.compile(
                 r"^(%s)$"
                 % "|".join(
@@ -1402,6 +1408,7 @@ class ChromeSDKCommand(command.CliCommand):
                     ]
                 )
             )
+            # pylint: enable=line-too-long
             toolchain_gn_args = {
                 k: v
                 for k, v in gn_args.items()
@@ -1515,9 +1522,9 @@ class ChromeSDKCommand(command.CliCommand):
         """Modify toolchain path for goma build.
 
         This function absolutizes the path to the given toolchain binary, which
-        will then be relativized in build/toolchain/cros/BUILD.gn. This ensures the
-        paths are the same across different machines & checkouts, which improves
-        cache hit rate in distributed build systems (i.e. goma).
+        will then be relativized in build/toolchain/cros/BUILD.gn. This ensures
+        the paths are the same across different machines & checkouts, which
+        improves cache hit rate in distributed build systems (i.e. goma).
 
         Args:
             binary: Name of toolchain binary.
@@ -1526,7 +1533,8 @@ class ChromeSDKCommand(command.CliCommand):
         Returns:
             Absolute path to the binary in the toolchain dir.
         """
-        # If binary doesn't contain a '/', assume it's located in the toolchain dir.
+        # If binary doesn't contain a '/', assume it's located in the toolchain
+        # dir.
         if os.path.basename(binary) == binary:
             return os.path.join(tc_path, "bin", binary)
         return binary
@@ -1536,7 +1544,8 @@ class ChromeSDKCommand(command.CliCommand):
 
         This function generates a wrapper script for the rewrapper to make it
         passed with --gomacc-path (rewrapper_<board>).
-        The wrapper adds a flag to preserve symlinks which are used by CrOS clang.
+        The wrapper adds a flag to preserve symlinks which are used by CrOS
+        clang.
 
         Args:
             board: Target board name to be used as a config and wrapper name.
@@ -1584,7 +1593,8 @@ class ChromeSDKCommand(command.CliCommand):
         )
         if options.chroot:
             # Override with the environment from the chroot if available (i.e.
-            # build_packages or emerge chromeos-chrome has been run for |board|).
+            # build_packages or emerge chromeos-chrome has been run for
+            # |board|).
             env_path = os.path.join(
                 sysroot,
                 portage_util.VDB_PATH,
@@ -1610,11 +1620,13 @@ class ChromeSDKCommand(command.CliCommand):
             else:
                 chroot_env_file = os.path.join(env_glob[0], "environment.bz2")
                 if os.path.isfile(chroot_env_file):
-                    # Log a warning here since this is new behavior that is not obvious.
+                    # Log a warning here since this is new behavior that is not
+                    # obvious.
                     logging.notice(
                         "Environment fetched from: %s", chroot_env_file
                     )
-                    # Uncompress enviornment.bz2 to pass to osutils.SourceEnvironment.
+                    # Uncompress enviornment.bz2 to pass to
+                    # osutils.SourceEnvironment.
                     chroot_cache = os.path.join(
                         options.cache_dir, COMMAND_NAME, "chroot"
                     )
@@ -1644,19 +1656,20 @@ class ChromeSDKCommand(command.CliCommand):
         gn_args["cros_board"] = board
 
         if options.is_lacros:
-            # The 'cros_sdk_version' is used by the chromium BUILD files to decide
-            # the runtime dependencies to isolate for swarming based testing, and
-            # given that Lacros uses CHROMEOS_LKGM for testing regardless of the
-            # version used for compilation, so always set the value as CHROME_LKGM.
+            # The 'cros_sdk_version' is used by the chromium BUILD files to
+            # decide the runtime dependencies to isolate for swarming based
+            # testing, and given that Lacros uses CHROMEOS_LKGM for testing
+            # regardless of the version used for compilation, so always set the
+            # value as CHROME_LKGM.
             gn_args["cros_sdk_version"] = SDKFetcher.GetChromeLKGM(
                 options.chrome_src
             )
         else:
             gn_args["cros_sdk_version"] = sdk_ctx.version
 
-        # Export the board/version info in a more accessible way, so developers can
-        # reference them in their chrome_sdk.bashrc files, as well as within the
-        # chrome-sdk shell.
+        # Export the board/version info in a more accessible way, so developers
+        # can reference them in their chrome_sdk.bashrc files, as well as within
+        # the chrome-sdk shell.
         for var in [self.sdk.SDK_VERSION_ENV, self.sdk.SDK_BOARD_ENV]:
             env[var.lstrip("%")] = os.environ[var]
 
@@ -1755,8 +1768,8 @@ class ChromeSDKCommand(command.CliCommand):
         gn_args.pop("internal_khronos_glcts_tests", None)  # crbug.com/588080
 
         # The ebuild sets dcheck_always_on to false to avoid a default value of
-        # true for bots. But we'd like developers using DCHECKs when possible, so
-        # we let dcheck_always_on use the default value for Simple Chrome.
+        # true for bots. But we'd like developers using DCHECKs when possible,
+        # so we let dcheck_always_on use the default value for Simple Chrome.
         gn_args.pop("dcheck_always_on", None)
 
         # Always allow LOG()s to be enabled via command line flag.
@@ -1768,7 +1781,8 @@ class ChromeSDKCommand(command.CliCommand):
             gn_args["use_thin_lto"] = False
         if not options.cfi:
             gn_args["is_cfi"] = False
-        # When using Goma and ThinLTO, distribute ThinLTO code generation on Goma.
+        # When using Goma and ThinLTO, distribute ThinLTO code generation on
+        # Goma.
         gn_args["use_goma_thin_lto"] = gn_args.get(
             "use_goma", False
         ) and gn_args.get("use_thin_lto", False)
@@ -1851,7 +1865,7 @@ class ChromeSDKCommand(command.CliCommand):
         goma_ctl = osutils.Which("goma_ctl.py", user_env.get("PATH"))
         if goma_ctl is not None:
             logging.warning(
-                "%s is adding Goma to the PATH.  Using that Goma instead of the "
+                "%s is adding Goma to the PATH. Using that Goma instead of the "
                 "managed Goma install.",
                 user_rc,
             )
@@ -1867,8 +1881,8 @@ class ChromeSDKCommand(command.CliCommand):
         chromite_bin = osutils.Which("parallel_emerge", user_env.get("PATH"))
         if chromite_bin is not None:
             logging.warning(
-                "%s is adding chromite/bin to the PATH.  Remove it from the PATH to "
-                "use the the default Chromite.",
+                "%s is adding chromite/bin to the PATH.  Remove it from the "
+                "PATH to use the the default Chromite.",
                 user_rc,
             )
 
@@ -1876,9 +1890,9 @@ class ChromeSDKCommand(command.CliCommand):
     def _GetRCFile(self, env, user_rc):
         """Returns path to dynamically created bashrc file.
 
-        The bashrc file sets the environment variables contained in |env|, as well
-        as sources the user-editable chrome_sdk.bashrc file in the user's home
-        directory.  That rc file is created if it doesn't already exist.
+        The bashrc file sets the environment variables contained in |env|, as
+        well as sources the user-editable chrome_sdk.bashrc file in the user's
+        home directory.  That rc file is created if it doesn't already exist.
 
         Args:
             env: A dictionary of environment variables that will be set by the
@@ -1893,11 +1907,11 @@ class ChromeSDKCommand(command.CliCommand):
 
         # We need a temporary rc file to 'wrap' the user configuration file,
         # because running with '--rcfile' causes bash to ignore bash special
-        # variables passed through subprocess.Popen, such as PS1.  So we set them
-        # here.
+        # variables passed through subprocess.Popen, such as PS1.  So we set
+        # them here.
         #
-        # Having a wrapper rc file will also allow us to inject bash functions into
-        # the environment, not just variables.
+        # Having a wrapper rc file will also allow us to inject bash functions
+        # into the environment, not just variables.
         with osutils.TempDir() as tempdir:
             # Only source the user's ~/.bashrc if running in interactive mode.
             contents = [
@@ -2025,8 +2039,9 @@ class ChromeSDKCommand(command.CliCommand):
                 duration = datetime.datetime.now() - start
                 if duration > datetime.timedelta(minutes=1):
                     logging.warning(
-                        "It took %s to fetch the SDK for %s. Consider removing it "
-                        "from your .gclient file if you no longer need to build for it.",
+                        "It took %s to fetch the SDK for %s. Consider removing "
+                        "it from your .gclient file if you no longer need to "
+                        "build for it.",
                         pformat.timedelta(duration),
                         board,
                     )
@@ -2086,17 +2101,18 @@ class ChromeSDKCommand(command.CliCommand):
                 if not self.options.cmd:
                     bash_cmd.extend(["--rcfile", rcfile, "-i"])
                 else:
-                    # The '"$@"' expands out to the properly quoted positional args
-                    # coming after the '--'.
+                    # The '"$@"' expands out to the properly quoted positional
+                    # args coming after the '--'.
                     bash_cmd.extend(["-c", '"$@"', "--"])
                     bash_cmd.extend(self.options.cmd)
-                    # When run in noninteractive mode, bash sources the rc file set in
-                    # BASH_ENV, and ignores the --rcfile flag.
+                    # When run in noninteractive mode, bash sources the rc file
+                    # set in BASH_ENV, and ignores the --rcfile flag.
                     extra_env = {"BASH_ENV": rcfile}
 
-                # Bash behaves differently when it detects that it's being launched by
-                # sshd - it ignores the BASH_ENV variable.  So prevent ssh-related
-                # environment variables from being passed through.
+                # Bash behaves differently when it detects that it's being
+                # launched by sshd - it ignores the BASH_ENV variable.  So
+                # prevent ssh-related environment variables from being passed
+                # through.
                 os.environ.pop("SSH_CLIENT", None)
                 os.environ.pop("SSH_CONNECTION", None)
                 os.environ.pop("SSH_TTY", None)

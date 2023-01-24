@@ -15,7 +15,7 @@ pytestmark = cros_test_lib.pytestmark_inside_only
 
 
 class CrosAPDumpConfigTest(cros_test_lib.TempDirTestCase):
-    """Test calling `cros ap dump-config` and doing some simple validity checking.
+    """Test calling `cros ap dump-config` and do some simple validity checking.
 
     Confirm that json output file is readable, contains expected structure and
     non-empty fields.
@@ -30,9 +30,9 @@ class CrosAPDumpConfigTest(cros_test_lib.TempDirTestCase):
         with output_file.open(encoding="utf-8") as fp:
             result = json.load(fp)
 
-        # dut_control_on, seen_dut_control_off and programmer are sometimes empty,
-        # but we can expect that at least one board:servo pair will have them
-        # non-empty. Assert that.
+        # dut_control_on, seen_dut_control_off and programmer are sometimes
+        # empty, but we can expect that at least one board:servo pair will have
+        # them non-empty. Assert that.
         seen_dut_control_on = False
         seen_dut_control_off = False
         seen_programmer = False

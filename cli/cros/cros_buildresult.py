@@ -78,8 +78,8 @@ def FixUpBuildStatus(buildstore, build_status):
     Returns:
         build_status dict with additional fields populated.
     """
-    # We don't actually store the artifacts_url, but we store a URL for a specific
-    # artifact we can use to derive it.
+    # We don't actually store the artifacts_url, but we store a URL for a
+    # specific artifact we can use to derive it.
     build_status["artifacts_url"] = None
     if build_status["metadata_url"]:
         build_status["artifacts_url"] = os.path.dirname(
@@ -180,8 +180,8 @@ Note:
 
         request_group.add_argument(
             "--buildbucket-id",
-            help="Buildbucket ID of build to look up. "
-            "It is a 19-digit long ID which can be found in Milo or GoldenEye URL.",
+            help="Buildbucket ID of build to look up. It is a 19-digit long ID "
+            "which can be found in Milo or GoldenEye URL.",
         )
         request_group.add_argument("--build-config", help="")
 

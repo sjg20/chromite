@@ -88,8 +88,8 @@ Examples:
             help="A local path or an xbuddy path: "
             "xbuddy://{local|remote}/board/version/{image_type} image_type "
             "can be: 'test', 'dev', 'base', 'recovery', or 'signed'. Note any "
-            "strings that do not map to a real file path will be converted to an "
-            "xbuddy path i.e., latest, will map to xbuddy://latest.",
+            "strings that do not map to a real file path will be converted to "
+            "an xbuddy path i.e., latest, will map to xbuddy://latest.",
         )
         parser.add_argument(
             "--clear-cache",
@@ -146,7 +146,8 @@ Examples:
             help="Do not update the rootfs partition on the device. "
             "Default is always update.",
         )
-        # TODO(b/190631159, b/196056723): Remove default + update help description.
+        # TODO(b/190631159, b/196056723): Remove default + update help
+        #   description.
         update.add_argument(
             "--minios-update",
             action="store_true",
@@ -165,8 +166,8 @@ Examples:
             "--clobber-stateful",
             action="store_true",
             default=False,
-            help="Clobber stateful partition when performing update. "
-            "Recommend to set clear-tpm-owner to true when this option is true.",
+            help="Clobber stateful partition when performing update. Recommend "
+            "to set clear-tpm-owner to true when this option is true.",
         )
         update.add_argument(
             "--clear-tpm-owner",
@@ -277,7 +278,9 @@ Examples:
                     reboot=self.options.reboot,
                     ssh_private_key=self.options.private_key,
                     ping=self.options.ping,
-                    disable_rootfs_verification=self.options.disable_rootfs_verification,
+                    disable_rootfs_verification=(
+                        self.options.disable_rootfs_verification
+                    ),
                     clear_cache=self.options.clear_cache,
                     delta=self.options.delta,
                     yes=self.options.yes,

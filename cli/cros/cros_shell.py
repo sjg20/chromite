@@ -60,8 +60,8 @@ Quoting can be tricky; the rules are the same as with ssh:
         self.ssh_private_key = None
         # Whether to use the SSH known_hosts file or not.
         self.known_hosts = None
-        # How to set SSH StrictHostKeyChecking. Can be 'no', 'yes', or 'ask'. Has
-        # no effect if |known_hosts| is not True.
+        # How to set SSH StrictHostKeyChecking. Can be 'no', 'yes', or 'ask'.
+        # Has no effect if |known_hosts| is not True.
         self.host_key_checking = None
         # The command to execute remotely.
         self.command = None
@@ -177,14 +177,16 @@ Quoting can be tricky; the rules are the same as with ssh:
         try:
             return self._StartSsh()
         except remote_access.SSHConnectionError as e:
-            # Handle a mismatched host key; mismatched keys are a bit of a pain to
-            # fix manually since `ssh-keygen -R` doesn't work within the chroot.
+            # Handle a mismatched host key; mismatched keys are a bit of a pain
+            # to fix manually since `ssh-keygen -R` doesn't work within the
+            # chroot.
             if e.IsKnownHostsMismatch():
                 # The full SSH error message has extra info for the user.
                 logging.warning("\n%s", e)
                 if self._UserConfirmKeyChange():
                     remote_access.RemoveKnownHost(self.device.hostname)
-                    # The user already OK'd so we can skip the additional SSH check.
+                    # The user already OK'd so we can skip the additional SSH
+                    # check.
                     self.host_key_checking = "no"
                     return self._StartSsh()
                 else:

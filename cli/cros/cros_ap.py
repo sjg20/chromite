@@ -160,7 +160,8 @@ class BuildSubcommand(command.CliCommand):
             "--dry-run",
             action="store_true",
             default=False,
-            help="Perform a dry run, describing the steps without running them.",
+            help="Execute a dry-run. Print the commands that would be run "
+            "instead of running them.",
         )
         parser.epilog = """
 To build the AP Firmware for foo:
@@ -221,8 +222,8 @@ class ReadSubcommand(command.CliCommand):
             "-n",
             "--dry-run",
             action="store_true",
-            help="Execute a dry-run. Print the commands that would be run instead "
-            "of running them.",
+            help="Execute a dry-run. Print the commands that would be run"
+            "instead of running them.",
         )
         parser.epilog = """Command to read the AP firmware from a DUT.
 To read image of device.cros via SSH:
@@ -309,8 +310,8 @@ class FlashSubcommand(command.CliCommand):
         """Post process options."""
         if not os.path.exists(options.image):
             parser.error(
-                f"{options.image} does not exist, verify the path of your build and "
-                "try again."
+                f"{options.image} does not exist, verify the path of your "
+                "build and try again."
             )
         if options.fast:
             parser.error(
@@ -363,8 +364,8 @@ class FlashSubcommand(command.CliCommand):
             "-n",
             "--dry-run",
             action="store_true",
-            help="Execute a dry-run. Print the commands that would be run instead "
-            "of running them.",
+            help="Execute a dry-run. Print the commands that would be run "
+            "instead of running them.",
         )
         parser.add_argument(
             "extra_options",
@@ -435,7 +436,8 @@ class CleanSubcommand(command.CliCommand):
             "-n",
             "--dry-run",
             action="store_true",
-            help="Perform a dry run, describing the steps without running them.",
+            help="Execute a dry-run. Print the commands that would be run "
+            "instead of running them.",
         )
         parser.epilog = """
 This command removes firmware-related packages, including everything in
