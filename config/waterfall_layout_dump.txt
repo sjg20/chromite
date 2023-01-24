@@ -178,6 +178,7 @@
     guado_labstation-release
     guybrush-kernelnext-release
     guybrush-release
+    hades-release
     hana-kernelnext-release
     hana-release
     hatch-arc-r-userdebug-release
@@ -787,6 +788,11 @@
   guybrush-llvm-toolchain-tryjob
   guybrush-payloads-tryjob
   guybrush-release-tryjob
+  hades-full-tryjob
+  hades-llvm-next-toolchain-tryjob
+  hades-llvm-toolchain-tryjob
+  hades-payloads-tryjob
+  hades-release-tryjob
   hana-factory-oak-8182.B-factorybranch-tryjob
   hana-full-tryjob
   hana-kernelnext-full-tryjob
@@ -1023,6 +1029,7 @@
     guado_labstation-release-tryjob
     guybrush-kernelnext-release-tryjob
     guybrush-release-tryjob
+    hades-release-tryjob
     hana-kernelnext-release-tryjob
     hana-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
