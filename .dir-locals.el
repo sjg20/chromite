@@ -3,7 +3,7 @@
 
 
 ((python-mode .
-              ((python-indent-offset . 2)
+              ((python-indent-offset . 4)
                ;; Add a python-mode hook that will detect if the
                ;; current buffer is inside of Chromite and, if so,
                ;; offer the direct executable wrapper of the current
