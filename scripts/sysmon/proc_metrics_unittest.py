@@ -185,35 +185,32 @@ class TestProcMetrics(cros_test_lib.TestCase):
                 ),
                 _mock_process(
                     name="common-tls",
-                    cmdline=["/opt/infra-tools/common-tls", "-port", "..."]
+                    cmdline=["/opt/infra-tools/common-tls", "-port", "..."],
                 ),
                 _mock_process(
                     name="fleet-tlw",
-                    cmdline=["/opt/infra-tools/fleet-tlw", "-port", "..."]
+                    cmdline=["/opt/infra-tools/fleet-tlw", "-port", "..."],
                 ),
                 _mock_process(
-                    name="drone-agent",
-                    cmdline=["/opt/infra-tools/drone-agent"]
+                    name="drone-agent", cmdline=["/opt/infra-tools/drone-agent"]
                 ),
-                _mock_process(
-                    name="dnsmasq",
-                    cmdline=["dnsmasq", "..."]
-                ),
+                _mock_process(name="dnsmasq", cmdline=["dnsmasq", "..."]),
                 _mock_process(
                     name="labservice",
-                    cmdline=["/opt/infra-tools/labservice", "-addr", "..."]
+                    cmdline=["/opt/infra-tools/labservice", "-addr", "..."],
                 ),
                 _mock_process(
                     name="cloud_sql_proxy",
                     cmdline=[
-                        "/opt/cloud_sql_proxy", "-dir=/var/run/tko_proxy",
+                        "/opt/cloud_sql_proxy",
+                        "-dir=/var/run/tko_proxy",
                         "-instances=google.com:chromeos-lab:us-central1:tko",
-                        "-credential_file=..."
+                        "-credential_file=...",
                     ],
                 ),
                 _mock_process(
                     name="downloader",
-                    cmdline=["./downloader", "-credential-file", "..."]
+                    cmdline=["./downloader", "-credential-file", "..."],
                 ),
             ]
             proc_metrics.collect_proc_info()

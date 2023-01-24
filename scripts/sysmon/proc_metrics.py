@@ -37,7 +37,7 @@ class _ProcessMetricsCollector(object):
             _ProcessMetric("autoserv", test_func=_is_parent_autoserv),
             _ProcessMetric(
                 "cache-downloader",
-                test_func=partial(_is_process_name, "downloader")
+                test_func=partial(_is_process_name, "downloader"),
             ),
             _ProcessMetric(
                 "common-tls", test_func=partial(_is_process_name, "common-tls")
@@ -48,7 +48,7 @@ class _ProcessMetricsCollector(object):
             ),
             _ProcessMetric(
                 "drone-agent",
-                test_func=partial(_is_process_name, "drone-agent")
+                test_func=partial(_is_process_name, "drone-agent"),
             ),
             _ProcessMetric(
                 "fleet-tlw", test_func=partial(_is_process_name, "fleet-tlw")
@@ -201,6 +201,6 @@ def _is_tko_proxy(proc):
     cmdline = proc.cmdline()
     return (
         len(cmdline) == 4
-        and cmdline[0].split("/")[-1] == 'cloud_sql_proxy'
-        and cmdline[2] == '-instances=google.com:chromeos-lab:us-central1:tko'
+        and cmdline[0].split("/")[-1] == "cloud_sql_proxy"
+        and cmdline[2] == "-instances=google.com:chromeos-lab:us-central1:tko"
     )
