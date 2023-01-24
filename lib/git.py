@@ -11,10 +11,11 @@ import fnmatch
 import hashlib
 import logging
 import os
+from pathlib import Path
 import re
 import string
 import subprocess
-from typing import List, Optional, Union
+from typing import Iterable, List, Optional, Union
 from xml import sax
 
 from chromite.lib import config_lib
@@ -1269,6 +1270,39 @@ def Log(
         cmd.append("--")
         cmd.extend(paths)
     return RunGit(git_repo, cmd, errors="replace").stdout
+
+
+def LsFiles(
+    cwd: Optional[Union[os.PathLike, str]] = None,
+    files: Iterable[Union[os.PathLike, str]] = (),
+    include_ignored: bool = False,
+    staging: bool = True,
+    untracked: bool = False,
+) -> List[Path]:
+    """Do a git ls-files.
+
+    Args:
+        cwd: The directory to run from.  Note that ls-files is sensitive to the
+            working directory, and will behave differently at the base of a repo
+            versus in a subdirectory.
+        files: Files to show.  If no files are given, all files are shown.
+        include_ignored: Include files normally excluded by the standard
+            .gitignore files.
+        staging: Include tracked files.
+        untracked: Include untracked files.
+
+    Returns:
+        The list of paths outputted by ls-files.
+    """
+    flags = []
+    if not include_ignored:
+        flags.append("--exclude-standard")
+    if staging:
+        flags.append("--cached")
+    if untracked:
+        flags.append("--others")
+    output = RunGit(cwd, ["ls-files", "-z", *flags, "--", *files]).stdout
+    return [Path(x) for x in output.split("\0") if x]
 
 
 # pylint: enable=redefined-builtin

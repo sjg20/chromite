@@ -145,6 +145,14 @@ Change-Id: %s
         self.assertEqual(git.GetCurrentBranchOrId(self.fake_path), "branch")
         self.assertCommandContains(["symbolic-ref", "-q", "HEAD"])
 
+    def testLsFiles(self):
+        files = [".", "somefile.txt"]
+        git.LsFiles(cwd=self.fake_path, files=files)
+        self.assertCommandContains(["ls-files", "-z"])
+        self.assertCommandContains(["--exclude-standard"])
+        self.assertCommandContains(["--cached"])
+        self.assertCommandContains(["--", *files])
+
     def testAddPath(self):
         git.AddPath(self.fake_path)
         self.assertCommandContains(["add"])
