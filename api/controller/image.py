@@ -167,9 +167,9 @@ def GetArtifacts(
 
     Copies (after optionally bundling) all required images into the output_dir,
     returning a mapping of image type to a list of (output_dir) paths to
-    the desired files. Note that currently it is only processing one image (DLC),
-    but the future direction is to process all required images. Required images
-    are located within output_artifact.artifact_type.
+    the desired files. Note that currently it is only processing one image
+    (DLC), but the future direction is to process all required images. Required
+    images are located within output_artifact.artifact_type.
 
     Args:
         in_proto: Proto request defining reqs.
@@ -379,7 +379,7 @@ def Create(
         return controller.RETURN_CODE_SUCCESS
 
     else:
-        # Failure, include all of the failed packages in the output when available.
+        # Failure, include all the failed packages in the output when available.
         packages = core_result.failed_packages + factory_result.failed_packages
         if not packages:
             return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
@@ -575,7 +575,8 @@ def Test(
 
     if not os.path.isfile(image_path) or not image_path.endswith(".bin"):
         cros_build_lib.Die(
-            "The image.path must be an existing image file with a .bin extension."
+            "The image.path must be an existing image file with a .bin "
+            "extension."
         )
 
     if config.validate_only:

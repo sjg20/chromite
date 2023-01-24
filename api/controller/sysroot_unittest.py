@@ -53,7 +53,7 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         return sysroot_pb2.SysrootCreateResponse()
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(sysroot_service, "Create")
 
         board = "board"
@@ -72,7 +72,7 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Sanity check that a mock call does not execute any logic."""
+        """Verify a mock call does not execute any logic."""
         patch = self.PatchObject(sysroot_service, "Create")
         request = self._InputProto()
         response = self._OutputProto()
@@ -83,7 +83,7 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         self.assertEqual(controller.RETURN_CODE_SUCCESS, rc)
 
     def testMockError(self):
-        """Sanity check that a mock error does not execute any logic."""
+        """Verify a mock error does not execute any logic."""
         patch = self.PatchObject(sysroot_service, "Create")
         request = self._InputProto()
         response = self._OutputProto()
@@ -195,6 +195,7 @@ class CreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 class GetArtifactsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     """GetArtifacts function tests."""
 
+    # pylint: disable=line-too-long
     _artifact_funcs = {
         common_pb2.ArtifactsByService.Sysroot.ArtifactType.SIMPLE_CHROME_SYSROOT: sysroot_service.CreateSimpleChromeSysroot,
         common_pb2.ArtifactsByService.Sysroot.ArtifactType.CHROME_EBUILD_ENV: sysroot_service.CreateChromeEbuildEnv,
@@ -202,6 +203,8 @@ class GetArtifactsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         common_pb2.ArtifactsByService.Sysroot.ArtifactType.DEBUG_SYMBOLS: sysroot_service.BundleDebugSymbols,
         common_pb2.ArtifactsByService.Sysroot.ArtifactType.FUZZER_SYSROOT: sysroot_service.CreateFuzzerSysroot,
     }
+
+    # pylint: enable=line-too-long
 
     def setUp(self):
         self._mocks = {}
@@ -243,7 +246,7 @@ class GetArtifactsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
             patch.assert_called_once()
 
     def testArtifactsException(self):
-        """Test GetArtifacts with all artifact types when one type throws an exception."""
+        """Test with all artifact types when one type throws an exception."""
 
         self._mocks[
             common_pb2.ArtifactsByService.Sysroot.ArtifactType.FUZZER_SYSROOT
@@ -305,7 +308,7 @@ class GenerateArchiveTest(
         return sysroot_pb2.SysrootGenerateArchiveResponse()
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(sysroot_service, "GenerateArchive")
 
         in_proto = self._InputProto(
@@ -412,7 +415,7 @@ class InstallToolchainTest(
         pkg_info: package_info.PackageInfo,
         timestamp: datetime.datetime,
     ):
-        """Creates a log file for testing for individual packages built by Portage.
+        """Creates a log file to test for individual packages built by Portage.
 
         Args:
             log_path: The PORTAGE_LOGDIR path.
@@ -432,7 +435,7 @@ class InstallToolchainTest(
         return path
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(sysroot_service, "InstallToolchain")
 
         in_proto = self._InputProto(
@@ -664,7 +667,7 @@ class InstallPackagesTest(
         pkg_info: package_info.PackageInfo,
         timestamp: datetime.datetime,
     ):
-        """Creates a log file for testing for individual packages built by Portage.
+        """Creates a log file to test for individual packages built by Portage.
 
         Args:
             log_path: The PORTAGE_LOGDIR path.
@@ -684,7 +687,7 @@ class InstallPackagesTest(
         return path
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(sysroot_service, "BuildPackages")
 
         in_proto = self._InputProto(
@@ -886,14 +889,13 @@ class InstallPackagesTest(
         )
         self.assertFalse(rc)
         self.assertFalse(out_proto.failed_package_data)
-        self.assertCountEqual(
-            out_proto.goma_artifacts.log_files,
-            [
-                "compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz",
-                "compiler_proxy.host.log.INFO.20180921-120000.000000.gz",
-                "gomacc.host.log.INFO.20180921-120200.000000.tar.gz",
-            ],
-        )
+
+        expected = [
+            "compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz",
+            "compiler_proxy.host.log.INFO.20180921-120000.000000.gz",
+            "gomacc.host.log.INFO.20180921-120200.000000.tar.gz",
+        ]
+        self.assertCountEqual(out_proto.goma_artifacts.log_files, expected)
 
     def testSuccessWithGomaLogsAndStatsCounterzFiles(self):
         """Test successful call with goma including stats and counterz files."""
@@ -942,27 +944,24 @@ class InstallPackagesTest(
         )
         self.assertFalse(rc)
         self.assertFalse(out_proto.failed_package_data)
-        self.assertCountEqual(
-            out_proto.goma_artifacts.log_files,
-            [
-                "compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz",
-                "compiler_proxy.host.log.INFO.20180921-120000.000000.gz",
-                "gomacc.host.log.INFO.20180921-120200.000000.tar.gz",
-            ],
-        )
+        expected_logs = [
+            "compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz",
+            "compiler_proxy.host.log.INFO.20180921-120000.000000.gz",
+            "gomacc.host.log.INFO.20180921-120200.000000.tar.gz",
+        ]
+        self.assertCountEqual(out_proto.goma_artifacts.log_files, expected_logs)
+
         # Verify that the output dir has 5 files -- since there should be 3 log
         # files, the stats file, and the counterz file.
         output_files = os.listdir(self.goma_out_dir)
-        self.assertCountEqual(
-            output_files,
-            [
-                "stats.binaryproto",
-                "counterz.binaryproto",
-                "compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz",
-                "compiler_proxy.host.log.INFO.20180921-120000.000000.gz",
-                "gomacc.host.log.INFO.20180921-120200.000000.tar.gz",
-            ],
-        )
+        expected_output = [
+            "stats.binaryproto",
+            "counterz.binaryproto",
+            "compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz",
+            "compiler_proxy.host.log.INFO.20180921-120000.000000.gz",
+            "gomacc.host.log.INFO.20180921-120200.000000.tar.gz",
+        ]
+        self.assertCountEqual(output_files, expected_output)
         self.assertEqual(
             out_proto.goma_artifacts.counterz_file, "counterz.binaryproto"
         )
@@ -985,8 +984,8 @@ class InstallPackagesTest(
         self._CreateGomaLogFile(
             self.goma_dir, "gomacc", datetime.datetime(2018, 9, 21, 12, 2, 0)
         )
-        # Note that stats and counterz files are not created, but are specified in
-        # the proto below.
+        # Note that stats and counterz files are not created, but are specified
+        # in the proto below.
 
         # Prevent argument validation error.
         self.PatchObject(
@@ -1010,14 +1009,12 @@ class InstallPackagesTest(
         )
         self.assertFalse(rc)
         self.assertFalse(out_proto.failed_package_data)
-        self.assertCountEqual(
-            out_proto.goma_artifacts.log_files,
-            [
-                "compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz",
-                "compiler_proxy.host.log.INFO.20180921-120000.000000.gz",
-                "gomacc.host.log.INFO.20180921-120200.000000.tar.gz",
-            ],
-        )
+        expected_logs = [
+            "compiler_proxy-subproc.host.log.INFO.20180921-120100.000000.gz",
+            "compiler_proxy.host.log.INFO.20180921-120000.000000.gz",
+            "gomacc.host.log.INFO.20180921-120200.000000.tar.gz",
+        ]
+        self.assertCountEqual(out_proto.goma_artifacts.log_files, expected_logs)
         self.assertFalse(out_proto.goma_artifacts.counterz_file)
         self.assertFalse(out_proto.goma_artifacts.stats_file)
 

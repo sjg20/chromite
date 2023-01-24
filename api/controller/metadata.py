@@ -74,9 +74,11 @@ def SystemImageMetadata(input_proto, output_proto, _config):
         ),
     )
 
+    # pylint: disable=line-too-long
     output_proto.system_image.metadata.build_target.portage_build_target.CopyFrom(
         portage_build_target
     )
+    # pylint: enable=line-too-long
     output_proto.system_image.metadata.package_summary.CopyFrom(package_summary)
 
     portage_db = portage_util.PortageDB(sysroot.path)

@@ -55,7 +55,7 @@ class DebugInfoTestTest(
         return test_pb2.DebugInfoTestResponse()
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(test_service, "DebugInfoTest")
         input_msg = self._GetInput(sysroot_path=self.full_sysroot_path)
         test_controller.DebugInfoTest(
@@ -158,7 +158,7 @@ class BuildTargetUnitTestTest(
         pkg_info: package_info.PackageInfo,
         timestamp: datetime.datetime,
     ) -> str:
-        """Creates a log file for testing for individual packages built by Portage.
+        """Creates a log file to test for individual packages built by Portage.
 
         Args:
             log_path: The PORTAGE_LOGDIR path.
@@ -178,7 +178,7 @@ class BuildTargetUnitTestTest(
         return path
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(test_service, "BuildTargetUnitTest")
 
         input_msg = self._GetInput(board="board")
@@ -188,7 +188,7 @@ class BuildTargetUnitTestTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(test_service, "BuildTargetUnitTest")
 
         input_msg = self._GetInput(board="board")
@@ -400,7 +400,9 @@ class BuildTestServiceContainers(
             metadata.repository.hostname = "gcr.io"
             metadata.repository.project = "chromeos-bot"
             metadata.name = "random-container-name"
+            # pylint: disable=line-too-long
             metadata.digest = "09b730f8b6a862f9c2705cb3acf3554563325f5fca5c784bf5c98beb2e56f6db"
+            # pylint: enable=line-too-long
             metadata.tags[:] = [
                 "staging-cq-amd64-generic.R96-1.2.3",
                 "8834106026340379089",
@@ -475,7 +477,7 @@ class ChromiteUnitTestTest(
         return test_pb2.ChromiteUnitTestResponse()
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(cros_build_lib, "run")
 
         input_msg = self._GetInput(chroot_path=self.chroot_path)
@@ -541,7 +543,7 @@ class CrosSigningTestTest(
         return test_pb2.CrosSigningTestResponse()
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         test_controller.CrosSigningTest(None, None, self.validate_only_config)
         self.assertFalse(self.rc.call_count)
 
@@ -702,7 +704,7 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
         return test_pb2.VmTestResponse()
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         test_controller.VmTest(
             self._GetInput(), None, self.validate_only_config
         )
@@ -714,7 +716,8 @@ class VmTestTest(cros_test_lib.RunCommandTestCase, api_config.ApiConfigMixin):
 
         request = self._GetInput()
         response = self._Output()
-        # VmTest does not return a value, checking mocked value is flagged by lint.
+        # VmTest does not return a value, checking mocked value is flagged by
+        # lint.
         test_controller.VmTest(request, response, self.mock_call_config)
         patch.assert_not_called()
 
@@ -813,12 +816,14 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
         common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON
     )
 
+    # pylint: disable=line-too-long
     _artifact_funcs = {
         common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_LLVM_JSON: test_service.BundleCodeCoverageLlvmJson,
         common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_RUST_LLVM_JSON: test_service.BundleCodeCoverageRustLlvmJson,
         common_pb2.ArtifactsByService.Test.ArtifactType.HWQUAL: test_service.BundleHwqualTarball,
         common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_GOLANG: test_service.BundleCodeCoverageGolang,
     }
+    # pylint: enable=line-too-long
 
     def setUp(self):
         """Set up the class for tests."""
@@ -870,6 +875,7 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
             test_service, "BundleCodeCoverageLlvmJson", return_value="test"
         )
 
+        # pylint: disable=line-too-long
         test_controller.GetArtifacts(
             common_pb2.ArtifactsByService.Test(
                 output_artifacts=[
@@ -890,6 +896,7 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
             self.build_target,
             self.tempdir,
         )
+        # pylint: enable=line-too-long
 
         BundleCodeCoverageLlvmJson_mock.assert_called_once()
 
@@ -939,7 +946,7 @@ class GetArtifactsTest(cros_test_lib.MockTempDirTestCase):
             patch.assert_called_once()
 
     def testArtifactsException(self):
-        """Test GetArtifacts with all artifact types when one type throws an exception."""
+        """Test with all artifact types when one type throws an exception."""
 
         self._mocks[
             common_pb2.ArtifactsByService.Test.ArtifactType.CODE_COVERAGE_GOLANG

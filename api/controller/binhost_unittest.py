@@ -32,7 +32,7 @@ class GetBinhostsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(binhost_service, "GetBinhosts")
 
         input_proto = binhost_pb2.BinhostGetRequest()
@@ -46,10 +46,12 @@ class GetBinhostsTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
     def testGetBinhosts(self):
         """GetBinhosts calls service with correct args."""
+        # pylint: disable=line-too-long
         binhost_list = [
             "gs://cr-prebuilt/board/amd64-generic/paladin-R66-17.0.0-rc2/packages/",
             "gs://cr-prebuilt/board/eve/paladin-R66-17.0.0-rc2/packages/",
         ]
+        # pylint: enable=line-too-long
         get_binhost = self.PatchObject(
             binhost_service, "GetBinhosts", return_value=binhost_list
         )
@@ -84,7 +86,7 @@ class GetPrivatePrebuiltAclArgsTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(binhost_service, "GetPrebuiltAclArgs")
 
         input_proto = binhost_pb2.AclArgsRequest()
@@ -157,7 +159,7 @@ class PrepareBinhostUploadsTest(
         self.assertEqual(rc, 0)
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(binhost_service, "GetPrebuiltsRoot")
 
         request = binhost_pb2.PrepareBinhostUploadsRequest()
@@ -214,7 +216,7 @@ class SetBinhostTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(binhost_service, "SetBinhost")
 
         request = binhost_pb2.SetBinhostRequest()
@@ -271,7 +273,7 @@ class GetBinhostConfPathTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(binhost_service, "GetBinhostConfPath")
 
         request = binhost_pb2.GetBinhostConfPathRequest()
@@ -324,7 +326,7 @@ class RegenBuildCacheTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(binhost_service, "RegenBuildCache")
 
         request = binhost_pb2.RegenBuildCacheRequest()
@@ -416,8 +418,8 @@ CPV: virtual/python-enum34-1
         packages_dir = os.path.join(full_sysroot_path, "packages")
         osutils.SafeMakedirs(packages_dir)
         for package in self.dev_install_packages:
-            # Since a package has a category, such as app-arch/zip-3.0-r3, we need
-            # to create the packages_dir / category dir as needed.
+            # Since a package has a category, such as app-arch/zip-3.0-r3, we
+            # need to create the packages_dir / category dir as needed.
             category = package.split(os.sep)[0]
             osutils.SafeMakedirs(os.path.join(packages_dir, category))
             package_tbz2_file = os.path.join(packages_dir, package) + ".tbz2"
@@ -446,7 +448,7 @@ CPV: virtual/python-enum34-1
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(
             binhost_service, "ReadDevInstallFilesToCreatePackageIndex"
         )

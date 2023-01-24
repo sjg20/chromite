@@ -44,14 +44,14 @@ class GetLatestBuildTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         self._mock.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         req = self._GetRequest(android_package="android-package")
         android.GetLatestBuild(req, self._output_proto, self.mock_call_config)
         self._mock.assert_not_called()
         self.assertEqual(self._output_proto.android_version, "7123456")
 
     def testFailsIfBranchAndPackageMissing(self):
-        """Fails if both android_build_branch and android_package are missing."""
+        """Fails if android_build_branch and android_package are missing."""
         req = self._GetRequest()
         with self.assertRaises(cros_build_lib.DieSystemExit):
             android.GetLatestBuild(req, self._output_proto, self.api_config)
@@ -105,14 +105,14 @@ class MarkStableTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         self.response = android_pb2.MarkStableResponse()
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         android.MarkStable(
             self.input_proto, self.response, self.validate_only_config
         )
         self.uprev.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         android.MarkStable(
             self.input_proto, self.response, self.mock_call_config
         )
@@ -204,13 +204,13 @@ class UnpinVersionTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         safeunlink = self.PatchObject(osutils, "SafeUnlink")
         self.PatchObject(constants, "_FindSourceRoot", return_value="SRCROOT")
 
-        # This has the side effect of making sure that input and output proto are
-        # not actually used.
+        # This has the side effect of making sure that input and output proto
+        # are not actually used.
         android.UnpinVersion(None, None, self.api_config)
         safeunlink.assert_called_once_with(android.ANDROIDPIN_MASK_PATH)
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         safeunlink = self.PatchObject(osutils, "SafeUnlink")
 
         android.UnpinVersion(None, None, self.validate_only_config)
@@ -250,7 +250,7 @@ class WriteLKGBTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         mock_write_lkgb.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         mock_write_lkgb = self.PatchObject(service_android, "WriteLKGB")
 
         req = android_pb2.WriteLKGBRequest(

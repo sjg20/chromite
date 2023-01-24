@@ -96,8 +96,9 @@ def GeneratePayload(
     # Find the value of bucket or default to 'chromeos-releases'.
     destination_bucket = input_proto.bucket or "chromeos-releases"
 
-    # There's a potential that some paygen_lib library might raise here, but since
-    # we're still involved in config we'll keep it before the validate_only.
+    # There's a potential that some paygen_lib library might raise here, but
+    # since we're still involved in config we'll keep it before the
+    # validate_only.
     payload_config = payload.PayloadConfig(
         tgt_image,
         src_image,

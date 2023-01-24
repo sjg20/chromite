@@ -44,7 +44,7 @@ class UprevTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         )
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(packages_service, "uprev_build_targets")
 
         targets = ["foo", "bar"]
@@ -55,7 +55,7 @@ class UprevTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(packages_service, "uprev_build_targets")
         targets = ["foo", "bar"]
         request = self._GetRequest(targets=targets, overlay_type=self._BOTH)
@@ -143,7 +143,7 @@ class UprevVersionedPackageTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         service.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(packages_service, "uprev_versioned_package")
         request = packages_pb2.UprevVersionedPackageRequest()
         packages_controller.UprevVersionedPackage(
@@ -228,7 +228,7 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         )
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(packages_service, "get_best_visible")
 
         request = self._GetRequest(atom="chromeos-chrome")
@@ -238,7 +238,7 @@ class GetBestVisibleTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(packages_service, "get_best_visible")
         request = self._GetRequest(atom="chromeos-chrome")
         packages_controller.GetBestVisible(
@@ -291,7 +291,7 @@ class GetChromeVersion(cros_test_lib.MockTestCase, ApiConfigMixin):
         return request
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         chrome_version = self.PatchObject(
             packages_service, "determine_chrome_version"
         )
@@ -302,7 +302,7 @@ class GetChromeVersion(cros_test_lib.MockTestCase, ApiConfigMixin):
         chrome_version.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         chrome_version = self.PatchObject(
             packages_service, "determine_chrome_version"
         )
@@ -370,7 +370,7 @@ class GetTargetVersionsTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         patch_version.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch_version = self.PatchObject(
             packages_service, "get_target_versions"
         )
@@ -569,7 +569,7 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         return request
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         request = self._GetRequest(board="betty")
         patch_version = self.PatchObject(
             packages_service, "determine_android_version"
@@ -594,7 +594,7 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         patch_get_models.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         request = self._GetRequest(board="betty")
         patch_version = self.PatchObject(
             packages_service, "determine_android_version"
@@ -835,7 +835,7 @@ class GetBuilderMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         self.assertEqual(
             self.response.build_target_metadata[0].arc_use_set, True
         )
-        # Verify call to determine_android_version passes list of the board name.
+        # Verify call to determine_android_version passes board name.
         android_version_mock.assert_called_with("betty")
         # Verify call to determine_android_branch passes board name.
         android_branch_mock.assert_called_with("betty")
@@ -922,7 +922,7 @@ class HasChromePrebuiltTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         return request
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(packages_service, "has_prebuilt")
 
         request = self._GetRequest(board="betty")
@@ -932,7 +932,7 @@ class HasChromePrebuiltTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(packages_service, "has_prebuilt")
 
         request = self._GetRequest(board="betty")
@@ -971,7 +971,7 @@ class BuildsChromeTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         return request
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(packages_service, "builds")
 
         request = self._GetRequest(board="betty")
@@ -1134,7 +1134,7 @@ class GetAndroidMetadataTest(cros_test_lib.MockTestCase, ApiConfigMixin):
         version_mock.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         package_mock = self.PatchObject(
             packages_service, "determine_android_package"
         )

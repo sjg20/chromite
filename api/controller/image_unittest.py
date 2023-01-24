@@ -53,7 +53,7 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
         )
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(image_service, "Build")
 
         request = self._GetRequest(board="board")
@@ -63,7 +63,7 @@ class CreateTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that mock call does not execute any logic, returns mocked value."""
+        """Test mock call does not execute any logic, returns mocked value."""
         patch = self.PatchObject(image_service, "Build")
 
         request = self._GetRequest(board="board")
@@ -232,6 +232,7 @@ class GetArtifactsTest(
 ):
     """GetArtifacts function tests."""
 
+    # pylint: disable=line-too-long
     _artifact_funcs = {
         common_pb2.ArtifactsByService.Image.ArtifactType.DLC_IMAGE: image_service.copy_dlc_image,
         common_pb2.ArtifactsByService.Image.ArtifactType.LICENSE_CREDITS: image_service.copy_license_credits,
@@ -239,6 +240,7 @@ class GetArtifactsTest(
         common_pb2.ArtifactsByService.Image.ArtifactType.STRIPPED_PACKAGES: image_service.create_stripped_packages_tar,
         common_pb2.ArtifactsByService.Image.ArtifactType.IMAGE_SCRIPTS: image_service.create_image_scripts_archive,
     }
+    # pylint: enable=line-too-long
 
     def setUp(self):
         self._mocks = {}
@@ -291,7 +293,7 @@ class GetArtifactsTest(
             patch.assert_called_once()
 
     def testArtifactsException(self):
-        """Test GetArtifacts with all artifact types when one type throws an exception."""
+        """Test with all artifact types when one type throws an exception."""
 
         self._mocks[
             common_pb2.ArtifactsByService.Image.ArtifactType.STRIPPED_PACKAGES
@@ -384,8 +386,8 @@ class RecoveryImageTest(
         """Helper to create Mock build_image results.
 
         Args:
-            image_types: A list of image types for which the mock BuildResult has to
-                be creates.
+            image_types: A list of image types for which the mock BuildResult
+                has to be created.
 
         Returns:
             A list of mock BuildResult.
@@ -468,7 +470,7 @@ class ImageSignerTestTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that mock call does not execute any logic, returns mocked value."""
+        """Test mock call does not execute any logic, returns mocked value."""
         patch = self.PatchObject(image_lib, "SecurityTest", return_value=True)
         input_proto = image_pb2.TestImageRequest()
         input_proto.image.path = self.image_path
@@ -540,7 +542,7 @@ class ImageTestTest(
         osutils.Touch(self.image_path)
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(image_service, "Test")
 
         input_proto = image_pb2.TestImageRequest()
@@ -555,7 +557,7 @@ class ImageTestTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that mock call does not execute any logic, returns mocked value."""
+        """Test mock call does not execute any logic, returns mocked value."""
         patch = self.PatchObject(image_service, "Test")
 
         input_proto = image_pb2.TestImageRequest()
@@ -690,7 +692,7 @@ class PushImageTest(api_config.ApiConfigMixin):
 
     @mock.patch.object(pushimage, "PushImage", return_value={})
     def testMockCall(self, MockPushImage):
-        """Test that mock call does not execute any logic, returns mocked value."""
+        """Test mock call does not execute any logic, returns mocked value."""
         rc = image_controller.PushImage(
             self._GetRequest(), self._GetResponse(), self.mock_call_config
         )

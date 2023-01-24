@@ -224,7 +224,7 @@ def BuildTestServiceContainers(
     output_proto: test_pb2.BuildTestServiceContainersResponse,
     _config,
 ):
-    """Builds docker containers for all test services and pushes them to gcr.io"""
+    """Build docker containers for all test services and push them to gcr.io."""
     build_target = controller_util.ParseBuildTarget(input_proto.build_target)
     chroot = controller_util.ParseChroot(input_proto.chroot)
     sysroot = sysroot_lib.Sysroot(build_target.root)
@@ -293,8 +293,8 @@ def BuildTestServiceContainers(
                 if result_file in file:
                     output_path = os.path.join(tempdir, file)
 
-                    # build-dockerimages.py will append the service name to outputfile
-                    # with an underscore.
+                    # build-dockerimages.py will append the service name to
+                    # outputfile with an underscore.
                     human_name = file.split("_")[-1]
 
                     result = test_pb2.TestServiceContainerBuildResult()

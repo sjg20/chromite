@@ -101,7 +101,7 @@ def _get_package_identifier_proto(
     python_copy: observability_service.PackageIdentifier,
     proto_copy: "sizes_pb2.PackageIdentifier",
 ):
-    """Convert PackageIdentifier named tuple to PackageIdentifier protocol buffer.
+    """Convert PackageIdentifier named tuple to PackageIdentifier protobuf.
 
     Args:
         python_copy: The named tuple version of PackageIdentifier.

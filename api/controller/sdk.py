@@ -175,7 +175,7 @@ def Clean(input_proto, _output_proto, _config):
 @faux.all_empty
 @validate.validation_complete
 def CreateSnapshot(input_proto, output_proto, _config):
-    """Create a chroot snapshot and return a corresponding opaque snapshot key."""
+    """Create a chroot snapshot and return a corresponding opaque key."""
     chroot = controller_util.ParseChroot(input_proto.chroot)
     token = sdk.CreateSnapshot(chroot, replace_if_needed=True)
     output_proto.snapshot_token.value = token

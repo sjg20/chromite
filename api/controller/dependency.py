@@ -26,8 +26,8 @@ def AugmentDepGraphProtoFromJsonMap(json_map, graph):
     Args:
         json_map: the json object that stores the portage package. This is
             generated from chromite.lib.service.dependency.GetBuildDependency()
-        graph: the proto object that represents the dependency graph (see DepGraph
-            message in chromite/api/depgraph.proto)
+        graph: the proto object that represents the dependency graph (see
+            DepGraph message in chromite/api/depgraph.proto)
     """
     graph.sysroot.build_target.name = json_map["target_board"]
     graph.sysroot.path = json_map["sysroot_path"]
@@ -76,7 +76,7 @@ def GetBuildDependencyGraph(
         board = input_proto.sysroot.build_target.name
         sysroot_path = input_proto.sysroot.path
     else:
-        # TODO(crbug/1081828): stop using build_target and drop it from the proto.
+        # TODO(crbug/1081828): stop using build_target & drop it from the proto.
         board = input_proto.build_target.name
         sysroot_path = build_target_lib.get_default_sysroot_path(board or None)
 

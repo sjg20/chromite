@@ -118,7 +118,7 @@ class BundleImageArchivesTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "ArchiveImages")
         artifacts.BundleImageArchives(
             self.target_request, self.response, self.mock_call_config
@@ -187,7 +187,7 @@ class BundleImageZipTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(commands, "BuildImageZip")
         artifacts.BundleImageZip(
             self.target_request, self.response, self.mock_call_config
@@ -242,7 +242,7 @@ class BundleAutotestFilesTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleAutotestFiles")
         artifacts.BundleAutotestFiles(
             self.sysroot_request, self.response, self.mock_call_config
@@ -256,8 +256,11 @@ class BundleAutotestFilesTest(BundleTestCase):
 
     def testBundleAutotestFiles(self):
         """BundleAutotestFiles calls service correctly."""
+
         files = {
-            artifacts_svc.ARCHIVE_CONTROL_FILES: "/tmp/artifacts/autotest-a.tar.gz",
+            artifacts_svc.ARCHIVE_CONTROL_FILES: (
+                "/tmp/artifacts/autotest-a.tar.gz"
+            ),
             artifacts_svc.ARCHIVE_PACKAGES: "/tmp/artifacts/autotest-b.tar.gz",
         }
         patch = self.PatchObject(
@@ -322,7 +325,7 @@ class BundleTastFilesTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleTastFiles")
         artifacts.BundleTastFiles(
             self.sysroot_request, self.response, self.mock_call_config
@@ -379,7 +382,7 @@ class BundleFirmwareTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleTastFiles")
         artifacts.BundleFirmware(
             self.sysroot_request, self.response, self.mock_call_config
@@ -428,7 +431,7 @@ class BundleFpmcuUnittestsTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleFpmcuUnittests")
         artifacts.BundleFpmcuUnittests(
             self.sysroot_request, self.response, self.mock_call_config
@@ -480,7 +483,7 @@ class BundleEbuildLogsTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(commands, "BuildEbuildLogsTarball")
         artifacts.BundleEbuildLogs(
             self.sysroot_request, self.response, self.mock_call_config
@@ -533,7 +536,7 @@ class BundleChromeOSConfigTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleChromeOSConfig")
         artifacts.BundleChromeOSConfig(
             self.sysroot_request, self.response, self.mock_call_config
@@ -624,7 +627,7 @@ class BundleTestUpdatePayloadsTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleTestUpdatePayloads")
         artifacts.BundleTestUpdatePayloads(
             self.input_proto, self.output_proto, self.mock_call_config
@@ -645,7 +648,7 @@ class BundleTestUpdatePayloadsTest(
         )
 
     def testBundleTestUpdatePayloads(self):
-        """BundleTestUpdatePayloads calls cbuildbot/commands with correct args."""
+        """BundleTestUpdatePayloads calls cbuildbot/commands correctly."""
         image_path = os.path.join(self.image_root, constants.BASE_IMAGE_BIN)
         osutils.WriteFile(image_path, "image!", makedirs=True)
 
@@ -675,7 +678,7 @@ class BundleTestUpdatePayloadsTest(
         self.assertFalse(self.output_proto.artifacts)
 
     def testBundleTestUpdatePayloadsNoImage(self):
-        """BundleTestUpdatePayloads dies if no usable image is found for target."""
+        """BundleTestUpdatePayloads dies if no usable image found for target."""
         # Intentionally do not write image, but create the directory.
         osutils.SafeMakedirs(self.image_root)
         with self.assertRaises(cros_build_lib.DieSystemExit):
@@ -737,7 +740,7 @@ class BundleSimpleChromeArtifactsTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleSimpleChromeArtifacts")
         request = self._GetRequest(
             chroot=self.chroot_dir,
@@ -869,7 +872,8 @@ class BundleVmFilesTest(
         Args:
             chroot: The chroot path.
             sysroot: The sysroot path relative to the chroot.
-            test_results_dir: The test results directory relative to the sysroot.
+            test_results_dir: The test results directory relative to the
+                sysroot.
             output_dir: The directory where the results tarball should be saved.
         """
         return artifacts_pb2.BundleVmFilesRequest(
@@ -894,7 +898,7 @@ class BundleVmFilesTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleVmFiles")
         in_proto = self._GetInput(
             chroot="/chroot/dir",
@@ -973,7 +977,8 @@ class BundleVmFilesTest(
 
         patch.assert_called_with(mock.ANY, "/test/results", self.output_dir)
 
-        # Make sure we have artifacts, and that every artifact is an expected file.
+        # Make sure we have artifacts, and that every artifact is an expected
+        # file.
         self.assertTrue(self.response.artifacts)
         for artifact in self.response.artifacts:
             self.assertIn(artifact.path, expected_files)
@@ -997,7 +1002,7 @@ class ExportCpeReportTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "GenerateCpeReport")
 
         artifacts.ExportCpeReport(
@@ -1044,7 +1049,7 @@ class BundleGceTarballTest(BundleTestCase):
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(artifacts_svc, "BundleGceTarball")
         artifacts.BundleGceTarball(
             self.target_request, self.response, self.mock_call_config
@@ -1134,7 +1139,7 @@ class FetchMetadataTestCase(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(controller_util, "ParseSysroot")
         request = self.createFetchMetadataRequest()
         response = artifacts_pb2.FetchMetadataResponse()
@@ -1182,6 +1187,7 @@ class GetTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
 
     def _InputProto(self):
         """Helper to build an input proto instance."""
+        # pylint: disable=line-too-long
         return artifacts_pb2.GetRequest(
             sysroot=sysroot_pb2.Sysroot(path=self.sysroot_path),
             artifact_info=common_pb2.ArtifactsByService(
@@ -1217,6 +1223,7 @@ class GetTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
                 path=common_pb2.Path(path=str(self.tempdir))
             ),
         )
+        # pylint: enable=line-too-long
 
     def _OutputProto(self):
         """Helper to build an output proto instance."""
@@ -1224,6 +1231,7 @@ class GetTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
 
     def testSuccess(self):
         """Test Get."""
+        # pylint: disable=line-too-long
         image_mock = self.PatchObject(
             image_controller,
             "GetArtifacts",
@@ -1255,6 +1263,7 @@ class GetTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
                 }
             ],
         )
+        # pylint: enable=line-too-long
 
         in_proto = self._InputProto()
         out_proto = self._OutputProto()
@@ -1268,6 +1277,7 @@ class GetTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
         sysroot_mock.assert_called_once()
         test_mock.assert_called_once()
 
+        # pylint: disable=line-too-long
         expected = common_pb2.UploadedArtifactsByService(
             sysroot=common_pb2.UploadedArtifactsByService.Sysroot(
                 artifacts=[
@@ -1305,4 +1315,5 @@ class GetTest(cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin):
                 ]
             ),
         )
+        # pylint: enable=line-too-long
         self.assertEqual(out_proto.artifacts, expected)

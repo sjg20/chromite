@@ -63,8 +63,8 @@ def _call_entry(fw_loc, metric_proto, subcmd, *args, **kwargs):
 
     if metric_proto:
         # Parse the entire metric file as our metric proto (as a passthru).
-        # TODO(b/177907747): BundleFirmwareArtifacts doesn't use this (yet?), but
-        # firmware_builder.py requires it.
+        # TODO(b/177907747): BundleFirmwareArtifacts doesn't use this (yet?),
+        #   but firmware_builder.py requires it.
         json_format.Parse(response, metric_proto)
 
     if result.returncode == 0:

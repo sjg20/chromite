@@ -117,9 +117,11 @@ _TOOLCHAIN_ARTIFACT_HANDLERS = {
     ),
 }
 
+# pylint: disable=line-too-long
 _TOOLCHAIN_COMMIT_HANDLERS = {
     BuilderConfig.Artifacts.VERIFIED_KERNEL_CWP_AFDO_FILE: "VerifiedKernelCwpAfdoFile"
 }
+# pylint: enable=line-too-long
 
 
 # TODO(crbug/1031213): When @faux is expanded to have more than success/failure,
@@ -143,16 +145,18 @@ def PrepareForBuild(
             yet been created.
         sysroot_path (str): sysroot path inside the chroot (e.g., /build/atlas).
             Will be an empty string if the sysroot has not yet been created.
-        build_target_name (str): name of the build target (e.g., atlas).  Will be
+        build_target_name (str): name of the build target (e.g., atlas). Will be
             an empty string if the sysroot has not yet been created.
-        input_artifacts ({(str) name:[str gs_locations]}): locations for possible
-            input artifacts.  The handler is expected to know which keys it should
-            be using, and ignore any keys that it does not understand.
+        input_artifacts ({(str) name:[str gs_locations]}): locations for
+            possible input artifacts.  The handler is expected to know which
+            keys it should be using, and ignore any keys that it does not
+            understand.
         profile_info ({(str) name: (str) value}) Dictionary containing profile
             information.
 
     They locate and modify any ebuilds and/or source required for the artifact
-    being created, then return a value from toolchain_util.PrepareForBuildReturn.
+    being created, then return a value from
+    toolchain_util.PrepareForBuildReturn.
 
     This function sets output_proto.build_relevance to the result.
 
@@ -364,9 +368,9 @@ def _GetProfileInfoDict(profile_info: "toolchain_pb2.ArtifactProfileInfo"):
     which = profile_info.WhichOneof("artifact_profile_info")
     if which:
         value = getattr(profile_info, which)
-        # If it is a message, then use the contents of the message.  This works as
-        # long as simple types do not have a 'DESCRIPTOR' attribute. (And protobuf
-        # messages do.)
+        # If it is a message, then use the contents of the message.  This works
+        # as long as simple types do not have a 'DESCRIPTOR' attribute. (And
+        # protobuf messages do.)
         if getattr(value, "DESCRIPTOR", None):
             ret.update({k.name: v for k, v in value.ListFields()})
         else:

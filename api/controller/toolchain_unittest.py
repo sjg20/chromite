@@ -65,8 +65,10 @@ class PrepareForBuildTest(
             toolchain,
             "_TOOLCHAIN_ARTIFACT_HANDLERS",
             {
-                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE: toolchain._Handlers(
-                    "UnverifiedChromeLlvmOrderfile", self.prep, self.bundle
+                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE: (
+                    toolchain._Handlers(
+                        "UnverifiedChromeLlvmOrderfile", self.prep, self.bundle
+                    )
                 ),
             },
         )
@@ -130,6 +132,7 @@ class PrepareForBuildTest(
         )
 
     def testPassesProfileInfo(self):
+        # pylint: disable=line-too-long
         request = toolchain_pb2.PrepareForToolchainBuildRequest(
             artifact_types=[
                 BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE
@@ -150,6 +153,7 @@ class PrepareForBuildTest(
                 chrome_cwp_profile="CWPVERSION"
             ),
         )
+        # pylint: enable=line-too-long
         toolchain.PrepareForBuild(request, self.response, self.api_config)
         self.prep.assert_called_once_with(
             "UnverifiedChromeLlvmOrderfile",
@@ -167,6 +171,7 @@ class PrepareForBuildTest(
         )
 
     def testPassesProfileInfoAfdoRelease(self):
+        # pylint: disable=line-too-long
         request = toolchain_pb2.PrepareForToolchainBuildRequest(
             artifact_types=[
                 BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE
@@ -189,6 +194,7 @@ class PrepareForBuildTest(
                 )
             ),
         )
+        # pylint: enable=line-too-long
         toolchain.PrepareForBuild(request, self.response, self.api_config)
         self.prep.assert_called_once_with(
             "UnverifiedChromeLlvmOrderfile",
@@ -206,6 +212,7 @@ class PrepareForBuildTest(
         )
 
     def testHandlesDuplicateInputArtifacts(self):
+        # pylint: disable=line-too-long
         request = toolchain_pb2.PrepareForToolchainBuildRequest(
             artifact_types=[
                 BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE
@@ -223,6 +230,7 @@ class PrepareForBuildTest(
                 ),
             ],
         )
+        # pylint: enable=line-too-long
         toolchain.PrepareForBuild(request, self.response, self.api_config)
         self.prep.assert_called_once_with(
             "UnverifiedChromeLlvmOrderfile",
@@ -259,8 +267,10 @@ class BundleToolchainTest(
             toolchain,
             "_TOOLCHAIN_ARTIFACT_HANDLERS",
             {
-                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE: toolchain._Handlers(
-                    "UnverifiedChromeLlvmOrderfile", self.prep, self.bundle
+                BuilderConfig.Artifacts.UNVERIFIED_CHROME_LLVM_ORDERFILE: (
+                    toolchain._Handlers(
+                        "UnverifiedChromeLlvmOrderfile", self.prep, self.bundle
+                    )
                 ),
             },
         )
@@ -411,7 +421,7 @@ class GetToolchainsForBoardTest(
         return toolchain_pb2.ToolchainsRequest(board=board)
 
     def testValidateOnly(self):
-        """Confidence check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         request = self._GetRequest()
         toolchain.GetToolchainsForBoard(
             request, self.response, self.validate_only_config

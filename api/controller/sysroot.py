@@ -65,7 +65,9 @@ def ExampleGetResponse():
                 artifact_type=cabs.Sysroot.ArtifactType.SIMPLE_CHROME_SYSROOT,
                 paths=[
                     common_pb2.Path(
-                        path="/tmp/sysroot_chromeos-base_chromeos-chrome.tar.xz",
+                        path=(
+                            "/tmp/sysroot_chromeos-base_chromeos-chrome.tar.xz"
+                        ),
                         location=common_pb2.Path.OUTSIDE,
                     )
                 ],
@@ -100,8 +102,8 @@ def GetArtifacts(
 ) -> list:
     """Builds and copies sysroot artifacts to specified output_dir.
 
-    Copies sysroot artifacts to output_dir, returning a list of (output_dir: str)
-    paths to the desired files.
+    Copies sysroot artifacts to output_dir, returning a list of
+    (output_dir: str) paths to the desired files.
 
     Args:
         in_proto: Proto request defining reqs.
@@ -114,6 +116,7 @@ def GetArtifacts(
         A list of dictionary mappings of ArtifactType to list of paths.
     """
     generated = []
+    # pylint: disable=line-too-long
     artifact_types = {
         in_proto.ArtifactType.SIMPLE_CHROME_SYSROOT: sysroot.CreateSimpleChromeSysroot,
         in_proto.ArtifactType.CHROME_EBUILD_ENV: sysroot.CreateChromeEbuildEnv,
@@ -121,6 +124,7 @@ def GetArtifacts(
         in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
         in_proto.ArtifactType.FUZZER_SYSROOT: sysroot.CreateFuzzerSysroot,
     }
+    # pylint: enable=line-too-long
 
     for output_artifact in in_proto.output_artifacts:
         for artifact_type, func in artifact_types.items():
@@ -309,7 +313,8 @@ def InstallPackages(input_proto, output_proto, _config):
         for x in input_proto.package_indexes
     ]
 
-    # Calculate which packages would have been merged, but don't install anything.
+    # Calculate which packages would have been merged, but don't install
+    # anything.
     dryrun = input_proto.flags.dryrun
 
     if not target_sysroot.IsToolchainInstalled():

@@ -154,7 +154,7 @@ class BoardBuildDependencyTest(
         patch.assert_not_called()
 
     def testMockCall(self):
-        """Test that a mock call does not execute logic, returns mocked value."""
+        """Test a mock call does not execute logic, returns mocked value."""
         patch = self.PatchObject(dependency_service, "GetBuildDependency")
         input_proto = depgraph_pb2.GetBuildDependencyGraphRequest()
         input_proto.build_target.name = "target"

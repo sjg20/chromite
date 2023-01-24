@@ -56,7 +56,7 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         return request
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(sdk_service, "Create")
 
         sdk_controller.Create(
@@ -151,7 +151,7 @@ class SdkDeleteTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         return request
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(sdk_service, "Delete")
 
         sdk_controller.Delete(
@@ -195,7 +195,7 @@ class SdkUnmountPathTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         return request
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(sdk_service, "UnmountPath")
 
         sdk_controller.UnmountPath(
@@ -246,7 +246,7 @@ class SdkUpdateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         return request
 
     def testValidateOnly(self):
-        """Sanity check that a validate only call does not execute any logic."""
+        """Verify a validate-only call does not execute any logic."""
         patch = self.PatchObject(sdk_service, "Update")
 
         sdk_controller.Update(
