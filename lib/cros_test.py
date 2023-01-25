@@ -65,6 +65,7 @@ class CrOSTest(object):
         self.tast_vars = opts.tast_vars
         self.tast_total_shards = opts.tast_total_shards
         self.tast_shard_index = opts.tast_shard_index
+        self.tast_shard_method = opts.tast_shard_method
         self.tast_retries = opts.tast_retries
         self.tast_extra_use_flags = []
         if opts.tast_extra_use_flags:
@@ -525,6 +526,8 @@ class CrOSTest(object):
             ]
         if self.tast_retries:
             cmd += ["-retries=%d" % self.tast_retries]
+        if self.tast_shard_method:
+            cmd += ["-shardmethod=%s" % self.tast_shard_method]
         if self._device.ssh_port:
             cmd += ["%s:%d" % (self._device.device, self._device.ssh_port)]
         else:
@@ -764,6 +767,10 @@ def ParseCommandLine(argv):
         type=int,
         default=0,
         help="Total number of shards when running Tast tests.",
+    )
+    parser.add_argument(
+        "--tast-shard-method",
+        help="The sharding algorithm used for Tast tests.",
     )
     parser.add_argument(
         "--tast-retries",
