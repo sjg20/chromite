@@ -76,10 +76,10 @@ def ShellQuote(s):
     run real programs and not shell ones.
 
     Args:
-      s: The string to quote.
+        s: The string to quote.
 
     Returns:
-      A safely (possibly quoted) string.
+        A safely (possibly quoted) string.
     """
     # If callers pass down bad types, don't blow up.
     if isinstance(s, bytes):
@@ -104,7 +104,7 @@ def ShellQuote(s):
         return "'%s'" % s
 
     # Have to use double quotes.  Escape the few chars that still expand when
-    # used inside of double quotes.
+    # used inside double quotes.
     for c in _SHELL_ESCAPE_CHARS:
         if c in s:
             s = s.replace(c, r"\%s" % c)
@@ -112,16 +112,16 @@ def ShellQuote(s):
 
 
 def TruncateStringToLine(s, maxlen=80):
-    """Truncate |s| to a maximum length of |maxlen| including elipsis (...)
+    """Truncate |s| to a maximum length of |maxlen| including ellipsis (...)
 
     Args:
-      s: A string.
-      maxlen: Maximum length of desired returned string. Must be at least 3.
+        s: A string.
+        maxlen: Maximum length of desired returned string. Must be at least 3.
 
     Returns:
-      s if len(s) <= maxlen already and s has no newline in it.
-      Otherwise, a single line truncation that ends with '...' and is of
-      length |maxlen|.
+        s if len(s) <= maxlen already and s has no newline in it.
+        Otherwise, a single line truncation that ends with '...' and is of
+        length |maxlen|.
     """
     assert maxlen >= 3
     line = s.splitlines()[0]
@@ -134,14 +134,14 @@ def TruncateStringToLine(s, maxlen=80):
 def ShellUnquote(s):
     """Do the opposite of ShellQuote.
 
-    This function assumes that the input is a valid escaped string. The behaviour
-    is undefined on malformed strings.
+    This function assumes that the input is a valid, escaped string. The
+    behaviour is undefined on malformed strings.
 
     Args:
-      s: An escaped string.
+        s: An escaped string.
 
     Returns:
-      The unescaped version of the string.
+        The unescaped version of the string.
     """
     if not s:
         return ""
@@ -172,18 +172,18 @@ def CmdToStr(cmd):
     quotes to keep them grouped, even if an argument has spaces in it.
 
     Examples:
-      ['a', 'b'] ==> "'a' 'b'"
-      ['a b', 'c'] ==> "'a b' 'c'"
-      ['a', 'b\'c'] ==> '\'a\' "b\'c"'
-      [u'a', "/'$b"] ==> '\'a\' "/\'$b"'
-      [] ==> ''
-      See unittest for additional (tested) examples.
+        ['a', 'b'] ==> "'a' 'b'"
+        ['a b', 'c'] ==> "'a b' 'c'"
+        ['a', 'b\'c'] ==> '\'a\' "b\'c"'
+        [u'a', "/'$b"] ==> '\'a\' "/\'$b"'
+        [] ==> ''
+        See unittest for additional (tested) examples.
 
     Args:
-      cmd: List of command arguments.
+        cmd: List of command arguments.
 
     Returns:
-      String representing full command.
+        String representing full command.
     """
     # If callers pass down bad types, triage it a bit.
     if isinstance(cmd, (list, tuple)):
@@ -197,8 +197,8 @@ def CmdToStr(cmd):
 class CompletedProcess(subprocess.CompletedProcess):
     """An object to store various attributes of a child process.
 
-    This is the same as subprocess.CompletedProcess except we allow None defaults
-    for |args| and |returncode|.
+    This is the same as subprocess.CompletedProcess except we allow None
+    defaults for |args| and |returncode|.
     """
 
     def __init__(self, args=None, returncode=None, **kwargs):
@@ -211,7 +211,10 @@ class CompletedProcess(subprocess.CompletedProcess):
 
     @property
     def cmdstr(self):
-        """Return self.cmd as a well shell-quoted string useful for log messages."""
+        """Return self.cmd as a well shell-quoted string.
+
+        Especially useful for log messages.
+        """
         if self.args is None:
             return ""
         else:
@@ -236,10 +239,10 @@ class CalledProcessError(subprocess.CalledProcessError):
     only |stdout|.
 
     Attributes:
-      returncode: The exit code of the process.
-      cmd: The command that triggered this exception.
-      msg: Short explanation of the error.
-      exception: The underlying Exception if available.
+        returncode: The exit code of the process.
+        cmd: The command that triggered this exception.
+        msg: Short explanation of the error.
+        exception: The underlying Exception if available.
     """
 
     def __init__(
@@ -258,7 +261,7 @@ class CalledProcessError(subprocess.CalledProcessError):
 
         super().__init__(returncode, cmd, stdout, stderr=stderr)
 
-        # The parent class will set |output|, so delete it.  If Python ever drops
+        # The parent class will set |output|, so delete it. If Python ever drops
         # this output/stdout compat logic, we can drop this to match.
         del self.output
         self.stdout = stdout
@@ -268,7 +271,10 @@ class CalledProcessError(subprocess.CalledProcessError):
 
     @property
     def cmdstr(self):
-        """Return self.cmd as a well shell-quoted string useful for log messages."""
+        """Return self.cmd as a well shell-quoted string.
+
+        Especially useful for log messages.
+        """
         if self.cmd is None:
             return ""
         else:
@@ -278,11 +284,11 @@ class CalledProcessError(subprocess.CalledProcessError):
         """Custom method for controlling what is included in stringifying this.
 
         Args:
-          stdout: Whether to include captured stdout in the return value.
-          stderr: Whether to include captured stderr in the return value.
+            stdout: Whether to include captured stdout in the return value.
+            stderr: Whether to include captured stderr in the return value.
 
         Returns:
-          A summary string for this result.
+            A summary string for this result.
         """
         items = [
             "return code: %s; command: %s" % (self.returncode, self.cmdstr),
@@ -327,10 +333,10 @@ class RunCommandError(CalledProcessError):
     """Error caught in run() method.
 
     Attributes:
-      args: Tuple of the attributes below.
-      msg: Short explanation of the error.
-      result: The CompletedProcess that triggered this error, if available.
-      exception: The underlying Exception if available.
+        args: Tuple of the attributes below.
+        msg: Short explanation of the error.
+        result: The CompletedProcess that triggered this error, if available.
+        exception: The underlying Exception if available.
     """
 
     def __init__(self, msg, result=None, exception=None):
@@ -371,22 +377,22 @@ def sudo_run(
     rules in our code about sudo usage, and as a potential auditing point.
 
     Args:
-      cmd: The command to run.  See run for rules of this argument: sudo_run
-           purely prefixes it with sudo.
-      user: The user to run the command as.
-      preserve_env: Whether to preserve the environment.
-      kwargs: See run() options, it's a direct pass thru to it.
+        cmd: The command to run.  See run for rules of this argument: sudo_run
+            purely prefixes it with sudo.
+        user: The user to run the command as.
+        preserve_env: Whether to preserve the environment.
+        kwargs: See run() options, it's a direct pass thru to it.
             Note that this supports a 'strict' keyword that defaults to True.
             If set to False, it'll suppress strict sudo behavior.
 
     Returns:
-      See run documentation.
+        See run documentation.
 
     Raises:
-      This function may immediately raise RunCommandError if we're operating
-      in a strict sudo context and the API is being misused.
-      Barring that, see run's documentation: it can raise the same things run
-      does.
+        This function may immediately raise RunCommandError if we're operating
+        in a strict sudo context and the API is being misused.
+        Barring that, see run's documentation: it can raise the same things run
+        does.
     """
     sudo_cmd = ["sudo"]
 
@@ -398,8 +404,9 @@ def sudo_run(
     if strict and STRICT_SUDO:
         if "CROS_SUDO_KEEP_ALIVE" not in os.environ:
             raise RunCommandError(
-                "We were invoked in a strict sudo non - interactive context, but no "
-                "sudo keep alive daemon is running.  This is a bug in the code.",
+                "We were invoked in a strict sudo non - interactive context, "
+                "but no sudo keep alive daemon is running. This is a bug in "
+                "the code.",
                 CompletedProcess(args=cmd, returncode=126),
             )
         sudo_cmd += ["-n"]
@@ -447,15 +454,16 @@ def _KillChildProcess(
     This is internal to run.  No other code should use this.
     """
     if signum:
-        # If we've been invoked because of a signal, ignore delivery of that signal
-        # from this point forward.  The invoking context of _KillChildProcess
-        # restores signal delivery to what it was prior; we suppress future delivery
-        # till then since this code handles SIGINT/SIGTERM fully including
-        # delivering the signal to the original handler on the way out.
+        # If we've been invoked because of a signal, ignore delivery of that
+        # signal from this point forward.  The invoking context of
+        # _KillChildProcess restores signal delivery to what it was prior; we
+        # suppress future delivery till then since this code handles
+        # SIGINT/SIGTERM fully including delivering the signal to the original
+        # handler on the way out.
         signal.signal(signum, signal.SIG_IGN)
 
-    # Do not trust Popen's returncode alone; we can be invoked from contexts where
-    # the Popen instance was created, but no process was generated.
+    # Do not trust Popen's returncode alone; we can be invoked from contexts
+    # where the Popen instance was created, but no process was generated.
     if proc.returncode is None and proc.pid is not None:
         try:
             while proc.poll_lock_breaker() is None and int_timeout >= 0:
@@ -493,19 +501,19 @@ class _Popen(subprocess.Popen):
     to the sudo machinery we have.
 
     While we're overriding send_signal, we also suppress ESRCH being raised
-    if the process has exited, and suppress signaling all together if the process
-    has knowingly been waitpid'd already.
+    if the process has exited, and suppress signaling all together if the
+    process has knowingly been waitpid'd already.
     """
 
     # Pylint seems to be buggy with the send_signal signature detection.
     # pylint: disable=arguments-differ
     def send_signal(self, sig):
         if self.returncode is not None:
-            # The original implementation in Popen would allow signaling whatever
-            # process now occupies this pid, even if the Popen object had waitpid'd.
-            # Since we can escalate to sudo kill, we do not want to allow that.
-            # Fixing this addresses that angle, and makes the API less sucky in the
-            # process.
+            # The original implementation in Popen would allow signaling
+            # whatever process now occupies this pid, even if the Popen object
+            # had waitpid'd. Since we can escalate to sudo kill, we do not want
+            # to allow that. Fixing this addresses that angle, and makes the API
+            # less sucky in the process.
             return
 
         try:
@@ -523,15 +531,16 @@ class _Popen(subprocess.Popen):
                     check=False,
                 )
                 if ret.returncode == 1:
-                    # The kill binary doesn't distinguish between permission denied,
-                    # and the pid is missing.  Denied can only occur under weird
-                    # grsec/selinux policies.  We ignore that potential and just
-                    # assume the pid was already dead and try to reap it.
+                    # The kill binary doesn't distinguish between permission
+                    # denied, and the pid is missing.  Denied can only occur
+                    # under weird grsec/selinux policies.  We ignore that
+                    # potential and just assume the pid was already dead and try
+                    # to reap it.
                     self.poll()
             elif e.errno == errno.ESRCH:
-                # Since we know the process is dead, reap it now.
-                # Normally Popen would throw this error- we suppress it since frankly
-                # that's a misfeature and we're already overriding this method.
+                # Since we know the process is dead, reap it now. Normally Popen
+                # would throw this error - we suppress it since frankly that's a
+                # misfeature, and we're already overriding this method.
                 self.poll()
             else:
                 raise
@@ -590,65 +599,69 @@ def run(
     """Runs a command.
 
     Args:
-      cmd: cmd to run.  Should be input to subprocess.Popen. If a string, shell
-        must be true. Otherwise the command must be an array of arguments, and
-        shell must be false.
-      print_cmd: prints the command before running it.
-      stdout: Where to send stdout.  This may be many things to control
+        cmd: cmd to run.  Should be input to subprocess.Popen. If a string,
+            shell must be true. Otherwise, the command must be an array of
+            arguments, and shell must be false.
+        print_cmd: prints the command before running it.
+        stdout: Where to send stdout.  This may be many things to control
         redirection:
-          * None is the default; the existing stdout is used.
-          * An existing file object (must be opened with mode 'w' or 'wb').
-          * A string to a file (will be truncated & opened automatically).
-          * subprocess.PIPE to capture & return the output.
-          * A boolean to indicate whether to capture the output.
-            True will capture the output via a tempfile (good for large output).
-          * An open file descriptor (as a positive integer).
-      stderr: Where to send stderr.  See |stdout| for possible values.  This also
-        may be subprocess.STDOUT to indicate stderr & stdout should be combined.
-      cwd: the working directory to run this cmd.
-      input: The data to pipe into this command through stdin.  If a file object
-        or file descriptor, stdin will be connected directly to that.
-      enter_chroot: this command should be run from within the chroot.  If set,
-        cwd must point to the scripts directory. If we are already inside the
-        chroot, this command will be run as if |enter_chroot| is False.
-      shell: Controls whether we add a shell as a command interpreter.  See cmd
-        since it has to agree as to the type.
-      env: If non-None, this is the environment for the new process.  If
-        enter_chroot is true then this is the environment of the enter_chroot,
-        most of which gets removed from the cmd run.
-      extra_env: If set, this is added to the environment for the new process.
-        In enter_chroot=True case, these are specified on the post-entry
-        side, and so are often more useful.  This dictionary is not used to
-        clear any entries though.
-      ignore_sigint: If True, we'll ignore signal.SIGINT before calling the
-        child.  This is the desired behavior if we know our child will handle
-        Ctrl-C.  If we don't do this, I think we and the child will both get
-        Ctrl-C at the same time, which means we'll forcefully kill the child.
-      chroot_args: An array of arguments for the chroot environment wrapper.
-      debug_level: The debug level of run's output.
-      check: Whether to raise an exception when command returns a non-zero exit
-        code, or return the CompletedProcess object containing the exit code.
-        Note: will still raise an exception if the cmd file does not exist.
-      int_timeout: If we're interrupted, how long (in seconds) should we give the
-        invoked process to clean up before we send a SIGTERM.
-      kill_timeout: If we're interrupted, how long (in seconds) should we give the
-        invoked process to shutdown from a SIGTERM before we SIGKILL it.
-      log_output: Log the command and its output automatically.
-      capture_output: Set |stdout| and |stderr| to True.
-      encoding: Encoding for stdin/stdout/stderr, otherwise bytes are used.  Most
-        users want 'utf-8' here for string data.
-      errors: How to handle errors when |encoding| is used.  Defaults to 'strict',
-        but 'ignore' and 'replace' are common settings.
-      dryrun: Only log the command,and return a stub result.
+            * None is the default; the existing stdout is used.
+            * An existing file object (must be opened with mode 'w' or 'wb').
+            * A string to a file (will be truncated & opened automatically).
+            * subprocess.PIPE to capture & return the output.
+            * A boolean to indicate whether to capture the output. True will
+                capture the output via a tempfile (good for large output).
+            * An open file descriptor (as a positive integer).
+        stderr: Where to send stderr.  See |stdout| for possible values. This
+            also may be subprocess.STDOUT to indicate stderr & stdout should be
+            combined.
+        cwd: the working directory to run this cmd.
+        input: The data to pipe into this command through stdin.  If a file
+            object or file descriptor, stdin will be connected directly to that.
+        enter_chroot: this command should be run from within the chroot. If set,
+            cwd must point to the scripts directory. If we are already inside
+            the chroot, this command will be run as if |enter_chroot| is False.
+        shell: Controls whether we add a shell as a command interpreter. See cmd
+            since it has to agree as to the type.
+        env: If non-None, this is the environment for the new process.  If
+            enter_chroot is true then this is the environment of the
+            enter_chroot, most of which gets removed from the cmd run.
+        extra_env: If set, this is added to the environment for the new process.
+            In enter_chroot=True case, these are specified on the post-entry
+            side, and so are often more useful.  This dictionary is not used to
+            clear any entries though.
+        ignore_sigint: If True, we'll ignore signal.SIGINT before calling the
+            child. This is the desired behavior if we know our child will handle
+            Ctrl-C.  If we don't do this, I think we and the child will both get
+            Ctrl-C at the same time, which means we'll forcefully kill the
+            child.
+        chroot_args: An array of arguments for the chroot environment wrapper.
+        debug_level: The debug level of run's output.
+        check: Whether to raise an exception when command returns a non-zero
+            exit code, or return the CompletedProcess object containing the exit
+            code.
+            Note: will still raise an exception if the cmd file does not exist.
+        int_timeout: If we're interrupted, how long (in seconds) should we give
+            the invoked process to clean up before we send a SIGTERM.
+        kill_timeout: If we're interrupted, how long (in seconds) should we give
+            the invoked process to shutdown from a SIGTERM before we SIGKILL it.
+        log_output: Log the command and its output automatically.
+        capture_output: Set |stdout| and |stderr| to True.
+        encoding: Encoding for stdin/stdout/stderr, otherwise bytes are used.
+            Most users want 'utf-8' here for string data.
+        errors: How to handle errors when |encoding| is used.  Defaults to
+            'strict', but 'ignore' and 'replace' are common settings.
+        dryrun: Only log the command,and return a stub result.
 
     Returns:
-      A CompletedProcess object.
+        A CompletedProcess object.
 
     Raises:
-      RunCommandError: Raised on error.
+        RunCommandError: Raised on error.
     """
     # Hide this function in pytest tracebacks when a RunCommandError is raised,
-    # as seeing the contents of this function when a command fails is not helpful.
+    # as seeing the contents of this function when a command fails is not
+    # helpful.
     # https://docs.pytest.org/en/latest/example/simple.html#writing-well-integrated-assertion-helpers
     __tracebackhide__ = operator.methodcaller("errisinstance", RunCommandError)
 
@@ -700,9 +713,10 @@ def run(
             if e.errno != errno.ENOENT:
                 raise
             # This can occur if we were pointed at a specific location for our
-            # TMP, but that location has since been deleted.  Suppress that issue
-            # in this particular case since our usage gurantees deletion,
-            # and since this is primarily triggered during hard cgroups shutdown.
+            # TMP, but that location has since been deleted.  Suppress that
+            # issue in this particular case since our usage guarantees deletion,
+            # and since this is primarily triggered during hard cgroups
+            # shutdown.
             return UnbufferedTemporaryFile(dir="/tmp")
 
     # Modify defaults based on parameters.
@@ -719,7 +733,8 @@ def run(
         popen_stdout = stdout
         log_stdout_to_file = True
     elif isinstance(stdout, bool):
-        # This check must come before isinstance(int) because bool subclasses int.
+        # This check must come before isinstance(int) because bool subclasses
+        # int.
         if stdout:
             popen_stdout = _get_tempfile()
     elif isinstance(stdout, int):
@@ -737,7 +752,8 @@ def run(
         popen_stderr = stderr
         log_stderr_to_file = True
     elif isinstance(stderr, bool):
-        # This check must come before isinstance(int) because bool subclasses int.
+        # This check must come before isinstance(int) because bool subclasses
+        # int.
         if stderr:
             popen_stderr = _get_tempfile()
     elif isinstance(stderr, int):
@@ -755,8 +771,9 @@ def run(
     # Otherwise we assume it's a file object that can be read from directly.
     if isinstance(input, (str, bytes)):
         stdin = subprocess.PIPE
-        # Allow people to always pass in bytes or strings regardless of encoding.
-        # Our Popen usage takes care of converting everything to bytes first.
+        # Allow people to always pass in bytes or strings regardless of
+        # encoding. Our Popen usage takes care of converting everything to bytes
+        # first.
         #
         # Linter can't see that we're using |input| as a var, not a builtin.
         # pylint: disable=input-builtin
@@ -799,9 +816,10 @@ def run(
     if enter_chroot and not IsInsideChroot():
         wrapper = ["cros_sdk"]
         if cwd:
-            # If the current working directory is set, try to find cros_sdk relative
-            # to cwd. Generally cwd will be the buildroot therefore we want to use
-            # {cwd}/chromite/bin/cros_sdk. For more info PTAL at crbug.com/432620
+            # If the current working directory is set, try to find cros_sdk
+            # relative to cwd. Generally cwd will be the buildroot therefore we
+            # want to use {cwd}/chromite/bin/cros_sdk. For more info PTAL at
+            # crbug.com/432620
             path = os.path.join(cwd, constants.CHROMITE_BIN_SUBDIR, "cros_sdk")
             if os.path.exists(path):
                 wrapper = [path]
@@ -905,9 +923,9 @@ def run(
                 elif log_stderr_to_file:
                     popen_stderr.close()
         except _TerminateRunCommandError as e:
-            # If we were killed by a signal (like SIGTERM in case of a timeout), don't
-            # swallow the output completely as it can be a huge help for figuring out
-            # why the command failed.
+            # If we were killed by a signal (like SIGTERM in case of a timeout),
+            # don't swallow the output completely as it can be a huge help for
+            # figuring out why the command failed.
             e.stdout = e.result.stdout = cmd_result.stdout
             e.stderr = e.result.stderr = cmd_result.stderr
             raise
@@ -916,8 +934,8 @@ def run(
 
         # The try/finally block is a bit hairy.  We normally want the logged
         # output to be what gets passed back up.  But if there's a decode error,
-        # we don't want it to break logging entirely.  If the output had a lot of
-        # newlines, always logging it as bytes wouldn't be human readable.
+        # we don't want it to break logging entirely.  If the output had a lot
+        # of newlines, always logging it as bytes wouldn't be human readable.
         try:
             if encoding:
                 if cmd_result.stdout is not None:
@@ -957,7 +975,7 @@ def run(
             )
 
     # We might capture stdout/stderr for internal reasons (like logging), but we
-    # don't want to let it leak back out to the callers.  They only get output if
+    # don't want to let it leak back out to the callers. They only get output if
     # they explicitly requested it.
     if stdout is None:
         cmd_result.stdout = None
@@ -990,7 +1008,7 @@ def Die(message, *args, **kwargs):
     """Emits an error message with a stack trace and halts execution.
 
     Args:
-      message: The message to be emitted before exiting.
+        message: The message to be emitted before exiting.
     """
     logging.error(message, *args, **kwargs)
     raise DieSystemExit(1)
@@ -1002,11 +1020,11 @@ def GetSysrootToolPath(sysroot, tool_name):
     Does not check that the tool actually exists.
 
     Args:
-      sysroot: build root of the system in question.
-      tool_name: string name of tool desired (e.g. 'equery').
+        sysroot: build root of the system in question.
+        tool_name: string name of tool desired (e.g. 'equery').
 
     Returns:
-      string path to tool inside the sysroot.
+        string path to tool inside the sysroot.
     """
     if sysroot == "/":
         return os.path.join(sysroot, "usr", "bin", tool_name)
@@ -1082,11 +1100,12 @@ def HostIsCIBuilder(fq_hostname=None, golo_only=False, gce_only=False):
     """Return True iff a host is a continuous-integration builder.
 
     Args:
-      fq_hostname: The fully qualified hostname. By default, we fetch it for you.
-      golo_only: Only return True if the host is in the Chrome Golo. Defaults to
-        False.
-      gce_only: Only return True if the host is in the Chrome GCE block. Defaults
-        to False.
+        fq_hostname: The fully qualified hostname. By default, we fetch it for
+            you.
+        golo_only: Only return True if the host is in the Chrome Golo. Defaults
+            to False.
+        gce_only: Only return True if the host is in the Chrome GCE block.
+            Defaults to False.
     """
     if not fq_hostname:
         fq_hostname = GetHostName(fully_qualified=True)
@@ -1123,14 +1142,14 @@ def FindCompressor(
     over the single threaded one.
 
     Args:
-      compression: The type of compression desired.
-      chroot: Optional path to a chroot to search.
+        compression: The type of compression desired.
+        chroot: Optional path to a chroot to search.
 
     Returns:
-      Path to a compressor.
+        Path to a compressor.
 
     Raises:
-      ValueError: If compression is unknown.
+        ValueError: If compression is unknown.
     """
     if compression == CompressionType.XZ:
         return os.path.join(constants.CHROMITE_SCRIPTS_DIR, "xz_auto")
@@ -1164,10 +1183,10 @@ def CompressionDetectType(path: Union[str, os.PathLike]) -> CompressionType:
     """Detect the type of compression used by |path| by sniffing its data.
 
     Args:
-      path: The file to sniff.
+        path: The file to sniff.
 
     Returns:
-      The compression type if we could detect it.
+        The compression type if we could detect it.
     """
     if not isinstance(path, Path):
         path = Path(path)
@@ -1191,10 +1210,10 @@ def CompressionStrToType(s: str) -> Optional[CompressionType]:
     """Convert a compression string type to a constant.
 
     Args:
-      s: string to check
+        s: string to check
 
     Returns:
-      A constant, or None if the compression type is unknown.
+        A constant, or None if the compression type is unknown.
     """
     _COMP_STR = {
         "gz": CompressionType.GZIP,
@@ -1212,10 +1231,10 @@ def CompressionExtToType(file_name: Union[Path, str]) -> CompressionType:
     """Retrieve a compression type constant from a compression file's name.
 
     Args:
-      file_name: Name of a compression file.
+        file_name: Name of a compression file.
 
     Returns:
-      A constant, return CompressionType.NONE if the extension is unknown.
+        A constant, return CompressionType.NONE if the extension is unknown.
     """
     ext = os.path.splitext(file_name)[-1]
     _COMP_EXT = {
@@ -1234,9 +1253,9 @@ def CompressFile(infile, outfile):
     """Compress a file using compressor specified by |outfile| suffix.
 
     Args:
-      infile: File to compress.
-      outfile: Name of output file. Compression used is based on the
-               type of suffix of the name specified (e.g.: .bz2).
+        infile: File to compress.
+        outfile: Name of output file. Compression used is based on the
+            type of suffix of the name specified (e.g.: .bz2).
     """
     comp_type = CompressionExtToType(outfile)
     assert comp_type and comp_type != CompressionType.NONE
@@ -1248,9 +1267,9 @@ def UncompressFile(infile, outfile):
     """Uncompress a file using compressor specified by |infile| suffix.
 
     Args:
-      infile: File to uncompress. Compression used is based on the
-              type of suffix of the name specified (e.g.: .bz2).
-      outfile: Name of output file.
+        infile: File to uncompress. Compression used is based on the
+            type of suffix of the name specified (e.g.: .bz2).
+        outfile: Name of output file.
     """
     comp_type = CompressionExtToType(infile)
     assert comp_type and comp_type != CompressionType.NONE
@@ -1280,23 +1299,24 @@ def CreateTarball(
     """Create a tarball.  Executes 'tar' on the commandline.
 
     Args:
-      tarball_path: The path of the tar file to generate. Can be file descriptor.
-      cwd: The directory to run the tar command.
-      sudo: Whether to run with "sudo".
-      compression: The type of compression desired.  See the FindCompressor
-        function for details.
-      chroot: See FindCompressor().
-      inputs: A list of files or directories to add to the tarball.  If unset,
-        defaults to ".".
-      timeout: The number of seconds to wait on soft failure.
-      extra_args: A list of extra args to pass to "tar".
-      kwargs: Any run options/overrides to use.
+        tarball_path: The path of the tar file to generate. Can be file
+            descriptor.
+        cwd: The directory to run the tar command.
+        sudo: Whether to run with "sudo".
+        compression: The type of compression desired.  See the FindCompressor
+            function for details.
+        chroot: See FindCompressor().
+        inputs: A list of files or directories to add to the tarball.  If unset,
+            defaults to ".".
+        timeout: The number of seconds to wait on soft failure.
+        extra_args: A list of extra args to pass to "tar".
+        kwargs: Any run options/overrides to use.
 
     Returns:
-      The cmd_result object returned by the run invocation.
+        The cmd_result object returned by the run invocation.
 
     Raises:
-      TarballError: if the tar command failed, possibly after retry.
+        TarballError: if the tar command failed, possibly after retry.
     """
     if inputs is None:
         inputs = ["."]
@@ -1349,10 +1369,10 @@ def CreateTarball(
                 **dict(kwargs, check=False, input=rc_input, stdout=rc_stdout),
             )
         except RunCommandError as rce:
-            # There are cases where run never executes the command (cannot find tar,
-            # cannot execute tar, such as when cwd does not exist). Although the run
-            # command will show low-level problems, we also want to log the context
-            # of what CreateTarball was trying to do.
+            # There are cases where run never executes the command (cannot find
+            # tar, cannot execute tar, such as when cwd does not exist).
+            # Although the run command will show low-level problems, we also
+            # want to log the context of what CreateTarball was trying to do.
             logging.error(
                 "CreateTarball unable to run tar for %s in %s. cmd={%s}",
                 tarball_path,
@@ -1363,10 +1383,10 @@ def CreateTarball(
         if result.returncode == 0:
             return result
         if result.returncode != 1 or try_count > 1:
-            # Since the build is abandoned at this point, we will take 5
-            # entire minutes to track down the competing process.
-            # Error will have the low-level tar command error, so log the context
-            # of the tar command (tarball_path file, current working dir).
+            # Since the build is abandoned at this point, we will take 5 entire
+            # minutes to track down the competing process. Error will have the
+            # low-level tar command error, so log the context of the tar command
+            # (tarball_path file, current working dir).
             logging.error(
                 "CreateTarball failed creating %s in %s. cmd={%s}",
                 tarball_path,
@@ -1397,18 +1417,18 @@ def ExtractTarball(
     extension and extracts the tarball into the install_path.
 
     Args:
-      tarball_path: Path to the tarball to extract.
-      install_path: Path to extract the tarball to.
-      files_to_extract: String of specific files in the tarball to extract.
-      excluded_files: String of files to not extract.
-      return_extracted_files: whether or not the caller expects the list of
-        files extracted; if False, returns an empty list.
+        tarball_path: Path to the tarball to extract.
+        install_path: Path to extract the tarball to.
+        files_to_extract: String of specific files in the tarball to extract.
+        excluded_files: String of files to not extract.
+        return_extracted_files: whether the caller expects the list of files
+            extracted; if False, returns an empty list.
 
     Returns:
-      List of absolute paths of the files extracted (possibly empty).
+        List of absolute paths of the files extracted (possibly empty).
 
     Raises:
-      TarballError: if the tar command failed
+        TarballError: if the tar command failed
     """
     # Use a separate decompression program - this enables parallel decompression
     # in some cases.
@@ -1487,12 +1507,12 @@ def GetChoice(title, options, group_size=0):
     from the first few choices.
 
     Args:
-      title: The text to display before listing options.
-      options: Iterable which provides options to display.
-      group_size: How many options to show before asking the user to choose.
+        title: The text to display before listing options.
+        options: Iterable which provides options to display.
+        group_size: How many options to show before asking the user to choose.
 
     Returns:
-      An integer of the index in |options| the user picked.
+        An integer of the index in |options| the user picked.
     """
 
     def PromptForChoice(max_choice, more):
@@ -1538,14 +1558,14 @@ def BooleanPrompt(
     """Helper function for processing boolean choice prompts.
 
     Args:
-      prompt: The question to present to the user.
-      default: Boolean to return if the user just presses enter.
-      true_value: The text to display that represents a True returned.
-      false_value: The text to display that represents a False returned.
-      prolog: The text to display before prompt.
+        prompt: The question to present to the user.
+        default: Boolean to return if the user just presses enter.
+        true_value: The text to display that represents a True returned.
+        false_value: The text to display that represents a False returned.
+        prolog: The text to display before prompt.
 
     Returns:
-      True or False.
+        True or False.
     """
     true_value, false_value = true_value.lower(), false_value.lower()
     true_text, false_text = true_value, false_value
@@ -1591,25 +1611,25 @@ def BooleanShellValue(sval, default, msg=None):
 
     Often times people set shell variables to different values to mean "true"
     or "false".  For example, they can do:
-      export FOO=yes
-      export BLAH=1
-      export MOO=true
+        export FOO=yes
+        export BLAH=1
+        export MOO=true
     Handle all that user ugliness here.
 
     If the user picks an invalid value, you can use |msg| to display a non-fatal
     warning rather than raising an exception.
 
     Args:
-      sval: The string value we got from the user.
-      default: If we can't figure out if the value is true or false, use this.
-      msg: If |sval| is an unknown value, use |msg| to warn the user that we
+        sval: The string value we got from the user.
+        default: If we can't figure out if the value is true or false, use this.
+        msg: If |sval| is an unknown value, use |msg| to warn the user that we
            could not decode the input.  Otherwise, raise ValueError().
 
     Returns:
-      The interpreted boolean value of |sval|.
+        The interpreted boolean value of |sval|.
 
     Raises:
-      ValueError() if |sval| is an unknown value and |msg| is not set.
+        ValueError() if |sval| is an unknown value and |msg| is not set.
     """
     if sval is None:
         return default
@@ -1662,9 +1682,9 @@ class ContextManagerStack(object):
     """Context manager that is designed to safely allow nesting and stacking.
 
     Python2.7 directly supports a with syntax generally removing the need for
-    this, although this form avoids indentation hell if there is a lot of context
-    managers.  It also permits more programmatic control and allowing conditional
-    usage.
+    this, although this form avoids indentation hell if there is a lot of
+    context managers.  It also permits more programmatic control and allowing
+    conditional usage.
 
     For Python2.6, see http://docs.python.org/library/contextlib.html; the short
     version is that there is a race in the available stdlib/language rules under
@@ -1691,13 +1711,14 @@ class ContextManagerStack(object):
         Invoking it in the form specified eliminates that race.
 
         Args:
-          functor: A callable to instantiate a context manager.
-          args and kwargs: positional and optional args to functor.
+            functor: A callable to instantiate a context manager.
+            args and kwargs: positional and optional args to functor.
 
         Returns:
-          The newly created (and __enter__'d) context manager.
-          Note: This is not the same value as the "with" statement -- that returns
-          the value from the __enter__ function while this is the manager itself.
+            The newly created (and __enter__'d) context manager.
+            Note: This is not the same value as the "with" statement -- that
+                returns the value from the __enter__ function while this is the
+                manager itself.
         """
         obj = None
         try:
@@ -1715,9 +1736,10 @@ class ContextManagerStack(object):
         return self
 
     def __exit__(self, exc_type, exc, exc_tb):
-        # Exit each context manager in stack in reverse order, tracking the results
-        # to know whether or not to suppress the exception raised (or to switch that
-        # exception to a new one triggered by an individual handler's __exit__).
+        # Exit each context manager in stack in reverse order, tracking the
+        # results to know whether or not to suppress the exception raised (or to
+        # switch that exception to a new one triggered by an individual
+        # handler's __exit__).
         for handler in reversed(self._stack):
             # pylint: disable=bare-except
             try:
@@ -1732,23 +1754,24 @@ class ContextManagerStack(object):
         if all(x is None for x in (exc_type, exc, exc_tb)):
             return True
 
-        # Raise any exception that is left over from exiting all context managers.
-        # Normally a single context manager would return False to allow caller to
-        # re-raise the exception itself, but here the exception might have been
-        # raised during the exiting of one of the individual context managers.
+        # Raise any exception that is left over from exiting all context
+        # managers. Normally a single context manager would return False to
+        # allow caller to re-raise the exception itself, but here the exception
+        # might have been raised during the exiting of one of the individual
+        # context managers.
         raise exc.with_traceback(exc_tb)
 
 
 def iflatten_instance(iterable, terminate_on_kls=(str, bytes)):
     """Derivative of snakeoil.lists.iflatten_instance; flatten an object.
 
-    Given an object, flatten it into a single depth iterable-
+    Given an object, flatten it into a single depth iterable,
     stopping descent on objects that either aren't iterable, or match
     isinstance(obj, terminate_on_kls).
 
     Examples:
-      >>> print list(iflatten_instance([1, 2, "as", ["4", 5]))
-      [1, 2, "as", "4", 5]
+        >>> print list(iflatten_instance([1, 2, "as", ["4", 5]))
+        [1, 2, "as", "4", 5]
     """
 
     def descend_into(item):
@@ -1758,7 +1781,7 @@ def iflatten_instance(iterable, terminate_on_kls=(str, bytes)):
             iter(item)
         except TypeError:
             return False
-        # Note strings can be infinitely descended through- thus this
+        # Note strings can be infinitely descended through - thus this
         # recursion limiter.
         return not isinstance(item, str) or len(item) > 1
 
@@ -1781,11 +1804,11 @@ def UserDateTimeFormat(timeval=None):
     use the RFC 2822 date format (with timezone name appended).
 
     Args:
-      timeval: Either a datetime object or a floating point time value as accepted
-               by gmtime()/localtime().  If None, the current time is used.
+        timeval: Either a datetime object or a floating point time value as
+            accepted by gmtime()/localtime(). If None, the current time is used.
 
     Returns:
-      A string format such as 'Wed, 20 Feb 2013 15:25:15 -0500 (EST)'
+        A string format such as 'Wed, 20 Feb 2013 15:25:15 -0500 (EST)'
     """
     if isinstance(timeval, datetime.datetime):
         timeval = time.mktime(timeval.timetuple())
@@ -1801,11 +1824,11 @@ def ParseUserDateTimeFormat(time_string):
     This function is essentially the inverse of UserDateTimeFormat.
 
     Args:
-      time_string: A string datetime represetation in RFC 2822 format, such as
-                   'Wed, 20 Feb 2013 15:25:15 -0500 (EST)'.
+        time_string: A string datetime representation in RFC 2822 format, such
+            as 'Wed, 20 Feb 2013 15:25:15 -0500 (EST)'.
 
     Returns:
-      Floating point Unix timestamp (seconds since epoch).
+        Floating point Unix timestamp (seconds since epoch).
     """
     return email.utils.mktime_tz(email.utils.parsedate_tz(time_string))
 
@@ -1814,8 +1837,8 @@ def GetDefaultBoard():
     """Gets the default board.
 
     Returns:
-      The default board (as a string), or None if either the default board
-      file was missing or malformed.
+        The default board (as a string), or None if either the default board
+        file was missing or malformed.
     """
     default_board_file_name = os.path.join(
         constants.SOURCE_ROOT, "src", "scripts", ".default_board"
@@ -1841,10 +1864,10 @@ def SetDefaultBoard(board: str):
     """Set the default board.
 
     Args:
-      board: The name of the board to save as the default.
+        board: The name of the board to save as the default.
 
     Returns:
-      bool - True if successfully wrote default, False otherwise.
+        bool - True if successfully wrote default, False otherwise.
     """
     config_path = os.path.join(constants.CROSUTILS_DIR, ".default_board")
     try:
@@ -1864,17 +1887,17 @@ def GetBoard(device_board, override_board=None, force=False, strict=False):
     both None.
 
     Args:
-      device_board: The board detected on the device.
-      override_board: Overrides the board.
-      force: Force using the default board if |device_board| is None.
-      strict: If True, abort if no valid board can be found.
+        device_board: The board detected on the device.
+        override_board: Overrides the board.
+        force: Force using the default board if |device_board| is None.
+        strict: If True, abort if no valid board can be found.
 
     Returns:
-      Returns the first non-None board in the following order:
-      |override_board|, |device_board|, and GetDefaultBoard().
+        Returns the first non-None board in the following order:
+        |override_board|, |device_board|, and GetDefaultBoard().
 
     Raises:
-      DieSystemExit: If board is not set or user enters no.
+        DieSystemExit: If board is not set or user enters no.
     """
     if override_board:
         return override_board
@@ -1910,19 +1933,19 @@ def GetRandomString():
 def MachineDetails():
     """Returns a string to help identify the source of a job.
 
-    This is not meant for machines to parse; instead, we want content that is easy
-    for humans to read when trying to figure out where "something" is coming from.
-    For example, when a service has grabbed a lock in Google Storage, and we want
-    to see what process actually triggered that (in case it is a test gone rogue),
-    the content in here should help triage.
+    This is not meant for machines to parse; instead, we want content that is
+    easy for humans to read when trying to figure out where "something" is
+    coming from. For example, when a service has grabbed a lock in Google
+    Storage, and we want to see what process actually triggered that (in case it
+    is a test gone rogue), the content in here should help triage.
 
-    Note: none of the details included may be secret so they can be freely pasted
-    into bug reports/chats/logs/etc...
+    Note: none of the details included may be secret, so they can be freely
+        pasted into bug reports/chats/logs/etc...
 
     Note: this content should not be large
 
     Returns:
-      A string with content that helps identify this system/process/etc...
+        A string with content that helps identify this system/process/etc...
     """
     return (
         "\n".join(
