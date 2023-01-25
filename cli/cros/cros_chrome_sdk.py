@@ -1685,6 +1685,9 @@ class ChromeSDKCommand(command.CliCommand):
         gn_args["target_sysroot"] = sysroot
         gn_args.pop("pkg_config", None)
 
+        # Use Chrome's host sysroot settings for building outside chroot.
+        gn_args.pop("use_sysroot", None)
+
         # --internal == --chrome-branding + --official
         if options.chrome_branding or options.internal:
             gn_args["is_chrome_branded"] = True
