@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1a\x63hromiumos/conductor.proto\x12\nchromiumos\x1a\x1b\x63hromiumos/checkpoint.proto\"\xe7\x01\n\tRetryRule\x12\x0e\n\x06status\x18\x01 \x03(\x05\x12\x17\n\x0f\x62uilder_name_re\x18\x02 \x03(\t\x12\x1b\n\x13summary_markdown_re\x18\x03 \x03(\t\x12\x30\n\x11\x66\x61iled_checkpoint\x18\x04 \x01(\x0e\x32\x15.chromiumos.RetryStep\x12\x16\n\x0e\x63utoff_percent\x18\x05 \x01(\x02\x12\x16\n\x0e\x63utoff_seconds\x18\x06 \x01(\x05\x12\x13\n\x0bmax_retries\x18\x07 \x01(\x05\x12\x1d\n\x15max_retries_per_build\x18\x08 \x01(\x05\"5\n\rCollectConfig\x12$\n\x05rules\x18\x01 \x03(\x0b\x32\x15.chromiumos.RetryRule\"\xcf\x01\n\x0f\x43onductorConfig\x12 \n\x18polling_interval_seconds\x18\x01 \x01(\x05\x12H\n\x0f\x63ollect_configs\x18\x02 \x03(\x0b\x32/.chromiumos.ConductorConfig.CollectConfigsEntry\x1aP\n\x13\x43ollectConfigsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12(\n\x05value\x18\x02 \x01(\x0b\x32\x19.chromiumos.CollectConfig:\x02\x38\x01\x42Y\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x1a\x63hromiumos/conductor.proto\x12\nchromiumos\x1a\x1b\x63hromiumos/checkpoint.proto\"\x9b\x02\n\tRetryRule\x12\x14\n\x0cinsufficient\x18\n \x01(\x08\x12\x0e\n\x06status\x18\x01 \x03(\x05\x12\x17\n\x0f\x62uilder_name_re\x18\x02 \x03(\t\x12\x1b\n\x13summary_markdown_re\x18\x03 \x03(\t\x12\x30\n\x11\x66\x61iled_checkpoint\x18\x04 \x01(\x0e\x32\x15.chromiumos.RetryStep\x12\x16\n\x0e\x63utoff_percent\x18\x05 \x01(\x02\x12\x16\n\x0e\x63utoff_seconds\x18\x06 \x01(\x05\x12\x1c\n\x14\x62uild_runtime_cutoff\x18\t \x01(\x05\x12\x13\n\x0bmax_retries\x18\x07 \x01(\x05\x12\x1d\n\x15max_retries_per_build\x18\x08 \x01(\x05\"5\n\rCollectConfig\x12$\n\x05rules\x18\x01 \x03(\x0b\x32\x15.chromiumos.RetryRuleBY\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
   ,
   dependencies=[chromiumos_dot_checkpoint__pb2.DESCRIPTOR,])
 
@@ -36,56 +36,70 @@ _RETRYRULE = _descriptor.Descriptor(
   create_key=_descriptor._internal_create_key,
   fields=[
     _descriptor.FieldDescriptor(
-      name='status', full_name='chromiumos.RetryRule.status', index=0,
+      name='insufficient', full_name='chromiumos.RetryRule.insufficient', index=0,
+      number=10, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='status', full_name='chromiumos.RetryRule.status', index=1,
       number=1, type=5, cpp_type=1, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='builder_name_re', full_name='chromiumos.RetryRule.builder_name_re', index=1,
+      name='builder_name_re', full_name='chromiumos.RetryRule.builder_name_re', index=2,
       number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='summary_markdown_re', full_name='chromiumos.RetryRule.summary_markdown_re', index=2,
+      name='summary_markdown_re', full_name='chromiumos.RetryRule.summary_markdown_re', index=3,
       number=3, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='failed_checkpoint', full_name='chromiumos.RetryRule.failed_checkpoint', index=3,
+      name='failed_checkpoint', full_name='chromiumos.RetryRule.failed_checkpoint', index=4,
       number=4, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='cutoff_percent', full_name='chromiumos.RetryRule.cutoff_percent', index=4,
+      name='cutoff_percent', full_name='chromiumos.RetryRule.cutoff_percent', index=5,
       number=5, type=2, cpp_type=6, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='cutoff_seconds', full_name='chromiumos.RetryRule.cutoff_seconds', index=5,
+      name='cutoff_seconds', full_name='chromiumos.RetryRule.cutoff_seconds', index=6,
       number=6, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='max_retries', full_name='chromiumos.RetryRule.max_retries', index=6,
+      name='build_runtime_cutoff', full_name='chromiumos.RetryRule.build_runtime_cutoff', index=7,
+      number=9, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='max_retries', full_name='chromiumos.RetryRule.max_retries', index=8,
       number=7, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='max_retries_per_build', full_name='chromiumos.RetryRule.max_retries_per_build', index=7,
+      name='max_retries_per_build', full_name='chromiumos.RetryRule.max_retries_per_build', index=9,
       number=8, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
@@ -104,7 +118,7 @@ _RETRYRULE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=72,
-  serialized_end=303,
+  serialized_end=355,
 )
 
 
@@ -135,95 +149,14 @@ _COLLECTCONFIG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=305,
-  serialized_end=358,
-)
-
-
-_CONDUCTORCONFIG_COLLECTCONFIGSENTRY = _descriptor.Descriptor(
-  name='CollectConfigsEntry',
-  full_name='chromiumos.ConductorConfig.CollectConfigsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='chromiumos.ConductorConfig.CollectConfigsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='chromiumos.ConductorConfig.CollectConfigsEntry.value', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=488,
-  serialized_end=568,
-)
-
-_CONDUCTORCONFIG = _descriptor.Descriptor(
-  name='ConductorConfig',
-  full_name='chromiumos.ConductorConfig',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='polling_interval_seconds', full_name='chromiumos.ConductorConfig.polling_interval_seconds', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='collect_configs', full_name='chromiumos.ConductorConfig.collect_configs', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_CONDUCTORCONFIG_COLLECTCONFIGSENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=361,
-  serialized_end=568,
+  serialized_start=357,
+  serialized_end=410,
 )
 
 _RETRYRULE.fields_by_name['failed_checkpoint'].enum_type = chromiumos_dot_checkpoint__pb2._RETRYSTEP
 _COLLECTCONFIG.fields_by_name['rules'].message_type = _RETRYRULE
-_CONDUCTORCONFIG_COLLECTCONFIGSENTRY.fields_by_name['value'].message_type = _COLLECTCONFIG
-_CONDUCTORCONFIG_COLLECTCONFIGSENTRY.containing_type = _CONDUCTORCONFIG
-_CONDUCTORCONFIG.fields_by_name['collect_configs'].message_type = _CONDUCTORCONFIG_COLLECTCONFIGSENTRY
 DESCRIPTOR.message_types_by_name['RetryRule'] = _RETRYRULE
 DESCRIPTOR.message_types_by_name['CollectConfig'] = _COLLECTCONFIG
-DESCRIPTOR.message_types_by_name['ConductorConfig'] = _CONDUCTORCONFIG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 RetryRule = _reflection.GeneratedProtocolMessageType('RetryRule', (_message.Message,), {
@@ -240,22 +173,6 @@ CollectConfig = _reflection.GeneratedProtocolMessageType('CollectConfig', (_mess
   })
 _sym_db.RegisterMessage(CollectConfig)
 
-ConductorConfig = _reflection.GeneratedProtocolMessageType('ConductorConfig', (_message.Message,), {
-
-  'CollectConfigsEntry' : _reflection.GeneratedProtocolMessageType('CollectConfigsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _CONDUCTORCONFIG_COLLECTCONFIGSENTRY,
-    '__module__' : 'chromiumos.conductor_pb2'
-    # @@protoc_insertion_point(class_scope:chromiumos.ConductorConfig.CollectConfigsEntry)
-    })
-  ,
-  'DESCRIPTOR' : _CONDUCTORCONFIG,
-  '__module__' : 'chromiumos.conductor_pb2'
-  # @@protoc_insertion_point(class_scope:chromiumos.ConductorConfig)
-  })
-_sym_db.RegisterMessage(ConductorConfig)
-_sym_db.RegisterMessage(ConductorConfig.CollectConfigsEntry)
-
 
 DESCRIPTOR._options = None
-_CONDUCTORCONFIG_COLLECTCONFIGSENTRY._options = None
 # @@protoc_insertion_point(module_scope)

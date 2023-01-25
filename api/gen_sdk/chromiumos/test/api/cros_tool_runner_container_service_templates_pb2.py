@@ -16,7 +16,7 @@ from chromite.api.gen_sdk.chromiumos.test.api import cros_provision_cli_pb2 as c
 from chromite.api.gen_sdk.chromiumos.test.lab.api import ip_endpoint_pb2 as chromiumos_dot_test_dot_lab_dot_api_dot_ip__endpoint__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nFchromiumos/test/api/cros_tool_runner_container_service_templates.proto\x12\x13\x63hromiumos.test.api\x1a,chromiumos/test/api/cros_provision_cli.proto\x1a)chromiumos/test/lab/api/ip_endpoint.proto\"\x95\x02\n\x08Template\x12\x38\n\x08\x63ros_dut\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.CrosDutTemplateH\x00\x12\x44\n\x0e\x63ros_provision\x18\x02 \x01(\x0b\x32*.chromiumos.test.api.CrosProvisionTemplateH\x00\x12:\n\tcros_test\x18\x03 \x01(\x0b\x32%.chromiumos.test.api.CrosTestTemplateH\x00\x12@\n\x0c\x63ros_publish\x18\x04 \x01(\x0b\x32(.chromiumos.test.api.CrosPublishTemplateH\x00\x42\x0b\n\tcontainer\"\xad\x01\n\x0f\x43rosDutTemplate\x12\x0f\n\x07network\x18\x01 \x01(\t\x12\x14\n\x0c\x61rtifact_dir\x18\x02 \x01(\t\x12\x39\n\x0c\x63\x61\x63he_server\x18\x03 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\x12\x38\n\x0b\x64ut_address\x18\x04 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\"\x80\x01\n\x15\x43rosProvisionTemplate\x12\x0f\n\x07network\x18\x01 \x01(\t\x12\x14\n\x0c\x61rtifact_dir\x18\x02 \x01(\t\x12@\n\rinput_request\x18\x03 \x01(\x0b\x32).chromiumos.test.api.CrosProvisionRequest\"9\n\x10\x43rosTestTemplate\x12\x0f\n\x07network\x18\x01 \x01(\t\x12\x14\n\x0c\x61rtifact_dir\x18\x02 \x01(\t\"\xd5\x01\n\x13\x43rosPublishTemplate\x12J\n\x0cpublish_type\x18\x01 \x01(\x0e\x32\x34.chromiumos.test.api.CrosPublishTemplate.PublishType\x12\x17\n\x0fpublish_src_dir\x18\x02 \x01(\t\"Y\n\x0bPublishType\x12\x17\n\x13PUBLISH_UNSPECIFIED\x10\x00\x12\x0f\n\x0bPUBLISH_GCS\x10\x01\x12\x0f\n\x0bPUBLISH_TKO\x10\x02\x12\x0f\n\x0bPUBLISH_RDB\x10\x03\x42/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\nFchromiumos/test/api/cros_tool_runner_container_service_templates.proto\x12\x13\x63hromiumos.test.api\x1a,chromiumos/test/api/cros_provision_cli.proto\x1a)chromiumos/test/lab/api/ip_endpoint.proto\"\x95\x02\n\x08Template\x12\x38\n\x08\x63ros_dut\x18\x01 \x01(\x0b\x32$.chromiumos.test.api.CrosDutTemplateH\x00\x12\x44\n\x0e\x63ros_provision\x18\x02 \x01(\x0b\x32*.chromiumos.test.api.CrosProvisionTemplateH\x00\x12:\n\tcros_test\x18\x03 \x01(\x0b\x32%.chromiumos.test.api.CrosTestTemplateH\x00\x12@\n\x0c\x63ros_publish\x18\x04 \x01(\x0b\x32(.chromiumos.test.api.CrosPublishTemplateH\x00\x42\x0b\n\tcontainer\"\x92\x01\n\x0f\x43rosDutTemplate\x12\x39\n\x0c\x63\x61\x63he_server\x18\x03 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpoint\x12\x38\n\x0b\x64ut_address\x18\x04 \x01(\x0b\x32#.chromiumos.test.lab.api.IpEndpointJ\x04\x08\x01\x10\x02J\x04\x08\x02\x10\x03\"e\n\x15\x43rosProvisionTemplate\x12@\n\rinput_request\x18\x03 \x01(\x0b\x32).chromiumos.test.api.CrosProvisionRequestJ\x04\x08\x01\x10\x02J\x04\x08\x02\x10\x03\"\x1e\n\x10\x43rosTestTemplateJ\x04\x08\x01\x10\x02J\x04\x08\x02\x10\x03\"\xd5\x01\n\x13\x43rosPublishTemplate\x12J\n\x0cpublish_type\x18\x01 \x01(\x0e\x32\x34.chromiumos.test.api.CrosPublishTemplate.PublishType\x12\x17\n\x0fpublish_src_dir\x18\x02 \x01(\t\"Y\n\x0bPublishType\x12\x17\n\x13PUBLISH_UNSPECIFIED\x10\x00\x12\x0f\n\x0bPUBLISH_GCS\x10\x01\x12\x0f\n\x0bPUBLISH_TKO\x10\x02\x12\x0f\n\x0bPUBLISH_RDB\x10\x03\x42/Z-go.chromium.org/chromiumos/config/go/test/apib\x06proto3')
 
 
 
@@ -68,13 +68,13 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _TEMPLATE._serialized_start=185
   _TEMPLATE._serialized_end=462
   _CROSDUTTEMPLATE._serialized_start=465
-  _CROSDUTTEMPLATE._serialized_end=638
-  _CROSPROVISIONTEMPLATE._serialized_start=641
-  _CROSPROVISIONTEMPLATE._serialized_end=769
-  _CROSTESTTEMPLATE._serialized_start=771
-  _CROSTESTTEMPLATE._serialized_end=828
-  _CROSPUBLISHTEMPLATE._serialized_start=831
-  _CROSPUBLISHTEMPLATE._serialized_end=1044
-  _CROSPUBLISHTEMPLATE_PUBLISHTYPE._serialized_start=955
-  _CROSPUBLISHTEMPLATE_PUBLISHTYPE._serialized_end=1044
+  _CROSDUTTEMPLATE._serialized_end=611
+  _CROSPROVISIONTEMPLATE._serialized_start=613
+  _CROSPROVISIONTEMPLATE._serialized_end=714
+  _CROSTESTTEMPLATE._serialized_start=716
+  _CROSTESTTEMPLATE._serialized_end=746
+  _CROSPUBLISHTEMPLATE._serialized_start=749
+  _CROSPUBLISHTEMPLATE._serialized_end=962
+  _CROSPUBLISHTEMPLATE_PUBLISHTYPE._serialized_start=873
+  _CROSPUBLISHTEMPLATE_PUBLISHTYPE._serialized_end=962
 # @@protoc_insertion_point(module_scope)
