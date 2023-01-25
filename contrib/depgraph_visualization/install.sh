@@ -11,4 +11,7 @@ source my_visualizations/bin/activate
 pip install -r requirements.txt
 pip install .
 
+# Install our version of portage.
+pip install ../../../src/third_party/portage_tool/
+
 cd "${WD}" || exit
