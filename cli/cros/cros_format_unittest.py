@@ -29,11 +29,14 @@ class FormatCommandTest(cros_test_lib.TestCase):
         """Check extension<->tool mapping."""
         self.assertEqual({}, cros_format._BreakoutFilesByTool([]))
         self.assertEqual(
-            {}, cros_format._BreakoutFilesByTool(["foo", "blah.xxx"])
+            {},
+            cros_format._BreakoutFilesByTool([Path("foo"), Path("blah.xxx")]),
         )
 
-        tool_map = cros_format._BreakoutFilesByTool(["foo.md"])
-        self.assertEqual({formatters.whitespace.Data: ["foo.md"]}, tool_map)
+        tool_map = cros_format._BreakoutFilesByTool([Path("foo.md")])
+        self.assertEqual(
+            {formatters.whitespace.Data: [Path("foo.md")]}, tool_map
+        )
 
     def testCliNoFiles(self):
         """Check cros format handling with no files."""

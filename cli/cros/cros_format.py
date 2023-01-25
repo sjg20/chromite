@@ -15,7 +15,7 @@ import logging
 import os
 from pathlib import Path
 import re
-from typing import Callable, Union
+from typing import Callable, Dict, List
 
 from chromite.cli import command
 from chromite.format import formatters
@@ -123,7 +123,7 @@ def _BreakoutDataByTool(map_to_return, path):
         logging.debug("%s: reading initial data failed: %s", path, e)
 
 
-def _BreakoutFilesByTool(files):
+def _BreakoutFilesByTool(files: List[Path]) -> Dict[Callable, List[Path]]:
     """Maps a tool method to the list of files to process."""
     map_to_return = {}
 
@@ -132,21 +132,21 @@ def _BreakoutFilesByTool(files):
         if any(x.search(str(f)) for x in _EXCLUDED_FILE_REGEX):
             continue
 
-        extension = os.path.splitext(f)[1]
+        extension = f.suffix
         for extensions, tools in _EXT_TOOL_MAP.items():
             if extension in extensions:
                 for tool in tools:
                     map_to_return.setdefault(tool, []).append(f)
                 break
         else:
-            name = os.path.basename(f)
+            name = f.name
             for patterns, tools in _FILENAME_PATTERNS_TOOL_MAP.items():
                 if any(fnmatch.fnmatch(name, x) for x in patterns):
                     for tool in tools:
                         map_to_return.setdefault(tool, []).append(f)
                     break
             else:
-                if os.path.isfile(f):
+                if f.is_file():
                     _BreakoutDataByTool(map_to_return, f)
 
     return map_to_return
@@ -158,7 +158,7 @@ def _Dispatcher(
     diff: bool,
     dryrun: bool,
     tool: Callable,
-    path: Union[str, os.PathLike],
+    path: Path,
 ) -> int:
     """Call |tool| on |path| and take care of coalescing exit codes."""
     try:
@@ -262,7 +262,7 @@ Supported file names: %s
         files = []
         syms = []
         for f in path_util.ExpandDirectories(self.options.files):
-            if os.path.islink(f):
+            if f.is_symlink():
                 syms.append(f)
             else:
                 files.append(f)
