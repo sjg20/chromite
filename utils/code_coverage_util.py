@@ -18,6 +18,8 @@ LLVM_COVERAGE_JSON_TYPE = "llvm.coverage.json.export"
 LLVM_COVERAGE_VERSION = "2.0.1"
 CHROMITE_UTILS_PATH = "chromite/utils/data"
 COVERAGE_BOARD_OWNERSHIP_JSON = "code_coverage_board_ownership.json"
+SOURCE = "SOURCE"
+MOCK_ZERO_COVERAGE = "MockZeroCoverage"
 
 
 def _IsInstrumented(line: str, exclude_line_prefixes: Tuple[str]) -> bool:
@@ -165,6 +167,7 @@ def _GenerateZeroCoverageLLVMForFile(
         file_data["segments"] = segments
         # Zoss does not use summary field, so keep it empty
         file_data["summary"] = {}
+        file_data[SOURCE] = MOCK_ZERO_COVERAGE
         return file_data
 
 

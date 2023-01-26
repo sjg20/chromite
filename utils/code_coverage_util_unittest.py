@@ -73,6 +73,8 @@ USE_CASE_5_HEADER_FILE_NAME = "USE_CASE_5.h"
 PYTHON_FILE_NAME = "USE_CASE_3.py"
 SHILL_FILE = "src/platform2/shill/net/shill_time.cc"
 GESTURES_FILE = "src/platform/gestures/include/activity_log.h"
+SOURCE = "SOURCE"
+MOCK_ZERO_COVERAGE = "MockZeroCoverage"
 
 
 def extractCovDataForFile(file_name: str, coverage_data: List):
@@ -234,6 +236,7 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
         self.assertEqual(
             usecase_3_cov_data["filename"], "src/" + USE_CASE_3_FILE_NAME
         )
+        self.assertEqual(usecase_1_cov_data[SOURCE], MOCK_ZERO_COVERAGE)
 
     def testCreateLlvmCoverageJson(self):
         """Verify that CreateLlvmCoverageJson is returning coverage json."""
