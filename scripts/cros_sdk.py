@@ -24,7 +24,7 @@ import resource
 import shlex
 import subprocess
 import sys
-from typing import List
+from typing import List, Optional
 import urllib.parse
 
 from chromite.cbuildbot import cbuildbot_alerts
@@ -32,6 +32,7 @@ from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
+from chromite.lib import goma_lib
 from chromite.lib import locking
 from chromite.lib import namespaces
 from chromite.lib import osutils
@@ -199,7 +200,7 @@ def EnterChroot(
     cache_dir,
     chrome_root,
     chrome_root_mount,
-    goma_dir,
+    goma: Optional[goma_lib.Goma],
     reclient_dir,
     reproxy_cfg_file,
     working_dir,
@@ -215,8 +216,8 @@ def EnterChroot(
         cmd.extend(["--chrome_root", chrome_root])
     if chrome_root_mount:
         cmd.extend(["--chrome_root_mount", chrome_root_mount])
-    if goma_dir:
-        cmd.extend(["--goma_dir", goma_dir])
+    if goma:
+        cmd.extend(["--goma_dir", goma.linux_goma_dir])
     if reclient_dir:
         cmd.extend(["--reclient_dir", reclient_dir])
     if reproxy_cfg_file:
@@ -1079,6 +1080,8 @@ def main(argv):
             " %s.  Please find a x86_64 machine." % (host,)
         )
 
+    goma = goma_lib.Goma(options.goma_dir) if options.goma_dir else None
+
     # Merge the outside PATH setting if we re-execed ourselves.
     if "CHROMEOS_SUDO_PATH" in os.environ:
         os.environ["PATH"] = "%s:%s" % (
@@ -1496,7 +1499,7 @@ snapshots will be unavailable)."""
                 options.cache_dir,
                 options.chrome_root,
                 options.chrome_root_mount,
-                options.goma_dir,
+                goma,
                 options.reclient_dir,
                 options.reproxy_cfg_file,
                 options.working_dir,
