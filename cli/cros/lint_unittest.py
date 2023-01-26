@@ -1122,6 +1122,24 @@ class EncodingCheckerTest(CheckerTestCase):
             else:
                 self.assertLintFailed()
 
+    def testNonConst(self):
+        """Check we don't crash on non-const inputs.
+
+        We can't detect the errors because pylint doesn't maintain enough state.
+        But these are uncommon cases, so don't worry about them as much.
+        """
+        self._check_tests(
+            (
+                "mode = 'r'\nopen('f', mode)",
+                "mode = 'r'\nopen('f', mode=mode)",
+                "open('f', None)",
+                "open('f', mode=None)",
+                "enc = 'ascii'\nopen('f', 'rb', -1, enc)",
+                "enc = 'ascii'\nopen('f', 'rb', encoding=enc)",
+            ),
+            True,
+        )
+
     def testPathlibOpenGood(self):
         """Verify we accept good Pathlib.Path.open() encoding."""
         self._check_tests(

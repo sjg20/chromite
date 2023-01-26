@@ -23,7 +23,7 @@ import os
 import re
 import sys
 import tokenize
-from typing import Optional
+from typing import Optional, Tuple
 
 import astroid
 
@@ -119,6 +119,10 @@ def _PylintrcConfig(config_file, section, opts):
     return cfg
 
 
+class _EncodingExtractError(Exception):
+    """When we can't extract real values."""
+
+
 class EncodingChecker(pylint.checkers.BaseChecker):
     """Various encoding enforcements."""
 
@@ -141,6 +145,41 @@ class EncodingChecker(pylint.checkers.BaseChecker):
     }
     options = ()
 
+    def _extract_mode_encoding(
+        self,
+        node: astroid.Call,
+        encoding_idx: int,
+        mode_idx: Optional[int] = None,
+    ) -> Tuple[Optional[str], Optional[str]]:
+        """Extract the mode & encoding settings in the call."""
+        mode = "r"
+        encoding = None
+
+        def _extract_value(arg):
+            if isinstance(arg, astroid.Name):
+                raise _EncodingExtractError()
+            return arg.value
+
+        if len(node.args) >= encoding_idx + 1:
+            encoding = _extract_value(node.args[encoding_idx])
+
+        if mode_idx is not None and len(node.args) >= mode_idx + 1:
+            mode = _extract_value(node.args[mode_idx])
+
+        if node.keywords:
+            for kw in node.keywords:
+                if kw.arg == "mode":
+                    mode = _extract_value(kw.value)
+                elif kw.arg == "encoding":
+                    encoding = _extract_value(kw.value)
+
+        # If the caller explicitly set mode=None, ignore it -- it's an error,
+        # but other lints (e.g. bad-open-mode) handle it for us.
+        if mode is None:
+            raise _EncodingExtractError()
+
+        return (mode, encoding)
+
     def _check_call(
         self,
         node: astroid.Call,
@@ -148,21 +187,13 @@ class EncodingChecker(pylint.checkers.BaseChecker):
         mode_idx: Optional[int] = None,
     ) -> None:
         """Check |node| call that has an encoding & mode argument."""
-        mode = "r"
-        encoding = None
-
-        if len(node.args) >= encoding_idx + 1:
-            encoding = node.args[encoding_idx].value
-
-        if mode_idx is not None and len(node.args) >= mode_idx + 1:
-            mode = node.args[mode_idx].value
-
-        if node.keywords:
-            for kw in node.keywords:
-                if kw.arg == "mode":
-                    mode = kw.value.value
-                elif kw.arg == "encoding":
-                    encoding = kw.value.value
+        try:
+            mode, encoding = self._extract_mode_encoding(
+                node, encoding_idx, mode_idx
+            )
+        except _EncodingExtractError:
+            # If we couldn't reliably probe the values, give up.
+            return
 
         if "b" not in mode and encoding != "utf-8":
             self.add_message("R9150", node=node, line=node.fromlineno)
