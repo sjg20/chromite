@@ -341,7 +341,7 @@ class RawPartitionUpdaterTest(cros_test_lib.MockTempDirTestCase):
             self.rsh_mock.AddCmdResult(
                 self.path_env
                 + " gzip --decompress --stdout | "
-                + "dd bs=1M oflag=direct of=/dev/mmcblk0p2"
+                + "dd bs=1M of=/dev/mmcblk0p2"
             )
 
             device_imager.RawPartitionUpdater(
@@ -365,7 +365,7 @@ class RawPartitionUpdaterTest(cros_test_lib.MockTempDirTestCase):
             self.rsh_mock.AddCmdResult(
                 self.path_env
                 + " gzip --decompress --stdout | "
-                + "dd bs=1M oflag=direct of=/dev/mmcblk0p2"
+                + "dd bs=1M of=/dev/mmcblk0p2"
             )
 
             path = os.path.join(

@@ -630,14 +630,12 @@ class RawPartitionUpdater(PartitionUpdaterBase):
             A string command to run on a device to read data from stdin,
             uncompress it and write it to the target partition.
         """
-        # Using oflag=direct to tell the OS not to cache the writes (faster).
         cmd = " ".join(
             [
                 *decompress_command,
                 "|",
                 "dd",
                 "bs=1M",
-                "oflag=direct",
                 f"of={self._target}",
             ]
         )
