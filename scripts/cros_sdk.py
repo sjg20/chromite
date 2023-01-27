@@ -38,6 +38,7 @@ from chromite.lib import namespaces
 from chromite.lib import osutils
 from chromite.lib import path_util
 from chromite.lib import process_util
+from chromite.lib import remoteexec_util
 from chromite.lib import retry_util
 from chromite.lib import timeout_util
 from chromite.lib import toolchain
@@ -201,8 +202,7 @@ def EnterChroot(
     chrome_root,
     chrome_root_mount,
     goma: Optional[goma_lib.Goma],
-    reclient_dir,
-    reproxy_cfg_file,
+    remoteexec: Optional[remoteexec_util.Remoteexec],
     working_dir,
     additional_args,
 ):
@@ -218,10 +218,15 @@ def EnterChroot(
         cmd.extend(["--chrome_root_mount", chrome_root_mount])
     if goma:
         cmd.extend(["--goma_dir", goma.linux_goma_dir])
-    if reclient_dir:
-        cmd.extend(["--reclient_dir", reclient_dir])
-    if reproxy_cfg_file:
-        cmd.extend(["--reproxy_cfg_file", reproxy_cfg_file])
+    if remoteexec:
+        cmd.extend(
+            [
+                "--reclient_dir",
+                remoteexec.reclient_dir,
+                "--reproxy_cfg_file",
+                remoteexec.reproxy_cfg_file,
+            ]
+        )
     if working_dir is not None:
         cmd.extend(["--working_dir", working_dir])
 
@@ -1231,6 +1236,14 @@ def main(argv):
 
     options.Freeze()
 
+    remoteexec = (
+        remoteexec_util.Remoteexec(
+            options.reclient_dir, options.reproxy_cfg_file
+        )
+        if (options.reclient_dir and options.reproxy_cfg_file)
+        else None
+    )
+
     # Anything that needs to manipulate the main chroot mount or communicate
     # with LVM needs to be done here before we enter the new namespaces.
 
@@ -1500,8 +1513,7 @@ snapshots will be unavailable)."""
                 options.chrome_root,
                 options.chrome_root_mount,
                 goma,
-                options.reclient_dir,
-                options.reproxy_cfg_file,
+                remoteexec,
                 options.working_dir,
                 options.commands,
             )
