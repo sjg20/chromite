@@ -1225,6 +1225,8 @@ def main(argv):
     # Make sure we will download if we plan to create.
     options.download |= options.create
 
+    options.Freeze()
+
     # Anything that needs to manipulate the main chroot mount or communicate
     # with LVM needs to be done here before we enter the new namespaces.
 
