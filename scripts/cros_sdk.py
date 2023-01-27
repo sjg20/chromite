@@ -24,10 +24,11 @@ import resource
 import shlex
 import subprocess
 import sys
-from typing import List, Optional
+from typing import List
 import urllib.parse
 
 from chromite.cbuildbot import cbuildbot_alerts
+from chromite.lib import chroot_lib
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -197,34 +198,35 @@ def FetchRemoteTarballs(storage_dir, urls):
 
 
 def EnterChroot(
-    chroot_path,
-    cache_dir,
-    chrome_root,
+    chroot: chroot_lib.Chroot,
     chrome_root_mount,
-    goma: Optional[goma_lib.Goma],
-    remoteexec: Optional[remoteexec_util.Remoteexec],
     working_dir,
     additional_args,
 ):
     """Enters an existing SDK chroot"""
-    st = os.statvfs(os.path.join(chroot_path, "usr", "bin", "sudo"))
+    st = os.statvfs(os.path.join(chroot.path, "usr", "bin", "sudo"))
     if st.f_flag & os.ST_NOSUID:
         cros_build_lib.Die("chroot cannot be in a nosuid mount")
 
-    cmd = ENTER_CHROOT + ["--chroot", chroot_path, "--cache_dir", cache_dir]
-    if chrome_root:
-        cmd.extend(["--chrome_root", chrome_root])
+    cmd = ENTER_CHROOT + [
+        "--chroot",
+        chroot.path,
+        "--cache_dir",
+        chroot.cache_dir,
+    ]
+    if chroot.chrome_root:
+        cmd.extend(["--chrome_root", chroot.chrome_root])
     if chrome_root_mount:
         cmd.extend(["--chrome_root_mount", chrome_root_mount])
-    if goma:
-        cmd.extend(["--goma_dir", goma.linux_goma_dir])
-    if remoteexec:
+    if chroot.goma:
+        cmd.extend(["--goma_dir", chroot.goma.linux_goma_dir])
+    if chroot.remoteexec:
         cmd.extend(
             [
                 "--reclient_dir",
-                remoteexec.reclient_dir,
+                chroot.remoteexec.reclient_dir,
                 "--reproxy_cfg_file",
-                remoteexec.reproxy_cfg_file,
+                chroot.remoteexec.reproxy_cfg_file,
             ]
         )
     if working_dir is not None:
@@ -1244,6 +1246,14 @@ def main(argv):
         else None
     )
 
+    chroot = chroot_lib.Chroot(
+        path=options.chroot,
+        cache_dir=options.cache_dir,
+        chrome_root=options.chrome_root,
+        goma=goma,
+        remoteexec=remoteexec,
+    )
+
     # Anything that needs to manipulate the main chroot mount or communicate
     # with LVM needs to be done here before we enter the new namespaces.
 
@@ -1269,7 +1279,7 @@ def main(argv):
                         "cros_sdk was invoked with force option, continuing."
                     )
             logging.notice("Deleting chroot.")
-            cros_sdk_lib.CleanupChrootMount(options.chroot, delete=True)
+            cros_sdk_lib.CleanupChrootMount(chroot.path, delete=True)
 
     # If cleanup was requested, we have to do it while we're still in the
     # original namespace.  Since cleaning up the mount will interfere with any
@@ -1289,13 +1299,13 @@ def main(argv):
                 logging.warning(
                     "Continuing with CleanupChroot(%s), which will umount the "
                     "tree.",
-                    options.chroot,
+                    chroot.path,
                 )
             # We can call CleanupChroot (which calls
             # cros_sdk_lib.CleanupChrootMount) even if we don't get the lock
             # because it will attempt to unmount the tree and will print
             # diagnostic information from 'fuser', 'lsof', and 'ps'.
-            cros_sdk_lib.CleanupChrootMount(options.chroot, delete=False)
+            cros_sdk_lib.CleanupChrootMount(chroot.path, delete=False)
             sys.exit(0)
 
     # Make sure the main chroot mount is visible.  Contents will be filled in
@@ -1317,24 +1327,24 @@ snapshots will be unavailable)."""
         logging.debug("Making sure chroot image is mounted.")
         with locking.FileLock(lock_path, "chroot lock") as lock:
             lock.write_lock()
-            if not cros_sdk_lib.MountChroot(options.chroot, create=True):
+            if not cros_sdk_lib.MountChroot(chroot.path, create=True):
                 cros_build_lib.Die(
                     "Unable to mount %s on chroot",
-                    _ImageFileForChroot(options.chroot),
+                    _ImageFileForChroot(chroot.path),
                 )
             logging.notice(
-                "Mounted %s on chroot", _ImageFileForChroot(options.chroot)
+                "Mounted %s on chroot", _ImageFileForChroot(chroot.path)
             )
 
     # Snapshot operations will always need the VG/LV, but other actions won't.
     if any_snapshot_operation:
         with locking.FileLock(lock_path, "chroot lock") as lock:
             chroot_vg, chroot_lv = cros_sdk_lib.FindChrootMountSource(
-                options.chroot
+                chroot.path
             )
             if not chroot_vg or not chroot_lv:
                 cros_build_lib.Die(
-                    "Unable to find VG/LV for chroot %s", options.chroot
+                    "Unable to find VG/LV for chroot %s", chroot.path
                 )
 
             # Delete snapshot before creating a new one. This allows the user to
@@ -1351,12 +1361,12 @@ snapshots will be unavailable)."""
                         options.snapshot_restore,
                         ", ".join(valid_snapshots),
                     )
-                osutils.UmountTree(options.chroot)
+                osutils.UmountTree(chroot.path)
                 if not RestoreChrootSnapshot(
                     options.snapshot_restore, chroot_vg, chroot_lv
                 ):
                     cros_build_lib.Die("Unable to restore chroot to snapshot.")
-                if not cros_sdk_lib.MountChroot(options.chroot, create=False):
+                if not cros_sdk_lib.MountChroot(chroot.path, create=False):
                     cros_build_lib.Die(
                         "Unable to mount restored snapshot onto chroot."
                     )
@@ -1380,16 +1390,16 @@ snapshots will be unavailable)."""
                 ):
                     cros_build_lib.Die("Unable to create snapshot.")
 
-    img_path = _ImageFileForChroot(options.chroot)
+    img_path = _ImageFileForChroot(chroot.path)
     if (
         options.use_image
-        and os.path.exists(options.chroot)
+        and os.path.exists(chroot.path)
         and os.path.exists(img_path)
     ):
         img_stat = os.stat(img_path)
         img_used_bytes = img_stat.st_blocks * 512
 
-        mount_stat = os.statvfs(options.chroot)
+        mount_stat = os.statvfs(chroot.path)
         mount_used_bytes = mount_stat.f_frsize * (
             mount_stat.f_blocks - mount_stat.f_bfree
         )
@@ -1406,7 +1416,7 @@ snapshots will be unavailable)."""
             if pid == 0:
                 try:
                     # Directly call Popen to run fstrim concurrently.
-                    cmd = ["fstrim", options.chroot]
+                    cmd = ["fstrim", chroot.path]
                     subprocess.Popen(cmd, close_fds=True, shell=False)
                 except subprocess.SubprocessError as e:
                     logging.warning(
@@ -1449,9 +1459,9 @@ snapshots will be unavailable)."""
         if options.proxy_sim:
             _ProxySimSetup(options)
 
-        sdk_cache = os.path.join(options.cache_dir, "sdks")
-        distfiles_cache = os.path.join(options.cache_dir, "distfiles")
-        osutils.SafeMakedirsNonRoot(options.cache_dir)
+        sdk_cache = os.path.join(chroot.cache_dir, "sdks")
+        distfiles_cache = os.path.join(chroot.cache_dir, "distfiles")
+        osutils.SafeMakedirsNonRoot(chroot.cache_dir)
 
         for target in (sdk_cache, distfiles_cache):
             src = os.path.join(constants.SOURCE_ROOT, os.path.basename(target))
@@ -1486,14 +1496,14 @@ snapshots will be unavailable)."""
             # Recheck if the chroot is set up here before creating to make sure
             # we account for whatever the various delete/unmount/remount steps
             # above have done.
-            if cros_sdk_lib.IsChrootReady(options.chroot):
+            if cros_sdk_lib.IsChrootReady(chroot.path):
                 logging.debug("Chroot already exists.  Skipping creation.")
             else:
                 sdk_tarball = FetchRemoteTarballs(sdk_cache, urls)
                 cros_sdk_lib.CreateChroot(
-                    Path(options.chroot),
+                    Path(chroot.path),
                     Path(sdk_tarball),
-                    Path(options.cache_dir),
+                    Path(chroot.cache_dir),
                     usepkg=not options.bootstrap and not options.nousepkg,
                     chroot_upgrade=options.chroot_upgrade,
                 )
@@ -1506,14 +1516,10 @@ snapshots will be unavailable)."""
         if options.enter:
             lock.read_lock()
             if not mounted:
-                cros_sdk_lib.MountChrootPaths(options.chroot)
+                cros_sdk_lib.MountChrootPaths(chroot.path)
             ret = EnterChroot(
-                options.chroot,
-                options.cache_dir,
-                options.chrome_root,
+                chroot,
                 options.chrome_root_mount,
-                goma,
-                remoteexec,
                 options.working_dir,
                 options.commands,
             )
