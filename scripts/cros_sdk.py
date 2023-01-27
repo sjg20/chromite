@@ -1067,7 +1067,6 @@ def main(argv):
         sdk_latest_version, bootstrap_latest_version
     )
     options = parser.parse_args(argv)
-    chroot_command = options.commands
 
     # Some basic checks first, before we ask for sudo credentials.
     cros_build_lib.AssertOutsideChroot()
@@ -1141,7 +1140,7 @@ def main(argv):
         getattr(options, x.dest) for x in commands._group_actions
     )
     # pylint: enable=protected-access
-    options.enter |= bool(chroot_command)
+    options.enter |= bool(options.commands)
 
     if (
         options.delete
@@ -1494,6 +1493,6 @@ snapshots will be unavailable)."""
                 options.reclient_dir,
                 options.reproxy_cfg_file,
                 options.working_dir,
-                chroot_command,
+                options.commands,
             )
             sys.exit(ret.returncode)
