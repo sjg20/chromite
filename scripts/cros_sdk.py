@@ -71,7 +71,7 @@ NEEDED_TOOLS = ("curl", "xz")
 # Tools needed for --proxy-sim only.
 PROXY_NEEDED_TOOLS = ("ip",)
 
-# Tools needed when use_image is true (the default).
+# Tools needed when use_image is true.
 IMAGE_NEEDED_TOOLS = (
     "losetup",
     "lvchange",
@@ -1195,6 +1195,10 @@ def main(argv):
             cros_build_lib.Die(
                 "Snapshot operations are not compatible with " "--nouse-image."
             )
+    if options.use_image:
+        logging.warning("--use-image is deprecated and will be removed soon.")
+        logging.warning("Please migrate, or create a new one with --delete.")
+        logging.warning("See http://b/266878468 for details.")
 
     # Discern if we need to create the chroot.
     if (
