@@ -220,4 +220,4 @@ def _is_podman(subcmd, proc):
     'podman run --option ... image:tag'
     """
     cmdline = proc.cmdline()
-    return proc.name() == "podman" and cmdline[1] == subcmd
+    return proc.name() == "podman" and len(cmdline) > 1 and cmdline[1] == subcmd
