@@ -214,6 +214,7 @@
     octopus-arc-r-release
     octopus-kernelnext-release
     octopus-release
+    ovis-release
     palkia-release
     puff-moblab-release
     puff-release
@@ -1065,6 +1066,7 @@
     octopus-arc-r-release-tryjob
     octopus-kernelnext-release-tryjob
     octopus-release-tryjob
+    ovis-release-tryjob
     palkia-release-tryjob
     puff-moblab-release-tryjob
     puff-release-tryjob
@@ -1181,6 +1183,11 @@
   octopus-master-factorybranch-tryjob
   octopus-payloads-tryjob
   octopus-release-tryjob
+  ovis-full-tryjob
+  ovis-llvm-next-toolchain-tryjob
+  ovis-llvm-toolchain-tryjob
+  ovis-payloads-tryjob
+  ovis-release-tryjob
   palkia-full-tryjob
   palkia-llvm-next-toolchain-tryjob
   palkia-llvm-toolchain-tryjob
