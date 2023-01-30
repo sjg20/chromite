@@ -11,7 +11,7 @@ import logging
 import os
 from pathlib import Path
 import stat
-from typing import Union
+from typing import Callable, Dict, List, Union
 
 from chromite.cli import command
 from chromite.lib import commandline
@@ -39,7 +39,7 @@ def _GetProjectPath(path: Path) -> Path:
         return path.parent
 
 
-def _GetPylintrc(path: Union[str, os.PathLike]) -> Path:
+def _GetPylintrc(path: Path) -> Path:
     """Locate pylintrc or .pylintrc file that applies to |path|.
 
     If not found - use the default.
@@ -55,7 +55,6 @@ def _GetPylintrc(path: Union[str, os.PathLike]) -> Path:
             )
         return pylintrc.exists() or dotpylintrc.exists()
 
-    path = Path(path)
     end_path = _GetProjectPath(path.parent).parent
     ret = osutils.FindInPathParents(
         "pylintrc", path.parent, test_func=_test_func, end_path=end_path
@@ -475,32 +474,31 @@ _FILENAME_PATTERNS_TOOL_MAP = {
 }
 
 
-def _BreakoutFilesByTool(files):
+def _BreakoutFilesByTool(files: List[Path]) -> Dict[Callable, List[Path]]:
     """Maps a tool method to the list of files to process."""
     map_to_return = {}
 
     for f in files:
-        extension = os.path.splitext(f)[1]
+        extension = f.suffix
         for extensions, tools in _EXT_TOOL_MAP.items():
             if extension in extensions:
                 for tool in tools:
                     map_to_return.setdefault(tool, []).append(f)
                 break
         else:
-            name = os.path.basename(f)
             for patterns, tools in _FILENAME_PATTERNS_TOOL_MAP.items():
-                if any(fnmatch.fnmatch(name, x) for x in patterns):
+                if any(fnmatch.fnmatch(f.name, x) for x in patterns):
                     for tool in tools:
                         map_to_return.setdefault(tool, []).append(f)
                     break
             else:
-                if os.path.isfile(f):
+                if f.is_file():
                     _BreakoutDataByTool(map_to_return, f)
 
     return map_to_return
 
 
-def _Dispatcher(output_format, debug, relaxed: bool, tool, path):
+def _Dispatcher(output_format, debug, relaxed: bool, tool, path: Path):
     """Call |tool| on |path| and take care of coalescing exit codes/output."""
     try:
         result = tool(path, output_format, debug, relaxed)
@@ -528,7 +526,7 @@ Supported file names: %s
     @classmethod
     def AddParser(cls, parser: commandline.ArgumentParser):
         super().AddParser(parser)
-        parser.add_argument("files", help="Files to lint", nargs="*")
+        parser.add_argument("files", type=Path, help="Files to lint", nargs="*")
         parser.add_argument(
             "--output",
             default="default",
@@ -559,7 +557,7 @@ Supported file names: %s
         files = []
         syms = []
         for f in self.options.files:
-            if os.path.islink(f):
+            if f.is_symlink():
                 syms.append(f)
             else:
                 files.append(f)
@@ -569,7 +567,7 @@ Supported file names: %s
         # Ignore generated files.  Some tools can do this for us, but not all,
         # and it'd be faster if we just never spawned the tools in the first
         # place.
-        files = [x for x in files if not x.endswith("_pb2.py")]
+        files = [x for x in files if not x.name.endswith("_pb2.py")]
 
         tool_map = _BreakoutFilesByTool(files)
         dispatcher = functools.partial(
