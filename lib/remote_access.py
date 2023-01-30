@@ -1,7 +1,6 @@
 # Copyright 2012 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Library containing functions to access a remote test device."""
 
 import functools
@@ -30,6 +29,9 @@ from chromite.utils import memoize
 _path = os.path.dirname(os.path.realpath(__file__))
 TEST_PRIVATE_KEY = os.path.normpath(
     os.path.join(_path, "../ssh_keys/testing_rsa")
+)
+TEST_PRIVATE_PARTNER_KEY = os.path.normpath(
+    os.path.join(_path, "../../sshkeys/partner_testing_rsa")
 )
 del _path
 
@@ -334,14 +336,27 @@ class RemoteAccess(object):
         self.port = port
         self.username = username if username else self.DEFAULT_USERNAME
         self.debug_level = debug_level
+        self.interactive = interactive
+
         private_key_src = private_key if private_key else TEST_PRIVATE_KEY
-        self.private_key = os.path.join(
+        private_key_copy = os.path.join(
             tempdir, os.path.basename(private_key_src)
         )
+        self.private_keys = [private_key_copy]
 
-        self.interactive = interactive
-        shutil.copyfile(private_key_src, self.private_key)
-        os.chmod(self.private_key, stat.S_IRUSR)
+        shutil.copyfile(private_key_src, private_key_copy)
+        os.chmod(private_key_copy, stat.S_IRUSR)
+
+        if not private_key and os.path.exists(TEST_PRIVATE_PARTNER_KEY):
+            # Try both external and partner private keys if private_key is not
+            # specified explicitly.
+            partner_key_src = TEST_PRIVATE_PARTNER_KEY
+            partner_key_copy = os.path.join(
+                tempdir, os.path.basename(partner_key_src)
+            )
+            self.private_keys.append(partner_key_copy)
+            shutil.copyfile(partner_key_src, partner_key_copy)
+            os.chmod(partner_key_copy, stat.S_IRUSR)
 
     @staticmethod
     def _mockable_popen(*args, **kwargs):
@@ -362,7 +377,9 @@ class RemoteAccess(object):
         if self.port:
             cmd += ["-p", str(self.port)]
         cmd += connect_settings
-        cmd += ["-oIdentitiesOnly=yes", "-i", self.private_key]
+        cmd += ["-oIdentitiesOnly=yes"]
+        for private_key in self.private_keys:
+            cmd.extend(["-i", private_key])
         if not self.interactive:
             cmd.append("-n")
 
@@ -744,7 +761,8 @@ class RemoteAccess(object):
         if self.port:
             scp_cmd += ["-P", str(self.port)]
         scp_cmd += CompileSSHConnectSettings(ConnectTimeout=60)
-        scp_cmd += ["-i", self.private_key]
+        for private_key in self.private_keys:
+            scp_cmd.extend(["-i", private_key])
 
         if not self.interactive:
             scp_cmd.append("-n")
