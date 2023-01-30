@@ -172,7 +172,7 @@ def IsChrootReady(chroot):
     return version is not None and version > 0
 
 
-def MountChrootPaths(path: Union[Path, str]):
+def MountChrootPaths(path: Union[Path, str], out_dir: Path):
     """Setup all the mounts for |path|.
 
     NB: This assumes running in a unique mount namespace.  If it is running in the
@@ -205,6 +205,15 @@ def MountChrootPaths(path: Union[Path, str]):
         constants.SOURCE_ROOT,
         path / constants.CHROOT_SOURCE_ROOT[1:],
         "~/chromiumos",
+        osutils.MS_BIND | osutils.MS_REC,
+    )
+
+    osutils.SafeMakedirsNonRoot(out_dir)
+    osutils.SafeMakedirs(path / constants.CHROOT_OUT_ROOT.relative_to("/"))
+    osutils.Mount(
+        out_dir,
+        path / constants.CHROOT_OUT_ROOT.relative_to("/"),
+        None,
         osutils.MS_BIND | osutils.MS_REC,
     )
 
@@ -904,6 +913,7 @@ class ChrootCreator:
         self,
         chroot_path: Path,
         sdk_tarball: Path,
+        out_dir: Path,
         cache_dir: Path,
         usepkg: bool = True,
         chroot_upgrade: bool = True,
@@ -913,6 +923,7 @@ class ChrootCreator:
         Args:
           chroot_path: Path where the new chroot will be created.
           sdk_tarball: Path to a downloaded Chromium OS SDK tarball.
+          out_dir: Path to a directory that will hold build outputs.
           cache_dir: Path to a directory that will be used for caching files.
           usepkg: If False, pass --nousepkg to cros_setup_toolchains inside the
               chroot.
@@ -920,6 +931,7 @@ class ChrootCreator:
         """
         self.chroot_path = chroot_path
         self.sdk_tarball = sdk_tarball
+        self.out_dir = out_dir
         self.cache_dir = cache_dir
         self.usepkg = usepkg
         self.chroot_upgrade = chroot_upgrade
@@ -1094,11 +1106,12 @@ class ChrootCreator:
         """Create various dirs & simple config files."""
         # Create random empty dirs.
         for path in (
-            constants.CHROOT_SOURCE_ROOT,
-            "/mnt/host/depot_tools",
-            "/run",
+            Path(constants.CHROOT_SOURCE_ROOT),
+            constants.CHROOT_OUT_ROOT,
+            Path("/mnt/host/depot_tools"),
+            Path("/run"),
         ):
-            (self.chroot_path / path[1:]).mkdir(
+            (self.chroot_path / path.relative_to("/")).mkdir(
                 mode=0o755, parents=True, exist_ok=True
             )
 
@@ -1213,7 +1226,7 @@ $ cros_sdk --delete%s
             self.init_filesystem_basic()
             self.init_etc(user=user)
 
-        MountChrootPaths(self.chroot_path)
+        MountChrootPaths(self.chroot_path, self.out_dir)
 
         self._make_chroot()
 

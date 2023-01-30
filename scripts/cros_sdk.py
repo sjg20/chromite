@@ -829,6 +829,13 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
         help=("SDK chroot dir name [%s]" % constants.DEFAULT_CHROOT_DIR),
     )
     parser.add_argument(
+        "--out-dir",
+        metavar="DIR",
+        default=constants.DEFAULT_OUT_DIR,
+        type=Path,
+        help="Use DIR for build state and output files",
+    )
+    parser.add_argument(
         "--nouse-image",
         dest="use_image",
         action="store_false",
@@ -1462,6 +1469,7 @@ snapshots will be unavailable)."""
         sdk_cache = os.path.join(chroot.cache_dir, "sdks")
         distfiles_cache = os.path.join(chroot.cache_dir, "distfiles")
         osutils.SafeMakedirsNonRoot(chroot.cache_dir)
+        osutils.SafeMakedirsNonRoot(options.out_dir)
 
         for target in (sdk_cache, distfiles_cache):
             src = os.path.join(constants.SOURCE_ROOT, os.path.basename(target))
@@ -1503,6 +1511,7 @@ snapshots will be unavailable)."""
                 cros_sdk_lib.CreateChroot(
                     Path(chroot.path),
                     Path(sdk_tarball),
+                    options.out_dir,
                     Path(chroot.cache_dir),
                     usepkg=not options.bootstrap and not options.nousepkg,
                     chroot_upgrade=options.chroot_upgrade,
@@ -1516,7 +1525,7 @@ snapshots will be unavailable)."""
         if options.enter:
             lock.read_lock()
             if not mounted:
-                cros_sdk_lib.MountChrootPaths(chroot.path)
+                cros_sdk_lib.MountChrootPaths(chroot.path, options.out_dir)
             ret = EnterChroot(
                 chroot,
                 options.chrome_root_mount,

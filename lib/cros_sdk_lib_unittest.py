@@ -921,13 +921,14 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
     def setUp(self):
         self.chroot_path = self.tempdir / "chroot"
         self.sdk_tarball = self.tempdir / "chroot.tar"
+        self.out_dir = self.tempdir / "out"
         self.cache_dir = self.tempdir / "cache_dir"
 
         # We can't really verify these in any useful way atm.
         self.mount_mock = self.PatchObject(osutils, "Mount")
 
         self.creater = cros_sdk_lib.ChrootCreator(
-            self.chroot_path, self.sdk_tarball, self.cache_dir
+            self.chroot_path, self.sdk_tarball, self.out_dir, self.cache_dir
         )
 
         # Create a minimal tarball to extract during testing.
@@ -1021,6 +1022,11 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
             "en_US.UTF-8 UTF-8",
             (etc / "locale.gen").read_text(encoding="utf-8"),
         )
+
+        # Check /mnt/host directories.
+        self.assertTrue((self.chroot_path / "mnt" / "host" / "source").is_dir())
+        self.assertTrue((self.chroot_path / "mnt" / "host" / "out").is_dir())
+        self.assertTrue(self.out_dir.is_dir())
 
     def testExistingCompatGroup(self):
         """Verify running with an existing, but matching, group works."""

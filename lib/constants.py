@@ -5,6 +5,7 @@
 """This module contains constants used by cbuildbot and related code."""
 
 import os
+from pathlib import Path
 
 
 def _FindSourceRoot():
@@ -23,6 +24,7 @@ def _FindSourceRoot():
 
 SOURCE_ROOT = _FindSourceRoot()
 CHROOT_SOURCE_ROOT = "/mnt/host/source"
+CHROOT_OUT_ROOT = Path("/mnt/host/out")
 CHROOT_CACHE_ROOT = "/var/cache/chromeos-cache"
 DEPOT_TOOLS_SUBPATH = "src/chromium/depot_tools"
 
@@ -38,6 +40,7 @@ CHROMITE_SCRIPTS_DIR = os.path.join(CHROMITE_DIR, "scripts")
 PATH_TO_CBUILDBOT = os.path.join(CHROMITE_BIN_SUBDIR, "cbuildbot")
 DEFAULT_CHROOT_DIR = "chroot"
 DEFAULT_CHROOT_PATH = os.path.join(SOURCE_ROOT, DEFAULT_CHROOT_DIR)
+DEFAULT_OUT_DIR = Path("out")
 DEFAULT_BUILD_ROOT = os.path.join(SOURCE_ROOT, "src/build")
 TERMINA_TOOLS_DIR = os.path.join(
     CHROOT_SOURCE_ROOT, "src/platform/container-guest-tools/termina"
