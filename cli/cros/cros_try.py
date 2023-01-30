@@ -20,7 +20,6 @@ from chromite.lib import cros_build_lib
 
 
 CIPD_TRY_PACKAGE = "chromiumos/infra/try/linux-amd64"
-PINNED_TRY_VERSION = "CEXpLEbLhmQGZu5_1nkPX19OeRXnrPO3a7m4qzugYAcC"
 
 
 @command.command_decorator("try")
@@ -38,7 +37,7 @@ For help, run `cros try help` (with no hyphens).
         super().AddParser(parser)
         parser.add_argument(
             "--try-version",
-            default=PINNED_TRY_VERSION,
+            default="prod",
             help="CIPD version of the try CLI. Can be instance ID or ref. "
             "Must be provided before other try subcommands/flags.",
         )
