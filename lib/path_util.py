@@ -455,3 +455,39 @@ def ExpandDirectories(files: List[Path]) -> Iterator[Path]:
                 yield from (x for x in f.rglob("*") if x.is_file())
         else:
             yield f
+
+
+def ProtoPathToPathlibPath(
+    path: "common_pb2.Path", chroot: Optional["common_pb2.Chroot"] = None
+) -> Path:
+    """Convert an absolute path to a pathlib.Path outside the chroot.
+
+    TODO(b/268732304): For some reason, importing common_pb2 at the top level of
+    this file causes chromite/scripts/wrapper3_unittest.py::FindTargetTests to
+    fail. Figure out what's going on there, and move the import inside this
+    function to the top of this file.
+
+    Args:
+        path: An absolute path, which might be outside the chroot or inside
+            (relative to) the chroot.
+        chroot: The chroot that the path might be inside of.
+
+    Returns:
+        A pathlib.Path pointing to the same location as the original path,
+        originating outside the chroot.
+
+    Raises:
+        ValueError: If the given path is relative instead of absolute.
+        ValueError: If the given path is inside the chroot, but a chroot is not
+            provided.
+    """
+    from chromite.api.gen.chromiumos import common_pb2
+
+    if path.path[0] != "/":
+        raise ValueError(f"Cannot convert relative path: {path.path}")
+    if path.location is common_pb2.Path.Location.OUTSIDE:
+        return Path(path.path)
+    if chroot is None:
+        raise ValueError("Cannot convert inside path without a chroot.")
+    path_relative_to_root = path.path[1:]
+    return Path(chroot.path, path_relative_to_root)

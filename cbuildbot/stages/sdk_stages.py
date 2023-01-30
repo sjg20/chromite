@@ -20,11 +20,7 @@ from chromite.lib import osutils
 from chromite.lib import perf_uploader
 from chromite.lib import portage_util
 from chromite.scripts import upload_prebuilts
-
-
-# Version of the Manifest file being generated for SDK artifacts. Should be
-# incremented for major format changes.
-PACKAGE_MANIFEST_VERSION = "1"
+from chromite.service import sdk
 
 
 def SdkPerfPath(buildroot):
@@ -177,7 +173,7 @@ class SDKPackageStage(
 
     def _WriteManifest(self, data, manifest):
         """Encode manifest into a json file."""
-        json_input = dict(version=PACKAGE_MANIFEST_VERSION, packages=data)
+        json_input = dict(version=sdk.PACKAGE_MANIFEST_VERSION, packages=data)
         osutils.WriteFile(manifest, json.dumps(json_input))
 
     def _SendPerfValues(

@@ -5,6 +5,7 @@
 """SDK tests."""
 
 import os
+import pathlib
 from typing import List, Optional
 from unittest import mock
 
@@ -299,6 +300,91 @@ class SdkUpdateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
             toolchain_targets=targets,
             toolchain_changed=False,
         )
+
+
+class CreateManifestFromSdkTest(
+    cros_test_lib.MockTestCase, api_config.ApiConfigMixin
+):
+    """Test the SdkService/CreateManifestFromSdk endpoint."""
+
+    _chroot_path = "/path/to/chroot"
+    _sdk_path_relative = "build/my_sdk"
+    _dest_dir = "/build"
+    _manifest_path = "/build/my_sdk.Manifest"
+
+    def _NewRequest(self, inside: bool) -> sdk_pb2.CreateManifestFromSdkRequest:
+        return sdk_pb2.CreateManifestFromSdkRequest(
+            chroot=common_pb2.Chroot(path=self._chroot_path),
+            sdk_path=common_pb2.Path(
+                path="/%s" % self._sdk_path_relative,
+                location=common_pb2.Path.Location.INSIDE
+                if inside
+                else common_pb2.Path.Location.OUTSIDE,
+            ),
+            dest_dir=common_pb2.Path(
+                path=self._dest_dir,
+                location=common_pb2.Path.Location.OUTSIDE,
+            ),
+        )
+
+    def _NewResponse(self) -> sdk_pb2.CreateManifestFromSdkResponse:
+        return sdk_pb2.CreateManifestFromSdkResponse()
+
+    def testValidateOnly(self):
+        """Check that a validate only call does not execute any logic."""
+        impl_patch = self.PatchObject(sdk_service, "CreateManifestFromSdk")
+        sdk_controller.BuildSdkToolchain(
+            self._NewRequest(False),
+            self._NewResponse(),
+            self.validate_only_config,
+        )
+        impl_patch.assert_not_called()
+
+    def testOutside(self):
+        """Check that a call with an outside path succeeds."""
+        impl_patch = self.PatchObject(
+            sdk_service,
+            "CreateManifestFromSdk",
+            return_value=pathlib.Path(self._manifest_path),
+        )
+        request = self._NewRequest(inside=False)
+        response = self._NewResponse()
+        sdk_controller.CreateManifestFromSdk(
+            request,
+            response,
+            self.api_config,
+        )
+        impl_patch.assert_called_with(
+            pathlib.Path("/", self._sdk_path_relative),
+            pathlib.Path(self._dest_dir),
+        )
+        self.assertEqual(
+            response.manifest_path.location, common_pb2.Path.Location.OUTSIDE
+        )
+        self.assertEqual(response.manifest_path.path, self._manifest_path)
+
+    def testInside(self):
+        """Check that an inside path parses correctly and the call succeeds."""
+        impl_patch = self.PatchObject(
+            sdk_service,
+            "CreateManifestFromSdk",
+            return_value=pathlib.Path(self._manifest_path),
+        )
+        request = self._NewRequest(inside=True)
+        response = self._NewResponse()
+        sdk_controller.CreateManifestFromSdk(
+            request,
+            response,
+            self.api_config,
+        )
+        impl_patch.assert_called_with(
+            pathlib.Path(self._chroot_path, self._sdk_path_relative),
+            pathlib.Path(self._dest_dir),
+        )
+        self.assertEqual(
+            response.manifest_path.location, common_pb2.Path.Location.OUTSIDE
+        )
+        self.assertEqual(response.manifest_path.path, self._manifest_path)
 
 
 class BuildSdkToolchainTest(

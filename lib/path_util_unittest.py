@@ -10,6 +10,7 @@ from pathlib import Path
 import tempfile
 from unittest import mock
 
+from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import git
@@ -585,3 +586,59 @@ def test_expand_directories_file(tmp_path):
     result = list(path_util.ExpandDirectories([file_path]))
 
     assert result == [file_path]
+
+
+class ProtoPathToPathlibPathTest(cros_test_lib.TestCase):
+    """Verify functionality for ProtoPathToPathlibPath."""
+
+    chroot = common_pb2.Chroot(path="/path/to/chroot")
+
+    @staticmethod
+    def createProtoPath(path: str, inside: bool) -> common_pb2.Path:
+        """Helper function to create a common_pb2.Path."""
+        location = (
+            common_pb2.Path.Location.INSIDE
+            if inside
+            else common_pb2.Path.Location.OUTSIDE
+        )
+        return common_pb2.Path(path=path, location=location)
+
+    def testRelativeInside(self):
+        """Verify that passing in a relative path inside the chroot fails"""
+        proto_path = self.createProtoPath(path="usr/bin", inside=True)
+        with self.assertRaises(ValueError):
+            path_util.ProtoPathToPathlibPath(proto_path, chroot=self.chroot)
+
+    def testRelativeOutside(self):
+        """Verify that passing in a relative path outside the chroot fails"""
+        proto_path = self.createProtoPath(path="usr/bin", inside=False)
+        with self.assertRaises(ValueError):
+            path_util.ProtoPathToPathlibPath(proto_path, chroot=self.chroot)
+
+    def testInsideWithChroot(self):
+        """Verify that we can convert an inside path with a chroot."""
+        proto_path = self.createProtoPath(path="/usr/bin", inside=True)
+        pathlib_path = path_util.ProtoPathToPathlibPath(
+            proto_path, chroot=self.chroot
+        )
+        self.assertEqual(pathlib_path, Path("/path/to/chroot/usr/bin"))
+
+    def testOutsideWithChroot(self):
+        """Verify that we can convert an outside path with a chroot."""
+        proto_path = self.createProtoPath(path="/usr/bin", inside=False)
+        pathlib_path = path_util.ProtoPathToPathlibPath(
+            proto_path, chroot=self.chroot
+        )
+        self.assertEqual(pathlib_path, Path("/usr/bin"))
+
+    def testInsideWithoutChroot(self):
+        """Verify that we cannot convert an inside path without a chroot."""
+        proto_path = self.createProtoPath(path="/usr/bin", inside=True)
+        with self.assertRaises(ValueError):
+            path_util.ProtoPathToPathlibPath(proto_path)
+
+    def testOutsideWithoutChroot(self):
+        """Verify that we can convert an outside path without a chroot."""
+        proto_path = self.createProtoPath(path="/usr/bin", inside=False)
+        pathlib_path = path_util.ProtoPathToPathlibPath(proto_path)
+        self.assertEqual(pathlib_path, Path("/usr/bin"))

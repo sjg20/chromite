@@ -15,6 +15,8 @@ from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
+from chromite.lib import portage_util
+from chromite.lib import sdk_builder_lib
 from chromite.service import sdk
 
 
@@ -22,9 +24,61 @@ class BuildSdkTarballTest(cros_test_lib.MockTestCase):
     """Tests for BuildSdkTarball function."""
 
     def testSuccess(self):
-        builder_lib = self.PatchObject(sdk.sdk_builder_lib, "BuildSdkTarball")
+        builder_lib = self.PatchObject(sdk_builder_lib, "BuildSdkTarball")
         sdk.BuildSdkTarball(chroot_lib.Chroot("/test/chroot"))
         builder_lib.assert_called_with(Path("/test/chroot/build/amd64-host"))
+
+
+class CreateManifestFromSdkTest(cros_test_lib.MockTempDirTestCase):
+    """Tests for CreateManifestFromSdk."""
+
+    def setUp(self):
+        """Set up the test case by populating a tempdir for the packages."""
+        self._portage_db = portage_util.PortageDB()
+        osutils.WriteFile(
+            os.path.join(self.tempdir, "dev-python/django-1.5.12-r3.ebuild"),
+            "EAPI=6",
+            makedirs=True,
+        )
+        osutils.WriteFile(
+            os.path.join(self.tempdir, "dev-python/urllib3-1.25.10.ebuild"),
+            "EAPI=7",
+            makedirs=True,
+        )
+        self._installed_packages = [
+            portage_util.InstalledPackage(
+                self._portage_db,
+                os.path.join(self.tempdir, "dev-python"),
+                category="dev-python",
+                pf="django-1.5.12-r3",
+            ),
+            portage_util.InstalledPackage(
+                self._portage_db,
+                os.path.join(self.tempdir, "dev-python"),
+                category="dev-python",
+                pf="urllib3-1.25.10",
+            ),
+        ]
+
+    def testSuccess(self):
+        """Test a standard, successful function call."""
+        dest_dir = Path("/my_build_root")
+        self.PatchObject(
+            portage_util.PortageDB,
+            "InstalledPackages",
+            return_value=self._installed_packages,
+        )
+        write_file_patch = self.PatchObject(osutils, "WriteFile")
+        manifest_path = sdk.CreateManifestFromSdk(self.tempdir, dest_dir)
+        expected_manifest_path = (
+            dest_dir / f"{constants.SDK_TARBALL_NAME}.Manifest"
+        )
+        expected_json_input = '{"version": "1", "packages": {"dev-python/django": [["1.5.12-r3", {}]], "dev-python/urllib3": [["1.25.10", {}]]}}'
+        write_file_patch.assert_called_with(
+            expected_manifest_path,
+            expected_json_input,
+        )
+        self.assertEqual(manifest_path, expected_manifest_path)
 
 
 class CreateArgumentsTest(cros_test_lib.MockTestCase):

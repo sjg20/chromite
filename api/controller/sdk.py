@@ -13,6 +13,7 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_build_lib
+from chromite.lib import path_util
 from chromite.service import sdk
 
 
@@ -46,6 +47,45 @@ def BuildSdkTarball(
     chroot = controller_util.ParseChroot(input_proto.chroot)
     output_proto.sdk_tarball_path.path = str(sdk.BuildSdkTarball(chroot))
     output_proto.sdk_tarball_path.location = common_pb2.Path.OUTSIDE
+
+
+def _CreateManifestFromSdkResponse(_input_proto, output_proto, _config):
+    """Populate a fake CreateManifestFromSdkResponse."""
+    output_proto.manifest_path.path = "/fake/sdk/tarball.tar.gz.Manifest"
+    output_proto.manifest_path.location = common_pb2.Path.Location.INSIDE
+
+
+@faux.success(_CreateManifestFromSdkResponse)
+@validate.require("chroot")
+@validate.require("sdk_path")
+@validate.require("dest_dir")
+@validate.validation_complete
+def CreateManifestFromSdk(
+    input_proto: "CreateManifestFromSdkRequest",
+    output_proto: "CreateManifestFromSdkResponse",
+    _config: "api_config.ApiConfig",
+) -> None:
+    """Create a manifest file showing the ebuilds in an SDK."""
+
+    def _assert_path_is_absolute(path: str, name: str):
+        """Raise an exception if the given path is not absolute."""
+        if not os.path.isabs(path):
+            cros_build_lib.Die(f"The {name} must be absolute; got {path}")
+
+    _assert_path_is_absolute(input_proto.chroot.path, "chroot path")
+    _assert_path_is_absolute(input_proto.sdk_path.path, "SDK path")
+    _assert_path_is_absolute(input_proto.dest_dir.path, "destination directory")
+
+    sdk_path = path_util.ProtoPathToPathlibPath(
+        input_proto.sdk_path, input_proto.chroot
+    )
+    dest_dir = path_util.ProtoPathToPathlibPath(
+        input_proto.dest_dir, input_proto.chroot
+    )
+
+    manifest_path = sdk.CreateManifestFromSdk(sdk_path, dest_dir)
+    output_proto.manifest_path.path = str(manifest_path)
+    output_proto.manifest_path.location = common_pb2.Path.Location.OUTSIDE
 
 
 @faux.success(_ChrootVersionResponse)

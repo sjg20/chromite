@@ -1581,7 +1581,9 @@ class InstalledPackage(object):
         # Check that the ebuild is present.
         ebuild_path = os.path.join(self.pkgdir, "%s.ebuild" % self.pf)
         if not os.path.exists(ebuild_path):
-            raise PortageDBError("Package doesn't contain an ebuild file.")
+            raise PortageDBError(
+                f"Package doesn't contain an ebuild file; expected {ebuild_path}."
+            )
 
         split_pv = package_info.parse(self.pf)
         if not split_pv.pv:

@@ -9,7 +9,7 @@ import logging
 import os
 from pathlib import Path
 import tempfile
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 import uuid
 
 from chromite.api.gen.chromiumos import common_pb2
@@ -17,12 +17,18 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import osutils
+from chromite.lib import portage_util
 from chromite.lib import sdk_builder_lib
 from chromite.scripts import upload_prebuilts
 
 
 if TYPE_CHECKING:
     from chromite.lib import chroot_lib
+
+
+# Version of the Manifest file being generated for SDK artifacts. Should be
+# incremented for major format changes.
+PACKAGE_MANIFEST_VERSION = "1"
 
 
 class Error(Exception):
@@ -486,6 +492,27 @@ def BuildSdkTarball(chroot: "chroot_lib.Chroot") -> Path:
     """
     sdk_path = Path(chroot.path) / "build/amd64-host"
     return sdk_builder_lib.BuildSdkTarball(sdk_path)
+
+
+def CreateManifestFromSdk(sdk_path: Path, dest_dir: Path) -> Path:
+    """Create a manifest file showing the ebuilds in an SDK.
+
+    Args:
+        sdk_path: The path to the full SDK. (Not a tarball!)
+        dest_dir: The directory in which the manifest file should be created.
+
+    Returns:
+        The filepath of the generated manifest file.
+    """
+    dest_manifest = dest_dir / f"{constants.SDK_TARBALL_NAME}.Manifest"
+    # package_data: {"category/package" : [("version", {}), ...]}
+    package_data: Dict[str, List[Tuple[str, Dict]]] = {}
+    for package in portage_util.PortageDB(sdk_path).InstalledPackages():
+        key = f"{package.category}/{package.package}"
+        package_data.setdefault(key, []).append((package.version, {}))
+    json_input = dict(version=PACKAGE_MANIFEST_VERSION, packages=package_data)
+    osutils.WriteFile(dest_manifest, json.dumps(json_input))
+    return dest_manifest
 
 
 def CreateBinhostCLs(
