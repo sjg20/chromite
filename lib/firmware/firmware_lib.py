@@ -1,7 +1,6 @@
 # Copyright 2021 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
-
 """Utilities to do build, flash, read, and other operations with AP Firmware.
 """
 
@@ -9,7 +8,7 @@ import logging
 import os
 import shutil
 import tempfile
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
@@ -20,6 +19,10 @@ from chromite.lib import workon_helper
 from chromite.lib.firmware import dut
 from chromite.lib.firmware import firmware_config
 from chromite.service import sysroot
+
+
+_ssh_id_filename = "/mnt/host/source/chromite/ssh_keys/testing_rsa"
+_ssh_partner_id_filename = "/mnt/host/source/sshkeys/partner_testing_rsa"
 
 
 class Error(Exception):
@@ -221,7 +224,6 @@ def _deploy_ssh(
     )
 
     logging.info("connecting to: %s\n", ip)
-    id_filename = "/mnt/host/source/chromite/ssh_keys/testing_rsa"
 
     if use_flashrom and fw_config.flash_extra_flags_flashrom:
         if passthrough_args:
@@ -245,14 +247,19 @@ def _deploy_ssh(
         else:
             passthrough_args = fw_config.flash_extra_flags_futility
 
-    with tempfile.NamedTemporaryFile() as tmpfile:
-        shutil.copyfile(id_filename, tmpfile.name)
+    with tempfile.NamedTemporaryFile() as tmpfile, tempfile.NamedTemporaryFile() as tmpfile2:
+        shutil.copyfile(_ssh_id_filename, tmpfile.name)
+        ssh_keys = [tmpfile.name]
+        if os.path.exists(_ssh_partner_id_filename):
+            shutil.copyfile(_ssh_partner_id_filename, tmpfile2.name)
+            ssh_keys += [tmpfile2.name]
+
         scp_cmd, flash_cmd = _build_flash_ssh_cmds(
             not flashrom,
             ip,
             port,
             image,
-            tmpfile.name,
+            ssh_keys,
             verbose,
             passthrough_args,
         )
@@ -283,7 +290,7 @@ def _build_flash_ssh_cmds(
     ip: str,
     port: int,
     path: str,
-    tmp_file_name: str,
+    tmp_ssh_keys: List[str],
     verbose: bool,
     passthrough_args: Iterable[str] = tuple(),
 ):
@@ -295,7 +302,7 @@ def _build_flash_ssh_cmds(
         ip: ip address of dut to flash.
         port: The port to ssh to.
         path: path to BIOS image to be flashed.
-        tmp_file_name: name of tempfile with copy of testing_rsa keys.
+        tmp_ssh_keys: list of filenames with copies of ssh keys.
         verbose: if True set -v flag in flash command.
         passthrough_args: List of additional options passed to flashrom or
             futility.
@@ -316,15 +323,17 @@ def _build_flash_ssh_cmds(
     scp_port = ["-P", str(port)] if port else []
     tmp = "/tmp"
     hostname = "root@%s" % ip
-    scp_cmd = (
-        ["scp", "-i", tmp_file_name]
-        + scp_port
-        + ssh_parameters
-        + [path, "%s:%s" % (hostname, tmp)]
-    )
-    flash_cmd = (
-        ["ssh", hostname, "-i", tmp_file_name] + ssh_port + ssh_parameters
-    )
+
+    scp_cmd = ["scp"]
+    for key in tmp_ssh_keys:
+        scp_cmd.extend(["-i", key])
+    scp_cmd += scp_port + ssh_parameters + [path, "%s:%s" % (hostname, tmp)]
+
+    flash_cmd = ["ssh", hostname]
+    for key in tmp_ssh_keys:
+        flash_cmd.extend(["-i", key])
+    flash_cmd += ssh_port + ssh_parameters
+
     if futility:
         flash_cmd += [
             "futility",
@@ -448,12 +457,16 @@ def ssh_read(
         bool: True on success, False on failure.
     """
     logging.info("Connecting to: %s\n", ip)
-    id_filename = "/mnt/host/source/chromite/ssh_keys/testing_rsa"
-    with tempfile.NamedTemporaryFile() as tmpfile:
-        shutil.copyfile(id_filename, tmpfile.name)
+    with tempfile.NamedTemporaryFile() as tmpfile, tempfile.NamedTemporaryFile() as tmpfile2:
+        shutil.copyfile(_ssh_id_filename, tmpfile.name)
+        ssh_keys = [tmpfile.name]
+
+        if os.path.exists(_ssh_partner_id_filename):
+            shutil.copyfile(_ssh_partner_id_filename, tmpfile2.name)
+            ssh_keys += [tmpfile2.name]
 
         scp_cmd, flash_cmd = _build_read_ssh_cmds(
-            ip, port, path, tmpfile.name, verbose, region
+            ip, port, path, ssh_keys, verbose, region
         )
 
         logging.info("Reading now, may take several minutes.")
@@ -480,7 +493,7 @@ def _build_read_ssh_cmds(
     ip: str,
     port: int,
     path: str,
-    tmp_file_name: str,
+    tmp_ssh_keys: List[str],
     verbose: bool,
     region: str,
 ):
@@ -490,7 +503,7 @@ def _build_read_ssh_cmds(
         ip: ip address of DUT.
         port: The port to ssh to.
         path: path to store the read BIOS image.
-        tmp_file_name: name of tempfile with copy of testing_rsa keys.
+        tmp_ssh_keys: list of filenames with copies of ssh keys.
         verbose: if True set -v flag in flash command.
         region: Region to read.
 
@@ -510,15 +523,19 @@ def _build_read_ssh_cmds(
     scp_port = ["-P", str(port)] if port else []
     remote_path = os.path.join("/tmp", os.path.basename(path))
     hostname = "root@%s" % ip
-    scp_cmd = (
-        ["scp", "-i", tmp_file_name]
-        + scp_port
-        + ssh_parameters
-        + ["%s:%s" % (hostname, remote_path), path]
+
+    scp_cmd = ["scp"]
+    for key in tmp_ssh_keys:
+        scp_cmd.extend(["-i", key])
+    scp_cmd += (
+        scp_port + ssh_parameters + ["%s:%s" % (hostname, remote_path), path]
     )
-    flash_cmd = (
-        ["ssh", hostname, "-i", tmp_file_name]
-        + ssh_port
+
+    flash_cmd = ["ssh", hostname]
+    for key in tmp_ssh_keys:
+        flash_cmd.extend(["-i", key])
+    flash_cmd += (
+        ssh_port
         + ssh_parameters
         + ["flashrom", "-p", "host", "-r", remote_path]
     )
