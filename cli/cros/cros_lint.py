@@ -21,6 +21,7 @@ from chromite.lib import git
 from chromite.lib import json_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
+from chromite.lib import path_util
 from chromite.lint.linters import owners
 from chromite.lint.linters import upstart
 from chromite.lint.linters import whitespace
@@ -543,7 +544,7 @@ Supported file names: %s
 
         files = []
         syms = []
-        for f in self.options.files:
+        for f in path_util.ExpandDirectories(self.options.files):
             if f.is_symlink():
                 syms.append(f)
             else:

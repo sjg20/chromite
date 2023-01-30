@@ -5,8 +5,11 @@
 """This module tests the cros lint command."""
 
 import os
+from typing import List
+from unittest import mock
 
 from chromite.cli.cros import cros_lint
+from chromite.lib import commandline
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 
@@ -81,3 +84,31 @@ def test_non_exec(tmp_path):
     sym_path.symlink_to("asdfasdfasdfasdf")
     ret = cros_lint._NonExecLintFile(sym_path, False, False, False)
     assert ret.returncode == 0
+
+
+def _call_cros_lint(args: List[str]) -> int:
+    """Call "cros lint" with the given command line arguments.
+
+    Args:
+        args: The command line arguments.
+
+    Returns:
+        The return code of "cros lint".
+    """
+    parser = commandline.ArgumentParser()
+    cros_lint.LintCommand.AddParser(parser)
+    opts = parser.parse_args(args)
+    cmd = cros_lint.LintCommand(opts)
+    return cmd.Run()
+
+
+def test_expand_dir(tmp_path):
+    """Test the CLI expands directories when given one."""
+    files = [tmp_path / "foo.txt", tmp_path / "bar.txt"]
+    for file in files:
+        osutils.Touch(file)
+    with mock.patch(
+        "chromite.cli.cros.cros_lint._BreakoutFilesByTool", spec=True
+    ) as breakout_files:
+        assert _call_cros_lint([str(tmp_path)]) == 0
+    assert set(breakout_files.call_args.args[0]) == set(files)
