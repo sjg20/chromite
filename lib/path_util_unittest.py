@@ -6,6 +6,7 @@
 
 import itertools
 import os
+from pathlib import Path
 import tempfile
 from unittest import mock
 
@@ -546,3 +547,41 @@ def test_normalize_paths_to_source_root_formatting_directory_paths(tmp_path):
         source_root=str(tmp_path),
     )
     assert actual_paths == expected_paths
+
+
+def test_expand_directories_in_git(tmp_path):
+    """Test ExpandDirectories when given a dir in a git repo."""
+    files_in_dir = [Path("foo.txt"), Path("bar.txt")]
+
+    with mock.patch("chromite.lib.git.FindGitTopLevel", return_value=tmp_path):
+        with mock.patch(
+            "chromite.lib.git.LsFiles", return_value=files_in_dir
+        ) as ls_files:
+            result = set(path_util.ExpandDirectories([tmp_path]))
+
+    assert result == set(files_in_dir)
+    ls_files.assert_called_once_with(files=[tmp_path], untracked=True)
+
+
+def test_expand_directories_not_git(tmp_path):
+    """Test ExpandDirectories when given a dir outside a git repo."""
+    subdir = tmp_path / "subdir"
+    subdir.mkdir()
+    files_in_dir = [tmp_path / "foo.txt", subdir / "bar.txt"]
+    for f in files_in_dir:
+        osutils.Touch(f)
+
+    with mock.patch("chromite.lib.git.FindGitTopLevel", return_value=None):
+        result = set(path_util.ExpandDirectories([tmp_path]))
+
+    assert result == set(files_in_dir)
+
+
+def test_expand_directories_file(tmp_path):
+    """Test ExpandDirectories when given a regular file."""
+    file_path = tmp_path / "foo.txt"
+    osutils.Touch(file_path)
+
+    result = list(path_util.ExpandDirectories([file_path]))
+
+    assert result == [file_path]

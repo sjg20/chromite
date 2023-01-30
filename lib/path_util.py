@@ -6,8 +6,9 @@
 
 import collections
 import os
+from pathlib import Path
 import tempfile
-from typing import List, Optional
+from typing import Iterator, List, Optional
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -429,3 +430,28 @@ def normalize_paths_to_source_root(
             results.append(path)
 
     return results
+
+
+def ExpandDirectories(files: List[Path]) -> Iterator[Path]:
+    """Expand a list of files and directories to be files only.
+
+    This function is intended to be called by tools which take a list of file
+    paths (e.g., cros format and cros lint), where expansion of directories
+    passed in would be useful.   If a directory is located inside of a git
+    checkout, any gitignore'd files will be respected (by means of using
+    "git ls-files").
+
+    Args:
+        files: The list of files to process.
+
+    Yields:
+        Paths to files.
+    """
+    for f in files:
+        if f.is_dir():
+            if git.FindGitTopLevel(f):
+                yield from git.LsFiles(files=[f], untracked=True)
+            else:
+                yield from (x for x in f.rglob("*") if x.is_file())
+        else:
+            yield f
