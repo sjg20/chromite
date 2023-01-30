@@ -155,7 +155,9 @@ def _ChromeVersionResponse(_input_proto, output_proto, _config):
 def GetChromeVersion(input_proto, output_proto, _config):
     """Returns the chrome version."""
     build_target = controller_util.ParseBuildTarget(input_proto.build_target)
-    chrome_version = packages.determine_chrome_version(build_target)
+    chrome_version = packages.determine_package_version(
+        constants.CHROME_CP, build_target
+    )
     if chrome_version:
         output_proto.version = chrome_version
 
@@ -169,6 +171,7 @@ def _GetTargetVersionsResponse(_input_proto, output_proto, _config):
     output_proto.platform_version = "12438.0.0"
     output_proto.milestone_version = "78"
     output_proto.full_version = "R78-12438.0.0"
+    output_proto.lacros_version = "111.0.5550.0"
 
 
 @faux.success(_GetTargetVersionsResponse)
@@ -191,6 +194,7 @@ def GetTargetVersions(input_proto, output_proto, _config):
     output_proto.platform_version = target_versions.platform_version or ""
     output_proto.milestone_version = target_versions.milestone_version or ""
     output_proto.full_version = target_versions.full_version or ""
+    output_proto.lacros_version = target_versions.lacros_version or ""
 
 
 def _GetBuilderMetadataResponse(input_proto, output_proto, _config):

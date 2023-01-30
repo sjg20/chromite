@@ -1499,7 +1499,9 @@ class ChromeVersionsTest(cros_test_lib.MockTestCase):
             portage_util, "PortageqBestVisible", return_value=r1_cpv
         )
 
-        chrome_version = packages.determine_chrome_version(self.build_target)
+        chrome_version = packages.determine_package_version(
+            constants.CHROME_CP, self.build_target
+        )
         version_numbers = chrome_version.split(".")
         self.assertEqual(len(version_numbers), 4)
         self.assertEqual(int(version_numbers[0]), 78)
@@ -1512,7 +1514,9 @@ class ChromeVersionsTest(cros_test_lib.MockTestCase):
             "PortageqBestVisible",
             side_effect=cros_build_lib.RunCommandError("error"),
         )
-        target = packages.determine_chrome_version(self.build_target)
+        target = packages.determine_package_version(
+            constants.CHROME_CP, self.build_target
+        )
         self.assertEqual(target, None)
 
 

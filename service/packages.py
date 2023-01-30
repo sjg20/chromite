@@ -1411,6 +1411,7 @@ class TargetVersions(NamedTuple):
     platform_version: str
     milestone_version: str
     full_version: str
+    lacros_version: str
 
 
 def get_target_versions(
@@ -1435,8 +1436,19 @@ def get_target_versions(
     chrome_version = None
     if builds_chrome:
         # Chrome version fetch.
-        chrome_version = determine_chrome_version(build_target)
+        chrome_version = determine_package_version(
+            constants.CHROME_CP, build_target
+        )
         logging.info("Found chrome version: %s", chrome_version)
+
+    builds_lacros = builds(constants.LACROS_CP, build_target, packages=packages)
+    lacros_version = None
+    if builds_lacros:
+        # LaCrOS version fetch.
+        lacros_version = determine_package_version(
+            constants.LACROS_CP, build_target
+        )
+        logging.info("Found LaCrOS version: %s", lacros_version)
 
     # The ChromeOS version info.
     platform_version = determine_platform_version()
@@ -1451,26 +1463,29 @@ def get_target_versions(
         platform_version,
         milestone_version,
         full_version,
+        lacros_version,
     )
 
 
-def determine_chrome_version(
+def determine_package_version(
+    cpv_name: str,
     build_target: "build_target_lib.BuildTarget",
 ) -> Optional[str]:
-    """Returns the current Chrome version for the board (or in buildroot).
+    """Returns the current package version for the board (or in buildroot).
 
     Args:
+        cpv_name: the name of the ebuild CPV
         build_target: The board build target.
 
     Returns:
-        The chrome version if available.
+        The version of the package, if available.
     """
     # TODO(crbug/1019770): Long term we should not need the try/catch here once
     # the builds function above only returns True for chrome when
     # determine_chrome_version will succeed.
     try:
         pkg_info = portage_util.PortageqBestVisible(
-            constants.CHROME_CP, build_target.name, cwd=constants.SOURCE_ROOT
+            cpv_name, build_target.name, cwd=constants.SOURCE_ROOT
         )
     except cros_build_lib.RunCommandError as e:
         # Return None because portage failed when trying to determine the chrome
