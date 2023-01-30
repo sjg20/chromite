@@ -11,7 +11,7 @@ import logging
 import os
 from pathlib import Path
 import stat
-from typing import Callable, Dict, List, Union
+from typing import Callable, Dict, List
 
 from chromite.cli import command
 from chromite.lib import commandline
@@ -72,19 +72,6 @@ def _GetPylintGroups(paths):
         if pylintrc:
             groups.setdefault(pylintrc, []).append(path)
     return groups
-
-
-def _GetIsortCfg(path: Union[str, os.PathLike]) -> Path:
-    """Locate isort.cfg file that applies to |path|.
-
-    If not found - use the default.
-    """
-    path = Path(path)
-    end_path = _GetProjectPath(path.parent).parent
-    ret = osutils.FindInPathParents(
-        ".isort.cfg", path.parent, end_path=end_path
-    )
-    return ret if ret else Path(constants.CHROMITE_DIR) / ".isort.cfg"
 
 
 def _GetPythonPath():
