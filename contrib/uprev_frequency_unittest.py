@@ -128,7 +128,7 @@ class GetAverageTimestampDeltaDaysTest(cros_test_lib.TestCase):
         )
 
     def testMultipleTimestampsInput(self):
-        """Test get_average_timestamp_delta_days computes correct average delta."""
+        """Test get_average_timestamp_delta_days computes correct avg delta."""
         timestamps = [
             1 * uprev_frequency.SECONDS_PER_DAY,
             3 * uprev_frequency.SECONDS_PER_DAY,

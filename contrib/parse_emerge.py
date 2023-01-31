@@ -141,7 +141,7 @@ class BuildPackagesProcessor(object):
             if e in line:
                 self.started = True
                 parts = line.split()
-                # ... Emerging [binary] (X of N) package::overlay [for /build/board]
+                # ... Emerging [binary] (X of N) package::overlay [for /sysroot]
                 pkgstr = parts[-1] if "::" in parts[-1] else parts[-3]
                 pkg = pkgstr.split("::")[0]
                 self.emerging.add(pkg)
@@ -220,13 +220,14 @@ class BuildPackagesProcessor(object):
             line_count += 1
 
         # Precondition: cursor at end of stream, directly after last status.
-        # \033[K = clear current line, \033[F = go to beginning of previous line.
+        # \033[K = clear current line.
+        # \033[F = go to beginning of previous line.
         # Clear each status line, moving cursor to the previous line each time.
         self.stream.write("\033[K\033[F" * (line_count - 1))
         # Finally, clear the last (i.e. first) line.
         self.stream.write("\033[K")
-        # Postcondition: Last status message has been erased, and cursor is at the
-        # beginning of the line where we will resume the output.
+        # Postcondition: Last status message has been erased, and cursor is at
+        # the beginning of the line where we will resume the output.
 
         # Clear the relevant status variables.
         self.last_status = None

@@ -23,13 +23,13 @@ the instructions if they're vague or out of date!
 For Intellij:
 Create a new External Tool (Settings > Tools > External Tools).
 Tool Settings:
-  Program: ~/chromiumos/chromite/contrib/generate_cs_path
-  Arguments: $FilePath$ -l $LineNumber$
+    Program: ~/chromiumos/chromite/contrib/generate_cs_path
+    Arguments: $FilePath$ -l $LineNumber$
 
 For VSCode:
 Create a custom task (code.visualstudio.com/docs/editor/tasks#_custom-tasks)
 with the command:
-  ~/chromiumos/chromite/contrib/generate_cs_path ${file} -l ${lineNumber}
+    ~/chromiumos/chromite/contrib/generate_cs_path ${file} -l ${lineNumber}
 """
 
 import os
@@ -139,14 +139,16 @@ def GetParser():
         "--open",
         action="store_true",
         default=False,
-        help="Open the link in a browser rather than copying it to the clipboard.",
+        help="Open the link in a browser rather than copying it to the "
+        "clipboard.",
     )
     action_group.add_argument(
         "-s",
         "--show",
         action="store_true",
         default=False,
-        help="Output the link to stdout rather than copying it to the clipboard.",
+        help="Output the link to stdout rather than copying it to the"
+        "clipboard.",
     )
 
     parser.add_argument("path", type="path", help="Path to a file.")

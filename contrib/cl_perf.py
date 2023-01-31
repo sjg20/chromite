@@ -152,7 +152,7 @@ def get_unique_test_name(
     cls_tested: List[str],
     cls_baseline: Optional[List[str]],
 ) -> str:
-    """Get a unique name of the test, which will be a valid dir name in Linux."""
+    """Get unique name of the test, which will be a valid dir name in Linux."""
     bucket = bucket.replace("/", "-")
     builder = builder.replace("/", "-")
     cls_tested_str = "_".join(
@@ -229,8 +229,8 @@ def parse_swarming_datetime(ts: str) -> datetime.datetime:
         # microsecs (i.e. microsecs == 0).
         microsecs = "0"
         if secs[-1].lower() == "z":
-            # If there is a trailing 'Z' or 'z', remove it so that the timestamp can
-            # be parse correctly below.
+            # If there is a trailing 'Z' or 'z', remove it so that the timestamp
+            # can be parsed correctly below.
             secs = secs[:-1]
     else:
         # Timestamp may look like "2022-06-14T14:55:48.123456Z" and contains
@@ -281,8 +281,8 @@ class TestResult:
             step_name = step["name"]
 
             if "|" in step_name:
-                # '|' appears in sub-steps, and that time is accounted for in the main
-                # step. Skip it.
+                # '|' appears in sub-steps, and that time is accounted for in
+                # the main step. Skip it.
                 continue
             status = step["status"]
             if status != "SUCCESS":
@@ -361,7 +361,8 @@ class SwarmingOutputProcessor:
             if baseline_test.GetStepsNames() != baseline_steps:
                 logging.warning(
                     "Baseline builds have different steps:\n"
-                    " Task %s (this set of steps will be used for comparison): %s\n"
+                    " Task %s (this set of steps will be used for comparison): "
+                    "%s\n"
                     " Task %s: %s",
                     self.baseline[0].task_id,
                     baseline_steps,
@@ -375,7 +376,8 @@ class SwarmingOutputProcessor:
             if tested_test.GetStepsNames() != tested_steps:
                 logging.warning(
                     "Tested builds have different steps:\n"
-                    " Task %s (this set of steps will be used for comparison): %s\n"
+                    " Task %s (this set of steps will be used for comparison): "
+                    "%s\n"
                     " Task %s: %s",
                     self.tested[0].task_id,
                     tested_steps,
@@ -407,7 +409,7 @@ class SwarmingOutputProcessor:
     def PrintIndividualBuildsStepsTable(
         self, csv: bool = False, min_seconds: int = 10
     ) -> None:
-        """Does final processing of performance and prints individual step table."""
+        """Final processing of performance and print individual step table."""
         if csv:
             separator = ","
         else:
@@ -473,7 +475,7 @@ class SwarmingOutputProcessor:
     def PrintMedianBuildsStepsTable(
         self, csv: bool = False, min_seconds: int = 10
     ) -> None:
-        """Does final processing of performance and prints median result table."""
+        """Final processing of performance and print median result table."""
         if csv:
             separator = ","
         else:
@@ -745,7 +747,10 @@ class Test:
             return None
 
     def SaveToDisk(self) -> None:
-        """Stores Test state to disk, which can be read later during processing."""
+        """Stores Test state to disk.
+
+        Can be read later during processing.
+        """
         state_dir = Path(self.test_state_dir)
         state_dir.mkdir(parents=True, exist_ok=True)
 
@@ -824,7 +829,8 @@ def SetupProcessParser(parser) -> None:
         "--csv",
         default=False,
         action="store_true",
-        help="Report results as CSV, ready for spreadsheet. Default: %(default)s.",
+        help="Report results as CSV, ready for spreadsheet. "
+        "Default: %(default)s.",
     )
     parser.add_argument(
         "--min-seconds",
@@ -838,7 +844,8 @@ def SetupProcessParser(parser) -> None:
         "--ignore-failed",
         default=False,
         action="store_true",
-        help="Ignore failed builds when processing results. Default: %(default)s.",
+        help="Ignore failed builds when processing results."
+        "Default: %(default)s.",
     )
     parser.add_argument(
         nargs="?",

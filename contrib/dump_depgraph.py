@@ -69,11 +69,11 @@ def main(argv: List[str]):
     commandline.RunInsideChroot()
     opts = parse_args(argv)
     logging.notice(
-        "Generating graph. Note that Chromite takes a few minutes to do this and"
-        " fails completely on some boards see e.g. b/214874483."
+        "Generating graph. Note that Chromite takes a few minutes to do this "
+        "and fails completely on some boards see e.g. b/214874483."
     )
-    # The --host case is handled implicitly, since it's the only way board can be
-    # unset and sysroot have its default.
+    # The --host case is handled implicitly, since it's the only way board can
+    # be unset and sysroot have its default.
     sysroot = opts.sysroot
     if opts.board:
         sysroot = build_target_lib.get_default_sysroot_path(opts.board)
