@@ -208,27 +208,9 @@ def EnterChroot(
     if st.f_flag & os.ST_NOSUID:
         cros_build_lib.Die("chroot cannot be in a nosuid mount")
 
-    cmd = ENTER_CHROOT + [
-        "--chroot",
-        chroot.path,
-        "--cache_dir",
-        chroot.cache_dir,
-    ]
-    if chroot.chrome_root:
-        cmd.extend(["--chrome_root", chroot.chrome_root])
+    cmd = ENTER_CHROOT + chroot.get_enter_args(for_shell=True)
     if chrome_root_mount:
         cmd.extend(["--chrome_root_mount", chrome_root_mount])
-    if chroot.goma:
-        cmd.extend(["--goma_dir", chroot.goma.linux_goma_dir])
-    if chroot.remoteexec:
-        cmd.extend(
-            [
-                "--reclient_dir",
-                chroot.remoteexec.reclient_dir,
-                "--reproxy_cfg_file",
-                chroot.remoteexec.reproxy_cfg_file,
-            ]
-        )
     if working_dir is not None:
         cmd.extend(["--working_dir", working_dir])
 

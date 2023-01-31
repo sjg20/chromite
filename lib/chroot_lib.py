@@ -109,31 +109,44 @@ class Chroot(object):
         """Check if a chroot-relative path exists inside the chroot."""
         return os.path.exists(self.full_path(*args))
 
-    def get_enter_args(self) -> List[str]:
-        """Build the arguments to enter this chroot."""
+    def get_enter_args(self, for_shell: Optional[bool] = False) -> List[str]:
+        """Build the arguments to enter this chroot.
+
+        Args:
+            for_shell: Whether the return value will be used when using the old
+                src/scripts/ shell code or with newer `cros_sdk` interface.
+
+        Returns:
+            The command line arguments to pass to the enter chroot program.
+        """
         args = []
+
+        # The old src/scripts/sdk_lib/enter_chroot.sh uses shflags which only
+        # accepts _ in option names.  Our Python code uses - instead.
+        # TODO(build): Delete this once sdk_lib/enter_chroot.sh is gone.
+        sep = "_" if for_shell else "-"
 
         # This check isn't strictly necessary, always passing the --chroot argument
         # is valid, but it's nice for cleaning up commands in logs.
         if not self._is_default_path:
             args.extend(["--chroot", self.path])
         if self.cache_dir:
-            args.extend(["--cache-dir", self.cache_dir])
+            args.extend([f"--cache{sep}dir", self.cache_dir])
         if self.chrome_root:
-            args.extend(["--chrome-root", self.chrome_root])
+            args.extend([f"--chrome{sep}root", self.chrome_root])
         if self.goma:
             args.extend(
                 [
-                    "--goma-dir",
+                    f"--goma{sep}dir",
                     self.goma.linux_goma_dir,
                 ]
             )
         if self.remoteexec:
             args.extend(
                 [
-                    "--reclient-dir",
+                    f"--reclient{sep}dir",
                     self.remoteexec.reclient_dir,
-                    "--reproxy-cfg-file",
+                    f"--reproxy{sep}cfg{sep}file",
                     self.remoteexec.reproxy_cfg_file,
                 ]
             )
