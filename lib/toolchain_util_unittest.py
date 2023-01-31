@@ -2285,6 +2285,23 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             compbinary=False,
         )
 
+    def testCreateAndUploadMergedAFDOProfileRedactsProfileOnArm(self):
+        prof = self._benchmark_afdo_profile_name(
+            major=9999, compression_suffix=False, arch="arm"
+        )
+        merged_name, mocks = self.runCreateAndUploadMergedAFDOProfileOnce(
+            unmerged_name=prof, arch="arm"
+        )
+        self.assertIsNotNone(merged_name)
+        mocks.process_afdo_profile.assert_called_once_with(
+            os.path.join(self.output_dir, "raw-" + merged_name),
+            os.path.join(self.output_dir, merged_name),
+            redact=True,
+            remove=True,
+            reduce_functions=20000,
+            compbinary=False,
+        )
+
     def testCreateAndUploadMergedAFDOProfileWorksInTheHappyCase(self):
         merged_name, mocks = self.runCreateAndUploadMergedAFDOProfileOnce()
         self.assertIsNotNone(merged_name)

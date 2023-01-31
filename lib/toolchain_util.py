@@ -1483,13 +1483,27 @@ class _CommonPrepareBundle(object):
         # merged profiles also grow. To stabilize the impact on production
         # profiles for Android/Linux, reduce the number of functions to 70k,
         # which aligns with recent 3 merged benchmark profiles.
-        # FIXME: see if a lower number (50K? 20K?) is equally as good.
+        reduce_functions = 70000
+        redact = False
+        remove = True
+        if self.arch == "arm":
+            # Redaction has significant effect on performance gain (+15% on
+            # speedometer2) but also has a drastic impact on the binary size
+            # (+16MB).
+            # We can balance the numbers by reducing the number of functions.
+            # Reduction of the number of functions from 70k to 20k saves 6MB while
+            # performance gain drops from 15 to 12 % (on speedometer2/trogdor).
+            # With the native arm profile we can further trim the binary size
+            # with sample-profile-accurate. On trogdor it shaves another 20MB
+            # with a slight performance impact, drop from 12 to 11 %.
+            reduce_functions = 20000
+            redact = True
         self._ProcessAFDOProfile(
             raw_merged_output_path,
             profile_to_upload_path,
-            redact=False,
-            remove=True,
-            reduce_functions=70000,
+            redact=redact,
+            remove=remove,
+            reduce_functions=reduce_functions,
             compbinary=False,
         )
 
