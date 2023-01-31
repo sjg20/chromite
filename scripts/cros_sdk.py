@@ -870,6 +870,7 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
         ),
     )
     parser.add_argument(
+        "--goma-dir",
         "--goma_dir",
         type="path",
         help="Goma installed directory to mount into the chroot.",

@@ -124,7 +124,7 @@ class Chroot(object):
         if self.goma:
             args.extend(
                 [
-                    "--goma_dir",
+                    "--goma-dir",
                     self.goma.linux_goma_dir,
                 ]
             )
