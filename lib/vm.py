@@ -469,7 +469,7 @@ class VM(device.Device):
                 if cros_build_lib.BooleanShellValue(
                     osutils.ReadFile(f).strip(), False
                 ):
-                    self.qemu_cpu += ",vmx=on"
+                    self.qemu_cpu += ",vmx=on,svm=on"
                     break
 
         qemu_args = [self.qemu_path]
