@@ -1649,6 +1649,12 @@ class Upgrader(object):
                 ebuild_path = result.stdout.strip()
                 (_overlay, cat, pn, _pv) = self._SplitEBuildPath(ebuild_path)
                 pkg_dirs.append(os.path.join(self._upstream, cat, pn))
+            elif "/" in pkg:
+                # If there are no EAPI<8 packages equery will fail so provide
+                # a fallback.
+                cat, pn = pkg.split("/", 2)
+                pkg_dirs.append(os.path.join(self._upstream, cat, pn))
+
         try:
             # Compile a list of ebuild files to be processed.
             ebuild_files = [
@@ -1659,12 +1665,17 @@ class Upgrader(object):
             # Replace EAPI version 8 with 7 for each ebuild file.
             for ebuild in ebuild_files:
                 with open(ebuild, "r+") as f:
-                    lines = [
-                        x.replace("8", "7") if x.startswith("EAPI=") else x
-                        for x in f.readlines()
-                    ]
-                    f.seek(0)
-                    f.writelines(lines)
+                    changed = False
+                    lines = []
+                    for line in f.readlines():
+                        if line.startswith("EAPI=") and "8" in line:
+                            lines.append(line.replace("8", "7"))
+                            changed = True
+                        else:
+                            lines.append(line)
+                    if changed:
+                        f.seek(0)
+                        f.writelines(lines)
         except OSError as e:
             oper.Error(f"Failed to downgrade ebuild file(s) {e}")
 
