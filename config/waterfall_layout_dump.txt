@@ -153,6 +153,7 @@
     cherry64-release
     coral-arc-r-release
     coral-release
+    corsola-kernelnext-release
     corsola-release
     dedede-release
     draco-release
@@ -509,6 +510,11 @@
   coral-release-tryjob
   corsola-factory-corsola-15196.B-factorybranch-tryjob
   corsola-full-tryjob
+  corsola-kernelnext-full-tryjob
+  corsola-kernelnext-llvm-next-toolchain-tryjob
+  corsola-kernelnext-llvm-toolchain-tryjob
+  corsola-kernelnext-payloads-tryjob
+  corsola-kernelnext-release-tryjob
   corsola-llvm-next-toolchain-tryjob
   corsola-llvm-toolchain-tryjob
   corsola-payloads-tryjob
@@ -1005,6 +1011,7 @@
     cherry64-release-tryjob
     coral-arc-r-release-tryjob
     coral-release-tryjob
+    corsola-kernelnext-release-tryjob
     corsola-release-tryjob
     dedede-release-tryjob
     draco-release-tryjob
