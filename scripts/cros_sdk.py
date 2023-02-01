@@ -1135,6 +1135,13 @@ def main(argv):
 
     options.Freeze()
 
+    if options.reclient_dir and not options.reproxy_cfg_file:
+        cros_build_lib.Die("--reclient-dir requires --reproxy-cfg-file")
+    if not options.reclient_dir and options.reproxy_cfg_file:
+        cros_build_lib.Die(
+            "--reproxy-cfg-file only makes sense with --reclient-dir"
+        )
+
     remoteexec = (
         remoteexec_util.Remoteexec(
             options.reclient_dir, options.reproxy_cfg_file
