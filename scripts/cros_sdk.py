@@ -777,17 +777,17 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
     parser.add_argument(
         "--goma-dir",
         "--goma_dir",
-        type="path",
+        type="dir_exists",
         help="Goma installed directory to mount into the chroot.",
     )
     parser.add_argument(
         "--reclient-dir",
-        type="path",
+        type="dir_exists",
         help="Reclient installed directory to mount into the chroot.",
     )
     parser.add_argument(
         "--reproxy-cfg-file",
-        type="path",
+        type="file_exists",
         help="Config file for re-client's reproxy used for remoteexec.",
     )
     parser.add_argument(
