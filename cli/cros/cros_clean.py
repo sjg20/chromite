@@ -29,6 +29,8 @@ from chromite.utils import timer
 class CleanCommand(command.CliCommand):
     """Clean up working files from the build."""
 
+    use_dryrun_options = True
+
     @classmethod
     def AddParser(cls, parser):
         """Add parser arguments."""
@@ -39,13 +41,6 @@ class CleanCommand(command.CliCommand):
             default=False,
             action="store_true",
             help="Clean up files that are automatically created.",
-        )
-        parser.add_argument(
-            "-n",
-            "--dry-run",
-            default=False,
-            action="store_true",
-            help="Show which paths would be cleaned up.",
         )
 
         group = parser.add_argument_group(
@@ -226,7 +221,7 @@ class CleanCommand(command.CliCommand):
             """Helper wrapper for the dry-run checks"""
             if ignore_mount and os.path.ismount(path):
                 logging.debug("Ignoring bind mounted dir: %s", path)
-            elif self.options.dry_run:
+            elif self.options.dryrun:
                 _LogClean(path)
             else:
                 osutils.RmDir(path, ignore_missing=True, sudo=True)
@@ -240,7 +235,7 @@ class CleanCommand(command.CliCommand):
             """Helper wrapper for the dry-run checks"""
             if ignore_mount and os.path.ismount(path):
                 logging.debug("Ignoring bind mounted dir: %s", path)
-            elif self.options.dry_run:
+            elif self.options.dryrun:
                 _LogEmpty(path)
             else:
                 osutils.EmptyDir(path, ignore_missing=True, sudo=True)
@@ -248,7 +243,7 @@ class CleanCommand(command.CliCommand):
         # Delete this first since many of the caches below live in the chroot.
         if self.options.chroot:
             logging.debug("Remove the chroot.")
-            if self.options.dry_run:
+            if self.options.dryrun:
                 logging.notice("would have cleaned: %s", chroot_dir)
             else:
                 with timer.timer("Remove the chroot", logging.debug):
@@ -283,7 +278,7 @@ class CleanCommand(command.CliCommand):
             # Recreate dirs that cros_sdk does when entering.
             # TODO: When sdk_lib/enter_chroot.sh is moved to chromite, we should
             # unify with those code paths.
-            if not self.options.dry_run:
+            if not self.options.dryrun:
                 # Prior to recreating the distfiles directory we must ensure
                 # that the cache directory is not root.
                 osutils.SafeMakedirsNonRoot(self.options.cache_dir)
@@ -328,7 +323,7 @@ class CleanCommand(command.CliCommand):
                         Clean(d)
 
         if self.options.flash:
-            if self.options.dry_run:
+            if self.options.dryrun:
                 _LogClean(dev_server_wrapper.DEFAULT_STATIC_DIR)
             else:
                 with timer.timer(
