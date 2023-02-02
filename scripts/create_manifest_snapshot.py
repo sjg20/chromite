@@ -26,7 +26,7 @@ BRANCH_REF_PREFIX = "refs/heads/"
 
 def GetParser():
     """Creates the argparse parser."""
-    parser = commandline.ArgumentParser(description=__doc__)
+    parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
     parser.add_argument(
         "--repo-path",
         type="path",
@@ -44,11 +44,6 @@ def GetParser():
         "--output-file",
         type="path",
         help="Path to write the manifest snapshot XML to.",
-    )
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="Do not actually push to remotes.",
     )
     # This is for limiting network traffic to the git remote(s).
     parser.add_argument(
@@ -122,13 +117,13 @@ def _MakeUniqueRef(project, base_ref, used_refs):
     return ref
 
 
-def _GitPushProjectUpstream(repo_root, project, dry_run):
+def _GitPushProjectUpstream(repo_root, project, dryrun):
     """Push the project revision to its remote upstream."""
     git.GitPush(
         os.path.join(repo_root, project.Path()),
         project.revision,
         git.RemoteRef(project.Remote().GitName(), project.upstream),
-        dry_run=dry_run,
+        dry_run=dryrun,
     )
 
 
@@ -171,7 +166,7 @@ def main(argv):
     with parallel.BackgroundTaskRunner(
         _GitPushProjectUpstream,
         repo.root,
-        dry_run=options.dry_run,
+        dryrun=options.dryrun,
         processes=options.jobs,
     ) as queue:
         for projects in snapshot_projects.values():
