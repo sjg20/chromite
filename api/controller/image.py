@@ -637,7 +637,7 @@ def PushImage(
         channel_to_uris = pushimage.PushImage(
             input_proto.gs_image_dir,
             input_proto.sysroot.build_target.name,
-            dry_run=input_proto.dryrun,
+            dryrun=input_proto.dryrun,
             sign_types=sign_types,
             **kwargs,
         )

@@ -742,7 +742,7 @@ class PushImageTest(api_config.ApiConfigMixin):
         MockPushImage.assert_called_with(
             request.gs_image_dir,
             request.sysroot.build_target.name,
-            dry_run=request.dryrun,
+            dryrun=request.dryrun,
             sign_types=["recovery"],
             dest_bucket=request.dest_bucket,
             force_channels=["dev", "canary"],

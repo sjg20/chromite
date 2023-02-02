@@ -2996,7 +2996,7 @@ def PushImages(
             board,
             profile=profile,
             sign_types=sign_types,
-            dry_run=dryrun,
+            dryrun=dryrun,
             buildroot=buildroot,
         )
     except pushimage.PushError as e:
