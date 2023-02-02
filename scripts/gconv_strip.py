@@ -128,13 +128,13 @@ class GconvModules(object):
             charsets.remove("INTERNAL")
         return charsets
 
-    def Rewrite(self, used_charsets, dry_run=False):
+    def Rewrite(self, used_charsets, dryrun=False):
         """Rewrite gconv-modules file with only the used charsets.
 
         Args:
           used_charsets: A list of used charsets. This should be a subset of the
                          list returned by Load().
-          dry_run: Whether this function should not change any file.
+          dryrun: Whether this function should not change any file.
         """
 
         # Compute the used modules.
@@ -181,7 +181,7 @@ class GconvModules(object):
             module_path = os.path.join(modules_dir, "%s.so" % module)
             unused_size += os.lstat(module_path).st_size
             logging.debug("rm %s", module_path)
-            if not dry_run:
+            if not dryrun:
                 os.unlink(module_path)
 
         unused_libdeps_size = 0
@@ -189,7 +189,7 @@ class GconvModules(object):
             lib_path = os.path.join(modules_dir, lib)
             unused_libdeps_size += os.lstat(lib_path).st_size
             logging.debug("rm %s", lib_path)
-            if not dry_run:
+            if not dryrun:
                 os.unlink(lib_path)
 
         logging.info(
@@ -227,7 +227,7 @@ class GconvModules(object):
                 else:
                     cros_build_lib.Die("Unknown line: %s", line)
 
-        if not dry_run:
+        if not dryrun:
             osutils.WriteFile(self._filename, "".join(result))
 
 
@@ -348,20 +348,14 @@ def GconvStrip(opts):
                     logging.debug(" - %s", strings[i])
 
     used_charsets = [cs for cs, used in zip(charsets, global_used) if used]
-    gmods.Rewrite(used_charsets, opts.dry_run)
+    gmods.Rewrite(used_charsets, opts.dryrun)
     return 0
 
 
 def ParseArgs(argv):
     """Return parsed commandline arguments."""
 
-    parser = commandline.ArgumentParser()
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        default=False,
-        help="process but don't modify any file.",
-    )
+    parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
     parser.add_argument(
         "root",
         type="path",

@@ -66,7 +66,7 @@ module charset_foo   charset_A     USED_MODULE
 
         self.PatchObject(gconv_strip.os, "lstat", return_value=_StubStat)
         self.PatchObject(gconv_strip.os, "unlink")
-        gmods.Rewrite(["charset_A", "charset_B"], dry_run=False)
+        gmods.Rewrite(["charset_A", "charset_B"], dryrun=False)
 
         expected = """
 #      from          to            module         cost
