@@ -52,21 +52,13 @@ from chromite.lib import patch as cros_patch
 
 def _GetParser():
     """Returns the parser to use for this module."""
-    parser = commandline.ArgumentParser(description=__doc__)
+    parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
     parser.add_argument(
         "-d",
         "--draft",
         default=False,
         action="store_true",
         help="upload a draft to Gerrit rather than a change",
-    )
-    parser.add_argument(
-        "-n",
-        "--dry-run",
-        default=False,
-        action="store_true",
-        dest="dryrun",
-        help="apply changes locally but do not upload them",
     )
     parser.add_argument(
         "-e",
