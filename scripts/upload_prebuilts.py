@@ -829,7 +829,7 @@ def ParseOptions(argv):
       A tuple containing a parsed options object and BuildTarget.
       The target instance is None if no board is specified.
     """
-    parser = commandline.ArgumentParser()
+    parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
     parser.add_argument(
         "-H",
         "--binhost-base-url",
@@ -984,14 +984,6 @@ def ParseOptions(argv):
         action="store_true",
         default=False,
         help="Upload board tarball to Google Storage.",
-    )
-    parser.add_argument(
-        "-n",
-        "--dry-run",
-        dest="dryrun",
-        action="store_true",
-        default=False,
-        help="Don't push or upload prebuilts.",
     )
 
     options = parser.parse_args(argv)
