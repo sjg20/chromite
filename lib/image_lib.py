@@ -374,6 +374,16 @@ class LoopbackPartitions(object):
             else:
                 raise KeyError(repr(part_id))
 
+    def Mounted(self) -> Dict[str, os.PathLike]:
+        """Returns information for mounted partitions.
+
+        Returns:
+            A dictionary of partition_names:mount_path.
+        """
+        return dict(
+            (x.name, self._GetMountPointAndSymlink(x)[0]) for x in self._mounted
+        )
+
     def _IsExt2(self, part_id, offset=0):
         """Is the given partition an ext2 file system?"""
         dev = self.GetPartitionDevName(part_id)

@@ -89,11 +89,13 @@ class LoopbackPartitionsMock(image_lib.LoopbackPartitions):
     def _Mount(self, part, mount_opts):
         """Stub out mount operations."""
         dest_number, _ = self._GetMountPointAndSymlink(part)
-        # Don't actually even try to mount it, let alone mark it mounted.
+        # Don't actually even try to mount it.
+        self._mounted.add(part)
         return dest_number
 
     def _Unmount(self, part):
         """Stub out unmount operations."""
+        self._mounted.remove(part)
 
     def close(self):
         pass
@@ -248,6 +250,18 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
         self.assertEqual(4, self.mount_mock.call_count)
         self.umount_mock.assert_not_called()
 
+        # Check that Mounted provides the right info.
+        mounts = lb.Mounted()
+        self.assertDictEqual(
+            mounts,
+            {
+                "STATE": f"{self.tempdir}/dir-1",
+                "ROOT-A": f"{self.tempdir}/dir-3",
+                "ROOT-B": f"{self.tempdir}/dir-5",
+                "ROOT-C": f"{self.tempdir}/dir-7",
+            },
+        )
+
         # Unmount half of them, confirm that they were unmounted.
         lb.Unmount((1, "ROOT-B"))
         for p in (1, 5):
@@ -256,6 +270,16 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
             )
         self.assertEqual(2, self.umount_mock.call_count)
         self.umount_mock.reset_mock()
+
+        # Check that Mounted has been updated
+        mounts = lb.Mounted()
+        self.assertDictEqual(
+            mounts,
+            {
+                "ROOT-A": f"{self.tempdir}/dir-3",
+                "ROOT-C": f"{self.tempdir}/dir-7",
+            },
+        )
 
         # Close the object, so that we unmount the other half of them.
         lb.close()

@@ -116,21 +116,17 @@ def get_installed_package_data(
     # partition contains the package db that we need. We do this once and get
     # installed packages once for all image types, regardless of whether we care
     # about what's installed on the stateful partition.
+
     with osutils.TempDir() as temp_dir:
+        # Get a dict of {partition:mountpoint}, including state always.
+        partitions = set(
+            _SUPPORTED_ISCP_PARTITIONS[image_type] + [constants.PART_STATE]
+        )
+
         with image_lib.LoopbackPartitions(
-            image_path, destination=temp_dir
+            path=image_path, destination=temp_dir, part_ids=partitions
         ) as img:
-            # Get a dict of {partition:mountpoint}, including state always.
-            partitions = list(
-                set(
-                    _SUPPORTED_ISCP_PARTITIONS[image_type]
-                    + [constants.PART_STATE]
-                )
-            )
-            mount_points = {
-                partition: path
-                for partition, path in zip(partitions, img.Mount(partitions))
-            }
+            mount_points = img.Mounted()
             db = portage_util.PortageDB(
                 root=mount_points[constants.PART_STATE],
                 vdb=_STATEFUL_PARTITION_VDB,
@@ -160,7 +156,6 @@ def get_installed_package_data(
                 results[partition] = get_package_details_for_partition(
                     package_install_path, installed_package_files
                 )
-            img.Unmount(partitions)
     return results
 
 
