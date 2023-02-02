@@ -315,7 +315,7 @@ class DlcGenerator(object):
         """Copy the temp files to the build directory using sudo."""
         src = self.temp_root.tempdir.rstrip("/") + "/."
         dst = self.sysroot
-        logging.info(
+        logging.debug(
             "Copy files from temporary directory (%s) to build directory (%s).",
             src,
             dst,
@@ -514,7 +514,7 @@ class DlcGenerator(object):
 
     def CreateImage(self):
         """Create the image and copy the DLC files to it."""
-        logging.info("Creating the DLC image.")
+        logging.debug("Creating the DLC image.")
         if self.ebuild_params.fs_type == EXT4_TYPE:
             self.CreateExt4Image()
         elif self.ebuild_params.fs_type == SQUASHFS_TYPE:
@@ -526,7 +526,7 @@ class DlcGenerator(object):
 
     def VerifyImageSize(self):
         """Verify the image can fit to the reserved file."""
-        logging.info("Verifying the DLC image size.")
+        logging.debug("Verifying the DLC image size.")
         image_bytes = os.path.getsize(self.dest_image)
         preallocated_bytes = (
             self.ebuild_params.pre_allocated_blocks * self._BLOCK_SIZE
@@ -617,7 +617,7 @@ class DlcGenerator(object):
 
     def GenerateVerity(self):
         """Generate verity parameters and hashes for the image."""
-        logging.info("Generating DLC image verity.")
+        logging.debug("Generating DLC image verity.")
         with osutils.TempDir(prefix="dlc_") as temp_dir:
             hash_tree = os.path.join(temp_dir, "hash_tree")
             # Get blocks in the image.
@@ -783,7 +783,7 @@ def InstallDlcImages(
     build_dir = os.path.join(sysroot, DLC_BUILD_DIR)
     build_dir_scaled = os.path.join(sysroot, DLC_BUILD_DIR_SCALED)
     if not os.path.exists(build_dir) and not os.path.exists(build_dir_scaled):
-        logging.info(
+        logging.debug(
             "DLC build directories (%s) (%s) do not exist, ignoring.",
             build_dir,
             build_dir_scaled,
@@ -794,7 +794,7 @@ def InstallDlcImages(
         dlc_build_dir = build_dir_scaled if scaled else build_dir
 
         if not os.path.exists(dlc_build_dir):
-            logging.info("Skipping build directory %s.", dlc_build_dir)
+            logging.debug("Skipping build directory %s.", dlc_build_dir)
             continue
 
         if dlc_id is not None:
@@ -814,7 +814,11 @@ def InstallDlcImages(
                 logging.info("There are no DLC(s) to copy to output, ignoring.")
                 return
 
-            logging.info("Detected the following DLCs: %s", ", ".join(dlc_ids))
+            logging.info(
+                "Detected the following DLCs (scaled=%s): %s",
+                scaled,
+                ", ".join(dlc_ids),
+            )
 
         for d_id in dlc_ids:
             dlc_id_path = os.path.join(dlc_build_dir, d_id)
@@ -824,7 +828,7 @@ def InstallDlcImages(
                 if os.path.isdir(os.path.join(dlc_id_path, direct))
             ]
             for d_package in dlc_packages:
-                logging.info("Building image: DLC %s", d_id)
+                logging.debug("Building image: DLC %s", d_id)
                 params = EbuildParams.LoadEbuildParams(
                     sysroot=sysroot,
                     dlc_id=d_id,
@@ -836,7 +840,7 @@ def InstallDlcImages(
                 # the existence of the file |EBUILD_PARAMETERS| to know if the image
                 # has to be generated or not.
                 if not params:
-                    logging.info(
+                    logging.debug(
                         "The ebuild parameters file (%s) for DLC (%s) does not "
                         "exist. This means that the image was already "
                         "generated and there is no need to create it again.",
@@ -859,7 +863,7 @@ def InstallDlcImages(
                     if preload and not IsDlcPreloadingAllowed(
                         d_id, dlc_build_dir
                     ):
-                        logging.info(
+                        logging.debug(
                             "Skipping installation of DLC %s because the preload "
                             "flag is set and the DLC does not support preloading.",
                             d_id,
@@ -878,18 +882,18 @@ def InstallDlcImages(
                             for fname in os.listdir(source_dlc_dir)
                             if fname.endswith(".img")
                         ):
-                            logging.info(
+                            logging.debug(
                                 "Copying DLC(%s) image from %s to %s: ",
                                 d_id,
                                 filepath,
                                 install_dlc_dir,
                             )
                             shutil.copy(filepath, install_dlc_dir)
-                            logging.info(
+                            logging.debug(
                                 "Done copying DLC to %s.", install_dlc_dir
                             )
                 else:
-                    logging.info(
+                    logging.debug(
                         "install_root_dir value was not provided. Copying dlc"
                         " image skipped."
                     )
@@ -917,7 +921,7 @@ def InstallDlcImages(
                         for fname in os.listdir(source_dlc_dir)
                         if fname.endswith(".img")
                     ):
-                        logging.info(
+                        logging.debug(
                             "Factory installing DLC(%s) image from %s to %s: ",
                             d_id,
                             filepath,
@@ -952,7 +956,7 @@ def InstallDlcImages(
                     meta_dir_src = os.path.join(
                         dlc_build_dir, d_id, d_package, DLC_TMP_META_DIR
                     )
-                    logging.info(
+                    logging.debug(
                         "Copying DLC(%s) metadata from %s to %s: ",
                         d_id,
                         meta_dir_src,
@@ -1010,17 +1014,17 @@ def InstallDlcImages(
                                 sudo=True,
                             )
                     else:
-                        logging.info(
+                        logging.debug(
                             "Skipping addition of LoadPin dm-verity digest of %s.",
                             d_id,
                         )
 
                 else:
-                    logging.info(
+                    logging.debug(
                         "rootfs value was not provided. Copying metadata skipped."
                     )
 
-    logging.info("Done installing DLCs.")
+    logging.debug("Done installing DLCs.")
 
 
 def ValidateDlcIdentifier(name):
