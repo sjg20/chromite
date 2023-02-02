@@ -42,7 +42,7 @@ def ParallelEmergeArgParser():
       commandline.ArgumentParser that captures arguments specific to
       parallel_emerge
     """
-    parser = commandline.ArgumentParser()
+    parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
 
     board_group = parser.add_mutually_exclusive_group()
     board_group.add_argument(
@@ -89,16 +89,6 @@ def ParallelEmergeArgParser():
         "--jobs",
         default=multiprocessing.cpu_count(),
         metavar="PARALLEL_JOBCOUNT",
-    )
-    parser.add_argument(
-        "-n",
-        "--dryrun",
-        "--dry-run",
-        dest="dry_run",
-        action="store_true",
-        default=False,
-        help="Print the emerge command that would have been run instead of "
-        "actually running it.",
     )
 
     parser.add_argument(
@@ -175,7 +165,7 @@ def main(argv):
 
     cmd = ["emerge"] + emerge_args
     cmd_str = cros_build_lib.CmdToStr(cmd)
-    if parsed_args.get("dry_run"):
+    if parsed_args.get("dryrun"):
         logging.notice("Would have run: %s", cmd_str)
         return
 
