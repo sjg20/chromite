@@ -63,7 +63,7 @@ def GetParser():
             namespace.dev_ids.append("%08x-%08x" % (values[0], values[1]))
 
     parser = commandline.ArgumentParser(
-        description=__doc__, default_log_level="debug"
+        description=__doc__, default_log_level="debug", dryrun=True
     )
 
     parser.add_argument(
@@ -86,13 +86,6 @@ def GetParser():
 
     parser.add_argument(
         "--archive", required=True, help="The gs://path of the archive to sign."
-    )
-
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        default=False,
-        help="This is a dryrun, nothing will be triggered.",
     )
 
     parser.add_argument(
@@ -138,17 +131,17 @@ def GetParser():
     return parser
 
 
-def LaunchOne(dry_run, builder, properties):
+def LaunchOne(dryrun, builder, properties):
     """Launch one build.
 
     Args:
-      dry_run: If true, just echo what would be done.
+      dryrun: If true, just echo what would be done.
       builder: builder to use.
       properties: json properties to use.
     """
     json_prop = json.dumps(properties)
     cmd = ["bb", "add", "-p", "@/dev/stdin", builder]
-    if dry_run:
+    if dryrun:
         logging.info("Would run: %s with input: %s", " ".join(cmd), json_prop)
     else:
         cros_build_lib.run(cmd, input=json_prop, log_output=True)
@@ -199,9 +192,9 @@ def main(argv):
         return 1
 
     if options.target != "node_locked":
-        LaunchOne(options.dry_run, builder, properties)
+        LaunchOne(options.dryrun, builder, properties)
     else:
         for dev in options.dev_ids:
             properties["gsc_instructions"]["device_id"] = dev
-            LaunchOne(options.dry_run, builder, properties)
+            LaunchOne(options.dryrun, builder, properties)
     return 0

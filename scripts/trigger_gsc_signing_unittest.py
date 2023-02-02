@@ -26,13 +26,13 @@ class TestLaunchOne(cros_test_lib.RunCommandTempDirTestCase):
         self.json_prop = json.dumps(self.properties)
 
     def testDryRunOnlyLogs(self):
-        """Test that dry_run=True results in only a log message."""
+        """Test that dryrun=True results in only a log message."""
         trigger.LaunchOne(True, "chromeos/packaging/test", self.properties)
         self.assertEqual(0, self.rc.call_count)
         self.log_info.assert_called_once()
 
     def testCallsRun(self):
-        """Test that dry_run=False calls run()."""
+        """Test that dryrun=False calls run()."""
         trigger.LaunchOne(False, "chromeos/packaging/test", self.properties)
         self.log_info.assert_not_called()
         self.assertEqual(
