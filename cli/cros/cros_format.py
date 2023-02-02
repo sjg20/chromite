@@ -213,6 +213,7 @@ Supported file names: %s
         " ".join(sorted(itertools.chain(*_FILENAME_PATTERNS_TOOL_MAP))),
     )
 
+    use_dryrun_options = True
     # Override base class property to use path filter options.
     use_filter_options = True
 
@@ -220,8 +221,6 @@ Supported file names: %s
     def AddParser(cls, parser):
         super().AddParser(parser)
         parser.add_argument(
-            "-n",
-            "--dry-run",
             "--check",
             dest="dryrun",
             action="store_true",
