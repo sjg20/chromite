@@ -130,6 +130,8 @@ class CliCommand(object):
 
     # Indicates whether command uses cache related commandline options.
     use_caching_options = False
+    # Whether command uses dry-run options.
+    use_dryrun_options = False
 
     def __init__(self, options):
         self.options = options

@@ -738,6 +738,7 @@ class BaseParser(object):
                 discerned where it should live.
                 If False, or caching is not given, then no --cache-dir option
                 will be added.
+            dryrun: Whether to make --dry-run available.
         """
         self.debug_enabled = False
         self.caching_group = None
@@ -755,6 +756,7 @@ class BaseParser(object):
             not kwargs.get("manual_debug", False) and "debug" in self.log_levels
         )
         self.caching = kwargs.get("caching", False)
+        self.dryrun_enabled = kwargs.get("dryrun", False)
         self._cros_defaults = {}
 
     @staticmethod
@@ -766,6 +768,7 @@ class BaseParser(object):
             "log_levels",
             "manual_debug",
             "caching",
+            "dryrun",
         ]
         for key in parser_keys:
             kwarg_dict.pop(key, None)
@@ -846,6 +849,21 @@ class BaseParser(object):
                 type="path",
                 help="Override the calculated chromeos cache directory; "
                 "typically defaults to '$REPO/.cache' .",
+            )
+
+        if self.dryrun_enabled:
+            self.add_argument(
+                "-n",
+                "--dry-run",
+                dest="dryrun",
+                action="store_true",
+                help="Show what would be done, but don't do it.",
+            )
+            self.add_argument(
+                "--dryrun",
+                dest="dryrun",
+                action="store_true",
+                help=argparse.SUPPRESS,
             )
 
     def SetupLogging(self, opts):

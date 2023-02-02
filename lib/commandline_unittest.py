@@ -1134,3 +1134,24 @@ class PathExistsTest(cros_test_lib.TempDirTestCase):
     def testExistingPathIsNotFile(self):
         """Test that an error occurs when an existing path is not a file."""
         self.assertRaises2(SystemExit, self._ParseFileExists, self.dir_path)
+
+
+class DryRunTests(cros_test_lib.TestCase):
+    """Check --dry-run integration."""
+
+    def testNoDryRun(self):
+        """Do not include --dry-run by default."""
+        parser = commandline.ArgumentParser()
+        opts = parser.parse_args([])
+        self.assertFalse(hasattr(opts, "dryrun"))
+        self.assertRaises2(SystemExit, parser.parse_args, ["--dry-run"])
+
+    def testDryRun(self):
+        """Verify --dry-run is included when requested."""
+        parser = commandline.ArgumentParser(dryrun=True)
+        opts = parser.parse_args([])
+        self.assertFalse(opts.dryrun)
+        opts = parser.parse_args(["-n"])
+        self.assertTrue(opts.dryrun)
+        opts = parser.parse_args(["--dry-run"])
+        self.assertTrue(opts.dryrun)

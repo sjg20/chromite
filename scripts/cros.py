@@ -47,6 +47,7 @@ def GetOptions(cmd_name=None):
                 description=class_def.__doc__,
                 epilog=epilog,
                 caching=class_def.use_caching_options,
+                dryrun=class_def.use_dryrun_options,
                 formatter_class=argparse.RawDescriptionHelpFormatter,
             )
             class_def.AddParser(sub_parser)
