@@ -310,7 +310,7 @@ class PushImageTests(gs_unittest.AbstractGSContextTest):
         """Simple smoke test in mock mode"""
         with mock.patch.object(gs.GSContext, "Exists", return_value=True):
             pushimage.PushImage(
-                "/src", "test.board", "R34-5126.0.0", dry_run=True, mock=True
+                "/src", "test.board", "R34-5126.0.0", dryrun=True, mock=True
             )
 
     def testBadVersion(self):

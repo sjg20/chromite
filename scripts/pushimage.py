@@ -306,7 +306,7 @@ def PushImage(
     profile=None,
     priority=50,
     sign_types=None,
-    dry_run=False,
+    dryrun=False,
     mock=False,
     force_keysets=(),
     force_channels=None,
@@ -324,7 +324,7 @@ def PushImage(
       priority: Set the signing priority (lower == higher prio).
       sign_types: If set, a set of types which we'll restrict ourselves to
         signing.  See the --sign-types option for more details.
-      dry_run: Show what would be done, but do not upload anything.
+      dryrun: Show what would be done, but do not upload anything.
       mock: Upload to a testing bucket rather than the real one.
       force_keysets: Set of keysets to use rather than what the inputs say.
       force_channels: Set of channels to use rather than what the inputs say.
@@ -363,7 +363,7 @@ def PushImage(
     if profile is not None:
         boardpath += "-%s" % profile.replace("_", "-")
 
-    ctx = gs.GSContext(dry_run=dry_run)
+    ctx = gs.GSContext(dry_run=dryrun)
 
     try:
         input_insns = InputInsns(board, buildroot=buildroot)
@@ -407,7 +407,7 @@ def PushImage(
     }
     sect_insns = {}
 
-    if dry_run:
+    if dryrun:
         logging.info("DRY RUN MODE ACTIVE: NOTHING WILL BE UPLOADED")
     logging.info("Signing for channels: %s", " ".join(channels))
 
@@ -691,7 +691,7 @@ def PushImage(
 
 def GetParser():
     """Creates the argparse parser."""
-    parser = commandline.ArgumentParser(description=__doc__)
+    parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
 
     # The type of image_dir will strip off trailing slashes (makes later
     # processing simpler and the display prettier).
@@ -720,13 +720,6 @@ def GetParser():
         default=None,
         action="split_extend",
         help="override list of channels to process",
-    )
-    parser.add_argument(
-        "-n",
-        "--dry-run",
-        default=False,
-        action="store_true",
-        help="show what would be done, but do not upload",
     )
     parser.add_argument(
         "-M",
@@ -788,7 +781,7 @@ def main(argv):
     # If we aren't using mock or test or dry run mode, then let's prompt the user
     # to make sure they actually want to do this.  It's rare that people want to
     # run this directly and hit the release bucket.
-    if not (opts.mock or force_keysets or opts.dry_run) and not opts.yes:
+    if not (opts.mock or force_keysets or opts.dryrun) and not opts.yes:
         prolog = "\n".join(
             textwrap.wrap(
                 textwrap.dedent(
@@ -812,7 +805,7 @@ def main(argv):
         profile=opts.profile,
         priority=opts.priority,
         sign_types=opts.sign_types,
-        dry_run=opts.dry_run,
+        dryrun=opts.dryrun,
         mock=opts.mock,
         force_keysets=force_keysets,
         force_channels=opts.channels,
