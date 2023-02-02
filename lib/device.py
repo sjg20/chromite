@@ -136,7 +136,7 @@ class Device(object):
         Returns:
           List of parsed opts.
         """
-        parser = commandline.ArgumentParser(description=__doc__)
+        parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
         parser.add_argument(
             "-d",
             "--device",
@@ -149,13 +149,6 @@ class Device(object):
             "--board", default=sdk_board_env, help="Board to use."
         )
         parser.add_argument("--private-key", help="Path to ssh private key.")
-        parser.add_argument(
-            "--dry-run",
-            dest="dryrun",
-            action="store_true",
-            default=False,
-            help="dry run for debugging.",
-        )
         parser.add_argument(
             "--cmd", action="store_true", default=False, help="Run a command."
         )
