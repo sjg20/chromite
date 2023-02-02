@@ -36,6 +36,8 @@ For more information of cros build usage:
   cros build -h
 """
 
+    use_dryrun_options = True
+
     @classmethod
     def AddParser(cls, parser):
         """Add a parser."""
@@ -102,12 +104,6 @@ For more information of cros build usage:
             default=True,
             help="Do not ping the device before attempting to connect to it.",
         )
-        parser.add_argument(
-            "--dry-run",
-            "-n",
-            action="store_true",
-            help="Output deployment plan but do not deploy anything.",
-        )
 
         advanced = parser.add_argument_group("Advanced options")
         advanced.add_argument(
@@ -150,6 +146,6 @@ For more information of cros build usage:
             ssh_private_key=self.options.private_key,
             ping=self.options.ping,
             force=self.options.force,
-            dry_run=self.options.dry_run,
+            dry_run=self.options.dryrun,
         )
         logging.info("cros deploy completed successfully.")
