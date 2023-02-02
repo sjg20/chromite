@@ -60,6 +60,7 @@ class APCommand(command.CliCommand):
                 name,
                 description=subcommand_class.__doc__,
                 caching=parser.caching,
+                dryrun=True,
                 help=subcommand_class.__doc__,
                 formatter_class=parser.formatter_class,
             )
@@ -155,14 +156,6 @@ class BuildSubcommand(command.CliCommand):
             help="Sets the FW_NAME environment variable. Set to build only the "
             "specified variant's firmware.",
         )
-        parser.add_argument(
-            "-n",
-            "--dry-run",
-            action="store_true",
-            default=False,
-            help="Execute a dry-run. Print the commands that would be run "
-            "instead of running them.",
-        )
         parser.epilog = """
 To build the AP Firmware for foo:
   cros ap build -b foo
@@ -178,7 +171,7 @@ To build the AP Firmware only for foo-variant:
             firmware_lib.build(
                 self.build_target,
                 fw_name=self.options.fw_name,
-                dry_run=self.options.dry_run,
+                dry_run=self.options.dryrun,
             )
         except firmware_lib.Error as e:
             cros_build_lib.Die(e)
@@ -217,13 +210,6 @@ class ReadSubcommand(command.CliCommand):
         )
         parser.add_argument(
             "-o", "--output", type="path", required=True, help="Output file."
-        )
-        parser.add_argument(
-            "-n",
-            "--dry-run",
-            action="store_true",
-            help="Execute a dry-run. Print the commands that would be run"
-            "instead of running them.",
         )
         parser.epilog = """Command to read the AP firmware from a DUT.
 To read image of device.cros via SSH:
@@ -268,7 +254,7 @@ To read a specific region from DUT via SERVO on default port(9999):
                 self.options.verbose,
                 ip,
                 port,
-                self.options.dry_run,
+                self.options.dryrun,
                 region,
             )
         else:
@@ -293,7 +279,7 @@ To read a specific region from DUT via SERVO on default port(9999):
                 ap_config.dut_control_off,
                 flashrom_cmd,
                 self.options.verbose,
-                self.options.dry_run,
+                self.options.dryrun,
             ):
                 logging.error(
                     "Unable to read, verify servo connection "
@@ -361,13 +347,6 @@ class FlashSubcommand(command.CliCommand):
             help="Deprecated. Pass your arbitrary flags after --.",
         )
         parser.add_argument(
-            "-n",
-            "--dry-run",
-            action="store_true",
-            help="Execute a dry-run. Print the commands that would be run "
-            "instead of running them.",
-        )
-        parser.add_argument(
             "extra_options",
             nargs=argparse.REMAINDER,
             help="Pass additional options to flashrom/futility.",
@@ -404,7 +383,7 @@ e.g.:
                 self.options.device,
                 flashrom=self.options.flashrom,
                 verbose=self.options.verbose,
-                dryrun=self.options.dry_run,
+                dryrun=self.options.dryrun,
                 flash_contents=self.options.flash_contents,
                 passthrough_args=passthrough_args,
             )
@@ -432,13 +411,6 @@ class CleanSubcommand(command.CliCommand):
             required=not bool(cros_build_lib.GetDefaultBoard()),
             help="The build target whose artifacts should be cleaned.",
         )
-        parser.add_argument(
-            "-n",
-            "--dry-run",
-            action="store_true",
-            help="Execute a dry-run. Print the commands that would be run "
-            "instead of running them.",
-        )
         parser.epilog = """
 This command removes firmware-related packages, including everything in
 `/build/${build_target}/firmware`.
@@ -453,6 +425,6 @@ This command removes firmware-related packages, including everything in
         commandline.RunInsideChroot(self)
 
         try:
-            firmware_lib.clean(self.build_target, self.options.dry_run)
+            firmware_lib.clean(self.build_target, self.options.dryrun)
         except firmware_lib.Error as e:
             cros_build_lib.Die(e)
