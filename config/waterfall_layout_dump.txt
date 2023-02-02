@@ -217,6 +217,7 @@
     octopus-release
     ovis-release
     palkia-release
+    puff-kernelnext-release
     puff-moblab-release
     puff-release
     pyro-release
@@ -1075,6 +1076,7 @@
     octopus-release-tryjob
     ovis-release-tryjob
     palkia-release-tryjob
+    puff-kernelnext-release-tryjob
     puff-moblab-release-tryjob
     puff-release-tryjob
     pyro-release-tryjob
@@ -1208,6 +1210,7 @@
   puff-factory-puff-13329.B-factorybranch-tryjob
   puff-factory-puff-13813.B-factorybranch-tryjob
   puff-full-tryjob
+  puff-kernelnext-release-tryjob
   puff-llvm-next-toolchain-tryjob
   puff-llvm-toolchain-tryjob
   puff-moblab-factory-puff-13329.B-factorybranch-tryjob
