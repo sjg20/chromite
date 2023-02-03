@@ -501,6 +501,9 @@ class LintCommand(command.CliCommand):
     """Run lint checks on the specified files."""
 
     EPILOG = """
+For some file formats, see the CrOS style guide:
+https://chromium.googlesource.com/chromiumos/docs/+/HEAD/styleguide/
+
 Supported file formats: %s
 Supported file names: %s
 """ % (

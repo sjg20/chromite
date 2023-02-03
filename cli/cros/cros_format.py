@@ -203,6 +203,9 @@ class FormatCommand(command.CliCommand):
     """Run the right formatter on the specified files."""
 
     EPILOG = """
+For some file formats, see the CrOS style guide:
+https://chromium.googlesource.com/chromiumos/docs/+/HEAD/styleguide/
+
 Supported file formats: %s
 Supported file names: %s
 """ % (
