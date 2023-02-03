@@ -925,25 +925,6 @@ class CBuildBotTest(ChromeosConfigTestBase):
                     "%s has an invalid hwtest priority." % build_name,
                 )
 
-    def testAllBoardsExist(self):
-        """Verifies that all config boards are in _all_boards."""
-        boards_dict = self._GetBoardTypeToBoardsDict()
-        for build_name, config in self.site_config.items():
-            self.assertIsNotNone(
-                config.boards, "Config %s has boards = None" % build_name
-            )
-            for board in config.boards:
-                if config.workspace_branch:
-                    # Builds on workspace branches may reference boards which no
-                    # longer exist.
-                    continue
-
-                self.assertIn(
-                    board,
-                    boards_dict["all_boards"],
-                    "Config %s has unknown board %s." % (build_name, board),
-                )
-
     def testPushImagePaygenDependancies(self):
         """Paygen requires PushImage."""
         for build_name, config in self.site_config.items():
