@@ -1,6 +1,7 @@
 # Copyright 2012 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """This library can use Google Storage files as basis for locking.
 
 A lock is acquired by creating a GS file (file creation is atomic). This means

@@ -1,6 +1,7 @@
 # Copyright 2012 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Centralize knowledge about how to create standardized Google Storage paths.
 
 This includes definitions for various build flags:

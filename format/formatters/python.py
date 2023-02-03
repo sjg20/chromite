@@ -33,6 +33,39 @@ def _find_pyproject_toml(
     return Path(constants.CHROMITE_DIR) / "pyproject.toml"
 
 
+def _custom_format_data(data: str) -> str:
+    """Apply some custom rules that black doesn't handle."""
+    lines = data.splitlines()
+
+    def _trim_blank_comments(i):
+        """Trim blank lines & empty comment lines at the top of the file."""
+        while len(lines) > i:
+            if lines[i] in ("", "#"):
+                lines.pop(i)
+            else:
+                break
+
+    # Trim leading comment lines.
+    _trim_blank_comments(0)
+    if lines and lines[0].startswith("#!"):
+        # Skip shebang and trim some more.
+        _trim_blank_comments(1)
+
+    # Skip license block and trim some more.
+    i = None
+    for i, line in enumerate(lines):
+        if line and not line.startswith("#"):
+            if line.startswith('"""'):
+                # Clean up the content around the module docstring.
+                while i and lines[i - 1] in ("", "#"):
+                    i -= 1
+                _trim_blank_comments(i)
+                lines.insert(i, "")
+            break
+
+    return "\n".join(lines) + "\n" if lines else ""
+
+
 def Data(
     data: str,
     path: Optional[Union[str, os.PathLike]] = None,
@@ -74,4 +107,4 @@ def Data(
         encoding="utf-8",
     )
 
-    return result.stdout
+    return _custom_format_data(result.stdout)

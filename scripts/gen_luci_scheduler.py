@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 # pylint: disable=line-too-long
+
 """Generate LUCI Scheduler config file.
 
 This generates the LUCI Scheduler configuration file for ChromeOS builds based

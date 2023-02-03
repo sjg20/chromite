@@ -1,6 +1,7 @@
 # Copyright 2022 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Implement the `cros try` CLI, which forwards to the try binary.
 
 The try binary is defined in the infra/infra repository, and distributed via

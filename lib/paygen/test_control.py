@@ -1,6 +1,7 @@
 # Copyright 2019 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Control file generation for the autoupdate_EndToEnd server-side test.
 
 This library is used by paygen_build_lib to generate the paygen_au_* control

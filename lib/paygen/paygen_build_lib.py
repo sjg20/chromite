@@ -1,6 +1,7 @@
 # Copyright 2013 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """PayGen - Automatic Payload Generation.
 
 This library processes a single build at a time, and decides which payloads
