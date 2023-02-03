@@ -7,7 +7,7 @@
 Handle all firmware builder related functionality.  Currently no service module
 exists: all of the work is done here.
 """
-
+import logging
 import os
 import tempfile
 
@@ -62,10 +62,13 @@ def _call_entry(fw_loc, metric_proto, subcmd, *args, **kwargs):
             response = f.read()
 
     if metric_proto:
-        # Parse the entire metric file as our metric proto (as a passthru).
-        # TODO(b/177907747): BundleFirmwareArtifacts doesn't use this (yet?),
-        #   but firmware_builder.py requires it.
-        json_format.Parse(response, metric_proto)
+        if not response:
+            logging.warning("Metrics data empty.")
+        else:
+            # Parse the entire metric file as our metric proto (as a passthru).
+            # TODO(b/177907747): BundleFirmwareArtifacts doesn't use this
+            #   (yet?), but firmware_builder.py requires it.
+            json_format.Parse(response, metric_proto)
 
     if result.returncode == 0:
         return controller.RETURN_CODE_SUCCESS

@@ -7,8 +7,6 @@
 import os
 from unittest import mock
 
-from chromite.third_party.google.protobuf import json_format
-
 from chromite.api import api_config
 from chromite.api.controller import firmware
 from chromite.api.gen.chromite.api import firmware_pb2
@@ -56,11 +54,6 @@ class BuildAllFirmwareTestCase(
                 fw_location=fw_loc,
                 code_coverage=True,
             )
-            # TODO(mmortensen): Consider refactoring firmware._call_entry code
-            # (putting the parsing of the output file in a function) so that we
-            # don't have to mock something as generic as 'json_format.Parse' to
-            # avoid an error on parsing an empty(due to mock call) file.
-            json_format_patch = self.PatchObject(json_format, "Parse")
             response = firmware_pb2.BuildAllFirmwareResponse()
             # Call the method under test.
             firmware.BuildAllFirmware(request, response, self.api_config)
@@ -79,8 +72,6 @@ class BuildAllFirmwareTestCase(
                 ],
                 check=False,
             )
-            # Verify that we try to parse the metrics file.
-            json_format_patch.assert_called()
 
     def testValidateOnly(self):
         """Verify a validate-only call does not execute any logic."""
