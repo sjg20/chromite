@@ -1110,7 +1110,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
         (WEEKLY, "factory-hatch-12692.B", ["hatch"]),
         (WEEKLY, "factory-excelsior-12812.B", ["excelsior"]),
         (WEEKLY, "factory-drallion-13080.B", ["drallion"]),
-        (DAILY, "factory-endeavour-13295.B", ["endeavour"]),
+        (MONTHLY, "factory-endeavour-13295.B", ["endeavour"]),
         (WEEKLY, "factory-puff-13329.B", ["puff", "puff-moblab"]),
         (WEEKLY, "factory-zork-13427.B", ["zork"]),
         (WEEKLY, "factory-trogdor-13443.B", ["trogdor", "strongbad"]),
