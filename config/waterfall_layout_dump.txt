@@ -213,6 +213,7 @@
     novato-arc64-release
     novato-release
     octopus-arc-r-release
+    octopus-arc-t-release
     octopus-kernelnext-release
     octopus-release
     ovis-release
@@ -1072,6 +1073,7 @@
     novato-arc64-release-tryjob
     novato-release-tryjob
     octopus-arc-r-release-tryjob
+    octopus-arc-t-release-tryjob
     octopus-kernelnext-release-tryjob
     octopus-release-tryjob
     ovis-release-tryjob
@@ -1180,6 +1182,7 @@
   octopus-arc-r-llvm-toolchain-tryjob
   octopus-arc-r-payloads-tryjob
   octopus-arc-r-release-tryjob
+  octopus-arc-t-release-tryjob
   octopus-factory-octopus-11512.B-factorybranch-tryjob
   octopus-full-tryjob
   octopus-kernelnext-full-tryjob
