@@ -1292,6 +1292,9 @@ class ChrootEnteror:
         self.chroot = chroot
         self.chrome_root_mount = chrome_root_mount
         self.cmd = cmd
+
+        if cwd and not cwd.is_absolute():
+            cwd = path_util.ToChrootPath(cwd)
         self.cwd = cwd
 
     def _check_chroot(self) -> None:

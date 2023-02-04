@@ -35,7 +35,6 @@ from chromite.lib import goma_lib
 from chromite.lib import locking
 from chromite.lib import namespaces
 from chromite.lib import osutils
-from chromite.lib import path_util
 from chromite.lib import process_util
 from chromite.lib import remoteexec_util
 from chromite.lib import retry_util
@@ -803,7 +802,7 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
     # transferred to absolute path automatically.
     parser.add_argument(
         "--working-dir",
-        type=str,
+        type=Path,
         help="Run the command in specific working directory in "
         "chroot.  If the given directory is a relative "
         "path, this program will transfer the path to "
@@ -1064,11 +1063,6 @@ def main(argv):
         options.create or options.enter or any_snapshot_operation
     ):
         parser.error("--unmount cannot be specified with other chroot actions.")
-
-    if options.working_dir is not None and not os.path.isabs(
-        options.working_dir
-    ):
-        options.working_dir = path_util.ToChrootPath(options.working_dir)
 
     # If there is an existing chroot image and we're not removing it then force
     # use_image on.  This ensures that people don't have to remember to pass
