@@ -95,7 +95,7 @@ def _call_cros_lint(args: List[str]) -> int:
     Returns:
         The return code of "cros lint".
     """
-    parser = commandline.ArgumentParser()
+    parser = commandline.ArgumentParser(filter=True)
     cros_lint.LintCommand.AddParser(parser)
     opts = parser.parse_args(args)
     cmd = cros_lint.LintCommand(opts)

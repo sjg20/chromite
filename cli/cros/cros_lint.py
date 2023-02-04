@@ -514,6 +514,9 @@ Supported file names: %s
     # The output formats supported by cros lint.
     OUTPUT_FORMATS = ("default", "colorized", "msvs", "parseable")
 
+    # Override base class property to use path filter options.
+    use_filter_options = True
+
     @classmethod
     def AddParser(cls, parser: commandline.ArgumentParser):
         super().AddParser(parser)
@@ -554,6 +557,11 @@ Supported file names: %s
                 files.append(f)
         if syms:
             logging.info("Ignoring symlinks: %s", syms)
+
+        files = self.options.filter.filter(files)
+        if not files:
+            logging.warning("All files are excluded.  Doing nothing.")
+            return 0
 
         # Ignore generated files.  Some tools can do this for us, but not all,
         # and it'd be faster if we just never spawned the tools in the first
