@@ -17,6 +17,7 @@ from chromite.api.gen.chromiumos.test.api import provision_state_pb2 as chromium
 from chromite.api.gen.chromiumos.test.api import test_suite_pb2 as chromiumos_dot_test_dot_api_dot_test__suite__pb2
 from chromite.api.gen.chromiumos.test.lab.api import dut_pb2 as chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2
 from chromite.api.gen.chromiumos.build.api import container_metadata_pb2 as chromiumos_dot_build_dot_api_dot_container__metadata__pb2
+from chromite.api.gen.test_platform.skylab_test_runner import cft_steps_config_pb2 as test__platform_dot_skylab__test__runner_dot_cft__steps__config__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -25,9 +26,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n2test_platform/skylab_test_runner/cft_request.proto\x12 test_platform.skylab_test_runner\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1btest_platform/request.proto\x1a)chromiumos/test/api/provision_state.proto\x1a$chromiumos/test/api/test_suite.proto\x1a!chromiumos/test/lab/api/dut.proto\x1a-chromiumos/build/api/container_metadata.proto\"\xb8\x06\n\x0e\x43\x46TTestRequest\x12L\n\x0bprimary_dut\x18\x01 \x01(\x0b\x32\x37.test_platform.skylab_test_runner.CFTTestRequest.Device\x12O\n\x0e\x63ompanion_duts\x18\x02 \x03(\x0b\x32\x37.test_platform.skylab_test_runner.CFTTestRequest.Device\x12\x33\n\x0btest_suites\x18\x03 \x03(\x0b\x32\x1e.chromiumos.test.api.TestSuite\x12,\n\x08\x64\x65\x61\x64line\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1a\n\x12parent_request_uid\x18\x05 \x01(\t\x12\x17\n\x0fparent_build_id\x18\x06 \x01(\x03\x12_\n\x10\x61utotest_keyvals\x18\x07 \x03(\x0b\x32\x45.test_platform.skylab_test_runner.CFTTestRequest.AutotestKeyvalsEntry\x12\\\n\x1f\x64\x65\x66\x61ult_test_execution_behavior\x18\x08 \x01(\x0e\x32\x33.test_platform.Request.Params.TestExecutionBehavior\x12\x43\n\x12\x63ontainer_metadata\x18\t \x01(\x0b\x32\'.chromiumos.build.api.ContainerMetadata\x12\x14\n\x0cretry_number\x18\n \x01(\x05\x1a\x36\n\x14\x41utotestKeyvalsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x9c\x01\n\x06\x44\x65vice\x12\x34\n\tdut_model\x18\x01 \x01(\x0b\x32!.chromiumos.test.lab.api.DutModel\x12<\n\x0fprovision_state\x18\x02 \x01(\x0b\x32#.chromiumos.test.api.ProvisionState\x12\x1e\n\x16\x63ontainer_metadata_key\x18\x03 \x01(\tBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3'
+  serialized_pb=b'\n2test_platform/skylab_test_runner/cft_request.proto\x12 test_platform.skylab_test_runner\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1btest_platform/request.proto\x1a)chromiumos/test/api/provision_state.proto\x1a$chromiumos/test/api/test_suite.proto\x1a!chromiumos/test/lab/api/dut.proto\x1a-chromiumos/build/api/container_metadata.proto\x1a\x37test_platform/skylab_test_runner/cft_steps_config.proto\"\x96\x07\n\x0e\x43\x46TTestRequest\x12L\n\x0bprimary_dut\x18\x01 \x01(\x0b\x32\x37.test_platform.skylab_test_runner.CFTTestRequest.Device\x12O\n\x0e\x63ompanion_duts\x18\x02 \x03(\x0b\x32\x37.test_platform.skylab_test_runner.CFTTestRequest.Device\x12\x33\n\x0btest_suites\x18\x03 \x03(\x0b\x32\x1e.chromiumos.test.api.TestSuite\x12,\n\x08\x64\x65\x61\x64line\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x1a\n\x12parent_request_uid\x18\x05 \x01(\t\x12\x17\n\x0fparent_build_id\x18\x06 \x01(\x03\x12_\n\x10\x61utotest_keyvals\x18\x07 \x03(\x0b\x32\x45.test_platform.skylab_test_runner.CFTTestRequest.AutotestKeyvalsEntry\x12\\\n\x1f\x64\x65\x66\x61ult_test_execution_behavior\x18\x08 \x01(\x0e\x32\x33.test_platform.Request.Params.TestExecutionBehavior\x12\x43\n\x12\x63ontainer_metadata\x18\t \x01(\x0b\x32\'.chromiumos.build.api.ContainerMetadata\x12\x14\n\x0cretry_number\x18\n \x01(\x05\x12\x46\n\x0csteps_config\x18\x0b \x01(\x0b\x32\x30.test_platform.skylab_test_runner.CftStepsConfig\x12\x14\n\x0crun_via_trv2\x18\x0c \x01(\x08\x1a\x36\n\x14\x41utotestKeyvalsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\x9c\x01\n\x06\x44\x65vice\x12\x34\n\tdut_model\x18\x01 \x01(\x0b\x32!.chromiumos.test.lab.api.DutModel\x12<\n\x0fprovision_state\x18\x02 \x01(\x0b\x32#.chromiumos.test.api.ProvisionState\x12\x1e\n\x16\x63ontainer_metadata_key\x18\x03 \x01(\tBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3'
   ,
-  dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,test__platform_dot_request__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_provision__state__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__suite__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2.DESCRIPTOR,chromiumos_dot_build_dot_api_dot_container__metadata__pb2.DESCRIPTOR,])
+  dependencies=[google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,test__platform_dot_request__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_provision__state__pb2.DESCRIPTOR,chromiumos_dot_test_dot_api_dot_test__suite__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2.DESCRIPTOR,chromiumos_dot_build_dot_api_dot_container__metadata__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_cft__steps__config__pb2.DESCRIPTOR,])
 
 
 
@@ -66,8 +67,8 @@ _CFTTESTREQUEST_AUTOTESTKEYVALSENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=925,
-  serialized_end=979,
+  serialized_start=1076,
+  serialized_end=1130,
 )
 
 _CFTTESTREQUEST_DEVICE = _descriptor.Descriptor(
@@ -111,8 +112,8 @@ _CFTTESTREQUEST_DEVICE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=982,
-  serialized_end=1138,
+  serialized_start=1133,
+  serialized_end=1289,
 )
 
 _CFTTESTREQUEST = _descriptor.Descriptor(
@@ -193,6 +194,20 @@ _CFTTESTREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='steps_config', full_name='test_platform.skylab_test_runner.CFTTestRequest.steps_config', index=10,
+      number=11, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='run_via_trv2', full_name='test_platform.skylab_test_runner.CFTTestRequest.run_via_trv2', index=11,
+      number=12, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -205,8 +220,8 @@ _CFTTESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=314,
-  serialized_end=1138,
+  serialized_start=371,
+  serialized_end=1289,
 )
 
 _CFTTESTREQUEST_AUTOTESTKEYVALSENTRY.containing_type = _CFTTESTREQUEST
@@ -220,6 +235,7 @@ _CFTTESTREQUEST.fields_by_name['deadline'].message_type = google_dot_protobuf_do
 _CFTTESTREQUEST.fields_by_name['autotest_keyvals'].message_type = _CFTTESTREQUEST_AUTOTESTKEYVALSENTRY
 _CFTTESTREQUEST.fields_by_name['default_test_execution_behavior'].enum_type = test__platform_dot_request__pb2._REQUEST_PARAMS_TESTEXECUTIONBEHAVIOR
 _CFTTESTREQUEST.fields_by_name['container_metadata'].message_type = chromiumos_dot_build_dot_api_dot_container__metadata__pb2._CONTAINERMETADATA
+_CFTTESTREQUEST.fields_by_name['steps_config'].message_type = test__platform_dot_skylab__test__runner_dot_cft__steps__config__pb2._CFTSTEPSCONFIG
 DESCRIPTOR.message_types_by_name['CFTTestRequest'] = _CFTTESTREQUEST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 

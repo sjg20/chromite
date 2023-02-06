@@ -19,10 +19,40 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n4test_platform/skylab_test_runner/common_config.proto\x12 test_platform.skylab_test_runner\"\xe9\x03\n\x0c\x43ommonConfig\x12l\n\x1b\x63ros_firmware_update_config\x18\x01 \x01(\x0b\x32G.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig\x12\x17\n\x0fpartner_private\x18\x02 \x01(\x08\x1a\xd1\x02\n\x18\x43rosFirmwareUpdateConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12i\n\nallow_list\x18\x02 \x01(\x0b\x32S.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig.CrosSlectorH\x00\x12i\n\nblock_list\x18\x03 \x01(\x0b\x32S.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig.CrosSlectorH\x00\x1a-\n\x0b\x43rosSlector\x12\x0e\n\x06\x62oards\x18\x01 \x03(\t\x12\x0e\n\x06models\x18\x02 \x03(\tB\x1f\n\x1d\x63ros_firmware_update_selectorBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3'
+  serialized_pb=b'\n4test_platform/skylab_test_runner/common_config.proto\x12 test_platform.skylab_test_runner\"\xb3\x04\n\x0c\x43ommonConfig\x12l\n\x1b\x63ros_firmware_update_config\x18\x01 \x01(\x0b\x32G.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig\x12\x17\n\x0fpartner_private\x18\x02 \x01(\x08\x12H\n\x12\x65nable_trv2_config\x18\x03 \x01(\x0b\x32,.test_platform.skylab_test_runner.Trv2Config\x1a\xd1\x02\n\x18\x43rosFirmwareUpdateConfig\x12\x0f\n\x07\x65nabled\x18\x01 \x01(\x08\x12i\n\nallow_list\x18\x02 \x01(\x0b\x32S.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig.CrosSlectorH\x00\x12i\n\nblock_list\x18\x03 \x01(\x0b\x32S.test_platform.skylab_test_runner.CommonConfig.CrosFirmwareUpdateConfig.CrosSlectorH\x00\x1a-\n\x0b\x43rosSlector\x12\x0e\n\x06\x62oards\x18\x01 \x03(\t\x12\x0e\n\x06models\x18\x02 \x03(\tB\x1f\n\x1d\x63ros_firmware_update_selector\"\xc3\x01\n\nTrv2Config\x12\x16\n\x0e\x61llowed_suites\x18\x01 \x03(\t\x12\x16\n\x0e\x61llowed_boards\x18\x02 \x03(\t\x12S\n\x13\x61llowed_build_types\x18\x03 \x03(\x0e\x32\x36.test_platform.skylab_test_runner.Trv2Config.BuildType\"0\n\tBuildType\x12\x06\n\x02\x43Q\x10\x00\x12\x0b\n\x07RELEASE\x10\x01\x12\x0e\n\nPOSTSUBMIT\x10\x02\x42LZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3'
 )
 
 
+
+_TRV2CONFIG_BUILDTYPE = _descriptor.EnumDescriptor(
+  name='BuildType',
+  full_name='test_platform.skylab_test_runner.Trv2Config.BuildType',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='CQ', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='RELEASE', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='POSTSUBMIT', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=804,
+  serialized_end=852,
+)
+_sym_db.RegisterEnumDescriptor(_TRV2CONFIG_BUILDTYPE)
 
 
 _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG_CROSSLECTOR = _descriptor.Descriptor(
@@ -59,8 +89,8 @@ _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG_CROSSLECTOR = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=502,
-  serialized_end=547,
+  serialized_start=576,
+  serialized_end=621,
 )
 
 _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG = _descriptor.Descriptor(
@@ -109,8 +139,8 @@ _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG = _descriptor.Descriptor(
       create_key=_descriptor._internal_create_key,
     fields=[]),
   ],
-  serialized_start=243,
-  serialized_end=580,
+  serialized_start=317,
+  serialized_end=654,
 )
 
 _COMMONCONFIG = _descriptor.Descriptor(
@@ -135,6 +165,13 @@ _COMMONCONFIG = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='enable_trv2_config', full_name='test_platform.skylab_test_runner.CommonConfig.enable_trv2_config', index=2,
+      number=3, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -148,7 +185,54 @@ _COMMONCONFIG = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=91,
-  serialized_end=580,
+  serialized_end=654,
+)
+
+
+_TRV2CONFIG = _descriptor.Descriptor(
+  name='Trv2Config',
+  full_name='test_platform.skylab_test_runner.Trv2Config',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='allowed_suites', full_name='test_platform.skylab_test_runner.Trv2Config.allowed_suites', index=0,
+      number=1, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='allowed_boards', full_name='test_platform.skylab_test_runner.Trv2Config.allowed_boards', index=1,
+      number=2, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='allowed_build_types', full_name='test_platform.skylab_test_runner.Trv2Config.allowed_build_types', index=2,
+      number=3, type=14, cpp_type=8, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+    _TRV2CONFIG_BUILDTYPE,
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=657,
+  serialized_end=852,
 )
 
 _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG_CROSSLECTOR.containing_type = _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG
@@ -162,7 +246,11 @@ _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG.oneofs_by_name['cros_firmware_update_sele
   _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG.fields_by_name['block_list'])
 _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG.fields_by_name['block_list'].containing_oneof = _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG.oneofs_by_name['cros_firmware_update_selector']
 _COMMONCONFIG.fields_by_name['cros_firmware_update_config'].message_type = _COMMONCONFIG_CROSFIRMWAREUPDATECONFIG
+_COMMONCONFIG.fields_by_name['enable_trv2_config'].message_type = _TRV2CONFIG
+_TRV2CONFIG.fields_by_name['allowed_build_types'].enum_type = _TRV2CONFIG_BUILDTYPE
+_TRV2CONFIG_BUILDTYPE.containing_type = _TRV2CONFIG
 DESCRIPTOR.message_types_by_name['CommonConfig'] = _COMMONCONFIG
+DESCRIPTOR.message_types_by_name['Trv2Config'] = _TRV2CONFIG
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 CommonConfig = _reflection.GeneratedProtocolMessageType('CommonConfig', (_message.Message,), {
@@ -187,6 +275,13 @@ CommonConfig = _reflection.GeneratedProtocolMessageType('CommonConfig', (_messag
 _sym_db.RegisterMessage(CommonConfig)
 _sym_db.RegisterMessage(CommonConfig.CrosFirmwareUpdateConfig)
 _sym_db.RegisterMessage(CommonConfig.CrosFirmwareUpdateConfig.CrosSlector)
+
+Trv2Config = _reflection.GeneratedProtocolMessageType('Trv2Config', (_message.Message,), {
+  'DESCRIPTOR' : _TRV2CONFIG,
+  '__module__' : 'test_platform.skylab_test_runner.common_config_pb2'
+  # @@protoc_insertion_point(class_scope:test_platform.skylab_test_runner.Trv2Config)
+  })
+_sym_db.RegisterMessage(Trv2Config)
 
 
 DESCRIPTOR._options = None
