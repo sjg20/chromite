@@ -49,14 +49,7 @@ TEST_NAME = "perf_uploader_tool.%s" % getpass.getuser()
 
 def GetParser():
     """Return a command line parser"""
-    parser = commandline.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "-n",
-        "--dry-run",
-        default=False,
-        action="store_true",
-        help="Show what would be uploaded",
-    )
+    parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
     parser.add_argument(
         "--url",
         default=perf_uploader.LOCAL_DASHBOARD_URL,
