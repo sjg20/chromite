@@ -1849,6 +1849,7 @@ def GetNonUniBuildLabBoardName(board):
         "-manatee",  #
         "-manatee-kernelnext",  #
         "-ndktranslation",  #
+        "-nopkvm",  #
         "-pkvm",  #
         "-userdebug",  #
     ]
