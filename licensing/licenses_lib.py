@@ -970,7 +970,6 @@ def _CheckForKnownBadLicenses(cpf, licenses):
             "media-libs/arc-mali-drivers-bifrost",
             "media-libs/cros-camera-hal-qti",
             "media-libs/cros-camera-hal-qti-bin",
-            "media-libs/dlm",
             "media-libs/glk-hotword-support",
             "media-libs/go2001-fw",
             "media-libs/img-ddk",
