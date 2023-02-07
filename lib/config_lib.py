@@ -1849,6 +1849,7 @@ def GetNonUniBuildLabBoardName(board):
         "-manatee",  #
         "-manatee-kernelnext",  #
         "-ndktranslation",  #
+        "-pkvm",  #
         "-userdebug",  #
     ]
     # ARM64 userspace boards use 64 suffix but can't put that in list above
