@@ -1847,6 +1847,7 @@ def GetNonUniBuildLabBoardName(board):
         "-kvm",  #
         "-libcamera",  #
         "-manatee",  #
+        "-manatee-kernelnext",  #
         "-ndktranslation",  #
         "-userdebug",  #
     ]
