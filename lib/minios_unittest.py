@@ -18,7 +18,8 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
     """Tests Builder."""
 
     FAKE_PARTITIONS = (
-        image_lib.PartitionInfo(9, 10, 512 * 4, "fs", "MINIOS-A"),
+        image_lib.PartitionInfo(9, 0, 512 * 4, "fs", "MINIOS-A"),
+        image_lib.PartitionInfo(10, 512 * 4, 512 * 8, "fs", "MINIOS-B"),
     )
 
     def setUp(self):
@@ -28,10 +29,12 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
             image_lib, "LoopbackPartitions", return_value=self.image
         )
         self.PatchObject(
-            self.image, "GetPartitionDevName", return_value="/foo/dev0"
+            self.image,
+            "GetPartitionDevName",
+            side_effect=["/foo/dev0", "/foo/dev1"],
         )
         self.PatchObject(
-            self.image, "GetPartitionInfo", return_value=self.FAKE_PARTITIONS[0]
+            self.image, "GetPartitionInfo", side_effect=self.FAKE_PARTITIONS
         )
 
     def testCreateMiniOsKernelImage(self):
@@ -214,7 +217,21 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
             ]
         )
         self.assertCommandCalled(
+            [
+                "sudo",
+                "--",
+                "dd",
+                "if=/dev/zero",
+                "of=/foo/dev1",
+                "bs=512",
+                "count=8",
+            ]
+        )
+        self.assertCommandCalled(
             ["sudo", "--", "dd", f"if={kernel_path}", "of=/foo/dev0", "bs=512"]
+        )
+        self.assertCommandCalled(
+            ["sudo", "--", "dd", f"if={kernel_path}", "of=/foo/dev1", "bs=512"]
         )
 
     def testLargeKernelFail(self):

@@ -6,9 +6,9 @@
 
 import logging
 import os
-import pathlib
 
 from chromite.lib import build_target_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import kernel_builder
@@ -26,7 +26,6 @@ KERNEL_FLAGS = [
     "pcserial",
     "-kernel_afdo",
 ]
-PART_NAME = "MINIOS-A"
 BLOCK_SIZE = 512
 
 
@@ -105,44 +104,47 @@ def CreateMiniOsKernelImage(
 
 
 def InsertMiniOsKernelImage(image: str, kernel: str):
-    """Writes the MiniOS into MINIOS-A partition of the Chromium OS image.
+    """Writes miniOS kernel into A + B miniOS partitions of the image.
 
-    It assumes the Chromium OS image has enough space in MINIOS-A partition,
-    otherwise it will fail.
+    A + B partitions of miniOS need to have enough space allocated for each copy
+    of the miniOS kernel to fit into.
 
     Args:
       image: The path to the Chromium OS image.
       kernel: The path to the kernel image.
     """
     with image_lib.LoopbackPartitions(image) as devs:
-        part_info = devs.GetPartitionInfo(PART_NAME)
-        if pathlib.Path(kernel).stat().st_size > part_info.size:
-            raise MiniOsError(
-                "MiniOS kernel image is larger than the MINIOS-A partition."
+        for part_name in (constants.PART_MINIOS_A, constants.PART_MINIOS_B):
+            part_info = devs.GetPartitionInfo(part_name)
+            if os.path.getsize(kernel) > part_info.size:
+                raise MiniOsError(
+                    f"MiniOS kernel is larger than the {part_name} partition."
+                )
+
+            device = devs.GetPartitionDevName(part_name)
+            logging.debug("MiniOS loopback partition is %s", device)
+
+            logging.info(
+                "Writing the MiniOS kernel %s into image %s at %s",
+                kernel,
+                image,
+                device,
             )
 
-        device = devs.GetPartitionDevName(PART_NAME)
-        logging.debug("Mini OS loopback partition is %s", device)
-
-        logging.info(
-            "Writing the MiniOS kernel image %s into the Chromium OS "
-            "image %s",
-            kernel,
-            image,
-        )
-        # First zero out the partition. This generally would help with update
-        # payloads so we don't have to compress junk bytes. The target file is a
-        # loopback dev device of the MINIOS-A partition.
-        cros_build_lib.sudo_run(
-            [
-                "dd",
-                "if=/dev/zero",
-                f"of={device}",
-                f"bs={BLOCK_SIZE}",
-                f"count={part_info.size // BLOCK_SIZE}",
-            ]
-        )
-        # Write the actual MiniOS kernel into the MINIOS-A partition.
-        cros_build_lib.sudo_run(
-            ["dd", f"if={kernel}", f"of={device}", f"bs={BLOCK_SIZE}"]
-        )
+            # First zero out partition.
+            # This generally would help with update payloads so we don't have
+            # to compress junk bytes. The target file is a loopback dev device
+            # of a miniOS partition.
+            cros_build_lib.sudo_run(
+                [
+                    "dd",
+                    "if=/dev/zero",
+                    f"of={device}",
+                    f"bs={BLOCK_SIZE}",
+                    f"count={part_info.size // BLOCK_SIZE}",
+                ]
+            )
+            # Write the actual MiniOS kernel into the A + B partitions.
+            cros_build_lib.sudo_run(
+                ["dd", f"if={kernel}", f"of={device}", f"bs={BLOCK_SIZE}"]
+            )

@@ -982,6 +982,7 @@ PART_ROOT_B = "ROOT-B"
 PART_KERN_A = "KERN-A"
 PART_KERN_B = "KERN-B"
 PART_MINIOS_A = "MINIOS-A"
+PART_MINIOS_B = "MINIOS-B"
 
 # Crossystem related constants.
 MINIOS_PRIORITY = "minios_priority"
