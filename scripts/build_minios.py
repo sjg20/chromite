@@ -7,6 +7,7 @@
 And inserting them into the Chromium OS images.
 """
 
+import os
 import tempfile
 
 from chromite.lib import commandline
@@ -69,6 +70,13 @@ def GetParser():
         "debug flags. Use with --mod-for-dev in case kernel is "
         "not already built or needs to be rebuilt.",
     )
+    parser.add_argument(
+        "--jobs",
+        type=int,
+        default=os.cpu_count(),
+        help="Number of packages to build in parallel. "
+        "(Default: %(default)s)",
+    )
     return parser
 
 
@@ -88,6 +96,7 @@ def main(argv):
             opts.private_key,
             opts.keyblock,
             opts.serial,
+            opts.jobs,
             build_kernel,
             opts.mod_for_dev,
         )

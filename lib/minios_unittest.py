@@ -51,6 +51,7 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
             "foo-private-key",
             "foo-keyblock",
             "foo-tty",
+            16,
         )
         bck_mock.assert_called_once_with(
             [
@@ -92,6 +93,7 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
             "foo-private-key",
             "foo-keyblock",
             "foo-tty",
+            16,
         )
         bck_mock.assert_called_once_with(
             [
@@ -133,6 +135,7 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
             "foo-private-key",
             "foo-keyblock",
             "foo-tty",
+            16,
             developer_mode=True,
         )
         bck_mock.assert_called_once_with(
@@ -176,6 +179,7 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
             "foo-private-key",
             "foo-keyblock",
             "foo-tty",
+            16,
             False,
             True,
         )

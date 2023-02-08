@@ -47,6 +47,7 @@ def CreateMiniOsKernelImage(
     private_key: str,
     keyblock: str,
     serial: str,
+    jobs: int,
     build_kernel: bool = True,
     developer_mode: bool = False,
 ) -> str:
@@ -55,6 +56,7 @@ def CreateMiniOsKernelImage(
     And puts it in the work directory.
 
     Args:
+      jobs: The number of packages to build in parallel.
       board: The board to build the kernel for.
       version: The chromeos version string.
       work_dir: The directory for keeping intermediary files.
@@ -74,7 +76,7 @@ def CreateMiniOsKernelImage(
     install_root = os.path.join(
         (build_target_lib.get_default_sysroot_path(board)), "factory-root"
     )
-    kb = kernel_builder.Builder(board, work_dir, install_root)
+    kb = kernel_builder.Builder(board, work_dir, install_root, jobs)
     if build_kernel:
         # MiniOS ramfs cannot be built with multiple conflicting `_ramfs` flags.
         kb.CreateCustomKernel(

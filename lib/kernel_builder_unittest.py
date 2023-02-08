@@ -16,7 +16,9 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
 
     def setUp(self):
         """Sets up common objects for testing."""
-        self._kb = kernel_builder.Builder("foo-board", "foo-tmp", "foo-root")
+        self._kb = kernel_builder.Builder(
+            "foo-board", "foo-tmp", "foo-root", "777"
+        )
 
     def testCreateCustomKernel(self):
         """Tests CreateCustomKernel()."""
@@ -39,22 +41,28 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
             "USE": "z x y",
         }
         self.assertCommandCalled(
-            [emerge_board, "chromeos-base/chromeos-initramfs"],
+            [emerge_board, "--jobs=777", "chromeos-base/chromeos-initramfs"],
             enter_chroot=True,
             extra_env=extra_env,
         )
         self.assertCommandCalled(
-            [emerge_board, "--onlydeps", "kernel"],
+            [emerge_board, "--jobs=777", "--onlydeps", "kernel"],
             enter_chroot=True,
             extra_env=extra_env,
         )
         self.assertCommandCalled(
-            [emerge_board, "--buildpkgonly", "kernel"],
+            [emerge_board, "--jobs=777", "--buildpkgonly", "kernel"],
             enter_chroot=True,
             extra_env=extra_env,
         )
         self.assertCommandCalled(
-            [emerge_board, "--usepkgonly", "--root=foo-root", "kernel"],
+            [
+                emerge_board,
+                "--jobs=777",
+                "--usepkgonly",
+                "--root=foo-root",
+                "kernel",
+            ],
             enter_chroot=True,
             extra_env=extra_env,
         )
@@ -79,22 +87,28 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
             "USE": "foo x y",
         }
         self.assertCommandCalled(
-            [emerge_board, "chromeos-base/chromeos-initramfs"],
+            [emerge_board, "--jobs=777", "chromeos-base/chromeos-initramfs"],
             enter_chroot=True,
             extra_env=extra_env,
         )
         self.assertCommandCalled(
-            [emerge_board, "--onlydeps", "kernel"],
+            [emerge_board, "--jobs=777", "--onlydeps", "kernel"],
             enter_chroot=True,
             extra_env=extra_env,
         )
         self.assertCommandCalled(
-            [emerge_board, "--buildpkgonly", "kernel"],
+            [emerge_board, "--jobs=777", "--buildpkgonly", "kernel"],
             enter_chroot=True,
             extra_env=extra_env,
         )
         self.assertCommandCalled(
-            [emerge_board, "--usepkgonly", "--root=foo-root", "kernel"],
+            [
+                emerge_board,
+                "--jobs=777",
+                "--usepkgonly",
+                "--root=foo-root",
+                "kernel",
+            ],
             enter_chroot=True,
             extra_env=extra_env,
         )

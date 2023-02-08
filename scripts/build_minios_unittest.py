@@ -39,6 +39,11 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         test_board = "test-board"
         test_version = "0.0.0.0"
         test_image = "/some/image/path"
+        self.PatchObject(
+            os,
+            "cpu_count",
+            return_value=777,
+        )
         build_minios.main(
             [
                 # --board is a required argument.
@@ -65,6 +70,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
                     constants.MINIOS_DATA_PRIVATE_KEY,
                     constants.MINIOS_KEYBLOCK,
                     None,
+                    777,
                     True,
                     False,
                 )
@@ -91,6 +97,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         test_private_key = "test-private-key"
         test_keyblock = "test-keyblock"
         test_serial = "test-serial"
+        test_jobs = 777
         build_minios.main(
             [
                 # --board is a required argument.
@@ -113,6 +120,8 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
                 "--serial",
                 test_serial,
                 "--force-build",
+                "--jobs",
+                str(test_jobs),
             ]
         )
 
@@ -128,6 +137,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
                     test_private_key,
                     test_keyblock,
                     test_serial,
+                    test_jobs,
                     True,
                     False,
                 )
@@ -149,6 +159,13 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         test_board = "test-board"
         test_version = "0.0.0.0"
         test_image = "/some/image/path"
+        test_jobs = 777
+        self.PatchObject(
+            os,
+            "cpu_count",
+            return_value=str(test_jobs),
+        )
+
         build_minios.main(
             [
                 # --board is a required argument.
@@ -176,6 +193,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
                     constants.MINIOS_DATA_PRIVATE_KEY,
                     constants.MINIOS_KEYBLOCK,
                     None,
+                    test_jobs,
                     False,
                     True,
                 )
@@ -197,6 +215,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         test_board = "test-board"
         test_version = "0.0.0.0"
         test_image = "/some/image/path"
+        test_jobs = 777
         build_minios.main(
             [
                 # --board is a required argument.
@@ -210,6 +229,8 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
                 test_image,
                 "--mod-for-dev",
                 "--force-build",
+                "--jobs",
+                str(test_jobs),
             ]
         )
 
@@ -225,6 +246,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
                     constants.MINIOS_DATA_PRIVATE_KEY,
                     constants.MINIOS_KEYBLOCK,
                     None,
+                    test_jobs,
                     True,
                     True,
                 )

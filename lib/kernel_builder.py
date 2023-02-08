@@ -26,17 +26,20 @@ class KernelBuildError(Error):
 class Builder:
     """A class for building kernel images."""
 
-    def __init__(self, board: str, work_dir: str, install_root: str):
+    def __init__(self, board: str, work_dir: str, install_root: str, jobs: int):
         """Initialize this class.
 
         Args:
           board: The board to build the kernel for.
           work_dir: The directory for keeping intermediary files.
           install_root: A directory to put the built kernel files (e.g. vmlinuz).
+          jobs: The number of packages to build in parallel.
         """
         self._board = board
         self._work_dir = pathlib.Path(work_dir)
         self._install_root = pathlib.Path(install_root)
+        # Convert to string since all cmds require bytes/strings/Path.
+        self.jobs = f"--jobs={jobs}"
 
         self._board_root = build_target_lib.get_default_sysroot_path(board)
 
@@ -106,7 +109,7 @@ class Builder:
         logging.info("Building initramfs package.")
         try:
             cros_build_lib.run(
-                [emerge, "chromeos-base/chromeos-initramfs"],
+                [emerge, self.jobs, "chromeos-base/chromeos-initramfs"],
                 enter_chroot=True,
                 extra_env=extra_env,
             )
@@ -134,7 +137,7 @@ class Builder:
             ).stdout.strip()
             logging.debug("Building kernel package %s", kernel)
             cros_build_lib.run(
-                [emerge, "--onlydeps", kernel],
+                [emerge, self.jobs, "--onlydeps", kernel],
                 enter_chroot=True,
                 extra_env=extra_env,
             )
@@ -151,7 +154,7 @@ class Builder:
         logging.info("Builing the custom kernel.")
         try:
             cros_build_lib.run(
-                [emerge, "--buildpkgonly", kernel],
+                [emerge, self.jobs, "--buildpkgonly", kernel],
                 enter_chroot=True,
                 extra_env=extra_env,
             )
@@ -169,6 +172,7 @@ class Builder:
             cros_build_lib.run(
                 [
                     emerge,
+                    self.jobs,
                     "--usepkgonly",
                     f"--root={self._install_root}",
                     kernel,
