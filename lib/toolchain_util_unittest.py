@@ -267,6 +267,7 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
         self.sysroot = "/build/%s" % self.board
         self.chrome_package = "chromeos-chrome"
         self.kernel_package = "chromeos-kernel-3_18"
+        self.profile_info = {"arch": "amd64"}
         self.chrome_PV = "chromeos-base/chromeos-chrome-78.0.3893.0_rc-r1"
         self.chrome_ebuild = os.path.realpath(
             os.path.join(
@@ -287,7 +288,10 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         self.rc.AddCmdResult(partial_mock.In("rm"), returncode=0)
         self.obj = toolchain_util._CommonPrepareBundle(
-            "None", chroot=self.chroot, sysroot_path=self.sysroot
+            "None",
+            chroot=self.chroot,
+            sysroot_path=self.sysroot,
+            profile_info=self.profile_info,
         )
         self.gs_context = self.PatchObject(self.obj, "_gs_context")
         self.gsc_list = self.PatchObject(
@@ -534,9 +538,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         self.artifact_type = "Unspecified"
         self.input_artifacts = {}
         self.kernel_version = "5_4"
-        self.profile_info = {
-            "kernel_version": self.kernel_version.replace("_", "."),
-        }
+        self.profile_info["kernel_version"] = self.kernel_version.replace(
+            "_", "."
+        )
         self.gsc_exists = None
         self.gsc_ls = None
         self.patch_ebuild = mock.MagicMock()
@@ -749,7 +753,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
 
     def testPrepareUnverifiedChromeBenchmarkArmAfdoFile(self):
         """Normal flow with Arm, build is needed, all artifacts are present."""
-        profile_info_extra = {"chrome_cwp_profile": "arm"}
+        profile_info_extra = {"chrome_cwp_profile": "arm", "arch": "arm"}
         self.setupUnverifiedChromeBenchmarkAfdoFileInputProperties(
             profile_info_extra
         )
@@ -964,11 +968,10 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             f'AFDO_PROFILE_VERSION="{fixed_version}"\n',
             'ARM_AFDO_PROFILE_VERSION="{changing_cwp_ver}"',
         )
-        # Prepend "arm-" to the kernel version which signifies
-        # the arm architecture of the cwp profile.
-        # TODO(b/246457583): Set up arch in self.arch.
+        # Overwrite profile_info with arm profile info.
         self.profile_info = {
-            "kernel_version": "arm-5.14",
+            "kernel_version": "5.14",
+            "arch": "arm",
         }
         self.callPrepareVerifiedKernelCwpAfdoFile(
             ebuild_data, cwp_old_ver=cwp_old_ver, cwp_new_ver=cwp_new_ver
@@ -992,7 +995,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
 
     def mockFindLatestAFDOArtifactNewArm(self, gs_urls, rank):
         """Return atom profiles and fresh profiles from the arm's cwp gs buckets."""
-        arm_cwp_location = os.path.join(self.cwp_gs_location, "arm")
+        arm_cwp_location = os.path.join(
+            self.cwp_gs_location, self.profile_info["chrome_cwp_profile"]
+        )
         try:
             return self.mockFindLatestAFDOArtifactAtom(gs_urls, rank)
         except toolchain_util.NoProfilesInGsBucketError:
@@ -1061,9 +1066,13 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
 
     def setupPrepareVerifiedReleaseAfdoFileInputProperties(
         self,
-        profile_info_extra=None,
-        arch="atom",
+        profile_info_extra,
     ):
+        profile = (
+            profile_info_extra["chrome_cwp_profile"]
+            if profile_info_extra
+            else "atom"
+        )
         self.SetUpPrepare(
             "VerifiedReleaseAfdoFile",
             {
@@ -1071,7 +1080,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
                     toolchain_util.BENCHMARK_AFDO_GS_URL
                 ],
                 "UnverifiedChromeCwpAfdoFile": [
-                    os.path.join(toolchain_util.CWP_AFDO_GS_URL, arch)
+                    os.path.join(toolchain_util.CWP_AFDO_GS_URL, profile)
                 ],
             },
             profile_info_extra=profile_info_extra,
@@ -1082,7 +1091,6 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         pi_extra = {"chrome_cwp_profile": "atom"}
         self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
             profile_info_extra=pi_extra,
-            arch="atom",
         )
         self.setupPrepareVerifiedReleaseAfdoFileMocks()
         # Published artifact is missing, debug binary is present, perf.data is
@@ -1094,7 +1102,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         expected_exists = [
             mock.call(
                 os.path.join(
-                    toolchain_util.RELEASE_AFDO_GS_URL_VETTED,
+                    toolchain_util.RELEASE_PROFILE_VETTED_URL,
                     (
                         f"chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo.xz"
@@ -1119,9 +1127,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
 
     def testPrepareVerifiedReleaseAfdoFileArmAtomProfile(self):
         """Test no arm profiles but there is atom."""
-        pi_extra = {"chrome_cwp_profile": "arm"}
+        pi_extra = {"chrome_cwp_profile": "arm", "arch": "arm"}
         self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
-            profile_info_extra=pi_extra, arch="arm"
+            profile_info_extra=pi_extra,
         )
         self.setupPrepareVerifiedReleaseAfdoFileMocks()
         # Published artifact is missing, debug binary is present, perf.data is
@@ -1148,9 +1156,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
 
     def testPrepareVerifiedReleaseAfdoFileArmProfile(self):
         """Test fresh arm profiles."""
-        pi_extra = {"chrome_cwp_profile": "arm"}
+        pi_extra = {"chrome_cwp_profile": "arm", "arch": "arm"}
         self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
-            profile_info_extra=pi_extra, arch="arm"
+            profile_info_extra=pi_extra,
         )
         self.setupPrepareVerifiedReleaseAfdoFileMocks(
             find_latest_mock=self.mockFindLatestAFDOArtifactNewArm
@@ -1176,9 +1184,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
 
     def testPrepareVerifiedReleaseAfdoFileOldArmProfile(self):
         """Test old arm profiles when there is a newer atom."""
-        pi_extra = {"chrome_cwp_profile": "arm"}
+        pi_extra = {"chrome_cwp_profile": "arm", "arch": "arm"}
         self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
-            profile_info_extra=pi_extra, arch="arm"
+            profile_info_extra=pi_extra,
         )
         self.setupPrepareVerifiedReleaseAfdoFileMocks(
             find_latest_mock=self.mockFindLatestAFDOArtifactOldArm
@@ -1205,12 +1213,14 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
 
     def testPrepareVerifiedReleaseAfdoFileMissingInput(self):
         """Test that _PrepareVerifiedReleaseAfdoFile raises assert."""
-        self.setupPrepareVerifiedReleaseAfdoFileInputProperties()
+        self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
+            profile_info_extra=None
+        )
         self.setupPrepareVerifiedReleaseAfdoFileMocks()
         with self.assertRaisesRegex(
             toolchain_util.PrepareForBuildHandlerError,
             (
-                r"Uarch is not set. "
+                r"Profile name is not set. "
                 r"Is 'chrome_cwp_profile' missing in profile_info?"
             ),
         ):
@@ -1218,9 +1228,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
 
     def testPrepareVerifiedReleaseAfdoFileArm32Profile(self):
         """Test fresh arm profiles for arm32."""
-        pi_extra = {"chrome_cwp_profile": "arm32"}
+        pi_extra = {"chrome_cwp_profile": "arm32", "arch": "arm"}
         self.setupPrepareVerifiedReleaseAfdoFileInputProperties(
-            profile_info_extra=pi_extra, arch="arm"
+            profile_info_extra=pi_extra,
         )
         self.setupPrepareVerifiedReleaseAfdoFileMocks(
             find_latest_mock=self.mockFindLatestAFDOArtifactNewArm
@@ -1259,9 +1269,9 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         self.outdir = None
         self.afdo_tmp_path = None
         self.kernel_version = "4_4"
-        self.profile_info = {
-            "kernel_version": self.kernel_version.replace("_", "."),
-        }
+        self.profile_info["kernel_version"] = self.kernel_version.replace(
+            "_", "."
+        )
         self.orderfile_name = (
             "chromeos-chrome-orderfile-field-78-3877.0-1567418235-"
             "benchmark-78.0.3893.0-r1.orderfile"
@@ -1601,11 +1611,10 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
             f'AFDO_PROFILE_VERSION="{unchanged_profile}"',
             f'ARM_AFDO_PROFILE_VERSION="{self.kernel_name}"',
         )
-        # Prepend "arm-" to the kernel version which signifies
-        # the arm architecture of the cwp profile.
-        # TODO(b/246457583): Set up arch in self.arch.
+        # Overwrite profile_info with arm profile info.
         self.profile_info = {
-            "kernel_version": "arm-5.15",
+            "kernel_version": "5.15",
+            "arch": "arm",
         }
         # Expected kernel ebuild version.
         self.kernel_version = "5_15"
@@ -2560,7 +2569,10 @@ class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase):
             self.afdo_sorted_by_freshness[2]
             + toolchain_util.KERNEL_AFDO_COMPRESSION_SUFFIX,
         )
-        self.profile_info = {"kernel_version": self.kernel}
+        self.profile_info = {
+            "kernel_version": self.kernel,
+            "arch": "amd64",
+        }
 
     def testUpdateKernelMetadataFailureWithInvalidKernel(self):
         with self.assertRaises(AssertionError) as context:

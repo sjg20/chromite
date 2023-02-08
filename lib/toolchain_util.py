@@ -52,12 +52,11 @@ BENCHMARK_AFDO_GS_URL = (
     "gs://chromeos-toolchain-artifacts/afdo/unvetted/benchmark"
 )
 CWP_AFDO_GS_URL = "gs://chromeos-prebuilt/afdo-job/cwp/chrome/"
-KERNEL_PROFILE_URL = "gs://chromeos-prebuilt/afdo-job/cwp/kernel/"
-KERNEL_ARM_PROFILE_URL = os.path.join(KERNEL_PROFILE_URL, "arm")
-AFDO_GS_URL_VETTED = "gs://chromeos-prebuilt/afdo-job/vetted/"
-KERNEL_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, "kernel")
-RELEASE_AFDO_GS_URL_VETTED = os.path.join(AFDO_GS_URL_VETTED, "release")
-KERNEL_ARM_AFDO_GS_URL_VETTED = os.path.join(KERNEL_AFDO_GS_URL_VETTED, "arm")
+KERNEL_PROFILE_URL = "gs://chromeos-prebuilt/afdo-job/cwp/kernel/{arch}"
+KERNEL_PROFILE_VETTED_URL = (
+    "gs://chromeos-prebuilt/afdo-job/vetted/kernel/{arch}"
+)
+RELEASE_PROFILE_VETTED_URL = "gs://chromeos-prebuilt/afdo-job/vetted/release"
 
 # Constants
 AFDO_SUFFIX = ".afdo"
@@ -71,7 +70,7 @@ KERNEL_AFDO_COMPRESSION_SUFFIX = ".gcov.xz"
 TOOLCHAIN_UTILS_PATH = os.path.join(
     constants.CHROOT_SOURCE_ROOT, "src/third_party/toolchain-utils"
 )
-AFDO_PROFILE_PATH_IN_CHROMIUM = "src/chromeos/profiles/%s.afdo.newest.txt"
+AFDO_PROFILE_PATH_IN_CHROMIUM = "src/chromeos/profiles/{arch}.afdo.newest.txt"
 MERGED_AFDO_NAME = "chromeos-chrome-{arch}-{name}"
 
 # How old can the Kernel AFDO data be? (in days).
@@ -317,27 +316,27 @@ def _GetArtifactVersionInChromium(arch, chrome_root):
       RuntimeError: when the file containing AFDO profile name can't be found.
     """
     if arch not in list(CHROME_AFDO_VERIFIER_BOARDS.values()):
-        raise ValueError(
-            "Invalid architecture %s to use in AFDO profile" % arch
-        )
+        raise ValueError(f"Invalid architecture {arch} to use in AFDO profile")
 
     if not os.path.exists(chrome_root):
-        raise RuntimeError("chrome_root %s does not exist." % chrome_root)
+        raise RuntimeError(f"chrome_root {chrome_root} does not exist.")
 
     profile_file = os.path.join(
-        chrome_root, AFDO_PROFILE_PATH_IN_CHROMIUM % arch
+        chrome_root, AFDO_PROFILE_PATH_IN_CHROMIUM.format(arch=arch)
     )
     if not os.path.exists(profile_file):
         logging.info(
             "Files in chrome_root profile: %r",
             os.listdir(
                 os.path.join(
-                    chrome_root, AFDO_PROFILE_PATH_IN_CHROMIUM % arch, ".."
+                    chrome_root,
+                    AFDO_PROFILE_PATH_IN_CHROMIUM.format(arch=arch),
+                    "..",
                 )
             ),
         )
         raise RuntimeError(
-            "File %s containing profile name does not exist" % (profile_file,)
+            f"File {profile_file} containing profile name does not exist"
         )
 
     return osutils.ReadFile(profile_file)
@@ -683,19 +682,8 @@ class _CommonPrepareBundle(object):
         self.build_target = build_target
         self.input_artifacts = input_artifacts or {}
         self.profile_info = profile_info or {}
-        # TODO(b/246457583): Pass arch, uarch, and kernel in proto.
-        profile = self.profile_info.get("chrome_cwp_profile")
-        if profile in ("atom", "bigcore"):
-            self.arch = "amd64"
-            self.uarch = profile
-        elif profile in ("arm", "arm32"):
-            self.arch = "arm"
-            self.uarch = "armv7a" if profile == "arm32" else "none"
-        else:
-            # "chrome_cwp_profile" can be unset,
-            # in this case default arch is amd64.
-            self.arch = "amd64"
-            self.uarch = None
+        self.arch = self.profile_info.get("arch")
+        self.profile = self.profile_info.get("chrome_cwp_profile")
         self._ebuild_info = {}
 
     @property
@@ -970,9 +958,8 @@ class _CommonPrepareBundle(object):
 
         if not latest:
             raise RuntimeError(
-                "No valid latest artifact was found in %s"
-                "(example invalid artifact: %s)."
-                % (" ".join(gs_urls), results[0].url)
+                f"No valid latest artifact was found in {','.join(gs_urls)}"
+                f" (example of invalid artifact: {results[0].url})."
             )
 
         name = latest[1]
@@ -1774,20 +1761,16 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
             raise PrepareForBuildHandlerError(
                 "Could not find kernel version to verify."
             )
-        # Temporary workaround for the kernel AFDO - extract arch
-        # from the kernel version.
         # kernel_version for arm will look like "arm-5.15".
-        # TODO(b/246457583): Pass arch via an expanded proto field.
+        # TODO(b/268356358): Remove after M112 reaches stable.
         if kernel_version.startswith("arm-"):
-            self.arch = "arm"
             kernel_version = kernel_version.split("-")[-1]
+
+        verified_profile_url = KERNEL_PROFILE_VETTED_URL.format(arch=self.arch)
+        profile_url = KERNEL_PROFILE_URL.format(arch=self.arch)
+        profile_var_name = "AFDO_PROFILE_VERSION"
+        if self.arch == "arm":
             profile_var_name = "ARM_AFDO_PROFILE_VERSION"
-            profile_url = KERNEL_ARM_PROFILE_URL
-            verified_profile_url = KERNEL_ARM_AFDO_GS_URL_VETTED
-        else:
-            profile_var_name = "AFDO_PROFILE_VERSION"
-            profile_url = KERNEL_PROFILE_URL
-            verified_profile_url = KERNEL_AFDO_GS_URL_VETTED
 
         cwp_locs = [
             x
@@ -1863,9 +1846,9 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         See also "chrome_afdo" code elsewhere in this file.
         """
         ret = PrepareForBuildReturn.NEEDED
-        if not self.uarch:
+        if not self.profile:
             raise PrepareForBuildHandlerError(
-                "Uarch is not set. "
+                "Profile name is not set. "
                 "Is 'chrome_cwp_profile' missing in profile_info?"
             )
         bench_locs = self.input_artifacts.get(
@@ -1914,13 +1897,22 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         # We only look at the first path in the list of vetted locations, since that
         # is where we will publish the verified profile.
         published_loc = self.input_artifacts.get(
-            "VerifiedReleaseAfdoFile", [RELEASE_AFDO_GS_URL_VETTED]
+            "VerifiedReleaseAfdoFile", [RELEASE_PROFILE_VETTED_URL]
         )[0]
+        profile = self.profile
+        # Arm has two variants: arm and arm32. Regardless of the name both use
+        # the same unvetted profile from arm (which is arm64) architecture.
+        # The difference is the target where the profile is tested and hence
+        # merged profile is created.
+        # -arm-armv7a- means that profile was generated on arm arch and verified
+        # on arm32 target. This profile is not used on production.
+        if self.arch == "arm":
+            profile = "armv7a" if self.profile == "arm32" else "none"
         merged_name = MERGED_AFDO_NAME.format(
             arch=self.arch,
             name=_GetCombinedAFDOName(
                 _ParseCWPProfileName(os.path.splitext(cwp_name)[0]),
-                self.uarch,
+                profile,
                 _ParseBenchmarkProfileName(os.path.splitext(bench_name)[0]),
             ),
         )
@@ -2301,16 +2293,14 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         if not kernel_version:
             raise BundleArtifactsHandlerError("kernel_version not provided.")
 
-        # Temporary workaround for the kernel AFDO - extract arch
-        # from the kernel version.
         # kernel_version for arm will look like "arm-5.15".
-        # TODO(b/246457583): Pass arch via an expanded proto field.
+        # TODO(b/268356358): Remove after M112 reaches stable.
         if kernel_version.startswith("arm-"):
-            self.arch = "arm"
             kernel_version = kernel_version.split("-")[-1]
+
+        profile_var_name = "AFDO_PROFILE_VERSION"
+        if self.arch == "arm":
             profile_var_name = "ARM_AFDO_PROFILE_VERSION"
-        else:
-            profile_var_name = "AFDO_PROFILE_VERSION"
 
         kernel_version = kernel_version.replace(".", "_")
         profile_name = self._GetArtifactVersionInEbuild(
