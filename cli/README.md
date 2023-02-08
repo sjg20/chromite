@@ -2,6 +2,10 @@
 
 This directory contains the core CLI system.
 
+This document covers the common APIs chromite provides when writing tools.
+It does not get into CLI best practices as the [CLI Guidelines] document covers
+that more generally already.
+
 [TOC]
 
 ## Adding a new command
@@ -109,11 +113,7 @@ form they must have.
 |---|---|---|
 | -b | --build-target | [Build Target](#Build-Target) |
 | -d | --device | [Device](#Device) |
-| -f | --force | [Force](#Force) |
-| -j | --jobs | [Jobs](#Jobs) |
-| -n | --dry-run | [Dry Run](#Dry-Run) |
 | | package(s) | [Packages](#Packages) |
-| -y | --yes | [Yes](#Yes) |
 
 #### Build Target
 
@@ -144,53 +144,6 @@ parser.add_argument(
                                    commandline.DEVICE_SCHEME_FILE]))
 ```
 
-#### Dry Run
-
-A dry-run of a script should log information about steps it would be taking
-without executing operations that mutate anything.
-Implementing a dry-run for your script is very strongly recommended.
-A dry-run allows developers to more quickly experiment with and verify their
-usage and understanding of your script, and empowers them to make mistakes
-without worrying about consequences.
-
-There are tentative plans to implement the dry-run argument as a default
-on our ArgumentParser subclass, making it available for all the commands.
-If done, any existing inclusions will be converted, so until then please feel
-free to add it to your script.
-
-```python
-parser.add_argument(
-    '-n',
-    '--dryrun',
-    '--dry-run',
-    dest='dryrun',
-    action='store_true',
-    default=False)
-```
-
-#### Force
-
-The force argument should only be used when there's an operation to "force"
-to complete that would otherwise abort, e.g. deleting an existing X, if it
-exists, to create a new X.
-If the operation would prompt the user, then [--yes](#Yes) is the correct option.
-
-```python
-parser.add_argument('-f', '--force', action='store_true', default=False)
-```
-
-#### Jobs
-
-This argument is used to specify maximum parallelism for concurrent tasks.
-The default should be unlimited when feasible, or the machine's CPU count
-when not.
-If unsure, lean towards unlimited and adjust if/when it is a problem.
-In particular, this helps avoid chained calls from unexpectedly being limited.
-
-```python
-parser.add_argument('-j', '--jobs', type=int, default=0)
-```
-
 #### Packages
 
 The package(s) argument should be a positional argument taking one or more
@@ -202,11 +155,4 @@ dependent on the script itself.
 parser.add_argument('packages', nargs='+')
 ```
 
-#### Yes
-
-The yes option is a pretty common argument to allow the user to skip manually
-confirming prompts and instead assume the user confirmed each case.
-
-```python
-parser.add_argument('-y', '--yes', action='store_true', default=False)
-```
+[CLI Guidelines]: /docs/cli-guidelines.md

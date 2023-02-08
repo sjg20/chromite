@@ -7,6 +7,9 @@ Conversely, when the same option name is used but with wildly different
 meanings, this can be very surprising for developers, and possibly lead them
 to do something destructive they didn't intend.
 
+See the [Chromite CLI Framework](/cli/README.md) document for Chromite-specific
+APIs.
+
 [TOC]
 
 ## Short Options
@@ -400,6 +403,9 @@ The [--dryrun] option should be accepted as an alias to [--dry-run], but should
 be omitted from documentation (i.e. [--help] output).
 This helps users who typo things, and because some tools have adopted that
 convention instead of [--dry-run] (although the latter is still more common).
+
+Internally, code should prefer to use `dryrun` as the variable name rather than
+`dry_run` for consistency, and because it's easier to type.
 
 [-n]: #dryrun
 [--dry-run]: #dryrun
