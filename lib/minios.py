@@ -116,7 +116,8 @@ def InsertMiniOsKernelImage(image: str, kernel: str):
     with image_lib.LoopbackPartitions(image) as devs:
         for part_name in (constants.PART_MINIOS_A, constants.PART_MINIOS_B):
             part_info = devs.GetPartitionInfo(part_name)
-            if os.path.getsize(kernel) > part_info.size:
+            kernel_size = os.path.getsize(kernel)
+            if kernel_size > part_info.size:
                 raise MiniOsError(
                     f"MiniOS kernel is larger than the {part_name} partition."
                 )
@@ -131,6 +132,9 @@ def InsertMiniOsKernelImage(image: str, kernel: str):
                 device,
             )
 
+            kernel_blocks = kernel_size // BLOCK_SIZE
+            part_blocks = part_info.size // BLOCK_SIZE
+
             # First zero out partition.
             # This generally would help with update payloads so we don't have
             # to compress junk bytes. The target file is a loopback dev device
@@ -141,7 +145,8 @@ def InsertMiniOsKernelImage(image: str, kernel: str):
                     "if=/dev/zero",
                     f"of={device}",
                     f"bs={BLOCK_SIZE}",
-                    f"count={part_info.size // BLOCK_SIZE}",
+                    f"seek={kernel_blocks}",
+                    f"count={part_blocks - kernel_blocks}",
                 ]
             )
             # Write the actual MiniOS kernel into the A + B partitions.

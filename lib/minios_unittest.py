@@ -213,6 +213,7 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
                 "if=/dev/zero",
                 "of=/foo/dev0",
                 "bs=512",
+                "seek=0",
                 "count=4",
             ]
         )
@@ -224,7 +225,46 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
                 "if=/dev/zero",
                 "of=/foo/dev1",
                 "bs=512",
+                "seek=0",
                 "count=8",
+            ]
+        )
+        self.assertCommandCalled(
+            ["sudo", "--", "dd", f"if={kernel_path}", "of=/foo/dev0", "bs=512"]
+        )
+        self.assertCommandCalled(
+            ["sudo", "--", "dd", f"if={kernel_path}", "of=/foo/dev1", "bs=512"]
+        )
+
+    def testInsertMiniOsLargerKernelImage(self):
+        """Tests InsertMiniOsKernelImage()."""
+        kernel_path = os.path.join(self.tempdir, minios.MINIOS_KERNEL_IMAGE)
+        osutils.WriteFile(kernel_path, "a" * (minios.BLOCK_SIZE + 1))
+
+        minios.InsertMiniOsKernelImage("foo-image", kernel_path)
+
+        self.assertCommandCalled(
+            [
+                "sudo",
+                "--",
+                "dd",
+                "if=/dev/zero",
+                "of=/foo/dev0",
+                "bs=512",
+                "seek=1",
+                "count=3",
+            ]
+        )
+        self.assertCommandCalled(
+            [
+                "sudo",
+                "--",
+                "dd",
+                "if=/dev/zero",
+                "of=/foo/dev1",
+                "bs=512",
+                "seek=1",
+                "count=7",
             ]
         )
         self.assertCommandCalled(
