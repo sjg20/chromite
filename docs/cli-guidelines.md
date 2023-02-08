@@ -182,6 +182,7 @@ should be strongly reconsidered.
 |:-----:|---------------|-------------|
 |       | [--debug]     | Show debugging information. |
 | [-f]  | [--force]     | Force an operation. |
+|       | [--format]    | Control output format. |
 | [-h]  | [--help]      | Show tool help/usage output. |
 | [-j]  | [--jobs]      | Control parallelization. |
 | [-n]  | [--dry-run]   | Show what would be done. |
@@ -227,6 +228,87 @@ recreated (even if it requires a bit of effort), then [-f] is OK.
 
 [-f]: #force
 [--force]: #force
+
+### --format {#format}
+
+Control the output format of the tool.
+
+Only add a single [--format]`=<format>` option.  Avoid adding any `--<format>`
+options at all.  The default should always be `automatic`, even if there aren't
+that many choices.  This provides some future proofing as tooling evolves, and
+signals to users that they have to pick a specific format when writing scripts
+to avoid things breaking in the future.
+
+Tools often handle a variety of formats, in their inputs & outputs, and with
+users wanting to explicitly control what is displayed to them.
+Providing automatic detection with reasonable default behavior is OK, but
+options should be provided for explicit control.
+
+For example, the `gerrit` tool can output in JSON, markdown, and more.
+The default is automatic which detects whether to use readable human-centric
+summaries or terse raw data which is useful for developers running things
+directly, but can be a nightmare when attempting to write scripts on top of it.
+
+Often tools start off with a single output format, and then someone requests a
+second one.  It can be tempting to use an option name that matches the format,
+but this is inevitably a short term trap.  For example, when adding a new JSON
+output format, you might start with `--json`.  But when other formats come up,
+adding `--markdown` and such easily get out of hand, both for the user (lots
+of options in `--help` output), and for the tool author (who has to register
+each option and then handle conflicting `--markdown --json` situations).
+
+While [--format] is most commonly associated with the output of a tool, this is
+not a strict requirement.  If a tool never outputs anything and only takes an
+input, using [--format] is permissible.  Use your best judgment.
+
+Do not provide `--fmt` as a shorter name.  It really doesn't save that many
+bytes compared to [--format].
+
+[--format]: #format
+
+#### Format Names
+
+Some common format names:
+
+*   `automatic` (alias: `auto`): Good for switching between `pretty` and some
+    other format (e.g. `raw`) depending on whether stdout is connected to a
+    terminal.  Good for sniffing input files and guessing at their format.
+*   `json`: JSON output of some format; good for returning structured results.
+    Some care should be taken to support backwards compatibility (e.g. always
+    return an object with at least a `version` field), but this is not strictly
+    required.
+*   `raw`: A bare minimum output format useful for extracting the most common
+    data that developers would want.  e.g. `gerrit --raw search` only returns CL
+    numbers with no metadata.  This should never be structured content.
+*   `pretty`: Good for humans to read, and never for machines to parse.
+
+#### Multiple Streams
+
+A single [--format] option is common when a tool only outputs to one place,
+and all of its inputs are of a specific format.
+When there are multiple inputs or outputs whose format can be controlled, add
+dedicated options to control each stream (using the pattern
+`--<name>-format=<format>`), with the [--format] option setting a common
+default.
+
+For example, if there is a single input and a single output,
+`--input-format=<format>` & `--output-format=<format>` is a good choice, in
+addition to the common [--format].
+
+The ordering of options should not override each other.  For example, using
+`--output-format=foo --format=bar` should behave the same as
+`--format=bar --output-format=foo`.  In these cases, [--format] is only for
+selecting a default if a stream-specific format has not been specified.
+
+Definitely do not provide separate format-specific options for each stream,
+otherwise the set of options really grows out of control.  For example, do
+not use options like `--input-json`, `--input-binary`, `--output-json`, and
+`--output-binary`.
+
+This has the nice benefit of disambiguating options that control paths and
+options that control formats.  For example, is `--input-json` a boolean, or
+does it expect a path to a JSON file?  Use `--input <path>` and
+`--input-format=<format>` instead.
 
 ### --help {#help}
 
@@ -354,7 +436,7 @@ i.e. users should not be expected to use [--verbose] all the time.
 [--verbose] may be specified multiple times to make the output even verboser.
 
 Debugging information should not be included here -- use [--debug] instead.
-Use your best judgement as to what is verbose output and what is debug output.
+Use your best judgment as to what is verbose output and what is debug output.
 
 Use of the short [-v] option is recommended out of wide convention, and because
 it can be common to type `-vvv` to quickly get more verbose output when trying
