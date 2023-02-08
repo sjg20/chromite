@@ -75,31 +75,32 @@ Argument --foo is deprecated: Use --bar instead!
 
 ### Defined Arguments
 
-*   --log-level: The minimum logging level (default: notice).
-*   --log-format: Change log line format.
-*   -v/--verbose: Sets the verbose option to true and sets the log-level to
+`logging=True` (default) enables standard logging options:
+
+*   `--log-level=<level>`: The minimum logging level (default: info).
+*   `--log-format=<format>`: Change log line format.
+*   `-v`, `--verbose`: Sets the verbose option to true and sets the log-level to
     info.
-*   --debug: Sets verbose and debug options to true and sets the log-level to
+*   `--debug`: Sets verbose and debug options to true and sets the log-level to
     debug.
-*   --nocolor: Disable log coloring.
-*   --cache-dir: Override the cache directory when caching is enabled in the
-    parser.
+*   `--color`, `--no-color`: Control log coloring.
 
-## Argument Standards
+The `caching=` option (disabled by default) enables the common cache dir, and
+exposes the options:
 
-There are only a few style rules on top of the standard rules imposed by the
-python `ArgumentParser`.
-Dashes should be preferred over underscores, e.g. `--argument-name`,
-**not** `--argument_name`.
-If there is historical context for `--argument_name`, it *may* be included,
-but `--argument-name` *must* also be included.
+*   `--cache-dir=<dir>`: Override the cache directory.
 
-For negative flag arguments, use --no-foo instead of --nofoo, and store it to
-foo. e.g.
+The `dryrun=` option (disabled by default) enables:
 
-```python
-parser.add_argument('--no-foo', dest='foo', action='store_false', default=True)
-```
+*   `-n`, `--dry-run`: Don't run commands, and show what would be done.
+
+The `filter=` option (disabled by default) sets up a generic filter for tools
+that process user-specified paths.  This filter can be accessed via `.filter`
+in the parsed options object; see `chromite.utils.path_filter.PathFilter` for
+more details.  It also enables:
+
+*   `--include=<pattern>`: Paths to include in the filter.
+*   `--exclude=<pattern>`: Paths to exclude from the filter.
 
 ### Standard Arguments
 
