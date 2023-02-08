@@ -276,6 +276,16 @@ To determine how many CPU cores are available:
 
 Use of the short [-j] option is recommended out of wide convention.
 
+Do not use `--cpus` or `--cores` or `--procs` or `--threads` or similar names
+as the options should be user focused, not internal implementation details.
+In other words, users want to run multiple tasks in parallel, they don't care
+about matching jobs to hardware or OS level concepts.
+Especially considering internals change (multiprocessing vs multithreading), and
+the distinction between cores & cpus can be easily lost or irrelevant, and they
+might run more tasks than corresponding hardware is available.
+For example, using `--cores=10` to run 10 slow I/O jobs in parallel on a system
+with 2 cpus is confusing.
+
 [-j]: #jobs
 [--jobs]: #jobs
 
