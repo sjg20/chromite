@@ -1199,6 +1199,10 @@ class PaygenPayload(object):
     def _UploadResults(self):
         """Copy the payload generation results to the specified destination."""
 
+        if self.payload.uri is None:
+            logging.info("Not uploading payload.")
+            return
+
         logging.info("Uploading payload to %s.", self.payload.uri)
 
         # Deliver the payload to the final location.
