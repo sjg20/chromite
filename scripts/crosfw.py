@@ -268,31 +268,6 @@ def ParseCmdline(argv):
         help="Write disassembly output",
     )
     parser.add_argument(
-        "--ro",
-        action="store_true",
-        default=False,
-        help="Create Chrome OS read-only image",
-    )
-    parser.add_argument(
-        "--rw",
-        action="store_true",
-        default=False,
-        help="Create Chrome OS read-write image",
-    )
-    parser.add_argument(
-        "-s",
-        "--separate",
-        action="store_false",
-        default=True,
-        help="Link device tree into U-Boot, instead of separate",
-    )
-    parser.add_argument(
-        "--small",
-        action="store_true",
-        default=False,
-        help="Create Chrome OS small image",
-    )
-    parser.add_argument(
         "-t",
         "--trace",
         action="store_true",
@@ -467,21 +442,6 @@ def SetupBuild(options):
     elif options.verbose > 2:
         base.append("V=1")
 
-    if options.ro and options.rw:
-        cros_build_lib.Die("Cannot specify both --ro and --rw options")
-    if options.ro:
-        base.append("CROS_RO=1")
-        options.small = True
-
-    if options.rw:
-        base.append("CROS_RW=1")
-        options.small = True
-
-    if options.small:
-        base.append("CROS_SMALL=1")
-    else:
-        base.append("CROS_FULL=1")
-
     if options.verified:
         base += [
             "VBOOT=%s" % vboot,
@@ -492,35 +452,9 @@ def SetupBuild(options):
         ]
         base.append("VBOOT_DEBUG=1")
 
-    # Handle the Chrome OS USE_STDINT workaround. Vboot needs <stdint.h> due
-    # to a recent change, the need for which I didn't fully understand. But
-    # U-Boot doesn't normally use this. We have added an option to U-Boot to
-    # enable use of <stdint.h> and without it vboot will fail to build. So we
-    # need to enable it where ww can. We can't just enable it always since
-    # that would prevent this script from building other non-Chrome OS boards
-    # with a different (older) toolchain, or Chrome OS boards without vboot.
-    # So use USE_STDINT if the toolchain supports it, and not if not. This
-    # file was originally part of glibc but has recently migrated to the
-    # compiler so it is reasonable to use it with a stand-alone program like
-    # U-Boot. At this point the comment has got long enough that we may as
-    # well include some poetry which seems to be sorely lacking the code base,
-    # so this is from Ogden Nash:
-    #    To keep your marriage brimming
-    #    With love in the loving cup,
-    #    Whenever you're wrong, admit it;
-    #    Whenever you're right, shut up.
-    cmd = [CompilerTool("gcc"), "-ffreestanding", "-x", "c", "-c", "-"]
-    result = cros_build_lib.run(
-        cmd, input="#include <stdint.h>", capture_output=True, **kwargs
-    )
-    if result.returncode == 0:
-        base.append("USE_STDINT=1")
-
     base.append("BUILD_ROM=1")
     if options.trace:
         base.append("FTRACE=1")
-    if options.separate:
-        base.append("DEV_TREE_SEPARATE=1")
 
     if options.incremental:
         config_mk = "%s/include/autoconf.mk" % outdir
@@ -531,11 +465,6 @@ def SetupBuild(options):
     config_mk = "include/autoconf.mk"
     if os.path.exists(config_mk):
         logging.warning("Warning: '%s' exists, try 'make distclean'", config_mk)
-
-    # For when U-Boot supports ccache
-    # See http://patchwork.ozlabs.org/patch/245079/
-    if use_ccache:
-        os.environ["CCACHE"] = "ccache"
 
     return base
 
