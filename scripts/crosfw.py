@@ -234,13 +234,6 @@ def ParseCmdline(argv):
     """
     parser = commandline.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "-b",
-        "--board",
-        type=str,
-        default=default_board,
-        help="Select board to build (daisy/peach_pit/link)",
-    )
-    parser.add_argument(
         "-B",
         "--build",
         action="store_false",
@@ -275,6 +268,13 @@ def ParseCmdline(argv):
         help="Enable trace support",
     )
     parser.add_argument(
+        "-T",
+        "--target",
+        nargs="?",
+        default="all",
+        help="Select target to build",
+    )
+    parser.add_argument(
         "-V",
         "--verified",
         action="store_true",
@@ -289,7 +289,10 @@ def ParseCmdline(argv):
         help="Display U-Boot image size",
     )
     parser.add_argument(
-        "target", nargs="?", default="all", help="The target to work on"
+        "board",
+        type=str,
+        default=default_board,
+        help="Select board to build (daisy/peach_pit/link)",
     )
     return parser.parse_args(argv)
 
