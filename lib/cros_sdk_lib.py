@@ -1271,6 +1271,9 @@ class ChrootEnteror:
     # We want a file limit at least this small.
     _RLIMIT_NOFILE_MIN = 262144
 
+    # Path to sysctl knob.  Class-level constant for easy test overrides.
+    _SYSCTL_VM_MAX_MAP_COUNT = Path("/sys/vm/max_map_count")
+
     def __init__(
         self,
         chroot: "chroot_lib.Chroot",
@@ -1359,7 +1362,6 @@ class ChrootEnteror:
     def _setup_vm_max_map_count(self) -> None:
         """Update OS limits as ThinLTO opens lots of files at the same time."""
         soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
-        max_map_count = Path("/proc/sys/vm/max_map_count")
         resource.setrlimit(
             resource.RLIMIT_NOFILE,
             (
@@ -1367,14 +1369,21 @@ class ChrootEnteror:
                 max(hard, self._RLIMIT_NOFILE_MIN),
             ),
         )
-        max_map_count = int(max_map_count.read_text(encoding="utf-8"))
+        try:
+            max_map_count = int(
+                self._SYSCTL_VM_MAX_MAP_COUNT.read_text(encoding="utf-8")
+            )
+        except FileNotFoundError:
+            return
         if max_map_count < self._RLIMIT_NOFILE_MIN:
             logging.notice(
                 "Raising vm.max_map_count from %s to %s",
                 max_map_count,
                 self._RLIMIT_NOFILE_MIN,
             )
-            max_map_count.write_text(str(self._RLIMIT_NOFILE_MIN))
+            self._SYSCTL_VM_MAX_MAP_COUNT.write_text(
+                str(self._RLIMIT_NOFILE_MIN), encoding="utf-8"
+            )
 
     def run(
         self, cmd: Optional[List[str]] = None, cwd: Optional[Path] = None

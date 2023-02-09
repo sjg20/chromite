@@ -14,6 +14,9 @@ from chromite.lib import osutils
 from chromite.lib import partial_mock
 
 
+# pylint: disable=protected-access
+
+
 class VersionHookTestCase(cros_test_lib.TempDirTestCase):
     """Class to set up tests that use the version hooks."""
 
@@ -1058,6 +1061,13 @@ class ChrootEnterorTests(cros_test_lib.MockTempDirTestCase):
 
         self.enteror = cros_sdk_lib.ChrootEnteror(self.chroot)
 
+        self.sysctl_vm_max_map_count = self.tempdir / "vm_max_map_count"
+        self.PatchObject(
+            cros_sdk_lib.ChrootEnteror,
+            "_SYSCTL_VM_MAX_MAP_COUNT",
+            self.sysctl_vm_max_map_count,
+        )
+
     def testRun(self):
         """Verify run works."""
         with self.PatchObject(cros_build_lib, "dbg_run"):
@@ -1067,3 +1077,12 @@ class ChrootEnterorTests(cros_test_lib.MockTempDirTestCase):
         """Verify helper run API works."""
         with self.PatchObject(cros_build_lib, "dbg_run"):
             cros_sdk_lib.EnterChroot(self.chroot)
+
+    def test_setup_vm_max_map_count(self):
+        """Verify _setup_vm_max_map_count works."""
+        self.sysctl_vm_max_map_count.write_text("1024", encoding="utf-8")
+        self.enteror._setup_vm_max_map_count()
+        self.assertEqual(
+            int(self.sysctl_vm_max_map_count.read_text(encoding="utf-8")),
+            self.enteror._RLIMIT_NOFILE_MIN,
+        )
