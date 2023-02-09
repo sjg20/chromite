@@ -473,44 +473,46 @@ def SetupBuild(options):
                 fields = line.split()
                 if not fields:
                     continue
+                target = fields[6]
+                # Make sure this is the right target.
+                if target != uboard:
+                    continue
                 arch = fields[1]
                 fields += [None, None, None]
                 if board_format == PRE_KBUILD:
                     smdk = fields[3]
                     vendor = fields[4]
                     family = fields[5]
-                    target = fields[6]
                 elif board_format in (PRE_KCONFIG, KCONFIG):
                     smdk = fields[5]
                     vendor = fields[4]
                     family = fields[3]
                     target = fields[0]
-
-                # Make sure this is the right target.
-                if target == uboard:
-                    break
     if not arch:
         cros_build_lib.Die(
             "Selected board '%s' not found in boards.cfg." % board
         )
 
     vboot = os.path.join("build", board, "usr")
-    if arch == "x86":
-        family = "em100"
-        if in_chroot:
-            compiler = "i686-pc-linux-gnu-"
-        else:
-            compiler = "/opt/i686/bin/i686-unknown-elf-"
-    elif arch == "arm":
-        compiler = FindCompiler(arch, "armv7a-cros-linux-gnueabi-")
-    elif arch == "aarch64":
-        compiler = FindCompiler(arch, "aarch64-cros-linux-gnu-")
-        # U-Boot builds both arm and aarch64 with the 'arm' architecture.
-        arch = "arm"
+    if in_chroot:
+        if arch == "x86":
+            compiler = "i686-cros-linux-gnu-"
+        elif arch == "arm":
+            compiler = FindCompiler(arch, "armv7a-cros-linux-gnueabihf-")
+        elif arch == "aarch64":
+            compiler = FindCompiler(arch, "aarch64-cros-linux-gnu-")
     elif arch == "sandbox":
         compiler = ""
     else:
-        cros_build_lib.Die("Selected arch '%s' not supported.", arch)
+        result = cros_build_lib.run(
+            ["buildman", "-A", "--boards", options.board],
+            capture_output=True,
+            encoding="utf-8",
+            **kwargs,
+        )
+        compiler = result.stdout.strip()
+        if not compiler:
+            cros_build_lib.Die("Selected arch '%s' not supported.", arch)
 
     if not options.build:
         options.incremental = True
