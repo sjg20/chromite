@@ -333,6 +333,11 @@ GROUP_BASELINE = dict(
         GroupEntry(group="arc-bridge", gid=602, users={"chronos"}),
         GroupEntry(group="arc-camera", gid=603, users={"chronos", "crosvm"}),
         GroupEntry(
+            group="camera",
+            gid=20042,
+            users={"arc-camera", "cfm-firmware-updaters"},
+        ),
+        GroupEntry(
             group="debugfs-access",
             gid=605,
             users={"arc-camera", "shill", "power", "metrics", "traced-probes"},
