@@ -1477,13 +1477,9 @@ class _CommonPrepareBundle(object):
             # Redaction has significant effect on performance gain (+15% on
             # speedometer2) but also has a drastic impact on the binary size
             # (+16MB).
-            # We can balance the numbers by reducing the number of functions.
-            # Reduction of the number of functions from 70k to 20k saves 6MB while
-            # performance gain drops from 15 to 12 % (on speedometer2/trogdor).
-            # With the native arm profile we can further trim the binary size
-            # with sample-profile-accurate. On trogdor it shaves another 20MB
-            # with a slight performance impact, drop from 12 to 11 %.
-            reduce_functions = 20000
+            # With the native arm profile we can trim the binary size with
+            # sample-profile-accurate. On trogdor it shaves another 20MB with a
+            # slight performance impact, drop from 12 to 11 %.
             redact = True
         self._ProcessAFDOProfile(
             raw_merged_output_path,

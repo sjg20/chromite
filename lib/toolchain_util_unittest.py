@@ -1916,7 +1916,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         redacted_temp_full = input_path + ".redacted.temp"
         removed_temp = input_path_inchroot + ".removed.temp"
         reduced_temp = input_path_inchroot + ".reduced.tmp"
-        reduce_functions = 20000
+        reduce_functions = 70000
         output_path = os.path.join(self.tempdir, self.redacted_name)
         mock_file_obj = io.StringIO()
         mock_open.return_value = mock_file_obj
@@ -2307,7 +2307,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             os.path.join(self.output_dir, merged_name),
             redact=True,
             remove=True,
-            reduce_functions=20000,
+            reduce_functions=70000,
             compbinary=False,
         )
 
