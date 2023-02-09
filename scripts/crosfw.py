@@ -234,12 +234,6 @@ def ParseCmdline(argv):
     """
     parser = commandline.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "-a",
-        "--cbfargs",
-        action="append",
-        help="Pass extra arguments to cros_bundle_firmware",
-    )
-    parser.add_argument(
         "-b",
         "--board",
         type=str,
@@ -254,39 +248,10 @@ def ParseCmdline(argv):
         help="Don't build U-Boot, just configure device tree",
     )
     parser.add_argument(
-        "-C",
-        "--console",
-        action="store_false",
-        default=True,
-        help="Permit console output",
-    )
-    parser.add_argument(
         "-d",
         "--dt",
         default="seaboard",
         help="Select name of device tree file to use",
-    )
-    parser.add_argument(
-        "-D",
-        "--nodefaults",
-        dest="use_defaults",
-        action="store_false",
-        default=True,
-        help="Don't select default filenames for those not given",
-    )
-    parser.add_argument(
-        "-F",
-        "--flash",
-        action="store_true",
-        default=False,
-        help="Create magic flasher for SPI flash",
-    )
-    parser.add_argument(
-        "-M",
-        "--mmc",
-        action="store_true",
-        default=False,
-        help="Create magic flasher for eMMC",
     )
     parser.add_argument(
         "-i",
@@ -296,25 +261,11 @@ def ParseCmdline(argv):
         help="Don't reconfigure and clean",
     )
     parser.add_argument(
-        "-k",
-        "--kernel",
-        action="store_true",
-        default=False,
-        help="Send kernel to board also",
-    )
-    parser.add_argument(
         "-O",
         "--objdump",
         action="store_true",
         default=False,
         help="Write disassembly output",
-    )
-    parser.add_argument(
-        "-r",
-        "--run",
-        action="store_false",
-        default=True,
-        help="Run the boot command",
     )
     parser.add_argument(
         "--ro",
@@ -336,13 +287,6 @@ def ParseCmdline(argv):
         help="Link device tree into U-Boot, instead of separate",
     )
     parser.add_argument(
-        "-S",
-        "--secure",
-        action="store_true",
-        default=False,
-        help="Use vboot_twostop secure boot",
-    )
-    parser.add_argument(
         "--small",
         action="store_true",
         default=False,
@@ -361,20 +305,6 @@ def ParseCmdline(argv):
         action="store_true",
         default=False,
         help="Include Chrome OS verified boot components",
-    )
-    parser.add_argument(
-        "-w",
-        "--write",
-        action="store_false",
-        default=True,
-        help="Don't write image to board using usb/em100",
-    )
-    parser.add_argument(
-        "-x",
-        "--sdcard",
-        action="store_true",
-        default=False,
-        help="Write to SD card instead of USB/em100",
     )
     parser.add_argument(
         "-z",
@@ -593,7 +523,6 @@ def SetupBuild(options):
         base.append("DEV_TREE_SEPARATE=1")
 
     if options.incremental:
-        # Get the correct board for cros_write_firmware
         config_mk = "%s/include/autoconf.mk" % outdir
         if not os.path.exists(config_mk):
             logging.warning("No build found for %s - dropping -i", board)
@@ -674,192 +603,8 @@ def RunBuild(options, base, target, queue):
     Log("Output directory %s" % outdir)
 
 
-def WriteFirmware(options):
-    """Write firmware to the board.
-
-    This uses cros_bundle_firmware to create a firmware image and write it to
-    the board.
-
-    Args:
-      options: Command line options
-    """
-    flash = []
-    kernel = []
-    run = []
-    secure = []
-    servo = []
-    silent = []
-    verbose_arg = []
-    ro_uboot = []
-
-    bl2 = ["--bl2", "%s/spl/%s-spl.bin" % (outdir, smdk)]
-
-    if options.use_defaults:
-        bl1 = []
-        bmpblk = []
-        ecro = []
-        ecrw = []
-        defaults = []
-    else:
-        bl1 = ["--bl1", "##/build/%s/firmware/u-boot.bl1.bin" % options.board]
-        bmpblk = ["--bmpblk", "##/build/%s/firmware/bmpblk.bin" % options.board]
-        ecro = ["--ecro", "##/build/%s/firmware/ec.RO.bin" % options.board]
-        ecrw = ["--ec", "##/build/%s/firmware/ec.RW.bin" % options.board]
-        defaults = ["-D"]
-
-    if arch == "x86":
-        seabios = [
-            "--seabios",
-            "##/build/%s/firmware/seabios.cbfs" % options.board,
-        ]
-    else:
-        seabios = []
-
-    if options.sdcard:
-        dest = "sd:."
-    elif arch == "x86":
-        dest = "em100"
-    elif arch == "sandbox":
-        dest = ""
-    else:
-        dest = "usb"
-
-    port = SERVO_PORT.get(options.board, "")
-    if port:
-        servo = ["--servo", "%d" % port]
-
-    if options.flash:
-        flash = ["-F", "spi"]
-
-        # The small builds don't have the command line interpreter so cannot
-        # run the magic flasher script. So use the standard U-Boot in this
-        # case.
-        if options.small:
-            logging.warning("Using standard U-Boot as flasher")
-            flash += ["-U", "##/build/%s/firmware/u-boot.bin" % options.board]
-
-    if options.mmc:
-        flash = ["-F", "sdmmc"]
-
-    if options.verbose:
-        verbose_arg = ["-v", "%s" % options.verbose]
-
-    if options.secure:
-        secure += ["--bootsecure", "--bootcmd", "vboot_twostop"]
-
-    if not options.verified:
-        # Make a small image, without GBB, etc.
-        secure.append("-s")
-
-    if options.kernel:
-        kernel = ["--kernel", "##/build/%s/boot/vmlinuz" % options.board]
-
-    if not options.console:
-        silent = ["--add-config-int", "silent-console", "1"]
-
-    if not options.run:
-        run = ["--bootcmd", "none"]
-
-    if arch != "sandbox" and not in_chroot and servo:
-        if dest == "usb":
-            logging.warning("Image cannot be written to board")
-            dest = ""
-            servo = []
-        elif dest == "em100":
-            logging.warning("Please reset the board manually to boot firmware")
-            servo = []
-
-        if not servo:
-            logging.warning("(sadly dut-control does not work outside chroot)")
-
-    if dest:
-        dest = ["-w", dest]
-    else:
-        dest = []
-
-    soc = SOCS.get(board)
-    if not soc:
-        soc = SOCS.get(uboard, "")
-    dt_name = DEFAULT_DTS.get(options.board, options.board)
-    dts_file = "board/%s/dts/%s%s.dts" % (vendor, soc, dt_name)
-    Log("Device tree: %s" % dts_file)
-
-    if arch == "sandbox":
-        uboot_fname = "%s/u-boot" % outdir
-    else:
-        uboot_fname = "%s/u-boot.bin" % outdir
-
-    if options.ro:
-        # RO U-Boot is passed through as blob 'ro-boot'. We use the standard
-        # ebuild one as RW.
-        # TODO(sjg@chromium.org): Option to build U-Boot a second time to get
-        # a fresh RW U-Boot.
-        logging.warning("Using standard U-Boot for RW")
-        ro_uboot = ["--add-blob", "ro-boot", uboot_fname]
-        uboot_fname = "##/build/%s/firmware/u-boot.bin" % options.board
-    cbf = [
-        "%s/platform/dev/host/cros_bundle_firmware" % src_root,
-        "-b",
-        options.board,
-        "-d",
-        dts_file,
-        "-I",
-        "arch/%s/dts" % arch,
-        "-I",
-        "cros/dts",
-        "-u",
-        uboot_fname,
-        "-O",
-        "%s/out" % outdir,
-        "-M",
-        family,
-    ]
-
-    for other in [
-        bl1,
-        bl2,
-        bmpblk,
-        defaults,
-        dest,
-        ecro,
-        ecrw,
-        flash,
-        kernel,
-        run,
-        seabios,
-        secure,
-        servo,
-        silent,
-        verbose_arg,
-        ro_uboot,
-    ]:
-        if other:
-            cbf += other
-    if options.cbfargs:
-        for item in options.cbfargs:
-            cbf += item.split(" ")
-    os.environ["PYTHONPATH"] = "%s/platform/dev/host/lib:%s/.." % (
-        src_root,
-        src_root,
-    )
-    Log(" ".join(cbf))
-    result = cros_build_lib.run(cbf, **kwargs)
-    if result.returncode:
-        cros_build_lib.Die("cros_bundle_firmware failed")
-
-    if not dest or not result.returncode:
-        logging.info("Image is available at %s/out/image.bin", outdir)
-    else:
-        if result.returncode:
-            cros_build_lib.Die("Failed to write image to board")
-        else:
-            logging.info(
-                "Image written to board with %s", " ".join(dest + servo)
-            )
-
-
 def main(argv):
-    """Main function for script to build/write firmware.
+    """Main function for script to build firmware.
 
     Args:
       argv: Program arguments.
@@ -869,9 +614,6 @@ def main(argv):
 
     with parallel.BackgroundTaskRunner(Dumper) as queue:
         RunBuild(options, base, options.target, queue)
-
-        if options.write:
-            WriteFirmware(options)
 
         if options.objdump:
             Log("Writing diasssembly files")
