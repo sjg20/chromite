@@ -63,8 +63,13 @@ class PayloadApiTests(
         )
 
         self.result = payload_pb2.GenerationResponse(
-            local_path="/tmp/aohiwdadoi/delta.bin",
-            remote_uri="gs://something",
+            versioned_artifacts=[
+                payload_pb2.GenerationResponse.VersionedArtifact(
+                    version=1,
+                    local_path="/tmp/aohiwdadoi/delta.bin",
+                    remote_uri="gs://something",
+                )
+            ]
         )
 
         self.PatchObject(
@@ -84,7 +89,7 @@ class PayloadApiTests(
         # Deep patch the paygen lib, this is a full run through service as well.
         patch_obj = self.PatchObject(paygen_payload_lib, "PaygenPayload")
         patch_obj.return_value.Run.return_value = {
-            1: ("/local/foo", "gs://something")
+            1: ("/tmp/aohiwdadoi/delta.bin", "gs://something")
         }
         res = payload.GeneratePayload(self.req, self.result, self.api_config)
         self.assertEqual(res, controller.RETURN_CODE_SUCCESS)
@@ -113,7 +118,7 @@ class PayloadApiTests(
         """Test a miniOS paygen request."""
         patch = self.PatchObject(paygen_payload_lib, "PaygenPayload")
         patch.return_value.Run.return_value = {
-            1: ("/local/foo", "gs://minios/something")
+            1: ("/tmp/aohiwdadoi/delta.bin", "gs://minios/something")
         }
         res = payload.GeneratePayload(
             self.minios_req, self.result, self.api_config

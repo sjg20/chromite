@@ -4,7 +4,7 @@
 
 """Payload API Service."""
 
-from typing import TYPE_CHECKING
+from typing import Dict, Tuple, TYPE_CHECKING
 
 from chromite.api import controller
 from chromite.api import faux
@@ -114,17 +114,17 @@ def GeneratePayload(
         return controller.RETURN_CODE_VALID_INPUT
 
     # Do payload generation.
-    local_path, remote_uri = "", ""
+    artifacts = {}
     try:
-        local_path, remote_uri = payload_config.GeneratePayload()
+        artifacts = payload_config.GeneratePayload()
     except paygen_payload_lib.PayloadGenerationSkippedException as e:
         # If paygen was skipped, provide a reason if possible.
         if isinstance(e, paygen_payload_lib.NoMiniOSPartitionException):
             reason = payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE
             output_proto.failure_reason = reason
 
-    _SetGeneratePayloadOutputProto(output_proto, local_path, remote_uri)
-    if remote_uri or input_proto.dryrun and local_path:
+    _SetGeneratePayloadOutputProto(output_proto, artifacts)
+    if _SuccessfulPaygen(artifacts, input_proto.dryrun):
         return controller.RETURN_CODE_SUCCESS
     elif output_proto.failure_reason:
         return controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE
@@ -132,17 +132,37 @@ def GeneratePayload(
         return controller.RETURN_CODE_COMPLETED_UNSUCCESSFULLY
 
 
+def _SuccessfulPaygen(
+    artifacts: Dict[int, Tuple[str, str]], dryrun: bool
+) -> bool:
+    """Check to see if the payload generation was successful.
+
+    Args:
+        artifacts: a dict containing an artifact tuple keyed by its
+            version. Artifacts tuple is (local_path, remote_uri).
+        dryrun: whether or not this was a dry run job.
+    """
+    if not artifacts:
+        return False
+    for _, artifact in artifacts.items():
+        if not (artifact[1] or dryrun and artifact[0]):
+            return False
+    return True
+
+
 def _SetGeneratePayloadOutputProto(
     output_proto: payload_pb2.GenerationResponse,
-    local_path: str,
-    remote_uri: str,
+    artifacts: Dict[int, Tuple[str, str]],
 ):
     """Set the output proto with the results from the service class.
 
     Args:
         output_proto: The output proto.
-        local_path: set output_proto with the local path, or ''.
-        remote_uri: set output_proto with the remote uri, or ''.
+        artifacts: a dict containing an artifact tuple keyed by its
+            version. Artifacts tuple is (local_path, remote_uri).
     """
-    output_proto.local_path = local_path or ""
-    output_proto.remote_uri = remote_uri or ""
+    for version, artifact in artifacts.items():
+        versioned_artifact = output_proto.versioned_artifacts.add()
+        versioned_artifact.version = version
+        versioned_artifact.local_path = artifact[0] or ""
+        versioned_artifact.remote_uri = artifact[1] or ""

@@ -6,7 +6,7 @@
 
 from copy import deepcopy
 import re
-from typing import Optional, Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 from chromite.api.gen.chromite.api import payload_pb2
 from chromite.api.gen.chromiumos import common_pb2
@@ -115,15 +115,16 @@ class PayloadConfig(object):
         if self.upload:
             self.payload.uri = paygen_build_lib.DefaultPayloadUri(self.payload)
 
-    def GeneratePayload(self) -> Tuple[str, str]:
+    def GeneratePayload(self) -> Dict[int, Tuple[str, str]]:
         """Do payload generation (& maybe sign) on Google Storage CrOS images.
 
         Returns:
-            A tuple of containing:
+            A dict containing tuples of the following format:
                 The location of the local generated artifact.
                     (e.g. /tmp/wdjaio/delta.bin)
                 The remote location that the payload was uploaded or None.
                     (e.g. 'gs://cr/beta-channel/coral/12345.0.1/payloads/...')
+            Keyed by a version number.
 
         Raises:
             paygen_payload_lib.PayloadGenerationSkippedException: If paygen was
@@ -152,11 +153,7 @@ class PayloadConfig(object):
             #     2: (local_path, remote_uri),
             #     ...
             # }
-            d = self.paygen.Run()
-
-            # TODO(b/268365767): Take just the first element, rubik team to
-            # propagate others.
-            return d[1]
+            return self.paygen.Run()
 
 
 def _ImageTypeToStr(image_type_n: int) -> str:
