@@ -153,7 +153,7 @@ def UploadPrebuilts(
 
     if category == constants.CHROOT_BUILDER_TYPE:
         extra_args.extend(["--sync-host", "--upload-board-tarball"])
-        tarball_location = os.path.join(buildroot, "built-sdk.tar.xz")
+        tarball_location = os.path.join(buildroot, constants.SDK_TARBALL_NAME)
         extra_args.extend(["--prepackaged-tarball", tarball_location])
 
         # Find toolchain overlay tarballs of the form

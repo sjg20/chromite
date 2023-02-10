@@ -68,12 +68,13 @@ GE_BUILD_CONFIG_FILE = os.path.join(
     CHROMITE_DIR, "config", "ge_build_config.json"
 )
 
-# The following define the location for storing toolchain packages and
 # SDK overlay tarballs created during SDK builder runs. The paths are relative
 # to the build root's chroot, which guarantees that they are reachable from it
 # and get cleaned up when it is removed.
 SDK_TOOLCHAINS_OUTPUT = "tmp/toolchain-pkgs"
 SDK_OVERLAYS_OUTPUT = "tmp/sdk-overlays"
+# The filename of the SDK tarball created during SDK builder runs.
+SDK_TARBALL_NAME = "built-sdk.tar.xz"
 
 AUTOTEST_BUILD_PATH = "usr/local/build/autotest"
 UNITTEST_PKG_PATH = "test-packages"
@@ -83,7 +84,7 @@ LSB_RELEASE_PATH = "/etc/lsb-release"
 
 HOME_DIRECTORY = os.path.expanduser("~")
 
-# If cbuiltbot is running on a bot, then the cidb access credentials will be
+# If cbuildbot is running on a bot, then the cidb access credentials will be
 # available here. This directory will not exist otherwise.
 CIDB_PROD_BOT_CREDS = os.path.join(
     HOME_DIRECTORY, ".cidb_creds", "prod_cidb_bot"

@@ -113,9 +113,9 @@ class SDKPackageStageTest(
         self.PatchObject(sdk_stages.SDKPackageStage, "_SendPerfValues")
 
         self._Prepare("chromiumos-sdk")
-        fake_tarball = os.path.join(self.build_root, "built-sdk.tar.xz")
+        fake_tarball = os.path.join(self.build_root, constants.SDK_TARBALL_NAME)
         fake_manifest = os.path.join(
-            self.build_root, "built-sdk.tar.xz.Manifest"
+            self.build_root, f"{constants.SDK_TARBALL_NAME}.Manifest"
         )
 
         self.PatchObject(

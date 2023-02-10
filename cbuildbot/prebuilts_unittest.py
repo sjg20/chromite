@@ -106,7 +106,7 @@ class PrebuiltTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertCommandContains(
             [
                 "--prepackaged-tarball",
-                os.path.join(self._buildroot, "built-sdk.tar.xz"),
+                os.path.join(self._buildroot, constants.SDK_TARBALL_NAME),
             ]
         )
 

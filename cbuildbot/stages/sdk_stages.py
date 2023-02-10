@@ -26,9 +26,6 @@ from chromite.scripts import upload_prebuilts
 # incremented for major format changes.
 PACKAGE_MANIFEST_VERSION = "1"
 
-# Names of various packaged artifacts.
-SDK_TARBALL_NAME = "built-sdk.tar.xz"
-
 
 def SdkPerfPath(buildroot):
     """Return the path to the perf file for sdk stages."""
@@ -140,7 +137,9 @@ class SDKPackageStage(
         super().__init__(builder_run, buildstore, **kwargs)
 
     def PerformStage(self):
-        tarball_location = os.path.join(self._build_root, SDK_TARBALL_NAME)
+        tarball_location = os.path.join(
+            self._build_root, constants.SDK_TARBALL_NAME
+        )
         chroot_location = os.path.join(
             self._build_root, constants.DEFAULT_CHROOT_DIR
         )
@@ -265,7 +264,9 @@ class SDKTestStage(generic_stages.BuilderStage):
 
     def PerformStage(self):
         new_chroot_dir = "new-sdk-chroot"
-        tarball_location = os.path.join(self._build_root, SDK_TARBALL_NAME)
+        tarball_location = os.path.join(
+            self._build_root, constants.SDK_TARBALL_NAME
+        )
         new_chroot_args = ["--chroot", new_chroot_dir]
         if self._run.options.chrome_root:
             new_chroot_args += ["--chrome_root", self._run.options.chrome_root]
