@@ -120,11 +120,9 @@ default_board = None
 family = None
 in_chroot = True
 
-logging.basicConfig(format="%(message)s")
 kwargs = {
     "print_cmd": False,
     "check": False,
-    "debug_level": logging.getLogger().getEffectiveLevel(),
 }
 
 outdir = ""
@@ -184,16 +182,6 @@ if os.path.exists(rc_file):
     with open(rc_file) as fp:
         # pylint: disable=exec-used
         exec(compile(fp.read(), rc_file, "exec"))
-
-
-def Log(msg):
-    """Print out a message if we are in verbose mode.
-
-    Args:
-      msg: Message to print
-    """
-    if verbose:
-        logging.info(msg)
 
 
 def Dumper(flag, infile, outfile):
@@ -340,9 +328,7 @@ def SetupBuild(options):
     if not verbose:
         verbose = options.verbose != 0
 
-    logging.getLogger().setLevel(options.verbose)
-
-    Log("Building for %s" % options.board)
+    logging.info("Building for %s", options.board)
 
     # Separate out board_variant string: "peach_pit" becomes "peach", "pit".
     # But don't mess up upstream boards which use _ in their name.
@@ -362,7 +348,7 @@ def SetupBuild(options):
         base_board = "chromeos_%s" % base_board
 
     uboard = UBOARDS.get(base_board, base_board)
-    Log("U-Boot board is %s" % uboard)
+    logging.info("U-Boot board is %s", uboard)
 
     # Pull out some information from the U-Boot boards config file
     family = None
@@ -481,7 +467,7 @@ def RunBuild(options, base, target, queue):
       target: Target to build.
       queue: A parallel queue to add jobs to.
     """
-    Log("U-Boot build flags: %s" % " ".join(base))
+    logging.info("U-Boot build flags: %s", " ".join(base))
 
     # Reconfigure U-Boot.
     if not options.incremental:
@@ -532,7 +518,7 @@ def RunBuild(options, base, target, queue):
             osutils.SafeUnlink(base + ".dis")
             osutils.SafeUnlink(base + ".Dis")
 
-    Log("Output directory %s" % outdir)
+    logging.info("Output directory %s", outdir)
 
 
 def main(argv):
@@ -548,4 +534,4 @@ def main(argv):
         RunBuild(options, base, options.target, queue)
 
         if options.objdump:
-            Log("Writing diasssembly files")
+            logging.info("Writing diasssembly files")
