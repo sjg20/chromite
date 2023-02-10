@@ -5,7 +5,6 @@
 """The payload API is the entry point for payload functionality."""
 
 from copy import deepcopy
-import os
 import re
 from typing import Optional, Tuple, Union
 
@@ -147,11 +146,17 @@ class PayloadConfig(object):
                 cache_dir=self.cache_dir,
             )
 
-            # We run and expect failures to raise, so if we get passed
-            # self.paygen.Run() then it's safe to assume the bin is in place.
-            local_path = os.path.join(temp_dir, "delta.bin")
-            remote_uri = self.paygen.Run()
-            return (local_path, remote_uri)
+            # The return from paygen will look like:
+            # {
+            #     1: (local_path, remote_uri),
+            #     2: (local_path, remote_uri),
+            #     ...
+            # }
+            d = self.paygen.Run()
+
+            # TODO(b/268365767): Take just the first element, rubik team to
+            # propagate others.
+            return d[1]
 
 
 def _ImageTypeToStr(image_type_n: int) -> str:

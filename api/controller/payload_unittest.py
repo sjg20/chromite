@@ -83,7 +83,9 @@ class PayloadApiTests(
         """Check that a call is made successfully."""
         # Deep patch the paygen lib, this is a full run through service as well.
         patch_obj = self.PatchObject(paygen_payload_lib, "PaygenPayload")
-        patch_obj.return_value.Run.return_value = "gs://something"
+        patch_obj.return_value.Run.return_value = {
+            1: ("/local/foo", "gs://something")
+        }
         res = payload.GeneratePayload(self.req, self.result, self.api_config)
         self.assertEqual(res, controller.RETURN_CODE_SUCCESS)
 
@@ -110,7 +112,9 @@ class PayloadApiTests(
     def testMiniOSSuccess(self):
         """Test a miniOS paygen request."""
         patch = self.PatchObject(paygen_payload_lib, "PaygenPayload")
-        patch.return_value.Run.return_value = "gs://minios/something"
+        patch.return_value.Run.return_value = {
+            1: ("/local/foo", "gs://minios/something")
+        }
         res = payload.GeneratePayload(
             self.minios_req, self.result, self.api_config
         )

@@ -166,55 +166,53 @@ class PaygenPayload(object):
         verify=False,
         upload=True,
         cache_dir=None,
+        static=True,
     ):
         """Init for PaygenPayload.
 
         Args:
-          payload: An instance of gspaths.Payload describing the payload to
-            generate.
-          work_dir: A working directory inside the chroot to put temporary files.
-            This can NOT be shared among different runs of PaygenPayload otherwise
-            there would be file collisions. Among the things that may go into this
-            directory are intermediate image files, extracted partitions, different
-            logs and metadata files, the payload itself, postinstall config file,
-            etc.
-          signer: PaygenSigner if payload should be signed, otherwise None.
-          verify: whether the payload should be verified after being generated
-          upload: Boolean saying if payload generation results should be uploaded.
-          cache_dir: If passed, override the default cache dir (useful on bots).
+            payload: An instance of gspaths.Payload describing the payload to
+                generate.
+            work_dir: A working directory inside the chroot to put temporary
+                files. This can NOT be shared among different runs of
+                PaygenPayload otherwise there would be file collisions. Among
+                the things that may go into this directory are intermediate
+                image files, extracted partitions, different logs and metadata
+                files, the payload itself, postinstall config file, etc.
+            signer: PaygenSigner if payload should be signed, otherwise None.
+            verify: whether the payload should be verified after being generated
+            upload: Boolean saying if payload generation results should be
+                uploaded.
+            cache_dir: If passed, override the default cache dir (useful on
+                bots).
+            static: Static local file and upload URI names otherwise random
+                string is added into the file/URI names.
         """
         self.payload = payload
         self.work_dir = work_dir
         self._verify = verify
         self._minor_version = None
         self._upload = upload
-
-        self.src_image_file = os.path.join(work_dir, "src_image.bin")
-        self.tgt_image_file = os.path.join(work_dir, "tgt_image.bin")
+        self.static = static
 
         self.partition_names = None
         self.tgt_partitions = None
         self.src_partitions = None
 
+        # Define properties here to avoid linter warnings.
+        self.metadata_size = 0
+        self.tgt_image_file = None
+        self.src_image_file = None
+
         self._appid = ""
 
-        self.payload_file = os.path.join(work_dir, "delta.bin")
-        self.log_file = os.path.join(work_dir, "delta.log")
-        self.description_file = os.path.join(work_dir, "delta.json")
-        self.metadata_size = 0
-        self.metadata_hash_file = os.path.join(work_dir, "metadata_hash")
-        self.payload_hash_file = os.path.join(work_dir, "payload_hash")
-
-        self._postinst_config_file = os.path.join(work_dir, "postinst_config")
+        # Make linter happy.
+        self._SetupNewFileNames()
 
         # How big will the signatures be.
         self._signature_sizes = [
             str(size) for size in self.PAYLOAD_SIGNATURE_SIZES_BYTES
         ]
-        self.signed_payload_file = self.payload_file + ".signed"
-        self.metadata_signature_file = self._MetadataUri(
-            self.signed_payload_file
-        )
         self.signer = signer
 
         # This cache dir will be shared with other processes, but we need our own
@@ -222,6 +220,39 @@ class PaygenPayload(object):
         cache_dir = cache_dir or self._FindCacheDir()
         self._cache = download_cache.DownloadCache(
             cache_dir, cache_size=PaygenPayload.CACHE_SIZE
+        )
+
+    def _SetupNewFileNames(self):
+        """Initializes files with static names or with random suffixes."""
+        self.rand = not self.static or self.payload.minios
+        rand = f"-{cros_build_lib.GetRandomString()}" if self.rand else ""
+
+        self.src_image_file = os.path.join(
+            self.work_dir, f"src_image{rand}.bin"
+        )
+        self.tgt_image_file = os.path.join(
+            self.work_dir, f"tgt_image{rand}.bin"
+        )
+
+        self.payload_file = os.path.join(self.work_dir, f"delta{rand}.bin")
+        self.log_file = os.path.join(self.work_dir, f"delta{rand}.log")
+        self.description_file = os.path.join(self.work_dir, f"delta{rand}.json")
+
+        self.metadata_size = 0
+        self.metadata_hash_file = os.path.join(
+            self.work_dir, f"metadata_hash{rand}"
+        )
+        self.payload_hash_file = os.path.join(
+            self.work_dir, f"payload_hash{rand}"
+        )
+
+        self._postinst_config_file = os.path.join(
+            self.work_dir, f"postinst_config{rand}"
+        )
+
+        self.signed_payload_file = self.payload_file + ".signed"
+        self.metadata_signature_file = self._MetadataUri(
+            self.signed_payload_file
         )
 
     def _MetadataUri(self, uri):
@@ -428,16 +459,24 @@ class PaygenPayload(object):
         """
         disk = cgpt.Disk.FromImage(image_file)
         try:
-            disk.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
+            parts = disk.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
+            # These are hard enforcements on miniOS partitions now to avoid
+            # payload generation when either A || B partitions aren't set.
+            if len(parts) != 2:
+                logging.info("MiniOS partition count did not match.")
+                return False
         except KeyError:
             return False
         return True
 
-    def _PreparePartitions(self):
+    def _PreparePartitions(self, part_a: bool = True):
         """Prepares parameters related to partitions of the given image.
 
-        This function basically distinguishes between normal platform images and DLC
-        images and creates and checks parameters necessary for each of them.
+        This function basically distinguishes between normal platform images and
+        DLC images and creates and checks parameters necessary for each of them.
+
+        Args:
+            part_a: True to extract default/A partition.
         """
         tgt_image_type = partition_lib.LookupImageType(self.tgt_image_file)
         if self.payload.src_image:
@@ -472,11 +511,13 @@ class PaygenPayload(object):
                 self.partition_names = (self._MINIOS,)
                 self._GetPartitionFiles()
                 partition_lib.ExtractMiniOS(
-                    self.tgt_image_file, self.tgt_partitions[0]
+                    self.tgt_image_file, self.tgt_partitions[0], part_a=part_a
                 )
                 if self.payload.src_image:
                     partition_lib.ExtractMiniOS(
-                        self.src_image_file, self.src_partitions[0]
+                        self.src_image_file,
+                        self.src_partitions[0],
+                        part_a=part_a,
                     )
             else:
                 self.partition_names = (self._ROOTFS, self._KERNEL)
@@ -1067,11 +1108,15 @@ class PaygenPayload(object):
 
         return (payload_signatures, metadata_signatures)
 
-    def _Create(self):
+    def _Create(self, part_a=True):
         """Create a given payload, if it doesn't already exist.
 
+        Args:
+            part_a: True to extract default/A partition.
+
         Raises:
-          PayloadGenerationSkippedException: If paygen was skipped for any reason.
+            PayloadGenerationSkippedException: If paygen was skipped for any
+              reason.
         """
 
         logging.info(
@@ -1122,7 +1167,7 @@ class PaygenPayload(object):
 
             # Setup parameters about the payload like whether it is a DLC or not. Or
             # parameters like the APPID, etc.
-            self._PreparePartitions()
+            self._PreparePartitions(part_a)
 
             # Generate the unsigned payload.
             self._GenerateUnsignedPayload()
@@ -1197,44 +1242,58 @@ class PaygenPayload(object):
         self._RunGeneratorCmd(cmd)
 
     def _UploadResults(self):
-        """Copy the payload generation results to the specified destination."""
+        """Copy the payload generation results to the specified destination.
+
+        Returns:
+            A string uri to uploaded payload.
+        """
 
         if self.payload.uri is None:
             logging.info("Not uploading payload.")
             return
 
-        logging.info("Uploading payload to %s.", self.payload.uri)
+        uri = self.payload.uri
+        if self.rand:
+            split = self.payload.uri.rstrip("/").rpartition("/")
+            split = split[:-1] + (
+                f"{split[-1]}-{cros_build_lib.GetRandomString()}",
+            )
+            uri = "".join(split)
+        logging.info("Uploading payload to %s.", uri)
 
         # Deliver the payload to the final location.
         if self.signer:
-            urilib.Copy(self.signed_payload_file, self.payload.uri)
+            urilib.Copy(self.signed_payload_file, uri)
         else:
-            urilib.Copy(self.payload_file, self.payload.uri)
+            urilib.Copy(self.payload_file, uri)
 
         # Upload payload related artifacts.
-        urilib.Copy(self.log_file, self._LogsUri(self.payload.uri))
-        urilib.Copy(self.description_file, self._JsonUri(self.payload.uri))
+        urilib.Copy(self.log_file, self._LogsUri(uri))
+        urilib.Copy(self.description_file, self._JsonUri(uri))
 
-    def Run(self):
-        """Create, verify and upload the results.
+        return uri
+
+    def _Run(self, part_a: bool = True):
+        """Run* method helper to create, verify, and upload results.
+
+        Args:
+            part_a: True to extract default/A partition.
 
         Returns:
-          A string uri to payload, if uploaded, otherwise None.
+            A tuple of local payload path and remote URI. If not uploaded, the
+            remote URI will be None.
 
         Raises:
-          PayloadGenerationSkippedException: If paygen was skipped for any reason.
+            PayloadGenerationSkippedException: If paygen was skipped for any
+                reason.
         """
-        ret_uri = None
-        logging.info("* Starting payload generation")
-        start_time = datetime.datetime.now()
-
+        self._SetupNewFileNames()
         try:
-            self._Create()
+            self._Create(part_a=part_a)
             if self._verify:
                 self._VerifyPayload()
             if self._upload:
-                self._UploadResults()
-                ret_uri = self.payload.uri
+                ret_uri = self._UploadResults()
         except PayloadGenerationSkippedException as ex:
             if self._verify:
                 print("Not verifying payload, because paygen was skipped.")
@@ -1242,11 +1301,49 @@ class PaygenPayload(object):
                 print("Not uploading payload, because paygen was skipped.")
             raise ex
 
+        return (self.payload_file, ret_uri)
+
+    def Run(self):
+        """Create, verify, and upload the results.
+
+        Returns:
+            A dict() of recovery key to tuple of payload local path and remote
+            URI. Remote URI will be None if it wasn't uploaded.
+
+            The keys will always be a positive integer starting from 1.
+
+            e.g.
+            {
+                1: ("<local_path>", "<remote_path>"),
+                2: ("<local_path>", "<remote_path>"),
+                ...
+            }
+
+        Raises:
+            PayloadGenerationSkippedException: If paygen was skipped for any
+                reason.
+        """
+        logging.info("* Starting payload generation")
+        start_time = datetime.datetime.now()
+
+        if not self.payload.minios:
+            ret = {
+                1: self._Run(),
+            }
+        else:
+            ret = {
+                1: self._Run(part_a=True),
+                2: self._Run(part_a=False),
+            }
+        logging.info(
+            "Generated payload(s): %s", pformat.json(ret, compact=False)
+        )
+
         end_time = datetime.datetime.now()
         logging.info(
             "* Total elapsed payload generation in %s", end_time - start_time
         )
-        return ret_uri
+        return ret
 
 
 def CreateAndUploadPayload(payload, sign=True, verify=True):

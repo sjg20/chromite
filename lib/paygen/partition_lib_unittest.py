@@ -126,5 +126,10 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         self.assertFalse(partition_lib.HasMiniOSPartitions(image))
 
-        self.PatchObject(cgpt.Disk, "GetPartitionByTypeGuid")
+        self.PatchObject(cgpt.Disk, "GetPartitionByTypeGuid", return_value=[])
+        self.assertFalse(partition_lib.HasMiniOSPartitions(image))
+
+        self.PatchObject(
+            cgpt.Disk, "GetPartitionByTypeGuid", return_value=[None, None]
+        )
         self.assertTrue(partition_lib.HasMiniOSPartitions(image))

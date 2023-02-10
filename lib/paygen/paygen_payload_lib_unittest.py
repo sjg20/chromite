@@ -159,6 +159,10 @@ class PaygenLibTest(cros_test_lib.RunCommandTempDirTestCase):
             uri="gs://delta_new_old/boo-test",
         )
 
+        self.PatchObject(
+            cros_build_lib, "GetRandomString", return_value="<random>"
+        )
+
     @classmethod
     def setUpClass(cls):
         cls.cache_dir = tempfile.mkdtemp(prefix="crostools-unittest-cache")
@@ -235,7 +239,7 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
     """PaygenPayloadLib basic (and quick) testing."""
 
     def _GetStdGenerator(
-        self, work_dir=None, payload=None, sign=True, minios=False
+        self, work_dir=None, payload=None, sign=True, minios=False, static=True
     ):
         """Helper function to create a standardized PayloadGenerator."""
         if payload is None:
@@ -252,7 +256,11 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
             signer_mock.public_key = None
 
         gen = paygen_payload_lib.PaygenPayload(
-            payload=payload, work_dir=work_dir, signer=signer_mock, verify=False
+            payload=payload,
+            work_dir=work_dir,
+            signer=signer_mock,
+            verify=False,
+            static=static,
         )
 
         gen.partition_names = ("foo-root", "foo-kernel")
@@ -262,7 +270,7 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         return gen
 
     def testWorkingDirNames(self):
-        """Make sure that some of the files we create have the expected names."""
+        """Make sure that files we create have the expected names."""
         gen = self._GetStdGenerator(work_dir="/foo")
 
         self.assertEqual(gen.src_image_file, "/foo/src_image.bin")
@@ -275,6 +283,42 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         self.assertEqual(
             gen.metadata_signature_file,
             "/foo/delta.bin.signed.metadata-signature",
+        )
+
+    def testWorkingDirNamesNonStatic(self):
+        """Make sure that files we create have the expected names."""
+        gen = self._GetStdGenerator(work_dir="/foo", static=False)
+
+        self.assertEqual(gen.src_image_file, "/foo/src_image-<random>.bin")
+        self.assertEqual(gen.tgt_image_file, "/foo/tgt_image-<random>.bin")
+        self.assertEqual(gen.payload_file, "/foo/delta-<random>.bin")
+        self.assertEqual(gen.log_file, "/foo/delta-<random>.log")
+
+        # Siged image specific values.
+        self.assertEqual(
+            gen.signed_payload_file, "/foo/delta-<random>.bin.signed"
+        )
+        self.assertEqual(
+            gen.metadata_signature_file,
+            "/foo/delta-<random>.bin.signed.metadata-signature",
+        )
+
+    def testWorkingDirNamesMiniOS(self):
+        """Make sure that files we create have the expected names."""
+        gen = self._GetStdGenerator(work_dir="/foo", minios=True)
+
+        self.assertEqual(gen.src_image_file, "/foo/src_image-<random>.bin")
+        self.assertEqual(gen.tgt_image_file, "/foo/tgt_image-<random>.bin")
+        self.assertEqual(gen.payload_file, "/foo/delta-<random>.bin")
+        self.assertEqual(gen.log_file, "/foo/delta-<random>.log")
+
+        # Siged image specific values.
+        self.assertEqual(
+            gen.signed_payload_file, "/foo/delta-<random>.bin.signed"
+        )
+        self.assertEqual(
+            gen.metadata_signature_file,
+            "/foo/delta-<random>.bin.signed.metadata-signature",
         )
 
     def testUriManipulators(self):
@@ -578,7 +622,7 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         # Check extract partition function is called correctly.
         self.assertEqual(len(gen.tgt_partitions), 1)
         minios_ext_mock.assert_called_once_with(
-            tgt_image_file, gen.tgt_partitions[0]
+            tgt_image_file, gen.tgt_partitions[0], part_a=True
         )
         # Checks we mounted the image and read the lsb-release file correctly.
         params_mock.assert_called_once_with(tgt_image_file)
@@ -1110,6 +1154,100 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
                 mock.call("/work/delta.bin", "gs://full_old_foo/boo"),
                 mock.call("/work/delta.log", "gs://full_old_foo/boo.log"),
                 mock.call("/work/delta.json", "gs://full_old_foo/boo.json"),
+            ],
+        )
+
+    def testUploadResultsNonStatic(self):
+        """Test the overall payload generation process."""
+        gen_sign = self._GetStdGenerator(
+            work_dir="/work", sign=True, static=False
+        )
+        gen_nosign = self._GetStdGenerator(
+            work_dir="/work", sign=False, static=False
+        )
+
+        # Set up stubs.
+        copy_mock = self.PatchObject(urilib, "Copy")
+
+        # Run the test.
+        gen_sign._UploadResults()
+        gen_nosign._UploadResults()
+
+        self.assertEqual(
+            copy_mock.call_args_list,
+            [
+                # Check signed calls.
+                mock.call(
+                    "/work/delta-<random>.bin.signed",
+                    "gs://full_old_foo/boo-<random>",
+                ),
+                mock.call(
+                    "/work/delta-<random>.log",
+                    "gs://full_old_foo/boo-<random>.log",
+                ),
+                mock.call(
+                    "/work/delta-<random>.json",
+                    "gs://full_old_foo/boo-<random>.json",
+                ),
+                # Check unsigned calls.
+                mock.call(
+                    "/work/delta-<random>.bin", "gs://full_old_foo/boo-<random>"
+                ),
+                mock.call(
+                    "/work/delta-<random>.log",
+                    "gs://full_old_foo/boo-<random>.log",
+                ),
+                mock.call(
+                    "/work/delta-<random>.json",
+                    "gs://full_old_foo/boo-<random>.json",
+                ),
+            ],
+        )
+
+    def testUploadResultsForMiniOS(self):
+        """Test the overall payload generation process."""
+        gen_sign = self._GetStdGenerator(
+            work_dir="/work", sign=True, minios=True
+        )
+        gen_nosign = self._GetStdGenerator(
+            work_dir="/work", sign=False, minios=True
+        )
+
+        # Set up stubs.
+        copy_mock = self.PatchObject(urilib, "Copy")
+
+        # Run the test.
+        gen_sign._UploadResults()
+        gen_nosign._UploadResults()
+
+        self.assertEqual(
+            copy_mock.call_args_list,
+            [
+                # Check signed calls.
+                mock.call(
+                    "/work/delta-<random>.bin.signed",
+                    "gs://full_old_foo/boo-<random>",
+                ),
+                mock.call(
+                    "/work/delta-<random>.log",
+                    "gs://full_old_foo/boo-<random>.log",
+                ),
+                mock.call(
+                    "/work/delta-<random>.json",
+                    "gs://full_old_foo/boo-<random>.json",
+                ),
+                # Check unsigned calls.
+                mock.call(
+                    "/work/delta-<random>.bin", "gs://full_old_foo/boo-<random>"
+                ),
+                mock.call(
+                    "/work/delta-<random>.log",
+                    "gs://full_old_foo/boo-<random>.log",
+                ),
+                mock.call(
+                    "/work/delta-<random>.json",
+                    "gs://full_old_foo/boo-<random>.json",
+                ),
             ],
         )
 

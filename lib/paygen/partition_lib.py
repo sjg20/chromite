@@ -129,14 +129,19 @@ def ExtractRoot(image, root_out, truncate=True):
         raise IOError("Error truncating the rootfs to filesystem size.")
 
 
-def ExtractMiniOS(image, minios_out):
+def ExtractMiniOS(image, minios_out, part_a: bool = True):
     """Extract the minios partition from a gpt image.
 
     Args:
-      image: The input image file.
-      minios_out: The output minios partition file.
+        image: The input image file.
+        minios_out: The output minios partition file.
+        part_a: True to extract A partition.
     """
-    ExtractPartition(image, constants.PART_MINIOS_A, minios_out)
+    ExtractPartition(
+        image,
+        constants.PART_MINIOS_A if part_a else constants.PART_MINIOS_B,
+        minios_out,
+    )
 
 
 def IsGptImage(image):
@@ -175,7 +180,12 @@ def HasMiniOSPartitions(image):
     """
     try:
         disk = cgpt.Disk.FromImage(image)
-        disk.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
+        parts = disk.GetPartitionByTypeGuid(cgpt.MINIOS_TYPE_GUID)
+        if len(parts) != 2:
+            logging.error(
+                "MiniOS should have two partitions, only found: %s", len(parts)
+            )
+            return False
         return True
     except KeyError:
         return False

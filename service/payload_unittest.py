@@ -18,7 +18,9 @@ class PayloadServiceTest(cros_test_lib.MockTestCase):
     def setUp(self):
         """Set up a payload test with the Run method mocked."""
         self.PatchObject(
-            paygen_payload_lib.PaygenPayload, "Run", return_value=None
+            paygen_payload_lib.PaygenPayload,
+            "Run",
+            return_value={1: ("/foo/path", None)},
         )
 
         # Common build defs.
