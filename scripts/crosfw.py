@@ -140,7 +140,6 @@ uboard = ""
 default_board = "peach_pit"
 use_ccache = False
 vendor = None
-verbose = False
 
 # Special cases for the U-Boot board config, the SOCs and default device tree
 # since the naming is not always consistent.
@@ -220,7 +219,9 @@ def ParseCmdline(argv):
     Returns:
       The parsed options object
     """
-    parser = commandline.ArgumentParser(description=__doc__)
+    parser = commandline.ArgumentParser(
+        description=__doc__, default_log_level="notice"
+    )
     parser.add_argument(
         "-B",
         "--build",
@@ -323,10 +324,7 @@ def SetupBuild(options):
       Base flags to use for U-Boot, as a list.
     """
     # pylint: disable=global-statement
-    global arch, board, compiler, family, outdir, smdk, uboard, vendor, verbose
-
-    if not verbose:
-        verbose = options.verbose != 0
+    global arch, board, compiler, family, outdir, smdk, uboard, vendor
 
     logging.info("Building for %s", options.board)
 
@@ -426,10 +424,11 @@ def SetupBuild(options):
         "QEMU_ARCH=",
     ]
 
-    if options.verbose < 2:
-        base.append("-s")
-    elif options.verbose > 2:
+    # Enable quiet output at INFO level, everything at DEBUG level
+    if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
         base.append("V=1")
+    elif logging.getLogger().getEffectiveLevel() >= logging.NOTICE:
+        base.append("-s")
 
     if options.verified:
         base += [
