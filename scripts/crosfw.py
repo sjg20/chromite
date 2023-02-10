@@ -123,6 +123,7 @@ in_chroot = True
 kwargs = {
     "print_cmd": False,
     "check": False,
+    "encoding": "utf-8",
 }
 
 outdir = ""
@@ -399,7 +400,6 @@ def SetupBuild(options):
         result = cros_build_lib.run(
             ["buildman", "-A", "--boards", options.board],
             capture_output=True,
-            encoding="utf-8",
             **kwargs,
         )
         compiler = result.stdout.strip()
@@ -471,7 +471,7 @@ def RunBuild(options, base, target, queue):
     # Reconfigure U-Boot.
     if not options.incremental:
         # Ignore any error from this, some older U-Boots fail on this.
-        cros_build_lib.run(base + ["distclean"], **kwargs)
+        cros_build_lib.run(base + ["distclean"], capture_output=True, **kwargs)
         if os.path.exists("tools/genboardscfg.py"):
             mtarget = "defconfig"
         else:
@@ -480,22 +480,29 @@ def RunBuild(options, base, target, queue):
         result = cros_build_lib.run(
             cmd, stdout=True, stderr=subprocess.STDOUT, **kwargs
         )
-        if result.returncode:
-            print("cmd: '%s', output: '%s'" % (result.cmdstr, result.stdout))
-            sys.exit(result.returncode)
+        if (
+            result.returncode
+            or logging.getLogger().getEffectiveLevel() <= logging.DEBUG
+        ):
+            print(f"cmd: {result.cmdstr}")
+            print(result.stdout, file=sys.stderr)
+            if result.returncode:
+                sys.exit(result.returncode)
 
     # Do the actual build.
     if options.build:
         result = cros_build_lib.run(
             base + [target], stdout=True, stderr=subprocess.STDOUT, **kwargs
         )
-        if result.returncode:
+        if (
+            result.returncode
+            or logging.getLogger().getEffectiveLevel() <= logging.INFO
+        ):
             # The build failed, so output the results to stderr.
-            print(
-                "cmd: '%s', output: '%s'" % (result.cmdstr, result.stdout),
-                file=sys.stderr,
-            )
-            sys.exit(result.returncode)
+            print(f"cmd: {result.cmdstr}")
+            print(result.stdout, file=sys.stderr)
+            if result.returncode:
+                sys.exit(result.returncode)
 
     files = ["%s/u-boot" % outdir]
     spl = glob.glob("%s/spl/u-boot-spl" % outdir)
