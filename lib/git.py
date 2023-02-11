@@ -1305,6 +1305,54 @@ def LsFiles(
     return [Path(x) for x in output.split("\0") if x]
 
 
+class LsTreeEntry(NamedTuple):
+    """An entry from git-ls-tree."""
+
+    name: Path
+    is_exec: bool
+    is_file: bool
+    is_symlink: bool
+
+    # Each line will be:
+    # <mode><space><type><space><hash><tab><file><NUL>
+    _RE_SPLIT_LINE = re.compile(r"^([0-9]+)[^\t]+\t([^\0]+)\0?$")
+
+    @classmethod
+    def from_line(cls, line: str) -> "LsTreeEntry":
+        """Convert a single line from git-ls-tree output to an entry."""
+        m = cls._RE_SPLIT_LINE.match(line)
+        mode = m.group(1)
+        return cls(
+            Path(m.group(2)),
+            is_exec=mode == "100755",
+            is_file=mode != "120000",
+            is_symlink=mode == "120000",
+        )
+
+
+def LsTree(
+    cwd: Optional[Union[os.PathLike, str]] = None,
+    commit: str = "",
+    files: Iterable[Union[os.PathLike, str]] = (),
+) -> List[LsTreeEntry]:
+    """Do a git ls-tree.
+
+    Args:
+        cwd: The directory to run from.  Note that ls-tree is sensitive to the
+            working directory, and will behave differently at the base of a repo
+            versus in a subdirectory.
+        commit: The commit to analyze.
+        files: Files to show.  If no files are given, all files are shown.
+
+    Returns:
+        The list of paths from ls-tree.
+    """
+    output = RunGit(
+        cwd, ["ls-tree", "-r", "-z", "--", commit, "--", *files]
+    ).stdout
+    return [LsTreeEntry.from_line(x) for x in output.split("\0")[:-1]]
+
+
 # pylint: enable=redefined-builtin
 
 

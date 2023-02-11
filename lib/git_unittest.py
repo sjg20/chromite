@@ -6,6 +6,7 @@
 
 import errno
 import os
+from pathlib import Path
 import shutil
 import unittest
 from unittest import mock
@@ -152,6 +153,44 @@ Change-Id: %s
         self.assertCommandContains(["--exclude-standard"])
         self.assertCommandContains(["--cached"])
         self.assertCommandContains(["--", *files])
+
+    def testLsTree(self):
+        files = ["exec.sh", "file.txt", "sym"]
+        self.rc.AddCmdResult(
+            partial_mock.In("ls-tree"),
+            stdout=(
+                "100755 blob 6a80f36980ec5de2357b7316a57559152af409fd\texec.sh\0"
+                "100644 blob 5c7d9bdc60697775b63c8b04de64cc67f4eeba5c\tfile.txt\0"
+                "120000 blob 702f5b64cc06d3ccc44e840c1e0714c043978c83\tsym\0"
+            ),
+        )
+        ret = git.LsTree(cwd=self.fake_path, commit="HEAD", files=files)
+        self.assertCommandContains(["ls-tree", "-r", "-z"])
+        self.assertCommandContains(["--", "HEAD", "--"])
+        self.assertCommandContains(["--", *files])
+        self.assertEqual(
+            ret,
+            [
+                git.LsTreeEntry(
+                    name=Path("exec.sh"),
+                    is_exec=True,
+                    is_file=True,
+                    is_symlink=False,
+                ),
+                git.LsTreeEntry(
+                    name=Path("file.txt"),
+                    is_exec=False,
+                    is_file=True,
+                    is_symlink=False,
+                ),
+                git.LsTreeEntry(
+                    name=Path("sym"),
+                    is_exec=False,
+                    is_file=False,
+                    is_symlink=True,
+                ),
+            ],
+        )
 
     def testAddPath(self):
         git.AddPath(self.fake_path)

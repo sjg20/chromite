@@ -15,10 +15,11 @@ import logging
 import os
 from pathlib import Path
 import re
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional
 
 from chromite.cli import command
 from chromite.format import formatters
+from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
@@ -157,15 +158,19 @@ def _Dispatcher(
     _debug: bool,
     diff: bool,
     dryrun: bool,
+    commit: Optional[str],
     tool: Callable,
     path: Path,
 ) -> int:
     """Call |tool| on |path| and take care of coalescing exit codes."""
-    try:
-        old_data = osutils.ReadFile(path)
-    except UnicodeDecodeError:
-        logging.error("%s: file is not UTF-8 compatible", path)
-        return 1
+    if commit:
+        old_data = git.RunGit(None, ["show", f"{commit}:{path}"]).stdout
+    else:
+        try:
+            old_data = osutils.ReadFile(path)
+        except UnicodeDecodeError:
+            logging.error("%s: file is not UTF-8 compatible", path)
+            return 1
     new_data = tool(old_data, path=path)
     if new_data == old_data:
         return 0
@@ -182,7 +187,7 @@ def _Dispatcher(
                     new_data.splitlines(),
                     fromfile=f"a/{path}",
                     tofile=f"b/{path}",
-                    fromfiledate="(original)",
+                    fromfiledate=f"({commit})" if commit else "(original)",
                     tofiledate="(formatted)",
                     lineterm="",
                 )
@@ -245,6 +250,11 @@ Supported file names: %s
             help="Format files inplace (default)",
         )
         parser.add_argument(
+            "--commit",
+            type=str,
+            help="Use files from git commit instead of on disk.",
+        )
+        parser.add_argument(
             "files",
             nargs="*",
             type=Path,
@@ -266,11 +276,18 @@ Supported file names: %s
         # Ignore symlinks.
         files = []
         syms = []
-        for f in path_util.ExpandDirectories(self.options.files):
-            if f.is_symlink():
-                syms.append(f)
-            else:
-                files.append(f)
+        if self.options.commit:
+            for f in git.LsTree(None, self.options.commit, self.options.files):
+                if f.is_symlink:
+                    syms.append(f.name)
+                else:
+                    files.append(f.name)
+        else:
+            for f in path_util.ExpandDirectories(self.options.files):
+                if f.is_symlink():
+                    syms.append(f)
+                else:
+                    files.append(f)
         if syms:
             logging.info("Ignoring symlinks: %s", syms)
 
@@ -286,6 +303,7 @@ Supported file names: %s
             self.options.debug,
             self.options.diff,
             self.options.dryrun,
+            self.options.commit,
         )
 
         # If we filtered out all files, do nothing.
