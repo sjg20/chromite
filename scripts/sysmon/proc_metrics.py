@@ -19,6 +19,9 @@ logger = logging.getLogger(__name__)
 _count_metric = metrics.GaugeMetric(
     "proc/count", description="Number of processes currently running."
 )
+_thread_count_metric = metrics.GaugeMetric(
+    "proc/thread_count", description="Number of threads currently running."
+)
 _cpu_percent_metric = metrics.GaugeMetric(
     "proc/cpu_percent", description="CPU usage percent of processes."
 )
@@ -121,6 +124,7 @@ class _ProcessMetric(object):
         }
         self._test_func = test_func
         self._count = 0
+        self._thread_count = 0
         self._cpu_percent = 0
 
     def add(self, proc):
@@ -131,6 +135,7 @@ class _ProcessMetric(object):
         if not self._test_func(proc):
             return False
         self._count += 1
+        self._thread_count += proc.num_threads()
         self._cpu_percent += proc.cpu_percent()
         return True
 
@@ -138,6 +143,10 @@ class _ProcessMetric(object):
         """Finish collection and send metrics."""
         _count_metric.set(self._count, fields=self._fields)
         self._count = 0
+
+        _thread_count_metric.set(self._thread_count, fields=self._fields)
+        self._thread_count = 0
+
         _cpu_percent_metric.set(
             int(round(self._cpu_percent)), fields=self._fields
         )

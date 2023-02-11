@@ -16,10 +16,11 @@ from chromite.lib import cros_test_lib
 from chromite.scripts.sysmon import proc_metrics
 
 
-def _mock_process(name, cmdline, parent=None):
+def _mock_process(name, cmdline, parent=None, num_threads=10):
     proc = mock.Mock(dir(psutil.Process))
     proc.name.return_value = name
     proc.cmdline.return_value = cmdline
+    proc.num_threads.return_value = num_threads
     proc.cpu_percent.return_value = 2
     if parent is not None:
         proc.parent.return_value = parent
@@ -35,6 +36,7 @@ def _expected_calls_for(name):
     """Return expected calls for a process metric."""
     return [
         mock.call("proc/count", (name,), None, 1, enforce_ge=mock.ANY),
+        mock.call("proc/thread_count", (name,), None, 10, enforce_ge=mock.ANY),
         mock.call("proc/cpu_percent", (name,), None, 2, enforce_ge=mock.ANY),
     ]
 
