@@ -179,6 +179,15 @@ def _PylintFile(path, output_format, debug, _relaxed: bool):
     return _ToolRunCommand(cmd, debug, extra_env=extra_env)
 
 
+def _GnlintFile(path, _, debug, _relaxed: bool):
+    """Returns result of running gnlint on |path|."""
+    gnlint = os.path.join(
+        constants.SOURCE_ROOT, "src", "platform2", "common-mk", "gnlint.py"
+    )
+    cmd = [gnlint, path]
+    return _ToolRunCommand(cmd, debug)
+
+
 def _GolintFile(path, _, debug, _relaxed: bool):
     """Returns result of running golint on |path|."""
     # Try using golint if it exists.
@@ -424,6 +433,7 @@ _EXT_TOOL_MAP = {
     frozenset({".c"}): (_WhitespaceLintFile, _NonExecLintFile),
     frozenset({".cc", ".cpp", ".h"}): (_CpplintFile, _NonExecLintFile),
     frozenset({".conf", ".conf.in"}): (_ConfLintFile, _NonExecLintFile),
+    frozenset({".gn", ".gni"}): (_GnlintFile, _NonExecLintFile),
     frozenset({".json"}): (_JsonLintFile, _NonExecLintFile),
     frozenset({".py"}): (_PylintFile,),
     frozenset({".go"}): (_GolintFile, _NonExecLintFile),
@@ -458,6 +468,7 @@ _EXT_TOOL_MAP = {
 
 # Map known filenames to a tool function.
 _FILENAME_PATTERNS_TOOL_MAP = {
+    frozenset({".gn"}): (_GnlintFile, _NonExecLintFile),
     frozenset({"DIR_METADATA"}): (_DirMdLintFile, _NonExecLintFile),
     frozenset({"OWNERS*"}): (_OwnersLintFile, _NonExecLintFile),
 }
