@@ -20,20 +20,17 @@ The script is normally run from within the U-Boot directory which is
 
 Example 1: Build upstream image for coreboot and write to a 'link':
 
- crosfw -b link
+ crosfw link
 
-Example 2: Build verified boot image (V) for daisy/snow and boot in secure
- mode (S) so that breaking in on boot is not possible.
+Example 2: Build verified boot image (V) for daisy/snow.
 
- crosfw -b daisy -VS
- crosfw -b daisy -VSC         (no console output)
+ crosfw daisy -V
 
-Example 3: Build a magic flasher (F) with full verified boot for peach_pit,
- but with console enabled, write to SD card (x)
+You can force a reconfigure with -f and a full distclean with -F.
 
- crosfw -b peach_pit -VSFx
+To increase verbosity use the -v and --debug options.
 
-This sript does not use an ebuild. It does a similar thing to the
+This script does not use an ebuild. It does a similar thing to the
 chromeos-u-boot ebuild, and runs cros_bundle_firmware to produce various
 types of image, a little like the chromeos-bootimage ebuild.
 
@@ -43,7 +40,7 @@ device tree files or lots of USE flags and complexity in the ebuilds.
 
 This script has been tested with snow, link and peach_pit. It builds for
 peach_pit by default. Note that it will also build any upstream ARM
-board - e.g. "-b snapper9260" will build an image for that board.
+board - e.g. "snapper9260" will build an image for that board.
 
 Mostly you can use the script inside and outside the chroot. The main
 limitation is that dut-control doesn't really work outside the chroot,
@@ -237,11 +234,18 @@ def ParseCmdline(argv):
         help="Select name of device tree file to use",
     )
     parser.add_argument(
-        "-i",
-        "--incremental",
+        "-f",
+        "--force-reconfig",
         action="store_true",
         default=False,
-        help="Don't reconfigure and clean",
+        help="Reconfigure before building",
+    )
+    parser.add_argument(
+        "-F",
+        "--force-distclean",
+        action="store_true",
+        default=False,
+        help="Run distclean and reconfigure before building",
     )
     parser.add_argument(
         "-O",
@@ -406,9 +410,6 @@ def SetupBuild(options):
         if not compiler:
             cros_build_lib.Die("Selected arch '%s' not supported.", arch)
 
-    if not options.build:
-        options.incremental = True
-
     cpus = multiprocessing.cpu_count()
 
     outdir = os.path.join(OUT_DIR, uboard)
@@ -444,11 +445,11 @@ def SetupBuild(options):
     if options.trace:
         base.append("FTRACE=1")
 
-    if options.incremental:
+    if not options.force_reconfig:
         config_mk = "%s/include/autoconf.mk" % outdir
         if not os.path.exists(config_mk):
-            logging.warning("No build found for %s - dropping -i", board)
-            options.incremental = False
+            logging.warning("No build found for %s - adding -f", board)
+            options.force_reconfig = True
 
     config_mk = "include/autoconf.mk"
     if os.path.exists(config_mk):
@@ -468,10 +469,13 @@ def RunBuild(options, base, target, queue):
     """
     logging.info("U-Boot build flags: %s", " ".join(base))
 
-    # Reconfigure U-Boot.
-    if not options.incremental:
+    if options.force_distclean:
+        options.force_reconfig = True
         # Ignore any error from this, some older U-Boots fail on this.
         cros_build_lib.run(base + ["distclean"], capture_output=True, **kwargs)
+
+    # Reconfigure U-Boot.
+    if options.force_reconfig:
         if os.path.exists("tools/genboardscfg.py"):
             mtarget = "defconfig"
         else:
