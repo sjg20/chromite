@@ -37,12 +37,19 @@ class _ProcessMetricsCollector(object):
 
     def __init__(self):
         self._metrics = [
+            _ProcessMetric("adb", test_func=partial(_is_process_name, "adb")),
             _ProcessMetric("autoserv", test_func=_is_parent_autoserv),
+            _ProcessMetric(
+                "bbagent", test_func=partial(_is_process_name, "bbagent")
+            ),
             _ProcessMetric(
                 "cache-downloader",
                 test_func=partial(_is_process_name, "downloader"),
             ),
             _ProcessMetric("cipd", test_func=partial(_is_process_name, "cipd")),
+            _ProcessMetric(
+                "cloudtail", test_func=partial(_is_process_name, "cloudtail")
+            ),
             _ProcessMetric(
                 "common-tls", test_func=partial(_is_process_name, "common-tls")
             ),
@@ -66,6 +73,7 @@ class _ProcessMetricsCollector(object):
             ),
             _ProcessMetric("gsutil", test_func=_is_gsutil),
             _ProcessMetric("java", test_func=partial(_is_process_name, "java")),
+            _ProcessMetric("k8s_system", test_func=_is_k8s_system),
             _ProcessMetric(
                 "labservice", test_func=partial(_is_process_name, "labservice")
             ),
@@ -79,8 +87,15 @@ class _ProcessMetricsCollector(object):
                 "podman-pull", test_func=partial(_is_podman, "pull")
             ),
             _ProcessMetric("podman-run", test_func=partial(_is_podman, "run")),
+            _ProcessMetric(
+                "phosphorus", test_func=partial(_is_process_name, "phosphorus")
+            ),
+            _ProcessMetric("recipe", test_func=_is_recipe),
             _ProcessMetric("sshd", test_func=partial(_is_process_name, "sshd")),
             _ProcessMetric("swarming_bot", test_func=_is_swarming_bot),
+            _ProcessMetric(
+                "swarming_sub_task", test_func=_is_swarming_sub_task
+            ),
             _ProcessMetric(
                 "sysmon",
                 test_func=partial(_is_python_module, "chromite.scripts.sysmon"),
@@ -181,6 +196,21 @@ def _is_process_name(name, proc):
     return proc.name() == name
 
 
+def _is_recipe(proc):
+    """Return whether proc is a recipe process.
+
+    An example proc is like
+    '/home/.../bin/python -u -s
+        /home/.../kitchen-checkout/recipe_engine/recipe_engine/main.py ...'.
+    """
+    cmdline = proc.cmdline()
+    return (
+        len(cmdline) >= 4
+        and cmdline[0].endswith("/python")
+        and cmdline[3].endswith("/recipe_engine/main.py")
+    )
+
+
 def _is_swarming_bot(proc):
     """Return whether proc is a Swarming bot.
 
@@ -194,6 +224,20 @@ def _is_swarming_bot(proc):
     )
 
 
+def _is_swarming_sub_task(proc):
+    """Return whether proc is a Swarming bot sub task.
+
+    An example Swarming sub task:
+        /usr/bin/python3.8 -u /.../swarming_bot.2.zip run_isolated ...
+    """
+    cmdline = proc.cmdline()
+    return (
+        len(cmdline) >= 4
+        and cmdline[0].split("/")[-1].startswith("python")
+        and cmdline[2].split("/")[-1].startswith("swarming_bot.")
+    )
+
+
 def _is_gsutil(proc):
     """Return whether proc is gsutil."""
     cmdline = proc.cmdline()
@@ -202,6 +246,11 @@ def _is_gsutil(proc):
         and cmdline[0] == "python"
         and cmdline[1].endswith("gsutil")
     )
+
+
+def _is_k8s_system(proc):
+    """Return whether proc is a k8s system process."""
+    return proc.name() in ("kubelet", "kube-proxy")
 
 
 def _is_tko_proxy(proc):

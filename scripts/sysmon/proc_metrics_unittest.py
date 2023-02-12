@@ -223,14 +223,43 @@ class TestProcMetrics(cros_test_lib.TestCase):
                 _mock_process(
                     name="podman", cmdline=["podman", "pull", "image:tag"]
                 ),
+                _mock_process(name="adb", cmdline=["adb", "..."]),
+                _mock_process(name="bbagent", cmdline=["bbagent", "..."]),
+                _mock_process(name="cloudtail", cmdline=["cloudtail", "..."]),
+                _mock_process(name="kubelet", cmdline=["kubelet", "..."]),
+                _mock_process(
+                    name="phosphorus", cmdline=["phosphorus", "upload-to-tko"]
+                ),
+                _mock_process(
+                    name="python",
+                    cmdline=[
+                        "bin/python",
+                        "-u",
+                        "-s",
+                        ".../recipe_engine/main.py",
+                    ],
+                ),
+                _mock_process(
+                    name="python3.8",
+                    cmdline=[
+                        "bin/python3.8",
+                        "-u",
+                        ".../swarming_bot.3.zip",
+                        "run_isolated",
+                        "...",
+                    ],
+                ),
             ]
             proc_metrics.collect_proc_info()
 
         setter = self.store.set
         calls = []
+        calls.extend(_expected_calls_for("adb"))
         calls.extend(_expected_calls_for("autoserv"))
+        calls.extend(_expected_calls_for("bbagent"))
         calls.extend(_expected_calls_for("cache-downloader"))
         calls.extend(_expected_calls_for("cipd"))
+        calls.extend(_expected_calls_for("cloudtail"))
         calls.extend(_expected_calls_for("common-tls"))
         calls.extend(_expected_calls_for("curl"))
         calls.extend(_expected_calls_for("dnsmasq"))
@@ -240,13 +269,17 @@ class TestProcMetrics(cros_test_lib.TestCase):
         calls.extend(_expected_calls_for("gs_offloader"))
         calls.extend(_expected_calls_for("gsutil"))
         calls.extend(_expected_calls_for("java"))
+        calls.extend(_expected_calls_for("k8s_system"))
         calls.extend(_expected_calls_for("labservice"))
         calls.extend(_expected_calls_for("lxc-attach"))
         calls.extend(_expected_calls_for("lxc-start"))
         calls.extend(_expected_calls_for("podman-pull"))
         calls.extend(_expected_calls_for("podman-run"))
+        calls.extend(_expected_calls_for("phosphorus"))
+        calls.extend(_expected_calls_for("recipe"))
         calls.extend(_expected_calls_for("sshd"))
         calls.extend(_expected_calls_for("swarming_bot"))
+        calls.extend(_expected_calls_for("swarming_sub_task"))
         calls.extend(_expected_calls_for("sysmon"))
         calls.extend(_expected_calls_for("tko_proxy"))
         calls.extend(_expected_calls_for("other"))
