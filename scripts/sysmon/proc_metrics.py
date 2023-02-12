@@ -25,6 +25,10 @@ _thread_count_metric = metrics.GaugeMetric(
 _cpu_percent_metric = metrics.GaugeMetric(
     "proc/cpu_percent", description="CPU usage percent of processes."
 )
+_cpu_times_metric = metrics.CumulativeMetric(
+    "proc/cpu_times",
+    description="Accumulated CPU time in each specific mode of processes.",
+)
 
 
 def collect_proc_info():
@@ -34,6 +38,10 @@ def collect_proc_info():
 
 class _ProcessMetricsCollector(object):
     """Class for collecting process metrics."""
+
+    # We need to store some per process metrics of last run in order to
+    # calculate the detla and aggregate them.
+    old_cpu_times = {}
 
     def __init__(self):
         self._metrics = [
@@ -105,9 +113,12 @@ class _ProcessMetricsCollector(object):
         self._other_metric = _ProcessMetric("other")
 
     def collect(self):
+        new_cpu_times = {}
         for proc in psutil.process_iter():
+            new_cpu_times[proc.pid] = proc.cpu_times()
             self._collect_proc(proc)
         self._flush()
+        _ProcessMetricsCollector.old_cpu_times = new_cpu_times
 
     def _collect_proc(self, proc):
         for metric in self._metrics:
@@ -141,6 +152,7 @@ class _ProcessMetric(object):
         self._count = 0
         self._thread_count = 0
         self._cpu_percent = 0
+        self._cpu_times = _CPUTimes()
 
     def add(self, proc):
         """Do metric collection for the given process.
@@ -152,6 +164,11 @@ class _ProcessMetric(object):
         self._count += 1
         self._thread_count += proc.num_threads()
         self._cpu_percent += proc.cpu_percent()
+
+        self._cpu_times += _CPUTimes(
+            proc.cpu_times()
+        ) - _ProcessMetricsCollector.old_cpu_times.get(proc.pid)
+
         return True
 
     def flush(self):
@@ -166,6 +183,55 @@ class _ProcessMetric(object):
             int(round(self._cpu_percent)), fields=self._fields
         )
         self._cpu_percent = 0
+
+        for mode, t in self._cpu_times.asdict().items():
+            _cpu_times_metric.increment_by(
+                t, fields={**self._fields, "mode": mode}
+            )
+        self._cpu_times = _CPUTimes()
+
+
+class _CPUTimes(object):
+    """A container for CPU times metrics."""
+
+    def __init__(self, v=None):
+        self.system = v.system if v else 0
+        self.user = v.user if v else 0
+        self.iowait = v.iowait if v else 0
+        self.children_system = v.children_system if v else 0
+        self.children_user = v.children_user if v else 0
+
+    def __sub__(self, rhs):
+        if not rhs:
+            return self
+
+        r = _CPUTimes()
+        r.system = self.system - rhs.system
+        r.user = self.user - rhs.user
+        r.iowait = self.iowait - rhs.iowait
+        r.children_system = self.children_system - rhs.children_system
+        r.children_user = self.children_user - rhs.children_user
+        return r
+
+    def __iadd__(self, rhs):
+        if not rhs:
+            return self
+
+        self.system += rhs.system
+        self.user += rhs.user
+        self.iowait += rhs.iowait
+        self.children_system += rhs.children_system
+        self.children_user += rhs.children_user
+        return self
+
+    def asdict(self):
+        return {
+            "system": self.system,
+            "user": self.user,
+            "iowait": self.iowait,
+            "children_system": self.children_system,
+            "children_user": self.children_user,
+        }
 
 
 def _is_parent_autoserv(proc):
