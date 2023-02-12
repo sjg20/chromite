@@ -28,6 +28,14 @@ def _mock_process(name, cmdline, parent=None, num_threads=10):
     proc.cpu_times.return_value.iowait = 12
     proc.cpu_times.return_value.children_system = 13
     proc.cpu_times.return_value.children_user = 14
+
+    proc.io_counters.return_value.read_count = 20
+    proc.io_counters.return_value.read_bytes = 21
+    proc.io_counters.return_value.read_chars = 22
+    proc.io_counters.return_value.write_count = 23
+    proc.io_counters.return_value.write_bytes = 24
+    proc.io_counters.return_value.write_chars = 25
+
     if parent is not None:
         proc.parent.return_value = parent
     return proc

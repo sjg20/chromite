@@ -29,6 +29,28 @@ _cpu_times_metric = metrics.CumulativeMetric(
     "proc/cpu_times",
     description="Accumulated CPU time in each specific mode of processes.",
 )
+_read_count_metric = metrics.CounterMetric(
+    "proc/read/count",
+    description="Accumulated read operation count of processes.",
+)
+_read_bytes_metric = metrics.CounterMetric(
+    "proc/read/bytes", description="Accumulated read bytes of processes."
+)
+_read_chars_metric = metrics.CounterMetric(
+    "proc/read/chars",
+    description="Accumulated buffered read bytes of processes.",
+)
+_write_count_metric = metrics.CounterMetric(
+    "proc/write/count",
+    description="Accumulated write operation count of processes.",
+)
+_write_bytes_metric = metrics.CounterMetric(
+    "proc/write/bytes", description="Accumulated write bytes of processes."
+)
+_write_chars_metric = metrics.CounterMetric(
+    "proc/write/chars",
+    description="Accumulated buffered write bytes of processes.",
+)
 
 
 def collect_proc_info():
@@ -42,6 +64,7 @@ class _ProcessMetricsCollector(object):
     # We need to store some per process metrics of last run in order to
     # calculate the detla and aggregate them.
     old_cpu_times = {}
+    old_io_counters = {}
 
     def __init__(self):
         self._metrics = [
@@ -114,11 +137,14 @@ class _ProcessMetricsCollector(object):
 
     def collect(self):
         new_cpu_times = {}
+        new_io_counters = {}
         for proc in psutil.process_iter():
             new_cpu_times[proc.pid] = proc.cpu_times()
+            new_io_counters[proc.pid] = proc.io_counters()
             self._collect_proc(proc)
         self._flush()
         _ProcessMetricsCollector.old_cpu_times = new_cpu_times
+        _ProcessMetricsCollector.old_io_counters = new_io_counters
 
     def _collect_proc(self, proc):
         for metric in self._metrics:
@@ -153,6 +179,7 @@ class _ProcessMetric(object):
         self._thread_count = 0
         self._cpu_percent = 0
         self._cpu_times = _CPUTimes()
+        self._io_counters = _IOCounters()
 
     def add(self, proc):
         """Do metric collection for the given process.
@@ -168,6 +195,10 @@ class _ProcessMetric(object):
         self._cpu_times += _CPUTimes(
             proc.cpu_times()
         ) - _ProcessMetricsCollector.old_cpu_times.get(proc.pid)
+
+        self._io_counters += _IOCounters(
+            proc.io_counters()
+        ) - _ProcessMetricsCollector.old_io_counters.get(proc.pid)
 
         return True
 
@@ -189,6 +220,26 @@ class _ProcessMetric(object):
                 t, fields={**self._fields, "mode": mode}
             )
         self._cpu_times = _CPUTimes()
+
+        _read_count_metric.increment_by(
+            self._io_counters.read_count, fields=self._fields
+        )
+        _read_bytes_metric.increment_by(
+            self._io_counters.read_bytes, fields=self._fields
+        )
+        _read_chars_metric.increment_by(
+            self._io_counters.read_chars, fields=self._fields
+        )
+        _write_count_metric.increment_by(
+            self._io_counters.write_count, fields=self._fields
+        )
+        _write_bytes_metric.increment_by(
+            self._io_counters.write_bytes, fields=self._fields
+        )
+        _write_chars_metric.increment_by(
+            self._io_counters.write_chars, fields=self._fields
+        )
+        self._io_counters = _IOCounters()
 
 
 class _CPUTimes(object):
@@ -345,3 +396,81 @@ def _is_podman(subcmd, proc):
     """
     cmdline = proc.cmdline()
     return proc.name() == "podman" and len(cmdline) > 1 and cmdline[1] == subcmd
+
+
+class _CPUTimes(object):
+    """A container for CPU times metrics."""
+
+    def __init__(self, v=None):
+        self.system = v.system if v else 0
+        self.user = v.user if v else 0
+        self.iowait = v.iowait if v else 0
+        self.children_system = v.children_system if v else 0
+        self.children_user = v.children_user if v else 0
+
+    def __sub__(self, rhs):
+        if not rhs:
+            return self
+
+        r = _CPUTimes()
+        r.system = self.system - rhs.system
+        r.user = self.user - rhs.user
+        r.iowait = self.iowait - rhs.iowait
+        r.children_system = self.children_system - rhs.children_system
+        r.children_user = self.children_user - rhs.children_user
+        return r
+
+    def __iadd__(self, rhs):
+        if not rhs:
+            return self
+
+        self.system += rhs.system
+        self.user += rhs.user
+        self.iowait += rhs.iowait
+        self.children_system += rhs.children_system
+        self.children_user += rhs.children_user
+        return self
+
+    def asdict(self):
+        return {
+            "system": self.system,
+            "user": self.user,
+            "iowait": self.iowait,
+            "children_system": self.children_system,
+            "children_user": self.children_user,
+        }
+
+
+class _IOCounters(object):
+    """A container for I/O counter metrics."""
+
+    def __init__(self, v=None):
+        self.read_count = v.read_count if v else 0
+        self.read_bytes = v.read_bytes if v else 0
+        self.read_chars = v.read_chars if v else 0
+        self.write_count = v.write_count if v else 0
+        self.write_bytes = v.write_bytes if v else 0
+        self.write_chars = v.write_chars if v else 0
+
+    def __sub__(self, rhs):
+        if not rhs:
+            return self
+
+        r = _IOCounters()
+        r.read_count = self.read_count - rhs.read_count
+        r.read_bytes = self.read_bytes - rhs.read_bytes
+        r.read_chars = self.read_chars - rhs.read_chars
+        r.write_count = self.write_count - rhs.write_count
+        r.write_bytes = self.write_bytes - rhs.write_bytes
+        r.write_chars = self.write_chars - rhs.write_chars
+        return r
+
+    def __iadd__(self, rhs):
+        if not rhs:
+            return self
+
+        self.read_count += rhs.read_count
+        self.read_bytes += rhs.read_bytes
+        self.write_count += rhs.write_count
+        self.write_bytes += rhs.write_bytes
+        return self
