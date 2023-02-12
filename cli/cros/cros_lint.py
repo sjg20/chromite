@@ -421,6 +421,7 @@ def _BreakoutDataByTool(map_to_return, path):
 _EXT_TOOL_MAP = {
     # Note these are defined to keep in line with cpplint.py. Technically, we
     # could include additional ones, but cpplint.py would just filter them out.
+    frozenset({".c"}): (_WhitespaceLintFile, _NonExecLintFile),
     frozenset({".cc", ".cpp", ".h"}): (_CpplintFile, _NonExecLintFile),
     frozenset({".conf", ".conf.in"}): (_ConfLintFile, _NonExecLintFile),
     frozenset({".json"}): (_JsonLintFile, _NonExecLintFile),
