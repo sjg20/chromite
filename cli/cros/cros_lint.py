@@ -25,6 +25,7 @@ from chromite.lib import path_util
 from chromite.lint.linters import owners
 from chromite.lint.linters import upstart
 from chromite.lint.linters import whitespace
+from chromite.utils import path_filter
 from chromite.utils import timer
 from chromite.utils.parser import shebang
 
@@ -570,15 +571,21 @@ Supported file names: %s
         if syms:
             logging.info("Ignoring symlinks: %s", syms)
 
+        # Ignore generated files.  Some tools can do this for us, but not all,
+        # and it'd be faster if we just never spawned the tools in the first
+        # place.
+        # TODO(build): Move to a centralized configuration somewhere.
+        self.options.filter.rules.extend(
+            (
+                # Compiled python protobuf bindings.
+                path_filter.exclude("*_pb2.py"),
+            )
+        )
+
         files = self.options.filter.filter(files)
         if not files:
             logging.warning("All files are excluded.  Doing nothing.")
             return 0
-
-        # Ignore generated files.  Some tools can do this for us, but not all,
-        # and it'd be faster if we just never spawned the tools in the first
-        # place.
-        files = [x for x in files if not x.name.endswith("_pb2.py")]
 
         tool_map = _BreakoutFilesByTool(files)
         dispatcher = functools.partial(

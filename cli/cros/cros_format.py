@@ -14,7 +14,6 @@ import itertools
 import logging
 import os
 from pathlib import Path
-import re
 from typing import Callable, Dict, List, Optional
 
 from chromite.cli import command
@@ -23,6 +22,7 @@ from chromite.lib import git
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
+from chromite.utils import path_filter
 from chromite.utils.parser import shebang
 
 
@@ -97,15 +97,6 @@ _FILENAME_PATTERNS_TOOL_MAP = {
 }
 
 
-# TODO: Move to a centralized configuration somewhere.
-_EXCLUDED_FILE_REGEX = (
-    # Compiled python protobuf bindings.
-    re.compile(r".*_pb2\.py"),
-    # Vendored third-party code.
-    re.compile(r".*third_party/.*\.py"),
-)
-
-
 def _BreakoutDataByTool(map_to_return, path):
     """Maps a tool method to the content of the |path|."""
     # Detect by content of the file itself.
@@ -137,10 +128,6 @@ def _BreakoutFilesByTool(files: List[Path]) -> Dict[Callable, List[Path]]:
     map_to_return = {}
 
     for f in files:
-        # Skip if excluded.
-        if any(x.search(str(f)) for x in _EXCLUDED_FILE_REGEX):
-            continue
-
         extension = f.suffix
         for extensions, tools in _EXT_TOOL_MAP.items():
             if extension in extensions:
@@ -298,6 +285,19 @@ Supported file names: %s
                     files.append(f)
         if syms:
             logging.info("Ignoring symlinks: %s", syms)
+
+        # Ignore generated files.  Some tools can do this for us, but not all,
+        # and it'd be faster if we just never spawned the tools in the first
+        # place.
+        # TODO(build): Move to a centralized configuration somewhere.
+        self.options.filter.rules.extend(
+            (
+                # Compiled python protobuf bindings.
+                path_filter.exclude("*_pb2.py"),
+                # Vendored third-party code.
+                path_filter.exclude("*third_party/*.py"),
+            )
+        )
 
         files = self.options.filter.filter(files)
         if not files:
