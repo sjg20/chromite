@@ -114,24 +114,27 @@ def CheckForRequiredLines(
     return ret
 
 
-def CheckInitConf(full_path: Path, relaxed: bool) -> bool:
+def Data(
+    data: str,
+    path: Path,
+    relaxed: bool,
+) -> bool:
     """Check an upstart conf file for linter errors."""
     ret = True
-    text = full_path.read_text(encoding="utf-8")
-    if not CheckForRequiredLines(text, full_path) and not relaxed:
+    if not CheckForRequiredLines(data, path) and not relaxed:
         ret = False
 
-    label = os.path.basename(full_path)
+    label = os.path.basename(path)
     ignore_set = set(GetIgnoreLookup().get(label, [])) if relaxed else ()
 
     found = []
-    for cmd in ExtractCommands(text):
+    for cmd in ExtractCommands(data):
         norm_cmd = " ".join(cmd)
         if norm_cmd not in ignore_set:
             found.append(norm_cmd)
 
     if found:
-        logging.error('Init script "%s" has unsafe commands:', full_path)
+        logging.error('Init script "%s" has unsafe commands:', path)
         for cmd in found:
             logging.error("    %s", cmd)
         logging.error(
@@ -140,7 +143,7 @@ def CheckInitConf(full_path: Path, relaxed: bool) -> bool:
         )
         ret = False
 
-    if not linters.whitespace.Data(text, full_path) and not relaxed:
+    if not linters.whitespace.Data(data, path) and not relaxed:
         ret = False
 
     return ret

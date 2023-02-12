@@ -339,7 +339,10 @@ def _UpstartLintFile(path, _output_format, _debug, relaxed: bool):
     """Run lints on upstart configs."""
     # Skip .conf files that aren't in an init parent directory.
     ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
-    if not linters.upstart.CheckInitConf(Path(path), relaxed):
+    path = Path(path)
+    if not linters.upstart.Data(
+        path.read_text(encoding="utf-8"), path, relaxed
+    ):
         ret.returncode = 1
     return ret
 
