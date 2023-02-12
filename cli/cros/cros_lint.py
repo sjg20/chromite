@@ -22,9 +22,7 @@ from chromite.lib import json_lib
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import path_util
-from chromite.lint.linters import owners
-from chromite.lint.linters import upstart
-from chromite.lint.linters import whitespace
+from chromite.lint import linters
 from chromite.utils import path_filter
 from chromite.utils import timer
 from chromite.utils.parser import shebang
@@ -216,7 +214,7 @@ def _JsonLintFile(path, _output_format, _debug, _relaxed: bool):
         logging.notice("%s: %s", path, e)
 
     # Check whitespace.
-    if not whitespace.LintData(path, data):
+    if not linters.whitespace.LintData(path, data):
         result.returncode = 1
 
     return result
@@ -231,7 +229,7 @@ def _MarkdownLintFile(path, _output_format, _debug, _relaxed: bool):
     data = osutils.ReadFile(path)
 
     # Check whitespace.
-    if not whitespace.LintData(path, data):
+    if not linters.whitespace.LintData(path, data):
         result.returncode = 1
 
     return result
@@ -300,7 +298,7 @@ def _ShellLintFile(
     lint_result = _ToolRunCommand(cmd, debug)
 
     # Check whitespace.
-    if not whitespace.LintData(path, osutils.ReadFile(path)):
+    if not linters.whitespace.LintData(path, osutils.ReadFile(path)):
         lint_result.returncode = 1
 
     return lint_result
@@ -345,7 +343,7 @@ def _UpstartLintFile(path, _output_format, _debug, relaxed: bool):
     """Run lints on upstart configs."""
     # Skip .conf files that aren't in an init parent directory.
     ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
-    if not upstart.CheckInitConf(Path(path), relaxed):
+    if not linters.upstart.CheckInitConf(Path(path), relaxed):
         ret.returncode = 1
     return ret
 
@@ -362,7 +360,7 @@ def _DirMdLintFile(path, _output_format, debug, _relaxed: bool):
 def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool):
     """Run lints on OWNERS files."""
     ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
-    if not owners.lint_path(Path(path)):
+    if not linters.owners.lint_path(Path(path)):
         ret.returncode = 1
     return ret
 
@@ -376,7 +374,7 @@ def _WhitespaceLintFile(path, _output_format, _debug, _relaxed: bool):
     data = osutils.ReadFile(path)
 
     # Check whitespace.
-    if not whitespace.LintData(path, data):
+    if not linters.whitespace.LintData(path, data):
         result.returncode = 1
 
     return result

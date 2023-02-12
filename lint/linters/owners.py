@@ -10,7 +10,7 @@ from pathlib import Path
 import re
 from typing import Union
 
-from chromite.lint.linters import whitespace
+from chromite.lint import linters
 
 
 # Cross-repository includes take the form:
@@ -33,7 +33,7 @@ def lint_data(path: Union[str, os.PathLike], data: str) -> bool:
     Returns:
         True if everything passed.
     """
-    ret = whitespace.LintData(path, data)
+    ret = linters.whitespace.LintData(path, data)
 
     lines = data.splitlines()
 

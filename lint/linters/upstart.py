@@ -12,7 +12,7 @@ from pathlib import Path
 import re
 from typing import Dict, Generator, List
 
-from chromite.lint.linters import whitespace
+from chromite.lint import linters
 
 
 _DOC_RESOURCE_URL = (
@@ -140,7 +140,7 @@ def CheckInitConf(full_path: Path, relaxed: bool) -> bool:
         )
         ret = False
 
-    if not whitespace.LintData(str(full_path), text) and not relaxed:
+    if not linters.whitespace.LintData(str(full_path), text) and not relaxed:
         ret = False
 
     return ret
