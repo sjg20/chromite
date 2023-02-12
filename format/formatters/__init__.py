@@ -4,14 +4,24 @@
 
 """Provide a namespace for our helpers."""
 
-from chromite.format.formatters import cpp
-from chromite.format.formatters import gn
-from chromite.format.formatters import go
-from chromite.format.formatters import json
-from chromite.format.formatters import proto
-from chromite.format.formatters import python
-from chromite.format.formatters import repo_manifest
-from chromite.format.formatters import rust
-from chromite.format.formatters import star
-from chromite.format.formatters import whitespace
-from chromite.format.formatters import xml
+from chromite.utils import lazy_loader
+
+
+# TODO(build): Switch to module __getattr__ when we're Python 3.7+.
+# https://peps.python.org/pep-0562/
+locals().update(
+    (x, lazy_loader.ForFunctions(f"chromite.format.formatters.{x}"))
+    for x in (
+        "cpp",
+        "gn",
+        "go",
+        "json",
+        "proto",
+        "python",
+        "repo_manifest",
+        "rust",
+        "star",
+        "whitespace",
+        "xml",
+    )
+)

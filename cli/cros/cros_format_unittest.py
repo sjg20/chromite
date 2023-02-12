@@ -40,9 +40,13 @@ class FormatCommandTest(FormatCommandTestCase):
         )
 
         tool_map = cros_format._BreakoutFilesByTool([Path("foo.md")])
-        self.assertEqual(
-            {formatters.whitespace.Data: [Path("foo.md")]}, tool_map
-        )
+        # It's not easy to test the tool_map as the keys are functools partials
+        # which do not support equality tests.
+        items = list(tool_map.items())
+        self.assertEqual(len(items), 1)
+        key, value = items[0]
+        self.assertEqual(key.func, formatters.whitespace.Data.func)
+        self.assertEqual(value, [Path("foo.md")])
 
     def testCliNoFiles(self):
         """Check cros format handling with no files."""
