@@ -11,7 +11,7 @@ import logging
 import os
 from pathlib import Path
 import stat
-from typing import Callable, Dict, List
+from typing import Callable, Dict, List, Optional, Union
 
 from chromite.cli import command
 from chromite.lib import commandline
@@ -37,6 +37,14 @@ def _GetProjectPath(path: Path) -> Path:
         # Maybe they're running on a file outside of a checkout.
         # e.g. cros lint ~/foo.py /tmp/test.py
         return path.parent
+
+
+def _get_file_data(path: Union[str, os.PathLike], commit: Optional[str]) -> str:
+    """Read the file data for |path| either from disk or git |commit|."""
+    if commit:
+        return git.RunGit(None, ["show", f"{commit}:./{path}"]).stdout
+    else:
+        return Path(path).read_text(encoding="utf-8")
 
 
 def _GetPylintrc(path: Path) -> Path:
@@ -119,7 +127,7 @@ def _ToolRunCommand(cmd, debug, **kwargs):
     )
 
 
-def _ConfLintFile(path, output_format, debug, relaxed: bool):
+def _ConfLintFile(path, output_format, debug, relaxed: bool, commit: str):
     """Determine applicable .conf syntax and call the appropriate handler."""
     ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
     if not os.path.isfile(path):
@@ -129,7 +137,7 @@ def _ConfLintFile(path, output_format, debug, relaxed: bool):
     # to filter them.
     parent_name = os.path.basename(os.path.dirname(os.path.realpath(path)))
     if parent_name in {"init", "upstart"}:
-        return _UpstartLintFile(path, output_format, debug, relaxed)
+        return _UpstartLintFile(path, output_format, debug, relaxed, commit)
 
     # Check for the description and author lines present in upstart configs.
     with open(path, "rb") as file:
@@ -150,11 +158,13 @@ def _ConfLintFile(path, output_format, debug, relaxed: bool):
                     "Found upstart .conf in a directory other than init or "
                     "upstart."
                 )
-                return _UpstartLintFile(path, output_format, debug, relaxed)
+                return _UpstartLintFile(
+                    path, output_format, debug, relaxed, commit
+                )
     return ret
 
 
-def _CpplintFile(path, output_format, debug, _relaxed: bool):
+def _CpplintFile(path, output_format, debug, _relaxed: bool, _commit: str):
     """Returns result of running cpplint on |path|."""
     cmd = [os.path.join(constants.DEPOT_TOOLS_DIR, "cpplint.py")]
     cmd.append("--filter=%s" % ",".join(CPPLINT_DEFAULT_FILTERS))
@@ -164,7 +174,7 @@ def _CpplintFile(path, output_format, debug, _relaxed: bool):
     return _ToolRunCommand(cmd, debug)
 
 
-def _PylintFile(path, output_format, debug, _relaxed: bool):
+def _PylintFile(path, output_format, debug, _relaxed: bool, _commit: str):
     """Returns result of running pylint on |path|."""
     pylint = os.path.join(constants.CHROMITE_SCRIPTS_DIR, "pylint")
     pylintrc = _GetPylintrc(path)
@@ -178,7 +188,7 @@ def _PylintFile(path, output_format, debug, _relaxed: bool):
     return _ToolRunCommand(cmd, debug, extra_env=extra_env)
 
 
-def _GnlintFile(path, _, debug, _relaxed: bool):
+def _GnlintFile(path, _, debug, _relaxed: bool, _commit: str):
     """Returns result of running gnlint on |path|."""
     gnlint = os.path.join(
         constants.SOURCE_ROOT, "src", "platform2", "common-mk", "gnlint.py"
@@ -187,7 +197,7 @@ def _GnlintFile(path, _, debug, _relaxed: bool):
     return _ToolRunCommand(cmd, debug)
 
 
-def _GolintFile(path, _, debug, _relaxed: bool):
+def _GolintFile(path, _, debug, _relaxed: bool, _commit: str):
     """Returns result of running golint on |path|."""
     # Try using golint if it exists.
     try:
@@ -198,13 +208,13 @@ def _GolintFile(path, _, debug, _relaxed: bool):
         return cros_build_lib.CompletedProcess(f'gofmt "{path}"', returncode=0)
 
 
-def _JsonLintFile(path, _output_format, _debug, _relaxed: bool):
+def _JsonLintFile(path, _output_format, _debug, _relaxed: bool, commit: str):
     """Returns result of running json lint checks on |path|."""
     result = cros_build_lib.CompletedProcess(
         f'python -mjson.tool "{path}"', returncode=0
     )
 
-    data = osutils.ReadFile(path)
+    data = _get_file_data(path, commit)
 
     # See if it validates.
     try:
@@ -216,13 +226,15 @@ def _JsonLintFile(path, _output_format, _debug, _relaxed: bool):
     return result
 
 
-def _MarkdownLintFile(path, _output_format, _debug, _relaxed: bool):
+def _MarkdownLintFile(
+    path, _output_format, _debug, _relaxed: bool, commit: str
+):
     """Returns result of running lint checks on |path|."""
     result = cros_build_lib.CompletedProcess(
         f'mdlint(internal) "{path}"', returncode=0
     )
 
-    data = osutils.ReadFile(path)
+    data = _get_file_data(path, commit)
 
     # Check whitespace.
     if not linters.whitespace.Data(data, Path(path)):
@@ -232,7 +244,12 @@ def _MarkdownLintFile(path, _output_format, _debug, _relaxed: bool):
 
 
 def _ShellLintFile(
-    path, output_format, debug, _relaxed: bool, gentoo_format=False
+    path,
+    output_format,
+    debug,
+    _relaxed: bool,
+    _commit: str,
+    gentoo_format=False,
 ):
     """Returns result of running lint checks on |path|.
 
@@ -300,14 +317,18 @@ def _ShellLintFile(
     return lint_result
 
 
-def _GentooShellLintFile(path, output_format, debug, relaxed: bool):
+def _GentooShellLintFile(
+    path, output_format, debug, relaxed: bool, commit: str
+):
     """Run shell checks with Gentoo rules."""
     return _ShellLintFile(
-        path, output_format, debug, relaxed, gentoo_format=True
+        path, output_format, debug, relaxed, commit, gentoo_format=True
     )
 
 
-def _SeccompPolicyLintFile(path, _output_format, debug, _relaxed: bool):
+def _SeccompPolicyLintFile(
+    path, _output_format, debug, _relaxed: bool, commit: str
+):
     """Run the seccomp policy linter."""
     dangerous_syscalls = {
         "bpf",
@@ -317,6 +338,11 @@ def _SeccompPolicyLintFile(path, _output_format, debug, _relaxed: bool):
         "swapoff",
         "swapon",
     }
+    if commit:
+        stdin = _get_file_data(path, commit)
+        path = "/dev/stdin"
+    else:
+        stdin = ""
     return _ToolRunCommand(
         [
             os.path.join(
@@ -332,22 +358,21 @@ def _SeccompPolicyLintFile(path, _output_format, debug, _relaxed: bool):
             path,
         ],
         debug,
+        input=stdin,
     )
 
 
-def _UpstartLintFile(path, _output_format, _debug, relaxed: bool):
+def _UpstartLintFile(path, _output_format, _debug, relaxed: bool, commit: str):
     """Run lints on upstart configs."""
     # Skip .conf files that aren't in an init parent directory.
     ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
-    path = Path(path)
-    if not linters.upstart.Data(
-        path.read_text(encoding="utf-8"), path, relaxed
-    ):
+    data = _get_file_data(path, commit)
+    if not linters.upstart.Data(data, Path(path), relaxed):
         ret.returncode = 1
     return ret
 
 
-def _DirMdLintFile(path, _output_format, debug, _relaxed: bool):
+def _DirMdLintFile(path, _output_format, debug, _relaxed: bool, _commit: str):
     """Run the dirmd linter."""
     return _ToolRunCommand(
         [os.path.join(constants.DEPOT_TOOLS_DIR, "dirmd"), "validate", path],
@@ -356,16 +381,17 @@ def _DirMdLintFile(path, _output_format, debug, _relaxed: bool):
     )
 
 
-def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool):
+def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool, commit: str):
     """Run lints on OWNERS files."""
     ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
-    if not linters.owners.lint_path(Path(path)):
+    data = _get_file_data(path, commit)
+    if not linters.owners.lint_data(Path(path), data):
         ret.returncode = 1
     return ret
 
 
 def _TextprotoLintFile(
-    path, _output_format, _debug, _relaxed: bool
+    path, _output_format, _debug, _relaxed: bool, _commit: str
 ) -> cros_build_lib.CompletedProcess:
     """Run lints on OWNERS files."""
     ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
@@ -381,13 +407,15 @@ def _TextprotoLintFile(
     return ret
 
 
-def _WhitespaceLintFile(path, _output_format, _debug, _relaxed: bool):
+def _WhitespaceLintFile(
+    path, _output_format, _debug, _relaxed: bool, commit: str
+):
     """Returns result of running basic whitespace checks on |path|."""
     result = cros_build_lib.CompletedProcess(
         f'whitespace(internal) "{path}"', returncode=0
     )
 
-    data = osutils.ReadFile(path)
+    data = _get_file_data(path, commit)
 
     # Check whitespace.
     if not linters.whitespace.Data(data, Path(path)):
@@ -396,7 +424,9 @@ def _WhitespaceLintFile(path, _output_format, _debug, _relaxed: bool):
     return result
 
 
-def _NonExecLintFile(path, _output_format, _debug, _relaxed: bool):
+def _NonExecLintFile(
+    path, _output_format, _debug, _relaxed: bool, _commit: str
+):
     """Check file permissions on |path| are -x."""
     result = cros_build_lib.CompletedProcess(
         f'stat(internal) "{path}"', returncode=0
@@ -552,10 +582,12 @@ def _BreakoutFilesByTool(files: List[Path]) -> Dict[Callable, List[Path]]:
     return map_to_return
 
 
-def _Dispatcher(output_format, debug, relaxed: bool, tool, path: Path):
+def _Dispatcher(
+    output_format, debug, relaxed: bool, commit: str, tool, path: Path
+) -> int:
     """Call |tool| on |path| and take care of coalescing exit codes/output."""
     try:
-        result = tool(path, output_format, debug, relaxed)
+        result = tool(path, output_format, debug, relaxed, commit)
     except UnicodeDecodeError:
         logging.error("%s: file is not UTF-8 compatible", path)
         return 1
@@ -586,6 +618,12 @@ Supported file names: %s
     @classmethod
     def AddParser(cls, parser: commandline.ArgumentParser):
         super().AddParser(parser)
+        parser.add_argument(
+            "--commit",
+            type=str,
+            help="Use files from git commit instead of on disk. "
+            "NB: Not all linters work with this yet.",
+        )
         parser.add_argument("files", type=Path, help="Files to lint", nargs="*")
         parser.add_argument(
             "--output",
@@ -614,13 +652,21 @@ Supported file names: %s
             logging.warning("No files provided to lint.  Doing nothing.")
             return 0
 
+        # Ignore symlinks.
         files = []
         syms = []
-        for f in path_util.ExpandDirectories(self.options.files):
-            if f.is_symlink():
-                syms.append(f)
-            else:
-                files.append(f)
+        if self.options.commit:
+            for f in git.LsTree(None, self.options.commit, self.options.files):
+                if f.is_symlink:
+                    syms.append(f.name)
+                else:
+                    files.append(f.name)
+        else:
+            for f in path_util.ExpandDirectories(self.options.files):
+                if f.is_symlink():
+                    syms.append(f)
+                else:
+                    files.append(f)
         if syms:
             logging.info("Ignoring symlinks: %s", syms)
 
@@ -646,6 +692,7 @@ Supported file names: %s
             self.options.output,
             self.options.debug,
             self.options.relaxed,
+            self.options.commit,
         )
 
         # If we filtered out all files, do nothing.

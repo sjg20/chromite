@@ -35,28 +35,28 @@ class JsonTest(cros_test_lib.TempDirTestCase):
         """Verify valid json file is accepted."""
         path = os.path.join(self.tempdir, "x.json")
         osutils.WriteFile(path, "{}\n")
-        ret = cros_lint._JsonLintFile(path, None, None, False)
+        ret = cros_lint._JsonLintFile(path, None, None, False, "")
         self.assertEqual(ret.returncode, 0)
 
     def testInvalid(self):
         """Verify invalid json file is rejected."""
         path = os.path.join(self.tempdir, "x.json")
         osutils.WriteFile(path, "{")
-        ret = cros_lint._JsonLintFile(path, None, None, False)
+        ret = cros_lint._JsonLintFile(path, None, None, False, "")
         self.assertEqual(ret.returncode, 1)
 
     def testUnicodeBom(self):
         """Verify we skip the Unicode BOM."""
         path = os.path.join(self.tempdir, "x.json")
         osutils.WriteFile(path, b"\xef\xbb\xbf{}\n", mode="wb")
-        ret = cros_lint._JsonLintFile(path, None, None, False)
+        ret = cros_lint._JsonLintFile(path, None, None, False, "")
         self.assertEqual(ret.returncode, 0)
 
 
 def test_non_exec(tmp_path):
     """Tests for _NonExecLintFile."""
     # Ignore dirs.
-    ret = cros_lint._NonExecLintFile(tmp_path, False, False, False)
+    ret = cros_lint._NonExecLintFile(tmp_path, False, False, False, "")
     assert ret.returncode == 0
 
     # Create a data file.
@@ -65,24 +65,24 @@ def test_non_exec(tmp_path):
 
     # -x data files are OK.
     path.chmod(0o644)
-    ret = cros_lint._NonExecLintFile(path, False, False, False)
+    ret = cros_lint._NonExecLintFile(path, False, False, False, "")
     assert ret.returncode == 0
 
     # +x data files are not OK.
     path.chmod(0o755)
-    ret = cros_lint._NonExecLintFile(path, False, False, False)
+    ret = cros_lint._NonExecLintFile(path, False, False, False, "")
     assert ret.returncode == 1
 
     # Ignore symlinks to bad files.
     sym_path = tmp_path / "sym.txt"
     sym_path.symlink_to(path.name)
-    ret = cros_lint._NonExecLintFile(sym_path, False, False, False)
+    ret = cros_lint._NonExecLintFile(sym_path, False, False, False, "")
     assert ret.returncode == 0
 
     # Ignore broken symlinks.
     sym_path = tmp_path / "broken.txt"
     sym_path.symlink_to("asdfasdfasdfasdf")
-    ret = cros_lint._NonExecLintFile(sym_path, False, False, False)
+    ret = cros_lint._NonExecLintFile(sym_path, False, False, False, "")
     assert ret.returncode == 0
 
 
