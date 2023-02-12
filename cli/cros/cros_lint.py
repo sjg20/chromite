@@ -225,7 +225,7 @@ def _MarkdownLintFile(path, _output_format, _debug, _relaxed: bool):
     data = osutils.ReadFile(path)
 
     # Check whitespace.
-    if not linters.whitespace.LintData(path, data):
+    if not linters.whitespace.Data(data, Path(path)):
         result.returncode = 1
 
     return result
@@ -294,7 +294,7 @@ def _ShellLintFile(
     lint_result = _ToolRunCommand(cmd, debug)
 
     # Check whitespace.
-    if not linters.whitespace.LintData(path, osutils.ReadFile(path)):
+    if not linters.whitespace.Data(osutils.ReadFile(path), Path(path)):
         lint_result.returncode = 1
 
     return lint_result
@@ -387,7 +387,7 @@ def _WhitespaceLintFile(path, _output_format, _debug, _relaxed: bool):
     data = osutils.ReadFile(path)
 
     # Check whitespace.
-    if not linters.whitespace.LintData(path, data):
+    if not linters.whitespace.Data(data, Path(path)):
         result.returncode = 1
 
     return result

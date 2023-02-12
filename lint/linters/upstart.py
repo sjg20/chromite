@@ -140,7 +140,7 @@ def CheckInitConf(full_path: Path, relaxed: bool) -> bool:
         )
         ret = False
 
-    if not linters.whitespace.LintData(str(full_path), text) and not relaxed:
+    if not linters.whitespace.Data(text, full_path) and not relaxed:
         ret = False
 
     return ret

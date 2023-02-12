@@ -33,7 +33,7 @@ def lint_data(path: Union[str, os.PathLike], data: str) -> bool:
     Returns:
         True if everything passed.
     """
-    ret = linters.whitespace.LintData(path, data)
+    ret = linters.whitespace.Data(data, Path(path))
 
     lines = data.splitlines()
 

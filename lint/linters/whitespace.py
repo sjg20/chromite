@@ -7,12 +7,12 @@
 import logging
 
 
-def LintData(path: str, data: str) -> bool:
+def Data(data: str, path: "Path") -> bool:
     """Run basic whitespace checks on |data|.
 
     Args:
-        path: The name of the file (for diagnostics).
         data: The file content to lint.
+        path: The name of the file (for diagnostics).
 
     Returns:
         True if everything passed.
