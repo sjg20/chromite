@@ -424,23 +424,31 @@ def _WhitespaceLintFile(
     return result
 
 
-def _NonExecLintFile(
-    path, _output_format, _debug, _relaxed: bool, _commit: str
-):
+def _NonExecLintFile(path, _output_format, _debug, _relaxed: bool, commit: str):
     """Check file permissions on |path| are -x."""
     result = cros_build_lib.CompletedProcess(
         f'stat(internal) "{path}"', returncode=0
     )
 
-    # Ignore symlinks.
-    st = os.lstat(path)
-    if stat.S_ISREG(st.st_mode):
-        mode = stat.S_IMODE(st.st_mode)
-        if mode & 0o111:
+    if commit:
+        entries = git.LsTree(
+            os.path.dirname(path) or None, commit, [os.path.basename(path)]
+        )
+        if entries and entries[0].is_exec:
             result.returncode = 1
             logging.notice(
                 "%s: file should not be executable; chmod -x to fix", path
             )
+    else:
+        # Ignore symlinks.
+        st = os.lstat(path)
+        if stat.S_ISREG(st.st_mode):
+            mode = stat.S_IMODE(st.st_mode)
+            if mode & 0o111:
+                result.returncode = 1
+                logging.notice(
+                    "%s: file should not be executable; chmod -x to fix", path
+                )
 
     return result
 
