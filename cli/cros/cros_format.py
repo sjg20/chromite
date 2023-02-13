@@ -47,7 +47,7 @@ _EXT_TOOL_MAP = {
     frozenset({".star"}): (formatters.star.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
-    frozenset({".grd", ".xml", ".xtb"}): (formatters.xml.Data,),
+    frozenset({".grd", ".svg", ".xml", ".xtb"}): (formatters.xml.Data,),
     # TODO(build): Switch .toml to rustfmt when available.
     # https://github.com/rust-lang/rustfmt/issues/4091
     frozenset({".cfg", ".conf", ".ini", ".rules", ".toml", ".txt"}): (
@@ -71,6 +71,7 @@ _FILENAME_PATTERNS_TOOL_MAP = {
             ".gitmodules",
             "COPYING*",
             "LICENSE*",
+            "make.conf",
             "make.defaults",
             "package.accept_keywords",
             "package.force",
@@ -79,7 +80,10 @@ _FILENAME_PATTERNS_TOOL_MAP = {
             "package.provided",
             "package.unmask",
             "package.use",
+            "package.use.force",
             "package.use.mask",
+            "use.force",
+            "use.mask",
         }
     ): (formatters.whitespace.Data,),
     # TODO(build): Add a formatter for this.
