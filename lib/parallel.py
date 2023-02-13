@@ -768,7 +768,7 @@ def RunParallelSteps(
 
     full_steps = []
     queues = []
-    with cros_build_lib.ContextManagerStack() as stack:
+    with contextlib.ExitStack() as stack:
         if return_values:
             # We use a managed queue here, because the child process will wait for the
             # queue(pipe) to be flushed (i.e., when items are read from the queue)
@@ -776,7 +776,7 @@ def RunParallelSteps(
             # large return values.  But with a managed queue, the manager process will
             # read the items and hold on to them until the managed queue goes out of
             # scope and is cleaned up.
-            manager = stack.Add(Manager)
+            manager = stack.enter_context(Manager())
             for step in steps:
                 queue = manager.Queue()
                 queues.append(queue)
