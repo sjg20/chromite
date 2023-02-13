@@ -6,6 +6,7 @@
 
 import fnmatch
 import functools
+import importlib
 import itertools
 import logging
 import os
@@ -164,14 +165,41 @@ def _ConfLintFile(path, output_format, debug, relaxed: bool, commit: str):
     return ret
 
 
-def _CpplintFile(path, output_format, debug, _relaxed: bool, _commit: str):
+@functools.lru_cache(maxsize=None)
+def _cpplint_module():
+    """Load the cpplint.py module.
+
+    We can't import the module directly because it lives in a non-standard path
+    (depot_tools), and we don't want to add that to sys.path because it has a
+    lot of unrelated Python module we don't want polluting our normal search.
+    """
+    modname = "cpplint"
+    cpplint = os.path.join(constants.DEPOT_TOOLS_DIR, "cpplint.py")
+    loader = importlib.machinery.SourceFileLoader(modname, cpplint)
+    spec = importlib.util.spec_from_loader(modname, loader)
+    module = importlib.util.module_from_spec(spec)
+    loader.exec_module(module)
+    return module
+
+
+def _CpplintFile(path, output_format, _debug, _relaxed: bool, _commit: str):
     """Returns result of running cpplint on |path|."""
-    cmd = [os.path.join(constants.DEPOT_TOOLS_DIR, "cpplint.py")]
-    cmd.append("--filter=%s" % ",".join(CPPLINT_DEFAULT_FILTERS))
-    if output_format != "default":
-        cmd.append("--output=%s" % CPPLINT_OUTPUT_FORMAT_MAP[output_format])
-    cmd.append(path)
-    return _ToolRunCommand(cmd, debug)
+    result = cros_build_lib.CompletedProcess(f'cpplint "{path}"', returncode=0)
+
+    # pylint: disable=protected-access
+    # The cpplint API doesn't expose state that we need.  We're pinned to a
+    # specific version, so we don't exactly have to worry about it changing.
+    cpplint = _cpplint_module()
+    cpplint._SetFilters(",".join(CPPLINT_DEFAULT_FILTERS))
+    cpplint._SetOutputFormat(
+        "emacs"
+        if output_format == "default"
+        else CPPLINT_OUTPUT_FORMAT_MAP[output_format]
+    )
+    cpplint.ProcessFile(str(path), cpplint._VerboseLevel())
+    result.returncode = 1 if cpplint._cpplint_state.error_count else 0
+
+    return result
 
 
 def _PylintFile(path, output_format, debug, _relaxed: bool, _commit: str):

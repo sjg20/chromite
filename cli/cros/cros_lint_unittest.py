@@ -86,6 +86,25 @@ def test_non_exec(tmp_path):
     assert ret.returncode == 0
 
 
+def test_cpplint(tmp_path):
+    """Tests for _CpplintFile."""
+    path = tmp_path / "test.cc"
+
+    # Simple file should pass.
+    path.write_text(
+        "// Copyright\nint main() {\n  return 0;\n}\n", encoding="utf-8"
+    )
+    ret = cros_lint._CpplintFile(path, "colorized", False, False, "")
+    assert ret.returncode == 0
+
+    # File missing trailing newlines.
+    path.write_text(
+        "// Copyright\nint main() {\n  return 0;\n}", encoding="utf-8"
+    )
+    ret = cros_lint._CpplintFile(path, "colorized", False, False, "")
+    assert ret.returncode
+
+
 def _call_cros_lint(args: List[str]) -> int:
     """Call "cros lint" with the given command line arguments.
 
