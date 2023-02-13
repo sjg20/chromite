@@ -11,9 +11,10 @@ import glob
 import json
 import logging
 import os
+from pathlib import Path
 import re
 import shutil
-from typing import Any, Callable, Iterable, Optional
+from typing import Any, Callable, Iterable, List, Optional
 
 from chromite.lib import alerts
 from chromite.lib import constants
@@ -70,7 +71,6 @@ KERNEL_AFDO_COMPRESSION_SUFFIX = ".gcov.xz"
 TOOLCHAIN_UTILS_PATH = os.path.join(
     constants.CHROOT_SOURCE_ROOT, "src/third_party/toolchain-utils"
 )
-AFDO_PROFILE_PATH_IN_CHROMIUM = "src/chromeos/profiles/{arch}.afdo.newest.txt"
 MERGED_AFDO_NAME = "chromeos-chrome-{arch}-{name}"
 
 # How old can the Kernel AFDO data be? (in days).
@@ -173,6 +173,15 @@ CHROME_PERF_AFDO_FILE = "%(package)s-%(arch)s-%(versionnorev)s.perf.data"
 CHROME_BENCHMARK_AFDO_FILE = "%s%s" % (CHROME_ARCH_VERSION, AFDO_SUFFIX)
 CHROME_DEBUG_BINARY_NAME = "%s.debug" % CHROME_ARCH_VERSION
 
+PROCESS_SCRIPT = os.path.join(
+    TOOLCHAIN_UTILS_PATH, "orderfile/post_process_orderfile.py"
+)
+CHROME_BINARY_PATH = (
+    "/var/cache/chromeos-chrome/chrome-src-internal/"
+    "src/out_{board}/Release/chrome"
+)
+INPUT_ORDERFILE_PATH = "/build/{board}/opt/google/chrome/chrome.orderfile.txt"
+
 
 class Error(Exception):
     """Base module error class."""
@@ -192,10 +201,6 @@ class GetUpdatedFilesForCommitError(Error):
 
 class NoArtifactsToBundleError(Error):
     """Error for bundling empty collection of artifacts."""
-
-
-class GenerateChromeOrderfileError(Error):
-    """Error for GenerateChromeOrderfile class."""
 
 
 class ProfilesNameHelperError(Error):
@@ -300,48 +305,6 @@ def _ParseMergedProfileName(artifact_name):
     )
 
 
-def _GetArtifactVersionInChromium(arch, chrome_root):
-    """Find the version (name) of AFDO artifact from chromium source.
-
-    Args:
-      arch: There are two AFDO profiles in chromium: atom or bigcore
-      chrome_root: The path to Chrome root.
-
-    Returns:
-      The name of the AFDO artifact found in the chroot.
-      None if not found.
-
-    Raises:
-      ValueError: when "arch" is not a supported.
-      RuntimeError: when the file containing AFDO profile name can't be found.
-    """
-    if arch not in list(CHROME_AFDO_VERIFIER_BOARDS.values()):
-        raise ValueError(f"Invalid architecture {arch} to use in AFDO profile")
-
-    if not os.path.exists(chrome_root):
-        raise RuntimeError(f"chrome_root {chrome_root} does not exist.")
-
-    profile_file = os.path.join(
-        chrome_root, AFDO_PROFILE_PATH_IN_CHROMIUM.format(arch=arch)
-    )
-    if not os.path.exists(profile_file):
-        logging.info(
-            "Files in chrome_root profile: %r",
-            os.listdir(
-                os.path.join(
-                    chrome_root,
-                    AFDO_PROFILE_PATH_IN_CHROMIUM.format(arch=arch),
-                    "..",
-                )
-            ),
-        )
-        raise RuntimeError(
-            f"File {profile_file} containing profile name does not exist"
-        )
-
-    return osutils.ReadFile(profile_file)
-
-
 def _GetCombinedAFDOName(cwp_versions, cwp_arch, benchmark_versions):
     """Construct a name mixing CWP and benchmark AFDO names.
 
@@ -380,24 +343,9 @@ def _GetCombinedAFDOName(cwp_versions, cwp_arch, benchmark_versions):
     return "%s-%s" % (cwp_piece, benchmark_piece)
 
 
-def _GetOrderfileName(chrome_root):
-    """Construct an orderfile name for the current Chrome OS checkout.
-
-    Args:
-      chrome_root: The path to chrome_root.
-
-    Returns:
-      An orderfile name using CWP + benchmark AFDO name.
-    """
-    benchmark_afdo_version, cwp_afdo_version = _ParseMergedProfileName(
-        _GetArtifactVersionInChromium(arch="atom", chrome_root=chrome_root)
-    )
-    return "chromeos-chrome-orderfile-%s" % (
-        _GetCombinedAFDOName(cwp_afdo_version, "field", benchmark_afdo_version)
-    )
-
-
-def _CompressAFDOFiles(targets, input_dir, output_dir, suffix):
+def _CompressAFDOFiles(
+    targets: Iterable[Path], input_dir: Path, output_dir: Path, suffix: str
+) -> List[Path]:
     """Compress files using AFDO compression type.
 
     Args:
@@ -434,159 +382,6 @@ def _CompressAFDOFiles(targets, input_dir, output_dir, suffix):
         )
         ret.append(output_path)
     return ret
-
-
-# TODO(b/187794927): Refactor the class.
-# The class was shared with the legacy builders. Legacy was removed and
-# now we can merge this code into the BundleArtifactHandler class.
-class GenerateChromeOrderfile(object):
-    """Class to handle generation of orderfile for Chrome.
-
-    This class takes orderfile containing symbols ordered by Call-Chain
-    Clustering (C3), produced when linking Chrome, and uses a toolchain
-    script to perform post processing to generate an orderfile that can
-    be used for linking Chrome and creates tarball. The output of this
-    script is a tarball of the orderfile and a tarball of the NM output
-    of the built Chrome binary.
-
-    The whole class runs outside chroot, so use paths relative outside
-    chroot, except the functions noted otherwise.
-    """
-
-    PROCESS_SCRIPT = os.path.join(
-        TOOLCHAIN_UTILS_PATH, "orderfile/post_process_orderfile.py"
-    )
-    CHROME_BINARY_PATH = (
-        "/var/cache/chromeos-chrome/chrome-src-internal/"
-        "src/out_${BOARD}/Release/chrome"
-    )
-    INPUT_ORDERFILE_PATH = (
-        "/build/${BOARD}/opt/google/chrome/chrome.orderfile.txt"
-    )
-
-    def __init__(
-        self, board, output_dir, chrome_root, chroot_path, chroot_args
-    ):
-        """Construct an object for generating orderfile for Chrome.
-
-        Args:
-          board: Name of the board.
-          output_dir: Directory (outside chroot) to save the output artifacts.
-          chrome_root: Path to the Chrome source.
-          chroot_path: Path to the chroot.
-          chroot_args: The arguments used to enter the chroot.
-        """
-        self.output_dir = output_dir
-        self.orderfile_name = _GetOrderfileName(chrome_root)
-        self.chrome_binary = self.CHROME_BINARY_PATH.replace("${BOARD}", board)
-        self.input_orderfile = self.INPUT_ORDERFILE_PATH.replace(
-            "${BOARD}", board
-        )
-        self.chroot_path = chroot_path
-        self.working_dir = os.path.join(self.chroot_path, "tmp")
-        self.working_dir_inchroot = "/tmp"
-        self.chroot_args = chroot_args
-        self.tarballs = []
-
-    def _CheckArguments(self):
-        """Make sure the arguments received are correct."""
-        if not os.path.isdir(self.output_dir):
-            raise GenerateChromeOrderfileError(
-                "Non-existent directory %s specified for --out-dir"
-                % (self.output_dir,)
-            )
-
-        chrome_binary_path_outside = os.path.join(
-            self.chroot_path, self.chrome_binary[1:]
-        )
-        if not os.path.exists(chrome_binary_path_outside):
-            raise GenerateChromeOrderfileError(
-                "Chrome binary does not exist at %s in chroot"
-                % (chrome_binary_path_outside,)
-            )
-
-        chrome_orderfile_path_outside = os.path.join(
-            self.chroot_path, self.input_orderfile[1:]
-        )
-        if not os.path.exists(chrome_orderfile_path_outside):
-            raise GenerateChromeOrderfileError(
-                "No orderfile generated in the builder."
-            )
-
-    def _GenerateChromeNM(self):
-        """Generate symbols by running nm command on Chrome binary.
-
-        This command runs inside chroot.
-        """
-        cmd = ["llvm-nm", "-n", self.chrome_binary]
-        result_inchroot = os.path.join(
-            self.working_dir_inchroot, self.orderfile_name + ".nm"
-        )
-        result_out_chroot = os.path.join(
-            self.working_dir, self.orderfile_name + ".nm"
-        )
-
-        try:
-            cros_build_lib.run(
-                cmd,
-                stdout=result_out_chroot,
-                enter_chroot=True,
-                chroot_args=self.chroot_args,
-            )
-        except cros_build_lib.RunCommandError:
-            raise GenerateChromeOrderfileError(
-                "Unable to run %s to get nm on Chrome binary" % (cmd)
-            )
-
-        # Return path inside chroot
-        return result_inchroot
-
-    def _PostProcessOrderfile(self, chrome_nm):
-        """Use toolchain script to do post-process on the orderfile.
-
-        This command runs inside chroot.
-        """
-        result = os.path.join(
-            self.working_dir_inchroot, self.orderfile_name + ".orderfile"
-        )
-        cmd = [
-            self.PROCESS_SCRIPT,
-            "--chrome",
-            chrome_nm,
-            "--input",
-            self.input_orderfile,
-            "--output",
-            result,
-        ]
-
-        try:
-            cros_build_lib.run(
-                cmd,
-                enter_chroot=True,
-                chroot_args=self.chroot_args,
-                check=True,
-                capture_output=True,
-            )
-        except cros_build_lib.RunCommandError as e:
-            raise GenerateChromeOrderfileError(
-                f"Unable to run %s to process orderfile {cmd} "
-                f"with error: {e.stdout} {e.stderr}."
-            )
-
-        # Return path inside chroot
-        return result
-
-    def Bundle(self):
-        """Generate post-processed Chrome orderfile and create tarball."""
-        self._CheckArguments()
-        chrome_nm = self._GenerateChromeNM()
-        orderfile = self._PostProcessOrderfile(chrome_nm)
-        self.tarballs = _CompressAFDOFiles(
-            [chrome_nm, orderfile],
-            self.working_dir,
-            self.output_dir,
-            XZ_COMPRESSION_SUFFIX,
-        )
 
 
 def _RankValidCWPProfiles(name: str) -> int:
@@ -783,22 +578,22 @@ class _CommonPrepareBundle(object):
         }
         return template % afdo_spec
 
-    def _GetArtifactVersionInGob(self, arch):
+    def _GetArtifactVersionInGob(self, profile_arch: str) -> str:
         """Find the version (name) of AFDO artifact from GoB.
 
         Args:
-          arch: There are two AFDO profiles in chromium: atom or bigcore.
+          profile_arch: There are two AFDO profiles in chromium: atom or bigcore.
 
         Returns:
           The name of the AFDO artifact found on GoB, or None if not found.
 
         Raises:
-          ValueError: when "arch" is not a supported.
-          RuntimeError: when the file containing AFDO profile name can't be found.
+          ValueError: when "profile_arch" is not a supported.
+          RuntimeError: when the file containing AFDO profile_arch name can't be found.
         """
-        if arch not in list(CHROME_AFDO_VERIFIER_BOARDS.values()):
+        if profile_arch not in list(CHROME_AFDO_VERIFIER_BOARDS.values()):
             raise ValueError(
-                "Invalid architecture %s to use in AFDO profile" % arch
+                f"Invalid architecture {profile_arch} to use in AFDO profile_arch"
             )
 
         chrome_info = self._GetEbuildInfo(constants.CHROME_PN)
@@ -806,15 +601,15 @@ class _CommonPrepareBundle(object):
         if version.endswith("_rc"):
             version = version[:-3]
         profile_path = (
-            "chromium/src/+/refs/tags/%s/chromeos/profiles/%s.afdo.newest.txt"
-            "?format=text" % (version, arch)
+            f"chromium/src/+/refs/tags/{version}/chromeos/profiles/{profile_arch}"
+            ".afdo.newest.txt?format=text"
         )
 
         contents = gob_util.FetchUrl(constants.EXTERNAL_GOB_HOST, profile_path)
         if not contents:
             raise RuntimeError(
-                "Could not fetch https://%s/%s"
-                % (constants.EXTERNAL_GOB_HOST, profile_path)
+                "Could not fetch https://"
+                f"{constants.EXTERNAL_GOB_HOST}/{profile_path}"
             )
 
         return base64.decodebytes(contents).decode("utf-8")
@@ -844,14 +639,13 @@ class _CommonPrepareBundle(object):
         logging.info("%s is not found in the ebuild: %s", variable, ebuild)
         return None
 
-    def _GetOrderfileName(self):
+    def _GetOrderfileName(self) -> str:
         """Get the name of the orderfile."""
-        artifact_version = self._GetArtifactVersionInGob(arch="atom")
+        artifact_version = self._GetArtifactVersionInGob(profile_arch="atom")
         logging.info("Orderfile artifact version = %s", artifact_version)
         benchmark_afdo, cwp_afdo = _ParseMergedProfileName(artifact_version)
-        return "chromeos-chrome-orderfile-%s.orderfile" % (
-            _GetCombinedAFDOName(cwp_afdo, "field", benchmark_afdo)
-        )
+        combined_name = _GetCombinedAFDOName(cwp_afdo, "field", benchmark_afdo)
+        return f"chromeos-chrome-orderfile-{combined_name}"
 
     def _FindLatestOrderfileArtifact(self, gs_urls):
         """Find the latest Ordering file artifact in a bucket.
@@ -1558,7 +1352,9 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
     def _PrepareUnverifiedChromeLlvmOrderfile(self):
         """Prepare to build an unverified ordering file."""
         return self._CommonPrepareBasedOnGsPathExists(
-            name=self._GetOrderfileName() + XZ_COMPRESSION_SUFFIX,
+            name=(
+                self._GetOrderfileName() + ".orderfile" + XZ_COMPRESSION_SUFFIX
+            ),
             url=ORDERFILE_GS_URL_UNVETTED,
             key="UnverifiedChromeLlvmOrderfile",
         )
@@ -1984,27 +1780,129 @@ class BundleArtifactHandler(_CommonPrepareBundle):
     def Bundle(self):
         return self._bundle_func()
 
-    def _BundleUnverifiedChromeLlvmOrderfile(self):
-        """Bundle to build an unverified ordering file."""
-        with self.chroot.tempdir() as tempdir:
-            GenerateChromeOrderfile(
-                board=self.build_target,
-                output_dir=tempdir,
-                chrome_root=self.chroot.chrome_root,
-                chroot_path=self.chroot.path,
-                chroot_args=self.chroot.get_enter_args(),
-            ).Bundle()
-
-            files = []
-            for path in osutils.DirectoryIterator(tempdir):
-                if os.path.isfile(path):
-                    rel_path = os.path.relpath(path, tempdir)
-                    files.append(os.path.join(self.output_dir, rel_path))
-            osutils.CopyDirContents(
-                tempdir, self.output_dir, allow_nonempty=True
+    def _CheckArguments(
+        self, input_orderfile: Path, chrome_binary: Path
+    ) -> None:
+        """Make sure the arguments received are correct."""
+        if not os.path.isdir(self.output_dir):
+            raise BundleArtifactsHandlerError(
+                f"Non-existent directory '{self.output_dir}' specified for --out-dir"
             )
 
-        return files
+        chrome_binary_path_outside = self.chroot.full_path(
+            self.sysroot_path, chrome_binary
+        )
+        if not os.path.exists(chrome_binary_path_outside):
+            raise BundleArtifactsHandlerError(
+                f"'{chrome_binary_path_outside}' chrome binary does not exist"
+            )
+
+        chrome_orderfile_path_outside = self.chroot.full_path(
+            self.sysroot_path, input_orderfile
+        )
+        if not os.path.exists(chrome_orderfile_path_outside):
+            raise BundleArtifactsHandlerError(
+                "No orderfile generated in the builder. "
+                f"Expected '{chrome_orderfile_path_outside}'"
+            )
+
+    def _GenerateChromeNM(
+        self, orderfile_name: Path, chrome_binary: Path
+    ) -> Path:
+        """Generate symbols by running nm command on Chrome binary.
+
+        This command runs inside chroot.
+        """
+        cmd = ["llvm-nm", "-n", chrome_binary]
+        result_inchroot = os.path.join(
+            self.chroot.chroot_path(self.chroot.tmp), orderfile_name + ".nm"
+        )
+        result_out_chroot = os.path.join(
+            self.chroot.tmp, orderfile_name + ".nm"
+        )
+
+        try:
+            cros_build_lib.run(
+                cmd,
+                stdout=result_out_chroot,
+                enter_chroot=True,
+            )
+        except cros_build_lib.RunCommandError:
+            raise BundleArtifactsHandlerError(
+                f"Unable to run {cmd} to get nm on Chrome binary"
+            )
+
+        # Return path inside chroot
+        return result_inchroot
+
+    def _PostProcessOrderfile(
+        self,
+        input_orderfile: Path,
+        chrome_nm: Path,
+        output_orderfile_name: Path,
+    ) -> Path:
+        """Use toolchain script to do post-process on the orderfile.
+
+        This command runs inside chroot.
+
+        Args:
+          input_orderfile: Chroot path to the input orderfile.
+          chrome_nm: Chroot path to the chrome symbols file.
+          output_orderfile_name: Basename of the output orderfile.
+
+        Returns:
+          Chroot path to the generated orderfile.
+
+        Raises:
+          BundleArtifactsHandlerError if generation fails.
+        """
+        output_orderfile_path = os.path.join(
+            self.chroot.chroot_path(self.chroot.tmp),
+            output_orderfile_name + ".orderfile",
+        )
+        cmd = [
+            PROCESS_SCRIPT,
+            "--chrome",
+            chrome_nm,
+            "--input",
+            input_orderfile,
+            "--output",
+            output_orderfile_path,
+        ]
+
+        try:
+            cros_build_lib.run(
+                cmd,
+                enter_chroot=True,
+                check=True,
+                capture_output=True,
+            )
+        except cros_build_lib.RunCommandError as e:
+            raise BundleArtifactsHandlerError(
+                f"Unable to run %s to process orderfile {cmd} "
+                f"with error: {e.stdout} {e.stderr}."
+            )
+
+        return output_orderfile_path
+
+    def _BundleUnverifiedChromeLlvmOrderfile(self) -> List[Path]:
+        """Bundle to build an unverified ordering file."""
+        input_orderfile = INPUT_ORDERFILE_PATH.format(board=self.build_target)
+        chrome_binary = CHROME_BINARY_PATH.format(board=self.build_target)
+        self._CheckArguments(input_orderfile, chrome_binary)
+
+        orderfile_name = self._GetOrderfileName()
+        chrome_nm = self._GenerateChromeNM(orderfile_name, chrome_binary)
+        orderfile = self._PostProcessOrderfile(
+            input_orderfile, chrome_nm, orderfile_name
+        )
+        tarballs = _CompressAFDOFiles(
+            [chrome_nm, orderfile],
+            self.chroot.tmp,
+            self.output_dir,
+            XZ_COMPRESSION_SUFFIX,
+        )
+        return tarballs
 
     def _BundleVerifiedChromeLlvmOrderfile(self):
         """Bundle vetted ordering file."""
@@ -2312,14 +2210,13 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         profile_name += KERNEL_AFDO_COMPRESSION_SUFFIX
         # The verified profile is in the sysroot with a name similar to:
         # /usr/lib/debug/boot/chromeos-kernel-4_4-R82-12874.0-1581935639.gcov.xz
-        profile_path = os.path.join(
-            self.chroot.path,
-            self.sysroot_path[1:],
+        profile_path = self.chroot.full_path(
+            self.sysroot_path,
             "usr",
             "lib",
             "debug",
             "boot",
-            "chromeos-kernel-%s-%s" % (kernel_version, profile_name),
+            f"chromeos-kernel-{kernel_version}-{profile_name}",
         )
         verified_profile = os.path.join(self.output_dir, profile_name)
         shutil.copy2(profile_path, verified_profile)

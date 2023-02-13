@@ -5,12 +5,10 @@
 """Unit tests for toolchain_util."""
 
 import base64
-import builtins
 import collections
 import datetime
 import fnmatch
 import glob
-import io
 import json
 import os
 from pathlib import Path
@@ -182,25 +180,6 @@ class ProfilesNameHelperTest(cros_test_lib.MockTempDirTestCase):
             ),
         )
 
-    def testGetOrderfileName(self):
-        """Test method _GetOrderfileName and related methods."""
-        profile_name = (
-            "chromeos-chrome-amd64-atom-77-3809.38-1562580965-"
-            "benchmark-77.0.3849.0-r1-redacted.afdo.xz"
-        )
-        self.PatchObject(
-            toolchain_util,
-            "_GetArtifactVersionInChromium",
-            return_value=profile_name,
-        )
-        result = toolchain_util._GetOrderfileName("/path/to/chrome_root")
-        cwp_name = "field-77-3809.38-1562580965"
-        benchmark_name = "benchmark-77.0.3849.0-r1"
-        self.assertEqual(
-            result,
-            "chromeos-chrome-orderfile-%s-%s" % (cwp_name, benchmark_name),
-        )
-
     def testCompressAFDOFiles(self):
         """Test _CompressAFDOFiles()."""
         input_dir = "/path/to/inputs"
@@ -261,10 +240,12 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
 
     def setUp(self):
         self.board = "chell"
-        self.chroot = chroot_lib.Chroot(
-            path=self.tempdir, chrome_root=self.tempdir
+        self.chroot = chroot_lib.Chroot(os.path.join(self.tempdir, "chroot"))
+        osutils.SafeMakedirs(self.chroot.tmp)
+        self.sysroot = f"/build/{self.board}"
+        self.sysroot_full_path = os.path.join(
+            self.chroot.path, "build", self.board
         )
-        self.sysroot = "/build/%s" % self.board
         self.chrome_package = "chromeos-chrome"
         self.kernel_package = "chromeos-kernel-3_18"
         self.profile_info = {"arch": "amd64"}
@@ -297,7 +278,10 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
         self.gsc_list = self.PatchObject(
             self.gs_context, "List", return_value=[]
         )
-        self.data = b"data"
+        self.data = (
+            b"chromeos-chrome-amd64-atom-77-3809.38-1562580965"
+            b"-benchmark-77.0.3849.0-r1-redacted.afdo.xz"
+        )
         self.arch = "atom"
         self.fetch = self.PatchObject(
             gob_util, "FetchUrl", return_value=base64.encodebytes(self.data)
@@ -374,7 +358,7 @@ class CommonPrepareBundleTest(PrepareBundleTest):
         )
         self.assertEqual(
             "chromeos-chrome-orderfile-field-78-1111.0-"
-            "157000000-benchmark-78.0.3893.0-r1.orderfile",
+            "157000000-benchmark-78.0.3893.0-r1",
             self.obj._GetOrderfileName(),
         )
         vers.assert_called_once()
@@ -625,7 +609,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         )
         self.obj._gs_context = self.gs_context
         self.PatchObject(
-            self.obj, "_GetOrderfileName", return_value="orderfile"
+            self.obj,
+            "_GetOrderfileName",
+            return_value="chromeos-chrome-orderfile-field",
         )
         self.gsc_exists = self.PatchObject(
             self.gs_context, "Exists", return_value=True
@@ -648,7 +634,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             toolchain_util.PrepareForBuildReturn.POINTLESS, self.obj.Prepare()
         )
         self.gs_context.Exists.assert_called_once_with(
-            "gs://publish/location/orderfile.xz"
+            "gs://publish/location/chromeos-chrome-orderfile-field.orderfile.xz"
         )
 
     def testPrepareUnverifiedChromeLlvmOrderfileMissing(self):
@@ -662,7 +648,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             toolchain_util.PrepareForBuildReturn.NEEDED, self.obj.Prepare()
         )
         self.gs_context.Exists.assert_called_once_with(
-            "gs://publish/location/orderfile.xz"
+            "gs://publish/location/chromeos-chrome-orderfile-field.orderfile.xz"
         )
 
     def testPrepareVerifiedChromeLlvmOrderfileExists(self):
@@ -904,38 +890,48 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             },
             mock_patch=False,
         )
-        kernel_cwp = os.path.join(cwp_new_loc, cwp_new_ver)
-        ebuild_info = toolchain_util._EbuildInfo(
-            path="/path/to/kernel-9999.ebuild", CPV=mock.MagicMock()
+        kernel_package = "sys-kernel/chromeos-kernel-5_15-5.15.12-r1234"
+        ebuild_spec = "{c}/{p}-{v}-r{r}.ebuild"
+        kernel_cpv = package_info.parse(kernel_package)
+        ebuild_info_path = os.path.join(
+            self.sysroot_full_path, format(kernel_cpv, ebuild_spec)
         )
-
-        self.PatchObject(os, "rename")
-        self.PatchObject(cros_build_lib, "run")
+        ebuild_info = toolchain_util._EbuildInfo(
+            path=self.chroot.chroot_path(ebuild_info_path), CPV=kernel_cpv
+        )
         self.PatchObject(toolchain_util, "_GetProfileAge", return_value=0)
         self.PatchObject(self.obj, "_GetEbuildInfo", return_value=ebuild_info)
+        kernel_cwp = os.path.join(cwp_new_loc, cwp_new_ver)
         self.PatchObject(
             self.obj, "_FindLatestAFDOArtifact", return_value=kernel_cwp
         )
         # The artifact is missing, build is needed.
         self.gsc_exists.return_value = False
         ebuild_old_str = "".join(ebuild_list_of_str).format(
-            changing_cwp_loc=cwp_old_loc, changing_cwp_ver=cwp_old_ver
+            changing_cwp_loc=cwp_old_loc,
+            changing_cwp_ver=cwp_old_ver,
         )
-        # We are going to check how the mock_object was called.
-        mock_open = self.PatchObject(
-            builtins, "open", mock.mock_open(read_data=(ebuild_old_str))
+        self.WriteTempFile(
+            ebuild_info_path,
+            ebuild_old_str,
+            makedirs=True,
         )
 
         self.obj.Prepare()
 
-        # Check the expected patched lines.
-        for ebuild_line in ebuild_list_of_str:
-            resolved_line = ebuild_line.format(
-                changing_cwp_loc=cwp_new_loc, changing_cwp_ver=cwp_new_ver
-            )
-            self.assertIn(
-                mock.call().write(resolved_line), mock_open.mock_calls
-            )
+        # Check contents in the uprevved package.
+        uprev_path = os.path.join(
+            self.sysroot_full_path,
+            format(kernel_cpv.revision_bump(), ebuild_spec),
+        )
+        new_contents = self.ReadTempFile(uprev_path)
+        self.assertEqual(
+            "".join(ebuild_list_of_str).format(
+                changing_cwp_loc=cwp_new_loc,
+                changing_cwp_ver=cwp_new_ver,
+            ),
+            new_contents,
+        )
 
     def testPrepareVerifiedKernelCwpAfdoFileOldEbuild(self):
         """Test PrepareVerifiedKernelCwpAfdoFile and patch old ebuild."""
@@ -1115,7 +1111,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
-                    self.tempdir,
+                    self.chroot.path,
                     (
                         f"tmp/chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo"
@@ -1144,7 +1140,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
-                    self.tempdir,
+                    self.chroot.path,
                     (
                         f"tmp/chromeos-chrome-arm-none-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo"
@@ -1172,7 +1168,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
-                    self.tempdir,
+                    self.chroot.path,
                     (
                         f"tmp/chromeos-chrome-arm-none-78-3877.0-{self.day_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo"
@@ -1201,7 +1197,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
-                    self.tempdir,
+                    self.chroot.path,
                     (
                         f"tmp/chromeos-chrome-arm-none-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo"
@@ -1244,7 +1240,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
-                    self.tempdir,
+                    self.chroot.path,
                     (
                         "tmp/chromeos-chrome-arm-armv7a-78-3877.0-"
                         f"{self.day_old_ts}-benchmark-78.0.3839.0-r1-redacted"
@@ -1272,28 +1268,33 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         self.profile_info["kernel_version"] = self.kernel_version.replace(
             "_", "."
         )
-        self.orderfile_name = (
-            "chromeos-chrome-orderfile-field-78-3877.0-1567418235-"
-            "benchmark-78.0.3893.0-r1.orderfile"
+        cwp_version = "78-3877.0-1567418235"
+        benchmark_version = "78.0.3893.0"
+        self.afdo_name = f"chromeos-chrome-amd64-{benchmark_version}_rc-r1.afdo"
+        self.perf_name = f"chromeos-chrome-amd64-{benchmark_version}.perf.data"
+        self.release_afdo_name = (
+            f"chromeos-chrome-amd64-atom-{cwp_version}-"
+            f"benchmark-{benchmark_version}-r1-redacted.afdo.xz"
         )
-        self.afdo_name = "chromeos-chrome-amd64-78.0.3893.0_rc-r1.afdo"
-        self.perf_name = "chromeos-chrome-amd64-78.0.3893.0.perf.data"
-        self.debug_binary_name = "chromeos-chrome-amd64-78.0.3893.0_rc-r1.debug"
-        self.merged_afdo_name = (
-            "chromeos-chrome-amd64-78.0.3893.0_rc-r1-merged.afdo"
+        self.orderfile_name = (
+            f"chromeos-chrome-orderfile-field-{cwp_version}-"
+            f"benchmark-{benchmark_version}-r1.orderfile"
+        )
+        self.debug_binary_name = (
+            f"chromeos-chrome-amd64-{benchmark_version}_rc-r1.debug"
+        )
+        self.merged_android_afdo_name = (
+            f"chromeos-chrome-amd64-{benchmark_version}_rc-r1-merged.afdo"
         )
         self.kernel_name = "R89-13638.0-1607337135"
 
-        self.gen_order = self.PatchObject(
-            toolchain_util.GenerateChromeOrderfile, "Bundle", new=_Bundle
-        )
-        self.PatchObject(
-            toolchain_util,
-            "_GetOrderfileName",
-            return_value=self.orderfile_name,
-        )
         self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
         self.copy2 = self.PatchObject(shutil, "copy2")
+        self.fetch = self.PatchObject(
+            gob_util,
+            "FetchUrl",
+            return_value=base64.encodebytes(self.release_afdo_name.encode()),
+        )
 
         class mock_datetime(object):
             """Class for mocking datetime.datetime."""
@@ -1337,12 +1338,130 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         ):
             self.SetUpBundle("UnverifiedChromeBenchmarkPerfFile")
 
+    def mockChromeAndOrderfile(self) -> (Path, Path):
+        """Generate names and mock the files in fs."""
+        self.PatchObject(
+            toolchain_util, "CHROME_BINARY_PATH", new="path/out_{board}/chrome"
+        )
+        self.PatchObject(
+            toolchain_util,
+            "INPUT_ORDERFILE_PATH",
+            new="build/{board}/orderfile",
+        )
+        chrome_binary = Path(
+            toolchain_util.CHROME_BINARY_PATH.format(board=self.board)
+        )
+        orderfile = Path(
+            toolchain_util.INPUT_ORDERFILE_PATH.format(board=self.board)
+        )
+        self.WriteTempFile(
+            self.chroot.full_path(self.sysroot, chrome_binary),
+            "",
+            makedirs=True,
+        )
+        self.WriteTempFile(
+            self.chroot.full_path(self.sysroot, orderfile),
+            "",
+            makedirs=True,
+        )
+        return chrome_binary, orderfile
+
+    def testCheckArgumentsFail(self):
+        """Test arguments checking fails without files existing."""
+        self.SetUpBundle("UnverifiedChromeLlvmOrderfile")
+        chrome_binary, orderfile = self.mockChromeAndOrderfile()
+        invalid_dir = "/does/not/exist/"
+
+        invalid_orderfile = Path(invalid_dir, "orderfile")
+        invalid_full_path = self.chroot.full_path(
+            self.sysroot, invalid_orderfile
+        )
+        with self.assertRaisesRegex(
+            toolchain_util.BundleArtifactsHandlerError,
+            (
+                "No orderfile generated in the builder. "
+                f"Expected '{invalid_full_path}'"
+            ),
+        ):
+            self.obj._CheckArguments(invalid_orderfile, chrome_binary)
+
+        invalid_chrome = Path(invalid_dir, "chrome")
+        with self.assertRaisesRegex(
+            toolchain_util.BundleArtifactsHandlerError,
+            f"'{self.chroot.full_path(invalid_chrome)}' chrome binary does not exist",
+        ):
+            self.obj._CheckArguments(chrome_binary, invalid_chrome)
+
+        self.obj.output_dir = invalid_dir
+        with self.assertRaisesRegex(
+            toolchain_util.BundleArtifactsHandlerError,
+            f"Non-existent directory '{invalid_dir}' specified for --out-dir",
+        ):
+            self.obj._CheckArguments(chrome_binary, orderfile)
+
+    def testGenerateChromeNM(self):
+        """Test generating chrome NM is handled correctly."""
+        self.SetUpBundle("UnverifiedChromeLlvmOrderfile")
+        chrome_binary, _ = self.mockChromeAndOrderfile()
+
+        self.obj._GenerateChromeNM(self.orderfile_name, chrome_binary)
+
+        cmd = ["llvm-nm", "-n", chrome_binary]
+        self.rc.assertCommandContains(cmd)
+
+    def testPostProcessOrderfile(self):
+        """Test post-processing orderfile is handled correctly."""
+        self.SetUpBundle("UnverifiedChromeLlvmOrderfile")
+        input_orderfile = "/path/to/chromeos-chrome-orderfile"
+        chrome_nm = "/tmp/chrome.nm"
+        output_orderfile_name = "new-shiny-orderfile"
+        output = os.path.join(
+            self.chroot.chroot_path(self.chroot.tmp),
+            output_orderfile_name + ".orderfile",
+        )
+
+        self.obj._PostProcessOrderfile(
+            input_orderfile, chrome_nm, output_orderfile_name
+        )
+
+        cmd = [
+            toolchain_util.PROCESS_SCRIPT,
+            "--chrome",
+            chrome_nm,
+            "--input",
+            input_orderfile,
+            "--output",
+            output,
+        ]
+        self.rc.assertCommandContains(cmd)
+
     def testBundleUnverifiedChromeLlvmOrderfile(self):
         """Test that BundleUnverfiedChromeLlvmOrderfile works."""
         self.SetUpBundle("UnverifiedChromeLlvmOrderfile")
-        artifact = os.path.join(self.outdir, "artifact")
-        self.assertEqual([artifact], self.obj.Bundle())
-        self.copy2.assert_called_once_with(mock.ANY, Path(artifact))
+        _, _ = self.mockChromeAndOrderfile()
+
+        self.PatchObject(cros_build_lib, "CompressFile")
+        self.PatchObject(os.path, "getsize", return_value=100000)
+        self.PatchObject(os.path, "exists", return_value=True)
+
+        bundle_files = self.obj.Bundle()
+
+        orderfile_base_name = self.orderfile_name.replace(".orderfile", "")
+        expect_artifacts = [
+            os.path.join(
+                self.outdir,
+                orderfile_base_name
+                + ".nm"
+                + toolchain_util.XZ_COMPRESSION_SUFFIX,
+            ),
+            os.path.join(
+                self.outdir,
+                orderfile_base_name
+                + ".orderfile"
+                + toolchain_util.XZ_COMPRESSION_SUFFIX,
+            ),
+        ]
+        self.assertEqual(expect_artifacts, bundle_files)
 
     def testBundleVerifiedChromeLlvmOrderfileExists(self):
         """Test that BundleVerfiedChromeLlvmOrderfile works."""
@@ -1360,7 +1479,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
                 "build",
                 self.board,
                 "opt/google/chrome",
-                "%s.xz" % self.orderfile_name,
+                f"{self.orderfile_name}.xz",
             ),
             artifact,
         )
@@ -1369,7 +1488,15 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         """Test that BundleVerfiedChromeLlvmOrderfile raises exception."""
         self.SetUpBundle("VerifiedChromeLlvmOrderfile")
         # Chrome ebuild file is missing UNVETTED_ORDERFILE.
-        self.PatchObject(builtins, "open", mock.mock_open(read_data=""))
+        ebuild_path = self.obj._GetEbuildInfo(
+            toolchain_util.constants.CHROME_PN
+        ).path
+        self.WriteTempFile(
+            self.chroot.full_path(self.sysroot, ebuild_path),
+            "",
+            makedirs=True,
+        )
+
         with self.assertRaisesRegex(
             toolchain_util.BundleArtifactsHandlerError,
             f"Could not find UNVETTED_ORDERFILE version in {constants.CHROME_PN}",
@@ -1447,8 +1574,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         )
         self.assertEqual([output], self.obj.Bundle())
 
-    @mock.patch.object(builtins, "open")
-    def testBundleUnverifiedChromeBenchmarkAfdoFile(self, mock_open):
+    def testBundleUnverifiedChromeBenchmarkAfdoFile(self):
         self.SetUpBundle("UnverifiedChromeBenchmarkAfdoFile")
         self.PatchObject(
             self.obj,
@@ -1457,12 +1583,9 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
                 path=self.chrome_ebuild, CPV=self.chrome_pkg
             ),
         )
-        run_command = self.PatchObject(cros_build_lib, "run")
         sym_link_command = self.PatchObject(osutils, "SafeSymlink")
         # Return ~1MB profile size.
         self.PatchObject(os.path, "getsize", return_value=100000)
-        mock_file_obj = io.StringIO()
-        mock_open.return_value = mock_file_obj
 
         ret = self.obj.Bundle()
         afdo_path = os.path.join(
@@ -1478,31 +1601,19 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         )
         afdo_path_inside = os.path.join(self.afdo_tmp_path, self.afdo_name)
         # Make sure commands are executed correctly
-        mock_calls = [
-            mock.call(
-                [
-                    toolchain_util._AFDO_GENERATE_LLVM_PROF,
-                    "--binary="
-                    + os.path.join(self.afdo_tmp_path, "chrome.unstripped"),
-                    "--profile="
-                    + os.path.join(self.afdo_tmp_path, self.perf_name),
-                    "--out=" + afdo_path_inside,
-                    "--sample_threshold_frac=0",
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
-            mock.call(
-                ["bzip2", "-c", afdo_path_inside],
-                stdout=mock_file_obj,
-                enter_chroot=True,
-                print_cmd=True,
-            ),
-        ]
-        run_command.assert_has_calls(mock_calls)
+        self.rc.assertCommandContains(
+            [
+                toolchain_util._AFDO_GENERATE_LLVM_PROF,
+                "--binary="
+                + os.path.join(self.afdo_tmp_path, "chrome.unstripped"),
+                "--profile=" + os.path.join(self.afdo_tmp_path, self.perf_name),
+                "--out=" + afdo_path_inside,
+                "--sample_threshold_frac=0",
+            ]
+        )
+        self.rc.assertCommandContains(["bzip2", "-c", afdo_path_inside])
 
-    @mock.patch.object(builtins, "open")
-    def testBundleUnverifiedChromeBenchmarkAfdoFileRaisesError(self, mock_open):
+    def testBundleUnverifiedChromeBenchmarkAfdoFileRaisesError(self):
         self.SetUpBundle("UnverifiedChromeBenchmarkAfdoFile")
         self.PatchObject(
             self.obj,
@@ -1511,12 +1622,9 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
                 path=self.chrome_ebuild, CPV=self.chrome_pkg
             ),
         )
-        self.PatchObject(cros_build_lib, "run")
         self.PatchObject(osutils, "SafeSymlink")
         # Return invalid size of the profile.
         self.PatchObject(os.path, "getsize", return_value=100)
-        mock_file_obj = io.StringIO()
-        mock_open.return_value = mock_file_obj
 
         with self.assertRaises(toolchain_util.BundleArtifactsHandlerError):
             self.obj.Bundle()
@@ -1531,51 +1639,48 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         self.assertIn("No new AFDO profile created", str(context.exception))
         merge_function.assert_not_called()
 
-    @mock.patch.object(builtins, "open")
-    def testBundleChromeAFDOProfileForAndroidLinuxPass(self, mock_open):
+    def testBundleChromeAFDOProfileForAndroidLinuxPass(self):
         self.SetUpBundle("ChromeAFDOProfileForAndroidLinux")
         self.PatchObject(os.path, "exists", return_value=True)
-        run_command = self.PatchObject(cros_build_lib, "run")
         merge_function = self.PatchObject(
             self.obj,
             "_CreateAndUploadMergedAFDOProfile",
-            return_value=self.merged_afdo_name,
+            return_value=self.merged_android_afdo_name,
         )
-        mock_file_obj = io.StringIO()
-        mock_open.return_value = mock_file_obj
 
         ret = self.obj.Bundle()
         merged_path = os.path.join(
             self.outdir,
-            self.merged_afdo_name + toolchain_util.BZ2_COMPRESSION_SUFFIX,
+            self.merged_android_afdo_name
+            + toolchain_util.BZ2_COMPRESSION_SUFFIX,
         )
         self.assertEqual([merged_path], ret)
         # Make sure merged function is called
         afdo_path_inside = os.path.join(self.afdo_tmp_path, self.afdo_name)
         merged_path_inside = os.path.join(
-            self.afdo_tmp_path, self.merged_afdo_name
+            self.afdo_tmp_path, self.merged_android_afdo_name
         )
         merge_function.assert_called_with(
             self.chroot.full_path(afdo_path_inside),
             self.chroot.full_path(os.path.join(self.afdo_tmp_path)),
         )
-        run_command.assert_called_with(
-            ["bzip2", "-c", merged_path_inside],
-            stdout=mock_file_obj,
-            enter_chroot=True,
-            print_cmd=True,
-        )
+        self.rc.assertCommandContains(["bzip2", "-c", merged_path_inside])
 
     def callBundleVerifiedKernelCwpAfdoFile(self, ebuild_data_list):
         self.SetUpBundle("VerifiedKernelCwpAfdoFile")
+        ebuild_info_path = self.chroot.full_path(
+            "path", "to", "kernel-9999.ebuild"
+        )
         ebuild_info = toolchain_util._EbuildInfo(
-            path="/path/to/kernel-9999.ebuild", CPV=mock.MagicMock()
+            path=ebuild_info_path, CPV=mock.MagicMock()
         )
         self.PatchObject(self.obj, "_GetEbuildInfo", return_value=ebuild_info)
         ebuild_old_str = "".join(ebuild_data_list)
         # We are going to check how the mock_object was called.
-        self.PatchObject(
-            builtins, "open", mock.mock_open(read_data=(ebuild_old_str))
+        self.WriteTempFile(
+            ebuild_info_path,
+            ebuild_old_str,
+            makedirs=True,
         )
 
         ret = self.obj.Bundle()
@@ -1585,9 +1690,8 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         )
         verified_profile = os.path.join(self.outdir, profile_name)
         self.assertEqual([verified_profile], ret)
-        profile_path = os.path.join(
-            self.chroot.path,
-            self.sysroot[1:],
+        profile_path = self.chroot.full_path(
+            self.sysroot,
             "usr",
             "lib",
             "debug",
@@ -1665,13 +1769,11 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         ) as create_tarball_mock:
             in_chroot_dirs = [
                 artifact_path,
-                "/build/%s%s" % (self.board, artifact_path),
+                f"/build/{self.board}{artifact_path}",
             ]
             for d in (self.chroot.full_path(x) for x in in_chroot_dirs):
                 for l in input_files:
-                    p = os.path.join(d, l)
-                    osutils.SafeMakedirs(os.path.dirname(p))
-                    osutils.Touch(p)
+                    self.WriteTempFile(os.path.join(d, l), "", makedirs=True)
 
             tarball = self.obj.Bundle()
 
@@ -1811,7 +1913,6 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
 
         self.gs_copy = self.PatchObject(self.gs_context, "Copy")
         self.decompress = self.PatchObject(cros_build_lib, "UncompressFile")
-        self.run_command = self.PatchObject(cros_build_lib, "run")
 
     def testMergeAFDOProfiles(self):
         self.obj._MergeAFDOProfiles(self.merge_inputs, self.merge_output)
@@ -1824,9 +1925,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
             "-weighted-input=%d,%s" % (weight, self.chroot.chroot_path(name))
             for name, weight in self.merge_inputs
         ]
-        self.run_command.assert_called_once_with(
-            merge_command, enter_chroot=True, print_cmd=True
-        )
+        self.rc.assertCommandContains(merge_command)
 
     def runProcessAFDOProfileOnce(
         self,
@@ -1844,7 +1943,8 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         self.PatchObject(os.path, "getsize", return_value=100000)
         self.obj._ProcessAFDOProfile(input_path, output_path, *args, **kwargs)
 
-        self.run_command.assert_has_calls(expected_commands)
+        for expected_command in expected_commands:
+            self.rc.assertCommandContains(expected_command)
 
     def testProcessAFDOProfileForAndroidLinuxProfile(self):
         """Test call on _processAFDOProfile() for Android/Linux profiles."""
@@ -1856,50 +1956,34 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         reduce_functions = 70000
         output_path = os.path.join(self.tempdir, "android.prof.output.afdo")
         expected_commands = [
-            mock.call(
-                [
-                    "llvm-profdata",
-                    "merge",
-                    "-sample",
-                    "-text",
-                    input_path_inchroot,
-                    "-output",
-                    input_to_text,
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
-            mock.call(
-                [
-                    "remove_indirect_calls",
-                    "--input=" + input_to_text,
-                    "--output=" + removed_temp,
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
-            mock.call(
-                [
-                    "remove_cold_functions",
-                    "--input=" + removed_temp,
-                    "--output=" + reduced_temp,
-                    "--number=" + str(reduce_functions),
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
-            mock.call(
-                [
-                    "llvm-profdata",
-                    "merge",
-                    "-sample",
-                    reduced_temp,
-                    "-output",
-                    self.chroot.chroot_path(output_path),
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
+            [
+                "llvm-profdata",
+                "merge",
+                "-sample",
+                "-text",
+                input_path_inchroot,
+                "-output",
+                input_to_text,
+            ],
+            [
+                "remove_indirect_calls",
+                "--input=" + input_to_text,
+                "--output=" + removed_temp,
+            ],
+            [
+                "remove_cold_functions",
+                "--input=" + removed_temp,
+                "--output=" + reduced_temp,
+                "--number=" + str(reduce_functions),
+            ],
+            [
+                "llvm-profdata",
+                "merge",
+                "-sample",
+                reduced_temp,
+                "-output",
+                self.chroot.chroot_path(output_path),
+            ],
         ]
 
         self.runProcessAFDOProfileOnce(
@@ -1918,74 +2002,49 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
         with self.assertRaises(toolchain_util.BundleArtifactsHandlerError):
             self.obj._ProcessAFDOProfile(input_path, output_path)
 
-    @mock.patch.object(builtins, "open")
-    def testProcessAFDOProfileForChromeOSReleaseProfile(self, mock_open):
+    def testProcessAFDOProfileForChromeOSReleaseProfile(self):
         """Test call on _processAFDOProfile() for CrOS release profiles."""
         input_path = os.path.join(self.tempdir, self.merged_name)
         input_path_inchroot = self.chroot.chroot_path(input_path)
         input_to_text = input_path_inchroot + ".text.temp"
         redacted_temp = input_path_inchroot + ".redacted.temp"
-        redacted_temp_full = input_path + ".redacted.temp"
         removed_temp = input_path_inchroot + ".removed.temp"
         reduced_temp = input_path_inchroot + ".reduced.tmp"
         reduce_functions = 70000
         output_path = os.path.join(self.tempdir, self.redacted_name)
-        mock_file_obj = io.StringIO()
-        mock_open.return_value = mock_file_obj
+        self.WriteTempFile(input_to_text, "", makedirs=True)
 
         expected_commands = [
-            mock.call(
-                [
-                    "llvm-profdata",
-                    "merge",
-                    "-sample",
-                    "-text",
-                    input_path_inchroot,
-                    "-output",
-                    input_to_text,
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
-            mock.call(
-                ["redact_textual_afdo_profile"],
-                input=mock_file_obj,
-                stdout=redacted_temp_full,
-                print_cmd=True,
-                enter_chroot=True,
-            ),
-            mock.call(
-                [
-                    "remove_indirect_calls",
-                    "--input=" + redacted_temp,
-                    "--output=" + removed_temp,
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
-            mock.call(
-                [
-                    "remove_cold_functions",
-                    "--input=" + removed_temp,
-                    "--output=" + reduced_temp,
-                    "--number=" + str(reduce_functions),
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
-            mock.call(
-                [
-                    "llvm-profdata",
-                    "merge",
-                    "-sample",
-                    reduced_temp,
-                    "-output",
-                    self.chroot.chroot_path(output_path),
-                    "-compbinary",
-                ],
-                enter_chroot=True,
-                print_cmd=True,
-            ),
+            [
+                "llvm-profdata",
+                "merge",
+                "-sample",
+                "-text",
+                input_path_inchroot,
+                "-output",
+                input_to_text,
+            ],
+            ["redact_textual_afdo_profile"],
+            [
+                "remove_indirect_calls",
+                "--input=" + redacted_temp,
+                "--output=" + removed_temp,
+            ],
+            [
+                "remove_cold_functions",
+                "--input=" + removed_temp,
+                "--output=" + reduced_temp,
+                "--number=" + str(reduce_functions),
+            ],
+            [
+                "llvm-profdata",
+                "merge",
+                "-sample",
+                reduced_temp,
+                "-output",
+                self.chroot.chroot_path(output_path),
+                "-compbinary",
+            ],
         ]
         self.runProcessAFDOProfileOnce(
             expected_commands,
@@ -2102,7 +2161,6 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             [
                 "gs_context",
                 "find_artifact",
-                "run_command",
                 "uncompress_file",
                 "compress_file",
                 "process_afdo_profile",
@@ -2168,7 +2226,6 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             ]
 
         self.gs_context.List = MockList
-        run_command = self.PatchObject(cros_build_lib, "run")
         uncompress_file = self.PatchObject(cros_build_lib, "UncompressFile")
         compress_file = self.PatchObject(cros_build_lib, "CompressFile")
         process_afdo_profile = self.PatchObject(self.obj, "_ProcessAFDOProfile")
@@ -2185,7 +2242,6 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
         return merged_name, Mocks(
             gs_context=self.gs_context,
             find_artifact=MockList,
-            run_command=run_command,
             uncompress_file=uncompress_file,
             compress_file=compress_file,
             process_afdo_profile=process_afdo_profile,
@@ -2240,7 +2296,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
         # Note that these should all be in-chroot names.
         expected_ordered_args = ["llvm-profdata", "merge", "-sample"]
 
-        args = mocks.run_command.call_args[0][0]
+        args = cros_build_lib.run.call_args[0][0]
         ordered_args = args[: len(expected_ordered_args)]
         self.assertEqual(ordered_args, expected_ordered_args)
 
@@ -2290,7 +2346,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
 
         # Note that these should all be in-chroot names.
         expected_ordered_args = ["llvm-profdata", "merge", "-sample"]
-        args = mocks.run_command.call_args[0][0]
+        args = cros_build_lib.run.call_args[0][0]
         ordered_args = args[: len(expected_ordered_args)]
         self.assertEqual(ordered_args, expected_ordered_args)
 
@@ -2335,7 +2391,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             ),
         )
 
-        mocks.run_command.assert_called_once()
+        cros_build_lib.run.assert_called_once()
 
         # Note that these should all be in-chroot names.
         expected_ordered_args = ["llvm-profdata", "merge", "-sample"]
@@ -2366,7 +2422,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             for n in input_afdo_names
         ]
 
-        args = mocks.run_command.call_args[0][0]
+        args = cros_build_lib.run.call_args[0][0]
         ordered_args = args[: len(expected_ordered_args)]
         self.assertEqual(ordered_args, expected_ordered_args)
 
@@ -2406,7 +2462,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             ),
         )
 
-        mocks.run_command.assert_called_once()
+        cros_build_lib.run.assert_called_once()
 
         # Note that these should all be in-chroot names.
         expected_ordered_args = ["llvm-profdata", "merge", "-sample"]
@@ -2438,7 +2494,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             for n in input_afdo_names
         ]
 
-        args = mocks.run_command.call_args[0][0]
+        args = cros_build_lib.run.call_args[0][0]
         ordered_args = args[: len(expected_ordered_args)]
         self.assertEqual(ordered_args, expected_ordered_args)
 
@@ -2514,7 +2570,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             ]
         ]
 
-        args = mocks.run_command.call_args[0][0]
+        args = cros_build_lib.run.call_args[0][0]
         ordered_args = args[: len(expected_ordered_args)]
         self.assertEqual(ordered_args, expected_ordered_args)
 
@@ -2533,7 +2589,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
         for merged_name, mocks in runs:
             self.assertIsNone(merged_name)
             self.gs_context.Copy.assert_not_called()
-            mocks.run_command.assert_not_called()
+            cros_build_lib.run.assert_not_called()
             mocks.uncompress_file.assert_not_called()
             mocks.compress_file.assert_not_called()
 
@@ -2638,127 +2694,4 @@ class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase):
             toolchain_util.GetUpdatedFiles("OtherType", "", "")
         self.assertIn(
             "has no handler in GetUpdatedFiles", str(context.exception)
-        )
-
-
-class GenerateChromeOrderfileTest(cros_test_lib.MockTempDirTestCase):
-    """Test GenerateChromeOrderfile class."""
-
-    # pylint: disable=protected-access
-    def setUp(self):
-        self.board = "board"
-        self.out_dir = os.path.join(self.tempdir, "outdir")
-        osutils.SafeMakedirs(self.out_dir)
-        self.chroot_dir = os.path.join(self.tempdir, "chroot")
-        self.working_dir = os.path.join(self.chroot_dir, "tmp")
-        osutils.SafeMakedirs(self.working_dir)
-        self.working_dir_inchroot = "/tmp"
-        self.chroot_args = []
-        self.orderfile_name = "chromeos-chrome-orderfile-1.0"
-        self.PatchObject(
-            toolchain_util,
-            "_GetOrderfileName",
-            return_value=self.orderfile_name,
-        )
-        self.test_obj = toolchain_util.GenerateChromeOrderfile(
-            self.board,
-            self.out_dir,
-            "/path/to/chrome_root",
-            self.chroot_dir,
-            self.chroot_args,
-        )
-
-    def testCheckArgumentsFail(self):
-        """Test arguments checking fails without files existing."""
-        with self.assertRaises(
-            toolchain_util.GenerateChromeOrderfileError
-        ) as context:
-            self.test_obj._CheckArguments()
-
-        self.assertIn("Chrome binary does not exist at", str(context.exception))
-
-    def testGenerateChromeNM(self):
-        """Test generating chrome NM is handled correctly."""
-        chrome_binary = self.test_obj.CHROME_BINARY_PATH.replace(
-            "${BOARD}", self.board
-        )
-        cmd = ["llvm-nm", "-n", chrome_binary]
-        output = os.path.join(self.working_dir, self.orderfile_name + ".nm")
-        self.test_obj.tempdir = self.tempdir
-        self.PatchObject(cros_build_lib, "run")
-        self.test_obj._GenerateChromeNM()
-        cros_build_lib.run.assert_called_with(
-            cmd, stdout=output, enter_chroot=True, chroot_args=self.chroot_args
-        )
-
-    def testPostProcessOrderfile(self):
-        """Test post-processing orderfile is handled correctly."""
-        chrome_nm = os.path.join(
-            self.working_dir_inchroot, self.orderfile_name + ".nm"
-        )
-        input_orderfile = self.test_obj.INPUT_ORDERFILE_PATH.replace(
-            "${BOARD}", self.board
-        )
-        output = os.path.join(
-            self.working_dir_inchroot, self.orderfile_name + ".orderfile"
-        )
-        self.PatchObject(cros_build_lib, "run")
-        self.test_obj._PostProcessOrderfile(chrome_nm)
-        cmd = [
-            self.test_obj.PROCESS_SCRIPT,
-            "--chrome",
-            chrome_nm,
-            "--input",
-            input_orderfile,
-            "--output",
-            output,
-        ]
-        cros_build_lib.run.assert_called_with(
-            cmd,
-            enter_chroot=True,
-            chroot_args=self.chroot_args,
-            check=True,
-            capture_output=True,
-        )
-
-    def testSuccessRun(self):
-        """Test the main function is running successfully."""
-        # Patch the two functions that generate artifacts from inputs that are
-        # non-existent without actually building Chrome
-        chrome_nm = os.path.join(self.working_dir, self.orderfile_name + ".nm")
-        with open(chrome_nm, "w") as f:
-            print("Write something in the nm file", file=f)
-        self.PatchObject(
-            toolchain_util.GenerateChromeOrderfile,
-            "_GenerateChromeNM",
-            return_value=chrome_nm,
-        )
-        chrome_orderfile = os.path.join(
-            self.working_dir, self.orderfile_name + ".orderfile"
-        )
-        with open(chrome_orderfile, "w") as f:
-            print("Write something in the orderfile", file=f)
-        self.PatchObject(
-            toolchain_util.GenerateChromeOrderfile,
-            "_PostProcessOrderfile",
-            return_value=chrome_orderfile,
-        )
-
-        self.PatchObject(
-            toolchain_util.GenerateChromeOrderfile, "_CheckArguments"
-        )
-
-        self.test_obj.Bundle()
-
-        # Make sure the tarballs are inside the output directory
-        output_files = os.listdir(self.out_dir)
-        self.assertIn(
-            self.orderfile_name + ".nm" + toolchain_util.XZ_COMPRESSION_SUFFIX,
-            output_files,
-        )
-        self.assertIn(
-            self.orderfile_name
-            + ".orderfile"
-            + toolchain_util.XZ_COMPRESSION_SUFFIX,
-            output_files,
         )
