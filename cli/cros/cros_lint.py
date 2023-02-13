@@ -182,7 +182,7 @@ def _cpplint_module():
     return module
 
 
-def _CpplintFile(path, output_format, _debug, _relaxed: bool, _commit: str):
+def _CpplintFile(path, output_format, _debug, _relaxed: bool, commit: str):
     """Returns result of running cpplint on |path|."""
     result = cros_build_lib.CompletedProcess(f'cpplint "{path}"', returncode=0)
 
@@ -196,8 +196,12 @@ def _CpplintFile(path, output_format, _debug, _relaxed: bool, _commit: str):
         if output_format == "default"
         else CPPLINT_OUTPUT_FORMAT_MAP[output_format]
     )
-    cpplint.ProcessFile(str(path), cpplint._VerboseLevel())
-    result.returncode = 1 if cpplint._cpplint_state.error_count else 0
+    if cpplint.ProcessConfigOverrides(str(path)):
+        data = _get_file_data(path, commit)
+        lines = data.split("\n")
+        ext = path.suffix[1:] or str(path)
+        cpplint.ProcessFileData(str(path), ext, lines, cpplint.Error)
+        result.returncode = 1 if cpplint._cpplint_state.error_count else 0
 
     return result
 
