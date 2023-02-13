@@ -417,7 +417,6 @@ def SetupBuild(options):
         "make",
         "-j%d" % cpus,
         "O=%s" % outdir,
-        "ARCH=%s" % arch,
         "CROSS_COMPILE=%s" % compiler,
         "--no-print-directory",
         "HOSTSTRIP=true",
