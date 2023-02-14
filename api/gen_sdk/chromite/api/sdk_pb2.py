@@ -16,7 +16,7 @@ from chromite.api.gen_sdk.chromite.api import build_api_pb2 as chromite_dot_api_
 from chromite.api.gen_sdk.chromiumos import common_pb2 as chromiumos_dot_common__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x63hromite/api/sdk.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\" \n\rChrootVersion\x12\x0f\n\x07version\x18\x01 \x01(\r\"\xdd\x01\n\rCreateRequest\x12\x30\n\x05\x66lags\x18\x01 \x01(\x0b\x32!.chromite.api.CreateRequest.Flags\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x13\n\x0bsdk_version\x18\x03 \x01(\t\x12\x1b\n\x13skip_chroot_upgrade\x18\x04 \x01(\x08\x1a\x44\n\x05\x46lags\x12\x12\n\nno_replace\x18\x01 \x01(\x08\x12\x11\n\tbootstrap\x18\x02 \x01(\x08\x12\x14\n\x0cno_use_image\x18\x03 \x01(\x08\">\n\x0e\x43reateResponse\x12,\n\x07version\x18\x01 \x01(\x0b\x32\x1b.chromite.api.ChrootVersion\"3\n\rDeleteRequest\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x10\n\x0e\x44\x65leteResponse\"4\n\x0eUnmountRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x11\n\x0fUnmountResponse\"\xd3\x01\n\rUpdateRequest\x12\x30\n\x05\x66lags\x18\x01 \x01(\x0b\x32!.chromite.api.UpdateRequest.Flags\x12\x32\n\x11toolchain_targets\x18\x02 \x03(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x1a\x38\n\x05\x46lags\x12\x14\n\x0c\x62uild_source\x18\x01 \x01(\x08\x12\x19\n\x11toolchain_changed\x18\x02 \x01(\x08\">\n\x0eUpdateResponse\x12,\n\x07version\x18\x01 \x01(\x0b\x32\x1b.chromite.api.ChrootVersion\"2\n\x0c\x43leanRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x0f\n\rCleanResponse\"\x1e\n\rSnapshotToken\x12\r\n\x05value\x18\x01 \x01(\t\";\n\x15\x43reateSnapshotRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"M\n\x16\x43reateSnapshotResponse\x12\x33\n\x0esnapshot_token\x18\x01 \x01(\x0b\x32\x1b.chromite.api.SnapshotToken\"q\n\x16RestoreSnapshotRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x33\n\x0esnapshot_token\x18\x02 \x01(\x0b\x32\x1b.chromite.api.SnapshotToken\"\x19\n\x17RestoreSnapshotResponse\"4\n\x12UnmountPathRequest\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x15\n\x13UnmountPathResponse\"j\n\x15\x42uildPrebuiltsRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12-\n\x0c\x62uild_target\x18\x02 \x01(\x0b\x32\x17.chromiumos.BuildTarget\"\x18\n\x16\x42uildPrebuiltsResponse\"<\n\x16\x42uildSdkTarballRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"E\n\x17\x42uildSdkTarballResponse\x12*\n\x10sdk_tarball_path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x8a\x01\n\x1c\x43reateManifestFromSdkRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\"\n\x08sdk_path\x18\x02 \x01(\x0b\x32\x10.chromiumos.Path\x12\"\n\x08\x64\x65st_dir\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\"H\n\x1d\x43reateManifestFromSdkResponse\x12\'\n\rmanifest_path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"z\n\x17\x43reateBinhostCLsRequest\x12\x17\n\x0fprepend_version\x18\x01 \x01(\t\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x17\n\x0fupload_location\x18\x03 \x01(\t\x12\x1c\n\x14sdk_tarball_template\x18\x04 \x01(\t\"\'\n\x18\x43reateBinhostCLsResponse\x12\x0b\n\x03\x63ls\x18\x01 \x03(\t\"\x86\x01\n\x1dUploadPrebuiltPackagesRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x17\n\x0fprepend_version\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x17\n\x0fupload_location\x18\x04 \x01(\t\" \n\x1eUploadPrebuiltPackagesResponse\"f\n\x18\x42uildSdkToolchainRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\tuse_flags\x18\x02 \x03(\x0b\x32\x13.chromiumos.UseFlag\"F\n\x19\x42uildSdkToolchainResponse\x12)\n\x0fgenerated_files\x18\x01 \x03(\x0b\x32\x10.chromiumos.Path2\xf8\t\n\nSdkService\x12\x43\n\x06\x43reate\x12\x1b.chromite.api.CreateRequest\x1a\x1c.chromite.api.CreateResponse\x12\x43\n\x06\x44\x65lete\x12\x1b.chromite.api.DeleteRequest\x1a\x1c.chromite.api.DeleteResponse\x12@\n\x05\x43lean\x12\x1a.chromite.api.CleanRequest\x1a\x1b.chromite.api.CleanResponse\x12\x46\n\x07Unmount\x12\x1c.chromite.api.UnmountRequest\x1a\x1d.chromite.api.UnmountResponse\x12K\n\x06Update\x12\x1b.chromite.api.UpdateRequest\x1a\x1c.chromite.api.UpdateResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12[\n\x0e\x43reateSnapshot\x12#.chromite.api.CreateSnapshotRequest\x1a$.chromite.api.CreateSnapshotResponse\x12^\n\x0fRestoreSnapshot\x12$.chromite.api.RestoreSnapshotRequest\x1a%.chromite.api.RestoreSnapshotResponse\x12R\n\x0bUnmountPath\x12 .chromite.api.UnmountPathRequest\x1a!.chromite.api.UnmountPathResponse\x12[\n\x0e\x42uildPrebuilts\x12#.chromite.api.BuildPrebuiltsRequest\x1a$.chromite.api.BuildPrebuiltsResponse\x12^\n\x0f\x42uildSdkTarball\x12$.chromite.api.BuildSdkTarballRequest\x1a%.chromite.api.BuildSdkTarballResponse\x12p\n\x15\x43reateManifestFromSdk\x12*.chromite.api.CreateManifestFromSdkRequest\x1a+.chromite.api.CreateManifestFromSdkResponse\x12\x61\n\x10\x43reateBinhostCLs\x12%.chromite.api.CreateBinhostCLsRequest\x1a&.chromite.api.CreateBinhostCLsResponse\x12s\n\x16UploadPrebuiltPackages\x12+.chromite.api.UploadPrebuiltPackagesRequest\x1a,.chromite.api.UploadPrebuiltPackagesResponse\x12\x64\n\x11\x42uildSdkToolchain\x12&.chromite.api.BuildSdkToolchainRequest\x1a\'.chromite.api.BuildSdkToolchainResponse\x1a\x0b\xc2\xed\x1a\x07\n\x03sdk\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x16\x63hromite/api/sdk.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\x1a\x17\x63hromiumos/common.proto\" \n\rChrootVersion\x12\x0f\n\x07version\x18\x01 \x01(\r\"\xdd\x01\n\rCreateRequest\x12\x30\n\x05\x66lags\x18\x01 \x01(\x0b\x32!.chromite.api.CreateRequest.Flags\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x13\n\x0bsdk_version\x18\x03 \x01(\t\x12\x1b\n\x13skip_chroot_upgrade\x18\x04 \x01(\x08\x1a\x44\n\x05\x46lags\x12\x12\n\nno_replace\x18\x01 \x01(\x08\x12\x11\n\tbootstrap\x18\x02 \x01(\x08\x12\x14\n\x0cno_use_image\x18\x03 \x01(\x08\">\n\x0e\x43reateResponse\x12,\n\x07version\x18\x01 \x01(\x0b\x32\x1b.chromite.api.ChrootVersion\"3\n\rDeleteRequest\x12\"\n\x06\x63hroot\x18\x02 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x10\n\x0e\x44\x65leteResponse\"4\n\x0eUnmountRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x11\n\x0fUnmountResponse\"\xd3\x01\n\rUpdateRequest\x12\x30\n\x05\x66lags\x18\x01 \x01(\x0b\x32!.chromite.api.UpdateRequest.Flags\x12\x32\n\x11toolchain_targets\x18\x02 \x03(\x0b\x32\x17.chromiumos.BuildTarget\x12\"\n\x06\x63hroot\x18\x03 \x01(\x0b\x32\x12.chromiumos.Chroot\x1a\x38\n\x05\x46lags\x12\x14\n\x0c\x62uild_source\x18\x01 \x01(\x08\x12\x19\n\x11toolchain_changed\x18\x02 \x01(\x08\">\n\x0eUpdateResponse\x12,\n\x07version\x18\x01 \x01(\x0b\x32\x1b.chromite.api.ChrootVersion\"}\n\x0cUprevRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x1d\n\x15sdk_tarball_gs_bucket\x18\x02 \x01(\t\x12\x19\n\x11\x62inhost_gs_bucket\x18\x03 \x01(\t\x12\x0f\n\x07version\x18\x04 \x01(\t\"J\n\rUprevResponse\x12(\n\x0emodified_files\x18\x01 \x03(\x0b\x32\x10.chromiumos.Path\x12\x0f\n\x07version\x18\x02 \x01(\t\"2\n\x0c\x43leanRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"\x0f\n\rCleanResponse\"\x1e\n\rSnapshotToken\x12\r\n\x05value\x18\x01 \x01(\t\";\n\x15\x43reateSnapshotRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"M\n\x16\x43reateSnapshotResponse\x12\x33\n\x0esnapshot_token\x18\x01 \x01(\x0b\x32\x1b.chromite.api.SnapshotToken\"q\n\x16RestoreSnapshotRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x33\n\x0esnapshot_token\x18\x02 \x01(\x0b\x32\x1b.chromite.api.SnapshotToken\"\x19\n\x17RestoreSnapshotResponse\"4\n\x12UnmountPathRequest\x12\x1e\n\x04path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x15\n\x13UnmountPathResponse\"j\n\x15\x42uildPrebuiltsRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12-\n\x0c\x62uild_target\x18\x02 \x01(\x0b\x32\x17.chromiumos.BuildTarget\"\x18\n\x16\x42uildPrebuiltsResponse\"<\n\x16\x42uildSdkTarballRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\"E\n\x17\x42uildSdkTarballResponse\x12*\n\x10sdk_tarball_path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"\x8a\x01\n\x1c\x43reateManifestFromSdkRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\"\n\x08sdk_path\x18\x02 \x01(\x0b\x32\x10.chromiumos.Path\x12\"\n\x08\x64\x65st_dir\x18\x03 \x01(\x0b\x32\x10.chromiumos.Path\"H\n\x1d\x43reateManifestFromSdkResponse\x12\'\n\rmanifest_path\x18\x01 \x01(\x0b\x32\x10.chromiumos.Path\"z\n\x17\x43reateBinhostCLsRequest\x12\x17\n\x0fprepend_version\x18\x01 \x01(\t\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x17\n\x0fupload_location\x18\x03 \x01(\t\x12\x1c\n\x14sdk_tarball_template\x18\x04 \x01(\t\"\'\n\x18\x43reateBinhostCLsResponse\x12\x0b\n\x03\x63ls\x18\x01 \x03(\t\"\x86\x01\n\x1dUploadPrebuiltPackagesRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12\x17\n\x0fprepend_version\x18\x02 \x01(\t\x12\x0f\n\x07version\x18\x03 \x01(\t\x12\x17\n\x0fupload_location\x18\x04 \x01(\t\" \n\x1eUploadPrebuiltPackagesResponse\"f\n\x18\x42uildSdkToolchainRequest\x12\"\n\x06\x63hroot\x18\x01 \x01(\x0b\x32\x12.chromiumos.Chroot\x12&\n\tuse_flags\x18\x02 \x03(\x0b\x32\x13.chromiumos.UseFlag\"F\n\x19\x42uildSdkToolchainResponse\x12)\n\x0fgenerated_files\x18\x01 \x03(\x0b\x32\x10.chromiumos.Path2\xba\n\n\nSdkService\x12\x43\n\x06\x43reate\x12\x1b.chromite.api.CreateRequest\x1a\x1c.chromite.api.CreateResponse\x12\x43\n\x06\x44\x65lete\x12\x1b.chromite.api.DeleteRequest\x1a\x1c.chromite.api.DeleteResponse\x12@\n\x05\x43lean\x12\x1a.chromite.api.CleanRequest\x1a\x1b.chromite.api.CleanResponse\x12\x46\n\x07Unmount\x12\x1c.chromite.api.UnmountRequest\x1a\x1d.chromite.api.UnmountResponse\x12K\n\x06Update\x12\x1b.chromite.api.UpdateRequest\x1a\x1c.chromite.api.UpdateResponse\"\x06\xc2\xed\x1a\x02\x10\x01\x12@\n\x05Uprev\x12\x1a.chromite.api.UprevRequest\x1a\x1b.chromite.api.UprevResponse\x12[\n\x0e\x43reateSnapshot\x12#.chromite.api.CreateSnapshotRequest\x1a$.chromite.api.CreateSnapshotResponse\x12^\n\x0fRestoreSnapshot\x12$.chromite.api.RestoreSnapshotRequest\x1a%.chromite.api.RestoreSnapshotResponse\x12R\n\x0bUnmountPath\x12 .chromite.api.UnmountPathRequest\x1a!.chromite.api.UnmountPathResponse\x12[\n\x0e\x42uildPrebuilts\x12#.chromite.api.BuildPrebuiltsRequest\x1a$.chromite.api.BuildPrebuiltsResponse\x12^\n\x0f\x42uildSdkTarball\x12$.chromite.api.BuildSdkTarballRequest\x1a%.chromite.api.BuildSdkTarballResponse\x12p\n\x15\x43reateManifestFromSdk\x12*.chromite.api.CreateManifestFromSdkRequest\x1a+.chromite.api.CreateManifestFromSdkResponse\x12\x61\n\x10\x43reateBinhostCLs\x12%.chromite.api.CreateBinhostCLsRequest\x1a&.chromite.api.CreateBinhostCLsResponse\x12s\n\x16UploadPrebuiltPackages\x12+.chromite.api.UploadPrebuiltPackagesRequest\x1a,.chromite.api.UploadPrebuiltPackagesResponse\x12\x64\n\x11\x42uildSdkToolchain\x12&.chromite.api.BuildSdkToolchainRequest\x1a\'.chromite.api.BuildSdkToolchainResponse\x1a\x0b\xc2\xed\x1a\x07\n\x03sdk\x10\x02\x42\x38Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3')
 
 
 
@@ -31,6 +31,8 @@ _UNMOUNTRESPONSE = DESCRIPTOR.message_types_by_name['UnmountResponse']
 _UPDATEREQUEST = DESCRIPTOR.message_types_by_name['UpdateRequest']
 _UPDATEREQUEST_FLAGS = _UPDATEREQUEST.nested_types_by_name['Flags']
 _UPDATERESPONSE = DESCRIPTOR.message_types_by_name['UpdateResponse']
+_UPREVREQUEST = DESCRIPTOR.message_types_by_name['UprevRequest']
+_UPREVRESPONSE = DESCRIPTOR.message_types_by_name['UprevResponse']
 _CLEANREQUEST = DESCRIPTOR.message_types_by_name['CleanRequest']
 _CLEANRESPONSE = DESCRIPTOR.message_types_by_name['CleanResponse']
 _SNAPSHOTTOKEN = DESCRIPTOR.message_types_by_name['SnapshotToken']
@@ -130,6 +132,20 @@ UpdateResponse = _reflection.GeneratedProtocolMessageType('UpdateResponse', (_me
   # @@protoc_insertion_point(class_scope:chromite.api.UpdateResponse)
   })
 _sym_db.RegisterMessage(UpdateResponse)
+
+UprevRequest = _reflection.GeneratedProtocolMessageType('UprevRequest', (_message.Message,), {
+  'DESCRIPTOR' : _UPREVREQUEST,
+  '__module__' : 'chromite.api.sdk_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.UprevRequest)
+  })
+_sym_db.RegisterMessage(UprevRequest)
+
+UprevResponse = _reflection.GeneratedProtocolMessageType('UprevResponse', (_message.Message,), {
+  'DESCRIPTOR' : _UPREVRESPONSE,
+  '__module__' : 'chromite.api.sdk_pb2'
+  # @@protoc_insertion_point(class_scope:chromite.api.UprevResponse)
+  })
+_sym_db.RegisterMessage(UprevResponse)
 
 CleanRequest = _reflection.GeneratedProtocolMessageType('CleanRequest', (_message.Message,), {
   'DESCRIPTOR' : _CLEANREQUEST,
@@ -309,48 +325,52 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _UPDATEREQUEST_FLAGS._serialized_end=773
   _UPDATERESPONSE._serialized_start=775
   _UPDATERESPONSE._serialized_end=837
-  _CLEANREQUEST._serialized_start=839
-  _CLEANREQUEST._serialized_end=889
-  _CLEANRESPONSE._serialized_start=891
-  _CLEANRESPONSE._serialized_end=906
-  _SNAPSHOTTOKEN._serialized_start=908
-  _SNAPSHOTTOKEN._serialized_end=938
-  _CREATESNAPSHOTREQUEST._serialized_start=940
-  _CREATESNAPSHOTREQUEST._serialized_end=999
-  _CREATESNAPSHOTRESPONSE._serialized_start=1001
-  _CREATESNAPSHOTRESPONSE._serialized_end=1078
-  _RESTORESNAPSHOTREQUEST._serialized_start=1080
-  _RESTORESNAPSHOTREQUEST._serialized_end=1193
-  _RESTORESNAPSHOTRESPONSE._serialized_start=1195
-  _RESTORESNAPSHOTRESPONSE._serialized_end=1220
-  _UNMOUNTPATHREQUEST._serialized_start=1222
-  _UNMOUNTPATHREQUEST._serialized_end=1274
-  _UNMOUNTPATHRESPONSE._serialized_start=1276
-  _UNMOUNTPATHRESPONSE._serialized_end=1297
-  _BUILDPREBUILTSREQUEST._serialized_start=1299
-  _BUILDPREBUILTSREQUEST._serialized_end=1405
-  _BUILDPREBUILTSRESPONSE._serialized_start=1407
-  _BUILDPREBUILTSRESPONSE._serialized_end=1431
-  _BUILDSDKTARBALLREQUEST._serialized_start=1433
-  _BUILDSDKTARBALLREQUEST._serialized_end=1493
-  _BUILDSDKTARBALLRESPONSE._serialized_start=1495
-  _BUILDSDKTARBALLRESPONSE._serialized_end=1564
-  _CREATEMANIFESTFROMSDKREQUEST._serialized_start=1567
-  _CREATEMANIFESTFROMSDKREQUEST._serialized_end=1705
-  _CREATEMANIFESTFROMSDKRESPONSE._serialized_start=1707
-  _CREATEMANIFESTFROMSDKRESPONSE._serialized_end=1779
-  _CREATEBINHOSTCLSREQUEST._serialized_start=1781
-  _CREATEBINHOSTCLSREQUEST._serialized_end=1903
-  _CREATEBINHOSTCLSRESPONSE._serialized_start=1905
-  _CREATEBINHOSTCLSRESPONSE._serialized_end=1944
-  _UPLOADPREBUILTPACKAGESREQUEST._serialized_start=1947
-  _UPLOADPREBUILTPACKAGESREQUEST._serialized_end=2081
-  _UPLOADPREBUILTPACKAGESRESPONSE._serialized_start=2083
-  _UPLOADPREBUILTPACKAGESRESPONSE._serialized_end=2115
-  _BUILDSDKTOOLCHAINREQUEST._serialized_start=2117
-  _BUILDSDKTOOLCHAINREQUEST._serialized_end=2219
-  _BUILDSDKTOOLCHAINRESPONSE._serialized_start=2221
-  _BUILDSDKTOOLCHAINRESPONSE._serialized_end=2291
-  _SDKSERVICE._serialized_start=2294
-  _SDKSERVICE._serialized_end=3566
+  _UPREVREQUEST._serialized_start=839
+  _UPREVREQUEST._serialized_end=964
+  _UPREVRESPONSE._serialized_start=966
+  _UPREVRESPONSE._serialized_end=1040
+  _CLEANREQUEST._serialized_start=1042
+  _CLEANREQUEST._serialized_end=1092
+  _CLEANRESPONSE._serialized_start=1094
+  _CLEANRESPONSE._serialized_end=1109
+  _SNAPSHOTTOKEN._serialized_start=1111
+  _SNAPSHOTTOKEN._serialized_end=1141
+  _CREATESNAPSHOTREQUEST._serialized_start=1143
+  _CREATESNAPSHOTREQUEST._serialized_end=1202
+  _CREATESNAPSHOTRESPONSE._serialized_start=1204
+  _CREATESNAPSHOTRESPONSE._serialized_end=1281
+  _RESTORESNAPSHOTREQUEST._serialized_start=1283
+  _RESTORESNAPSHOTREQUEST._serialized_end=1396
+  _RESTORESNAPSHOTRESPONSE._serialized_start=1398
+  _RESTORESNAPSHOTRESPONSE._serialized_end=1423
+  _UNMOUNTPATHREQUEST._serialized_start=1425
+  _UNMOUNTPATHREQUEST._serialized_end=1477
+  _UNMOUNTPATHRESPONSE._serialized_start=1479
+  _UNMOUNTPATHRESPONSE._serialized_end=1500
+  _BUILDPREBUILTSREQUEST._serialized_start=1502
+  _BUILDPREBUILTSREQUEST._serialized_end=1608
+  _BUILDPREBUILTSRESPONSE._serialized_start=1610
+  _BUILDPREBUILTSRESPONSE._serialized_end=1634
+  _BUILDSDKTARBALLREQUEST._serialized_start=1636
+  _BUILDSDKTARBALLREQUEST._serialized_end=1696
+  _BUILDSDKTARBALLRESPONSE._serialized_start=1698
+  _BUILDSDKTARBALLRESPONSE._serialized_end=1767
+  _CREATEMANIFESTFROMSDKREQUEST._serialized_start=1770
+  _CREATEMANIFESTFROMSDKREQUEST._serialized_end=1908
+  _CREATEMANIFESTFROMSDKRESPONSE._serialized_start=1910
+  _CREATEMANIFESTFROMSDKRESPONSE._serialized_end=1982
+  _CREATEBINHOSTCLSREQUEST._serialized_start=1984
+  _CREATEBINHOSTCLSREQUEST._serialized_end=2106
+  _CREATEBINHOSTCLSRESPONSE._serialized_start=2108
+  _CREATEBINHOSTCLSRESPONSE._serialized_end=2147
+  _UPLOADPREBUILTPACKAGESREQUEST._serialized_start=2150
+  _UPLOADPREBUILTPACKAGESREQUEST._serialized_end=2284
+  _UPLOADPREBUILTPACKAGESRESPONSE._serialized_start=2286
+  _UPLOADPREBUILTPACKAGESRESPONSE._serialized_end=2318
+  _BUILDSDKTOOLCHAINREQUEST._serialized_start=2320
+  _BUILDSDKTOOLCHAINREQUEST._serialized_end=2422
+  _BUILDSDKTOOLCHAINRESPONSE._serialized_start=2424
+  _BUILDSDKTOOLCHAINRESPONSE._serialized_end=2494
+  _SDKSERVICE._serialized_start=2497
+  _SDKSERVICE._serialized_end=3835
 # @@protoc_insertion_point(module_scope)
