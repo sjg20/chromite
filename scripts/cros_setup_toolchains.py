@@ -129,11 +129,16 @@ class Crossdev(object):
     # Packages that needs separate handling, in addition to what we have from
     # crossdev.
     MANUAL_PKGS = {
-        "rust": "dev-lang",
         "llvm": "sys-devel",
         "llvm-libunwind": "sys-libs",
         "libcxx": "sys-libs",
         "elfutils": "dev-libs",
+        # b/269306499: note that rust and rust-host are shipped as a part of
+        # this tarball on a best-effort basis. If you would like them to be
+        # fully supported (with an SLA), please reach out to
+        # chromeos-toolchain@google.com and chat with us.
+        "rust": "dev-lang",
+        "rust-host": "dev-lang",
     }
 
     @classmethod
