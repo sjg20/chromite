@@ -26,6 +26,10 @@ from chromite.lib import path_util
 from chromite.utils.parser import shebang
 
 
+# These are used in _BreakoutDataByTool, so add a constant to keep in sync.
+_PYTHON_EXT = frozenset({".py", ".pyi"})
+_SHELL_EXT = frozenset({".sh"})
+
 # Map file extensions to a formatter function.
 _EXT_TOOL_MAP = {
     frozenset({".bzl"}): (formatters.star.BzlData,),
@@ -40,10 +44,10 @@ _EXT_TOOL_MAP = {
     # TODO(build): Add a formatter for this (minijail seccomp policies).
     frozenset({".policy"}): (formatters.whitespace.Data,),
     frozenset({".proto"}): (formatters.proto.Data,),
-    frozenset({".py", ".pyi"}): (formatters.python.Data,),
+    _PYTHON_EXT: (formatters.python.Data,),
     frozenset({".rs"}): (formatters.rust.Data,),
     # TODO(build): Add a formatter for this.
-    frozenset({".sh"}): (formatters.whitespace.Data,),
+    _SHELL_EXT: (formatters.whitespace.Data,),
     frozenset({".star"}): (formatters.star.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
@@ -119,10 +123,10 @@ def _BreakoutDataByTool(map_to_return, path):
 
             basename = os.path.basename(result.real_command)
             if basename.startswith("python") or basename.startswith("vpython"):
-                for tool in _EXT_TOOL_MAP[frozenset({".py"})]:
+                for tool in _EXT_TOOL_MAP[_PYTHON_EXT]:
                     map_to_return.setdefault(tool, []).append(path)
             elif basename in ("sh", "dash", "bash"):
-                for tool in _EXT_TOOL_MAP[frozenset({".sh"})]:
+                for tool in _EXT_TOOL_MAP[_SHELL_EXT]:
                     map_to_return.setdefault(tool, []).append(path)
     except IOError as e:
         logging.debug("%s: reading initial data failed: %s", path, e)
