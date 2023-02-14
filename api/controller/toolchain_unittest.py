@@ -150,7 +150,8 @@ class PrepareForBuildTest(
                 ),
             ],
             profile_info=common_pb2.ArtifactProfileInfo(
-                chrome_cwp_profile="CWPVERSION"
+                chrome_cwp_profile="CWPVERSION",
+                arch="amd64",
             ),
         )
         # pylint: enable=line-too-long
@@ -167,7 +168,10 @@ class PrepareForBuildTest(
                     "gs://path3",
                 ],
             },
-            {"chrome_cwp_profile": "CWPVERSION"},
+            {
+                "chrome_cwp_profile": "CWPVERSION",
+                "arch": "amd64",
+            },
         )
 
     def testPassesProfileInfoAfdoRelease(self):
@@ -190,8 +194,10 @@ class PrepareForBuildTest(
             ],
             profile_info=common_pb2.ArtifactProfileInfo(
                 afdo_release=common_pb2.AfdoRelease(
-                    chrome_cwp_profile="CWPVERSION", image_build_id=1234
-                )
+                    chrome_cwp_profile="CWPVERSION",
+                    image_build_id=1234,
+                ),
+                arch="amd64",
             ),
         )
         # pylint: enable=line-too-long
@@ -208,7 +214,11 @@ class PrepareForBuildTest(
                     "gs://path3",
                 ],
             },
-            {"chrome_cwp_profile": "CWPVERSION", "image_build_id": 1234},
+            {
+                "chrome_cwp_profile": "CWPVERSION",
+                "image_build_id": 1234,
+                "arch": "amd64",
+            },
         )
 
     def testHandlesDuplicateInputArtifacts(self):
@@ -335,7 +345,9 @@ class GetUpdatedFilesTest(
     def setUp(self):
         self.response = toolchain_pb2.GetUpdatedFilesResponse()
         self.artifact_path = "/any/path/to/metadata"
-        self.profile_info = common_pb2.ArtifactProfileInfo(kernel_version="4.4")
+        self.profile_info = common_pb2.ArtifactProfileInfo(
+            kernel_version="4.4", arch="amd64"
+        )
         self.update = self.PatchObject(
             toolchain_util, "GetUpdatedFiles", return_value=([], "")
         )

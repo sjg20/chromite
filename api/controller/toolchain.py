@@ -375,6 +375,9 @@ def _GetProfileInfoDict(profile_info: "toolchain_pb2.ArtifactProfileInfo"):
             ret.update({k.name: v for k, v in value.ListFields()})
         else:
             ret[which] = value
+    arch = getattr(profile_info, "arch", None)
+    if arch:
+        ret["arch"] = arch
     return ret
 
 

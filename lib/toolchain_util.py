@@ -682,8 +682,10 @@ class _CommonPrepareBundle(object):
         self.build_target = build_target
         self.input_artifacts = input_artifacts or {}
         self.profile_info = profile_info or {}
-        self.arch = self.profile_info.get("arch")
         self.profile = self.profile_info.get("chrome_cwp_profile")
+        self.arch = self.profile_info.get("arch")
+        if profile_info and not self.arch:
+            raise ValueError("No 'arch' specified in ArtifactProfileInfo")
         self._ebuild_info = {}
 
     @property

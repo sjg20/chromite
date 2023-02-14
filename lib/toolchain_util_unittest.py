@@ -1325,6 +1325,18 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         )
         self.obj._gs_context = self.gs_context
 
+    def testBundleArtifactHandlerWithoutArchRaises(self):
+        """Test that BundleArtifactHandler w/o arch in profile_info raises."""
+        self.profile_info = {
+            "chrome_cwp_profile": "atom",
+            # "arch" is missing.
+        }
+        with self.assertRaisesRegex(
+            ValueError,
+            "No 'arch' specified in ArtifactProfileInfo",
+        ):
+            self.SetUpBundle("UnverifiedChromeBenchmarkPerfFile")
+
     def testBundleUnverifiedChromeLlvmOrderfile(self):
         """Test that BundleUnverfiedChromeLlvmOrderfile works."""
         self.SetUpBundle("UnverifiedChromeLlvmOrderfile")
