@@ -99,6 +99,7 @@ import glob
 import logging
 import multiprocessing
 import os
+from pathlib import Path
 import re
 import subprocess
 import sys
@@ -457,6 +458,32 @@ def SetupBuild(options):
     return base
 
 
+def CheckConfigChange() -> bool:
+    """See if we need to reconfigure due to config files changing
+
+    Checks if any defconfig or Kconfig file has changed in the source tree
+    since the last time U-Boot was configured for this build. For simplicity,
+    any defconfig change will trigger this, not just one for the board being
+    built, since the cost of a reconfigure is fairly small.
+
+    Returns:
+        True if any config file has changed since U-Boot was last configured
+    """
+    fname = os.path.join(outdir, ".config")
+    ref_time = os.path.getctime(fname)
+    for p in Path.cwd().glob("configs/*"):
+        if p.stat().st_ctime > ref_time:
+            logging.warning("config/ dir has changed - adding -f")
+            return True
+
+    for p in Path.cwd().glob("**/Kconfig*"):
+        if p.stat().st_ctime > ref_time:
+            logging.warning("Kconfig file(s) changed - adding -f")
+            return True
+
+    return False
+
+
 def RunBuild(options, base, target, queue):
     """Run the U-Boot build.
 
@@ -472,6 +499,9 @@ def RunBuild(options, base, target, queue):
         options.force_reconfig = True
         # Ignore any error from this, some older U-Boots fail on this.
         cros_build_lib.run(base + ["distclean"], capture_output=True, **kwargs)
+
+    if not options.force_reconfig:
+        options.force_reconfig = CheckConfigChange()
 
     # Reconfigure U-Boot.
     if options.force_reconfig:
