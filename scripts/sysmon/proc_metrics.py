@@ -115,11 +115,45 @@ class _ProcessMetricsCollector(object):
                 "lxc-start", test_func=partial(_is_process_name, "lxc-start")
             ),
             _ProcessMetric(
-                "podman-pull", test_func=partial(_is_podman, "pull")
+                "podman-pull",
+                test_func=partial(_is_cmd_with_subcmd, "podman", "pull"),
             ),
-            _ProcessMetric("podman-run", test_func=partial(_is_podman, "run")),
             _ProcessMetric(
-                "phosphorus", test_func=partial(_is_process_name, "phosphorus")
+                "podman-run",
+                test_func=partial(_is_cmd_with_subcmd, "podman", "run"),
+            ),
+            _ProcessMetric(
+                "phosphorus-fetch-crashes",
+                test_func=partial(
+                    _is_cmd_with_subcmd, "phosphorus", "fetch-crashes"
+                ),
+            ),
+            _ProcessMetric(
+                "phosphorus-prejob",
+                test_func=partial(_is_cmd_with_subcmd, "phosphorus", "prejob"),
+            ),
+            _ProcessMetric(
+                "phosphorus-run-test",
+                test_func=partial(
+                    _is_cmd_with_subcmd, "phosphorus", "run-test"
+                ),
+            ),
+            _ProcessMetric(
+                "phosphorus-upload-to-gs",
+                test_func=partial(
+                    _is_cmd_with_subcmd, "phosphorus", "upload-to-gs"
+                ),
+            ),
+            _ProcessMetric(
+                "phosphorus-upload-to-tko",
+                test_func=partial(
+                    _is_cmd_with_subcmd, "phosphorus", "upload-to-tko"
+                ),
+            ),
+            # Catch all phosphorus subcommands we missed.
+            _ProcessMetric(
+                "phosphorus-other",
+                test_func=partial(_is_process_name, "phosphorus"),
             ),
             _ProcessMetric("recipe", test_func=_is_recipe),
             _ProcessMetric("sshd", test_func=partial(_is_process_name, "sshd")),
@@ -386,16 +420,13 @@ def _is_tko_proxy(proc):
     )
 
 
-def _is_podman(subcmd, proc):
-    """Return whiter proc is a podman process.
+def _is_cmd_with_subcmd(cmd, subcmd, proc):
+    """Return whiter proc is a subcommand of a command process.
 
-    A podman pull process is like
-    'podman pull image:tag'
-    A podman run process is like
-    'podman run --option ... image:tag'
+    For example: 'podman pull image:tag' or `phosphorus run-test ...`.
     """
     cmdline = proc.cmdline()
-    return proc.name() == "podman" and len(cmdline) > 1 and cmdline[1] == subcmd
+    return proc.name() == cmd and len(cmdline) > 1 and cmdline[1] == subcmd
 
 
 class _CPUTimes(object):

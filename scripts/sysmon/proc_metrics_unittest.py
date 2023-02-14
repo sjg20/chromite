@@ -245,6 +245,21 @@ class TestProcMetrics(cros_test_lib.TestCase):
                     name="phosphorus", cmdline=["phosphorus", "upload-to-tko"]
                 ),
                 _mock_process(
+                    name="phosphorus", cmdline=["phosphorus", "upload-to-gs"]
+                ),
+                _mock_process(
+                    name="phosphorus", cmdline=["phosphorus", "run-test"]
+                ),
+                _mock_process(
+                    name="phosphorus", cmdline=["phosphorus", "prejob"]
+                ),
+                _mock_process(
+                    name="phosphorus", cmdline=["phosphorus", "fetch-crashes"]
+                ),
+                _mock_process(
+                    name="phosphorus", cmdline=["phosphorus", "new-subcmd"]
+                ),
+                _mock_process(
                     name="python",
                     cmdline=[
                         "bin/python",
@@ -289,7 +304,12 @@ class TestProcMetrics(cros_test_lib.TestCase):
         calls.extend(_expected_calls_for("lxc-start"))
         calls.extend(_expected_calls_for("podman-pull"))
         calls.extend(_expected_calls_for("podman-run"))
-        calls.extend(_expected_calls_for("phosphorus"))
+        calls.extend(_expected_calls_for("phosphorus-fetch-crashes"))
+        calls.extend(_expected_calls_for("phosphorus-prejob"))
+        calls.extend(_expected_calls_for("phosphorus-run-test"))
+        calls.extend(_expected_calls_for("phosphorus-upload-to-gs"))
+        calls.extend(_expected_calls_for("phosphorus-upload-to-tko"))
+        calls.extend(_expected_calls_for("phosphorus-other"))
         calls.extend(_expected_calls_for("recipe"))
         calls.extend(_expected_calls_for("sshd"))
         calls.extend(_expected_calls_for("swarming_bot"))
