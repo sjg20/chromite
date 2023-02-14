@@ -411,25 +411,23 @@ class CrOSTest(object):
         """
         # Try using the Tast binaries that the SimpleChrome SDK downloads
         # automatically.
-        tast_cache_dir = cros_chrome_sdk.SDKFetcher.GetCachePath(
-            "chromeos-base", self.cache_dir, self._device.board
+        autotest_pkg_dir = cros_chrome_sdk.SDKFetcher.GetCachePath(
+            commands.AUTOTEST_SERVER_PACKAGE,
+            self.cache_dir,
+            self._device.board,
         )
-        if tast_cache_dir:
-            tast_bin_dir = os.path.join(
-                tast_cache_dir, "tast-cmd", "usr", "bin"
-            )
-            cmd = [os.path.join(tast_bin_dir, "tast")]
+        if autotest_pkg_dir:
+            cmd = [os.path.join(autotest_pkg_dir, "tast", "run_tast.sh")]
             need_chroot = False
         else:
             # Silently fall back to using the chroot if there's no SimpleChrome
             # SDK present.
             cmd = ["tast"]
+            if self._device.log_level == "debug":
+                cmd += ["-verbose"]
+            cmd += ["run"]
             need_chroot = True
-
-        if self._device.log_level == "debug":
-            cmd += ["-verbose"]
         cmd += [
-            "run",
             "-build=false",
             "-waituntilready",
             # Skip tests depending on private runtime variables.
@@ -443,37 +441,12 @@ class CrOSTest(object):
         if "!informational" in self.tast[0]:
             cmd += ["-failfortests"]
         if not need_chroot:
-            # The test runner needs to be pointed to the location of the test
-            # files when we're using those in the SimpleChrome cache.
-            remote_runner_path = os.path.join(
-                tast_bin_dir, "remote_test_runner"
-            )
-            remote_bundle_dir = os.path.join(
-                tast_cache_dir,
-                "tast-remote-tests-cros",
-                "usr",
-                "libexec",
-                "tast",
-                "bundles",
-                "remote",
-            )
-            remote_data_dir = os.path.join(
-                tast_cache_dir,
-                "tast-remote-tests-cros",
-                "usr",
-                "share",
-                "tast",
-                "data",
-            )
             private_key = (
                 self._device.private_key
                 or self._device.remote.agent.private_keys[-1]
             )
             assert private_key, "ssh private key not found."
             cmd += [
-                "-remoterunner=%s" % remote_runner_path,
-                "-remotebundledir=%s" % remote_bundle_dir,
-                "-remotedatadir=%s" % remote_data_dir,
                 "-ephemeraldevserver=true",
                 "-keyfile",
                 private_key,
@@ -484,17 +457,6 @@ class CrOSTest(object):
             # copy of gsutil onto path during the test.
             gsutil_dir = constants.CHROMITE_SCRIPTS_DIR
             extra_env = {"PATH": os.environ.get("PATH", "") + ":" + gsutil_dir}
-
-            tast_vars_dir = cros_chrome_sdk.SDKFetcher.GetCachePath(
-                commands.AUTOTEST_SERVER_PACKAGE,
-                self.cache_dir,
-                self._device.board,
-            )
-            tast_vars_dir = os.path.join(
-                tast_vars_dir, "tast", "vars", "private"
-            )
-            if os.path.exists(tast_vars_dir):
-                cmd += ["-defaultvarsdir=%s" % tast_vars_dir]
         else:
             extra_env = None
 

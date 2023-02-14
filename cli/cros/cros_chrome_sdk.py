@@ -121,8 +121,6 @@ class SDKFetcher(object):
     SEABIOS_BIN_PATH = "sys-firmware/seabios"
     SQUASHFS_CIPD_PATH = "infra/3pp/tools/squashfs/linux-amd64"
     SQUASHFS_CIPD_VER = "97pLXFMaDo0YFKrWyL_wfrZHyTNXM9iO6T_uRHkMkrQC"
-    TAST_CMD_PATH = "chromeos-base/tast-cmd"
-    TAST_REMOTE_TESTS_PATH = "chromeos-base/tast-remote-tests-cros"
     ZSTD_CIPD_PATH = "infra/3pp/static_libs/libzstd/linux-amd64"
     ZSTD_CIPD_VER = "znTYHKuCvEQXnJ16VeZl1-TvGRwrCUBoFDuKLIB_5IIC"
 
@@ -927,17 +925,6 @@ class SDKFetcher(object):
                 self.toolchain_path, toolchain_url % {"target": target_tc}
             )
             components.remove(self.TARGET_TOOLCHAIN_KEY)
-
-        # Fetch the Tast binary.
-        tast_cmd_path = self._GetBinPackageGSPath(version, self.TAST_CMD_PATH)
-        tast_remote_tests_path = self._GetBinPackageGSPath(
-            version, self.TAST_REMOTE_TESTS_PATH
-        )
-        if tast_cmd_path and tast_remote_tests_path:
-            fetch_urls[self.TAST_CMD_PATH] = tast_cmd_path
-            fetch_urls[self.TAST_REMOTE_TESTS_PATH] = tast_remote_tests_path
-        else:
-            logging.warning("Failed to find Tast binaries to download.")
 
         # Also fetch QEMU binary if VM download is requested.
         if constants.TEST_IMAGE_TAR in components:

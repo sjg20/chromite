@@ -692,41 +692,20 @@ class CrOSTesterTast(CrOSTesterBase):
         self._tester.tast = ["ui.ChromeLogin"]
         self._tester._device.private_key = "/tmp/.ssh/testing_rsa"
         fake_cache = cros_test_lib.FakeSDKCache(self._tester.cache_dir)
-        tast_cache_dir = fake_cache.CreateCacheReference(
-            self._tester._device.board, "chromeos-base"
-        )
-        tast_bin_dir = os.path.join(tast_cache_dir, "tast-cmd/usr/bin")
-        osutils.SafeMakedirs(tast_bin_dir)
-        tast_vars_dir = fake_cache.CreateCacheReference(
+        autotest_pkg_dir = fake_cache.CreateCacheReference(
             self._tester._device.board, commands.AUTOTEST_SERVER_PACKAGE
         )
-        tast_vars_dir = os.path.join(tast_vars_dir, "tast", "vars", "private")
-        osutils.SafeMakedirs(tast_vars_dir)
+        tast_bin_dir = os.path.join(autotest_pkg_dir, "tast")
+        osutils.SafeMakedirs(tast_bin_dir)
         self._tester.Run()
         self.assertCommandContains(
             [
-                os.path.join(tast_bin_dir, "tast"),
-                "run",
+                os.path.join(tast_bin_dir, "run_tast.sh"),
                 "-build=false",
                 "-waituntilready",
-                "-remoterunner=%s"
-                % os.path.join(tast_bin_dir, "remote_test_runner"),
-                "-remotebundledir=%s"
-                % os.path.join(
-                    tast_cache_dir,
-                    "tast-remote-tests-cros/usr",
-                    "libexec/tast/bundles/remote",
-                ),
-                "-remotedatadir=%s"
-                % os.path.join(
-                    tast_cache_dir,
-                    "tast-remote-tests-cros/usr",
-                    "share/tast/data",
-                ),
                 "-ephemeraldevserver=true",
                 "-keyfile",
                 "/tmp/.ssh/testing_rsa",
-                "-defaultvarsdir=%s" % tast_vars_dir,
                 "-extrauseflags=tast_vm",
                 "localhost:9222",
                 "ui.ChromeLogin",
