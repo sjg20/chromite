@@ -249,6 +249,14 @@ def ParseCmdline(argv):
         help="Run distclean and reconfigure before building",
     )
     parser.add_argument(
+        "-L",
+        "--no-lto",
+        dest="lto",
+        action="store_false",
+        default=True,
+        help="Disable Link-time Optimisation (LTO) when building",
+    )
+    parser.add_argument(
         "-O",
         "--objdump",
         action="store_true",
@@ -424,6 +432,9 @@ def SetupBuild(options):
         "DEV_TREE_SRC=%s-%s" % (family, options.dt),
         "QEMU_ARCH=",
     ]
+
+    if not options.lto:
+        base.append("NO_LTO=1")
 
     # Enable quiet output at INFO level, everything at DEBUG level
     if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
