@@ -34,7 +34,6 @@ from chromite.lib import binpkg
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
-from chromite.lib import gerrit
 from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
@@ -95,110 +94,6 @@ class BuildTarget(object):
 
     def __hash__(self):
         return hash(str(self))
-
-
-def UpdateLocalFile(filename, value, key="PORTAGE_BINHOST"):
-    """Update the key in file with the value passed.
-
-    File format:
-      key="value"
-    Note quotes are added automatically
-
-    Args:
-      filename: Name of file to modify.
-      value: Value to write with the key.
-      key: The variable key to update. (Default: PORTAGE_BINHOST)
-
-    Returns:
-      True if changes were made to the file.
-    """
-
-    keyval_str = "%(key)s=%(value)s"
-
-    # Add quotes around the value, if missing.
-    if not value or value[0] != '"' or value[-1] != '"':
-        value = f'"{value}"'
-
-    # new_lines is the content to be used to overwrite/create the config file
-    # at the end of this function.
-    made_changes = False
-    new_lines = []
-
-    # Read current lines.
-    try:
-        current_lines = osutils.ReadFile(filename).splitlines()
-    except FileNotFoundError:
-        current_lines = []
-        print(f"Creating new file {filename}")
-
-    # Scan current lines, copy all vars to new_lines, change the line with |key|.
-    found = False
-    for line in current_lines:
-        # Strip newlines from end of line. We already add newlines below.
-        line = line.rstrip("\n")
-        if len(line.split("=")) != 2:
-            # Skip any line that doesn't fit key=val.
-            new_lines.append(line)
-            continue
-        file_var, file_val = line.split("=")
-        if file_var == key:
-            found = True
-            print(f"Updating {file_var}={file_val} to {key}={value}")
-            made_changes |= file_val != value
-            new_lines.append(keyval_str % {"key": key, "value": value})
-        else:
-            new_lines.append(keyval_str % {"key": file_var, "value": file_val})
-    if not found:
-        print(f"Adding new variable {key}={value}")
-        made_changes = True
-        new_lines.append(keyval_str % {"key": key, "value": value})
-
-    # Write out new file.
-    osutils.WriteFile(filename, "\n".join(new_lines) + "\n")
-    return made_changes
-
-
-def RevGitFile(filename, data, report=None, dryrun=False):
-    """Update and push the git file.
-
-    Args:
-      filename: file to modify that is in a git repo already
-      data: A dict of key/values to update in |filename|
-      report: Dict in which to collect information to report to the user.
-      dryrun: If True, do not actually commit the change.
-    """
-    if report is None:
-        report = {}
-    prebuilt_branch = "prebuilt_branch"
-    cwd = os.path.abspath(os.path.dirname(filename))
-    remote_name = git.RunGit(cwd, ["remote"]).stdout.strip()
-    gerrit_helper = gerrit.GetGerritHelper(remote_name)
-    remote_url = git.RunGit(
-        cwd, ["config", "--get", f"remote.{remote_name}.url"]
-    ).stdout.strip()
-    description = "%s: updating %s" % (
-        os.path.basename(filename),
-        ", ".join(data.keys()),
-    )
-    # UpdateLocalFile will print out the keys/values for us.
-    print("Revving git file %s" % filename)
-    git.CreatePushBranch(prebuilt_branch, cwd)
-    for key, value in data.items():
-        UpdateLocalFile(filename, value, key)
-    git.RunGit(cwd, ["add", filename])
-    git.RunGit(cwd, ["commit", "-m", description])
-
-    tracking_info = git.GetTrackingBranch(
-        cwd, prebuilt_branch, for_push=True, for_checkout=False
-    )
-    gpatch = gerrit_helper.CreateGerritPatch(
-        cwd, remote_url, ref=tracking_info.ref, notify="NONE"
-    )
-    report.setdefault("created_cls", []).append(gpatch.PatchLink())
-    gerrit_helper.SetReview(
-        gpatch, labels={"Bot-Commit": 1}, dryrun=dryrun, notify="NONE"
-    )
-    gerrit_helper.SubmitChange(gpatch, dryrun=dryrun, notify="NONE")
 
 
 def GetVersion():
@@ -354,7 +249,7 @@ def UpdateBinhostConfFile(path, key, value):
     if not git.GetCurrentBranch(cwd):
         git.CreatePushBranch(constants.STABLE_EBUILD_BRANCH, cwd, sync=False)
     osutils.WriteFile(path, "", mode="a")
-    if UpdateLocalFile(path, value, key):
+    if binpkg.UpdateKeyInLocalFile(path, value, key):
         desc = "%s: %s %s" % (
             filename,
             "updating" if value else "clearing",
@@ -739,7 +634,7 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
             git_file = os.path.join(
                 self._build_path, _PREBUILT_MAKE_CONF[_HOST_ARCH]
             )
-            RevGitFile(
+            binpkg.UpdateAndSubmitKeyValueFile(
                 git_file, {key: binhost}, self._report, dryrun=self._dryrun
             )
         if sync_binhost_conf:
@@ -835,7 +730,7 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
 
             if git_sync:
                 git_file = DeterminePrebuiltConfFile(self._build_path, target)
-                RevGitFile(
+                binpkg.UpdateAndSubmitKeyValueFile(
                     git_file,
                     {key: url_value},
                     self._report,

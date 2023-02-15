@@ -12,6 +12,7 @@ from chromite.cbuildbot import commands
 from chromite.cbuildbot.stages import generic_stages
 from chromite.cbuildbot.stages import generic_stages_unittest
 from chromite.cbuildbot.stages import sdk_stages
+from chromite.lib import binpkg
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -20,7 +21,6 @@ from chromite.lib import perf_uploader
 from chromite.lib import portage_util
 from chromite.lib.buildstore import FakeBuildStore
 from chromite.lib.parser import package_info
-from chromite.scripts import upload_prebuilts
 
 
 class SDKBuildToolchainsStageTest(
@@ -261,8 +261,8 @@ class SDKUprevStageTest(generic_stages_unittest.AbstractStageTestCase):
     def testUprev(self):
         recorded_args = []
         self.PatchObject(
-            upload_prebuilts,
-            "RevGitFile",
+            binpkg,
+            "UpdateAndSubmitKeyValueFile",
             lambda *args, **kwargs: recorded_args.append(args),
         )
 
@@ -275,7 +275,7 @@ class SDKUprevStageTest(generic_stages_unittest.AbstractStageTestCase):
         self._Prepare("chromiumos-sdk")
 
         self.RunStage()
-        # upload_prebuilts.RevGitFile should be called exact once.
+        # binpkg.UpdateAndSubmitKeyValueFile should be called exactly once.
         self.assertEqual(1, len(recorded_args))
         sdk_conf, sdk_settings = recorded_args[0]
         self.assertEqual(

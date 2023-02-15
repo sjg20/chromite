@@ -14,12 +14,12 @@ from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
 from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import generic_stages
+from chromite.lib import binpkg
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.lib import perf_uploader
 from chromite.lib import portage_util
-from chromite.scripts import upload_prebuilts
 from chromite.service import sdk
 
 
@@ -366,7 +366,7 @@ class SDKUprevStage(generic_stages.BuilderStage):
             "TC_PATH": tc_path_format % {"version": self._version},
         }
         if self._run.options.publish:
-            upload_prebuilts.RevGitFile(
+            binpkg.UpdateAndSubmitKeyValueFile(
                 sdk_conf, sdk_settings, dryrun=self._run.options.debug
             )
         else:

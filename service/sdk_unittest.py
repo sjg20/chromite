@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import List
 
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import binpkg
 from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -143,7 +144,7 @@ class CreateBinhostCLsTest(cros_test_lib.RunCommandTestCase):
             report.setdefault("created_cls", []).append("sdk_version/18")
 
         self.PatchObject(
-            sdk.upload_prebuilts, "RevGitFile", side_effect=mock_rev
+            binpkg, "UpdateAndSubmitKeyValueFile", side_effect=mock_rev
         )
 
         cls = sdk.CreateBinhostCLs(

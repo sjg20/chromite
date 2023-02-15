@@ -6,7 +6,7 @@
 # Copyright 2003-2004 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-"""Helpers dealing with binpkg Packages index files"""
+"""Helpers for binpkg Package index files and managing binhosts."""
 
 import collections
 import io
@@ -16,13 +16,15 @@ import operator
 import os
 import tempfile
 import time
-from typing import List
+from typing import Any, Dict, List, Optional
 import urllib.error
 import urllib.request
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
+from chromite.lib import gerrit
+from chromite.lib import git
 from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
@@ -521,3 +523,114 @@ def FetchTarballs(binhost_urls, pkgdir):
             if not os.path.exists(category_dir):
                 os.makedirs(category_dir)
             queue.put((urls.values(), category_dir))
+
+
+def UpdateKeyInLocalFile(
+    filename: str, value: str, key: str = "PORTAGE_BINHOST"
+) -> bool:
+    """Update a key in a key-value store file with the value passed.
+
+    File format:
+        key="value"
+    Note that quotes are added automatically.
+
+    Args:
+        filename: Name of file to modify.
+        value: Value to write with the key.
+        key: The variable key to update. (Default: PORTAGE_BINHOST)
+
+    Returns:
+        True if changes were made to the file.
+    """
+
+    keyval_str = "%(key)s=%(value)s"
+
+    # Add quotes around the value, if missing.
+    if not value or value[0] != '"' or value[-1] != '"':
+        value = f'"{value}"'
+
+    # new_lines is the content to be used to overwrite/create the config file
+    # at the end of this function.
+    made_changes = False
+    new_lines = []
+
+    # Read current lines.
+    try:
+        current_lines = osutils.ReadFile(filename).splitlines()
+    except FileNotFoundError:
+        current_lines = []
+        print(f"Creating new file {filename}")
+
+    # Scan current lines, copy all vars to new_lines, change the line with |key|.
+    found = False
+    for line in current_lines:
+        # Strip newlines from end of line. We already add newlines below.
+        line = line.rstrip("\n")
+        if len(line.split("=")) != 2:
+            # Skip any line that doesn't fit key=val.
+            new_lines.append(line)
+            continue
+        file_var, file_val = line.split("=")
+        if file_var == key:
+            found = True
+            print(f"Updating {file_var}={file_val} to {key}={value}")
+            made_changes |= file_val != value
+            new_lines.append(keyval_str % {"key": key, "value": value})
+        else:
+            new_lines.append(keyval_str % {"key": file_var, "value": file_val})
+    if not found:
+        print(f"Adding new variable {key}={value}")
+        made_changes = True
+        new_lines.append(keyval_str % {"key": key, "value": value})
+
+    # Write out new file.
+    osutils.WriteFile(filename, "\n".join(new_lines) + "\n")
+    return made_changes
+
+
+def UpdateAndSubmitKeyValueFile(
+    filename: str,
+    data: Dict[str, str],
+    report: Optional[Dict[str, Any]] = None,
+    dryrun: bool = False,
+) -> None:
+    """Update a key/value file, commit it, and submit the change.
+
+    Args:
+      filename: file to modify that is in a git repo already
+      data: A dict of key/values to update in |filename|
+      report: Dict in which to collect information to report to the user.
+      dryrun: If True, do not actually commit the change.
+    """
+    if report is None:
+        report = {}
+    prebuilt_branch = "prebuilt_branch"
+    cwd = os.path.abspath(os.path.dirname(filename))
+    remote_name = git.RunGit(cwd, ["remote"]).stdout.strip()
+    gerrit_helper = gerrit.GetGerritHelper(remote_name)
+    remote_url = git.RunGit(
+        cwd, ["config", "--get", f"remote.{remote_name}.url"]
+    ).stdout.strip()
+    description = "%s: updating %s" % (
+        os.path.basename(filename),
+        ", ".join(data.keys()),
+    )
+    # UpdateKeyInLocalFile will print out the keys/values for us.
+    print("Revving git file %s" % filename)
+    git.CreatePushBranch(prebuilt_branch, cwd)
+    for key, value in data.items():
+        UpdateKeyInLocalFile(filename, value, key)
+    git.RunGit(cwd, ["add", filename])
+    git.RunGit(cwd, ["commit", "-m", description])
+
+    tracking_info = git.GetTrackingBranch(
+        cwd, prebuilt_branch, for_push=True, for_checkout=False
+    )
+    gpatch = gerrit_helper.CreateGerritPatch(
+        cwd, remote_url, ref=tracking_info.ref, notify="NONE"
+    )
+    report.setdefault("created_cls", []).append(gpatch.PatchLink())
+    gerrit_helper.SetReview(
+        gpatch, labels={"Bot-Commit": 1}, dryrun=dryrun, notify="NONE"
+    )
+    gerrit_helper.SubmitChange(gpatch, dryrun=dryrun, notify="NONE")

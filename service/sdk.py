@@ -13,6 +13,7 @@ import tempfile
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import binpkg
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
@@ -20,7 +21,6 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sdk_builder_lib
-from chromite.scripts import upload_prebuilts
 
 
 if TYPE_CHECKING:
@@ -486,7 +486,7 @@ def CreateBinhostCLs(
         }
         # Note: dryrun=True prevents the change from being automatically
         # submitted. We only want to create the change, not submit it.
-        upload_prebuilts.RevGitFile(
+        binpkg.UpdateAndSubmitKeyValueFile(
             constants.SDK_VERSION_FILE, sdk_settings, report=report, dryrun=True
         )
         return report["created_cls"]
