@@ -181,6 +181,28 @@ def Update(
 
 
 @faux.all_empty
+@validate.require("chroot")
+@validate.require("binhost_gs_bucket")
+@validate.validation_complete
+def Uprev(input_proto, output_proto, _config):
+    """Update the SDK version and prebuilt files to point to the latest SDK."""
+    target_version = input_proto.version or sdk.GetLatestVersion()
+    modified_files = sdk.UprevSdkAndPrebuilts(
+        controller_util.ParseChroot(input_proto.chroot),
+        binhost_gs_bucket=input_proto.binhost_gs_bucket,
+        version=target_version,
+    )
+    for modified_file in modified_files:
+        output_proto.modified_files.add(
+            common_pb2.Path(
+                path=str(modified_file),
+                location=common_pb2.Path.OUTSIDE,
+            )
+        )
+    output_proto.version = target_version
+
+
+@faux.all_empty
 @validate.validation_complete
 def Delete(input_proto, _output_proto, _config):
     """Delete a chroot."""

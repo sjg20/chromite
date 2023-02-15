@@ -8,6 +8,7 @@ import json
 import logging
 import os
 from pathlib import Path
+import re
 import tempfile
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 import uuid
@@ -16,6 +17,7 @@ from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
+from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sdk_builder_lib
@@ -354,6 +356,36 @@ def Update(arguments: UpdateArguments) -> Optional[int]:
     cros_build_lib.run(cmd, extra_env=extra_env)
 
     return GetChrootVersion()
+
+
+def GetLatestVersion() -> str:
+    """Return the latest SDK version according to GS://."""
+    uri = gs.GetGsURL(
+        constants.SDK_GS_BUCKET,
+        for_gsutil=True,
+        suburl="cros-sdk-latest.conf",
+    )
+    contents = gs.GSContext().Cat(uri).decode()
+    version_re = re.compile(r'LATEST_SDK="([\d.]+)"')
+    m = version_re.match(contents)
+    if m is None:
+        raise ValueError(
+            f"Failed to parse latest SDK file ({uri}) contents:\n{contents}"
+        )
+    return m.group(1)
+
+
+def UprevSdkAndPrebuilts(
+    chroot: "chroot_lib.Chroot",
+    binhost_gs_bucket: str,
+    version: str,
+) -> List[Path]:
+    """Uprev the SDK version and prebuilt conf files on the local filesystem.
+
+    Returns:
+        List of modified filepaths.
+    """
+    raise NotImplementedError()
 
 
 def CreateSnapshot(

@@ -13,6 +13,7 @@ from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
@@ -196,6 +197,30 @@ class UpdateArgumentsTest(cros_test_lib.TestCase):
         self.assertEqual(
             [], self._GetArgList(build_source=False, toolchain_targets=None)
         )
+
+
+class GetLatestVersionTest(cros_test_lib.MockTestCase):
+    """Test case for GetLatestVersion()."""
+
+    def testSuccess(self):
+        """Test an ordinary, successful call."""
+        expected_latest_version = "1970.01.01.000000"
+        file_contents = f'LATEST_SDK="{expected_latest_version}"'.encode()
+        cat_patch = self.PatchObject(
+            gs.GSContext,
+            "Cat",
+            return_value=file_contents,
+        )
+        returned_version = sdk.GetLatestVersion()
+        self.assertEqual(expected_latest_version, returned_version)
+        cat_patch.assert_called_with("gs://chromiumos-sdk/cros-sdk-latest.conf")
+
+    def testInvalidFileContents(self):
+        """Test a response if the file contents are malformed."""
+        file_contents = b"Latest SDK version: 1970.01.01.000000"
+        self.PatchObject(gs.GSContext, "Cat", return_value=file_contents)
+        with self.assertRaises(ValueError):
+            sdk.GetLatestVersion()
 
 
 class UnmountTest(

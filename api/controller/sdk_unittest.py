@@ -486,3 +486,70 @@ class BuildSdkToolchainTest(
             impl_patch.call_args.kwargs["extra_env"],
             {"USE": "llvm-next another-flag"},
         )
+
+
+class UprevTestCase(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+    """Test case for SdkService/Uprev() endpoint."""
+
+    _chroot_path = "/path/to/chroot"
+    _binhost_gs_bucket = "gs://chromiumos-prebuilts/"
+    _latest_version = "2023.02.15.115707"
+
+    def setUp(self):
+        """Set up the test case."""
+        self._chroot_pb2 = common_pb2.Chroot(path=self._chroot_path)
+        self._chroot = controller_util.ParseChroot(self._chroot_pb2)
+        self.PatchObject(
+            sdk_service,
+            "GetLatestVersion",
+            return_value=self._latest_version,
+        )
+        self._uprev_patch = self.PatchObject(
+            sdk_service,
+            "UprevSdkAndPrebuilts",
+        )
+
+    def NewRequest(self, version: str = ""):
+        """Return a new UprevRequest with standard inputs."""
+        return sdk_pb2.UprevRequest(
+            chroot=self._chroot_pb2,
+            binhost_gs_bucket=self._binhost_gs_bucket,
+            version=version,
+        )
+
+    @staticmethod
+    def NewResponse() -> sdk_pb2.UprevResponse:
+        """Return a new empty UprevResponse."""
+        return sdk_pb2.UprevResponse()
+
+    def testWithVersion(self):
+        """Test the endpoint with `version` specified.
+
+        In this case, we expect that sdk_controller.Uprev is called with the
+        version specified in the UprevRequest.
+        """
+        specified_version = "1970.01.01.000000"
+        request = self.NewRequest(version=specified_version)
+        response = self.NewResponse()
+        sdk_controller.Uprev(request, response, self.api_config)
+        self._uprev_patch.assert_called_with(
+            self._chroot,
+            binhost_gs_bucket=self._binhost_gs_bucket,
+            version=specified_version,
+        )
+
+    def testWithoutVersion(self):
+        """Test the endpoint with `version` not specified.
+
+        In this case, we expect that sdk_controller.Uprev is called with the
+        latest version available on gs://. This is fetched via
+        sdk_controller.GetLatestVersion (mocked here in setUp()).
+        """
+        request = self.NewRequest()
+        response = self.NewResponse()
+        sdk_controller.Uprev(request, response, self.api_config)
+        self._uprev_patch.assert_called_with(
+            self._chroot,
+            binhost_gs_bucket=self._binhost_gs_bucket,
+            version=self._latest_version,
+        )
