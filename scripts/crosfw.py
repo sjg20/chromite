@@ -228,9 +228,7 @@ def ParseCmdline(argv):
         help="Don't build U-Boot, just configure device tree",
     )
     parser.add_argument(
-        "-d",
         "--dt",
-        default="seaboard",
         help="Select name of device tree file to use",
     )
     parser.add_argument(
@@ -438,9 +436,10 @@ def SetupBuild(options):
         "CROSS_COMPILE=%s" % compiler,
         "--no-print-directory",
         "HOSTSTRIP=true",
-        "DEV_TREE_SRC=%s-%s" % (family, options.dt),
         "QEMU_ARCH=",
     ]
+    if options.dt:
+        base.append(f"DEVICE_TREE={options.dt}")
     if not options.in_tree:
         outdir = os.path.join(OUT_DIR, uboard)
         base.append(f"O={outdir}")
