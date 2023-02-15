@@ -255,6 +255,13 @@ def ParseCmdline(argv):
         help="Select the number of CPUs to use (defaults to all)",
     )
     parser.add_argument(
+        "-I",
+        "--in-tree",
+        action="store_true",
+        default=False,
+        help="Build in-tree",
+    )
+    parser.add_argument(
         "-L",
         "--no-lto",
         dest="lto",
@@ -425,18 +432,18 @@ def SetupBuild(options):
         if not compiler:
             cros_build_lib.Die("Selected arch '%s' not supported.", arch)
 
-    outdir = os.path.join(OUT_DIR, uboard)
     base = [
         "make",
         "-j%d" % options.jobs,
-        "O=%s" % outdir,
         "CROSS_COMPILE=%s" % compiler,
         "--no-print-directory",
         "HOSTSTRIP=true",
         "DEV_TREE_SRC=%s-%s" % (family, options.dt),
         "QEMU_ARCH=",
     ]
-
+    if not options.in_tree:
+        outdir = os.path.join(OUT_DIR, uboard)
+        base.append(f"O={outdir}")
     if not options.lto:
         base.append("NO_LTO=1")
 
@@ -468,7 +475,7 @@ def SetupBuild(options):
 
     config_mk = "include/autoconf.mk"
     if os.path.exists(config_mk):
-        logging.warning("Warning: '%s' exists, try 'make distclean'", config_mk)
+        logging.warning("Warning: '%s' exists, try 'make mrproper'", config_mk)
 
     return base
 
