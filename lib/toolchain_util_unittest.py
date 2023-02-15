@@ -348,6 +348,8 @@ class CommonPrepareBundleTest(PrepareBundleTest):
 
     def test_GetOrderfileName(self):
         """Test that GetOrderfileName finds the right answer."""
+        self.obj.arch = "amd64"
+        self.obj.profile = "atom"
         vers = self.PatchObject(
             self.obj,
             "_GetArtifactVersionInGob",
@@ -358,6 +360,25 @@ class CommonPrepareBundleTest(PrepareBundleTest):
         )
         self.assertEqual(
             "chromeos-chrome-orderfile-field-78-1111.0-"
+            "157000000-benchmark-78.0.3893.0-r1",
+            self.obj._GetOrderfileName(),
+        )
+        vers.assert_called_once()
+
+    def test_GetOrderfileNameArm(self):
+        """Test that GetOrderfileName finds the right answer."""
+        self.obj.arch = "arm"
+        self.obj.profile = "arm"
+        vers = self.PatchObject(
+            self.obj,
+            "_GetArtifactVersionInGob",
+            return_value=(
+                "chromeos-chrome-arm-none-78-1111.0-"
+                "157000000-benchmark-78.0.3893.0-r1-redacted.afdo.xz"
+            ),
+        )
+        self.assertEqual(
+            "chromeos-chrome-orderfile-arm-78-1111.0-"
             "157000000-benchmark-78.0.3893.0-r1",
             self.obj._GetOrderfileName(),
         )
@@ -1437,6 +1458,10 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
 
     def testBundleUnverifiedChromeLlvmOrderfile(self):
         """Test that BundleUnverfiedChromeLlvmOrderfile works."""
+        self.profile_info = {
+            "chrome_cwp_profile": "atom",
+            "arch": "amd64",
+        }
         self.SetUpBundle("UnverifiedChromeLlvmOrderfile")
         _, _ = self.mockChromeAndOrderfile()
 

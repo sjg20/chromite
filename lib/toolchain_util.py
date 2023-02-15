@@ -95,7 +95,11 @@ _CHROME_DEBUG_BIN = os.path.join(
 # at least 4GB of memory.
 #
 # This must be consistent with the definitions in autotest.
-CHROME_AFDO_VERIFIER_BOARDS = {"chell": "atom", "eve": "bigcore"}
+CHROME_AFDO_VERIFIER_BOARDS = {
+    "chell": "atom",
+    "eve": "bigcore",
+    "trogdor": "arm",
+}
 
 AFDO_ALERT_RECIPIENTS = ["chromeos-toolchain-oncall1@google.com"]
 
@@ -151,7 +155,7 @@ MERGED_PROFILE_NAME_REGEX = r"""
       -(?:orderfile|amd64|arm)                   # prefix for either orderfile
                                                  # or release profile.
       # CWP parts
-      -(?:field|atom|bigcore|none)               # Valid names
+      -(?:field|atom|bigcore|none|arm)           # Valid names
       -(\d+)                                     # Major
       -(\d+)                                     # Build
       \.(\d+)                                    # Patch
@@ -640,11 +644,28 @@ class _CommonPrepareBundle(object):
         return None
 
     def _GetOrderfileName(self) -> str:
-        """Get the name of the orderfile."""
-        artifact_version = self._GetArtifactVersionInGob(profile_arch="atom")
+        """Get the name of the orderfile.
+
+        Returns:
+          The orderfile base name derived from the GoB release AFDO.
+
+        Raises:
+          ValueError if self.profile is not set.
+        """
+        if not self.profile:
+            raise ValueError(
+                "Profile name is not set. "
+                "Is 'chrome_cwp_profile' missing in profile_info?"
+            )
+        artifact_version = self._GetArtifactVersionInGob(
+            profile_arch=self.profile
+        )
         logging.info("Orderfile artifact version = %s", artifact_version)
         benchmark_afdo, cwp_afdo = _ParseMergedProfileName(artifact_version)
-        combined_name = _GetCombinedAFDOName(cwp_afdo, "field", benchmark_afdo)
+        profile_type = "field" if self.arch == "amd64" else self.arch
+        combined_name = _GetCombinedAFDOName(
+            cwp_afdo, profile_type, benchmark_afdo
+        )
         return f"chromeos-chrome-orderfile-{combined_name}"
 
     def _FindLatestOrderfileArtifact(self, gs_urls):
@@ -710,11 +731,12 @@ class _CommonPrepareBundle(object):
                     continue
 
                 x_name = os.path.basename(x.url)
+                profile_type = "field" if self.arch == "amd64" else self.arch
                 # Filter in CWP, benchmark AFDO and Orderfiles.
                 if (
                     x_name.startswith(f"R{branch}")
                     or x_name.startswith(
-                        f"chromeos-chrome-orderfile-field-{branch}"
+                        f"chromeos-chrome-orderfile-{profile_type}-{branch}"
                     )
                     or x_name.startswith(
                         f"chromeos-chrome-{self.arch}-{branch}"
