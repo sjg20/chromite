@@ -60,9 +60,6 @@ def main(argv):
 
     if opts.quick:
         logging.info("Skipping test namespacing due to --quickstart.")
-        # Default to running in a single process under --quickstart. User args can
-        # still override this.
-        pytest_args = ["-n", "0"] + pytest_args
     else:
         # Namespacing is enabled by default because tests may break each other or
         # interfere with parts of the running system if not isolated in a namespace.
@@ -70,6 +67,13 @@ def main(argv):
         namespaces.ReExecuteWithNamespace(
             [sys.argv[0]] + argv, network=opts.network
         )
+
+    jobs = opts.jobs
+    if jobs is None:
+        # Default to running in a single process under --quickstart. User args can
+        # still override this.
+        jobs = 0 if opts.quick else os.cpu_count()
+    pytest_args = ["-n", str(jobs)] + pytest_args
 
     # Check the environment.  https://crbug.com/1015450
     st = os.stat("/")
@@ -132,6 +136,13 @@ def get_parser():
     parser = commandline.ArgumentParser(
         description=__doc__,
         epilog="To see the help output for pytest:\n$ %(prog)s -- --help",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=None,
+        help="Number of tests to run in parallel.",
     )
     parser.add_argument(
         "--quickstart",
