@@ -232,6 +232,11 @@ def ParseCmdline(argv):
         help="Select name of device tree file to use",
     )
     parser.add_argument(
+        "--dtb",
+        type="file_exists",
+        help="Select a binary .dtb, passed to the U-Boot build using EXT_DTB",
+    )
+    parser.add_argument(
         "-f",
         "--force-reconfig",
         action="store_true",
@@ -445,6 +450,8 @@ def SetupBuild(options):
         base.append(f"O={outdir}")
     if not options.lto:
         base.append("NO_LTO=1")
+    if options.dtb:
+        base.append(f"EXT_DTB={options.dtb}")
 
     # Enable quiet output at INFO level, everything at DEBUG level
     if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
