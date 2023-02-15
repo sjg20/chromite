@@ -97,7 +97,6 @@ Note the standard bmpblk is at:
 
 import glob
 import logging
-import multiprocessing
 import os
 from pathlib import Path
 import re
@@ -247,6 +246,13 @@ def ParseCmdline(argv):
         action="store_true",
         default=False,
         help="Run distclean and reconfigure before building",
+    )
+    parser.add_argument(
+        "-j",
+        "--jobs",
+        type=int,
+        default=os.cpu_count(),
+        help="Select the number of CPUs to use (defaults to all)",
     )
     parser.add_argument(
         "-L",
@@ -419,12 +425,10 @@ def SetupBuild(options):
         if not compiler:
             cros_build_lib.Die("Selected arch '%s' not supported.", arch)
 
-    cpus = multiprocessing.cpu_count()
-
     outdir = os.path.join(OUT_DIR, uboard)
     base = [
         "make",
-        "-j%d" % cpus,
+        "-j%d" % options.jobs,
         "O=%s" % outdir,
         "CROSS_COMPILE=%s" % compiler,
         "--no-print-directory",
