@@ -439,6 +439,7 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
             "gms_core_cache",
             "ureadahead_pack_host",
             "tts_cache",
+            "dex_opt_cache",
         ]
 
         for arch in archs:
@@ -492,6 +493,7 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         path2 = "gs://r/packages_reference_arm_userdebug_100.tar"
         path3 = "gs://r/gms_core_cache_arm_userdebug_100.tar"
         path4 = "gs://r/tts_cache_arm64_user_100.tar"
+        path5 = "gs://r/dex_opt_cache_x86_user_100.tar"
 
         self.gs_mock.AddCmdResult(
             ["stat", "--", path1], stdout=_STAT_OUTPUT % path1
@@ -505,6 +507,9 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         self.gs_mock.AddCmdResult(
             ["stat", "--", path4], stdout=_STAT_OUTPUT % path4
         )
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", path5], stdout=_STAT_OUTPUT % path5
+        )
 
         variables = android.FindDataCollectorArtifacts(
             self.android_package,
@@ -517,6 +522,7 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         expectation2 = "gs://r/packages_reference_arm_userdebug_${PV}.tar"
         expectation3 = "gs://r/gms_core_cache_arm_userdebug_${PV}.tar"
         expectation4 = "gs://r/tts_cache_arm64_user_${PV}.tar"
+        expectation5 = "gs://r/dex_opt_cache_x86_user_${PV}.tar"
 
         self.assertDictEqual(
             variables,
@@ -525,6 +531,7 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
                 "ARM_USERDEBUG_PACKAGES_REFERENCE": expectation2,
                 "ARM_USERDEBUG_GMS_CORE_CACHE": expectation3,
                 "ARM64_USER_TTS_CACHE": expectation4,
+                "X86_USER_DEX_OPT_CACHE": expectation5,
             },
         )
 

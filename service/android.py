@@ -677,6 +677,7 @@ def FindDataCollectorArtifacts(
         "packages_reference",
         "gms_core_cache",
         "tts_cache",
+        "dex_opt_cache",
     ]
     archs = ["arm", "arm64", "x86", "x86_64"]
     build_types = ["user", "userdebug"]
