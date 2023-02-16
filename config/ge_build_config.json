@@ -13604,10 +13604,22 @@
         {
           "board_name": "strongbad64",
           "name": "coachz",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7250,
           "is_active": true,
+          "stable_target_milestone": 112,
           "is_experimental": false
         },
         {
@@ -13647,7 +13659,8 @@
           "is_experimental": false
         }
       ],
-      "rubik_target_milestone": 108
+      "rubik_target_milestone": 108,
+      "stable_target_milestone": 112
     },
     {
       "name": "trogdor",
