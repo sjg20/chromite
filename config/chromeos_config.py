@@ -1126,7 +1126,7 @@ def FactoryBuilders(site_config, _boards_dict, _ge_build_config):
         (DAILY, "factory-kukui-14374.B", ["kukui", "jacuzzi"]),
         (WEEKLY, "factory-cherry-14455.B", ["cherry"]),
         (DAILY, "factory-brya-14517.B", ["brya", "brask"]),
-        (DAILY, "factory-guybrush-14908.B", ["guybrush"]),
+        (WEEKLY, "factory-guybrush-14908.B", ["guybrush"]),
         (WEEKLY, "factory-brya-14909.124.B", ["brya"]),
         (WEEKLY, "factory-corsola-15196.B", ["corsola"]),
         (DAILY, "factory-nissa-15199.B", ["nissa"]),
