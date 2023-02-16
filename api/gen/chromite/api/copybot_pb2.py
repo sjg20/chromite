@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1a\x63hromite/api/copybot.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\"\x98\x07\n\x11RunCopybotRequest\x12\x36\n\x08upstream\x18\x01 \x01(\x0b\x32$.chromite.api.RunCopybotRequest.Repo\x12\x38\n\ndownstream\x18\x02 \x01(\x0b\x32$.chromite.api.RunCopybotRequest.Repo\x12\r\n\x05topic\x18\x03 \x01(\t\x12;\n\x06labels\x18\x04 \x03(\x0b\x32+.chromite.api.RunCopybotRequest.GerritLabel\x12=\n\treviewers\x18\x05 \x03(\x0b\x32*.chromite.api.RunCopybotRequest.GerritUser\x12\x37\n\x03\x63\x63s\x18\x06 \x03(\x0b\x32*.chromite.api.RunCopybotRequest.GerritUser\x12\x17\n\x0fprepend_subject\x18\x07 \x01(\t\x12V\n\x17merge_conflict_behavior\x18\x08 \x01(\x0e\x32\x35.chromite.api.RunCopybotRequest.MergeConflictBehavior\x12\x46\n\x15\x65xclude_file_patterns\x18\t \x03(\x0b\x32\'.chromite.api.RunCopybotRequest.Pattern\x12H\n\x12keep_pseudoheaders\x18\n \x03(\x0b\x32,.chromite.api.RunCopybotRequest.Pseudoheader\x12\x19\n\x11\x61\x64\x64_signed_off_by\x18\x0b \x01(\x08\x12\x0f\n\x07\x64ry_run\x18\x0c \x01(\x08\x1a#\n\x04Repo\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x0e\n\x06\x62ranch\x18\x02 \x01(\t\x1a\x1a\n\nGerritUser\x12\x0c\n\x04user\x18\x01 \x01(\t\x1a\x1c\n\x0bGerritLabel\x12\r\n\x05label\x18\x01 \x01(\t\x1a\x1a\n\x07Pattern\x12\x0f\n\x07pattern\x18\x01 \x01(\t\x1a\x1c\n\x0cPseudoheader\x12\x0c\n\x04name\x18\x01 \x01(\t\"\x84\x01\n\x15MergeConflictBehavior\x12\'\n#MERGE_CONFLICT_BEHAVIOR_UNSPECIFIED\x10\x00\x12 \n\x1cMERGE_CONFLICT_BEHAVIOR_SKIP\x10\x01\x12 \n\x1cMERGE_CONFLICT_BEHAVIOR_FAIL\x10\x02\"\xfc\x02\n\x12RunCopybotResponse\x12\x46\n\x0e\x66\x61ilure_reason\x18\x01 \x01(\x0e\x32..chromite.api.RunCopybotResponse.FailureReason\x12M\n\x0fmerge_conflicts\x18\x02 \x03(\x0b\x32\x34.chromite.api.RunCopybotResponse.MergeConflictCommit\x1a#\n\x13MergeConflictCommit\x12\x0c\n\x04hash\x18\x01 \x01(\t\"\xa9\x01\n\rFailureReason\x12\x13\n\x0f\x46\x41ILURE_UNKNOWN\x10\x00\x12 \n\x1c\x46\x41ILURE_UPSTREAM_FETCH_ERROR\x10\x01\x12\"\n\x1e\x46\x41ILURE_DOWNSTREAM_FETCH_ERROR\x10\x02\x12!\n\x1d\x46\x41ILURE_DOWNSTREAM_PUSH_ERROR\x10\x03\x12\x1a\n\x16\x46\x41ILURE_MERGE_CONFLITS\x10\x04\x32p\n\x0e\x43opybotService\x12O\n\nRunCopybot\x12\x1f.chromite.api.RunCopybotRequest\x1a .chromite.api.RunCopybotResponse\x1a\r\xc2\xed\x1a\t\n\x07\x63opybotB8Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
+  serialized_pb=b'\n\x1a\x63hromite/api/copybot.proto\x12\x0c\x63hromite.api\x1a\x1c\x63hromite/api/build_api.proto\"\xf5\x07\n\x11RunCopybotRequest\x12\x36\n\x08upstream\x18\x01 \x01(\x0b\x32$.chromite.api.RunCopybotRequest.Repo\x12\x38\n\ndownstream\x18\x02 \x01(\x0b\x32$.chromite.api.RunCopybotRequest.Repo\x12\r\n\x05topic\x18\x03 \x01(\t\x12;\n\x06labels\x18\x04 \x03(\x0b\x32+.chromite.api.RunCopybotRequest.GerritLabel\x12=\n\treviewers\x18\x05 \x03(\x0b\x32*.chromite.api.RunCopybotRequest.GerritUser\x12\x37\n\x03\x63\x63s\x18\x06 \x03(\x0b\x32*.chromite.api.RunCopybotRequest.GerritUser\x12\x17\n\x0fprepend_subject\x18\x07 \x01(\t\x12V\n\x17merge_conflict_behavior\x18\x08 \x01(\x0e\x32\x35.chromite.api.RunCopybotRequest.MergeConflictBehavior\x12\x46\n\x15\x65xclude_file_patterns\x18\t \x03(\x0b\x32\'.chromite.api.RunCopybotRequest.Pattern\x12H\n\x12keep_pseudoheaders\x18\n \x03(\x0b\x32,.chromite.api.RunCopybotRequest.Pseudoheader\x12\x19\n\x11\x61\x64\x64_signed_off_by\x18\x0b \x01(\x08\x12\x0f\n\x07\x64ry_run\x18\x0c \x01(\x08\x12@\n\x0cpush_options\x18\r \x03(\x0b\x32*.chromite.api.RunCopybotRequest.PushOption\x1a#\n\x04Repo\x12\x0b\n\x03url\x18\x01 \x01(\t\x12\x0e\n\x06\x62ranch\x18\x02 \x01(\t\x1a\x1a\n\nGerritUser\x12\x0c\n\x04user\x18\x01 \x01(\t\x1a\x1c\n\x0bGerritLabel\x12\r\n\x05label\x18\x01 \x01(\t\x1a\x1a\n\x07Pattern\x12\x0f\n\x07pattern\x18\x01 \x01(\t\x1a\x1c\n\x0cPseudoheader\x12\x0c\n\x04name\x18\x01 \x01(\t\x1a\x19\n\nPushOption\x12\x0b\n\x03opt\x18\x01 \x01(\t\"\x84\x01\n\x15MergeConflictBehavior\x12\'\n#MERGE_CONFLICT_BEHAVIOR_UNSPECIFIED\x10\x00\x12 \n\x1cMERGE_CONFLICT_BEHAVIOR_SKIP\x10\x01\x12 \n\x1cMERGE_CONFLICT_BEHAVIOR_FAIL\x10\x02\"\xfc\x02\n\x12RunCopybotResponse\x12\x46\n\x0e\x66\x61ilure_reason\x18\x01 \x01(\x0e\x32..chromite.api.RunCopybotResponse.FailureReason\x12M\n\x0fmerge_conflicts\x18\x02 \x03(\x0b\x32\x34.chromite.api.RunCopybotResponse.MergeConflictCommit\x1a#\n\x13MergeConflictCommit\x12\x0c\n\x04hash\x18\x01 \x01(\t\"\xa9\x01\n\rFailureReason\x12\x13\n\x0f\x46\x41ILURE_UNKNOWN\x10\x00\x12 \n\x1c\x46\x41ILURE_UPSTREAM_FETCH_ERROR\x10\x01\x12\"\n\x1e\x46\x41ILURE_DOWNSTREAM_FETCH_ERROR\x10\x02\x12!\n\x1d\x46\x41ILURE_DOWNSTREAM_PUSH_ERROR\x10\x03\x12\x1a\n\x16\x46\x41ILURE_MERGE_CONFLITS\x10\x04\x32p\n\x0e\x43opybotService\x12O\n\nRunCopybot\x12\x1f.chromite.api.RunCopybotRequest\x1a .chromite.api.RunCopybotResponse\x1a\r\xc2\xed\x1a\t\n\x07\x63opybotB8Z6go.chromium.org/chromiumos/infra/proto/go/chromite/apib\x06proto3'
   ,
   dependencies=[chromite_dot_api_dot_build__api__pb2.DESCRIPTOR,])
 
@@ -51,8 +51,8 @@ _RUNCOPYBOTREQUEST_MERGECONFLICTBEHAVIOR = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=863,
-  serialized_end=995,
+  serialized_start=956,
+  serialized_end=1088,
 )
 _sym_db.RegisterEnumDescriptor(_RUNCOPYBOTREQUEST_MERGECONFLICTBEHAVIOR)
 
@@ -91,8 +91,8 @@ _RUNCOPYBOTRESPONSE_FAILUREREASON = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1209,
-  serialized_end=1378,
+  serialized_start=1302,
+  serialized_end=1471,
 )
 _sym_db.RegisterEnumDescriptor(_RUNCOPYBOTRESPONSE_FAILUREREASON)
 
@@ -131,8 +131,8 @@ _RUNCOPYBOTREQUEST_REPO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=709,
-  serialized_end=744,
+  serialized_start=775,
+  serialized_end=810,
 )
 
 _RUNCOPYBOTREQUEST_GERRITUSER = _descriptor.Descriptor(
@@ -162,8 +162,8 @@ _RUNCOPYBOTREQUEST_GERRITUSER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=746,
-  serialized_end=772,
+  serialized_start=812,
+  serialized_end=838,
 )
 
 _RUNCOPYBOTREQUEST_GERRITLABEL = _descriptor.Descriptor(
@@ -193,8 +193,8 @@ _RUNCOPYBOTREQUEST_GERRITLABEL = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=774,
-  serialized_end=802,
+  serialized_start=840,
+  serialized_end=868,
 )
 
 _RUNCOPYBOTREQUEST_PATTERN = _descriptor.Descriptor(
@@ -224,8 +224,8 @@ _RUNCOPYBOTREQUEST_PATTERN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=804,
-  serialized_end=830,
+  serialized_start=870,
+  serialized_end=896,
 )
 
 _RUNCOPYBOTREQUEST_PSEUDOHEADER = _descriptor.Descriptor(
@@ -255,8 +255,39 @@ _RUNCOPYBOTREQUEST_PSEUDOHEADER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=832,
-  serialized_end=860,
+  serialized_start=898,
+  serialized_end=926,
+)
+
+_RUNCOPYBOTREQUEST_PUSHOPTION = _descriptor.Descriptor(
+  name='PushOption',
+  full_name='chromite.api.RunCopybotRequest.PushOption',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='opt', full_name='chromite.api.RunCopybotRequest.PushOption.opt', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=928,
+  serialized_end=953,
 )
 
 _RUNCOPYBOTREQUEST = _descriptor.Descriptor(
@@ -351,10 +382,17 @@ _RUNCOPYBOTREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='push_options', full_name='chromite.api.RunCopybotRequest.push_options', index=12,
+      number=13, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
-  nested_types=[_RUNCOPYBOTREQUEST_REPO, _RUNCOPYBOTREQUEST_GERRITUSER, _RUNCOPYBOTREQUEST_GERRITLABEL, _RUNCOPYBOTREQUEST_PATTERN, _RUNCOPYBOTREQUEST_PSEUDOHEADER, ],
+  nested_types=[_RUNCOPYBOTREQUEST_REPO, _RUNCOPYBOTREQUEST_GERRITUSER, _RUNCOPYBOTREQUEST_GERRITLABEL, _RUNCOPYBOTREQUEST_PATTERN, _RUNCOPYBOTREQUEST_PSEUDOHEADER, _RUNCOPYBOTREQUEST_PUSHOPTION, ],
   enum_types=[
     _RUNCOPYBOTREQUEST_MERGECONFLICTBEHAVIOR,
   ],
@@ -365,7 +403,7 @@ _RUNCOPYBOTREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=75,
-  serialized_end=995,
+  serialized_end=1088,
 )
 
 
@@ -396,8 +434,8 @@ _RUNCOPYBOTRESPONSE_MERGECONFLICTCOMMIT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1171,
-  serialized_end=1206,
+  serialized_start=1264,
+  serialized_end=1299,
 )
 
 _RUNCOPYBOTRESPONSE = _descriptor.Descriptor(
@@ -435,8 +473,8 @@ _RUNCOPYBOTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=998,
-  serialized_end=1378,
+  serialized_start=1091,
+  serialized_end=1471,
 )
 
 _RUNCOPYBOTREQUEST_REPO.containing_type = _RUNCOPYBOTREQUEST
@@ -444,6 +482,7 @@ _RUNCOPYBOTREQUEST_GERRITUSER.containing_type = _RUNCOPYBOTREQUEST
 _RUNCOPYBOTREQUEST_GERRITLABEL.containing_type = _RUNCOPYBOTREQUEST
 _RUNCOPYBOTREQUEST_PATTERN.containing_type = _RUNCOPYBOTREQUEST
 _RUNCOPYBOTREQUEST_PSEUDOHEADER.containing_type = _RUNCOPYBOTREQUEST
+_RUNCOPYBOTREQUEST_PUSHOPTION.containing_type = _RUNCOPYBOTREQUEST
 _RUNCOPYBOTREQUEST.fields_by_name['upstream'].message_type = _RUNCOPYBOTREQUEST_REPO
 _RUNCOPYBOTREQUEST.fields_by_name['downstream'].message_type = _RUNCOPYBOTREQUEST_REPO
 _RUNCOPYBOTREQUEST.fields_by_name['labels'].message_type = _RUNCOPYBOTREQUEST_GERRITLABEL
@@ -452,6 +491,7 @@ _RUNCOPYBOTREQUEST.fields_by_name['ccs'].message_type = _RUNCOPYBOTREQUEST_GERRI
 _RUNCOPYBOTREQUEST.fields_by_name['merge_conflict_behavior'].enum_type = _RUNCOPYBOTREQUEST_MERGECONFLICTBEHAVIOR
 _RUNCOPYBOTREQUEST.fields_by_name['exclude_file_patterns'].message_type = _RUNCOPYBOTREQUEST_PATTERN
 _RUNCOPYBOTREQUEST.fields_by_name['keep_pseudoheaders'].message_type = _RUNCOPYBOTREQUEST_PSEUDOHEADER
+_RUNCOPYBOTREQUEST.fields_by_name['push_options'].message_type = _RUNCOPYBOTREQUEST_PUSHOPTION
 _RUNCOPYBOTREQUEST_MERGECONFLICTBEHAVIOR.containing_type = _RUNCOPYBOTREQUEST
 _RUNCOPYBOTRESPONSE_MERGECONFLICTCOMMIT.containing_type = _RUNCOPYBOTRESPONSE
 _RUNCOPYBOTRESPONSE.fields_by_name['failure_reason'].enum_type = _RUNCOPYBOTRESPONSE_FAILUREREASON
@@ -497,6 +537,13 @@ RunCopybotRequest = _reflection.GeneratedProtocolMessageType('RunCopybotRequest'
     # @@protoc_insertion_point(class_scope:chromite.api.RunCopybotRequest.Pseudoheader)
     })
   ,
+
+  'PushOption' : _reflection.GeneratedProtocolMessageType('PushOption', (_message.Message,), {
+    'DESCRIPTOR' : _RUNCOPYBOTREQUEST_PUSHOPTION,
+    '__module__' : 'chromite.api.copybot_pb2'
+    # @@protoc_insertion_point(class_scope:chromite.api.RunCopybotRequest.PushOption)
+    })
+  ,
   'DESCRIPTOR' : _RUNCOPYBOTREQUEST,
   '__module__' : 'chromite.api.copybot_pb2'
   # @@protoc_insertion_point(class_scope:chromite.api.RunCopybotRequest)
@@ -507,6 +554,7 @@ _sym_db.RegisterMessage(RunCopybotRequest.GerritUser)
 _sym_db.RegisterMessage(RunCopybotRequest.GerritLabel)
 _sym_db.RegisterMessage(RunCopybotRequest.Pattern)
 _sym_db.RegisterMessage(RunCopybotRequest.Pseudoheader)
+_sym_db.RegisterMessage(RunCopybotRequest.PushOption)
 
 RunCopybotResponse = _reflection.GeneratedProtocolMessageType('RunCopybotResponse', (_message.Message,), {
 
@@ -533,8 +581,8 @@ _COPYBOTSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=b'\302\355\032\t\n\007copybot',
   create_key=_descriptor._internal_create_key,
-  serialized_start=1380,
-  serialized_end=1492,
+  serialized_start=1473,
+  serialized_end=1585,
   methods=[
   _descriptor.MethodDescriptor(
     name='RunCopybot',

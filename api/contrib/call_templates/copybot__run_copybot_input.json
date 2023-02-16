@@ -27,6 +27,11 @@
   ],
   "merge_conflict_behavior": "MERGE_CONFLICT_BEHAVIOR_SKIP",
   "prepend_subject": "[Subj]",
+  "push_options": [
+    {
+      "opt": "push-option"
+    }
+  ],
   "reviewers": [
     {
       "user": "reviewers@example.com"

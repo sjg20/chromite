@@ -76,6 +76,9 @@ def RunCopybot(input_proto, output_proto, _config_proto):
     if input_proto.dry_run:
         cmd.append("--dry-run")
 
+    for po in input_proto.push_options:
+        cmd.extend(["--push-option", po.opt])
+
     cmd.append(f"{input_proto.upstream.url}:{input_proto.upstream.branch}")
     cmd.append(f"{input_proto.downstream.url}:{input_proto.downstream.branch}")
 
