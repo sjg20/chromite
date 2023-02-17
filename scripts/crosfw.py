@@ -416,15 +416,15 @@ def SetupBuild(options):
         )
 
     vboot = os.path.join("build", board, "usr")
-    if in_chroot:
+    if arch == "sandbox":
+        compiler = ""
+    elif in_chroot:
         if arch == "x86":
             compiler = "i686-cros-linux-gnu-"
         elif arch == "arm":
             compiler = FindCompiler(arch, "armv7a-cros-linux-gnueabihf-")
         elif arch == "aarch64":
             compiler = FindCompiler(arch, "aarch64-cros-linux-gnu-")
-    elif arch == "sandbox":
-        compiler = ""
     else:
         result = cros_build_lib.run(
             ["buildman", "-A", "--boards", options.board],
