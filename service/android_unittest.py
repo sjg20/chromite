@@ -434,7 +434,12 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
 
         archs = ["arm", "arm64", "x86", "x86_64"]
         build_types = ["user", "userdebug"]
-        runtime_datas = ["gms_core_cache", "ureadahead_pack_host", "tts_cache"]
+        runtime_datas = [
+            "packages_reference",
+            "gms_core_cache",
+            "ureadahead_pack_host",
+            "tts_cache",
+        ]
 
         for arch in archs:
             for build_type in build_types:
@@ -484,8 +489,9 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
 
         # Override few as existing.
         path1 = "gs://r/ureadahead_pack_host_x86_64_user_100.tar"
-        path2 = "gs://r/gms_core_cache_arm_userdebug_100.tar"
-        path3 = "gs://r/tts_cache_arm64_user_100.tar"
+        path2 = "gs://r/packages_reference_arm_userdebug_100.tar"
+        path3 = "gs://r/gms_core_cache_arm_userdebug_100.tar"
+        path4 = "gs://r/tts_cache_arm64_user_100.tar"
 
         self.gs_mock.AddCmdResult(
             ["stat", "--", path1], stdout=_STAT_OUTPUT % path1
@@ -496,6 +502,9 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         self.gs_mock.AddCmdResult(
             ["stat", "--", path3], stdout=_STAT_OUTPUT % path3
         )
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", path4], stdout=_STAT_OUTPUT % path4
+        )
 
         variables = android.FindDataCollectorArtifacts(
             self.android_package,
@@ -505,15 +514,17 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         )
 
         expectation1 = "gs://r/ureadahead_pack_host_x86_64_user_${PV}.tar"
-        expectation2 = "gs://r/gms_core_cache_arm_userdebug_${PV}.tar"
-        expectation3 = "gs://r/tts_cache_arm64_user_${PV}.tar"
+        expectation2 = "gs://r/packages_reference_arm_userdebug_${PV}.tar"
+        expectation3 = "gs://r/gms_core_cache_arm_userdebug_${PV}.tar"
+        expectation4 = "gs://r/tts_cache_arm64_user_${PV}.tar"
 
         self.assertDictEqual(
             variables,
             {
                 "X86_64_USER_UREADAHEAD_PACK_HOST": expectation1,
-                "ARM_USERDEBUG_GMS_CORE_CACHE": expectation2,
-                "ARM64_USER_TTS_CACHE": expectation3,
+                "ARM_USERDEBUG_PACKAGES_REFERENCE": expectation2,
+                "ARM_USERDEBUG_GMS_CORE_CACHE": expectation3,
+                "ARM64_USER_TTS_CACHE": expectation4,
             },
         )
 
