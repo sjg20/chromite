@@ -412,12 +412,8 @@ def parse_args(
 
 
 @timer.timed("Elapsed time (build_image)")
-def main(argv: Optional[List[str]] = None) -> Optional[int]:
-    commandline.RunInsideChroot()
-
-    # Make sure we run with network disabled to prevent leakage.
-    namespaces.ReExecuteWithNamespace(sys.argv, preserve_env=True)
-
+def inner_main(argv: Optional[List[str]] = None):
+    """Inner main that processes building the image."""
     parser, opts = parse_args(argv)
 
     # If the opts.board is not set, then it means user hasn't specified a default
@@ -437,3 +433,12 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
         cros_build_lib.Die(
             f"Error running build_image. Exit Code : {result.return_code}"
         )
+
+
+def main(argv: Optional[List[str]] = None) -> Optional[int]:
+    commandline.RunInsideChroot()
+
+    # Make sure we run with network disabled to prevent leakage.
+    namespaces.ReExecuteWithNamespace(sys.argv, preserve_env=True)
+
+    inner_main(argv)
