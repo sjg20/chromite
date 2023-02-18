@@ -163,6 +163,9 @@ def _Dispatcher(
     else:
         try:
             old_data = osutils.ReadFile(path)
+        except FileNotFoundError:
+            logging.error("%s: file does not exist", path)
+            return 1
         except UnicodeDecodeError:
             logging.error("%s: file is not UTF-8 compatible", path)
             return 1

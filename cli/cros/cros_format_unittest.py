@@ -125,3 +125,10 @@ class FormatCommandTempDirTests(
         cmd = cros_format.FormatCommand(opts)
         self.assertEqual(0, cmd.Run())
         self.assertEqual("", file.read_text(encoding="utf-8"))
+
+    def testMissingFile(self):
+        """Check behavior with missing files."""
+        file = self.tempdir / "foo.py"
+        opts = self.parse_args([str(file)])
+        cmd = cros_format.FormatCommand(opts)
+        self.assertEqual(1, cmd.Run())
