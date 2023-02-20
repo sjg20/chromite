@@ -442,6 +442,7 @@ def SetupBuild(options):
         "--no-print-directory",
         "HOSTSTRIP=true",
         "QEMU_ARCH=",
+        "KCONFIG_NOSILENTUPDATE=1",
     ]
     if options.dt:
         base.append(f"DEVICE_TREE={options.dt}")
@@ -553,7 +554,11 @@ def RunBuild(options, base, target, queue):
     # Do the actual build.
     if options.build:
         result = cros_build_lib.run(
-            base + [target], stdout=True, stderr=subprocess.STDOUT, **kwargs
+            base + [target],
+            input="",
+            stdout=True,
+            stderr=subprocess.STDOUT,
+            **kwargs,
         )
         if (
             result.returncode
