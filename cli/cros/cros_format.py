@@ -167,7 +167,11 @@ def _Dispatcher(
         except UnicodeDecodeError:
             logging.error("%s: file is not UTF-8 compatible", path)
             return 1
-    new_data = tool(old_data, path=path)
+    try:
+        new_data = tool(old_data, path=path)
+    except formatters.ParseError as e:
+        logging.error("%s: parsing error: %s", e.args[0], e.__cause__)
+        return 1
     if new_data == old_data:
         return 0
 

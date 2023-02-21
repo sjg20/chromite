@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from typing import Optional, Union
 
+from chromite.format import formatters
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import git
@@ -96,15 +97,22 @@ def Data(
         encoding="utf-8",
     )
 
-    result = cros_build_lib.run(
-        [
-            Path(constants.CHROMITE_SCRIPTS_DIR) / "black",
-            f"--config={_find_pyproject_toml(path)}",
-            "-",
-        ],
-        input=result.stdout,
-        capture_output=True,
-        encoding="utf-8",
-    )
+    try:
+        result = cros_build_lib.run(
+            [
+                Path(constants.CHROMITE_SCRIPTS_DIR) / "black",
+                f"--config={_find_pyproject_toml(path)}",
+                f"--stdin-filename={path}",
+                "-",
+            ],
+            input=result.stdout,
+            capture_output=True,
+            encoding="utf-8",
+        )
+    except cros_build_lib.RunCommandError as e:
+        # Black will emit the entire input to stdout which is both excessively
+        # noisy and useless for errors, so discard it.
+        e.stdout = None
+        raise formatters.ParseError(path) from e
 
     return _custom_format_data(result.stdout)

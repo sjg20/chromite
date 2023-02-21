@@ -136,3 +136,35 @@ class FormatCommandTempDirTests(
         opts = self.parse_args([str(file)])
         cmd = cros_format.FormatCommand(opts)
         self.assertEqual(1, cmd.Run())
+
+    def testUnicodeError(self):
+        """Check binary files don't crash."""
+        file = self.tempdir / "foo.txt"
+        file.write_bytes(b"\xff")
+        opts = self.parse_args([str(file)])
+        cmd = cros_format.FormatCommand(opts)
+        self.assertEqual(1, cmd.Run())
+
+    def testParseErrorJson(self):
+        """Check JSON parsing errors don't crash."""
+        file = self.tempdir / "foo.json"
+        file.write_bytes(b"{")
+        opts = self.parse_args([str(file)])
+        cmd = cros_format.FormatCommand(opts)
+        self.assertEqual(1, cmd.Run())
+
+    def testParseErrorPython(self):
+        """Check Python parsing errors don't crash."""
+        file = self.tempdir / "foo.py"
+        file.write_bytes(b"'")
+        opts = self.parse_args([str(file)])
+        cmd = cros_format.FormatCommand(opts)
+        self.assertEqual(1, cmd.Run())
+
+    def testParseErrorXml(self):
+        """Check XML parsing errors don't crash."""
+        file = self.tempdir / "foo.xml"
+        file.write_bytes(b"<")
+        opts = self.parse_args([str(file)])
+        cmd = cros_format.FormatCommand(opts)
+        self.assertEqual(1, cmd.Run())

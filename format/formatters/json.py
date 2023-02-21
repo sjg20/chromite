@@ -8,6 +8,7 @@ import json
 import os
 from typing import Optional, Union
 
+from chromite.format import formatters
 from chromite.utils import pformat
 
 
@@ -27,5 +28,8 @@ def Data(
     """
     # If the file is one line, assume it should be condensed.  If it isn't, assume
     # it should be human readable.
-    obj = json.loads(data)
+    try:
+        obj = json.loads(data)
+    except json.decoder.JSONDecodeError as e:
+        raise formatters.ParseError(path) from e
     return pformat.json(obj, fp=None, compact="\n" not in data.strip())

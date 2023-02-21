@@ -26,3 +26,11 @@ locals().update(
         "xml",
     )
 )
+
+
+class Error(Exception):
+    """General formatting error."""
+
+
+class ParseError(Error):
+    """Parsing error in the format input."""

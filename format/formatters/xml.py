@@ -11,8 +11,7 @@ import os
 from typing import Optional, Union
 from xml.etree import ElementTree
 
-from chromite.format.formatters import repo_manifest
-from chromite.format.formatters import whitespace
+from chromite.format import formatters
 
 
 def Data(
@@ -29,9 +28,12 @@ def Data(
     Returns:
         Formatted data.
     """
-    root = ElementTree.fromstring(data)
+    try:
+        root = ElementTree.fromstring(data)
+    except ElementTree.ParseError as e:
+        raise formatters.ParseError(path) from e
     if root.tag == "manifest":
-        data = repo_manifest.Data(data)
+        data = formatters.repo_manifest.Data(data)
     else:
-        data = whitespace.Data(data)
+        data = formatters.whitespace.Data(data)
     return data
