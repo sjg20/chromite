@@ -983,7 +983,11 @@ def main(argv):
             " %s.  Please find a x86_64 machine." % (host,)
         )
 
-    goma = goma_lib.Goma(options.goma_dir) if options.goma_dir else None
+    goma = (
+        goma_lib.Goma(options.goma_dir, chroot_dir=options.chroot)
+        if options.goma_dir
+        else None
+    )
 
     # Merge the outside PATH setting if we re-execed ourselves.
     if "CHROMEOS_SUDO_PATH" in os.environ:
