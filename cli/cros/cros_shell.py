@@ -78,11 +78,16 @@ Quoting can be tricky; the rules are the same as with ssh:
             help="SSH identify file (private key).",
         )
         parser.add_argument(
+            "--known-hosts",
+            action="store_true",
+            default=None,
+            help="Use a known_hosts file.",
+        )
+        parser.add_argument(
             "--no-known-hosts",
             action="store_false",
             dest="known_hosts",
-            default=True,
-            help="Do not use a known_hosts file.",
+            help="Do not use a known_hosts file (default).",
         )
         parser.add_argument(
             "command",
@@ -108,7 +113,15 @@ Quoting can be tricky; the rules are the same as with ssh:
     def _ConnectSettings(self):
         """Generates the correct SSH connect settings based on our state."""
         kwargs = {"NumberOfPasswordPrompts": 2}
-        if self.known_hosts:
+        if self.known_hosts is None:
+            # Disable password auth by default, but not when the user has
+            # explicitly opted-in to not tracking host keys.  We want the
+            # default to be seamless: ignore changing host keys because the
+            # default testing ssh auth keys are accepted.  But don't let
+            # password auth be presented in case the user put in the wrong
+            # host and types in a password to a wrong host.
+            kwargs["PasswordAuthentication"] = "no"
+        elif self.known_hosts:
             # Use the default known_hosts and our current key check setting.
             kwargs["UserKnownHostsFile"] = None
             kwargs["StrictHostKeyChecking"] = self.host_key_checking
@@ -182,7 +195,7 @@ Quoting can be tricky; the rules are the same as with ssh:
             # chroot.
             if e.IsKnownHostsMismatch():
                 # The full SSH error message has extra info for the user.
-                logging.warning("\n%s", e)
+                logging.warning("\n%s", str(e).strip())
                 if self._UserConfirmKeyChange():
                     remote_access.RemoveKnownHost(self.device.hostname)
                     # The user already OK'd so we can skip the additional SSH
