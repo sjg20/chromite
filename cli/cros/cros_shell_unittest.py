@@ -155,9 +155,7 @@ class ShellTest(cros_test_lib.MockTempDirTestCase):
         self.SetupCommandMock([self.DEVICE_IP])
         self.mock_run_command.side_effect = remote_access.SSHConnectionError()
 
-        self.assertRaises(
-            remote_access.SSHConnectionError, self.cmd_mock.inst.Run
-        )
+        self.assertEqual(self.cmd_mock.inst.Run(), 1)
 
         self.assertFalse(self.mock_prompt.called)
         self.assertEqual(self.mock_run_command.call_count, 1)

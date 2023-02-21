@@ -210,4 +210,8 @@ Quoting can be tricky; the rules are the same as with ssh:
                     return self._StartSsh()
                 else:
                     return 1
-            raise
+            if self.options.debug:
+                raise
+            else:
+                # The remote_access call should have logged an error for us.
+                return 1
