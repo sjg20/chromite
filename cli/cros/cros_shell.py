@@ -167,6 +167,8 @@ Quoting can be tricky; the rules are the same as with ssh:
         Raises:
             SSHConnectionError on SSH connect failure.
         """
+        run_interactive_shell = not bool(self.command)
+
         # Create the ChromiumOSDevice the first time through this function.
         if not self.device:
             self.device = remote_access.ChromiumOSDevice(
@@ -175,12 +177,16 @@ Quoting can be tricky; the rules are the same as with ssh:
                 username=self.ssh_username,
                 private_key=self.ssh_private_key,
                 ping=False,
+                # It's not possible to pass env vars and run an interactive
+                # shell at the same time.
+                include_dev_paths=not run_interactive_shell,
             )
         return self.device.run(
             self.command,
             connect_settings=self._ConnectSettings(),
             check=False,
-            stderr=True,
+            # Only capture stderr if we aren't launching an interactive shell.
+            stderr=not run_interactive_shell,
             stdout=None,
         ).returncode
 
