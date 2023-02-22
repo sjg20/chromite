@@ -435,13 +435,13 @@ class CleanOutdatedCommand(command.CliCommand):
         """Perform the command."""
         commandline.RunInsideChroot(self)
 
-        # Require qmerge from app-portage/portage-utils version >= 0.94.4.
+        # Require qmerge from app-portage/portage-utils version >= 0.95.
         self.ensure_pkg_min_version(
             portage_util.PortageDB(
                 build_target_lib.get_default_sysroot_path(None)
             ),
             "app-portage/portage-utils",
-            "0.94.4",
+            "0.95",
         )
 
         if self.options.host:
