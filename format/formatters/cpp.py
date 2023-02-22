@@ -8,8 +8,10 @@ This currently only supports clang-format.
 """
 
 import os
+from pathlib import Path
 from typing import Optional, Union
 
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 
 
@@ -27,7 +29,11 @@ def Data(
         Formatted data.
     """
     result = cros_build_lib.run(
-        ["clang-format", "--style=file", f"--assume-filename={path}"],
+        [
+            Path(constants.CHROMITE_SCRIPTS_DIR, "clang-format"),
+            "--style=file",
+            f"--assume-filename={path}",
+        ],
         capture_output=True,
         input=data,
         encoding="utf-8",
