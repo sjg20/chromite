@@ -1,6 +1,7 @@
 # Copyright 2012 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
+
 """Library containing functions to access a remote test device."""
 
 import functools
@@ -361,9 +362,8 @@ class RemoteAccess(object):
     @staticmethod
     def _mockable_popen(*args, **kwargs):
         """This wraps subprocess.Popen so it can be mocked in unit tests."""
-        return subprocess.Popen(
-            *args, **kwargs
-        )  # pylint: disable=consider-using-with
+        # pylint: disable=consider-using-with
+        return subprocess.Popen(*args, **kwargs)
 
     @property
     def target_ssh_url(self):
