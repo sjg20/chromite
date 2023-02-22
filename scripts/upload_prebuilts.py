@@ -614,7 +614,15 @@ class PrebuiltUploader(object):
             remote_pointerfile = toolchain.GetSdkURL(
                 for_gsutil=True, suburl="cros-sdk-latest.conf"
             )
-            osutils.WriteFile(pointerfile, 'LATEST_SDK="%s"' % version_str)
+            osutils.WriteFile(
+                pointerfile,
+                f"""# The most recent SDK that is tested and ready for use.
+LATEST_SDK=\"{version_str}\"
+
+# The most recently built version. New uprev attempts should target this.
+# Warning: This version may not be tested yet.
+LATEST_SDK_UPREV_TARGET=\"None\"""",
+            )
             self._Upload(pointerfile, remote_pointerfile)
 
     def _GetTargets(self):

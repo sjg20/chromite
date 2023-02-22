@@ -694,6 +694,7 @@ class TestSdk(cros_test_lib.MockTestCase):
             "UpdateBinhostConfFile",
             side_effect=Exception("should not get called"),
         )
+        self.write_file_mock = self.PatchObject(osutils, "WriteFile")
         self.upload_mock = self.PatchObject(
             prebuilt.PrebuiltUploader, "_Upload"
         )
@@ -729,7 +730,7 @@ class TestSdk(cros_test_lib.MockTestCase):
         ver = "1234"
         vtar = "cros-sdk-%s.tar.xz" % ver
 
-        calls = [
+        upload_calls = [
             mock.call(
                 "%s.Manifest" % tar, "gs://chromiumos-sdk/%s.Manifest" % vtar
             ),
@@ -737,7 +738,7 @@ class TestSdk(cros_test_lib.MockTestCase):
         ]
         for to in to_tarballs:
             to = to.split(":")
-            calls.append(
+            upload_calls.append(
                 mock.call(
                     to[1],
                     ("gs://chromiumos-sdk/" + to_upload_path)
@@ -746,14 +747,14 @@ class TestSdk(cros_test_lib.MockTestCase):
             )
         for tc in tc_tarballs:
             tc = tc.split(":")
-            calls.append(
+            upload_calls.append(
                 mock.call(
                     tc[1],
                     ("gs://chromiumos-sdk/" + tc_upload_path)
                     % {"target": tc[0]},
                 )
             )
-        calls.append(
+        upload_calls.append(
             mock.call(mock.ANY, "gs://chromiumos-sdk/cros-sdk-latest.conf")
         )
 
@@ -766,7 +767,18 @@ class TestSdk(cros_test_lib.MockTestCase):
             tc_tarballs,
             tc_upload_path,
         )
-        self.upload_mock.assert_has_calls(calls)
+        self.upload_mock.assert_has_calls(upload_calls)
+
+        expected_latest_file_contents = f"""\
+# The most recent SDK that is tested and ready for use.
+LATEST_SDK="{ver}"
+
+# The most recently built version. New uprev attempts should target this.
+# Warning: This version may not be tested yet.
+LATEST_SDK_UPREV_TARGET=\"None\""""
+        self.write_file_mock.assert_any_call(
+            mock.ANY, expected_latest_file_contents
+        )
 
     def testBoardOverlayTarballUpload(self):
         """Make sure processing of board-specific overlay tarballs works."""
