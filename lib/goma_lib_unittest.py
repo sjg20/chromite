@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import time
+from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
@@ -30,7 +31,10 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
         osutils.SafeMakedirs(self.goma_dir)
         osutils.SafeMakedirs(self.chroot_tmp)
 
-    def testExtraEnvCustomChroot(self):
+    @mock.patch(
+        "chromite.lib.cros_build_lib.IsInsideChroot", return_value=False
+    )
+    def testExtraEnvCustomChroot(self, _):
         """Test the chroot env building with a custom chroot location."""
         stats_filename = "stats_filename"
         counterz_filename = "counterz_filename"

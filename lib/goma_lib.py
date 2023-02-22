@@ -17,9 +17,9 @@ import tempfile
 from typing import List, NamedTuple, Optional, Union
 
 from chromite.cbuildbot import goma_util
+from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
-from chromite.lib import path_util
 
 
 class GomaApproach(NamedTuple):
@@ -161,6 +161,7 @@ class Goma(object):
                 f"GOMA_TMP_DIR does not point a directory: {goma_tmp_dir}"
             )
 
+        chroot = chroot_lib.Chroot(path=chroot_dir)
         self.linux_goma_dir = goma_dir
         self.chromeos_goma_dir = chromeos_goma_dir
         self.goma_approach = goma_approach
@@ -181,16 +182,7 @@ class Goma(object):
             self.goma_cache = None
 
         if goma_tmp_dir is None:
-            # path_util depends on the chroot directory existing at
-            # SOURCE_ROOT/chroot. This assumption is not valid for Luci builders,
-            # but generally shouldn't be an assumption anyway since we allow setting
-            # the chroot location. This block, and the two a few lines down, bypass
-            # path_util to compensate for those assumptions.
-            # TODO(crbug.com/1014138) Cleanup when path_util can handle custom chroot.
-            if chroot_dir:
-                chroot_tmp = chroot_dir / "tmp"
-            else:
-                chroot_tmp = path_util.FromChrootPath("/tmp")
+            chroot_tmp = chroot.full_path("/tmp")
 
             # If |goma_tmp_dir| is not given, create GOMA_TMP_DIR (goma
             # compiler_proxy's working directory), and its log directory.
@@ -201,13 +193,7 @@ class Goma(object):
             )
         self.goma_tmp_dir = goma_tmp_dir
 
-        root_dir = Path("/")
-        if chroot_dir:
-            self.chroot_goma_tmp_dir = root_dir / self.goma_tmp_dir.relative_to(
-                chroot_dir
-            )
-        else:
-            self.chroot_goma_tmp_dir = path_util.ToChrootPath(self.goma_tmp_dir)
+        self.chroot_goma_tmp_dir = chroot.chroot_path(self.goma_tmp_dir)
 
         self._log_dir = log_dir
         # Create log directory if not exist.
@@ -223,28 +209,11 @@ class Goma(object):
         if counterz_filename:
             self._counterz_file = self.goma_log_dir / counterz_filename
 
-        if chroot_dir:
-            self.chroot_goma_log_dir = root_dir / self.goma_log_dir.relative_to(
-                chroot_dir
-            )
-            if self._stats_file:
-                self._chroot_stats_file = (
-                    root_dir / self._stats_file.relative_to(chroot_dir)
-                )
-            if self._counterz_file:
-                self._chroot_counterz_file = (
-                    root_dir / self._counterz_file.relative_to(chroot_dir)
-                )
-        else:
-            self.chroot_goma_log_dir = path_util.ToChrootPath(self.goma_log_dir)
-            if self._stats_file:
-                self._chroot_stats_file = path_util.ToChrootPath(
-                    self._stats_file
-                )
-            if self._counterz_file:
-                self._chroot_counterz_file = path_util.ToChrootPath(
-                    self._counterz_file
-                )
+        self.chroot_goma_log_dir = chroot.chroot_path(self.goma_log_dir)
+        if self._stats_file:
+            self._chroot_stats_file = chroot.chroot_path(self._stats_file)
+        if self._counterz_file:
+            self._chroot_counterz_file = chroot.chroot_path(self._counterz_file)
 
     @property
     def goma_log_dir(self):
