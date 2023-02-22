@@ -560,18 +560,18 @@ def clean(build_target: build_target_lib.BuildTarget, dry_run: bool = False):
     pkgs = []
     try:
         qfile_pkgs = cros_build_lib.run(
-            [build_target.get_command("qfile"), "/firmware"],
+            [build_target.get_command("qfile"), "-q", "/firmware"],
             capture_output=True,
             check=False,
             dryrun=dry_run,
         ).stdout
-        pkgs = [l.split()[0] for l in qfile_pkgs.decode().splitlines()]
     except cros_build_lib.RunCommandError as e:
         raise CleanError(
             "qfile for target board %s is not present; board may "
             "not have been set up." % build_target.name
         )
 
+    pkgs = qfile_pkgs.decode().splitlines()
     config = firmware_config.get_config(build_target.name, None)
     pkgs = set(pkgs).union(config.build_packages)
     pkgs = sorted(
