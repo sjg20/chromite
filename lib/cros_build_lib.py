@@ -580,6 +580,7 @@ def run(
     cwd=None,
     input=None,
     enter_chroot=False,
+    executable: Optional[Union[str, os.PathLike]] = None,
     shell=False,
     env=None,
     extra_env=None,
@@ -621,6 +622,8 @@ def run(
         enter_chroot: this command should be run from within the chroot. If set,
             cwd must point to the scripts directory. If we are already inside
             the chroot, this command will be run as if |enter_chroot| is False.
+        executable: Program to run instead of relying on cmd[0].  Useful to set
+            a different value for argv[0].
         shell: Controls whether we add a shell as a command interpreter. See cmd
             since it has to agree as to the type.
         env: If non-None, this is the environment for the new process.  If
@@ -856,6 +859,7 @@ def run(
     try:
         proc = _Popen(
             popen_cmd,
+            executable=executable,
             cwd=cwd,
             stdin=stdin,
             stdout=popen_stdout,

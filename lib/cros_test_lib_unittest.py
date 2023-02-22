@@ -341,3 +341,12 @@ class RunCommandTestCase(cros_test_lib.RunCommandTestCase):
         )
         self.assertEqual(None, result.stderr)
         self.assertEqual(b"outerr", result.stdout)
+
+    def testExecutable(self):
+        """Verify executable arg is handled."""
+        self.rc.AddCmdResult(["/x"], stderr="err", stdout="out")
+        result = cros_build_lib.run(
+            ["/x"], executable="/exe", stdout=True, stderr=True
+        )
+        self.assertEqual(b"err", result.stderr)
+        self.assertEqual(b"out", result.stdout)

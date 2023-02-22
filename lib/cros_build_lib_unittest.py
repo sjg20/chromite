@@ -13,6 +13,7 @@ import itertools
 import logging
 import os
 from pathlib import Path
+import shutil
 import signal
 import socket
 import subprocess
@@ -319,6 +320,26 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
         """Verify command args with invalid types are rejected."""
         with self.assertRaises(TypeError):
             cros_build_lib.run(["echo", 1234], capture_output=True)
+
+    def testExecutable(self):
+        """Verify executable arg is handled correctly."""
+        # This should run the echo program.
+        result = cros_build_lib.run(
+            ["asdf", "1234"],
+            executable=shutil.which("echo"),
+            capture_output=True,
+            encoding="utf-8",
+        )
+        self.assertEqual(result.stdout, "1234\n")
+
+        # The shell should see the custom argv[0].
+        result = cros_build_lib.run(
+            ["-asdf", "-c", 'printf %s "$0"'],
+            executable=shutil.which("sh"),
+            capture_output=True,
+            encoding="utf-8",
+        )
+        self.assertEqual(result.stdout, "-asdf")
 
 
 def _ForceLoggingLevel(functor):

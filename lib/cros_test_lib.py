@@ -1689,9 +1689,10 @@ class PopenMock(partial_mock.PartialCmdMock):
                 "cat %s >&2\n" % stderr,
                 "exit %s" % result.returncode,
             ],
+            chmod=0o700,
         )
-        os.chmod(script, 0o700)
         kwargs["cwd"] = self.tempdir
+        kwargs.pop("executable", None)
         self.backup["__init__"](inst, [script, "--"] + cmd, *args, **kwargs)
 
 
