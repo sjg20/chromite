@@ -5,6 +5,7 @@
 """Unittests for the cache.py module."""
 
 import datetime
+import hashlib
 import os
 from unittest import mock
 
@@ -298,6 +299,40 @@ class RemoteCacheTest(CacheTestCase):
             ref.Assign(url)
             self.assertTrue(ref.Exists())
 
+    def testFetchFileSha1(self):
+        """Verify we validate hash_sha1 when passed."""
+        # pylint: disable=protected-access
+
+        local_path = self.tempdir / "local-path"
+        data = "daaaaata"
+        path = self.tempdir / "test-file"
+        url = "file://%s" % path
+        osutils.WriteFile(path, data)
+
+        # Valid SHA-1, should not raise.
+        self.cache._Fetch(
+            url,
+            local_path,
+            hash_sha1=hashlib.sha1(data.encode("utf-8")).hexdigest(),
+        )
+
+        with self.assertRaises(cache.Error):
+            self.cache._Fetch(url, local_path, hash_sha1="12345")
+
+    def testFetchFileMode(self):
+        """Verify changing the file mode."""
+        # pylint: disable=protected-access
+
+        local_path = self.tempdir / "local-path"
+        data = "daaaaata"
+        path = self.tempdir / "test-file"
+        url = "file://%s" % path
+        osutils.WriteFile(path, data)
+
+        self.cache._Fetch(url, local_path, mode=0o654)
+        self.assertEqual(osutils.ReadFile(local_path), data)
+        self.assertEqual(os.stat(local_path).st_mode & 0o777, 0o654)
+
 
 class TarballCacheTest(CacheTestCase):
     """Tests for TarballCache."""
@@ -349,3 +384,22 @@ class UntarTest(cros_test_lib.RunCommandTestCase):
                 "/some/tarball.tbz2",
             ]
         )
+
+
+class Sha1FileTest(cros_test_lib.TestCase):
+    """Test the Sha1File function."""
+
+    def testEmpty(self):
+        """Test Sha1File on a empty file."""
+        self.assertEqual(
+            cache.Sha1File("/dev/null"),
+            # sha1sum /dev/null
+            "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+        )
+
+    def testLargeFile(self):
+        """Test Sha1File on a file that is greater than 4069 bytes."""
+        expected_sha1 = hashlib.sha1(
+            osutils.ReadFile(__file__, "rb")
+        ).hexdigest()
+        self.assertEqual(cache.Sha1File(__file__), expected_sha1)

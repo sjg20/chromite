@@ -6,6 +6,7 @@
 
 import datetime
 import errno
+import hashlib
 import logging
 import os
 import shutil
@@ -20,6 +21,10 @@ from chromite.lib import retry_util
 
 
 # pylint: disable=protected-access
+
+
+class Error(Exception):
+    """Raised on fatal errors."""
 
 
 def EntryLock(f):
@@ -309,8 +314,22 @@ class DiskCache(object):
 class RemoteCache(DiskCache):
     """Supports caching of remote objects via URI."""
 
-    def _Fetch(self, url, local_path):
-        """Fetch a remote file."""
+    def _Fetch(
+        self,
+        url: str,
+        local_path: str,
+        *,
+        hash_sha1: Optional[str] = None,
+        mode: Optional[int] = None,
+    ):
+        """Fetch a remote file.
+
+        Args:
+            url: URL of the remote object.
+            local_path: Path to store
+            hash_sha1: If set, check for the SHA-1 sum.
+            mode: If set, the file is chmod-ed to mode.
+        """
         # We have to nest the import because gs.GSContext uses us to cache its own
         # gsutil tarball.  We know we won't get into a recursive loop though as it
         # only fetches files via non-gs URIs.
@@ -326,6 +345,14 @@ class RemoteCache(DiskCache):
                 debug_level=logging.DEBUG,
                 capture_output=True,
             )
+
+        if hash_sha1 is not None:
+            actual_sha1 = Sha1File(local_path)
+            if actual_sha1 != hash_sha1:
+                raise Error(f"sha1({url!r}) = {actual_sha1} != {hash_sha1}")
+
+        if mode is not None:
+            osutils.Chmod(local_path, mode)
 
     def _Insert(self, key, url):  # pylint: disable=arguments-differ
         """Insert a remote file into the cache."""
@@ -406,3 +433,21 @@ class TarballCache(RemoteCache):
                 raise
 
         return os.path.exists(key_path)
+
+
+def Sha1File(path: Union[str, os.PathLike]) -> str:
+    """Computes the SHA-1 checksum of path as a hex string."""
+    # Reusable buffer to reduce allocations.
+    buf = bytearray(4096)
+    view = memoryview(buf)
+    sha1 = hashlib.sha1()
+
+    with open(path, "rb") as fileobj:
+        while True:
+            size = fileobj.readinto(buf)
+            if size == 0:
+                # EOF
+                break
+            sha1.update(view[:size])
+
+    return sha1.hexdigest()
