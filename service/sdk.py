@@ -11,7 +11,6 @@ from pathlib import Path
 import re
 import tempfile
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
-import uuid
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import constants
@@ -67,7 +66,6 @@ class CreateArguments(object):
         self,
         replace: bool = False,
         bootstrap: bool = False,
-        use_image: bool = True,
         chroot_path: Optional[str] = None,
         cache_dir: Optional[str] = None,
         sdk_version: Optional[str] = None,
@@ -78,8 +76,6 @@ class CreateArguments(object):
         Args:
             replace: Whether an existing chroot should be deleted.
             bootstrap: Whether to build the SDK from source.
-            use_image: Whether to mount the chroot on a loopback image or create
-                it directly in a directory.
             chroot_path: Path to where the chroot should reside.
             cache_dir: Alternative directory to use as a cache for the chroot.
             sdk_version: Specific SDK version to use, e.g. 2022.01.20.073008.
@@ -88,7 +84,6 @@ class CreateArguments(object):
         """
         self.replace = replace
         self.bootstrap = bootstrap
-        self.use_image = use_image
         self.chroot_path = chroot_path
         self.cache_dir = cache_dir
         self.sdk_version = sdk_version
@@ -109,11 +104,6 @@ class CreateArguments(object):
 
         if self.bootstrap:
             args.append("--bootstrap")
-
-        if self.use_image:
-            args.append("--use-image")
-        else:
-            args.append("--nouse-image")
 
         if self.cache_dir:
             args.extend(["--cache-dir", self.cache_dir])
@@ -386,112 +376,6 @@ def UprevSdkAndPrebuilts(
         List of modified filepaths.
     """
     raise NotImplementedError()
-
-
-def CreateSnapshot(
-    chroot: Optional["chroot_lib.Chroot"] = None,
-    replace_if_needed: bool = False,
-) -> str:
-    """Create a logical volume snapshot of a chroot.
-
-    Args:
-        chroot: The chroot to perform the operation on.
-        replace_if_needed: If True, will replace the existing chroot with a new
-            one capable of being mounted as a loopback image if needed.
-
-    Returns:
-        The name of the snapshot created.
-    """
-    _EnsureSnapshottableState(chroot, replace=replace_if_needed)
-
-    snapshot_token = str(uuid.uuid4())
-    logging.info("Creating SDK snapshot with token ID: %s", snapshot_token)
-
-    cmd = [
-        os.path.join(constants.CHROMITE_BIN_DIR, "cros_sdk"),
-        "--snapshot-create",
-        snapshot_token,
-    ]
-    if chroot:
-        cmd.extend(["--chroot", chroot.path])
-
-    cros_build_lib.run(cmd)
-
-    return snapshot_token
-
-
-def RestoreSnapshot(
-    snapshot_token: str, chroot: Optional["chroot_lib.Chroot"] = None
-) -> None:
-    """Restore a logical volume snapshot of a chroot.
-
-    Args:
-        snapshot_token: The name of the snapshot to restore. Typically an opaque
-            generated name returned from `CreateSnapshot`.
-        chroot: The chroot to perform the operation on, or None for the default
-            chroot.
-    """
-    # Unmount to clean up stale processes that may still be in the chroot, in
-    # order to prevent 'device busy' errors from umount.
-    Unmount(chroot)
-    logging.info("Restoring SDK snapshot with ID: %s", snapshot_token)
-    cmd = [
-        os.path.join(constants.CHROMITE_BIN_DIR, "cros_sdk"),
-        "--snapshot-restore",
-        snapshot_token,
-    ]
-    if chroot:
-        cmd.extend(["--chroot", chroot.path])
-
-    # '--snapshot-restore' will automatically remount the image after restoring.
-    cros_build_lib.run(cmd)
-
-
-def _EnsureSnapshottableState(
-    chroot: Optional["chroot_lib.Chroot"] = None, replace: bool = False
-) -> None:
-    """Ensures that a chroot is in a capable state to create an LVM snapshot.
-
-    Args:
-        chroot: The chroot to perform the operation on, or None for the default
-            chroot.
-        replace: If true, will replace the existing chroot with a new one
-            capable of being mounted as a loopback image if needed.
-    """
-    cmd = [
-        os.path.join(constants.CHROMITE_BIN_DIR, "cros_sdk"),
-        "--snapshot-list",
-    ]
-    if chroot:
-        cmd.extend(["--chroot", chroot.path])
-
-    cache_dir = chroot.cache_dir if chroot else None
-    chroot_path = chroot.path if chroot else None
-
-    res = cros_build_lib.run(
-        cmd, check=False, encoding="utf-8", capture_output=True
-    )
-
-    if res.returncode == 0:
-        return
-    elif "Unable to find VG" in res.stderr and replace:
-        logging.warning(
-            "SDK was created with nouse-image which does not support "
-            "snapshots. Recreating SDK to support snapshots."
-        )
-
-        args = CreateArguments(
-            replace=True,
-            bootstrap=False,
-            use_image=True,
-            cache_dir=cache_dir,
-            chroot_path=chroot_path,
-        )
-
-        Create(args)
-        return
-    else:
-        res.check_returncode()
 
 
 def BuildPrebuilts(chroot: "chroot_lib.Chroot", board: str = ""):

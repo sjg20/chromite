@@ -975,9 +975,6 @@ SELF_DESTRUCTED_BUILD = "self_destructed_build"
 # Metadata key to indicate whether a build is self-destructed with success.
 SELF_DESTRUCTED_WITH_SUCCESS_BUILD = "self_destructed_with_success_build"
 
-# Chroot snapshot names
-CHROOT_SNAPSHOT_CLEAN = "clean-chroot"
-
 # Partition labels.
 PART_STATE = "STATE"
 PART_ROOT_A = "ROOT-A"

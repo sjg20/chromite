@@ -107,7 +107,6 @@ def Create(
     """
     replace = not input_proto.flags.no_replace
     bootstrap = input_proto.flags.bootstrap
-    use_image = not input_proto.flags.no_use_image
 
     chroot_path = input_proto.chroot.path
     cache_dir = input_proto.chroot.cache_dir
@@ -123,7 +122,6 @@ def Create(
     args = sdk.CreateArguments(
         replace=replace,
         bootstrap=bootstrap,
-        use_image=use_image,
         cache_dir=cache_dir,
         chroot_path=chroot_path,
         sdk_version=sdk_version,
@@ -232,24 +230,6 @@ def Clean(input_proto, _output_proto, _config):
     """Clean unneeded files from a chroot."""
     chroot = controller_util.ParseChroot(input_proto.chroot)
     sdk.Clean(chroot, safe=True, sysroots=True)
-
-
-@faux.all_empty
-@validate.validation_complete
-def CreateSnapshot(input_proto, output_proto, _config):
-    """Create a chroot snapshot and return a corresponding opaque key."""
-    chroot = controller_util.ParseChroot(input_proto.chroot)
-    token = sdk.CreateSnapshot(chroot, replace_if_needed=True)
-    output_proto.snapshot_token.value = token
-
-
-@faux.all_empty
-@validate.validation_complete
-def RestoreSnapshot(input_proto, _output_proto, _config):
-    """Restore a chroot snapshot from a snapshot key."""
-    chroot = controller_util.ParseChroot(input_proto.chroot)
-    token = input_proto.snapshot_token.value
-    sdk.RestoreSnapshot(token, chroot)
 
 
 @faux.all_empty

@@ -33,7 +33,6 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         self,
         no_replace=False,
         bootstrap=False,
-        no_use_image=False,
         cache_path=None,
         chroot_path=None,
         sdk_version=None,
@@ -43,7 +42,6 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         request = sdk_pb2.CreateRequest()
         request.flags.no_replace = no_replace
         request.flags.bootstrap = bootstrap
-        request.flags.no_use_image = no_use_image
 
         if cache_path:
             request.chroot.cache_dir = cache_path
@@ -95,13 +93,13 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         # Flag translation tests.
         # Test all false values in the message.
         request = self._GetRequest(
-            no_replace=False, bootstrap=False, no_use_image=False
+            no_replace=False,
+            bootstrap=False,
         )
         sdk_controller.Create(request, self.response, self.api_config)
         args_patch.assert_called_with(
             replace=True,
             bootstrap=False,
-            use_image=True,
             chroot_path=mock.ANY,
             cache_dir=mock.ANY,
             sdk_version=mock.ANY,
@@ -118,7 +116,6 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         request = self._GetRequest(
             no_replace=True,
             bootstrap=True,
-            no_use_image=True,
             sdk_version="foo",
             skip_chroot_upgrade=True,
         )
@@ -126,7 +123,6 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         args_patch.assert_called_with(
             replace=False,
             bootstrap=True,
-            use_image=False,
             chroot_path=mock.ANY,
             cache_dir=mock.ANY,
             sdk_version="foo",

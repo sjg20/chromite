@@ -100,7 +100,6 @@ class CreateArgumentsTest(cros_test_lib.MockTestCase):
         self.assertListEqual(
             [
                 "--create",
-                "--use-image",
                 "--sdk-version",
                 "foo",
                 "--skip-chroot-upgrade",
@@ -108,15 +107,14 @@ class CreateArgumentsTest(cros_test_lib.MockTestCase):
             self._GetArgsList(
                 replace=False,
                 bootstrap=False,
-                use_image=True,
                 sdk_version="foo",
                 skip_chroot_upgrade=True,
             ),
         )
 
         self.assertListEqual(
-            ["--create", "--bootstrap", "--nouse-image"],
-            self._GetArgsList(replace=False, bootstrap=True, use_image=False),
+            ["--create", "--bootstrap"],
+            self._GetArgsList(replace=False, bootstrap=True),
         )
 
 
@@ -317,21 +315,6 @@ class UpdateTest(cros_test_lib.RunCommandTestCase):
 
         self.assertCommandContains(expected_args)
         self.assertEqual(expected_version, version)
-
-
-class SnapshotTest(cros_test_lib.RunCommandTestCase):
-    """Snapshot command tests."""
-
-    def testCreateSnapshot(self):
-        """Test the bare snapshot creation command."""
-        sdk.CreateSnapshot()
-        self.assertCommandContains(["--snapshot-create"])
-
-    def testRestoreMatchesCreate(self):
-        """Test the token restored snapshot name matches the created name."""
-        token = sdk.CreateSnapshot()
-        sdk.RestoreSnapshot(token)
-        self.assertCommandContains(["--snapshot-restore", token])
 
 
 class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
