@@ -19,7 +19,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import NamedTuple, Optional, Union
+from typing import Dict, NamedTuple, Optional, Union
 import urllib.parse
 
 from chromite.lib import cache
@@ -31,6 +31,7 @@ from chromite.lib import retry_stats
 from chromite.lib import retry_util
 from chromite.lib import signals
 from chromite.lib import timeout_util
+from chromite.utils import key_value_store
 
 
 # This bucket has the allAuthenticatedUsers:READER ACL.
@@ -1671,6 +1672,30 @@ wheel: <
             return matching_names
         except timeout_util.TimeoutError:
             return None
+
+    def LoadKeyValueStore(
+        self,
+        src_uri: str,
+        ignore_missing: bool = False,
+        multiline: bool = False,
+        acl: Optional[str] = None,
+    ) -> Dict[str, str]:
+        """Turn a remote key=value file from Google Storage into a dict.
+
+        Args:
+            src_uri: The full gs:// path to the key-value store file.
+            ignore_missing: If True and the URI is not found, return {}.
+            multiline: Allow a value enclosed by quotes to span multiple lines.
+            acl: An ACL permissions file or canned ACL.
+
+        Returns:
+            A dict containing the key-values stored in the remote file.
+        """
+        with tempfile.NamedTemporaryFile() as f:
+            self.Copy(src_uri, f.name, acl=acl)
+            return key_value_store.LoadFile(
+                f, ignore_missing=ignore_missing, multiline=multiline
+            )
 
 
 def _FirstMatch(predicate, elems):

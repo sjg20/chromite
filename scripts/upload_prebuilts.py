@@ -26,6 +26,7 @@ import multiprocessing
 import os
 from pathlib import Path
 import tempfile
+from typing import Optional
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
@@ -609,21 +610,77 @@ class PrebuiltUploader(object):
 
         # Finally, also update the pointer to the latest SDK on which polling
         # scripts rely.
-        with osutils.TempDir() as tmpdir:
-            pointerfile = os.path.join(tmpdir, "cros-sdk-latest.conf")
-            remote_pointerfile = toolchain.GetSdkURL(
-                for_gsutil=True, suburl="cros-sdk-latest.conf"
+        self._UpdateRemoteSdkLatestFile(latest_sdk=version_str)
+
+    def _UpdateRemoteSdkLatestFile(
+        self,
+        latest_sdk: Optional[str] = None,
+        latest_sdk_uprev_target: Optional[str] = None,
+    ) -> None:
+        """Update the remote SDK pointer file on GS://.
+
+        The remote file contains multiple key-value pairs. This function can
+        update one or more of them; Nones will retain their existing values.
+
+        Args:
+            latest_sdk: The latest SDK that is tested and ready to be used. If
+                None, then the existing value on GS:// will be retained.
+            latest_sdk_uprev_target: The latest SDK that has been built, which
+                new PUprs can try to test and uprev. If None, then the existing
+                value on GS:// will be retained.
+        """
+        # Get existing values from the remote file.
+        remote_pointerfile = toolchain.GetSdkURL(
+            for_gsutil=True, suburl="cros-sdk-latest.conf"
+        )
+        existing_keyval = self._gs_context.LoadKeyValueStore(
+            remote_pointerfile, acl=self._acl
+        )
+        if not all(
+            key in existing_keyval
+            for key in ("LATEST_SDK", "LATEST_SDK_UPREV_TARGET")
+        ):
+            raise ValueError(
+                f"Remote pointerfile missing expected keys:\n{existing_keyval}"
             )
-            osutils.WriteFile(
-                pointerfile,
-                f"""# The most recent SDK that is tested and ready for use.
-LATEST_SDK=\"{version_str}\"
+
+        # If any values were not specified in args, use the existing values.
+        if latest_sdk is None:
+            latest_sdk = existing_keyval["LATEST_SDK"]
+        if latest_sdk_uprev_target is None:
+            latest_sdk_uprev_target = existing_keyval["LATEST_SDK_UPREV_TARGET"]
+
+        # Write a new local latest file with target values, and upload.
+        new_file_contents = self._CreateRemoteSdkLatestFileContents(
+            latest_sdk, latest_sdk_uprev_target
+        )
+        with osutils.TempDir() as tmpdir:
+            local_pointerfile = os.path.join(tmpdir, "cros-sdk-latest.conf")
+            osutils.WriteFile(local_pointerfile, new_file_contents)
+            self._Upload(local_pointerfile, remote_pointerfile)
+
+    @staticmethod
+    def _CreateRemoteSdkLatestFileContents(
+        latest_sdk: str, latest_sdk_uprev_target: str
+    ) -> str:
+        """Generate file contents for a remote SDK file.
+
+        Args:
+            latest_sdk: The latest SDK that is tested and ready to be used.
+            latest_sdk_uprev_target: The latest SDK that has been built, which
+                new PUprs can try to test and uprev.
+
+        Returns:
+            The contents of a remote SDK latest file containing the given args
+            as a key-value store.
+        """
+        return f"""\
+# The most recent SDK that is tested and ready for use.
+LATEST_SDK=\"{latest_sdk}\"
 
 # The most recently built version. New uprev attempts should target this.
 # Warning: This version may not be tested yet.
-LATEST_SDK_UPREV_TARGET=\"None\"""",
-            )
-            self._Upload(pointerfile, remote_pointerfile)
+LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
 
     def _GetTargets(self):
         """Retuns the list of targets to use."""

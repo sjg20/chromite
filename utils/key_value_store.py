@@ -6,12 +6,18 @@
 
 import contextlib
 import errno
+import io
 import os
+from typing import Dict, Generator, Union
 
 
 @contextlib.contextmanager
-def _Open(obj, mode="r", encoding="utf-8"):
-    """Convenience ctx that accepts a file path or an already open file object."""
+def _Open(
+    obj: Union[str, os.PathLike, io.TextIOWrapper],
+    mode: str = "r",
+    encoding: str = "utf-8",
+) -> Generator[io.TextIOWrapper, None, None]:
+    """Convenience ctx that accepts a file path or an open file object."""
     if isinstance(obj, (str, os.PathLike)):
         with open(obj, mode=mode, encoding=encoding) as f:
             yield f
@@ -19,8 +25,10 @@ def _Open(obj, mode="r", encoding="utf-8"):
         yield obj
 
 
-def LoadData(data, multiline=False, source="<data>"):
-    """Turn key=value content into a dict
+def LoadData(
+    data: str, multiline: bool = False, source: str = "<data>"
+) -> Dict[str, str]:
+    """Turn key=value content into a dict.
 
     Note: If you're designing a new data store, please use json rather than
     this format.  This func is designed to work with legacy/external files
@@ -75,8 +83,12 @@ def LoadData(data, multiline=False, source="<data>"):
     return d
 
 
-def LoadFile(obj, ignore_missing=False, multiline=False):
-    """Turn a key=value file into a dict
+def LoadFile(
+    obj: Union[str, os.PathLike, io.TextIOWrapper],
+    ignore_missing: bool = False,
+    multiline: bool = False,
+) -> Dict[str, str]:
+    """Turn a key=value file into a dict.
 
     Note: If you're designing a new data store, please use json rather than
     this format.  This func is designed to work with legacy/external files

@@ -403,6 +403,69 @@ class TestUploadPrebuilt(cros_test_lib.MockTempDirTestCase):
         self.assertTrue(self.gs_up_mock.called)
 
 
+class TestUpdateRemoteSdkLatestFile(cros_test_lib.MockTestCase):
+    """Tests for PrebuiltUploader._UpdateRemoteSdkLatestFile."""
+
+    def setUp(self):
+        self._write_file_patch = self.PatchObject(osutils, "WriteFile")
+        self.PatchObject(prebuilt.PrebuiltUploader, "_Upload")
+        self.PatchObject(
+            gs.GSContext,
+            "LoadKeyValueStore",
+            return_value={
+                "LATEST_SDK": "1000",
+                "LATEST_SDK_UPREV_TARGET": "2000",
+            },
+        )
+        self._uploader = prebuilt.PrebuiltUploader(
+            "gs://foo",
+            "public-read",
+            SimplePackageIndex().header["URI"],
+            [],
+            "/",
+            [],
+            False,
+            "foo",
+            False,
+            "x86-foo",
+            [],
+            "",
+            report={},
+        )
+
+    def testNoChanges(self):
+        self._uploader._UpdateRemoteSdkLatestFile()
+        expected = prebuilt.PrebuiltUploader._CreateRemoteSdkLatestFileContents(
+            "1000", "2000"
+        )
+        self._write_file_patch.assert_called_with(mock.ANY, expected)
+
+    def testChangeLatestSdk(self):
+        self._uploader._UpdateRemoteSdkLatestFile(latest_sdk="3000")
+        expected = prebuilt.PrebuiltUploader._CreateRemoteSdkLatestFileContents(
+            "3000", "2000"
+        )
+        self._write_file_patch.assert_called_with(mock.ANY, expected)
+
+    def testChangeLatestUprevTarget(self):
+        self._uploader._UpdateRemoteSdkLatestFile(
+            latest_sdk_uprev_target="4000"
+        )
+        expected = prebuilt.PrebuiltUploader._CreateRemoteSdkLatestFileContents(
+            "1000", "4000"
+        )
+        self._write_file_patch.assert_called_with(mock.ANY, expected)
+
+    def testChangeBoth(self):
+        self._uploader._UpdateRemoteSdkLatestFile(
+            latest_sdk="3000", latest_sdk_uprev_target="4000"
+        )
+        expected = prebuilt.PrebuiltUploader._CreateRemoteSdkLatestFileContents(
+            "3000", "4000"
+        )
+        self._write_file_patch.assert_called_with(mock.ANY, expected)
+
+
 class TestSyncPrebuilts(cros_test_lib.MockTestCase):
     """Tests for the SyncHostPrebuilts function."""
 
@@ -694,6 +757,14 @@ class TestSdk(cros_test_lib.MockTestCase):
             "UpdateBinhostConfFile",
             side_effect=Exception("should not get called"),
         )
+        self.PatchObject(
+            gs.GSContext,
+            "LoadKeyValueStore",
+            return_value={
+                "LATEST_SDK": "1000",
+                "LATEST_SDK_UPREV_TARGET": "2000",
+            },
+        )
         self.write_file_mock = self.PatchObject(osutils, "WriteFile")
         self.upload_mock = self.PatchObject(
             prebuilt.PrebuiltUploader, "_Upload"
@@ -775,7 +846,7 @@ LATEST_SDK="{ver}"
 
 # The most recently built version. New uprev attempts should target this.
 # Warning: This version may not be tested yet.
-LATEST_SDK_UPREV_TARGET=\"None\""""
+LATEST_SDK_UPREV_TARGET=\"2000\""""
         self.write_file_mock.assert_any_call(
             mock.ANY, expected_latest_file_contents
         )
