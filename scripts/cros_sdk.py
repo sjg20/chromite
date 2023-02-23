@@ -707,20 +707,17 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
     )
 
     # Global options.
-    default_chroot = os.path.join(
-        constants.SOURCE_ROOT, constants.DEFAULT_CHROOT_DIR
-    )
     parser.add_argument(
         "--chroot",
         dest="chroot",
-        default=default_chroot,
+        default=constants.DEFAULT_CHROOT_PATH,
         type="path",
         help=("SDK chroot dir name [%s]" % constants.DEFAULT_CHROOT_DIR),
     )
     parser.add_argument(
         "--out-dir",
         metavar="DIR",
-        default=constants.DEFAULT_OUT_DIR,
+        default=constants.DEFAULT_OUT_PATH,
         type=Path,
         help="Use DIR for build state and output files",
     )

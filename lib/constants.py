@@ -41,6 +41,7 @@ PATH_TO_CBUILDBOT = os.path.join(CHROMITE_BIN_SUBDIR, "cbuildbot")
 DEFAULT_CHROOT_DIR = "chroot"
 DEFAULT_CHROOT_PATH = os.path.join(SOURCE_ROOT, DEFAULT_CHROOT_DIR)
 DEFAULT_OUT_DIR = Path("out")
+DEFAULT_OUT_PATH = SOURCE_ROOT / DEFAULT_OUT_DIR
 DEFAULT_BUILD_ROOT = os.path.join(SOURCE_ROOT, "src/build")
 TERMINA_TOOLS_DIR = os.path.join(
     CHROOT_SOURCE_ROOT, "src/platform/container-guest-tools/termina"
