@@ -111,8 +111,17 @@ class CrOSTest(object):
         else:
             self._device.WaitForBoot()
 
+        @retry_util.WithRetry(
+            max_retry=2,
+            sleep=60.0,
+            backoff_factor=2,
+            exception=cros_build_lib.RunCommandError,
+        )
+        def _FlashWithRetry():
+            self._Flash()
+
         self._Build()
-        self._Flash()
+        _FlashWithRetry()
         self._Deploy()
 
         returncode = self._RunTests()
