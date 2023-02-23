@@ -7,10 +7,10 @@
 import contextlib
 import os
 from typing import ContextManager, Sequence
-import urllib.parse
 
 from chromite.lib import cache
 from chromite.lib import cros_build_lib
+from chromite.lib import gs
 from chromite.lib import path_util
 
 
@@ -28,7 +28,7 @@ class ClangFormatCache(cache.RemoteCache):
     def _Fetch(
         self, url: str, local_path: str
     ):  # pylint: disable=arguments-differ
-        expected_sha1 = urllib.parse.urlparse(url).path.lstrip("/")
+        expected_sha1 = url.rsplit("/", 1)[-1]
         super()._Fetch(url, local_path, hash_sha1=expected_sha1, mode=0o755)
 
 
@@ -42,7 +42,7 @@ def GetClangFormatCache() -> ClangFormatCache:
 def ClangFormat() -> ContextManager[str]:
     """Context manager returning the clang-format binary."""
     key = (CLANG_FORMAT_SHA1,)
-    url = f"{CLANG_FORMAT_BUCKET}/{CLANG_FORMAT_SHA1}"
+    url = gs.GsUrlToHttp(f"{CLANG_FORMAT_BUCKET}/{CLANG_FORMAT_SHA1}")
     with GetClangFormatCache().Lookup(key) as ref:
         if not ref.Exists(lock=True):
             ref.SetDefault(url, lock=True)
