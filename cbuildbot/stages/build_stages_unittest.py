@@ -7,7 +7,6 @@
 import contextlib
 import os
 from pathlib import Path
-from unittest import mock
 
 from chromite.third_party.infra_libs.buildbucket.proto import (
     build_pb2,
@@ -698,21 +697,13 @@ class CleanUpStageTest(generic_stages_unittest.StageTestCase):
             buildbucket_id="200",
         )
 
-        self._Prepare(extra_config={"chroot_use_image": False})
+        self._Prepare()
 
     def ConstructStage(self):
         return build_stages.CleanUpStage(self._run, self.buildstore)
 
-    def testChrootReuseImageMismatch(self):
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        self.assertFalse(stage.CanReuseChroot(chroot_path))
-
     def testChrootReuseChrootReplace(self):
-        self._Prepare(
-            extra_config={"chroot_use_image": False, "chroot_replace": True}
-        )
+        self._Prepare(extra_config={"chroot_replace": True})
 
         self.PatchObject(
             build_stages.CleanUpStage,
@@ -722,9 +713,8 @@ class CleanUpStageTest(generic_stages_unittest.StageTestCase):
             ),
         )
 
-        chroot_path = os.path.join(self.build_root, "chroot")
         stage = self.ConstructStage()
-        self.assertFalse(stage.CanReuseChroot(chroot_path))
+        self.assertFalse(stage.CanReuseChroot())
 
     def testChrootReusePreviousFailed(self):
         self.PatchObject(
@@ -735,9 +725,8 @@ class CleanUpStageTest(generic_stages_unittest.StageTestCase):
             ),
         )
 
-        chroot_path = os.path.join(self.build_root, "chroot")
         stage = self.ConstructStage()
-        self.assertFalse(stage.CanReuseChroot(chroot_path))
+        self.assertFalse(stage.CanReuseChroot())
 
     def testChrootReusePreviousMasterMissing(self):
         self.PatchObject(
@@ -750,9 +739,8 @@ class CleanUpStageTest(generic_stages_unittest.StageTestCase):
             ),
         )
 
-        chroot_path = os.path.join(self.build_root, "chroot")
         stage = self.ConstructStage()
-        self.assertFalse(stage.CanReuseChroot(chroot_path))
+        self.assertFalse(stage.CanReuseChroot())
 
     def testChrootReusePreviousMasterFailed(self):
         master_id = self.fake_db.InsertBuild(
@@ -773,9 +761,8 @@ class CleanUpStageTest(generic_stages_unittest.StageTestCase):
             ),
         )
 
-        chroot_path = os.path.join(self.build_root, "chroot")
         stage = self.ConstructStage()
-        self.assertFalse(stage.CanReuseChroot(chroot_path))
+        self.assertFalse(stage.CanReuseChroot())
 
     def testChrootReuseAllPassed(self):
         master_id = self.fake_db.InsertBuild(
@@ -796,121 +783,8 @@ class CleanUpStageTest(generic_stages_unittest.StageTestCase):
             ),
         )
 
-        chroot_path = os.path.join(self.build_root, "chroot")
         stage = self.ConstructStage()
-        self.assertTrue(stage.CanReuseChroot(chroot_path))
-
-    def testChrootSnapshotClobber(self):
-        self._Prepare(
-            extra_cmd_args=["--clobber"],
-            extra_config={"chroot_use_image": True, "chroot_replace": False},
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        self.assertFalse(stage.CanUseChrootSnapshotToDelete(chroot_path))
-
-    def testChrootSnapshotReplace(self):
-        self._Prepare(
-            extra_config={"chroot_use_image": True, "chroot_replace": True}
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        self.assertFalse(stage.CanUseChrootSnapshotToDelete(chroot_path))
-
-    def testChrootSnapshotNoUseImage(self):
-        self._Prepare(
-            extra_config={"chroot_use_image": False, "chroot_replace": False}
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        self.assertFalse(stage.CanUseChrootSnapshotToDelete(chroot_path))
-
-    def testChrootSnapshotMissingImage(self):
-        self._Prepare(
-            extra_config={"chroot_use_image": True, "chroot_replace": False}
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        stage = self.ConstructStage()
-        self.assertFalse(stage.CanUseChrootSnapshotToDelete(chroot_path))
-
-    def testChrootSnapshotAllPass(self):
-        self._Prepare(
-            extra_config={"chroot_use_image": True, "chroot_replace": False}
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        self.assertTrue(stage.CanUseChrootSnapshotToDelete(chroot_path))
-
-    def testChrootRevertNoSnapshots(self):
-        self.PatchObject(commands, "ListChrootSnapshots", return_value=[])
-        self._Prepare(
-            extra_config={"chroot_use_image": True, "chroot_replace": False}
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        self.assertFalse(stage._RevertChrootToCleanSnapshot())
-
-    def testChrootRevertSnapshotNotFound(self):
-        self.PatchObject(commands, "ListChrootSnapshots", return_value=["snap"])
-        self._Prepare(
-            extra_config={"chroot_use_image": True, "chroot_replace": False}
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        self.assertFalse(stage._RevertChrootToCleanSnapshot())
-
-    def testChrootCleanSnapshotReplacesAllExisting(self):
-        self.PatchObject(
-            commands,
-            "ListChrootSnapshots",
-            return_value=["snap1", "snap2", constants.CHROOT_SNAPSHOT_CLEAN],
-        )
-        delete_mock = self.PatchObject(
-            commands, "DeleteChrootSnapshot", return_value=True
-        )
-        create_mock = self.PatchObject(commands, "CreateChrootSnapshot")
-
-        self._Prepare(
-            extra_config={"chroot_use_image": True, "chroot_replace": False}
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        stage._CreateCleanSnapshot()
-
-        self.assertEqual(
-            delete_mock.mock_calls,
-            [
-                mock.call(self.build_root, "snap1"),
-                mock.call(self.build_root, "snap2"),
-                mock.call(self.build_root, constants.CHROOT_SNAPSHOT_CLEAN),
-            ],
-        )
-        create_mock.assert_called_with(
-            self.build_root, constants.CHROOT_SNAPSHOT_CLEAN
-        )
-
-    def testChrootRevertFailsWhenCommandsRaiseExceptions(self):
-        self.PatchObject(
-            cros_build_lib,
-            "sudo_run",
-            side_effect=cros_build_lib.RunCommandError(
-                "error", cros_build_lib.CompletedProcess("error", returncode=5)
-            ),
-        )
-        self._Prepare(
-            extra_config={"chroot_use_image": True, "chroot_replace": False}
-        )
-        chroot_path = os.path.join(self.build_root, "chroot")
-        osutils.Touch(chroot_path + ".img")
-        stage = self.ConstructStage()
-        self.assertFalse(stage._RevertChrootToCleanSnapshot())
+        self.assertTrue(stage.CanReuseChroot())
 
 
 class CleanUpStageCancelSlaveBuilds(generic_stages_unittest.StageTestCase):
@@ -927,7 +801,7 @@ class CleanUpStageCancelSlaveBuilds(generic_stages_unittest.StageTestCase):
             buildbucket_v2.BuildbucketV2, "BatchSearchBuilds"
         )
 
-        self._Prepare(extra_config={"chroot_use_image": False})
+        self._Prepare()
         self.fake_db = fake_cidb.FakeCIDBConnection()
         self.buildstore = FakeBuildStore(self.fake_db)
         cidb.CIDBConnectionFactory.SetupMockCidb(self.fake_db)

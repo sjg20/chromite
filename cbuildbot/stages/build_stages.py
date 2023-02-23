@@ -70,38 +70,10 @@ class CleanUpStage(generic_stages.BuilderStage):
             d = os.path.join(chroot_dir, "build", board, cache_dir)
             osutils.RmDir(d, ignore_missing=True, sudo=True)
 
-    def _RevertChrootToCleanSnapshot(self):
-        try:
-            logging.info(
-                "Attempting to revert chroot to %s snapshot",
-                constants.CHROOT_SNAPSHOT_CLEAN,
-            )
-            snapshots = commands.ListChrootSnapshots(self._build_root)
-            if constants.CHROOT_SNAPSHOT_CLEAN not in snapshots:
-                logging.error(
-                    "Can't find %s snapshot.", constants.CHROOT_SNAPSHOT_CLEAN
-                )
-                return False
-
-            return commands.RevertChrootToSnapshot(
-                self._build_root, constants.CHROOT_SNAPSHOT_CLEAN
-            )
-        except failures_lib.BuildScriptFailure as e:
-            logging.error("Failed to revert chroot to snapshot: %s", e)
-            return False
-
-    def _CreateCleanSnapshot(self):
-        for snapshot in commands.ListChrootSnapshots(self._build_root):
-            if not commands.DeleteChrootSnapshot(self._build_root, snapshot):
-                logging.warning("Couldn't delete old snapshot %s", snapshot)
-        commands.CreateChrootSnapshot(
-            self._build_root, constants.CHROOT_SNAPSHOT_CLEAN
-        )
-
     def _DeleteChroot(self):
         logging.info("Deleting chroot.")
         chroot = os.path.join(self._build_root, constants.DEFAULT_CHROOT_DIR)
-        if os.path.exists(chroot) or os.path.exists(chroot + ".img"):
+        if os.path.exists(chroot):
             # At this stage, it's not safe to run the cros_sdk inside the buildroot
             # itself because we haven't sync'd yet, and the version of the chromite
             # in there might be broken. Since we've already unmounted everything in
@@ -166,7 +138,7 @@ class CleanUpStage(generic_stages.BuilderStage):
 
         logging.info("Remove Chroot.")
         chroot_dir = os.path.join(workspace, constants.DEFAULT_CHROOT_DIR)
-        if os.path.exists(chroot_dir) or os.path.exists(chroot_dir + ".img"):
+        if os.path.exists(chroot_dir):
             cros_sdk_lib.CleanupChrootMount(chroot_dir, delete=True)
 
         logging.info("Remove all workspace files except .repo.")
@@ -315,34 +287,17 @@ class CleanUpStage(generic_stages.BuilderStage):
             cancel_nodes, "Canceling builds from a previous orchestrator."
         )
 
-    def CanReuseChroot(self, chroot_path):
+    def CanReuseChroot(self):
         """Determine if the chroot can be reused.
 
         A chroot can be reused if all of the following are true:
-            1.  The existence of chroot.img matches what is requested in the config,
-                i.e. exists when chroot_use_image is True or vice versa.
-            2.  The build config doesn't request chroot_replace.
-            3.  The previous local build succeeded.
-            4.  If there was a previous master build, that build also succeeded.
-
-        Args:
-          chroot_path: Path to the chroot we want to reuse.
+            1.  The build config doesn't request chroot_replace.
+            2.  The previous local build succeeded.
+            3.  If there was a previous master build, that build also succeeded.
 
         Returns:
-          True if the chroot at |chroot_path| can be reused, False if not.
+          True if the chroot can be reused, False if not.
         """
-
-        chroot_img = chroot_path + ".img"
-        chroot_img_exists = os.path.exists(chroot_img)
-        if self._run.config.chroot_use_image != chroot_img_exists:
-            logging.info(
-                "chroot image at %s %s but chroot_use_image=%s.  "
-                "Cannot reuse chroot.",
-                chroot_img,
-                "exists" if chroot_img_exists else "doesn't exist",
-                self._run.config.chroot_use_image,
-            )
-            return False
 
         if self._run.config.chroot_replace and self._run.options.build:
             logging.info(
@@ -368,47 +323,6 @@ class CleanUpStage(generic_stages.BuilderStage):
                     status,
                 )
                 return False
-
-        return True
-
-    def CanUseChrootSnapshotToDelete(self, chroot_path):
-        """Determine if the chroot can be "deleted" by reverting to a snapshot.
-
-        A chroot can be reverted instead of deleting if all of the following are
-        true:
-            1. The builder isn't being clobbered.
-            2. The config allows chroot reuse, i.e. chroot_replace=False.
-            3. The chroot actually supports snapshots, i.e. chroot_use_image is
-               True and chroot.img exists.
-        Note that the chroot might not contain any snapshots. This means that even
-        if this function returns True, the chroot isn't guaranteed to be able to be
-        reverted.
-
-        Args:
-          chroot_path: Path to the chroot we want to revert.
-
-        Returns:
-          True if it is safe to revert |chroot| to a snapshot instead of deleting.
-        """
-        if self._run.options.clobber:
-            logging.info("Clobber is set.  Cannot revert to snapshot.")
-            return False
-
-        if self._run.config.chroot_replace:
-            logging.info("Chroot will be replaced. Cannot revert to snapshot.")
-            return False
-
-        if not self._run.config.chroot_use_image:
-            logging.info("chroot_use_image=false. Cannot revert to snapshot.")
-            return False
-
-        chroot_img = chroot_path + ".img"
-        if not os.path.exists(chroot_img):
-            logging.info(
-                "Chroot image %s does not exist. Cannot revert to snapshot.",
-                chroot_img,
-            )
-            return False
 
         return True
 
@@ -455,26 +369,7 @@ class CleanUpStage(generic_stages.BuilderStage):
             osutils.UmountTree(self._build_root)
 
         if not delete_chroot:
-            delete_chroot = not self.CanReuseChroot(chroot_path)
-
-        # If we're going to delete the chroot and we can use a snapshot instead,
-        # try to revert.  If the revert succeeds, we don't need to delete after all.
-        if delete_chroot and self.CanUseChrootSnapshotToDelete(chroot_path):
-            delete_chroot = not self._RevertChrootToCleanSnapshot()
-
-        # Re-mount chroot image if it exists so that subsequent steps can clean up
-        # inside.
-        if not delete_chroot and self._run.config.chroot_use_image:
-            try:
-                cros_sdk_lib.MountChroot(chroot=chroot_path, create=False)
-            except cros_build_lib.RunCommandError as e:
-                logging.error(
-                    "Unable to mount chroot under %s.  Deleting chroot.  "
-                    "Error: %s",
-                    self._build_root,
-                    e,
-                )
-                delete_chroot = True
+            delete_chroot = not self.CanReuseChroot()
 
         if manifest is None:
             self._DeleteChroot()
@@ -506,17 +401,6 @@ class CleanUpStage(generic_stages.BuilderStage):
             #  tasks.append(self.CancelObsoleteSlaveBuilds)
 
             parallel.RunParallelSteps(tasks)
-
-        # If chroot.img still exists after everything is cleaned up, it means we're
-        # planning to reuse it. This chroot was created by the previous run, so its
-        # creation isn't affected by any potential changes in the current run.
-        # Therefore, if this run fails, having the subsequent run revert to this
-        # snapshot will still produce a clean chroot.  If this run succeeds, the
-        # next run will reuse the chroot without needing to revert it.  Thus, taking
-        # a snapshot now should be correct regardless of whether this run will
-        # ultimately succeed or not.
-        if os.path.exists(chroot_path + ".img"):
-            self._CreateCleanSnapshot()
 
 
 class InitSDKStage(generic_stages.BuilderStage):
@@ -563,7 +447,6 @@ class InitSDKStage(generic_stages.BuilderStage):
                 use_sdk=use_sdk,
                 chrome_root=self._run.options.chrome_root,
                 extra_env=self._portage_extra_env,
-                use_image=self._run.config.chroot_use_image,
                 cache_dir=self._run.options.cache_dir,
             )
 

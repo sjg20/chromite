@@ -230,15 +230,10 @@ def MakeChroot(
     use_sdk,
     chrome_root=None,
     extra_env=None,
-    use_image=False,
     cache_dir=None,
 ):
     """Wrapper around make_chroot."""
     cmd = ["cros_sdk", "--buildbot-log-version"]
-    if use_image:
-        cmd.append("--use-image")
-    else:
-        cmd.append("--nouse-image")
     if use_sdk:
         cmd.append("--create")
     else:
@@ -254,40 +249,6 @@ def MakeChroot(
         cmd += ["--cache-dir", cache_dir]
 
     RunBuildScript(buildroot, cmd, chromite_cmd=True, extra_env=extra_env)
-
-
-def ListChrootSnapshots(buildroot):
-    """Wrapper around cros_sdk --snapshot-list."""
-    cmd = ["cros_sdk", "--snapshot-list"]
-
-    cmd_snapshots = RunBuildScript(
-        buildroot, cmd, chromite_cmd=True, stdout=True
-    )
-    return cmd_snapshots.stdout.splitlines()
-
-
-def RevertChrootToSnapshot(buildroot, snapshot_name):
-    """Wrapper around cros_sdk --snapshot-restore."""
-    cmd = ["cros_sdk", "--snapshot-restore", snapshot_name]
-
-    result = RunBuildScript(buildroot, cmd, chromite_cmd=True, check=False)
-    return result.returncode == 0
-
-
-def CreateChrootSnapshot(buildroot, snapshot_name):
-    """Wrapper around cros_sdk --snapshot-create."""
-    cmd = ["cros_sdk", "--snapshot-create", snapshot_name]
-
-    result = RunBuildScript(buildroot, cmd, chromite_cmd=True, check=False)
-    return result.returncode == 0
-
-
-def DeleteChrootSnapshot(buildroot, snapshot_name):
-    """Wrapper around cros_sdk --snapshot-delete."""
-    cmd = ["cros_sdk", "--snapshot-delete", snapshot_name]
-
-    result = RunBuildScript(buildroot, cmd, chromite_cmd=True, check=False)
-    return result.returncode == 0
 
 
 def UpdateChroot(
@@ -586,6 +547,7 @@ def RunLocalTryjob(buildroot, build_config, args=None, target_buildroot=None):
         RunBuildScript(buildroot, cmd, chromite_cmd=True)
 
 
+# pylint: disable=unused-argument
 def Build(
     buildroot,
     board,

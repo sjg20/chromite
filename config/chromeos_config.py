@@ -399,7 +399,6 @@ def GeneralTemplates(site_config):
         display_label=config_lib.DISPLAY_LABEL_RELEASE,
         build_type=constants.CANARY_TYPE,
         luci_builder=config_lib.LUCI_BUILDER_LEGACY_RELEASE,
-        chroot_use_image=False,
         suite_scheduling=True,
         # Because release builders never use prebuilts, they need the
         # longer timeout.  See crbug.com/938958.
