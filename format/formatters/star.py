@@ -27,28 +27,23 @@ def Data(
     data: str,
     # pylint: disable=unused-argument
     path: Optional[Union[str, os.PathLike]] = None,
-    *,
-    type_: str = "default",
 ) -> str:
     """Format starlark |data|.
 
     Args:
         data: The file content to lint.
         path: The file name for diagnostics/configs/etc...
-        type_: The type of the starlark file.
 
     Returns:
         Formatted data.
     """
+    cmd = [_find_buildifier()]
+    if path is not None:
+        cmd.append(f"--path={path}")
     result = cros_build_lib.run(
-        [_find_buildifier(), f"--type={type_}"],
+        cmd,
         capture_output=True,
         input=data,
         encoding="utf-8",
     )
     return result.stdout
-
-
-BuildData = functools.partial(Data, type_="build")
-BzlData = functools.partial(Data, type_="bzl")
-WorkspaceData = functools.partial(Data, type_="workspace")

@@ -32,7 +32,7 @@ _SHELL_EXT = frozenset({".sh"})
 
 # Map file extensions to a formatter function.
 _EXT_TOOL_MAP = {
-    frozenset({".bzl"}): (formatters.star.BzlData,),
+    frozenset({".bzl", ".star"}): (formatters.star.Data,),
     frozenset({".c", ".cc", ".cpp", ".cxx", ".h"}): (formatters.cpp.Data,),
     frozenset({".gn", ".gni"}): (formatters.gn.Data,),
     frozenset({".go"}): (formatters.go.Data,),
@@ -48,7 +48,6 @@ _EXT_TOOL_MAP = {
     frozenset({".rs"}): (formatters.rust.Data,),
     # TODO(build): Add a formatter for this.
     _SHELL_EXT: (formatters.whitespace.Data,),
-    frozenset({".star"}): (formatters.star.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
     frozenset({".grd", ".svg", ".xml", ".xtb"}): (formatters.xml.Data,),
@@ -63,9 +62,8 @@ _EXT_TOOL_MAP = {
 # Map known filenames to a tool function.
 _FILENAME_PATTERNS_TOOL_MAP = {
     frozenset({".gn"}): (formatters.gn.Data,),
-    frozenset({"BUILD", "BUILD.bazel"}): (formatters.star.BuildData,),
-    frozenset({"WORKSPACE", "WORKSPACE.bazel"}): (
-        formatters.star.WorkspaceData,
+    frozenset({"BUILD", "BUILD.bazel", "WORKSPACE", "WORKSPACE.bazel"}): (
+        formatters.star.Data,
     ),
     # These are plain text files.
     frozenset(
