@@ -4666,191 +4666,6 @@
     "hw_tests_override": null,
     "luci_builder": "Try"
   },
-  "brya-lvm-stateful-full": {
-    "_template": "full",
-    "boards": [
-      "brya-lvm-stateful"
-    ],
-    "prebuilts": "public",
-    "run_cpeexport": true,
-    "useflags": [
-      "-chrome_internal"
-    ],
-    "vm_tests": []
-  },
-  "brya-lvm-stateful-full-tryjob": {
-    "_template": "full",
-    "boards": [
-      "brya-lvm-stateful"
-    ],
-    "debug": true,
-    "display_label": "tryjob",
-    "hw_tests": [
-      "{\n  \"async\": false,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"Build\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-inline\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 0,\n  \"timeout\": 10800,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": false,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"Build\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-arc\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 0,\n  \"timeout\": 10800,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": false,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"Build\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-tast-cq\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 0,\n  \"timeout\": 10800,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": true,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"PostBuild\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-tast-informational\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 1,\n  \"timeout\": 15000,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": true,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"PostBuild\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-installer\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 1,\n  \"timeout\": 15000,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": true,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"PostBuild\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-cq\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 1,\n  \"timeout\": 15000,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": true,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"PostBuild\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-perbuild\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 1,\n  \"timeout\": 15000,\n  \"warn_only\": false\n}"
-    ],
-    "hw_tests_override": null,
-    "luci_builder": "Try",
-    "prebuilts": "public",
-    "run_cpeexport": true,
-    "useflags": [
-      "-chrome_internal"
-    ],
-    "vm_tests": []
-  },
-  "brya-lvm-stateful-llvm-next-toolchain": {
-    "_template": "llvm_next_toolchain",
-    "boards": [
-      "brya-lvm-stateful"
-    ]
-  },
-  "brya-lvm-stateful-llvm-next-toolchain-tryjob": {
-    "_template": "llvm_next_toolchain",
-    "boards": [
-      "brya-lvm-stateful"
-    ],
-    "debug": true,
-    "display_label": "tryjob",
-    "hw_tests_override": null,
-    "luci_builder": "Try"
-  },
-  "brya-lvm-stateful-llvm-toolchain": {
-    "_template": "llvm_toolchain",
-    "boards": [
-      "brya-lvm-stateful"
-    ]
-  },
-  "brya-lvm-stateful-llvm-toolchain-tryjob": {
-    "_template": "llvm_toolchain",
-    "boards": [
-      "brya-lvm-stateful"
-    ],
-    "debug": true,
-    "display_label": "tryjob",
-    "hw_tests_override": null,
-    "luci_builder": "Try"
-  },
-  "brya-lvm-stateful-payloads": {
-    "_template": "payloads",
-    "boards": [
-      "brya-lvm-stateful"
-    ]
-  },
-  "brya-lvm-stateful-payloads-tryjob": {
-    "_template": "payloads",
-    "boards": [
-      "brya-lvm-stateful"
-    ],
-    "debug": true,
-    "hw_tests_override": null,
-    "luci_builder": "Try"
-  },
-  "brya-lvm-stateful-release": {
-    "_template": "release",
-    "boards": [
-      "brya-lvm-stateful"
-    ],
-    "important": false,
-    "models": [
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"anahera\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"anahera4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"banshee\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"brya\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"brya4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"brya4esti50\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"crota\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"crota360\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"felwinter\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"gimble\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"gimble4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"kano\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"marasov\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"mithrax\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"osiris\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"primus\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"primus4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"redrix\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"redrix4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"skolas\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"skolas4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"taeko\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"taeko4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"taniks\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"tarlo\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"vell\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"volmar\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zydron\",\n  \"test_suites\": []\n}"
-    ],
-    "sign_types": [
-      "recovery",
-      "factory"
-    ],
-    "vm_tests_override": null
-  },
-  "brya-lvm-stateful-release-tryjob": {
-    "_template": "release",
-    "boards": [
-      "brya-lvm-stateful"
-    ],
-    "debug": true,
-    "display_label": "tryjob",
-    "hw_tests": [
-      "{\n  \"async\": false,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"Build\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-inline\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 0,\n  \"timeout\": 10800,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": false,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"Build\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-arc\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 0,\n  \"timeout\": 10800,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": false,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"Build\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-tast-cq\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 0,\n  \"timeout\": 10800,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": true,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"PostBuild\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-tast-informational\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 1,\n  \"timeout\": 15000,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": true,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"PostBuild\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-installer\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 1,\n  \"timeout\": 15000,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": true,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"PostBuild\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-cq\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 1,\n  \"timeout\": 15000,\n  \"warn_only\": false\n}",
-      "{\n  \"async\": true,\n  \"blocking\": false,\n  \"critical\": false,\n  \"enable_skylab\": true,\n  \"file_bugs\": false,\n  \"max_retries\": 5,\n  \"minimum_duts\": 0,\n  \"offload_failures_only\": false,\n  \"pool\": \"quota\",\n  \"priority\": \"PostBuild\",\n  \"quota_account\": \"legacypool-suites\",\n  \"retry\": true,\n  \"suite\": \"bvt-perbuild\",\n  \"suite_args\": null,\n  \"suite_min_duts\": 1,\n  \"timeout\": 15000,\n  \"warn_only\": false\n}"
-    ],
-    "hw_tests_override": null,
-    "luci_builder": "Try",
-    "models": [
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"anahera\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"anahera4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"banshee\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"brya\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"brya4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"brya4esti50\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"crota\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"crota360\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"felwinter\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"gimble\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"gimble4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"kano\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"marasov\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"mithrax\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"osiris\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"primus\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"primus4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"redrix\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"redrix4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"skolas\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"skolas4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"taeko\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"taeko4es\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"taniks\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"tarlo\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"vell\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"volmar\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zavala\",\n  \"test_suites\": []\n}",
-      "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"brya-lvm-stateful\",\n  \"name\": \"zydron\",\n  \"test_suites\": []\n}"
-    ],
-    "paygen": false,
-    "push_image": false,
-    "sign_types": [
-      "recovery",
-      "factory"
-    ],
-    "suite_scheduling": false,
-    "vm_tests_override": null
-  },
   "brya-manatee-full": {
     "_template": "full",
     "boards": [
@@ -17136,7 +16951,6 @@
       "brya-gki-release",
       "brya-hibernate-release",
       "brya-kernelnext-release",
-      "brya-lvm-stateful-release",
       "brya-manatee-kernelnext-release",
       "brya-manatee-release",
       "brya-nopkvm-release",
@@ -17339,7 +17153,6 @@
       "brya-gki-release-tryjob",
       "brya-hibernate-release-tryjob",
       "brya-kernelnext-release-tryjob",
-      "brya-lvm-stateful-release-tryjob",
       "brya-manatee-kernelnext-release-tryjob",
       "brya-manatee-release-tryjob",
       "brya-nopkvm-release-tryjob",
