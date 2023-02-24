@@ -396,7 +396,7 @@ class RunThroughTest(
                 "build/args/chromeos/%s-crostoolchain.gni" % board,
             )
             self.assertExists(board_crostoolchain_arg_file)
-            with open(board_crostoolchain_arg_file) as f:
+            with open(board_crostoolchain_arg_file, encoding="utf-8") as f:
                 self.assertIn('cros_sdk_version = "5678.0.0"', f.read())
 
     def testManyBoardsBrokenArgs(self):

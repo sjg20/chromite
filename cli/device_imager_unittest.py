@@ -15,6 +15,7 @@ from chromite.lib import cros_test_lib
 from chromite.lib import gs
 from chromite.lib import image_lib
 from chromite.lib import image_lib_unittest
+from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import remote_access
 from chromite.lib import remote_access_unittest
@@ -371,8 +372,7 @@ class RawPartitionUpdaterTest(cros_test_lib.MockTempDirTestCase):
             path = os.path.join(
                 self.tempdir, constants.QUICK_PROVISION_PAYLOAD_KERNEL
             )
-            with open(path, "w") as image:
-                image.write("helloworld")
+            osutils.WriteFile(path, "helloworld")
 
             device_imager.KernelUpdater(
                 device,
