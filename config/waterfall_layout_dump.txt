@@ -255,7 +255,6 @@
     trogdor-release
     trogdor-userdebug-release
     trogdor-zephyr-release
-    trogdor64-release
     volteer-kernelnext-release
     volteer-release
     whirlwind-release
@@ -1114,7 +1113,6 @@
     trogdor-release-tryjob
     trogdor-userdebug-release-tryjob
     trogdor-zephyr-release-tryjob
-    trogdor64-release-tryjob
     volteer-kernelnext-release-tryjob
     volteer-release-tryjob
     whirlwind-release-tryjob
@@ -1412,11 +1410,6 @@
   trogdor-zephyr-llvm-toolchain-tryjob
   trogdor-zephyr-payloads-tryjob
   trogdor-zephyr-release-tryjob
-  trogdor64-full-tryjob
-  trogdor64-llvm-next-toolchain-tryjob
-  trogdor64-llvm-toolchain-tryjob
-  trogdor64-payloads-tryjob
-  trogdor64-release-tryjob
   veyron_mighty-full-tryjob
   veyron_mighty-llvm-next-toolchain-tryjob
   veyron_mighty-llvm-toolchain-tryjob
