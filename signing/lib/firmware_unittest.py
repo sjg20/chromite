@@ -357,7 +357,7 @@ class TestFirmwareSigner(cros_test_lib.RunCommandTempDirTestCase):
 
         # Create signer_config.csv
         signer_config_csv = os.path.join(shellball_dir, "signer_config.csv")
-        with open(signer_config_csv, "w") as csv_file:
+        with open(signer_config_csv, "w", encoding="utf-8") as csv_file:
             csv_file.write(SignerConfigsFromCSVTest.CreateCSV().read())
 
         fs.Sign(ks, shellball_dir, None)

@@ -33,7 +33,7 @@ class TestImportKeyset(cros_test_lib.MockTempDirTestCase):
             self.prod, "signer", "configs", "cros_common.config"
         )
         os.makedirs(os.path.dirname(conf_path))
-        with open(conf_path, "w") as fp:
+        with open(conf_path, "w", encoding="utf-8") as fp:
             fp.write("[keysets]\nfoo-mp-v3 = FooMPKeys-v3\n")
         self.config = update_release_keys.ParseSignerConfig(self.prod)
         self.argv = ["-d", self.base]
@@ -123,7 +123,7 @@ class TestRepoYaml(cros_test_lib.MockTempDirTestCase):
             self.prod, "signer", "configs", "cros_common.config"
         )
         os.makedirs(os.path.dirname(conf_path))
-        with open(conf_path, "w") as fp:
+        with open(conf_path, "w", encoding="utf-8") as fp:
             fp.write("[keysets]\nfoo-mp-v3 = FooMPKeys-v3\n")
         self.config = update_release_keys.ParseSignerConfig(self.prod)
         self.argv = ["-d", self.base]

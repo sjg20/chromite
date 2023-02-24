@@ -194,7 +194,7 @@ class KeyVersions(object):
         self._path = filename
         if os.path.exists(filename):
             self.saved = True
-            for line in open(filename, "r").readlines():
+            for line in open(filename, "r", encoding="utf-8").readlines():
                 if line.find("=") > 0:
                     k, v = line.strip().split("=")
                     try:

@@ -257,7 +257,7 @@ class FirmwareSigner(signer.BaseSigner):
         shellball_dir = input_name
         signerconfig_csv = os.path.join(shellball_dir, "signer_config.csv")
         if os.path.exists(signerconfig_csv):
-            with open(signerconfig_csv) as csv_file:
+            with open(signerconfig_csv, encoding="utf-8") as csv_file:
                 signerconfigs = SignerConfigsFromCSV(csv_file)
 
             for signerconfig in signerconfigs:
@@ -455,7 +455,9 @@ def ResignImageFirmware(image_file, keyset):
                         )
 
                     version_signer_path = os.path.join(sb_dir, "VERSION.signer")
-                    with open(version_signer_path, "w") as version_signer:
+                    with open(
+                        version_signer_path, "w", encoding="utf-8"
+                    ) as version_signer:
                         WriteSignerNotes(keyset, version_signer)
             else:
                 logging.warning(

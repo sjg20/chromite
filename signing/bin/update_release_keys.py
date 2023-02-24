@@ -48,7 +48,7 @@ class KeyringData(object):
         """Read the directory of active keysets in the repo."""
         default = {"metadata-version": METADATA_VERSION}
         if os.path.exists(self.contents_yaml):
-            with open(self.contents_yaml) as fp:
+            with open(self.contents_yaml, encoding="utf-8") as fp:
                 ret = yaml.safe_load(fp)
             if not ret or "metadata-version" not in ret:
                 logging.error("%s: no metadata-version.", self.contents_yaml)
