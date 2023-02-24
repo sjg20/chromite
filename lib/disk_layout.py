@@ -206,7 +206,7 @@ def GetScriptShell() -> str:
     """
 
     script_shell_path = Path(constants.CHROMITE_DIR) / "sdk/cgpt_shell.sh"
-    with open(script_shell_path, "r") as f:
+    with open(script_shell_path, "r", encoding="utf-8") as f:
         script_shell = "".join(f.readlines())
 
     # Before we return, insert the path to this tool so somebody reading the
@@ -1671,7 +1671,7 @@ class DiskLayout(object):
             sfilename: Filename to write the finished script to
             vfilename: Filename to write the partition variables json data to
         """
-        with open(sfilename, "w") as f, open(vfilename, "w") as jFile:
+        with open(sfilename, "w", encoding="utf-8") as f:
             script_shell = GetScriptShell()
             f.write(script_shell)
 
@@ -1685,7 +1685,8 @@ class DiskLayout(object):
                 self.WritePartitionSizesFunction(slines, func, layout, data)
 
             f.write("".join(slines))
-            json.dump(data, jFile)
+            with open(vfilename, "w", encoding="utf-8") as jFile:
+                json.dump(data, jFile)
 
             # TODO: Backwards compat.  Should be killed off once we update
             #       cros_generate_update_payload to use the new code.

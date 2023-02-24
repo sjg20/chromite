@@ -10,6 +10,7 @@ from pathlib import Path
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
 from chromite.lib import disk_layout
+from chromite.lib import osutils
 
 
 class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
@@ -50,9 +51,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testJSONComments(self):
         """Test that we ignore comments in JSON in lines starting with #."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """# This line is a comment.
+        osutils.WriteFile(
+            self.layout_json,
+            """# This line is a comment.
                 {
                     #  comment with some whitespaces on the left.
                     "metadata": {
@@ -63,8 +64,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                         "base": []
                     }
                 }
-                """
-            )
+                """,
+        )
 
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
@@ -82,14 +83,14 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         If we ever enable this, we need to change the README.disk_layout
         documentation to mention it.
         """
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                     "layouts": { # This is an inline comment.
                         "common": []
                     }
-                }"""
-            )
+                }""",
+        )
         self.assertRaises(
             ValueError,
             disk_layout.DiskLayout,
@@ -98,21 +99,20 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testPartitionOrderPreserved(self):
         """Test the order of the partitions is the same as in the parent."""
-        with open(self.parent_layout_json, "w") as f:
-            f.write(self.parent_layout_content)
+        osutils.WriteFile(self.parent_layout_json, self.parent_layout_content)
 
         parent_layout = disk_layout.DiskLayout(self.parent_layout_json)
 
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "parent": "%s",
                   "layouts": {
                     "base": []
                   }
                 }"""
-                % self.parent_layout_json
-            )
+            % self.parent_layout_json,
+        )
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertEqual(
@@ -121,9 +121,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
         # Test also that even overriding one partition keeps all of them in
         # order.
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "parent": "%s",
                   "layouts": {
                     "base": [
@@ -134,8 +134,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                     ]
                   }
                 }"""
-                % self.parent_layout_json
-            )
+            % self.parent_layout_json,
+        )
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertEqual(
@@ -144,11 +144,10 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testJSONEmptyParent(self):
         """Test that absence of layout section in parent is supported."""
-        with open(self.parent_layout_json, "w") as f:
-            f.write("""{}""")
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(self.parent_layout_json, "{}")
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "parent": "%s",
                   "metadata": {
                     "fs_block_size": 4096
@@ -163,24 +162,23 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                     ]
                   }
                 }"""
-                % self.parent_layout_json
-            )
+            % self.parent_layout_json,
+        )
         disk_layout.DiskLayout(self.layout_json)
 
     def testJSONEmptyLayout(self):
         """Test that absence of layout section in child is supported."""
-        with open(self.parent_layout_json, "w") as f:
-            f.write(self.parent_layout_content)
+        osutils.WriteFile(self.parent_layout_json, self.parent_layout_content)
 
         parent_layout = disk_layout.DiskLayout(self.parent_layout_json)
 
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "parent": "%s"
                 }"""
-                % self.parent_layout_json
-            )
+            % self.parent_layout_json,
+        )
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertEqual(
@@ -190,8 +188,7 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
     def testJSONrequiredFields(self):
         """Test required fields."""
         # Need Metadata field.
-        with open(self.layout_json, "w") as f:
-            f.write("""{}""")
+        osutils.WriteFile(self.layout_json, "{}")
 
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError,
@@ -200,12 +197,12 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
             disk_layout.DiskLayout(self.layout_json)
 
         # Need fs_block_size in Metadata.
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {}
-                }"""
-            )
+                }""",
+        )
 
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError,
@@ -214,31 +211,31 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
             disk_layout.DiskLayout(self.layout_json)
 
         # Need base layout.
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 4096
                   },
                   "layouts": {}
-                }"""
-            )
+                }""",
+        )
 
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError, 'Missing "base" config.*'
         ):
             disk_layout.DiskLayout(self.layout_json)
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 4096
                   },
                   "layouts": {
                     "common": []
                   }
-                }"""
-            )
+                }""",
+        )
 
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError, 'Missing "base" config.*'
@@ -248,9 +245,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
     def testJSONPartitionRequiredFields(self):
         """Test partition required fields."""
         # Need partition type.
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 4096
                   },
@@ -261,8 +258,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
 
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError,
@@ -271,9 +268,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
             disk_layout.DiskLayout(self.layout_json)
 
         # Need partition label.
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 4096
                   },
@@ -285,17 +282,17 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError, 'Layout "base" missing "label"'
         ):
             disk_layout.DiskLayout(self.layout_json)
 
         # unknown entry.
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 4096
                   },
@@ -309,8 +306,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError,
             "Unknown items in layout base: " "{'unknown'}",
@@ -320,9 +317,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
     def testJSONFileSystemFields(self):
         """Test filesystem fields."""
         # fs_size > fs_size_min size.
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 4096
                   },
@@ -338,8 +335,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidSizeError,
             ".*is not an even multiple of fs_align.*",
@@ -347,17 +344,17 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
             disk_layout.DiskLayout(self.layout_json)
 
         # test fs_align in metadata
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 4096
                   },
                   "layouts": {
                     "base": []
                   }
-                }"""
-            )
+                }""",
+        )
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertEqual(
@@ -365,9 +362,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
         )
 
         # test invalid fs_align in metadata
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 400,
                     "fs_align": 300
@@ -375,8 +372,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                   "layouts": {
                     "base": []
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError, "fs_align.*"
         ):
@@ -384,9 +381,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testPartitionOrderPreservedWithBase(self):
         """Test the order of the partitions is the same as in the parent."""
-        with open(self.parent_layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.parent_layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 4096
                   },
@@ -410,15 +407,15 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                     ],
                     "base": []
                   }
-                }"""
-            )
+                }""",
+        )
         parent_layout = disk_layout.DiskLayout(self.parent_layout_json)
 
         # Test also that even overriding one partition keeps all of them in
         # order.
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "parent": "%s",
                   "layouts": {
                     "common": [
@@ -435,8 +432,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                     ]
                   }
                 }"""
-                % self.parent_layout_json
-            )
+            % self.parent_layout_json,
+        )
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertEqual(
@@ -456,9 +453,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
             (1024, 32768, 64),
         )
         for i in test_params:
-            with open(self.layout_json, "w") as f:
-                f.write(
-                    """{
+            osutils.WriteFile(
+                self.layout_json,
+                """{
                       "metadata": {
                         "block_size": %d,
                         "fs_block_size": 4096,
@@ -475,8 +472,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                         ]
                       }
                     }"""
-                    % (i[0], i[1] * i[0], i[2])
-                )
+                % (i[0], i[1] * i[0], i[2]),
+            )
 
             layout = disk_layout.DiskLayout(self.layout_json)
             # pylint: disable-msg=W0212
@@ -492,9 +489,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testMultipleParents(self):
         """Test that multiple inheritance works."""
-        with open(self.parent_layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.parent_layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 1000
                   },
@@ -522,11 +519,11 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
-        with open(self.another_parent_layout_json, "w") as f:
-            f.write(
-                """{
+                }""",
+        )
+        osutils.WriteFile(
+            self.another_parent_layout_json,
+            """{
                   "layouts": {
                     "common": [
                       {
@@ -546,11 +543,11 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+                }""",
+        )
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "parent": "%s %s",
                   "layouts": {
                     "common": [
@@ -562,8 +559,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                     ]
                   }
                 }"""
-                % (self.parent_layout_json, self.another_parent_layout_json)
-            )
+            % (self.parent_layout_json, self.another_parent_layout_json),
+        )
 
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
@@ -618,9 +615,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testGapPartitionsAreIncluded(self):
         """Test empty partitions (gaps) can be included in the child layout."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 1000
                   },
@@ -643,8 +640,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertDictEqual(
@@ -681,9 +678,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testPartitionOrderShouldMatch(self):
         """Test the partition order in parent and child layouts must match."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 1000
                   },
@@ -697,16 +694,16 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       {"num": 1, "type": "rootfs", "label": "Part1"}
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaises(disk_layout.ConflictingPartitionOrderError):
             disk_layout.DiskLayout(self.layout_json)
 
     def testOnlySharedPartitionsOrderMatters(self):
         """Test that only the order of the partition in both layouts matters."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "fs_block_size": 1000
                   },
@@ -723,8 +720,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       {"num": 12, "type": "kernel", "label": "Part12"}
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertDictEqual(
@@ -798,9 +795,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testFileSystemSizeMustBePositive(self):
         """Test that zero or negative file system size will raise exception."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "block_size": "512",
                     "fs_block_size": "4 KiB"
@@ -815,8 +812,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidSizeError, ".*must be positive"
         ):
@@ -824,9 +821,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testFileSystemSizeLargerThanPartition(self):
         """Test that file system size must not be greater than partition."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "block_size": "512",
                     "fs_block_size": "4 KiB"
@@ -842,8 +839,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidSizeError, ".*may not be larger than partition.*"
         ):
@@ -851,9 +848,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testFileSystemSizeNotMultipleBlocks(self):
         """Test file system size must be multiples of file system blocks."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "block_size": "512",
                     "fs_block_size": "4 KiB"
@@ -869,8 +866,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidSizeError, ".*not an even multiple of fs_align.*"
         ):
@@ -878,9 +875,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testFileSystemSizeForUbiWithNoPageSize(self):
         """Test that "page_size" must be present to calculate UBI fs size."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "block_size": "512",
                     "fs_block_size": "4 KiB"
@@ -897,8 +894,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError, ".*page_size.*"
         ):
@@ -906,9 +903,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testFileSystemSizeForUbiWithNoEraseBlockSize(self):
         """Test "erase_block_size" must be present to calculate UBI fs size."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "block_size": "512",
                     "fs_block_size": "4 KiB"
@@ -929,8 +926,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidLayoutError, ".*erase_block_size.*"
         ):
@@ -938,9 +935,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testFileSystemSizeForUbiIsNotMultipleOfUbiEraseBlockSize(self):
         """Test that we raise when fs_size is not multiple of eraseblocks."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "block_size": "512",
                     "fs_block_size": "4 KiB"
@@ -962,8 +959,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         with self.assertRaisesRegex(
             disk_layout.InvalidSizeError,
             '.*to "248 KiB" in the "common" layout.*',
@@ -972,9 +969,9 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
 
     def testFileSystemSizeForUbiIsMultipleOfUbiEraseBlockSize(self):
         """Test everything is okay when fs_size is multiple of eraseblocks."""
-        with open(self.layout_json, "w") as f:
-            f.write(
-                """{
+        osutils.WriteFile(
+            self.layout_json,
+            """{
                   "metadata": {
                     "block_size": "512",
                     "fs_block_size": "4 KiB"
@@ -996,8 +993,8 @@ class JSONLoadingTest(cros_test_lib.MockTempDirTestCase):
                       }
                     ]
                   }
-                }"""
-            )
+                }""",
+        )
         layout = disk_layout.DiskLayout(self.layout_json)
         # pylint: disable-msg=W0212
         self.assertEqual(
