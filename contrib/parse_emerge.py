@@ -333,7 +333,7 @@ def replay_file(f, stream=sys.stdout):
 
 def compare(f1, f2):
     """Differences over 15 seconds in package times between the files."""
-    with open(os.devnull, "w") as devnull:
+    with open(os.devnull, "w", encoding="utf-8") as devnull:
         f1_times = replay_file(f1, stream=devnull).all_package_times
         f2_times = replay_file(f2, stream=devnull).all_package_times
 
