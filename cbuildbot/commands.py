@@ -2059,7 +2059,7 @@ def GenerateStackTraces(
             else:
                 # Prepend '/chrome/$board' path to the stack trace in log.
                 log_content = ""
-                with open(full_file_path) as f:
+                with open(full_file_path, encoding="utf-8") as f:
                     for line in f:
                         # Stack frame line example to be matched here:
                         #    #0 0x721d1831 (/opt/google/chrome/chrome+0xb837831)
@@ -2470,7 +2470,7 @@ def GenerateBuildConfigs(board, config_useflags):
 
     results = {}
     if os.path.exists(config_fname):
-        with open(config_fname) as f:
+        with open(config_fname, "rb") as f:
             results = json.load(f)
     else:
         logging.warning("Cannot find config.yaml file in %s", config_fname)

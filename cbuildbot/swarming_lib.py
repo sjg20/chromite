@@ -257,7 +257,7 @@ class SwarmingCommandResult(cros_build_lib.CompletedProcess):
             logging.debug(
                 "Loading summary json file: %s", task_summary_json_path
             )
-            with open(task_summary_json_path) as f:
+            with open(task_summary_json_path, "rb") as f:
                 return json.load(f)
 
     @staticmethod

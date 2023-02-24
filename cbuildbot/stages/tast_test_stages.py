@@ -290,7 +290,7 @@ class TastVMTestStage(
             # Each object should contain the test name in a 'name' attribute and a
             # list of errors in an 'error' attribute.
             try:
-                with open(results_path, "r") as f:
+                with open(results_path, "r", encoding="utf-8") as f:
                     for test in json.load(f):
                         # Report the test as failed if it didn't finish or had errors.
                         if (

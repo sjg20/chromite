@@ -1819,7 +1819,7 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
             path = os.path.join(self._buildroot, p)
             if not os.path.exists(os.path.dirname(path)):
                 os.makedirs(os.path.dirname(path))
-            open(path, "a").close()
+            open(path, "ab").close()
             expected_files.append(path)
 
         commands.BuildAutotestServerPackageTarball(
@@ -2377,7 +2377,7 @@ class GenerateAFDOArtifactsTests(cros_test_lib.RunCommandTempDirTestCase):
         input_proto_file = os.path.join(self.tempdir, "input.json")
         output_proto_file = os.path.join(self.tempdir, "output.json")
         # Write stub outputs to output JSON file
-        with open(output_proto_file, "w") as f:
+        with open(output_proto_file, "w", encoding="utf-8") as f:
             output_proto = {
                 "artifacts": [
                     {"path": "artifact1"},
@@ -2444,7 +2444,7 @@ class VerifyAFDOArtifactsTests(cros_test_lib.RunCommandTempDirTestCase):
         input_proto_file = os.path.join(self.tempdir, "input.json")
         output_proto_file = os.path.join(self.tempdir, "output.json")
         # Write stub outputs to output JSON file
-        with open(output_proto_file, "w") as f:
+        with open(output_proto_file, "w", encoding="utf-8") as f:
             output_proto = {"status": True}
             json.dump(output_proto, f)
 

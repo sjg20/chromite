@@ -161,12 +161,16 @@ class LogTest(cros_test_lib.TempDirTestCase):
 
     def _generateLogs(self, num):
         """Generates cbuildbot.log and num backups."""
-        with open(os.path.join(self.tempdir, "cbuildbot.log"), "w") as f:
+        with open(
+            os.path.join(self.tempdir, "cbuildbot.log"), "w", encoding="utf-8"
+        ) as f:
             f.write(str(num + 1))
 
         for i in range(1, num + 1):
             with open(
-                os.path.join(self.tempdir, "cbuildbot.log." + str(i)), "w"
+                os.path.join(self.tempdir, "cbuildbot.log." + str(i)),
+                "w",
+                encoding="utf-8",
             ) as f:
                 f.write(str(i))
 
@@ -176,7 +180,9 @@ class LogTest(cros_test_lib.TempDirTestCase):
         cbuildbot._BackupPreviousLog(
             os.path.join(self.tempdir, "cbuildbot.log"), backup_limit=25
         )
-        with open(os.path.join(self.tempdir, "cbuildbot.log.1")) as f:
+        with open(
+            os.path.join(self.tempdir, "cbuildbot.log.1"), encoding="utf-8"
+        ) as f:
             self.assertEqual(f.readline(), "1")
 
     def testNineToTenLogs(self):
@@ -185,7 +191,9 @@ class LogTest(cros_test_lib.TempDirTestCase):
         cbuildbot._BackupPreviousLog(
             os.path.join(self.tempdir, "cbuildbot.log"), backup_limit=25
         )
-        with open(os.path.join(self.tempdir, "cbuildbot.log.10")) as f:
+        with open(
+            os.path.join(self.tempdir, "cbuildbot.log.10"), encoding="utf-8"
+        ) as f:
             self.assertEqual(f.readline(), "10")
 
     def testOverLimit(self):
@@ -194,7 +202,9 @@ class LogTest(cros_test_lib.TempDirTestCase):
         cbuildbot._BackupPreviousLog(
             os.path.join(self.tempdir, "cbuildbot.log"), backup_limit=25
         )
-        with open(os.path.join(self.tempdir, "cbuildbot.log.26")) as f:
+        with open(
+            os.path.join(self.tempdir, "cbuildbot.log.26"), encoding="utf-8"
+        ) as f:
             self.assertEqual(f.readline(), "26")
 
         self.assertEqual(

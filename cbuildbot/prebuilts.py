@@ -39,7 +39,7 @@ def _AddPackagesForPrebuilt(filename):
     """
     try:
         cmd = []
-        with open(filename) as f:
+        with open(filename, encoding="utf-8") as f:
             # Get only the package name and category as that is what upload_prebuilts
             # matches on.
             for line in f:

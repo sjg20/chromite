@@ -397,7 +397,7 @@ def ListTests(results_path, show_failed=True, show_passed=True):
         #   /path/to/base/dir/test_harness/all/SimpleTestUpdateAndVerify/ \
         #     2_autotest_tests/results-01-security_OpenSSLBlacklist/ \
         #     security_OpenBlacklist [  FAILED  ]
-        with open(report) as f:
+        with open(report, encoding="utf-8") as f:
             folder_re = re.compile(r"([\./\w-]*)\s*\[\s*(\S+?)\s*\]")
             test_name_re = re.compile(r"results-[\d]+?-([\.\w_]*)")
             for line in f:
@@ -601,7 +601,9 @@ def _RunTestSuiteUsingChromite(
                 result.returncode,
             )
             with open(
-                results_dir_in_chroot + "/failed_test_command", "w"
+                results_dir_in_chroot + "/failed_test_command",
+                "w",
+                encoding="utf-8",
             ) as failed:
                 failed.write(error)
 
@@ -670,7 +672,9 @@ def _RunTestSuiteUsingCtest(
                 result.returncode,
             )
             with open(
-                results_dir_in_chroot + "/failed_test_command", "w"
+                results_dir_in_chroot + "/failed_test_command",
+                "w",
+                encoding="utf-8",
             ) as failed:
                 failed.write(error)
 

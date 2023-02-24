@@ -175,7 +175,7 @@ class TastVMTestStageTest(
 
     def _WriteResultsFile(self, data):
         """Writes a results file within the suite's results dir."""
-        with open(self._GetResultsFilePath(), "w") as f:
+        with open(self._GetResultsFilePath(), "w", encoding="utf-8") as f:
             if isinstance(data, str):
                 f.write(data)
             else:
@@ -212,7 +212,7 @@ class TastVMTestStageTest(
             archive_dir, tast_test_stages.RESULTS_LINK_PREFIX
         )
         num_failed_tests = 0
-        with open(archived_results_path, "r") as f:
+        with open(archived_results_path, "r", encoding="utf-8") as f:
             for test in json.load(f):
                 if (
                     test[tast_test_stages.RESULTS_ERRORS_KEY]
@@ -385,7 +385,7 @@ class CopyResultsDirTest(cros_test_lib.TempDirTestCase):
         dir_path = os.path.dirname(full_path)
         if not os.path.exists(dir_path):
             os.makedirs(dir_path)
-        with open(full_path, "w") as f:
+        with open(full_path, "w", encoding="utf-8") as f:
             f.write(data)
 
     def _DoCopy(self):

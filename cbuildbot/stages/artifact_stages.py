@@ -1016,7 +1016,7 @@ class UploadCFTArtifactsStage(
             with osutils.TempDir(prefix="md") as tempdir:
                 if md_data:
                     fn = os.path.join(tempdir, "containers.jsonpb")
-                    with open(fn, "w") as f:
+                    with open(fn, "w", encoding="utf-8") as f:
                         f.write(md_data)
                     self.UploadArtifact(fn, prefix="metadata")
 

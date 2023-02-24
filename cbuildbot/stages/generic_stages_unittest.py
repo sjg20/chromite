@@ -97,7 +97,7 @@ class StageTestCase(
 
         # Don't use osutils.WriteFile, some tests mock it out.
         osutils.SafeMakedirs(os.path.dirname(layout_path))
-        with open(layout_path, "w") as f:
+        with open(layout_path, "w", encoding="utf-8") as f:
             f.writelines(cros_build_lib.iflatten_instance(layout_content))
 
     def _Prepare(
@@ -518,10 +518,10 @@ class BuilderStageTest(AbstractStageTestCase):
             results_lib.Results.SUCCESS,
             description="Injected success",
         )
-        with open(self.tempfile, "w") as out:
+        with open(self.tempfile, "w", encoding="utf-8") as out:
             results_lib.Results.SaveCompletedStages(out)
         results_lib.Results.Clear()
-        with open(self.tempfile, "r") as out:
+        with open(self.tempfile, "r", encoding="utf-8") as out:
             results_lib.Results.RestoreCompletedStages(out)
 
         output = self._RunCapture(stage)

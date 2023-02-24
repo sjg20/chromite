@@ -400,7 +400,7 @@ class UpdateConfigStage(generic_stages.BuilderStage):
         result = git.RunGit(
             self.chromite_dir, ["diff"] + self.config_paths, print_cmd=True
         )
-        with open(config_change_patch, "w") as f:
+        with open(config_change_patch, "w", encoding="utf-8") as f:
             f.write(result.stdout)
 
         return config_change_patch
@@ -552,7 +552,7 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
             % chromite_rev
         )
 
-        with open(target_file, "w") as f:
+        with open(target_file, "w", encoding="utf-8") as f:
             f.write(concatenated_content)
 
         git.RunGit(self.project_dir, ["add", "-A"])
