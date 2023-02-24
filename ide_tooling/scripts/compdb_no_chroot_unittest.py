@@ -43,10 +43,12 @@ class GenerateTest(cros_test_lib.TestCase):
         input_dir = os.path.join(testdata, "input")
         expected_dir = os.path.join(testdata, "expected")
         for name in os.listdir(input_dir):
-            given = json.load(open(os.path.join(input_dir, name)))
+            with open(os.path.join(input_dir, name), "rb") as f:
+                given = json.load(f)
 
             expected_file = os.path.join(expected_dir, name)
-            expected = json.load(open(expected_file))
+            with open(expected_file, encoding="utf-8") as f:
+                expected = json.load(f)
 
             got = compdb_no_chroot.generate(given, EXT_TRUNK_PATH, custom_which)
 
@@ -54,6 +56,6 @@ class GenerateTest(cros_test_lib.TestCase):
                 self.assertEqual(got, expected)
             except Exception as e:
                 # Update the golden file so that manual modification is not needed.
-                with open(expected_file, "w") as outfile:
+                with open(expected_file, "w", encoding="utf-8") as outfile:
                     json.dump(got, outfile, indent=2, sort_keys=True)
                 raise e
