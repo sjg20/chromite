@@ -164,7 +164,6 @@ GROUP_BASELINE = dict(
                 "rtanalytics",
                 "crosvm",
                 "cfm-monitor",
-                "runtime_probe",
                 "smdisplay",
                 "cdm-oemcrypto",
                 "cros_healthd",
