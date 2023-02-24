@@ -986,7 +986,8 @@ class PaygenPayload(object):
             "--properties_format=json",
         ]
         self._RunGeneratorCmd(cmd)
-        props_map = json.load(open(props_file))
+        with open(props_file, "rb") as f:
+            props_map = json.load(f)
 
         # delta_generator assigns empty string for signatures when the payload is
         # not signed. Replace it with 'None' so the json.dumps() writes 'null' as

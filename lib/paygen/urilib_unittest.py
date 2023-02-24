@@ -8,6 +8,7 @@ import os
 
 from chromite.lib import cros_test_lib
 from chromite.lib import gs
+from chromite.lib import osutils
 from chromite.lib.paygen import filelib
 from chromite.lib.paygen import urilib
 
@@ -80,8 +81,7 @@ index %s..%s 100644
         )
 
         urilib.URLRetrieve(good_url, local_path)
-        with open(local_path, "r") as f:
-            actual_contents = f.read()
+        actual_contents = osutils.ReadFile(local_path)
         self.assertEqual(expected_contents, actual_contents)
 
         self.assertRaises(IOError, urilib.URLRetrieve, good_url, bad_local_path)

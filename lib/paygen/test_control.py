@@ -12,6 +12,7 @@ import os
 import re
 
 from chromite.lib import constants
+from chromite.lib import osutils
 
 
 _name_re = re.compile(r"\s*NAME\s*=")
@@ -61,8 +62,7 @@ def dump_autotest_control_file(test, env, control_code, directory):
     )
 
     control_file = os.path.join(directory, test.get_control_file_name())
-    with open(control_file, "w") as fh:
-        fh.write(parametrized_control_code)
+    osutils.WriteFile(control_file, parametrized_control_code)
 
     return control_file
 

@@ -48,7 +48,7 @@ class BasePaygenBuildLibTest(cros_test_lib.MockTestCase):
         paygen_json_file = os.path.join(
             os.path.dirname(__file__), "testdata", "paygen.json"
         )
-        with open(paygen_json_file, "r") as fp:
+        with open(paygen_json_file, "rb") as fp:
             return json.load(fp)
 
 

@@ -145,7 +145,7 @@ def ReadLsbRelease(sysroot):
     """
     lsb_release_file = os.path.join(sysroot, "etc", "lsb-release")
     lsb_release = {}
-    with open(lsb_release_file, "r") as f:
+    with open(lsb_release_file, "r", encoding="utf-8") as f:
         for line in f:
             tokens = line.strip().split("=")
             lsb_release[tokens[0]] = tokens[1]
@@ -228,7 +228,7 @@ class MemoryConsumptionSemaphore(object):
 
     def _get_system_available(self):
         """Get the system's available memory (memory free before swapping)."""
-        with open("/proc/meminfo") as fp:
+        with open("/proc/meminfo", encoding="utf-8") as fp:
             for line in fp:
                 fields = line.split()
                 if fields[0] == "MemAvailable:":

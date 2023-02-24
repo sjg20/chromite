@@ -258,11 +258,8 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
         cache.GetFileCopy(self.uri_a, file_a)
         cache.GetFileCopy(self.uri_a, file_b)
 
-        with open(file_a, "r") as f:
-            contents_a = f.read()
-
-        with open(file_b, "r") as f:
-            contents_b = f.read()
+        contents_a = osutils.ReadFile(file_a)
+        contents_b = osutils.ReadFile(file_b)
 
         self.assertEqual(contents_a, contents_b)
 
@@ -270,11 +267,8 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
         cache.GetFileCopy(self.uri_b, file_a)
         cache.GetFileCopy(self.uri_b, file_b)
 
-        with open(file_a, "r") as f:
-            contents_a = f.read()
-
-        with open(file_b, "r") as f:
-            contents_b = f.read()
+        contents_a = osutils.ReadFile(file_a)
+        contents_b = osutils.ReadFile(file_b)
 
         self.assertEqual(contents_a, contents_b)
 

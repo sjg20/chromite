@@ -28,6 +28,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import failures_lib
 from chromite.lib import gs
+from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import retry_util
 from chromite.lib.paygen import gslock
@@ -1284,8 +1285,7 @@ class PaygenBuild(object):
         Returns:
           a string control file path.
         """
-        with open(test_control.get_control_file_name()) as f:
-            control_code = f.read()
+        control_code = osutils.ReadFile(test_control.get_control_file_name())
         control_file = test_control.dump_autotest_control_file(
             payload_test_config, None, control_code, control_dump_dir
         )
