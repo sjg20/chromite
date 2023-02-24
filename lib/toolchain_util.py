@@ -109,7 +109,9 @@ _CHROMIUMOS_OVERLAY = os.path.join(
 )
 
 # RegExps
-AFDO_ARTIFACT_EBUILD_REGEX = r'(?P<bef>%s=)(?P<name>("[^"]*"|.*))(?P<aft>.*)'
+AFDO_ARTIFACT_EBUILD_REGEX = (
+    r'(?P<bef>\b%s\b=)(?P<name>("[^"]*"|.*))(?P<aft>.*)'
+)
 AFDO_ARTIFACT_EBUILD_REPL = r'\g<bef>"%s"\g<aft>'
 
 ChromeVersion = collections.namedtuple(

@@ -543,9 +543,10 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         self.artifact_type = "Unspecified"
         self.input_artifacts = {}
         self.kernel_version = "5_4"
-        self.profile_info["kernel_version"] = self.kernel_version.replace(
-            "_", "."
-        )
+        self.profile_info = {
+            "arch": "amd64",
+            "kernel_version": self.kernel_version.replace("_", "."),
+        }
         self.gsc_exists = None
         self.gsc_ls = None
         self.patch_ebuild = mock.MagicMock()
@@ -994,6 +995,24 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             ebuild_data, cwp_old_ver=cwp_old_ver, cwp_new_ver=cwp_new_ver
         )
 
+    def testPrepareVerifiedKernelCwpAfdoFileArmAndAmd64(self):
+        """Test PrepareVerifiedKernelCwpAfdoFile with the Amd64 profile."""
+        cwp_old_ver = "R99-14469.8-1644229953"
+        cwp_new_ver = "R100-14496.0-1644834841"
+        # changing_cwp_ver is going to be resolved to cwp_old_ver
+        # before Prepare() and cwp_new_ver after.
+        fixed_version = cwp_old_ver
+        # Ebuild contains both Arm and Amd64 version but we change only Amd64.
+        ebuild_data = (
+            "# some comment\n",
+            'AFDO_LOCATION="{changing_cwp_loc}"\n',
+            'AFDO_PROFILE_VERSION="{changing_cwp_ver}"\n',
+            f'ARM_AFDO_PROFILE_VERSION="{fixed_version}"',
+        )
+        self.callPrepareVerifiedKernelCwpAfdoFile(
+            ebuild_data, cwp_old_ver=cwp_old_ver, cwp_new_ver=cwp_new_ver
+        )
+
     def mockFindLatestAFDOArtifactAtom(self, gs_urls, _):
         """Return artifacts from atom's bench and cwp gs buckets."""
         atom_cwp_location = os.path.join(self.cwp_gs_location, "atom")
@@ -1286,9 +1305,10 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         self.outdir = None
         self.afdo_tmp_path = None
         self.kernel_version = "4_4"
-        self.profile_info["kernel_version"] = self.kernel_version.replace(
-            "_", "."
-        )
+        self.profile_info = {
+            "arch": "amd64",
+            "kernel_version": self.kernel_version.replace("_", "."),
+        }
         cwp_version = "78-3877.0-1567418235"
         benchmark_version = "78.0.3893.0"
         self.afdo_name = f"chromeos-chrome-amd64-{benchmark_version}_rc-r1.afdo"
