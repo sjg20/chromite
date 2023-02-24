@@ -425,7 +425,7 @@ CPV: virtual/python-enum34-1
             package_tbz2_file = os.path.join(packages_dir, package) + ".tbz2"
             osutils.Touch(package_tbz2_file)
         with open(
-            package_installable_filename, "w"
+            package_installable_filename, "w", encoding="utf-8"
         ) as package_installable_file:
             for package in self.dev_install_packages:
                 package_installable_file.write(package + "\n")

@@ -58,7 +58,7 @@ def _call_entry(fw_loc, metric_proto, subcmd, *args, **kwargs):
         cmd += [subcmd]
 
         result = cros_build_lib.run(cmd, check=False)
-        with open(tmpfile.name, "r") as f:
+        with open(tmpfile.name, "r", encoding="utf-8") as f:
             response = f.read()
 
     if metric_proto:
@@ -198,7 +198,7 @@ def BundleFirmwareArtifacts(input_proto, output_proto, _config):
         )
         file_paths = []
         if os.path.exists(metadata_path):
-            with open(metadata_path, "r") as f:
+            with open(metadata_path, "r", encoding="utf-8") as f:
                 metadata = json_format.Parse(
                     f.read(), firmware_pb2.FirmwareArtifactInfo()
                 )
