@@ -422,7 +422,7 @@ def UploadSymbolFile(upload_url, symbol, api_key):
                 "debug_id": symbol.header.id.replace("-", ""),
             }
         }
-        with open(symbol.file_name, "r") as fp:
+        with open(symbol.file_name, "r", encoding="utf-8") as fp:
             logging.debug("Executing put to uploadUrl: %s", symbol.display_name)
             ExecRequest(
                 "put",
@@ -577,7 +577,7 @@ def ReportResults(symbols, failed_list):
         )
 
     if failed_list is not None:
-        with open(failed_list, "w") as fl:
+        with open(failed_list, "w", encoding="utf-8") as fl:
             for s in upload_failures:
                 fl.write("%s\n" % s.display_path)
 

@@ -64,5 +64,5 @@ def main(argv):
         output = "/dev/stdout"
 
     results = {x: get_all_package_objects(x) for x in opts.board}
-    with open(output, "w") as f:
+    with open(output, "w", encoding="utf-8") as f:
         json.dump(results, f)

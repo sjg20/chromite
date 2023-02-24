@@ -245,7 +245,7 @@ class Upgrader(object):
 
         self._stable_repo_categories = set()
         cat_file_path = os.path.join(self._stable_repo, self.CATEGORIES_FILE)
-        with open(cat_file_path, "r") as f:
+        with open(cat_file_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -256,7 +256,7 @@ class Upgrader(object):
 
         categories = sorted(self._stable_repo_categories)
         cat_file_path = os.path.join(self._stable_repo, self.CATEGORIES_FILE)
-        with open(cat_file_path, "w") as f:
+        with open(cat_file_path, "w", encoding="utf-8") as f:
             f.writelines("\n".join(categories))
 
         self._RunGit(self._stable_repo, ["add", self.CATEGORIES_FILE])
@@ -1664,7 +1664,7 @@ class Upgrader(object):
             ]
             # Replace EAPI version 8 with 7 for each ebuild file.
             for ebuild in ebuild_files:
-                with open(ebuild, "r+") as f:
+                with open(ebuild, "r+", encoding="utf-8") as f:
                     changed = False
                     lines = []
                     for line in f.readlines():
@@ -1740,7 +1740,7 @@ class Upgrader(object):
             self._RunGit(root, args)
 
             # Create a README file to explain its presence.
-            with open(self._upstream + "-README", "w") as f:
+            with open(self._upstream + "-README", "w", encoding="utf-8") as f:
                 f.write(
                     "Directory at %s is local copy of upstream "
                     "Gentoo/Portage packages. Used by cros_portage_upgrade.\n"
@@ -1990,7 +1990,7 @@ class Upgrader(object):
         self._master_table.Sort(PkgSlotSort)
 
         if csv:
-            with open(csv, "w") as filehandle:
+            with open(csv, "w", encoding="utf-8") as filehandle:
                 oper.Notice("Writing package status as csv to %s." % csv)
                 self._master_table.WriteCSV(filehandle)
         elif not self._IsInUpgradeMode():

@@ -400,7 +400,7 @@ To install the debug symbols for all available packages, run:
                     "shell": "/bin/bash",
                 }
             )
-            with open(passwd_db, "a") as f:
+            with open(passwd_db, "a", encoding="utf-8") as f:
                 if data[-1] != "\n":
                     f.write("\n")
                 f.write("%s\n" % acct)

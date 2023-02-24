@@ -173,5 +173,5 @@ def main(argv):
         GenerateImages(sys.stdin.read(), options)
     else:
         for i in options.inputs:
-            with open(i) as handle:
+            with open(i, encoding="utf-8") as handle:
                 GenerateImages(handle.read(), options)

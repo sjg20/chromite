@@ -52,7 +52,7 @@ def main(argv):
     if options.update_config:
         filename = constants.CHROMEOS_CONFIG_FILE
 
-    with open(filename, "w") as f:
+    with open(filename, "w", encoding="utf-8") as f:
         if options.builder:
             if options.builder not in site_config:
                 raise Exception(

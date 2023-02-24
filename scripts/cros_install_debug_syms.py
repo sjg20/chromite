@@ -100,7 +100,9 @@ class DebugSymbolsInstaller(object):
             )
 
             with open(
-                self._vartree.getpath(cpv, filename="CONTENTS"), "a"
+                self._vartree.getpath(cpv, filename="CONTENTS"),
+                "a",
+                encoding="utf-8",
             ) as content_file:
                 # Merge the content of the temporary dir into the sysroot.
                 # pylint: disable=protected-access
@@ -431,5 +433,5 @@ def main(argv):
     # binpkg will set DEBUG_SYMBOLS automatically if it detects the debug symbols
     # in the packages dir.
     pkgindex = binpkg.GrabLocalPackageIndex(packages_dir)
-    with open(packages_file, "w") as p:
+    with open(packages_file, "w", encoding="utf-8") as p:
         pkgindex.Write(p)

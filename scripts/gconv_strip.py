@@ -85,7 +85,7 @@ class GconvModules(object):
 
     def Load(self):
         """Load the charsets from gconv-modules."""
-        with open(self._filename) as fp:
+        with open(self._filename, encoding="utf-8") as fp:
             for line in fp:
                 line = line.split("#", 1)[0].strip()
                 if not line:
@@ -204,7 +204,7 @@ class GconvModules(object):
 
         # Recompute the gconv-modules file with only the included gconv modules.
         result = []
-        with open(self._filename) as fp:
+        with open(self._filename, encoding="utf-8") as fp:
             for line in fp:
                 lst = line.split("#", 1)[0].strip().split()
 

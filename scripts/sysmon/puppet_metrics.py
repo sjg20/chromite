@@ -105,7 +105,7 @@ class _PuppetRunSummary(object):
 def collect_puppet_summary():
     """Send Puppet run summary metrics."""
     try:
-        with open(LAST_RUN_FILE) as f:
+        with open(LAST_RUN_FILE, encoding="utf-8") as f:
             summary = _PuppetRunSummary(f)
     except Exception as e:
         logger.warning("Error loading Puppet run summary: %s", e)

@@ -1158,5 +1158,5 @@ def main(argv):
         )
 
     if options.output:
-        with open(options.output, "w") as f:
+        with open(options.output, "w", encoding="utf-8") as f:
             pformat.json(report, fp=f)

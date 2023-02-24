@@ -176,7 +176,7 @@ OUT_DIR = "/tmp/crosfw"
 
 rc_file = os.path.expanduser("~/.crosfwrc")
 if os.path.exists(rc_file):
-    with open(rc_file) as fp:
+    with open(rc_file, "rb") as fp:
         # pylint: disable=exec-used
         exec(compile(fp.read(), rc_file, "exec"))
 
@@ -385,7 +385,7 @@ def SetupBuild(options):
         board_format = PRE_KBUILD
     else:
         board_format = PRE_KCONFIG
-    with open("boards.cfg") as f:
+    with open("boards.cfg", encoding="utf-8") as f:
         for line in f:
             if "genboardscfg" in line:
                 board_format = KCONFIG

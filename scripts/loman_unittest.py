@@ -205,7 +205,9 @@ class IncludeXmlTest(cros_test_lib.MockOutputTestCase, ManifestTest):
   <project name="project" path="path" remote="remote" workon="False" />
 </manifest>"""
         )
-        with open(os.path.join(".repo", "local_manifest.xml")) as f:
+        with open(
+            os.path.join(".repo", "local_manifest.xml"), encoding="utf-8"
+        ) as f:
             local_manifest_nodes = ElementTree.fromstring(f.read())
 
         # Read project, check for failure.

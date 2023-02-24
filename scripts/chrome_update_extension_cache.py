@@ -236,7 +236,8 @@ def main(argv):
     identifier = options.version[0]
     tarball = "%s.tar.xz" % identifier
     if options.create:
-        extensions = json.load(open("external_extensions.json", "r"))
+        with open("external_extensions.json", "rb") as f:
+            extensions = json.load(f)
         with osutils.TempDir() as tempdir:
             CreateCacheTarball(
                 extensions, tempdir, identifier, os.path.abspath(tarball)

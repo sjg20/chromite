@@ -251,6 +251,8 @@ def main(argv):
     branch_config = chromeos_config.BranchScheduleConfig()
 
     with (
-        open(options.file_out, "w") if options.file_out else sys.stdout
+        open(options.file_out, "w", encoding="utf-8")
+        if options.file_out
+        else sys.stdout
     ) as fh:
         fh.write(genLuciSchedulerConfig(site_config, branch_config))

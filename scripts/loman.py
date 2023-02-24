@@ -237,6 +237,6 @@ def main(argv):
         )
         _AddProjectsToManifestGroups(options, [element.attrib["name"]])
 
-        with open(options.local_manifest_path, "w") as f:
+        with open(options.local_manifest_path, "w", encoding="utf-8") as f:
             f.write(local_manifest.ToString())
     return 0

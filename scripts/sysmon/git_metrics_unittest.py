@@ -95,8 +95,7 @@ class TestGitRepoWithTempdir(cros_test_lib.TempDirTestCase):
             call(["git", "init"])
             call(["git", "config", "user.name", "John Doe"])
             call(["git", "config", "user.email", "john@example.com"])
-            with open("foo", "w") as f:
-                f.write("a\nb\nc\n")
+            osutils.WriteFile("foo", "a\nb\nc\n")
             call(["git", "add", "foo"])
             env = os.environ.copy()
             env["GIT_AUTHOR_DATE"] = "2017-01-01T00:00:00Z"
@@ -117,8 +116,7 @@ class TestGitRepoWithTempdir(cros_test_lib.TempDirTestCase):
 
     def test_get_unstaged_changes(self):
         """Test get_unstaged_changes()."""
-        with open(os.path.join(self.tempdir, "spam"), "w") as f:
-            f.write("a\n")
+        (self.tempdir / "spam").write_text("a\n", encoding="utf-8")
         os.remove(os.path.join(self.tempdir, "foo"))
         repo = git_metrics._GitRepo(self.git_dir)
         added, removed = repo.get_unstaged_changes()

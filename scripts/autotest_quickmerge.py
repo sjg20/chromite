@@ -463,7 +463,7 @@ def main(argv):
             try:
                 # Open file in a try-except block, for atomicity, instead of
                 # doing existence check.
-                with open(logfile, "r") as f:
+                with open(logfile, "r", encoding="utf-8") as f:
                     package_cp = f.readline().strip()
                     DOWNGRADE_EBUILDS.append(package_cp)
             except IOError:

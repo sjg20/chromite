@@ -116,7 +116,7 @@ def _ReadBatch(file_batch):
       file_batch: A list of file paths to read.
     """
     for f in file_batch:
-        with open(f) as fp:
+        with open(f, encoding="utf-8") as fp:
             for line in fp:
                 yield line
 

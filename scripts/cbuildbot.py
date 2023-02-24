@@ -150,8 +150,8 @@ def _RunBuildStagesWrapper(options, site_config, build_config):
         "branch": options.branch,
     }
     if options.metadata_dump:
-        with open(options.metadata_dump, "r") as metadata_file:
-            metadata_dump_dict = json.loads(metadata_file.read())
+        with open(options.metadata_dump, "rb") as metadata_file:
+            metadata_dump_dict = json.load(metadata_file)
 
     with parallel.Manager() as manager:
         builder_run = cbuildbot_run.BuilderRun(
@@ -1229,7 +1229,7 @@ def main(argv):
         stack.Add(critical_section.ForkWatchdog)
 
         if options.mock_slave_status is not None:
-            with open(options.mock_slave_status, "r") as f:
+            with open(options.mock_slave_status, "rb") as f:
                 mock_statuses = pickle.load(f)
                 for key, value in mock_statuses.items():
                     mock_statuses[key] = builder_status_lib.BuilderStatus(

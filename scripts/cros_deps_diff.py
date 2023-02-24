@@ -163,8 +163,8 @@ def main(argv):
 
     input_deps = []
     for i in options.inputs:
-        with open(i) as handle:
-            input_deps.append(json.loads(handle.read()))
+        with open(i, "rb") as handle:
+            input_deps.append(json.load(handle))
 
     version_map = GetVersionMap(input_deps)
     divergent_set = GetDivergentSet(version_map, len(input_deps))

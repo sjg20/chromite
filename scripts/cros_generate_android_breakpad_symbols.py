@@ -140,7 +140,7 @@ def _UnpackGenerateBreakpad(elf_file, *args, **kwargs):
     # packed binaries.).
     unpack_cmd = [RELOCATION_PACKER_BIN, "-u", elf_file]
     unpack_result = cros_build_lib.run(
-        unpack_cmd, stdout=True, check=False, encoding="utf8"
+        unpack_cmd, stdout=True, check=False, encoding="utf-8"
     )
 
     # If we unpacked, extract the offset, and remember it.

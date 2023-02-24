@@ -195,7 +195,7 @@ class Crossdev(object):
     def Save(cls):
         """Store crossdev cache on disk."""
         # Save the cache from the successful run.
-        with open(cls._CACHE_FILE, "w") as f:
+        with open(cls._CACHE_FILE, "w", encoding="utf-8") as f:
             json.dump(cls._CACHE, f)
 
     @classmethod
@@ -513,7 +513,7 @@ def RebuildLibtool(root="/"):
         root: The install root where we want libtool rebuilt.
     """
     needs_update = False
-    with open(os.path.join(root, "usr/bin/libtool")) as f:
+    with open(os.path.join(root, "usr/bin/libtool"), encoding="utf-8") as f:
         for line in f:
             # Look for a line like:
             #   sys_lib_search_path_spec="..."
@@ -1321,7 +1321,11 @@ def _CreateRemoteToolchainFile(output_dir):
     for clang_files in glob.glob(os.path.join(clang_path, "clang*-[0-9]*")):
         toolchain_inputs.append(os.path.basename(clang_files))
 
-    with open(os.path.join(clang_path, "remote_toolchain_inputs"), "w") as f:
+    with open(
+        os.path.join(clang_path, "remote_toolchain_inputs"),
+        "w",
+        encoding="utf-8",
+    ) as f:
         f.writelines("%s\n" % line for line in toolchain_inputs)
 
 

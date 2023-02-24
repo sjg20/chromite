@@ -126,6 +126,6 @@ def main(argv):
     else:
         upper_parent_key = None
 
-    with open(entities_path, "r") as f:
+    with open(entities_path, "r", encoding="utf-8") as f:
         entities = GetEntities(project_id, f, upper_parent_key, namespace)
         dslib.ChunkedBatchWrite(entities, c)

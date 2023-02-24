@@ -173,7 +173,9 @@ def main(argv):
         namespaces.ReExecuteWithNamespace(sys.argv, preserve_env=True)
 
     # We currently don't have any APIs that want to access stdin, so rebind.
-    sys.stdin = open(os.devnull, "r")  # pylint: disable=consider-using-with
+    # pylint: disable=consider-using-with
+    sys.stdin = open(os.devnull, "r", encoding="utf-8")
+    # pylint: enable=consider-using-with
     os.dup2(sys.stdin.fileno(), 0)
 
     if opts.config.log_path:

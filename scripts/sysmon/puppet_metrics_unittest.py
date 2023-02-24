@@ -13,6 +13,7 @@ import os
 from unittest import mock
 
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.scripts.sysmon import puppet_metrics
 
 
@@ -128,8 +129,7 @@ class TestPuppetMetrics(cros_test_lib.TempDirTestCase):
         self.tempfile = os.path.join(self.tempdir, "last_run_summary.yaml")
 
     def test_collect(self):
-        with open(self.tempfile, "w") as f:
-            f.write(_SUMMARY)
+        osutils.WriteFile(self.tempfile, _SUMMARY)
         with mock.patch("time.time", return_value=1500000000):
             with mock.patch.object(
                 puppet_metrics, "LAST_RUN_FILE", self.tempfile

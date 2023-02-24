@@ -92,7 +92,7 @@ def main(argv):
     # pylint: disable=consider-using-with
     output = sys.stdout
     if opts.out_file:
-        output = open(opts.out_file, "w")
+        output = open(opts.out_file, "w", encoding="utf-8")
 
     sysroot = sysroot_lib.Sysroot(opts.sysroot)
     if opts.command == "create-wrappers":

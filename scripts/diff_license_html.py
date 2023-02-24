@@ -39,7 +39,7 @@ def GetPackagesLicensesFromHtml(html_file):
     license_rgx5 = re.compile(
         r'class="title">(Custom License .+)</a>', re.IGNORECASE
     )
-    with open(html_file, "r") as f:
+    with open(html_file, "r", encoding="utf-8") as f:
         for line in f:
             # Grep and turn
             # <span class="title">ath6k-34</span>
