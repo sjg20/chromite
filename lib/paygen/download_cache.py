@@ -324,14 +324,11 @@ class DownloadCache(object):
                 ):
 
                     if os.path.exists(cache_file):
-                        fd = open(
-                            cache_file, "rb"
-                        )  # pylint: disable=consider-using-with
-
                         # Touch the timestamp on cache file to help purging logic.
-                        os.utime(cache_file, None)
+                        osutils.Touch(cache_file)
 
-                        return fd
+                        # pylint: disable=consider-using-with
+                        return open(cache_file, "rb")
                     else:
                         # We don't have the file in our cache. There are three ways this
                         # can happen:

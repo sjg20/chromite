@@ -14,6 +14,7 @@ import shutil
 import threading
 
 from chromite.lib import gs
+from chromite.lib import osutils
 from chromite.lib.xbuddy import android_build
 from chromite.lib.xbuddy import build_artifact
 from chromite.lib.xbuddy import common_util
@@ -88,10 +89,9 @@ class Downloader(object):
 
     @staticmethod
     def TouchTimestampForStaged(directory_path):
-        file_name = os.path.join(directory_path, Downloader._TIMESTAMP_FILENAME)
-        # Easiest python version of |touch file_name|
-        with open(file_name, "a"):
-            os.utime(file_name, None)
+        osutils.Touch(
+            os.path.join(directory_path, Downloader._TIMESTAMP_FILENAME)
+        )
 
     @staticmethod
     def _TryRemoveStageDir(directory_path):

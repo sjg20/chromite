@@ -147,9 +147,7 @@ def update_timestamp(timestamp_dir: os.PathLike, build_id: os.PathLike) -> None:
     """Update timestamp file of build with build_id."""
     common_util.MkDirP(timestamp_dir)
     logging.debug("Updating timestamp for %s", build_id)
-    time_file = os.path.join(timestamp_dir, build_to_timestamp(build_id))
-    with open(time_file, "a"):
-        os.utime(time_file, None)
+    osutils.Touch(os.path.join(timestamp_dir, build_to_timestamp(build_id)))
 
 
 def timestamp_to_build(timestamp_filename: os.PathLike) -> os.PathLike:
