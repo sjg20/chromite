@@ -12,6 +12,7 @@ import shutil
 import traceback
 
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 from chromite.lib.xbuddy import artifact_info
 from chromite.lib.xbuddy import common_util
 from chromite.lib.xbuddy import devserver_constants
@@ -224,7 +225,7 @@ class Artifact(object, metaclass=ArtifactMeta):
 
         # We want to ensure that every file listed in the marker is actually there.
         if self.store_installed_files:
-            with open(marker_file) as f:
+            with open(marker_file, encoding="utf-8") as f:
                 files = [line.strip() for line in f]
 
             # Check to see if any of the purportedly installed files are missing, in
@@ -248,13 +249,17 @@ class Artifact(object, metaclass=ArtifactMeta):
 
     def StagedFiles(self):
         """Returns the installed/staged files for this artifact."""
-        with open(os.path.join(self.install_dir, self.marker_name)) as f:
+        with open(
+            os.path.join(self.install_dir, self.marker_name), encoding="utf-8"
+        ) as f:
             return [line.strip() for line in f]
 
     def _MarkArtifactStaged(self):
         """Marks the artifact as staged."""
-        with open(os.path.join(self.install_dir, self.marker_name), "w") as f:
-            f.write("\n".join(self.installed_files))
+        osutils.WriteFile(
+            os.path.join(self.install_dir, self.marker_name),
+            "\n".join(self.installed_files),
+        )
 
     def _UpdateName(self, names):
         if self.single_name and len(names) > 1:

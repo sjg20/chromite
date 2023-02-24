@@ -269,7 +269,9 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
         shutil.rmtree(self.work_dir)
 
     def _CheckMarker(self, marker_file, installed_files):
-        with open(os.path.join(self.work_dir, marker_file)) as f:
+        with open(
+            os.path.join(self.work_dir, marker_file), encoding="utf-8"
+        ) as f:
             self.assertEqual(installed_files, f.read().splitlines())
 
     def testBundledArtifactTypes(self):

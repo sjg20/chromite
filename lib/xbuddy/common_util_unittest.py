@@ -9,6 +9,7 @@ import shutil
 import tempfile
 
 from chromite.lib import cros_test_lib
+from chromite.lib import osutils
 from chromite.lib.xbuddy import common_util
 from chromite.lib.xbuddy import devserver_constants
 
@@ -37,24 +38,21 @@ class CommonUtilTest(cros_test_lib.TestCase):
             os.mkdir(board_path)
             for build in builds:
                 build_path = os.path.join(board_path, build)
-                os.mkdir(build_path)
-                with open(
+                osutils.WriteFile(
                     os.path.join(
                         build_path, devserver_constants.TEST_IMAGE_FILE
                     ),
-                    "w",
-                ) as f:
-                    f.write("TEST_IMAGE_FILE")
-                with open(
+                    "TEST_IMAGE_FILE",
+                    makedirs=True,
+                )
+                osutils.WriteFile(
                     os.path.join(build_path, devserver_constants.STATEFUL_FILE),
-                    "w",
-                ) as f:
-                    f.write("STATEFUL_FILE")
-                with open(
+                    "STATEFUL_FILE",
+                )
+                osutils.WriteFile(
                     os.path.join(build_path, devserver_constants.UPDATE_FILE),
-                    "w",
-                ) as f:
-                    f.write("UPDATE_FILE")
+                    "UPDATE_FILE",
+                )
 
     def tearDown(self):
         shutil.rmtree(self._static_dir)
@@ -141,8 +139,7 @@ class CommonUtilTest(cros_test_lib.TestCase):
             "network_VPN",
         )
         os.makedirs(control_file_dir)
-        with open(os.path.join(control_file_dir, "control"), "w") as f:
-            f.write("hello!")
+        osutils.WriteFile(os.path.join(control_file_dir, "control"), "hello!")
 
         control_content = common_util.GetControlFile(
             self._static_dir,

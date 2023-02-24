@@ -131,8 +131,7 @@ def GetControlFile(static_dir, build, control_path):
         # crosbug.com/25040
         return "Unknown control path %s" % control_path
 
-    with open(control_path, "r") as control_file:
-        return control_file.read()
+    return osutils.ReadFile(control_path)
 
 
 def GetControlFileListForSuite(static_dir, build, suite_name):
@@ -173,7 +172,7 @@ def GetControlFileListForSuite(static_dir, build, suite_name):
             "Is it staged? %s" % suite_to_control_map
         )
 
-    with open(suite_to_control_map, "r") as fd:
+    with open(suite_to_control_map, "r", encoding="utf-8") as fd:
         try:
             return "\n".join(ast.literal_eval(fd.read())[suite_name])
         except KeyError:
