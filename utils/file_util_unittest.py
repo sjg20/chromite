@@ -25,10 +25,10 @@ class OpenTests(cros_test_lib.TempDirTestCase):
     def testHandle(self):
         """Read/write a file by an open handle."""
         path = os.path.join(self.tempdir, "test.txt")
-        with open(path, mode="w") as fp:
+        with open(path, mode="w", encoding="utf-8") as fp:
             with file_util.Open(fp) as fp2:
                 fp2.write("foo")
-        with open(path, mode="r") as fp:
+        with open(path, mode="r", encoding="utf-8") as fp:
             with file_util.Open(fp) as fp2:
                 self.assertEqual("foo", fp2.read())
 

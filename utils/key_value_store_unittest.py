@@ -96,7 +96,7 @@ ttt"
 
     def testLoadFileObject(self):
         """Verify passing in open file object works."""
-        with open(self.conf_file) as f:
+        with open(self.conf_file, encoding="utf-8") as f:
             self._RunAndCompare(f, True)
 
     def testNoMultlineValues(self):

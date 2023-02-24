@@ -37,5 +37,5 @@ class Command(enum.IntEnum):
 
 def detach(path: Union[str, os.PathLike]) -> None:
     """Detach the loopdev |path|."""
-    with open(path) as f:
+    with open(path, "wb") as f:
         fcntl.ioctl(f.fileno(), Command.CLR_FD)

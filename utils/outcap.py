@@ -70,13 +70,19 @@ class _FdCapturer(object):
             tempfile_obj = tempfile.NamedTemporaryFile(delete=False)
             self._capturefile = tempfile_obj.file
             self._capturefile_name = tempfile_obj.name
-            self._capturefile_reader = open(self._capturefile_name)
+            self._capturefile_reader = open(
+                self._capturefile_name, encoding="utf-8"
+            )
             self._SafeCreateTempfile(tempfile_obj)
         else:
             # Open file passed in for writing. Set buffering=1 for line level
             # buffering.
-            self._capturefile = open(self._capturefile_name, "w", buffering=1)
-            self._capturefile_reader = open(self._capturefile_name)
+            self._capturefile = open(
+                self._capturefile_name, "w", buffering=1, encoding="utf-8"
+            )
+            self._capturefile_reader = open(
+                self._capturefile_name, encoding="utf-8"
+            )
         # Save the original fd so we can revert in Stop().
         self._saved_fd = os.dup(self._source.fileno())
         os.dup2(self._capturefile.fileno(), self._source.fileno())

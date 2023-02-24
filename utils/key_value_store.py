@@ -10,10 +10,10 @@ import os
 
 
 @contextlib.contextmanager
-def _Open(obj, mode="r"):
+def _Open(obj, mode="r", encoding="utf-8"):
     """Convenience ctx that accepts a file path or an already open file object."""
     if isinstance(obj, (str, os.PathLike)):
-        with open(obj, mode=mode) as f:
+        with open(obj, mode=mode, encoding=encoding) as f:
             yield f
     else:
         yield obj

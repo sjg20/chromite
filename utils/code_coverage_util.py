@@ -123,7 +123,7 @@ def _GenerateZeroCoverageLLVMForFile(
     segments = []
     line_index = 0
 
-    with open(file_path, "r", encoding="utf8", errors="ignore") as file:
+    with open(file_path, "r", encoding="utf-8", errors="ignore") as file:
 
         lines = file.readlines()
         if not lines:
