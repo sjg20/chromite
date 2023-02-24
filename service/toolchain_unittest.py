@@ -48,7 +48,7 @@ class MockBuildLinter(toolchain.BuildLinter):
         )
 
         os.makedirs(os.path.dirname(tmp_path), exist_ok=True)
-        with open(tmp_path, "w") as tmp_artifact_file:
+        with open(tmp_path, "w", encoding="utf-8") as tmp_artifact_file:
             tmp_artifact_file.write(artifact.contents)
         self.artifacts[artifact.linter][artifact.package].append(tmp_path)
 
@@ -83,7 +83,9 @@ class BuildLinterTests(cros_test_lib.MockTempDirTestCase):
                 if artifact_path.endswith(
                     f"{artifact.linter}/{artifact.package}/{artifact.file_name}"
                 ):
-                    with open(artifact_path, "r") as artifact_file:
+                    with open(
+                        artifact_path, "r", encoding="utf-8"
+                    ) as artifact_file:
                         contents = artifact_file.read()
                     self.assertEqual(contents, artifact.contents)
 

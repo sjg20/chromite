@@ -591,7 +591,7 @@ def uprev_kernel_afdo(*_args, **_kwargs):
 
     result = uprev_lib.UprevVersionedPackageResult()
     for metadata in metadata_files:
-        with open(metadata.path, "r") as f:
+        with open(metadata.path, "r", encoding="utf-8") as f:
             versions = json.load(f)
 
         for kernel_pkg, version_info in versions.items():
@@ -743,7 +743,7 @@ def uprev_parallels_desktop(_build_targets, _refs, chroot):
     #   "test_image": { "url": "...", "size": 12345678,
     #                   "sha256sum": "<32 bytes of hexadecimal>" }
     # }
-    with open(version_pin_src_path, "r") as f:
+    with open(version_pin_src_path, "r", encoding="utf-8") as f:
         pinned = json.load(f)
 
     if "version" not in pinned or "test_image" not in pinned:
@@ -766,7 +766,7 @@ def uprev_parallels_desktop(_build_targets, _refs, chroot):
         "pluginvm_image.zip.external"
     )
     test_image_src_path = os.path.join(constants.SOURCE_ROOT, test_image_path)
-    with open(test_image_src_path, "w") as f:
+    with open(test_image_src_path, "w", encoding="utf-8") as f:
         json.dump(pinned["test_image"], f, indent=2)
     result.add_result(version, [test_image_src_path])
 

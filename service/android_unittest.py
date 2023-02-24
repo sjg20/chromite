@@ -383,30 +383,32 @@ class LKGBTest(cros_test_lib.TempDirTestCase):
 
     def testReadLKGBNotJSON(self):
         android_package_dir = self.tempdir
-        with open(os.path.join(android_package_dir, "LKGB.json"), "w") as f:
-            f.write("not-a-json-file")
+        (android_package_dir / "LKGB.json").write_text(
+            "not-a-json-file", encoding="utf-8"
+        )
 
         with self.assertRaises(android.InvalidLKGBError):
             android.ReadLKGB(android_package_dir)
 
     def testReadLKGBMissingBuildID(self):
         android_package_dir = self.tempdir
-        with open(os.path.join(android_package_dir, "LKGB.json"), "w") as f:
-            f.write('{"not_build_id": "foo"}')
+        (android_package_dir / "LKGB.json").write_text(
+            '{"not_build_id": "foo"}', encoding="utf-8"
+        )
 
         with self.assertRaises(android.InvalidLKGBError):
             android.ReadLKGB(android_package_dir)
 
     def testReadLKGBDiscardUnusedFields(self):
         android_package_dir = self.tempdir
-        with open(os.path.join(android_package_dir, "LKGB.json"), "w") as f:
-            f.write(
-                """{
+        (android_package_dir / "LKGB.json").write_text(
+            """{
     "build_id": "build-id",
     "runtime_artifacts_pin": "runtime-artifacts-pin",
     "unused": "foo"
-}"""
-            )
+}""",
+            encoding="utf-8",
+        )
 
         lkgb = android.ReadLKGB(android_package_dir)
         self.assertEqual(

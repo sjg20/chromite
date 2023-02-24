@@ -401,7 +401,7 @@ def ReadDevInstallPackageFile(filename: str) -> List[str]:
     Returns:
         The packages in the package list file.
     """
-    with open(filename) as f:
+    with open(filename, encoding="utf-8") as f:
         return [line.strip() for line in f]
 
 

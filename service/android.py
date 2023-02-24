@@ -605,7 +605,7 @@ def WriteLKGB(android_package_dir: str, lkgb: dict) -> str:
         Path to the updated file.
     """
     path = os.path.join(android_package_dir, _LKGB_JSON)
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(lkgb, f, indent=2, sort_keys=True)
         f.write("\n")
     return path
@@ -633,7 +633,7 @@ def ReadLKGB(android_package_dir: str) -> dict:
         raise MissingLKGBError(path)
 
     try:
-        with open(path, "r") as f:
+        with open(path, "r", encoding="utf-8") as f:
             lkgb = json.load(f)
     except json.JSONDecodeError as e:
         raise InvalidLKGBError("Error decoding LKGB file as JSON: " + str(e))

@@ -355,7 +355,9 @@ class BundleChromeOSConfigTest(cros_test_lib.MockTempDirTestCase):
             "chromeos": {"configs": [{"identity": {"platform-name": "Samus"}}]}
         }
         with open(
-            os.path.join(config_files_root, "yaml", "config.yaml"), "w"
+            os.path.join(config_files_root, "yaml", "config.yaml"),
+            "w",
+            encoding="utf-8",
         ) as f:
             json.dump(test_config_payload, f)
 
@@ -364,7 +366,11 @@ class BundleChromeOSConfigTest(cros_test_lib.MockTempDirTestCase):
         )
         self.assertEqual("config.yaml", config_filename)
 
-        with open(os.path.join(self.archive_dir, config_filename), "r") as f:
+        with open(
+            os.path.join(self.archive_dir, config_filename),
+            "r",
+            encoding="utf-8",
+        ) as f:
             self.assertEqual(test_config_payload, json.load(f))
 
     def testNoChromeOSConfigFound(self):

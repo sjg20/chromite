@@ -128,7 +128,7 @@ class CreateBinhostCLsTest(cros_test_lib.RunCommandTestCase):
             i = cmd.index("--output")
             self.assertGreater(len(cmd), i + 1, "no filename after --output")
             name = cmd[i + 1]
-            with open(name, "w") as f:
+            with open(name, "w", encoding="utf-8") as f:
                 f.write(
                     '{ "created_cls": ["the_cl"'
                     ', "https://crrev.com/another/42"]\n}\n'
