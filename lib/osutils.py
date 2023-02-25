@@ -303,7 +303,10 @@ def Touch(
         SafeMakedirs(path.parent)
 
     # Create the file if nonexistant.
-    path.open("ab").close()
+    try:
+        path.open("ab").close()
+    except PermissionError:
+        pass
     if mode is not None:
         path.chmod(mode)
     # Update timestamp to right now.

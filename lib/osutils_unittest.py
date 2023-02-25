@@ -15,6 +15,7 @@ import pwd
 import re
 import stat
 import sys
+import time
 from unittest import mock
 
 from chromite.lib import cros_build_lib
@@ -471,6 +472,18 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
         osutils.Touch(path)
         self.assertExists(path)
         self.assertEqual(os.path.getsize(path), 0)
+
+    def testTouchReadOnlyFile(self):
+        """Test that we can touch read-only files that we own."""
+        path = self.tempdir / "touchit"
+        nowish = time.time() - 60
+        path.touch(mode=0o600)
+        # Set the times to very old.
+        os.utime(path, (1, 1))
+        assert os.path.getmtime(path) < 10
+        # This should still update the times even though it's read-only.
+        osutils.Touch(path)
+        assert os.path.getmtime(path) >= nowish
 
     def testTouchFileSubDir(self):
         """Test that we can touch files in non-existent subdirs."""
