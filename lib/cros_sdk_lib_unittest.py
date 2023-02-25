@@ -521,11 +521,11 @@ class TestMountChroot(cros_test_lib.MockTempDirTestCase):
         # e.g. if cros_sdk fails in the middle of populating the chroot.
         # Should return True without running any commands.
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write(
-                "/dev/mapper/cros_test_000-chroot %s ext4 rw 0 0\n"
-                % self.chroot_path
-            )
+        osutils.WriteFile(
+            proc_mounts,
+            "/dev/mapper/cros_test_000-chroot %s ext4 rw 0 0\n"
+            % self.chroot_path,
+        )
 
         success = cros_sdk_lib.MountChroot(
             self.chroot_path, create=False, proc_mounts=proc_mounts
@@ -541,8 +541,9 @@ class TestMountChroot(cros_test_lib.MockTempDirTestCase):
         # Chroot with something else mounted on it.
         # Should return False without running any commands.
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write("/dev/sda1 %s ext4 rw 0 0\n" % self.chroot_path)
+        osutils.WriteFile(
+            proc_mounts, f"/dev/sda1 {self.chroot_path} ext4 rw 0 0\n"
+        )
 
         success = cros_sdk_lib.MountChroot(
             self.chroot_path, create=False, proc_mounts=proc_mounts
@@ -560,8 +561,7 @@ class TestFindChrootMountSource(cros_test_lib.MockTempDirTestCase):
 
     def testNoMatchingMount(self):
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write("sysfs /sys sysfs rw 0 0\n")
+        osutils.WriteFile(proc_mounts, "sysfs /sys sysfs rw 0 0\n")
 
         vg, lv = cros_sdk_lib.FindChrootMountSource(
             "/chroot", proc_mounts=proc_mounts
@@ -571,8 +571,7 @@ class TestFindChrootMountSource(cros_test_lib.MockTempDirTestCase):
 
     def testMatchWrongName(self):
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write("/dev/sda1 /chroot ext4 rw 0 0\n")
+        osutils.WriteFile(proc_mounts, "/dev/sda1 /chroot ext4 rw 0 0\n")
 
         vg, lv = cros_sdk_lib.FindChrootMountSource(
             "/chroot", proc_mounts=proc_mounts
@@ -582,8 +581,10 @@ class TestFindChrootMountSource(cros_test_lib.MockTempDirTestCase):
 
     def testMatchRightName(self):
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write("/dev/mapper/cros_vg_name-lv_name /chroot ext4 rw 0 0\n")
+        osutils.WriteFile(
+            proc_mounts,
+            "/dev/mapper/cros_vg_name-lv_name /chroot ext4 rw 0 0\n",
+        )
 
         vg, lv = cros_sdk_lib.FindChrootMountSource(
             "/chroot", proc_mounts=proc_mounts
@@ -593,13 +594,13 @@ class TestFindChrootMountSource(cros_test_lib.MockTempDirTestCase):
 
     def testMatchMultipleMounts(self):
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write(
-                """/dev/mapper/cros_first_mount-lv_name /chroot ext4 rw 0 0
+        osutils.WriteFile(
+            proc_mounts,
+            """/dev/mapper/cros_first_mount-lv_name /chroot ext4 rw 0 0
 /dev/mapper/cros_inner_mount-lv /chroot/inner ext4 rw 0 0
 /dev/mapper/cros_second_mount-lv_name /chroot ext4 rw 0 0
-"""
-            )
+""",
+        )
 
         vg, lv = cros_sdk_lib.FindChrootMountSource(
             "/chroot", proc_mounts=proc_mounts
@@ -639,11 +640,11 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
         m2 = self.PatchObject(cros_sdk_lib, "_RescanDeviceLvmMetadata")
 
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write(
-                "/dev/mapper/cros_vg_name-chroot %s ext4 rw 0 0\n"
-                % self.chroot_path
-            )
+        osutils.WriteFile(
+            proc_mounts,
+            "/dev/mapper/cros_vg_name-chroot %s ext4 rw 0 0\n"
+            % self.chroot_path,
+        )
 
         with cros_test_lib.RunCommandMock() as rc_mock:
             rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, stdout="  /dev/loop0")
@@ -662,11 +663,11 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
         m2 = self.PatchObject(cros_sdk_lib, "_RescanDeviceLvmMetadata")
 
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write(
-                "/dev/mapper/cros_vg_name-chroot %s ext4 rw 0 0\n"
-                % self.chroot_path
-            )
+        osutils.WriteFile(
+            proc_mounts,
+            "/dev/mapper/cros_vg_name-chroot %s ext4 rw 0 0\n"
+            % self.chroot_path,
+        )
 
         with cros_test_lib.RunCommandMock() as rc_mock:
             rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, stdout="  /dev/loop0")
@@ -687,11 +688,11 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
         m4 = self.PatchObject(cros_sdk_lib, "_RescanDeviceLvmMetadata")
 
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write(
-                "/dev/mapper/cros_vg_name-chroot %s ext4 rw 0 0\n"
-                % self.chroot_path
-            )
+        osutils.WriteFile(
+            proc_mounts,
+            "/dev/mapper/cros_vg_name-chroot %s ext4 rw 0 0\n"
+            % self.chroot_path,
+        )
 
         with cros_test_lib.RunCommandMock() as rc_mock:
             rc_mock.AddCmdResult(self._VGS_DEV_LOOKUP, stdout="  /dev/loop0")
@@ -714,8 +715,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
         m3 = self.PatchObject(cros_sdk_lib, "_RescanDeviceLvmMetadata")
 
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write("sysfs /sys sysfs rw 0 0\n")
+        osutils.WriteFile(proc_mounts, "sysfs /sys sysfs rw 0 0\n")
 
         with cros_test_lib.RunCommandMock() as rc_mock:
             rc_mock.AddCmdResult(self._LOSETUP_FIND, stdout="/dev/loop1")
@@ -740,8 +740,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
         m3 = self.PatchObject(cros_sdk_lib, "_RescanDeviceLvmMetadata")
 
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write("sysfs /sys sysfs rw 0 0\n")
+        osutils.WriteFile(proc_mounts, "sysfs /sys sysfs rw 0 0\n")
 
         with cros_test_lib.RunCommandMock() as rc_mock:
             rc_mock.AddCmdResult(self._LOSETUP_FIND, stdout="/dev/loop1")
@@ -764,8 +763,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
         m2.return_value = "cros_chroot_001"
 
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write("sysfs /sys sysfs rw 0 0\n")
+        osutils.WriteFile(proc_mounts, "sysfs /sys sysfs rw 0 0\n")
 
         with cros_test_lib.RunCommandMock() as rc_mock:
             rc_mock.AddCmdResult(self._LOSETUP_FIND, returncode=1)
@@ -788,8 +786,7 @@ class TestCleanupChrootMount(cros_test_lib.MockTempDirTestCase):
         m4 = self.PatchObject(osutils, "RmDir")
 
         proc_mounts = os.path.join(self.tempdir, "proc_mounts")
-        with open(proc_mounts, "w") as f:
-            f.write("sysfs /sys sysfs rw 0 0\n")
+        osutils.WriteFile(proc_mounts, "sysfs /sys sysfs rw 0 0\n")
 
         with cros_test_lib.RunCommandMock() as rc_mock:
             rc_mock.AddCmdResult(self._LOSETUP_FIND, returncode=1)

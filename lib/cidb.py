@@ -367,7 +367,7 @@ class SchemaVersionedMySQLConnection(object):
 
     def RunQueryScript(self, script_path):
         """Run a .sql script file located at |script_path| on the database."""
-        with open(script_path, "r") as f:
+        with open(script_path, "r", encoding="utf-8") as f:
             script = f.read()
         queries = [q.strip() for q in script.split(";") if q.strip()]
         for q in queries:

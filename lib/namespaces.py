@@ -50,7 +50,7 @@ def SetNS(fd, nstype):
     try:
         fp = None
         if isinstance(fd, str):
-            fp = open(fd)  # pylint: disable=consider-using-with
+            fp = open(fd, "wb")  # pylint: disable=consider-using-with
             fd = fp.fileno()
 
         libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)

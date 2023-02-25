@@ -108,8 +108,8 @@ class ProgressBarOperation(object):
         """Open the stdout and stderr streams."""
         if self._stdout is None and self._stderr is None:
             # pylint: disable=consider-using-with
-            self._stdout = open(self._stdout_path, "r")
-            self._stderr = open(self._stderr_path, "r")
+            self._stdout = open(self._stdout_path, "r", encoding="utf-8")
+            self._stderr = open(self._stderr_path, "r", encoding="utf-8")
 
     def Cleanup(self):
         """Method to cleanup progress bar.

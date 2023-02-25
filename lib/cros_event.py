@@ -178,7 +178,7 @@ class EventLogger(object):
 
 def getEventFileLogger(file_name, data=None, encoder_func=json.dumps):
     """Returns an EventFileLogger using the given file name"""
-    file_out = open(file_name, "w")
+    file_out = open(file_name, "w", encoding="utf-8")
     event_logger = EventFileLogger(
         file_out, data=data, encoder_func=encoder_func
     )

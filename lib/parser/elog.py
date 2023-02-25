@@ -68,7 +68,7 @@ class SummaryLog(object):
 
     @staticmethod
     def parse_from_file(file_path):
-        with open(file_path) as logfile:
+        with open(file_path, encoding="utf-8") as logfile:
             return _parse_summary_log_from_lines_iterator(logfile)
 
     @staticmethod

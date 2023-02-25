@@ -688,7 +688,7 @@ class Cgroup(object):
         except EnvironmentError as e:
             if e.errno != errno.ENOENT:
                 raise
-            with open("/proc/%s/cgroup" % pid) as f:
+            with open(f"/proc/{pid}/cgroup", encoding="utf-8") as f:
                 for line in f:
                     # First digit is the hierachy index, 2nd is subsytem, 3rd is space.
                     # 2:cpuset:/

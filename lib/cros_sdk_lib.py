@@ -422,7 +422,7 @@ def MountChroot(
             return False
 
         logging.debug("Creating image %s", chroot_image)
-        with open(chroot_image, "w") as f:
+        with open(chroot_image, "w", encoding="utf-8") as f:
             f.seek(500 * 2**30)  # 500GB sparse image.
             f.write("\0")
 

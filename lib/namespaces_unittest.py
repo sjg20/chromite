@@ -22,7 +22,7 @@ class SetNSTests(cros_test_lib.TestCase):
         if not os.path.exists(NS_PATH):
             raise unittest.SkipTest("kernel too old (missing %s)" % NS_PATH)
 
-        with open(NS_PATH) as f:
+        with open(NS_PATH, encoding="utf-8") as f:
             try:
                 namespaces.SetNS(f.fileno(), 0)
             except OSError as e:
@@ -55,7 +55,7 @@ class UnshareCGroupsTests(cros_test_lib.TestCase):
             namespaces.Unshare(namespaces.CLONE_NEWCGROUP)
             # After we have unshared cgroups, every cgroups entry in
             # /proc/self/cgroups should have a path that's root (ie "/").
-            with open("/proc/self/cgroup") as cgroups:
+            with open("/proc/self/cgroup", encoding="utf-8") as cgroups:
                 for cgroup in cgroups:
                     self.assertRegex(cgroup, ":/\n$")
         except OSError as e:

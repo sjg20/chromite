@@ -199,7 +199,7 @@ class PackageIndex(object):
         Args:
             pkgfile_path: The path to the file.
         """
-        with open(pkgfile_path) as f:
+        with open(pkgfile_path, encoding="utf-8") as f:
             self.Read(f)
 
     def RemoveFilteredPackages(self, filter_fn):
@@ -455,7 +455,7 @@ def GrabLocalPackageIndex(package_path):
     Returns:
         A PackageIndex object.
     """
-    with open(os.path.join(package_path, "Packages")) as f:
+    with open(os.path.join(package_path, "Packages"), encoding="utf-8") as f:
         pkgindex = PackageIndex()
         pkgindex.Read(f)
 

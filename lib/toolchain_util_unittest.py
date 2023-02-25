@@ -2675,7 +2675,7 @@ class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase):
             },
         }
 
-        with open(self.json_file, "w") as f:
+        with open(self.json_file, "w", encoding="utf-8") as f:
             json.dump(self.afdo_versions, f)
         self.artifact_path = os.path.join(
             "/any/path/to/",

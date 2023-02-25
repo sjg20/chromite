@@ -155,7 +155,7 @@ class _TeeProcess(multiprocessing.Process):
             # https://bugs.python.org/issue17404.
             output_files = [os.fdopen(sys.stdout.fileno(), "w")]
             for filename in self._output_filenames:
-                output_files.append(open(filename, "w"))
+                output_files.append(open(filename, "w", encoding="utf-8"))
 
             # Send all data from the one input to all the outputs.
             _tee(input_fd, output_files, self._complain)

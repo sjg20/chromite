@@ -630,13 +630,13 @@ class VM(device.Device):
                 "Attempting to take a VM snapshot without --copy-on-write. Saved "
                 "VM image may not contain the desired snapshot."
             )
-        with open(self.kvm_pipe_in, "w") as monitor_pipe:
+        with open(self.kvm_pipe_in, "w", encoding="utf-8") as monitor_pipe:
             # Saving the snapshot will take an indeterminate amount of time, so also
             # send a fake command that the monitor will complain about so we can know
             # when the snapshot saving is done.
             monitor_pipe.write("savevm chromite_lib_vm_snapshot\n")
             monitor_pipe.write("thisisafakecommand\n")
-        with open(self.kvm_pipe_out) as monitor_pipe:
+        with open(self.kvm_pipe_out, encoding="utf-8") as monitor_pipe:
             # Set reads to be non-blocking
             fd = monitor_pipe.fileno()
             cur_flags = fcntl.fcntl(fd, fcntl.F_GETFL)

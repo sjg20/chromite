@@ -54,7 +54,7 @@ def IsProcessAlive(pid):
     if not os.path.exists(path):
         return False
 
-    with open(path, "r") as fp:
+    with open(path, "r", encoding="utf-8") as fp:
         stat = fp.readline().rstrip("\n")
 
     return stat.split()[2] != "Z"

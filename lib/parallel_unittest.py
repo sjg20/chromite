@@ -202,7 +202,7 @@ class TestBackgroundWrapper(cros_test_lib.TestCase):
         # reproduce bugs.
         with mock.patch.multiple(parallel._BackgroundTask, PRINT_INTERVAL=0.01):
             with tempfile.NamedTemporaryFile() as temp:
-                with open(temp.name, "w") as output:
+                with open(temp.name, "w", encoding="utf-8") as output:
                     with mock.patch.multiple(sys, stdout=output):
                         func()
                 return osutils.ReadFile(temp.name)

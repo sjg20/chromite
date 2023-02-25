@@ -97,7 +97,7 @@ class PackageIndexTest(cros_test_lib.TempDirTestCase):
         # Write the package index files using each writing method.
         pkg_index.modified = True
         pkg_index.WriteFile(packages1)
-        with open(packages2, "w") as f:
+        with open(packages2, "w", encoding="utf-8") as f:
             pkg_index.Write(f)
         tmpf = pkg_index.WriteToNamedTemporaryFile()
 
@@ -109,7 +109,7 @@ class PackageIndexTest(cros_test_lib.TempDirTestCase):
         self.assertEqual(fc1, fc3)
 
         # Make sure it parses out the same data we wrote.
-        with open(packages1) as f:
+        with open(packages1, encoding="utf-8") as f:
             read_index = binpkg.PackageIndex()
             read_index.Read(f)
 

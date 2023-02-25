@@ -313,7 +313,7 @@ class TableTest(cros_test_lib.TempDirTestCase):
         """Write and Read CSV and verify contents preserved."""
         # This also tests the Table == and != operators.
         _, path = tempfile.mkstemp(text=True)
-        with open(path, "w") as tmpfile:
+        with open(path, "w", encoding="utf-8") as tmpfile:
             self._table.WriteCSV(tmpfile)
         mytable = table.Table.LoadFromCSV(path)
         self.assertEqual(mytable, self._table)

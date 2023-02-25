@@ -13,6 +13,7 @@ from chromite.third_party.infra_libs import ts_mon
 
 from chromite.lib import cros_test_lib
 from chromite.lib import metrics
+from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import ts_mon_config
 
@@ -116,8 +117,7 @@ class TestIndirectMetrics(cros_test_lib.MockTestCase):
                     ).set(True)
 
             # By leaving the context, we .join() the flushing process.
-            with open(out.name, "r") as fh:
-                content = fh.read()
+            content = osutils.ReadFile(out.name)
 
             # The reset metrics should be sent only three times, because:
             # * original=False is sent twice

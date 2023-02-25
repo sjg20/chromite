@@ -101,7 +101,7 @@ def GetValueInJsonFile(json_path, key, default_value=None):
       default_value: (default:None) The default value returned in case of missing
         key.
     """
-    with open(json_path) as fd:
+    with open(json_path, "rb") as fd:
         return json.load(fd).get(key, default_value)
 
 

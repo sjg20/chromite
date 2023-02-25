@@ -63,7 +63,7 @@ def FixBotoCerts(activate=True, strict=False):
             prefix="fix_certs", suffix="boto.cfg"
         )
         os.close(fd)
-        with open(boto_cfg_path, "w") as f:
+        with open(boto_cfg_path, "w", encoding="utf-8") as f:
             config.write(f)
         os.chmod(boto_cfg_path, 0o644)
 

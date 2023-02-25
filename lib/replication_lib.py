@@ -83,16 +83,14 @@ def _ApplyStringReplacementRules(destination_path, rules):
     """
     assert rules
 
-    with open(destination_path, "r") as f:
-        dst_data = f.read()
+    dst_data = osutils.ReadFile(destination_path)
 
     for string_replacement_rule in rules:
         dst_data = dst_data.replace(
             string_replacement_rule.before, string_replacement_rule.after
         )
 
-    with open(destination_path, "w") as f:
-        f.write(dst_data)
+    osutils.WriteFile(destination_path, dst_data)
 
 
 def Replicate(replication_config):
@@ -121,7 +119,7 @@ def Replicate(replication_config):
             )
             assert rule.destination_fields.paths
 
-            with open(src, "r") as f:
+            with open(src, "rb") as f:
                 source_json = json.load(f)
 
             try:

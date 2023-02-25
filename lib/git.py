@@ -100,7 +100,7 @@ def GetGitGitdir(pwd):
 
     # A git worktree checkout.
     if os.path.isfile(dotgit):
-        with open(dotgit, "r") as fp:
+        with open(dotgit, "r", encoding="utf-8") as fp:
             if fp.read(7) == "gitdir:":
                 return dotgit
 

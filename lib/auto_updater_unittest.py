@@ -335,12 +335,12 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
                 transfer_class=auto_updater_transfer.LocalTransfer,
             )
             prop_file = os.path.join(self._payload_dir, "payload.json")
-            with open(prop_file, "w") as fp:
+            with open(prop_file, "w", encoding="utf-8") as fp:
                 json.dump({"appid": "helloworld!"}, fp)
             type(device).app_id = mock.PropertyMock(return_value="different")
             # pylint: disable=protected-access
             CrOS_AU._ResolveAPPIDMismatchIfAny()
-            with open(prop_file) as fp:
+            with open(prop_file, "rb") as fp:
                 self.assertEqual(json.load(fp), {"appid": ""})
 
     def testMatchedAppId(self):
@@ -356,12 +356,12 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
                 transfer_class=auto_updater_transfer.LocalTransfer,
             )
             prop_file = os.path.join(self._payload_dir, "payload.json")
-            with open(prop_file, "w") as fp:
+            with open(prop_file, "w", encoding="utf-8") as fp:
                 json.dump({"appid": "same"}, fp)
             type(device).app_id = mock.PropertyMock(return_value="same")
             # pylint: disable=protected-access
             CrOS_AU._ResolveAPPIDMismatchIfAny()
-            with open(prop_file) as fp:
+            with open(prop_file, "rb") as fp:
                 self.assertEqual(json.load(fp), {"appid": "same"})
 
     def testCreateTransferObjectError(self):

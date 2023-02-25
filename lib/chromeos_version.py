@@ -89,7 +89,7 @@ class VersionInfo(object):
 
     def _LoadFromFile(self):
         """Read the version file and set the version components"""
-        with open(self.version_file, "r") as version_fh:
+        with open(self.version_file, "r", encoding="utf-8") as version_fh:
             for line in version_fh:
                 if not line.strip():
                     continue
@@ -238,7 +238,9 @@ class VersionInfo(object):
         )
 
         with tempfile.NamedTemporaryFile(prefix="mvp", mode="w") as temp_fh:
-            with open(self.version_file, "r") as source_version_fh:
+            with open(
+                self.version_file, "r", encoding="utf-8"
+            ) as source_version_fh:
                 for line in source_version_fh:
                     for key, value in components:
                         line = re.sub(

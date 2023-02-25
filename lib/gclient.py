@@ -58,7 +58,7 @@ def LoadGclientFile(path):
     # which is essentially a Python script, and then extract the solutions
     # defined by the gclient file from the 'solutions' variable in the global
     # scope.
-    with open(path) as fp:
+    with open(path, "rb") as fp:
         # pylint: disable=exec-used
         exec(compile(fp.read(), path, "exec"), global_scope)
     return global_scope.get("solutions", [])

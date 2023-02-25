@@ -236,11 +236,13 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
     def testInputFileObject(self):
         """Verify input argument when it is a file object."""
         result = cros_build_lib.run(
-            ["cat"], input=open("/dev/null"), capture_output=True
+            ["cat"],
+            input=open("/dev/null", encoding="utf-8"),
+            capture_output=True,
         )
         self.assertEqual(result.stdout, b"")
 
-        with open(__file__) as f:
+        with open(__file__, encoding="utf-8") as f:
             result = cros_build_lib.run(["cat"], input=f, capture_output=True)
             self.assertEqual(
                 result.stdout, osutils.ReadFile(__file__, mode="rb")
@@ -248,13 +250,13 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
 
     def testInputFileDescriptor(self):
         """Verify input argument when it is a file descriptor."""
-        with open("/dev/null") as f:
+        with open("/dev/null", encoding="utf-8") as f:
             result = cros_build_lib.run(
                 ["cat"], input=f.fileno(), capture_output=True
             )
             self.assertEqual(result.stdout, b"")
 
-        with open(__file__) as f:
+        with open(__file__, encoding="utf-8") as f:
             result = cros_build_lib.run(
                 ["cat"], input=f.fileno(), capture_output=True
             )

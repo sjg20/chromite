@@ -706,7 +706,7 @@ class ChromiumOSUpdater(BaseUpdater):
         prop_file = os.path.join(
             self.payload_dir, self.payload_filename + ".json"
         )
-        with open(prop_file) as fp:
+        with open(prop_file, "rb") as fp:
             content = json.load(fp)
             payload_app_id = content.get("appid", "")
             if not payload_app_id:
@@ -723,7 +723,7 @@ class ChromiumOSUpdater(BaseUpdater):
             )
             # Override the properties file with the new empty APP ID.
             content["appid"] = ""
-            with open(prop_file, "w") as fp:
+            with open(prop_file, "w", encoding="utf-8") as fp:
                 json.dump(content, fp)
 
     def RunUpdate(self):

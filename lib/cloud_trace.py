@@ -42,7 +42,7 @@ def LogSpan(span):
     """
     _RecordSpanMetrics(span)
     try:
-        with open(GetSpanLogFilePath(span), "w") as fh:
+        with open(GetSpanLogFilePath(span), "w", encoding="utf-8") as fh:
             fh.write(json.dumps(span, default=serialize_span))
     # Catch various configuration errors.
     except OSError as error:

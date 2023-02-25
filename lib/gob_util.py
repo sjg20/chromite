@@ -168,7 +168,7 @@ def GetCookies(host, path, cookie_paths=None):
         cookie_paths = (constants.GOB_COOKIE_PATH, constants.GITCOOKIES_PATH)
     for cookie_path in cookie_paths:
         if os.path.isfile(cookie_path):
-            with open(cookie_path) as f:
+            with open(cookie_path, encoding="utf-8") as f:
                 for line in f:
                     fields = line.strip().split("\t")
                     if line.strip().startswith("#") or len(fields) != 7:

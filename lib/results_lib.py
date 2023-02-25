@@ -23,7 +23,7 @@ def _GetCheckpointFile(buildroot):
 def WriteCheckpoint(buildroot):
     """Drops a completed stages file with current state."""
     completed_stages_file = _GetCheckpointFile(buildroot)
-    with open(completed_stages_file, "w+") as save_file:
+    with open(completed_stages_file, "w+", encoding="utf-8") as save_file:
         Results.SaveCompletedStages(save_file)
 
 
@@ -34,7 +34,7 @@ def LoadCheckpoint(buildroot):
         logging.warning("Checkpoint file not found in buildroot %s", buildroot)
         return
 
-    with open(completed_stages_file, "r") as load_file:
+    with open(completed_stages_file, "r", encoding="utf-8") as load_file:
         Results.RestoreCompletedStages(load_file)
 
 

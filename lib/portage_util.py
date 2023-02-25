@@ -372,7 +372,9 @@ def GetOverlayName(overlay):
     except (KeyError, IOError):
         # Not all layout.conf files have a repo-name, so don't make a fuss.
         try:
-            with open(os.path.join(overlay, "profiles", "repo_name")) as f:
+            with open(
+                os.path.join(overlay, "profiles", "repo_name"), encoding="utf-8"
+            ) as f:
                 return f.readline().rstrip()
         except IOError:
             # Not all overlays have a repo_name, so don't make a fuss.
@@ -1663,7 +1665,7 @@ class InstalledPackage(object):
             return []
 
         result = []
-        for line in open(path):
+        for line in open(path, encoding="utf-8"):
             line = line.strip()
             # Line format is: "type file_path [more space-separated fields]".
             # Discard any other line without at least the first two fields. The
@@ -2763,7 +2765,7 @@ def ParseDieHookStatusFile(metrics_dir: str) -> List[package_info.CPV]:
     if not os.path.exists(file_path):
         return []
 
-    with open(file_path) as failed_pkgs_file:
+    with open(file_path, encoding="utf-8") as failed_pkgs_file:
         failed_pkgs = []
         for line in failed_pkgs_file:
             cpv, _phase = line.split()

@@ -29,7 +29,7 @@ def GetClient(creds_file, project_id=None, namespace=None):
       A (datastore.Client instance, project_id) tuple.
     """
     if project_id is None:
-        with open(creds_file, "r") as f:
+        with open(creds_file, "rb") as f:
             project_id = json.load(f)["project_id"]
 
     return (

@@ -163,7 +163,7 @@ def _GetProjects(repo_root):
     # Drop the leading ./ and the trailing .git
     data = [x[2:-4] for x in data.stdout.splitlines() if x]
 
-    with open(cache_path, "w") as f:
+    with open(cache_path, "w", encoding="utf-8") as f:
         f.write("\n".join(sorted(data)))
 
     # Finally, mark the cache with the time of the manifest.xml we examined.

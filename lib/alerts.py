@@ -77,7 +77,7 @@ def ReadRefreshTokenJson(path):
         AuthenticationError if failed to read from json file.
     """
     try:
-        with open(path, "r") as f:
+        with open(path, "rb") as f:
             data = json.load(f)
             return RefreshToken(
                 client_id=str(data["client_id"]),

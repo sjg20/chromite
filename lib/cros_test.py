@@ -1039,6 +1039,6 @@ def FileList(files, files_from):
         Contents of files_from if it exists, otherwise files.
     """
     if files_from and os.path.isfile(files_from):
-        with open(files_from) as f:
+        with open(files_from, encoding="utf-8") as f:
             files = [line.rstrip() for line in f]
     return files

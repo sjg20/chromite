@@ -1838,18 +1838,17 @@ def GetDefaultBoard():
         constants.SOURCE_ROOT, "src", "scripts", ".default_board"
     )
     try:
-        with open(default_board_file_name) as default_board_file:
-            default_board = default_board_file.read().strip()
-            # Check for user typos like whitespace
-            if not re.match("[a-zA-Z0-9-_]*$", default_board):
-                logging.warning(
-                    "Noticed invalid default board: |%s|. Ignoring this "
-                    "default.",
-                    default_board,
-                )
-                default_board = None
+        default_board = osutils.ReadFile(default_board_file_name).strip()
     except IOError:
         return None
+
+    # Check for user typos like whitespace
+    if not re.match("[a-zA-Z0-9-_]*$", default_board):
+        logging.warning(
+            "Noticed invalid default board: |%s|. Ignoring this default.",
+            default_board,
+        )
+        default_board = None
 
     return default_board
 
@@ -1865,8 +1864,7 @@ def SetDefaultBoard(board: str):
     """
     config_path = os.path.join(constants.CROSUTILS_DIR, ".default_board")
     try:
-        with open(config_path, "w") as f:
-            f.write(board)
+        osutils.WriteFile(config_path, board)
     except IOError as e:
         logging.error("Unable to write default board: %s", e)
         return False

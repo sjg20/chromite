@@ -178,9 +178,9 @@ def read_metrics_events():
 
     logging.info("reading metrics logs from %s", metrics_logfile)
     # TODO(b/187788898): Drop this once it's stable.
-    with open(metrics_logfile) as f:
+    with open(metrics_logfile, encoding="utf-8") as f:
         logging.info("[metrics log file]\n%s", f.read())
-    with open(metrics_logfile, "r") as f:
+    with open(metrics_logfile, "r", encoding="utf-8") as f:
         for line in f:
             yield parse_metric(line)
 
@@ -233,7 +233,7 @@ def append_metrics_log(timestamp, name, op, arg=None):
     line = "|".join(str(x) for x in terms)
     if metrics_log:
         with locking.FileLock(metrics_log).write_lock():
-            with open(metrics_log, "a") as f:
+            with open(metrics_log, "a", encoding="utf-8") as f:
                 f.write("%s\n" % line)
 
 

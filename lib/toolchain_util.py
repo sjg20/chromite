@@ -633,7 +633,7 @@ class _CommonPrepareBundle(object):
         info = self._GetEbuildInfo(package)
         ebuild = info.path
         pattern = re.compile(AFDO_ARTIFACT_EBUILD_REGEX % variable)
-        with open(ebuild) as f:
+        with open(ebuild, encoding="utf-8") as f:
             for line in f:
                 match = pattern.search(line)
                 if match:
@@ -848,7 +848,9 @@ class _CommonPrepareBundle(object):
         )
 
         want = patterns.copy()
-        with open(old_name) as old, open(new_name, "w") as new:
+        with open(old_name, encoding="utf-8") as old, open(
+            new_name, "w", encoding="utf-8"
+        ) as new:
             for line in old:
                 for match, sub in patterns:
                     line, count = match.subn(sub, line, count=1)
@@ -2043,8 +2045,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         # form '{llvm-package-pv}-{clang-head_sha}.llvm_profdata.tar.zx.
         with self.chroot.tempdir() as tempdir:
             raw_list = os.path.join(tempdir, "profraw_list")
-            with open(raw_list, "w") as f:
-                f.write("\n".join(profiles))
+            osutils.WriteFile(raw_list, "\n".join(profiles))
             basename = "%s.llvm.profdata" % profdata_base
             merged_path = os.path.join(tempdir, basename)
             cros_build_lib.sudo_run(
@@ -2084,7 +2085,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         bin_path = os.path.join(
             self.output_dir, binary_name + BZ2_COMPRESSION_SUFFIX
         )
-        with open(bin_path, "w") as f:
+        with open(bin_path, "w", encoding="utf-8") as f:
             cros_build_lib.run(
                 ["bzip2", "-c", debug_bin_inside],
                 stdout=f,
@@ -2148,7 +2149,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         afdo_path = os.path.join(
             self.output_dir, afdo_name + BZ2_COMPRESSION_SUFFIX
         )
-        with open(afdo_path, "w") as f:
+        with open(afdo_path, "w", encoding="utf-8") as f:
             cros_build_lib.run(
                 ["bzip2", "-c", afdo_path_inside],
                 stdout=f,
