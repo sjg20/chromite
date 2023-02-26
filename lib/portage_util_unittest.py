@@ -954,7 +954,12 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         """Tests that GitRepoHasChanges works correctly."""
         git.RunGit(
             self.tempdir,
-            ["clone", "--depth=1", constants.CHROMITE_DIR, self.tempdir],
+            [
+                "clone",
+                "--depth=1",
+                f"file://{constants.CHROMITE_DIR}",
+                self.tempdir,
+            ],
         )
         # No changes yet as we just cloned the repo.
         self.assertFalse(portage_util.EBuild.GitRepoHasChanges(self.tempdir))
