@@ -1,0 +1,1 @@
+/mnt/host/depot_tools/ninjalog_uploader_wrapper.py

@@ -1,0 +1,1 @@
+/mnt/host/depot_tools/ninja_reclient.py

@@ -1,0 +1,1 @@
+/mnt/host/depot_tools/post_build_ninja_summary.py

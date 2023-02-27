@@ -1,0 +1,1 @@
+/mnt/host/depot_tools/clang_format_merge_driver.py
