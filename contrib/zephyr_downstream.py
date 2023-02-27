@@ -28,6 +28,11 @@ def main(args):
         "--dry-run", action="store_true", help="Dry run, no updates to Gerrit."
     )
     parser.add_argument(
+        "--cq-dry-run",
+        action="store_true",
+        help="Label the patches for dry run (CQ+1) instead of merge (CQ+2, default behavior).",
+    )
+    parser.add_argument(
         "--limit", type=int, help="How many changes to modify, from the oldest."
     )
     parser.add_argument(
@@ -51,6 +56,8 @@ def main(args):
         "Downstreaming the following CLs:\n%s",
         "\n".join((patch["number"] for patch in cls_to_downstream)),
     )
+
+    cq_level = "1" if opts.cq_dry_run else "2"
 
     stop_at = opts.stop_at
     # TODO(aaronmassey): Investigate bulk changes from Gerrit lib API instead.
@@ -83,7 +90,7 @@ def main(args):
             labels={
                 "Verified": "1",
                 "Code-Review": "2",
-                "Commit-Queue": "2",
+                "Commit-Queue": cq_level,
             },
         )
 
