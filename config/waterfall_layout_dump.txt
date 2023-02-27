@@ -159,6 +159,7 @@
     draco-release
     drallion-kernelnext-release
     drallion-release
+    elm-arc64-release
     elm-kernelnext-release
     elm-release
     endeavour-release
@@ -542,6 +543,11 @@
   drallion-master-factorybranch-tryjob
   drallion-payloads-tryjob
   drallion-release-tryjob
+  elm-arc64-full-tryjob
+  elm-arc64-llvm-next-toolchain-tryjob
+  elm-arc64-llvm-toolchain-tryjob
+  elm-arc64-payloads-tryjob
+  elm-arc64-release-tryjob
   elm-factory-oak-8182.B-factorybranch-tryjob
   elm-full-tryjob
   elm-kernelnext-full-tryjob
@@ -1017,6 +1023,7 @@
     draco-release-tryjob
     drallion-kernelnext-release-tryjob
     drallion-release-tryjob
+    elm-arc64-release-tryjob
     elm-kernelnext-release-tryjob
     elm-release-tryjob
     endeavour-release-tryjob

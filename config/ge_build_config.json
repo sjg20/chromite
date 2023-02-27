@@ -5341,6 +5341,25 @@
       "stable_target_milestone": 52
     },
     {
+      "name": "elm-arc64",
+      "reference_board_name": "elm-arc64",
+      "arch": "ARM_INTERNAL",
+      "builder": "RELEASE",
+      "experimental": true,
+      "models": [
+        {
+          "board_name": "elm-arc64",
+          "name": "elm",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7156,
+          "is_active": true,
+          "is_experimental": false
+        }
+      ],
+      "rubik_target_milestone": 108
+    },
+    {
       "name": "elm-kernelnext",
       "reference_board_name": "elm-kernelnext",
       "arch": "ARM_INTERNAL",
