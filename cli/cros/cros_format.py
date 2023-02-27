@@ -241,6 +241,7 @@ Supported file names: %s
         parser.add_argument(
             "-i",
             "--inplace",
+            "--fix",
             default=True,
             action="store_true",
             help="Format files inplace (default)",
