@@ -124,7 +124,7 @@ def _ValidatePrebuiltsRoot(
 
 
 def _ValidateBinhostMaxURIs(max_uris: int) -> None:
-    """Validates that the max_uris is greater or equalt to 1.
+    """Validates that the max_uris is greater or equal to 1.
 
     Args:
         max_uris: Maximum number of uris that we need to store in Binhost conf
@@ -267,7 +267,7 @@ def SetBinhost(
         key: The binhost key to set, e.g. POSTSUBMIT_BINHOST.
         uri: The new value for the binhost key,
             e.g. gs://chromeos-prebuilt/foo/bar.
-        private: Whether or not the build target is private.
+        private: Whether the build target is private.
         max_uris: Maximum number of uris to keep in the conf.
 
     Returns:
@@ -286,7 +286,7 @@ def GetBinhostConfPath(target: str, key: str, private: bool = True) -> Path:
     Args:
         target: The build target to get configuration file path for.
         key: The binhost key to get, e.g. POSTSUBMIT_BINHOST.
-        private: Whether or not the build target is private.
+        private: Whether the build target is private.
 
     Returns:
         Path to the .conf file.
@@ -345,7 +345,7 @@ def RegenBuildCache(
         task_inputs = [[o] for o in overlays if os.path.isdir(o)]
         results = parallel.RunTasksInProcessPool(task, task_inputs)
 
-    # Filter out all of the unchanged-overlay results.
+    # Filter out all the unchanged-overlay results.
     return [overlay_dir for overlay_dir in results if overlay_dir]
 
 
@@ -487,7 +487,7 @@ def CreateFilteredPackageIndex(
 
     Args:
         package_path: Absolute path to the standard Packages file.
-        devinstall_package_list: Packages from packages.installable
+        devinstall_package_list: Packages from packages.installable.
         package_index_path: Absolute path for new Packages file.
         upload_uri: The URI where prebuilts will be uploaded.
         upload_path: The path at the URI for the prebuilts.
