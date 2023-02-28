@@ -1014,6 +1014,8 @@ class ChrootCreatorTests(cros_test_lib.MockTempDirTestCase):
         # Check various /etc paths.
         etc = self.chroot_path / "etc"
         self.assertExists(etc / "mtab")
+        self.assertExists(etc / "hosts")
+        self.assertExists(etc / "resolv.conf")
         self.assertIn(
             f'PORTAGE_USERNAME="{TEST_USER}"',
             (etc / "env.d" / "99chromiumos").read_text(encoding="utf-8"),

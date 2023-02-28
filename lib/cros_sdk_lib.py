@@ -1131,7 +1131,7 @@ class ChrootCreator:
             mtab.symlink_to("/proc/mounts")
 
         # Copy config from outside chroot into chroot.
-        for path in ("hosts", "resolve.conf"):
+        for path in ("hosts", "resolv.conf"):
             host_path = Path("/etc") / path
             chroot_path = etc_dir / path
             if host_path.exists():
