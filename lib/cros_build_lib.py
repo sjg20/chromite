@@ -668,11 +668,6 @@ def run(
     __tracebackhide__ = operator.methodcaller("errisinstance", RunCommandError)
 
     # Handle backwards compatible settings.
-    if "log_stdout_to_file" in kwargs:
-        logging.warning("run: log_stdout_to_file=X is now stdout=X")
-        log_stdout_to_file = kwargs.pop("log_stdout_to_file")
-        if log_stdout_to_file is not None:
-            stdout = log_stdout_to_file
     stdout_file_mode = "w+b"
     if "append_to_file" in kwargs:
         # TODO(vapier): Enable this warning once chromite & users migrate.
