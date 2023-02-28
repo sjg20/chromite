@@ -62,4 +62,8 @@ import sys
 from pylint import lint
 
 
-lint.Run(sys.argv[1:])
+try:
+    lint.Run(sys.argv[1:])
+except Exception:
+    print(f"{sys.argv[0]} failed; args: {sys.argv}", file=sys.stderr)
+    raise
