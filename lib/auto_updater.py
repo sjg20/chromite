@@ -946,7 +946,6 @@ class ChromiumOSUpdater(BaseUpdater):
             self.device.run,
             cmd,
             delay_sec=DELAY_SEC_FOR_RETRY,
-            shell=isinstance(cmd, str),
             **kwargs,
         )
 
@@ -1058,6 +1057,7 @@ class ChromiumOSUpdater(BaseUpdater):
         )
         self._RetryCommand(
             autoreboot_cmd % self.REMOTE_LAB_MACHINE_FILE_PATH,
+            shell=True,
             **self._cmd_kwargs,
         )
 

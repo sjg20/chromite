@@ -789,5 +789,5 @@ class RetryCommand(cros_test_lib.RunCommandTestCase):
             # pylint: disable=protected-access
             CrOS_AU._RetryCommand(["some", "list", "command"])
             self.assertCommandContains(["some", "list", "command"])
-            CrOS_AU._RetryCommand("some string command")
+            CrOS_AU._RetryCommand("some string command", shell=True)
             self.assertCommandContains("some string command")
