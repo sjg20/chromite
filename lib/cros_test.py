@@ -678,7 +678,7 @@ class CrOSTest(object):
             chrome_src_dir,
         )
         test_args = self.args[1:]
-        command = 'cd %s && su chronos -c -- "%s %s"' % (
+        command = "cd %s && sudo -u chronos -- %s %s" % (
             self.chrome_test_deploy_target_dir,
             test_binary,
             " ".join(test_args),

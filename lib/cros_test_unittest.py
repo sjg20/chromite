@@ -819,8 +819,8 @@ class CrOSTesterChromeTest(CrOSTesterBase):
                 "9222",
                 "root@localhost",
                 "--",
-                "cd /usr/local/chrome_test && su chronos -c -- "
-                '"out_amd64-generic/Release/%s %s"' % (test_exe, args),
+                "cd /usr/local/chrome_test && sudo -u chronos -- "
+                "out_amd64-generic/Release/%s %s" % (test_exe, args),
             ]
         )
 
