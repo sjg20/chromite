@@ -679,12 +679,14 @@ class CrOSTest(object):
             chrome_src_dir,
         )
         test_args = self.args[1:]
-        command = "cd %s && sudo -u chronos -- %s %s" % (
+        command = "cd %s && %s %s" % (
             self.chrome_test_deploy_target_dir,
             test_binary,
             " ".join(test_args),
         )
-        result = self._device.run(command, stream_output=True)
+        result = self._device.run(
+            command, stream_output=True, remote_user="chronos"
+        )
         return result
 
 

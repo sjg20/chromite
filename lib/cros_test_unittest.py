@@ -817,9 +817,9 @@ class CrOSTesterChromeTest(CrOSTesterBase):
                 "ssh",
                 "-p",
                 "9222",
-                "root@localhost",
+                "chronos@localhost",
                 "--",
-                "cd /usr/local/chrome_test && sudo -u chronos -- "
+                "cd /usr/local/chrome_test && "
                 "out_amd64-generic/Release/%s %s" % (test_exe, args),
             ]
         )
