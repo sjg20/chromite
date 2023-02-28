@@ -368,11 +368,11 @@ def GetPrebuiltAclArgs(
     if not acl_file:
         raise NoAclFileFound("No ACL file found for %s." % build_target.name)
 
-    lines = osutils.ReadFile(acl_file).splitlines()
+    lines = osutils.ReadFile(acl_file).splitlines()  # type: List[str]
     # Remove comments.
     lines = [line.split("#", 1)[0].strip() for line in lines]
     # Remove empty lines.
-    lines = [line.strip() for line in lines if line.strip()]
+    lines = [line for line in lines if line]
 
     return [line.split() for line in lines]
 
