@@ -120,7 +120,10 @@ class ChrootUtilTest(cros_test_lib.RunCommandTempDirTestCase):
         chroot_util.RunUnittests(
             sysroot="/sysroot/",
             packages=["package1", "package2"],
-            extra_env={"USE": "chrome_internal coverage"},
+            extra_env={
+                "USE": "chrome_internal coverage",
+                "FEATURES": "noclean",
+            },
             keep_going=True,
         )
         sudo_run_mock.assert_called_once_with(
@@ -133,7 +136,7 @@ class ChrootUtilTest(cros_test_lib.RunCommandTempDirTestCase):
             ],
             extra_env={
                 "USE": "chrome_internal coverage",
-                "FEATURES": "test",
+                "FEATURES": "noclean test",
                 "PKGDIR": "/sysroot/test-packages",
             },
         )

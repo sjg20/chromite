@@ -215,6 +215,10 @@ def main(argv):
         use_flags += " -cros-debug"
         env["USE"] = use_flags
 
+    features_flags = os.environ.get("FEATURES", "")
+    if features_flags:
+        env["FEATURES"] = features_flags
+
     keep_going = get_keep_going()
 
     metrics_dir = os.environ.get(constants.CROS_METRICS_DIR_ENVVAR)

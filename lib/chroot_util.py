@@ -188,7 +188,7 @@ def RunUnittests(
         packages: List of packages to test.
         extra_env: Python dictionary containing the extra environment variable
             to pass to the build command.
-        keep_going: Tolerent package failure from parallel_emerge.
+        keep_going: Tolerate package failure from parallel_emerge.
         verbose: If True, show the output from emerge, even when the tests
             succeed.
         retries: Number of time we should retry a failed packages. If None, use
@@ -199,12 +199,13 @@ def RunUnittests(
         RunCommandError if the unit tests failed.
     """
     env = extra_env.copy() if extra_env else {}
-    env.update(
-        {
-            "FEATURES": "test",
-            "PKGDIR": os.path.join(sysroot, constants.UNITTEST_PKG_PATH),
-        }
-    )
+
+    if "FEATURES" in env:
+        env["FEATURES"] += " test"
+    else:
+        env["FEATURES"] = "test"
+
+    env["PKGDIR"] = os.path.join(sysroot, constants.UNITTEST_PKG_PATH)
 
     command = [
         os.path.join(constants.CHROMITE_BIN_DIR, "parallel_emerge"),
