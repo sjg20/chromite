@@ -827,13 +827,12 @@ class ChrootCreator:
                 chroot_path.write_bytes(host_path.read_bytes())
                 chroot_path.chmod(0o644)
 
-        # Add chromite/bin and depot_tools into the path globally; note that the
-        # chromite wrapper itself might also be found in depot_tools.
-        # We rely on 'env-update' getting called below.
+        # Add chromite/sdk/bin and chromite/bin into the path globally. We rely
+        # on 'env-update' getting called later (make_chroot.sh).
         env_d = etc_dir / "env.d" / "99chromiumos"
         env_d.write_text(
             f"""\
-PATH="{constants.CHROOT_SOURCE_ROOT}/chromite/bin:/mnt/host/depot_tools"
+PATH="{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/bin:{constants.CHROOT_SOURCE_ROOT}/chromite/bin"
 CROS_WORKON_SRCROOT="{constants.CHROOT_SOURCE_ROOT}"
 PORTAGE_USERNAME="{user}"
 """,
