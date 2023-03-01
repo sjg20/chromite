@@ -908,6 +908,18 @@ class TestRunCommandOutput(
         self.assertIs(ret.stdout, None)
         self.assertIs(ret.stderr, None)
 
+    def testOutputPath(self):
+        """Check stdout=/stderr= works with Path objects."""
+        stdout = self.tempdir / "stdout"
+        stderr = self.tempdir / "stderr"
+        cros_build_lib.run(
+            ["sh", "-c", "echo out; echo err >&2"],
+            stdout=stdout,
+            stderr=stderr,
+        )
+        self.assertEqual(stdout.read_bytes(), b"out\n")
+        self.assertEqual(stderr.read_bytes(), b"err\n")
+
     def testOutputFileHandle(self):
         """Verify writing to existing file handles."""
         stdout = os.path.join(self.tempdir, "stdout")

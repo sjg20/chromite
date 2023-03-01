@@ -717,7 +717,7 @@ def run(
     # what a separate process did to that file can result in a bad
     # view of the file.
     log_stdout_to_file = False
-    if isinstance(stdout, str):
+    if isinstance(stdout, (str, os.PathLike)):
         # We explicitly close this handle below before returning.
         # pylint: disable=consider-using-with
         popen_stdout = open(stdout, stdout_file_mode)
@@ -736,7 +736,7 @@ def run(
         popen_stdout = _get_tempfile()
 
     log_stderr_to_file = False
-    if isinstance(stderr, str):
+    if isinstance(stderr, (str, os.PathLike)):
         # We explicitly close this handle below before returning.
         # pylint: disable=consider-using-with
         popen_stderr = open(stderr, "w+b")
