@@ -556,17 +556,23 @@ def RunBuild(options, base, target, queue):
         result = cros_build_lib.run(
             base + [target],
             input="",
-            stdout=True,
-            stderr=subprocess.STDOUT,
+            capture_output=True,
             **kwargs,
         )
         if (
             result.returncode
             or logging.getLogger().getEffectiveLevel() <= logging.INFO
+            or result.stderr
         ):
             # The build failed, so output the results to stderr.
-            print(f"cmd: {result.cmdstr}")
-            print(result.stdout, file=sys.stderr)
+            print(f"cmd: {result.cmdstr}", file=sys.stderr)
+            print(result.stderr, file=sys.stderr)
+
+            # Note that stdout and stderr are separated here, so warnings
+            # associated with a file will appear separately from any output
+            # from the build system
+            if logging.getLogger().getEffectiveLevel() <= logging.INFO:
+                print(result.stdout)
             if result.returncode:
                 sys.exit(result.returncode)
 
