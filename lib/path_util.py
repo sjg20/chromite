@@ -180,8 +180,6 @@ class ChrootPathResolver(object):
         Raises:
           ValueError: If |path| is not reachable from the chroot.
         """
-        new_path = None
-
         # Preliminary: compute the actual source and chroot paths to use. These are
         # generally the precomputed values, unless we're inferring the source root
         # from the path itself.
@@ -196,29 +194,28 @@ class ChrootPathResolver(object):
             chroot_path = self._GetSourcePathChroot(source_path)
             chroot_link = self._ReadChrootLink(chroot_path)
 
-        # First, check if the path happens to be in the chroot already.
-        if chroot_path is not None:
-            new_path = self._TranslatePath(path, chroot_path, "/")
+        # NB: This mirrors self._chroot_to_host_roots, with tweaks due to
+        # per-|path| dynamic handling of |self._source_from_path_repo|. If you
+        # update one, you might need to update both.
+        host_to_chroot_roots = (
+            # Check if the path happens to be in the chroot already.
+            (chroot_path, "/"),
             # Or in the symlinked dir.
-            if new_path is None and chroot_link is not None:
-                new_path = self._TranslatePath(path, chroot_link, "/")
+            (chroot_link, "/"),
+            # Check the cache directory.
+            (self._GetCachePath(), constants.CHROOT_CACHE_ROOT),
+            # Check the current SDK checkout tree.
+            (source_path, constants.CHROOT_SOURCE_ROOT),
+        )
 
-        # Second, check the cache directory.
-        if new_path is None:
-            new_path = self._TranslatePath(
-                path, self._GetCachePath(), constants.CHROOT_CACHE_ROOT
-            )
+        for src_root, dst_root in host_to_chroot_roots:
+            if src_root is None:
+                continue
+            new_path = self._TranslatePath(path, src_root, dst_root)
+            if new_path is not None:
+                return new_path
 
-        # Finally, check the current SDK checkout tree.
-        if new_path is None and source_path is not None:
-            new_path = self._TranslatePath(
-                path, source_path, constants.CHROOT_SOURCE_ROOT
-            )
-
-        if new_path is None:
-            raise ValueError("Path is not reachable from the chroot")
-
-        return new_path
+        raise ValueError("Path is not reachable from the chroot")
 
     def _GetHostPath(self, path):
         """Translates a fully-expanded chroot |path| into a host equivalent.
