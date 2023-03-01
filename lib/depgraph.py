@@ -526,7 +526,6 @@ class DepGraphGenerator(object):
 
             all_dep_types = ignored_dep_types | needed_dep_types
             for pkg in packages:
-
                 # Create an entry for the package
                 action = packages[pkg]["action"]
                 default_pkg = {

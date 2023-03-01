@@ -1339,7 +1339,6 @@ class PrepareRemotePatchesTest(cros_test_lib.TestCase):
         tracking_branch="main",
         internal=False,
     ):
-
         l = [
             project,
             original_branch,

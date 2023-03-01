@@ -97,7 +97,6 @@ def CreateValidationFiles(validationdir, crxdir, identifier):
 
     # Discover all extensions to be validated (but not JSON files).
     for directory, _, filenames in os.walk(os.path.join(crxdir, "extensions")):
-
         # Make directory relative to output dir by removing crxdir and /.
         for filename in filenames:
             verified_files.append(

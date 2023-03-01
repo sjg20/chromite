@@ -607,6 +607,7 @@ def _CreateNewArtifact(tag, base, name, *fixed_args, **fixed_kwargs):
     Returns:
       A data wrapper that describes an artifact's implementation.
     """
+
     # pylint: disable=bad-option-value,super-on-old-class
     class NewArtifact(base):
         """A data wrapper that describes an artifact's implementation."""

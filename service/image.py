@@ -584,7 +584,7 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
         exist.
     """
     ret = []
-    for (dlc_build_dir, dlc_dir) in (
+    for dlc_build_dir, dlc_dir in (
         (dlc_lib.DLC_BUILD_DIR, dlc_lib.DLC_DIR),
         (dlc_lib.DLC_BUILD_DIR_SCALED, dlc_lib.DLC_DIR_SCALED),
     ):

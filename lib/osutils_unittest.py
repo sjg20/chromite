@@ -518,6 +518,7 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
 
     def testChown(self):
         """Test chown."""
+
         # Helpers to get the user and group name of the given path's owner.
         def User(path):
             return pwd.getpwuid(os.stat(path).st_uid).pw_name

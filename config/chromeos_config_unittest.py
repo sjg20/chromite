@@ -191,6 +191,7 @@ class FindConfigsForBoardTest(cros_test_lib.TestCase):
 
     def testOneFullConfigPerBoard(self):
         """There is at most one 'full' config for a board."""
+
         # Verifies the number of external 'full' and internal 'release'
         # build per board.  This is to ensure that we fail any new configs that
         # wrongly have names like *-bla-release or *-bla-full. This case can also
@@ -928,7 +929,6 @@ class CBuildBotTest(ChromeosConfigTestBase):
     def testPushImagePaygenDependancies(self):
         """Paygen requires PushImage."""
         for build_name, config in self.site_config.items():
-
             # paygen can't complete without push_image, except for payloads
             # where --channel arguments meet the requirements.
             if config["paygen"]:
@@ -941,7 +941,6 @@ class CBuildBotTest(ChromeosConfigTestBase):
     def testPaygenTestDependancies(self):
         """paygen testing requires upload_hw_test_artifacts."""
         for build_name, config in self.site_config.items():
-
             # This requirement doesn't apply to payloads(-tryjob)
             # builds. Payloads(-tryjob) are using artifacts from a previous build.
             if build_name.endswith("-payloads") or build_name.endswith(

@@ -114,7 +114,6 @@ def ParallelEmergeArgParser():
 
 
 def main(argv):
-
     parser = ParallelEmergeArgParser()
     parsed_args, emerge_args = parser.parse_known_args(argv)
     parsed_args = vars(parsed_args)

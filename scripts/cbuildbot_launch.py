@@ -587,7 +587,6 @@ def _main(options, argv):
     with metrics.Presence(METRIC_ACTIVE), metrics.SuccessCounter(
         METRIC_COMPLETED
     ) as s_fields:
-
         # Preliminary set, mostly command line parsing.
         with metrics.SuccessCounter(METRIC_INVOKED):
             if options.enable_buildbot_tags:

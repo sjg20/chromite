@@ -399,7 +399,6 @@ class TarballCache(RemoteCache):
         with osutils.TempDir(
             prefix="tarball-cache", base_dir=self.staging_dir
         ) as tempdir:
-
             o = urllib.parse.urlsplit(tarball_path)
             if o.scheme == "file":
                 tarball_path = o.path

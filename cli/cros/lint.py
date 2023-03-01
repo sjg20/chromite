@@ -1066,7 +1066,7 @@ class CommentChecker(pylint.checkers.BaseTokenChecker):
 
     def process_tokens(self, tokens):
         """Process tokens and look for comments."""
-        for (tok_type, token, (start_row, _), _, _) in tokens:
+        for tok_type, token, (start_row, _), _, _ in tokens:
             if tok_type == tokenize.COMMENT:
                 self._visit_comment(start_row, token)
 

@@ -103,7 +103,6 @@ class HWTestStage(
         lab_board_name=None,
         **kwargs,
     ):
-
         if suffix is None:
             suffix = ""
 

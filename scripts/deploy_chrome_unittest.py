@@ -314,6 +314,7 @@ class TestDisableRootfsVerification(DeployTest):
 
     def testDisableRootfsVerificationFailure(self):
         """Test failure to disable rootfs verification."""
+
         # pylint: disable=unused-argument
         def RaiseRunCommandError(timeout_sec=None):
             raise cros_build_lib.RunCommandError("Mock RunCommandError")
@@ -706,6 +707,7 @@ class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
 
     def testRetrySuccess(self):
         """Ensure that a transient exception still results in success."""
+
         # Raises a RunCommandError on its first invocation, but passes on subsequent
         # calls.
         def SideEffect(*args, **kwargs):

@@ -32,7 +32,6 @@ class xBuddyTest(cros_test_lib.TestCase):
     """Regression tests for xbuddy."""
 
     def setUp(self):
-
         self.static_image_dir = tempfile.mkdtemp("xbuddy_unittest_static")
 
         self.mock_xb = xbuddy.XBuddy(True, static_dir=self.static_image_dir)

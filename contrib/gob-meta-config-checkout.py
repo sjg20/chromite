@@ -226,7 +226,7 @@ def main(argv):
     with multiprocessing.Pool(opts.jobs) as pool:
         finished = 0
         num_repos = len(repos)
-        for (repo, output) in pool.imap_unordered(capture, repos):
+        for repo, output in pool.imap_unordered(capture, repos):
             finished += 1
             print(
                 f"\r[{finished}/{num_repos}] {repo}{CSI_ERASE_LINE_AFTER}",

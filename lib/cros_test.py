@@ -333,6 +333,7 @@ class CrOSTest(object):
                 |copy_paths| are copied to.
             copy_paths: A list of chrome_utils.Path of files to be copied.
         """
+
         # The rsync connection can occasionally crash during the transfer, so
         # retry in the hope that it's transient.
         @retry_util.WithRetry(max_retry=3, sleep=1, backoff_factor=2)

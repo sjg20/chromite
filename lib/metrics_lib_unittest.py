@@ -25,6 +25,7 @@ class MetricsTest(cros_test_lib.TestCase):
             mock_time.side_effect = [128000, 256000, 512300]
 
             events = []
+
             # Create a fake usage site of the metrics.
             @metrics_lib.collect_metrics
             def measure_things():

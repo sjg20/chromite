@@ -44,6 +44,7 @@ class SimpleBuilderTest(cros_test_lib.MockTempDirTestCase):
         ]
 
         self.buildstore = FakeBuildStore()
+
         # Simple new function that redirects RunStage to record all stages to be
         # run rather than mock them completely. These can be used in a test to
         # assert something has been called.

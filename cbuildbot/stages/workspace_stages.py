@@ -607,7 +607,6 @@ class WorkspaceBuildImageStage(
     category = constants.PRODUCT_OS_STAGE
 
     def PerformStage(self):
-
         # Collect build_image arguments.
         version = self.GetWorkspaceReleaseTag()
         rootfs_verification = self._run.config.rootfs_verification

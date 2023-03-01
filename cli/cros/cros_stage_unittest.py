@@ -34,7 +34,7 @@ class GSURLRegexHelperTest(cros_test_lib.TestCase):
                 "R42-6744.0.0-b77",
             ),
         ]
-        for (gsurl, board, build) in gsurls:
+        for gsurl, board, build in gsurls:
             match = cros_stage.GSURLRegexHelper(gsurl)
             self.assertNotEqual(match, None)
             self.assertEqual(match.group("board"), board)

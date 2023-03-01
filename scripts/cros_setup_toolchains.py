@@ -1003,7 +1003,6 @@ def _GetFilesForTarget(target, root="/"):
 
     # Find all the files owned by the packages for this target.
     for pkg in GetTargetPackages(target):
-
         # Skip Go compiler from redistributable packages.
         # The "go" executable has GOROOT=/usr/lib/go/${CTARGET} hardcoded
         # into it. Due to this, the toolchain cannot be unpacked anywhere

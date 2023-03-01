@@ -58,6 +58,7 @@ TEST_CASES = (
     ),
 )
 
+
 # Use a separate variable to avoid pytest log spam.
 @pytest.mark.parametrize("data,exp", TEST_CASES)
 def test_check_format(data, exp):

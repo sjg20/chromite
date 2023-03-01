@@ -272,7 +272,6 @@ class RunThroughTest(
     def SetupCommandMock(
         self, many_boards=False, extra_args=None, default_cache_dir=False
     ):
-
         cmd_args = ["--chrome-src", self.chrome_src_dir, "true"]
         if many_boards:
             cmd_args += [

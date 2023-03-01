@@ -19,6 +19,7 @@ BLKPG_ADD_PARTITION = 1
 BLKPG_DEL_PARTITION = 2
 BLKPG_RESIZE_PARTITION = 3
 
+
 # struct blkpg_partition {
 #     long long start;     /* starting offset in bytes */
 #     long long length;    /* length in bytes */

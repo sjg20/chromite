@@ -171,6 +171,7 @@ def FatalTimeout(max_run_time, display_message=None):
 
 def TimeoutDecorator(max_time):
     """Decorator used to ensure a func is interrupted if it's running too long."""
+
     # Save off the built-in versions of time.time, signal.signal, and
     # signal.alarm, in case they get mocked out later. We want to ensure that
     # tests don't accidentally mock out the functions used by Timeout.
@@ -310,6 +311,7 @@ def WaitForSuccess(
     is_main_thread = isinstance(
         threading.current_thread(), threading._MainThread
     )
+
     # pylint: enable=protected-access
     def retry():
         while True:

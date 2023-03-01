@@ -267,7 +267,7 @@ class BuildLinter:
         new_lines = self._get_added_lines(repo_paths_dict)
         for finding in findings:
             for loc in finding.locations:
-                for (addition_start, addition_end) in new_lines.get(
+                for addition_start, addition_end in new_lines.get(
                     loc.filepath, []
                 ):
                     if addition_start <= loc.line_start < addition_end:

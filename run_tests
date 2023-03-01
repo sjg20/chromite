@@ -9,6 +9,7 @@ import os
 import sys
 
 
-sys.argv[0] = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                           'scripts', 'run_tests')
+sys.argv[0] = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "scripts", "run_tests"
+)
 os.execv(sys.argv[0], sys.argv)

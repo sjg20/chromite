@@ -59,9 +59,7 @@ def getXMLGZFiles(test_name, test_folder):
     files = []
     for xml_file in xml_files:
         xml_file_gz = "%s.gz" % xml_file
-        with open(xml_file, "r") as f_in, (
-            gzip.open(xml_file_gz, "w")
-        ) as f_out:
+        with open(xml_file, "r") as f_in, gzip.open(xml_file_gz, "w") as f_out:
             shutil.copyfileobj(f_in, f_out)
         files.append(xml_file_gz)
     return files

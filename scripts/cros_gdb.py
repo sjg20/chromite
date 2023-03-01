@@ -222,7 +222,6 @@ To install the debug symbols for all available packages, run:
             self.cross_gdb = self.SimpleChromeGdb()
 
         if self.remote:
-
             # If given remote process name, find pid & inf_cmd on remote device.
             if self.remote_process_name or self.pid:
                 self._FindRemoteProcess(device)
@@ -535,7 +534,6 @@ To install the debug symbols for all available packages, run:
             connect_settings=self.ssh_settings,
             ping=self.ping,
         ) as device:
-
             self.VerifyAndFinishInitialization(device)
             gdb_cmd = self.cross_gdb
 
@@ -639,7 +637,6 @@ def FindInferior(arg_list):
 
 
 def main(argv):
-
     parser = commandline.ArgumentParser(description=__doc__)
 
     parser.add_argument("--board", default=None, help="board to debug for")

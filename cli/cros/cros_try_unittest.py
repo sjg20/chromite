@@ -49,7 +49,7 @@ class TryCommandTest(cros_test_lib.RunCommandTestCase):
     def testDoubleDashes(self):
         """Unit tests for _ModifyFlagsToDoubleDashes."""
         # pylint: disable=protected-access
-        for (in_str, expected_out) in (
+        for in_str, expected_out in (
             ("-flag", "--flag"),
             ("\n-flag", "\n--flag"),
             ("--flag", "--flag"),

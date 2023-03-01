@@ -387,7 +387,6 @@ class CleanLlvmFileNamesTest(cros_test_lib.TempDirTestCase):
         """Verify thrown exception on invalid path mapping entry"""
 
         with self.assertRaises(Exception) as context:
-
             path_mapping_json = {"version": 1, "mapping": [{}]}
             path = os.path.join(self.tempdir, "src_to_build_dest_map.json")
 

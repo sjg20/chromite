@@ -16,6 +16,7 @@ from chromite.lib import metrics
 
 BUILD_START_TIMEOUT_MIN = 60
 
+
 # TODO(nxia): Rename this module to slave_status, since this module is for
 # a master build which has slave builds and there is builder_status_lib for
 # managing the status of an indivudual build.

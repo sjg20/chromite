@@ -532,7 +532,10 @@ class ChromeosReleases(object):
         values["uri"] = image_uri
 
         # Create an Image object using the values we parsed out.
-        return {OSType.CROS: Image, OSType.MINIOS: MiniOSImage,}[
+        return {
+            OSType.CROS: Image,
+            OSType.MINIOS: MiniOSImage,
+        }[
             os_type
         ](values)
 

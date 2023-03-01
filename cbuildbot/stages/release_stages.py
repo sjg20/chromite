@@ -611,7 +611,7 @@ class PaygenBuildStage(generic_stages.BoardSpecificBuilderStage):
                             config_lib.GetHWTestEnv(self._run.config),
                         ).Run()
 
-            except (paygen_build_lib.BuildLocked) as e:
+            except paygen_build_lib.BuildLocked as e:
                 # These errors are normal if it's possible that another builder is
                 # processing the same build. (perhaps by a trybot generating payloads on
                 # request).

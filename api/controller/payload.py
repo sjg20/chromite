@@ -37,6 +37,7 @@ _VALID_MINIOS_PAIRS = (
 #  document why it cannot be used and preferably move outside of the repo.
 _DEFAULT_PAYGEN_CACHE_DIR = ".paygen_cache"
 
+
 # We have more fields we might validate however, they're either
 # 'oneof' or allowed to be the empty value by design. If @validate
 # gets more complex in the future we can add more here.

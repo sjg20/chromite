@@ -1669,6 +1669,7 @@ class PopenMock(partial_mock.PartialCmdMock):
         script = os.path.join(self.tempdir, "mock_cmd.sh")
         stdout = os.path.join(self.tempdir, "output")
         stderr = os.path.join(self.tempdir, "error")
+
         # This encoding handling might appear a bit wonky, but it's OK, I promise.
         # The purpose of this mock is to stuff data into files so that we can run a
         # fake script in place of the real command.  So any cros_build_lib.run()

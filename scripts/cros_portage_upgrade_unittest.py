@@ -1092,7 +1092,7 @@ class CPVUtilTest(cros_test_lib.TestCase):
             ("foo/bar-1", "foo/bar-1-r0"),
             (None, None),
         ]
-        for (cpv1, cpv2) in equal:
+        for cpv1, cpv2 in equal:
             self.assertEqual(0, self._TestCmpCpv(cpv1, cpv2))
 
         lessthan = [
@@ -1103,13 +1103,13 @@ class CPVUtilTest(cros_test_lib.TestCase):
             ("foo/bar-1.2.3", "foo/bar-1.2.4"),
             ("foo/bar-5a", "foo/bar-5b"),
         ]
-        for (cpv1, cpv2) in lessthan:
+        for cpv1, cpv2 in lessthan:
             # pylint: disable=bad-option-value,arguments-out-of-order
             self.assertTrue(self._TestCmpCpv(cpv1, cpv2) < 0)
             self.assertTrue(self._TestCmpCpv(cpv2, cpv1) > 0)
 
         not_comparable = [("foo/bar-1", "bar/foo-1")]
-        for (cpv1, cpv2) in not_comparable:
+        for cpv1, cpv2 in not_comparable:
             self.assertEqual(None, self._TestCmpCpv(cpv1, cpv2))
 
     def _TestGetCatPkgFromCpv(self, cpv):
@@ -1126,7 +1126,7 @@ class CPVUtilTest(cros_test_lib.TestCase):
             ("bar", None),
         ]
 
-        for (cpv, catpn) in data:
+        for cpv, catpn in data:
             result = self._TestGetCatPkgFromCpv(cpv)
             self.assertEqual(catpn, result)
 
@@ -1145,7 +1145,7 @@ class CPVUtilTest(cros_test_lib.TestCase):
             ("bar", None),
         ]
 
-        for (cpv, verrev) in data:
+        for cpv, verrev in data:
             result = self._TestGetVerRevFromCpv(cpv)
             self.assertEqual(verrev, result)
 
@@ -1162,7 +1162,7 @@ class CPVUtilTest(cros_test_lib.TestCase):
             ("foo/bar-3.222-r0", "foo/bar/bar-3.222-r0.ebuild"),
         ]
 
-        for (cpv, verrev) in data:
+        for cpv, verrev in data:
             result = self._TestGetEbuildPathFromCpv(cpv)
             self.assertEqual(verrev, result)
 

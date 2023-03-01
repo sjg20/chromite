@@ -84,7 +84,7 @@ def GetScheduledBuildDict(scheduled_slave_list):
         return {}
 
     buildbucket_info_dict = {}
-    for (build_config, buildbucket_id, created_ts) in scheduled_slave_list:
+    for build_config, buildbucket_id, created_ts in scheduled_slave_list:
         if build_config not in buildbucket_info_dict:
             buildbucket_info_dict[build_config] = BuildbucketInfo(
                 buildbucket_id, 0, created_ts, None, None

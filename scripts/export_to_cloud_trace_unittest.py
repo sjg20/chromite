@@ -18,6 +18,7 @@ _SPAN = """{
     "endTime": "2017-08-23T23:29:46.484326Z"
 }"""
 
+
 # pylint: disable=protected-access
 class ExportToCloudTraceTest(cros_test_lib.MockTempDirTestCase):
     """Test that various functions in export_to_cloud_trace work."""

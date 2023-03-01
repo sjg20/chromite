@@ -942,7 +942,7 @@ class SymlinkTest(image_test_lib.ImageTestCase):
                 if not self._SymlinkTargetAllowed(source, target):
                     failures.append((source, target))
 
-        for (source, target) in failures:
+        for source, target in failures:
             logging.error("Insecure symlink: %s -> %s", source, target)
         self.assertEqual(0, len(failures))
 

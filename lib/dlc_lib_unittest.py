@@ -591,7 +591,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
     def testInstallDlcImagesAll(self):
         """Tests InstallDlcImages to make sure all types of DLCs are copied correctly"""
         sysroot = os.path.join(self.tempdir, "sysroot")
-        for (p, _id) in (
+        for p, _id in (
             (dlc_lib.DLC_BUILD_DIR, _ID),
             (dlc_lib.DLC_BUILD_DIR_SCALED, _ID_FOO),
         ):

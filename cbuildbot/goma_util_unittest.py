@@ -22,7 +22,6 @@ class TestGomaLogUploader(cros_test_lib.MockTempDirTestCase):
     """Tests for upload_goma_info."""
 
     def setUp(self):
-
         # cros_build_lib.CreateTarball() function is unit tested. Safe to patch.
         # pylint: disable=unused-argument
         def _createTarball(tarball_path, *args, **kwargs):

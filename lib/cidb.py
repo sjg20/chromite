@@ -348,7 +348,7 @@ class SchemaVersionedMySQLConnection(object):
         # Execute the migration scripts in order, asserting that each one
         # updates the schema version to the expected number. If maxVersion
         # is specified stop early.
-        for (number, script) in migrations:
+        for number, script in migrations:
             if maxVersion is not None and number > maxVersion:
                 break
 

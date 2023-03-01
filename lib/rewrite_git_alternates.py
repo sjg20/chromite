@@ -85,7 +85,6 @@ def _UpdateAlternatesDir(alternates_root, reference_maps, projects):
 
 def _UpdateGitAlternates(proj_root, projects):
     for project in projects:
-
         alt_path = os.path.join(
             proj_root, project, "objects", "info", "alternates"
         )

@@ -27,6 +27,7 @@ from chromite.lib import retry_util
 
 # pylint: disable=protected-access
 
+
 # Used to ensure that all build_number values we use are unique.
 def _random():
     return random.randint(1, 1000000000)

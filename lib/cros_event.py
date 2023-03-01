@@ -27,6 +27,7 @@ EVENT_FAIL_MSG = "failure_message"
 
 EVENT_KIND_ROOT = "Root"
 
+
 # Helper functions
 def EventIdGenerator():
     """Returns multiprocess safe iterator that  generates locally unique id"""

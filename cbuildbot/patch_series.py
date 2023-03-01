@@ -206,7 +206,6 @@ class _ManifestShim(object):
     """
 
     def __init__(self, path, tracking_branch, remote="origin"):
-
         tracking_branch = "refs/remotes/%s/%s" % (
             remote,
             git.StripRefs(tracking_branch),
@@ -280,6 +279,7 @@ class PatchSeries(object):
         This function automatically initializes the manifest, and allows callers to
         override the manifest if needed.
         """
+
         # pylint: disable=no-self-argument,protected-access,not-callable
         def f(self, *args, **kwargs):
             manifest = kwargs.pop("manifest", None)

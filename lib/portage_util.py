@@ -975,7 +975,6 @@ class EBuild(object):
         for local, project, srcpath, subdir, subtree in zip(
             localnames, projects, srcpaths, subdirs, subtrees
         ):
-
             if srcpath:
                 subdir_path = os.path.join(srcbase, srcpath)
                 if not os.path.isdir(subdir_path):

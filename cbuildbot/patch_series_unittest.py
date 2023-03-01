@@ -191,6 +191,7 @@ class TestUploadedLocalPatch(PatchSeriesTestCase):
 
     def testFetchChangesWithChangeNotInManifest(self):
         """test FetchChanges with ChangeNotInManifest."""
+
         # pylint: disable=unused-argument
         def raiseException(change, **kwargs):
             raise cros_patch.ChangeNotInManifest(change)

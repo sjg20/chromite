@@ -790,7 +790,7 @@ class RepoRepository(object):
 
         current = self.ExportManifest()
         with open(other_manifest, "r", encoding="utf-8") as manifest2_fh:
-            for (line1, line2) in zip(current.splitlines(), manifest2_fh):
+            for line1, line2 in zip(current.splitlines(), manifest2_fh):
                 line1 = line1.strip()
                 line2 = line2.strip()
                 if ignore_pattern.search(line1):

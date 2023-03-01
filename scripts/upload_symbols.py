@@ -263,7 +263,6 @@ def AdjustSymbolFileSize(symbol, tempdir, file_limit):
         with cros_build_lib.UnbufferedNamedTemporaryFile(
             prefix="upload_symbols", dir=tempdir, delete=False
         ) as temp_sym_file:
-
             with open(symbol.file_name, "rb") as fp:
                 temp_sym_file.writelines(
                     x for x in fp.readlines() if not x.startswith(b"STACK CFI")

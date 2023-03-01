@@ -124,7 +124,6 @@ def _GenerateZeroCoverageLLVMForFile(
     line_index = 0
 
     with open(file_path, "r", encoding="utf-8", errors="ignore") as file:
-
         lines = file.readlines()
         if not lines:
             return None
@@ -520,7 +519,6 @@ def GenerateZeroCoverageLlvm(
                 ) and not _ShouldExclude(
                     relative_file_path, exclude_files, exclude_files_suffixes
                 ):
-
                     zero_cov = _GenerateZeroCoverageLLVMForFile(
                         full_file_path, src_prefix_path, exclude_line_prefixes
                     )

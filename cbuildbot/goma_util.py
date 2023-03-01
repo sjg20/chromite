@@ -25,6 +25,7 @@ _GOMA_NINJA_LOG_URL_TEMPLATE = (
     "https://chromium-build-stats.appspot.com/ninja_log/%s/%s"
 )
 
+
 # Note: Public for testing purpose. In real use, please think about using
 # Goma.UploadLogs() instead.
 class GomaLogUploader(object):

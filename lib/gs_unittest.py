@@ -1684,7 +1684,6 @@ class UnmockedStatTest(cros_test_lib.TempDirTestCase):
         """Test ability to get the generation of a file."""
         ctx = gs.GSContext()
         with gs.TemporaryURL("testStat") as url:
-
             # The URL doesn't exist. Test Stat for this case.
             self.assertRaises(gs.GSNoSuchKey, ctx.Stat, url)
 

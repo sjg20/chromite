@@ -508,6 +508,7 @@ class _BackgroundTask(multiprocessing.Process):
 
     def _Run(self):
         """Internal method for running the list of steps."""
+
         # Register a handler for a signal that is rarely used.
         def trigger_bt(_sig_num, frame):
             logging.error(

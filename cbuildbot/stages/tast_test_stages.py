@@ -76,6 +76,7 @@ def _CopyResultsDir(src, dest):
     Raises:
       OSError if dest already exists or the copy fails.
     """
+
     # Skip symlinks since gsutil chokes on broken ones (and just duplicates
     # symlinked files, in any case).
     def GetSymlinks(dirname, files):

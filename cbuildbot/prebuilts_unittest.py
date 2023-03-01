@@ -17,6 +17,7 @@ from chromite.lib import osutils
 
 DEFAULT_CHROME_BRANCH = "27"
 
+
 # pylint: disable=protected-access
 class PrebuiltTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test general cbuildbot command methods."""

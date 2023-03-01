@@ -33,6 +33,7 @@ AUDITED_SHELL_COMMAND_REGEX = re.compile(
 SHELL_TOKEN_SPLIT_REGEX = re.compile(r"(?:\\\n|\s)+", re.MULTILINE)
 IGNORE_LINT_REGEX = re.compile(r"#\s+croslint:\s+disable")
 
+
 # TODO(python3.9): Change to functools.cache.
 @functools.lru_cache(maxsize=None)
 def GetIgnoreLookup() -> Dict[str, List[str]]:

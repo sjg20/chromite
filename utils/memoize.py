@@ -19,6 +19,7 @@ def MemoizedSingleCall(functor):
     Note that this cache is per-process, so sibling and parent processes won't
     notice updates to the cache.
     """
+
     # pylint: disable=protected-access
     @functools.wraps(functor)
     def wrapper(obj):

@@ -164,6 +164,7 @@ def blue(s):
 
 def _run_parallel_tasks(task, *args):
     """Small wrapper around BackgroundTaskRunner to enforce job count."""
+
     # When we run in parallel, we can hit the max requests limit.
     def check_exc(e):
         if not isinstance(e, gob_util.GOBError):
@@ -621,6 +622,7 @@ class _ActionLabeler(UserAction):
     @classmethod
     def __call__(cls, opts):
         """Implement the action."""
+
         # Convert user-friendly command line option into a gerrit parameter.
         def task(arg):
             helper, cl = GetGerrit(opts, arg)
@@ -1039,6 +1041,7 @@ class ActionCherryPick(UserAction):
     @staticmethod
     def __call__(opts):
         """Implement the action."""
+
         # Process branches in parallel, but CLs in serial in case of CL stacks.
         def task(branch):
             for arg in opts.cls:
@@ -1457,7 +1460,7 @@ Actions:
 
 def GetParser(
     parser: commandline.ArgumentParser = None,
-) -> (commandline.ArgumentParser):
+) -> commandline.ArgumentParser:
     """Returns the full parser to use for this module."""
     if parser is None:
         parser = GetBaseParser()

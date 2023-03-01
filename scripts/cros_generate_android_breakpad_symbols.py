@@ -185,7 +185,6 @@ def GenerateBreakpadSymbols(breakpad_dir, symbols_dir):
         breakpad_dir=breakpad_dir,
         num_errors=num_errors,
     ) as queue:
-
         for root, _, files in os.walk(symbols_dir):
             for f in files:
                 queue.put([os.path.join(root, f)])

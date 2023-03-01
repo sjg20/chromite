@@ -60,7 +60,7 @@ class TableTest(cros_test_lib.TempDirTestCase):
         )
 
     def assertRowListsEqual(self, rows1, rows2):
-        for (row1, row2) in zip(rows1, rows2):
+        for row1, row2 in zip(rows1, rows2):
             self.assertRowsEqual(row1, row2)
 
     def setUp(self):

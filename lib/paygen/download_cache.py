@@ -196,7 +196,6 @@ class DownloadCache(object):
         try:
             # Prevent other changes while we purge the cache.
             with self._PurgeLock(shared=False, blocking=False):
-
                 # Purge files based on age, if specified.
                 if max_age is not None:
                     now = time.time()
@@ -322,7 +321,6 @@ class DownloadCache(object):
                 with self._CacheFileLock(
                     cache_file, shared=True, blocking=True
                 ):
-
                     if os.path.exists(cache_file):
                         # Touch the timestamp on cache file to help purging logic.
                         osutils.Touch(cache_file)
