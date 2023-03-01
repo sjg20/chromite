@@ -557,16 +557,19 @@ def RunBuild(options, base, target, queue):
             base + [target],
             input="",
             stdout=True,
-            stderr=subprocess.STDOUT,
+            stderr=True,
             **kwargs,
         )
         if (
             result.returncode
             or logging.getLogger().getEffectiveLevel() <= logging.INFO
+            or result.stderr
         ):
             # The build failed, so output the results to stderr.
-            print(f"cmd: {result.cmdstr}")
-            print(result.stdout, file=sys.stderr)
+            print(f"cmd: {result.cmdstr}", file=sys.stderr)
+            print(result.stderr, file=sys.stderr)
+            if logging.getLogger().getEffectiveLevel() <= logging.INFO:
+                print(result.stdout)
             if result.returncode:
                 sys.exit(result.returncode)
 
