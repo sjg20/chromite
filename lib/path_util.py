@@ -38,6 +38,7 @@ class ChrootPathResolver(object):
         path's repo parent during inbound translation; overrides |source_path|.
       chroot_path: Full path of the chroot to use. If chroot_path is specified,
         source_path cannot be specified.
+      out_path: Full path of the output directory to use.
     """
 
     # When chroot_path is specified, it is assumed that any reference to
@@ -54,11 +55,19 @@ class ChrootPathResolver(object):
     # ToChroot('/custom/checkout/chroot/this/file') -> /this/file
 
     def __init__(
-        self, source_path=None, source_from_path_repo=True, chroot_path=None
+        self,
+        source_path=None,
+        source_from_path_repo=True,
+        chroot_path=None,
+        out_path=None,
     ):
         if chroot_path and source_path:
             raise AssertionError(
                 "Either source_path or chroot_path must be specified"
+            )
+        if out_path and source_path:
+            raise AssertionError(
+                "Either source_path or out_path must be specified"
             )
         self._inside_chroot = cros_build_lib.IsInsideChroot()
         self._source_from_path_repo = source_from_path_repo
@@ -78,9 +87,13 @@ class ChrootPathResolver(object):
             self._chroot_path = None
             self._chroot_link = None
             self._chroot_to_host_roots = None
+            self._out_path = None
         else:
             self._chroot_path = self._GetSourcePathChroot(
                 self._source_path, self._custom_chroot_path
+            )
+            self._out_path = (
+                constants.DEFAULT_OUT_PATH if out_path is None else out_path
             )
             # The chroot link allows us to resolve paths when the chroot is symlinked
             # to the default location. This is generally not used, but it is useful
@@ -360,13 +373,14 @@ def GetCacheDir():
     return os.environ.get(constants.SHARED_CACHE_ENVVAR, FindCacheDir())
 
 
-def ToChrootPath(path, source_path=None, chroot_path=None):
+def ToChrootPath(path, source_path=None, chroot_path=None, out_path=None):
     """Resolves current environment |path| for use in the chroot.
 
     Args:
       path: string path to translate into chroot namespace.
       source_path: string path to root of source checkout with chroot in it.
       chroot_path: string name of the full chroot path to use.
+      out_path: Path name of the full out path to use.
 
     Returns:
       The same path converted to "inside chroot" namespace.
@@ -375,23 +389,24 @@ def ToChrootPath(path, source_path=None, chroot_path=None):
       ValueError: If the path references a location not available in the chroot.
     """
     return ChrootPathResolver(
-        source_path=source_path, chroot_path=chroot_path
+        source_path=source_path, chroot_path=chroot_path, out_path=out_path
     ).ToChroot(path)
 
 
-def FromChrootPath(path, source_path=None, chroot_path=None):
+def FromChrootPath(path, source_path=None, chroot_path=None, out_path=None):
     """Resolves chroot |path| for use in the current environment.
 
     Args:
       path: string path to translate out of chroot namespace.
       source_path: string path to root of source checkout with chroot in it.
       chroot_path: string name of the full chroot path to use
+      out_path: Path name of the full out path to use
 
     Returns:
       The same path converted to "outside chroot" namespace.
     """
     return ChrootPathResolver(
-        source_path=source_path, chroot_path=chroot_path
+        source_path=source_path, chroot_path=chroot_path, out_path=out_path
     ).FromChroot(path)
 
 

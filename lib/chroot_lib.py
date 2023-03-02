@@ -35,6 +35,7 @@ class Chroot(object):
     def __init__(
         self,
         path: Optional[Union[str, os.PathLike]] = None,
+        out_path: Optional[os.PathLike] = None,
         cache_dir: Optional[str] = None,
         chrome_root: Optional[str] = None,
         env: Optional[Dict[str, str]] = None,
@@ -45,6 +46,7 @@ class Chroot(object):
 
         Args:
             path: Path to the chroot.
+            out_path: Path to the out directory.
             cache_dir: Path to a directory that will be used for caching files.
             chrome_root: Root of the Chrome browser source checkout.
             env: Extra environment settings to use.
@@ -56,7 +58,9 @@ class Chroot(object):
         self._path = (
             str(path) if path else constants.DEFAULT_CHROOT_PATH
         ).rstrip("/")
+        self._out_path = out_path if out_path else constants.DEFAULT_OUT_PATH
         self._is_default_path = not bool(path)
+        self._is_default_out_path = not out_path
         self._env = env
         self.goma = goma
         self.remoteexec = remoteexec
@@ -84,6 +88,10 @@ class Chroot(object):
     def path(self) -> str:
         return self._path
 
+    @property
+    def out_path(self) -> os.PathLike:
+        return self._out_path
+
     def exists(self) -> bool:
         """Checks if the chroot exists."""
         return os.path.exists(self.path)
@@ -99,12 +107,16 @@ class Chroot(object):
 
     def chroot_path(self, path: str) -> str:
         """Turn an absolute path into a chroot relative path."""
-        return path_util.ToChrootPath(path=path, chroot_path=self._path)
+        return path_util.ToChrootPath(
+            path=path, chroot_path=self._path, out_path=self._out_path
+        )
 
     def full_path(self, *args: str) -> str:
         """Turn a fully expanded chrootpath into an host-absolute path."""
         path = os.path.join(os.path.sep, *args)
-        return path_util.FromChrootPath(path=path, chroot_path=self._path)
+        return path_util.FromChrootPath(
+            path=path, chroot_path=self._path, out_path=self._out_path
+        )
 
     def has_path(self, *args: str) -> bool:
         """Check if a chroot-relative path exists inside the chroot."""
@@ -131,6 +143,8 @@ class Chroot(object):
         # argument is valid, but it's nice for cleaning up commands in logs.
         if not self._is_default_path:
             args.extend(["--chroot", self.path])
+        if not self._is_default_out_path:
+            args.extend(["--out-dir", str(self.out_path)])
         if self.cache_dir:
             args.extend([f"--cache{sep}dir", self.cache_dir])
         if self.chrome_root:
