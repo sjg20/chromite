@@ -1119,9 +1119,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
-                    self.chroot.path,
+                    self.chroot.tmp,
                     (
-                        f"tmp/chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
+                        f"chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo"
                     ),
                 )
@@ -1145,9 +1145,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
-                    self.chroot.path,
+                    self.chroot.tmp,
                     (
-                        f"tmp/chromeos-chrome-arm-none-78-3876.0-{self.week_old_ts}-"
+                        f"chromeos-chrome-arm-none-78-3876.0-{self.week_old_ts}-"
                         "benchmark-78.0.3839.0-r1-redacted.afdo"
                     ),
                 )
@@ -1186,9 +1186,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj._GetEbuildInfo(toolchain_util.constants.CHROME_PN),
             {
                 "UNVETTED_AFDO_FILE": os.path.join(
-                    self.chroot.path,
+                    self.chroot.tmp,
                     (
-                        "tmp/chromeos-chrome-arm-arm32-78-3876.0-"
+                        "chromeos-chrome-arm-arm32-78-3876.0-"
                         f"{self.week_old_ts}-benchmark-78.0.3839.0-r1-redacted"
                         ".afdo"
                     ),
