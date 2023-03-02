@@ -90,7 +90,7 @@ class Chroot(object):
     @property
     def tmp(self) -> str:
         """Get the chroot's tmp dir."""
-        return os.path.join(self.path, "tmp")
+        return self.full_path("/tmp")
 
     def tempdir(self) -> osutils.TempDir:
         """Get a TempDir in the chroot's tmp dir."""
