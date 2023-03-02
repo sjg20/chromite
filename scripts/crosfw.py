@@ -300,30 +300,6 @@ def ParseCmdline(argv):
     return parser.parse_args(argv)
 
 
-def FindCompiler(gcc, cros_prefix):
-    """Look up the compiler for an architecture.
-
-    Args:
-      gcc: GCC architecture, either 'arm' or 'aarch64'
-      cros_prefix: Full Chromium OS toolchain prefix
-    """
-    if in_chroot:
-        # Use the Chromium OS toolchain.
-        prefix = cros_prefix
-    else:
-        prefix = glob.glob("/opt/linaro/gcc-linaro-%s-linux-*/bin/*gcc" % gcc)
-        if not prefix:
-            cros_build_lib.Die(
-                """Please install an %s toolchain for your machine.
-Install a Linaro toolchain from:
-https://launchpad.net/linaro-toolchain-binaries
-or see cros/commands/cros_chrome_sdk.py."""
-                % gcc
-            )
-        prefix = re.sub("gcc$", "", prefix[0])
-    return prefix
-
-
 def SetupBuild(options):
     """Set up parameters needed for the build.
 
@@ -398,9 +374,9 @@ def SetupBuild(options):
         if arch == "x86":
             compiler = "i686-cros-linux-gnu-"
         elif arch == "arm":
-            compiler = FindCompiler(arch, "armv7a-cros-linux-gnueabihf-")
+            compiler = "armv7a-cros-linux-gnueabihf-"
         elif arch == "aarch64":
-            compiler = FindCompiler(arch, "aarch64-cros-linux-gnu-")
+            compiler = "aarch64-cros-linux-gnu-"
     else:
         result = cros_build_lib.run(
             ["buildman", "-A", "--boards", options.board],
