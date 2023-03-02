@@ -114,7 +114,6 @@ arch = None
 board = None
 compiler = None
 default_board = None
-family = None
 in_chroot = True
 
 kwargs = {
@@ -129,7 +128,6 @@ outdir = ""
 # like 'SERVO_PORT{"peach_pit"} = 7777' in your ~/.crosfwrc
 SERVO_PORT = {}
 
-smdk = None
 src_root = os.path.join(constants.SOURCE_ROOT, "src")
 in_chroot = cros_build_lib.IsInsideChroot()
 
@@ -137,7 +135,6 @@ uboard = ""
 
 default_board = "peach_pit"
 use_ccache = False
-vendor = None
 
 # Special cases for the U-Boot board config, the SOCs and default device tree
 # since the naming is not always consistent.
@@ -354,7 +351,7 @@ def SetupBuild(options):
       Base flags to use for U-Boot, as a list.
     """
     # pylint: disable=global-statement
-    global arch, board, compiler, family, outdir, smdk, uboard, vendor
+    global arch, board, compiler, outdir, uboard
 
     logging.info("Building for %s", options.board)
 
@@ -379,7 +376,6 @@ def SetupBuild(options):
     logging.info("U-Boot board is %s", uboard)
 
     # Pull out some information from the U-Boot boards config file
-    family = None
     (PRE_KBUILD, PRE_KCONFIG, KCONFIG) = range(3)
     if os.path.exists("MAINTAINERS"):
         board_format = PRE_KBUILD
@@ -401,14 +397,7 @@ def SetupBuild(options):
                     continue
                 arch = fields[1]
                 fields += [None, None, None]
-                if board_format == PRE_KBUILD:
-                    smdk = fields[3]
-                    vendor = fields[4]
-                    family = fields[5]
-                elif board_format in (PRE_KCONFIG, KCONFIG):
-                    smdk = fields[5]
-                    vendor = fields[4]
-                    family = fields[3]
+                if board_format in (PRE_KCONFIG, KCONFIG):
                     target = fields[0]
     if not arch:
         cros_build_lib.Die(
