@@ -17,8 +17,8 @@ def test_missing_file():
 GOOD_DATA = (
     "v@e.x\n",
     # Shared owners includes.
-    f"include chromiumos/owners:{owners.SHARED_OWNERS_BRANCH}:/OWNERS.foo\n"
-    f"include chromeos/owners:{owners.SHARED_OWNERS_BRANCH}:/OWNERS.foo\n",
+    "include chromiumos/owners:v1:/OWNERS.foo\n"
+    "include chromeos/owners:v1:/OWNERS.foo\n",
 )
 
 
@@ -47,12 +47,12 @@ BAD_DATA = (
     "include chromiumos/owners:foo:/OWNERS.foo\n"
     "include chromeos/owners:foo:/OWNERS.foo\n"
     # Shared owners bad includes.
-    f"include chromiumos/owners:{owners.SHARED_OWNERS_BRANCH}:OWNERS.foo\n"
-    f"include chromeos/owners:{owners.SHARED_OWNERS_BRANCH}:OWNERS.foo\n"
-    f"include chromiumos/owners:{owners.SHARED_OWNERS_BRANCH}:/OWNERS\n"
-    f"include chromeos/owners:{owners.SHARED_OWNERS_BRANCH}:/OWNERS\n"
-    f"include chromiumos/owners:{owners.SHARED_OWNERS_BRANCH}:/foo/OWNERS\n"
-    f"include chromeos/owners:{owners.SHARED_OWNERS_BRANCH}:/foo/OWNERS\n",
+    "include chromiumos/owners:v1:OWNERS.foo\n"
+    "include chromeos/owners:v1:OWNERS.foo\n"
+    "include chromiumos/owners:v1:/OWNERS\n"
+    "include chromeos/owners:v1:/OWNERS\n"
+    "include chromiumos/owners:v1:/foo/OWNERS\n"
+    "include chromeos/owners:v1:/foo/OWNERS\n",
 )
 
 

@@ -15,11 +15,11 @@ from typing import Dict, Generator, List
 from chromite.lint.linters import whitespace
 
 
-DOC_RESOURCE_URL = (
+_DOC_RESOURCE_URL = (
     "https://dev.chromium.org/chromium-os/chromiumos-design-docs/"
     "boot-design/#runtime-resource-limits"
 )
-AUDITED_SHELL_COMMAND_REGEX = re.compile(
+_AUDITED_SHELL_COMMAND_REGEX = re.compile(
     # Match comment lines so they can be excluded.
     r"(?P<comment>^\s*#.*$)|"
     # Match common command delimiters.
@@ -30,8 +30,8 @@ AUDITED_SHELL_COMMAND_REGEX = re.compile(
     r"(?P<args>(?:\\\n|[^\n;])*)",
     re.MULTILINE,
 )
-SHELL_TOKEN_SPLIT_REGEX = re.compile(r"(?:\\\n|\s)+", re.MULTILINE)
-IGNORE_LINT_REGEX = re.compile(r"#\s+croslint:\s+disable")
+_SHELL_TOKEN_SPLIT_REGEX = re.compile(r"(?:\\\n|\s)+", re.MULTILINE)
+_IGNORE_LINT_REGEX = re.compile(r"#\s+croslint:\s+disable")
 
 
 # TODO(python3.9): Change to functools.cache.
@@ -53,7 +53,7 @@ def GetIgnoreLookup() -> Dict[str, List[str]]:
 
 def ExtractCommands(text: str) -> Generator[List[str], None, None]:
     """Finds and normalizes audited commands."""
-    for match in AUDITED_SHELL_COMMAND_REGEX.finditer(text, re.S):
+    for match in _AUDITED_SHELL_COMMAND_REGEX.finditer(text, re.S):
         # Skip comments.
         if match.group("comment"):
             continue
@@ -63,14 +63,14 @@ def ExtractCommands(text: str) -> Generator[List[str], None, None]:
         cmd_args = match.group("args")
 
         # Skip if 'croslint: disable' is set.
-        if IGNORE_LINT_REGEX.search(cmd_args):
+        if _IGNORE_LINT_REGEX.search(cmd_args):
             continue
 
         if cmd_prefix:
-            cmd = [SHELL_TOKEN_SPLIT_REGEX.sub(cmd_prefix, " ") + cmd_name]
+            cmd = [_SHELL_TOKEN_SPLIT_REGEX.sub(cmd_prefix, " ") + cmd_name]
         else:
             cmd = [cmd_name]
-        cmd.extend(x for x in SHELL_TOKEN_SPLIT_REGEX.split(cmd_args) if x)
+        cmd.extend(x for x in _SHELL_TOKEN_SPLIT_REGEX.split(cmd_args) if x)
         yield cmd
 
 
@@ -108,7 +108,7 @@ def CheckForRequiredLines(
             'Missing clauses from upstart script "%s": %s\nPlease see:\n%s',
             full_path,
             ", ".join(tokens_to_find),
-            DOC_RESOURCE_URL,
+            _DOC_RESOURCE_URL,
         )
         ret = False
     return ret

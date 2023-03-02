@@ -15,12 +15,12 @@ from chromite.lint.linters import whitespace
 
 # Cross-repository includes take the form:
 # include [server/path[:branch]:]/path/to/file
-INCLUDE_RE = re.compile(
+_INCLUDE_RE = re.compile(
     r"^include +((?P<repo>[^:]*):((?P<branch>[^:]*):)?)?(?P<path>[^\s]*)"
 )
 
 # Current version of our owners repo.
-SHARED_OWNERS_BRANCH = "v1"
+_SHARED_OWNERS_BRANCH = "v1"
 
 
 def lint_data(path: Union[str, os.PathLike], data: str) -> bool:
@@ -53,16 +53,16 @@ def lint_data(path: Union[str, os.PathLike], data: str) -> bool:
                 '%s:%i: no leading whitespace allowed: "%s"', path, i, line
             )
 
-        m = INCLUDE_RE.match(lstrip)
+        m = _INCLUDE_RE.match(lstrip)
         if m:
             if m.group("repo") in ("chromiumos/owners", "chromeos/owners"):
-                if m.group("branch") != SHARED_OWNERS_BRANCH:
+                if m.group("branch") != _SHARED_OWNERS_BRANCH:
                     ret = False
                     logging.error(
                         '%s:%i: shared owners must use branch "%s", not "%s"',
                         path,
                         i,
-                        SHARED_OWNERS_BRANCH,
+                        _SHARED_OWNERS_BRANCH,
                         m.group("branch"),
                     )
 
