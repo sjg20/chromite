@@ -162,7 +162,7 @@ class ChrootPathResolver(object):
             raise ValueError("No target root to translate path to")
         return os.path.join(
             dst_root, path[len(str(src_root)) :].lstrip(os.path.sep)
-        )
+        ).rstrip(os.path.sep)
 
     def _GetChrootPath(self, path):
         """Translates a fully-expanded host |path| into a chroot equivalent.

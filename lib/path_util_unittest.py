@@ -269,6 +269,12 @@ class TestPathResolver(cros_test_lib.MockTestCase):
                 resolver.ToChroot(os.path.join(self.chroot_path, "some/path")),
             )
 
+            # Case: the cache directory.
+            self.assertEqual(
+                constants.CHROOT_CACHE_ROOT,
+                resolver.ToChroot(path_util.GetCacheDir()),
+            )
+
             # Case: path inside the cache directory.
             self.assertEqual(
                 os.path.join(constants.CHROOT_CACHE_ROOT, "some/path"),
@@ -390,6 +396,12 @@ class TestPathResolver(cros_test_lib.MockTestCase):
                     "some/path",
                 )
             ),
+        )
+
+        # Case: the cache directory.
+        self.assertEqual(
+            path_util.GetCacheDir(),
+            resolver.FromChroot(constants.CHROOT_CACHE_ROOT),
         )
 
         # Case: path inside the cache directory.
