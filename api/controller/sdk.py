@@ -210,10 +210,9 @@ def Delete(input_proto, _output_proto, _config):
 
 @faux.all_empty
 @validate.validation_complete
-def Unmount(input_proto, _output_proto, _config):
+def Unmount(_input_proto, _output_proto, _config):
     """Unmount a chroot"""
-    chroot = controller_util.ParseChroot(input_proto.chroot)
-    sdk.Unmount(chroot)
+    # Deprecated. Do nothing.
 
 
 @faux.all_empty

@@ -177,6 +177,17 @@ class SdkDeleteTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         patch.assert_called_once_with(mock.ANY, force=True)
 
 
+class SdkUnmountTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+    """SDK Unmount tests."""
+
+    def testNoop(self):
+        """Unmount is a deprecated noop."""
+        request = sdk_pb2.UnmountRequest()
+        response = sdk_pb2.UnmountResponse()
+        rc = sdk_controller.Unmount(request, response, self.api_config)
+        self.assertFalse(rc)
+
+
 class SdkUnmountPathTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     """Update tests."""
 

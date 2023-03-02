@@ -582,20 +582,16 @@ def _CreateParser(sdk_latest_version, bootstrap_latest_version):
         "--force",
         action="store_true",
         default=False,
-        help="Force unmount/delete of the current SDK chroot even if "
+        help="Force delete of the current SDK chroot even if "
         "obtaining the write lock fails.",
     )
     group.add_argument(
         "--unmount",
         action="store_true",
         default=False,
-        help="Unmount and clean up devices associated with the "
-        "SDK chroot if it exists.  This does not delete the "
-        "chroot contents, so the same chroot can be later "
-        "re-mounted for reuse.  To fully delete the chroot, use "
-        "--delete.  This is primarily useful for working on "
-        "cros_sdk or the chroot setup; you should not need it "
-        "under normal circumstances.",
+        deprecated="loopback-image (--use-image) is no longer supported "
+        "(b/266878468). If needed, consider `cros unmount /path/to/chroot`.",
+        help=argparse.SUPPRESS,
     )
     group.add_argument(
         "--download",
@@ -746,9 +742,6 @@ def main(argv):
             "was specified makes no sense."
         )
 
-    if options.unmount and (options.create or options.enter):
-        parser.error("--unmount cannot be specified with other chroot actions.")
-
     chroot_exists = cros_sdk_lib.IsChrootReady(options.chroot)
     # Finally, flip create if necessary.
     if options.enter:
@@ -806,33 +799,6 @@ def main(argv):
                     )
             logging.notice("Deleting chroot.")
             cros_sdk_lib.CleanupChrootMount(chroot.path, delete=True)
-
-    # If cleanup was requested, we have to do it while we're still in the
-    # original namespace.  Since cleaning up the mount will interfere with any
-    # other commands, we exit here.  The check above should have made sure that
-    # no other action was requested, anyway.
-    if options.unmount:
-        # Set a timeout of 300 seconds when getting the lock.
-        with locking.FileLock(
-            lock_path, "chroot lock", blocking_timeout=300
-        ) as lock:
-            try:
-                lock.write_lock()
-            except timeout_util.TimeoutError as e:
-                logging.error(
-                    "Acquiring write_lock on %s failed: %s", lock_path, e
-                )
-                logging.warning(
-                    "Continuing with CleanupChroot(%s), which will umount the "
-                    "tree.",
-                    chroot.path,
-                )
-            # We can call CleanupChroot (which calls
-            # cros_sdk_lib.CleanupChrootMount) even if we don't get the lock
-            # because it will attempt to unmount the tree and will print
-            # diagnostic information from 'fuser', 'lsof', and 'ps'.
-            cros_sdk_lib.CleanupChrootMount(chroot.path, delete=False)
-            sys.exit(0)
 
     # Enter a new set of namespaces.  Everything after here cannot directly
     # affect the hosts's mounts or alter LVM volumes.
@@ -897,8 +863,8 @@ def main(argv):
         if options.create:
             lock.write_lock()
             # Recheck if the chroot is set up here before creating to make sure
-            # we account for whatever the various delete/unmount/remount steps
-            # above have done.
+            # we account for whatever the various delete/cleanup steps above
+            # have done.
             if cros_sdk_lib.IsChrootReady(chroot.path):
                 logging.debug("Chroot already exists.  Skipping creation.")
             else:
