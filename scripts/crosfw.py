@@ -156,19 +156,6 @@ for b in [
     UBOARDS[b] = "coreboot-x86"
     UBOARDS["chromeos_%s" % b] = "chromeos_coreboot"
 
-SOCS = {
-    "coreboot-x86": "",
-    "chromeos_coreboot": "",
-    "daisy": "exynos5250-",
-    "peach": "exynos5420-",
-}
-
-DEFAULT_DTS = {
-    "daisy": "snow",
-    "daisy_spring": "spring",
-    "peach_pit": "peach-pit",
-}
-
 OUT_DIR = "/tmp/crosfw"
 
 rc_file = os.path.expanduser("~/.crosfwrc")
