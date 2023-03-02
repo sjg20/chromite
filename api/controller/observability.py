@@ -114,7 +114,7 @@ def _get_package_identifier_proto(
     proto_copy.package_name.category = python_copy.package_name.category
     proto_copy.package_name.package_name = python_copy.package_name.package_name
     proto_copy.package_version.major = python_copy.package_version.major
-    proto_copy.package_version.minor = python_copy.package_version.major
+    proto_copy.package_version.minor = python_copy.package_version.minor
     proto_copy.package_version.patch = python_copy.package_version.patch
     proto_copy.package_version.extended = python_copy.package_version.extended
     proto_copy.package_version.revision = python_copy.package_version.revision
