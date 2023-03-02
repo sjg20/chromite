@@ -306,7 +306,12 @@ def Touch(
     try:
         path.open("ab").close()
     except PermissionError:
-        pass
+        # If the file exists, updating the timestamp below via os.utime often
+        # works (even if it's owned by someone else).  But if it doesn't exist,
+        # throw the permission error to make it clear to the caller what's wrong
+        # since a FileNotFound error is confusing.
+        if not path.exists():
+            raise
     if mode is not None:
         path.chmod(mode)
     # Update timestamp to right now.
