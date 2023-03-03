@@ -160,7 +160,9 @@ class SymbolFile(object):
         """
         self.display_path = display_path
         self.file_name = file_name
-        self.header = cros_generate_breakpad_symbols.ReadSymsHeader(file_name)
+        self.header = cros_generate_breakpad_symbols.ReadSymsHeader(
+            file_name, file_name
+        )
         self.status = SymbolFile.INITIAL
 
     @property

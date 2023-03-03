@@ -292,7 +292,16 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         # Not needed as the code itself should create it as needed.
         self.breakpad_dir = os.path.join(self.debug_dir, "breakpad")
 
+        self.FILE_OUT = (
+            f"{self.elf_file}: ELF 64-bit LSB pie executable, x86-64, "
+            "version 1 (SYSV), dynamically linked, interpreter "
+            "/lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, "
+            "BuildID[sha1]=cf9a21fa6b14bfb2dfcb76effd713c4536014d95, stripped"
+        )
         self.rc.SetDefaultCmdResult(stdout="MODULE OS CPU ID NAME")
+        self.rc.AddCmdResult(
+            ["/usr/bin/file", self.elf_file], stdout=self.FILE_OUT
+        )
         self.assertCommandContains = self.rc.assertCommandContains
         self.sym_file = os.path.join(self.breakpad_dir, "NAME/ID/NAME.sym")
 
@@ -305,12 +314,14 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
     def testNormal(self):
         """Normal run -- given an ELF and a debug file"""
         ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
-            self.elf_file, self.debug_file, self.breakpad_dir
+            self.elf_file,
+            self.debug_file,
+            self.breakpad_dir,
         )
         self.assertEqual(ret, self.sym_file)
-        self.assertEqual(self.rc.call_count, 1)
+        self.assertEqual(self.rc.call_count, 2)
         self.assertCommandArgs(
-            0, ["dump_syms", "-v", self.elf_file, self.debug_dir]
+            1, ["dump_syms", "-v", self.elf_file, self.debug_dir]
         )
         self.assertExists(self.sym_file)
 
@@ -326,8 +337,8 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         self.assertEqual(ret, self.sym_file)
         self.assertEqual(num_errors.value, 0)
-        self.assertCommandArgs(0, ["dump_syms", "-v", "-c", self.elf_file])
-        self.assertEqual(self.rc.call_count, 1)
+        self.assertCommandArgs(1, ["dump_syms", "-v", "-c", self.elf_file])
+        self.assertEqual(self.rc.call_count, 2)
         self.assertExists(self.sym_file)
 
     def testNormalElfOnly(self):
@@ -336,8 +347,8 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
             self.elf_file, breakpad_dir=self.breakpad_dir
         )
         self.assertEqual(ret, self.sym_file)
-        self.assertCommandArgs(0, ["dump_syms", "-v", self.elf_file])
-        self.assertEqual(self.rc.call_count, 1)
+        self.assertCommandArgs(1, ["dump_syms", "-v", self.elf_file])
+        self.assertEqual(self.rc.call_count, 2)
         self.assertExists(self.sym_file)
 
     def testNormalSudo(self):
@@ -349,7 +360,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
             )
         self.assertEqual(ret, self.sym_file)
         self.assertCommandArgs(
-            0, ["sudo", "--", "dump_syms", "-v", self.elf_file]
+            1, ["sudo", "--", "dump_syms", "-v", self.elf_file]
         )
 
     def testLargeDebugFail(self):
@@ -361,12 +372,18 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
             self.elf_file, self.debug_file, self.breakpad_dir
         )
         self.assertEqual(ret, self.sym_file)
-        self.assertEqual(self.rc.call_count, 2)
+        self.assertEqual(self.rc.call_count, 4)
         self.assertCommandArgs(
-            0, ["dump_syms", "-v", self.elf_file, self.debug_dir]
+            1, ["dump_syms", "-v", self.elf_file, self.debug_dir]
+        )
+        # The current fallback from _DumpExpectingSymbols() to
+        # _DumpAllowingBasicFallback() causes the first dump_sums command to get
+        # repeated.
+        self.assertCommandArgs(
+            2, ["dump_syms", "-v", self.elf_file, self.debug_dir]
         )
         self.assertCommandArgs(
-            1, ["dump_syms", "-v", "-c", "-r", self.elf_file, self.debug_dir]
+            3, ["dump_syms", "-v", "-c", "-r", self.elf_file, self.debug_dir]
         )
         self.assertExists(self.sym_file)
 
@@ -383,14 +400,20 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
             self.elf_file, self.debug_file, self.breakpad_dir
         )
         self.assertEqual(ret, self.sym_file)
-        self.assertEqual(self.rc.call_count, 3)
+        self.assertEqual(self.rc.call_count, 5)
         self.assertCommandArgs(
-            0, ["dump_syms", "-v", self.elf_file, self.debug_dir]
+            1, ["dump_syms", "-v", self.elf_file, self.debug_dir]
+        )
+        # The current fallback from _DumpExpectingSymbols() to
+        # _DumpAllowingBasicFallback() causes the first dump_sums command to get
+        # repeated.
+        self.assertCommandArgs(
+            2, ["dump_syms", "-v", self.elf_file, self.debug_dir]
         )
         self.assertCommandArgs(
-            1, ["dump_syms", "-v", "-c", "-r", self.elf_file, self.debug_dir]
+            3, ["dump_syms", "-v", "-c", "-r", self.elf_file, self.debug_dir]
         )
-        self.assertCommandArgs(2, ["dump_syms", "-v", self.elf_file])
+        self.assertCommandArgs(4, ["dump_syms", "-v", self.elf_file])
         self.assertExists(self.sym_file)
 
     def testCompleteFail(self):
@@ -408,6 +431,122 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(num_errors.value, 1)
 
+    def testKernelObjects(self):
+        """Kernel object files should call _DumpAllowingBasicFallback()"""
+        ko_file = os.path.join(self.tempdir, "elf.ko")
+        osutils.Touch(ko_file)
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", ko_file, self.debug_dir], returncode=1
+        )
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", "-c", "-r", ko_file, self.debug_dir],
+            returncode=1,
+        )
+        ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
+            ko_file, self.debug_file, self.breakpad_dir
+        )
+        self.assertEqual(ret, self.sym_file)
+        self.assertEqual(self.rc.call_count, 3)
+        # Only one call (at the beginning of _DumpAllowingBasicFallback())
+        # to "dump_syms -v"
+        self.assertCommandArgs(0, ["dump_syms", "-v", ko_file, self.debug_dir])
+        self.assertCommandArgs(
+            1, ["dump_syms", "-v", "-c", "-r", ko_file, self.debug_dir]
+        )
+        self.assertCommandArgs(2, ["dump_syms", "-v", ko_file])
+        self.assertExists(self.sym_file)
+
+    def testGoBinary(self):
+        """Go binaries should call _DumpAllowingBasicFallback()
+
+        Also tests that dump_syms failing with 'file contains no debugging
+        information' does not fail the script.
+        """
+        go_binary = os.path.join(self.tempdir, "goprogram")
+        osutils.Touch(go_binary)
+        go_debug_file = os.path.join(self.debug_dir, "goprogram.debug")
+        osutils.Touch(go_debug_file, makedirs=True)
+        FILE_OUT_GO = go_binary + (
+            ": ELF 64-bit LSB executable, x86-64, "
+            "version 1 (SYSV), statically linked, "
+            "Go BuildID=KKXVlL66E8Qmngr4qll9/5kOKGZw9I7TmNhoqKLqq/SiYVJam6w5Fo39B3BtDo/ba8_ceezZ-3R4qEv6_-K, "
+            "not stripped"
+        )
+        self.rc.AddCmdResult(["/usr/bin/file", go_binary], stdout=FILE_OUT_GO)
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", go_binary, self.debug_dir], returncode=1
+        )
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", "-c", "-r", go_binary, self.debug_dir],
+            returncode=1,
+        )
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", go_binary],
+            returncode=1,
+            stderr=(
+                f"{go_binary}: file contains no debugging information "
+                '(no ".stab" or ".debug_info" sections)'
+            ),
+        )
+        num_errors = ctypes.c_int()
+        ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
+            go_binary, go_debug_file, self.breakpad_dir
+        )
+        self.assertEqual(ret, 0)
+        self.assertEqual(self.rc.call_count, 4)
+        self.assertCommandArgs(0, ["/usr/bin/file", go_binary])
+        # Only one call (at the beginning of _DumpAllowingBasicFallback())
+        # to "dump_syms -v"
+        self.assertCommandArgs(
+            1, ["dump_syms", "-v", go_binary, self.debug_dir]
+        )
+        self.assertCommandArgs(
+            2, ["dump_syms", "-v", "-c", "-r", go_binary, self.debug_dir]
+        )
+        self.assertCommandArgs(3, ["dump_syms", "-v", go_binary])
+        self.assertNotExists(self.sym_file)
+        self.assertEqual(num_errors.value, 0)
+
+    def testAllowlist(self):
+        """Binaries in the allowlist should call _DumpAllowingBasicFallback()"""
+        binary = os.path.join(self.tempdir, "usr/bin/goldctl")
+        osutils.Touch(binary, makedirs=True)
+        debug_dir = os.path.join(self.debug_dir, "usr/bin")
+        debug_file = os.path.join(debug_dir, "goldctl.debug")
+        osutils.Touch(debug_file, makedirs=True)
+        self.rc.AddCmdResult(["/usr/bin/file", binary], stdout=self.FILE_OUT)
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", binary, debug_dir], returncode=1
+        )
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", "-c", "-r", binary, debug_dir],
+            returncode=1,
+        )
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", binary],
+            returncode=1,
+            stderr=(
+                f"{binary}: file contains no debugging information "
+                '(no ".stab" or ".debug_info" sections)'
+            ),
+        )
+        num_errors = ctypes.c_int()
+        ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
+            binary, debug_file, self.breakpad_dir, sysroot=self.tempdir
+        )
+        self.assertEqual(ret, 0)
+        self.assertEqual(self.rc.call_count, 4)
+        self.assertCommandArgs(0, ["/usr/bin/file", binary])
+        # Only one call (at the beginning of _DumpAllowingBasicFallback())
+        # to "dump_syms -v"
+        self.assertCommandArgs(1, ["dump_syms", "-v", binary, debug_dir])
+        self.assertCommandArgs(
+            2, ["dump_syms", "-v", "-c", "-r", binary, debug_dir]
+        )
+        self.assertCommandArgs(3, ["dump_syms", "-v", binary])
+        self.assertNotExists(self.sym_file)
+        self.assertEqual(num_errors.value, 0)
+
 
 class UtilsTestDir(cros_test_lib.TempDirTestCase):
     """Tests ReadSymsHeader."""
@@ -416,7 +555,9 @@ class UtilsTestDir(cros_test_lib.TempDirTestCase):
         """Make sure ReadSymsHeader can parse sym files"""
         sym_file = os.path.join(self.tempdir, "sym")
         osutils.WriteFile(sym_file, "MODULE Linux x86 s0m31D chrooome")
-        result = cros_generate_breakpad_symbols.ReadSymsHeader(sym_file)
+        result = cros_generate_breakpad_symbols.ReadSymsHeader(
+            sym_file, "unused_elfname"
+        )
         self.assertEqual(result.cpu, "x86")
         self.assertEqual(result.id, "s0m31D")
         self.assertEqual(result.name, "chrooome")
@@ -429,7 +570,7 @@ class UtilsTest(cros_test_lib.TestCase):
     def testReadSymsHeaderGoodBuffer(self):
         """Make sure ReadSymsHeader can parse sym file handles"""
         result = cros_generate_breakpad_symbols.ReadSymsHeader(
-            io.BytesIO(b"MODULE Linux arm MY-ID-HERE blkid")
+            io.BytesIO(b"MODULE Linux arm MY-ID-HERE blkid"), "unused_elfname"
         )
         self.assertEqual(result.cpu, "arm")
         self.assertEqual(result.id, "MY-ID-HERE")
@@ -442,6 +583,7 @@ class UtilsTest(cros_test_lib.TestCase):
             ValueError,
             cros_generate_breakpad_symbols.ReadSymsHeader,
             io.BytesIO(b"asdf"),
+            "unused_elfname",
         )
 
     def testBreakpadDir(self):

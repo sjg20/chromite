@@ -18,6 +18,7 @@ If you want to actually upload things, see upload_symbols.py.
 
 import collections
 import ctypes
+import enum
 import logging
 import multiprocessing
 import os
@@ -37,6 +38,24 @@ ALLOWED_DEBUG_ONLY_FILES = {
     "boot/vmlinux",
 }
 
+# Allowlist of elf files that we know we can't symbolize in the normal way, but
+# which we don't have an automatic way to detect.
+EXPECTED_POOR_SYMBOLIZATION_FILES = ALLOWED_DEBUG_ONLY_FILES | {
+    # Git binaries are downloaded as binary blobs already stripped.
+    "usr/bin/git",
+    "usr/bin/git-receive-pack",
+    "usr/bin/git-upload-archive",
+    "usr/bin/git-upload-pack",
+    # Prebuild Android binary
+    "build/rootfs/opt/google/vms/android/etc/bin/XkbToKcmConverter",
+    # Pulled from
+    # https://skia.googlesource.com/buildbot/+/refs/heads/main/gold-client/, no
+    # need to resymbolize.
+    "usr/bin/goldctl",
+    # This is complete for --board=eve
+    # TODO(b/241470012): Complete for other boards.
+}
+
 SymbolHeader = collections.namedtuple(
     "SymbolHeader",
     (
@@ -48,7 +67,54 @@ SymbolHeader = collections.namedtuple(
 )
 
 
-def ReadSymsHeader(sym_file):
+class SymbolGenerationResult(enum.Enum):
+    """Result of running dump_syms
+
+    Return value of _DumpAllowingBasicFallback() and _DumpExpectingSymbols().
+    """
+
+    SUCCESS = 1
+    UNEXPECTED_FAILURE = 2
+    EXPECTED_FAILURE = 3
+
+
+def _ExpectGoodSymbols(elf_file, sysroot):
+    """Determines if we expect dump_syms to create good symbols
+
+    We know that certain types of files never generate good symbols. Distinguish
+    those from the majority of elf files which should generate good symbols.
+
+    Args:
+        elf_file: The complete path to the file which we will pass to dump_syms
+        sysroot: If not None, the root of the build directory ('/build/eve', for
+                 instance)
+
+    Returns:
+        True if the elf file should generate good symbols, False if not.
+    """
+    # .ko files (kernel object files) never produce good symbols.
+    if elf_file.endswith(".ko"):
+        return False
+
+    # dump_syms doesn't understand Golang executables.
+    result = cros_build_lib.run(
+        ["/usr/bin/file", elf_file], print_cmd=False, stdout=True
+    )
+    if b"Go BuildID" in result.stdout:
+        return False
+
+    if sysroot is not None:
+        relative_path = os.path.relpath(elf_file, sysroot)
+    else:
+        relative_path = elf_file
+
+    if relative_path in EXPECTED_POOR_SYMBOLIZATION_FILES:
+        return False
+
+    return True
+
+
+def ReadSymsHeader(sym_file, name_for_errors):
     """Parse the header of the symbol file
 
     The first line of the syms file will read like:
@@ -58,6 +124,9 @@ def ReadSymsHeader(sym_file):
 
     Args:
       sym_file: The symbol file to parse
+      name_for_errors: A name for error strings. Can be the name of the elf file
+          that generated the symbol file, or the name of the symbol file if the
+          symbol file has already been moved to a meaningful location.
 
     Returns:
       A SymbolHeader object
@@ -68,8 +137,10 @@ def ReadSymsHeader(sym_file):
     with file_util.Open(sym_file, "rb") as f:
         header = f.readline().decode("utf-8").split()
 
-    if header[0] != "MODULE" or len(header) != 5:
-        raise ValueError("header of sym file is invalid")
+    if len(header) != 5 or header[0] != "MODULE":
+        raise ValueError(
+            f"header of sym file from {name_for_errors} is invalid"
+        )
 
     return SymbolHeader(
         os=header[1], cpu=header[2], id=header[3], name=header[4]
@@ -81,6 +152,7 @@ def GenerateBreakpadSymbol(
     debug_file=None,
     breakpad_dir=None,
     strip_cfi=False,
+    sysroot=None,
     num_errors=None,
     dump_syms_cmd="dump_syms",
 ):
@@ -91,6 +163,7 @@ def GenerateBreakpadSymbol(
       debug_file: Split debug file to use for symbol information
       breakpad_dir: The dir to store the output symbol file in
       strip_cfi: Do not generate CFI data
+      sysroot: Path to the sysroot with the elf_file under it
       num_errors: An object to update with the error count (needs a .value member)
       dump_syms_cmd: Command to use for dumping symbols.
 
@@ -140,10 +213,12 @@ def GenerateBreakpadSymbol(
                 )
             logging.warning("output:\n%s", result.stderr.decode("utf-8"))
 
-    osutils.SafeMakedirs(breakpad_dir)
-    with cros_build_lib.UnbufferedNamedTemporaryFile(
-        dir=breakpad_dir, delete=False
-    ) as temp:
+    def _DumpAllowingBasicFallback():
+        """Dump symbols for a executable when we do NOT expect to get good symbols.
+
+        Returns:
+            A SymbolGenerationResult
+        """
         if debug_file:
             # Try to dump the symbols using the debug file like normal.
             if debug_file_only:
@@ -158,36 +233,79 @@ def GenerateBreakpadSymbol(
             if result.returncode:
                 # Sometimes dump_syms can crash because there's too much info.
                 # Try dumping and stripping the extended stuff out.  At least
-                # this way we'll get the extended symbols.  https://crbug.com/266064
+                # this way we'll get the extended symbols.
+                #  https://crbug.com/266064
                 _CrashCheck(result, file_or_files, "retrying w/out CFI")
                 cmd_args = ["-c", "-r"] + cmd_args
                 result = _DumpIt(cmd_args)
                 _CrashCheck(result, file_or_files, "retrying w/out debug")
 
-            basic_dump = result.returncode
-        else:
-            basic_dump = True
+            if not result.returncode:
+                return SymbolGenerationResult.SUCCESS
 
-        if basic_dump:
-            # If that didn't work (no debug, or dump_syms still failed), try
-            # dumping just the file itself directly.
-            result = _DumpIt([elf_file])
-            if result.returncode:
-                # A lot of files (like kernel files) contain no debug information,
-                # do not consider such occurrences as errors.
-                cbuildbot_alerts.PrintBuildbotStepWarnings()
-                if b"file contains no debugging information" in result.stderr:
-                    logging.warning("dump_syms failed; giving up entirely.")
-                    logging.warning("No symbols found for %s", elf_file)
-                else:
-                    num_errors.value += 1
-                    _CrashCheck(result, elf_file, "giving up entirely")
-                os.unlink(temp.name)
-                return num_errors.value
+        # If that didn't work (no debug, or dump_syms still failed), try
+        # dumping just the file itself directly.
+        result = _DumpIt([elf_file])
+        if result.returncode:
+            # A lot of files (like kernel files) contain no debug information,
+            # do not consider such occurrences as errors.
+            cbuildbot_alerts.PrintBuildbotStepWarnings()
+            if b"file contains no debugging information" in result.stderr:
+                logging.warning("dump_syms failed; giving up entirely.")
+                logging.warning("No symbols found for %s", elf_file)
+                return SymbolGenerationResult.EXPECTED_FAILURE
+            else:
+                _CrashCheck(result, elf_file, "counting as failure")
+                return SymbolGenerationResult.UNEXPECTED_FAILURE
+
+        return SymbolGenerationResult.SUCCESS
+
+    def _DumpExpectingSymbols():
+        """Dump symbols for a executable when we expect to get good symbols.
+
+        Returns:
+            A SymbolGenerationResult. We never expect failure, so the result
+            will always be SUCCESS or UNEXPECTED_FAILURE.
+        """
+        if not debug_file:
+            logging.warning("%s must have debug file", elf_file)
+            return SymbolGenerationResult.UNEXPECTED_FAILURE
+
+        cmd_args = [elf_file, os.path.dirname(debug_file)]
+        result = _DumpIt(cmd_args)
+        if result.returncode:
+            _CrashCheck(result, [elf_file, debug_file], "unexpected failure")
+            return SymbolGenerationResult.UNEXPECTED_FAILURE
+        return SymbolGenerationResult.SUCCESS
+
+    osutils.SafeMakedirs(breakpad_dir)
+    with cros_build_lib.UnbufferedNamedTemporaryFile(
+        dir=breakpad_dir, delete=False
+    ) as temp:
+        if _ExpectGoodSymbols(elf_file, sysroot):
+            result = _DumpExpectingSymbols()
+            # Until the EXPECTED_POOR_SYMBOLIZATION_FILES allowlist is
+            # completely set up for all boards, don't fail the build if
+            # _ExpectGoodSymbols is wrong.
+            # TODO(b/241470012): Remove the call to _DumpAllowingBasicFallback()
+            # and just error out if _DumpExpectingSymbols fails.
+            if result == SymbolGenerationResult.UNEXPECTED_FAILURE:
+                result = _DumpAllowingBasicFallback()
+        else:
+            result = _DumpAllowingBasicFallback()
+
+        if result == SymbolGenerationResult.UNEXPECTED_FAILURE:
+            num_errors.value += 1
+            os.unlink(temp.name)
+            return num_errors.value
+
+        if result == SymbolGenerationResult.EXPECTED_FAILURE:
+            os.unlink(temp.name)
+            return 0
 
         # Move the dumped symbol file to the right place:
         # /build/$BOARD/usr/lib/debug/breakpad/<module-name>/<id>/<module-name>.sym
-        header = ReadSymsHeader(temp)
+        header = ReadSymsHeader(temp, elf_file)
         logging.info("Dumped %s as %s : %s", elf_file, header.name, header.id)
         sym_file = os.path.join(
             breakpad_dir, header.name, header.id, header.name + ".sym"
@@ -320,6 +438,7 @@ def GenerateBreakpadSymbols(
         strip_cfi=strip_cfi,
         num_errors=bg_errors,
         processes=num_processes,
+        sysroot=sysroot,
     ) as queue:
         for _, elf_file, debug_file in sorted(targets, reverse=True):
             if generate_count == 0:
