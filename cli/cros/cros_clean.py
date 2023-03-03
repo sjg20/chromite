@@ -17,6 +17,7 @@ import logging
 import os
 
 from chromite.cli import command
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import dev_server_wrapper
@@ -193,7 +194,7 @@ class CleanCommand(command.CliCommand):
     @timer.timed("Cros Clean", logging.debug)
     def Run(self):
         """Perform the cros clean command."""
-        chroot_dir = self.options.sdk_path
+        chroot = chroot_lib.Chroot(self.options.sdk_path)
 
         cros_build_lib.AssertOutsideChroot()
 
@@ -244,7 +245,7 @@ class CleanCommand(command.CliCommand):
         if self.options.chroot:
             logging.debug("Remove the chroot.")
             if self.options.dryrun:
-                logging.notice("would have cleaned: %s", chroot_dir)
+                logging.notice("would have cleaned: %s", chroot.path)
             else:
                 with timer.timer("Remove the chroot", logging.debug):
                     cros_build_lib.run(["cros_sdk", "--delete"])
@@ -252,7 +253,7 @@ class CleanCommand(command.CliCommand):
         boards = self.options.board or []
         if self.options.sysroots:
             try:
-                boards = os.listdir(os.path.join(chroot_dir, "build"))
+                boards = os.listdir(chroot.full_path("build"))
             except OSError as e:
                 if e.errno != errno.ENOENT:
                     raise
@@ -263,12 +264,12 @@ class CleanCommand(command.CliCommand):
                     with timer.timer(
                         f"Clean up the {b} sysroot.", logging.debug
                     ):
-                        Clean(os.path.join(chroot_dir, "build", b))
+                        Clean(chroot.full_path("build", b))
 
         if self.options.chroot_tmp:
             logging.debug("Empty chroot tmp directory.")
             with timer.timer("Empty chroot tmp directory", logging.debug):
-                Empty(os.path.join(chroot_dir, "tmp"))
+                Empty(chroot.tmp)
 
         if self.options.cache:
             logging.debug("Clean the common cache.")
@@ -315,9 +316,7 @@ class CleanCommand(command.CliCommand):
             logging.debug("Clean up the cros deploy cache.")
             with timer.timer("Clean up the cros deploy cache", logging.debug):
                 for subdir in ("custom-packages", "gmerge-packages"):
-                    for d in glob.glob(
-                        os.path.join(chroot_dir, "build", "*", subdir)
-                    ):
+                    for d in glob.glob(chroot.full_path("build", "*", subdir)):
                         Clean(d)
 
         if self.options.flash:
@@ -331,7 +330,7 @@ class CleanCommand(command.CliCommand):
 
         if self.options.images:
             logging.debug("Clean the images cache.")
-            cache_dir = os.path.join(constants.SOURCE_ROOT, "src", "build")
+            cache_dir = constants.DEFAULT_BUILD_ROOT
             with timer.timer("Clean the images cache", logging.debug):
                 Clean(cache_dir, ignore_mount=True)
 
@@ -340,16 +339,13 @@ class CleanCommand(command.CliCommand):
             with timer.timer(
                 "Clean package incremental objects", logging.debug
             ):
-                Empty(os.path.join(chroot_dir, "var", "cache", "portage"))
+                Empty(chroot.full_path("var", "cache", "portage"))
                 for d in glob.glob(
-                    os.path.join(
-                        chroot_dir, "build", "*", "var", "cache", "portage"
-                    )
+                    chroot.full_path("build", "*", "var", "cache", "portage")
                 ):
                     Empty(d)
                 for d in glob.glob(
-                    os.path.join(
-                        chroot_dir,
+                    chroot.full_path(
                         "var",
                         "cache",
                         "chromeos-chrome",
@@ -363,21 +359,19 @@ class CleanCommand(command.CliCommand):
         if self.options.logs:
             logging.debug("Clean log files.")
             with timer.timer("Clean log files", logging.debug):
-                Empty(os.path.join(chroot_dir, "var", "log"))
+                Empty(chroot.full_path("var", "log"))
                 for d in glob.glob(
-                    os.path.join(
-                        chroot_dir, "build", "*", "tmp", "portage", "logs"
-                    )
+                    chroot.full_path("build", "*", "tmp", "portage", "logs")
                 ):
                     Empty(d)
 
         if self.options.workdirs:
             logging.debug("Clean package workdirs.")
             with timer.timer("Clean package workdirs", logging.debug):
-                Clean(os.path.join(chroot_dir, "var", "tmp", "portage"))
+                Clean(chroot.full_path("var", "tmp", "portage"))
                 Clean(constants.CHROMITE_DIR / "venv" / "venv")
                 for d in glob.glob(
-                    os.path.join(chroot_dir, "build", "*", "tmp", "portage")
+                    chroot.full_path("build", "*", "tmp", "portage")
                 ):
                     Clean(d)
 
