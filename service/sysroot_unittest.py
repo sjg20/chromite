@@ -1192,6 +1192,7 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
         gather_symbol_files_patch.assert_called()
 
         # Verify response proto contents and output directory contents.
+        self.assertIsNotNone(tar_file)
         self.assertTrue(tar_file.endswith("/output_dir/debug_breakpad.tar.xz"))
 
     def testBundleDebugSymbols(self):
@@ -1209,11 +1210,15 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
         )
 
         tar_file = sysroot.BundleDebugSymbols(
-            self.chroot, self.sysroot, None, self.output_dir
+            self.chroot,
+            self.sysroot,
+            build_target_lib.BuildTarget(None),
+            self.output_dir,
         )
         create_tarball_patch.assert_called()
 
         # Verify response contents.
+        self.assertIsNotNone(tar_file)
         self.assertTrue(tar_file.endswith("/output_dir/debug.tgz"))
 
 
