@@ -9,6 +9,7 @@ registration.
 """
 
 import collections
+import contextlib
 import importlib
 import logging
 import os
@@ -360,25 +361,27 @@ class Router(object):
         if not chroot.exists():
             raise InvalidSdkError("Chroot does not exist.")
 
-        # Use a ContextManagerStack to avoid the deep nesting this many
-        # context managers introduces.
-        with cros_build_lib.ContextManagerStack() as stack:
+        # Use a ExitStack to avoid the deep nesting this many context managers
+        # introduces.
+        with contextlib.ExitStack() as stack:
             # TempDirs setup.
-            tempdir = stack.Add(chroot.tempdir).tempdir
-            sync_tempdir = stack.Add(chroot.tempdir).tempdir
+            tempdir = stack.enter_context(chroot.tempdir())
+            sync_tempdir = stack.enter_context(chroot.tempdir())
             # The copy-paths-in context manager to handle Path messages.
-            stack.Add(
-                field_handler.copy_paths_in,
-                input_msg,
-                chroot.tmp,
-                prefix=chroot.path,
+            stack.enter_context(
+                field_handler.copy_paths_in(
+                    input_msg,
+                    chroot.tmp,
+                    prefix=chroot.path,
+                )
             )
             # The sync-directories context manager to handle SyncedDir messages.
-            stack.Add(
-                field_handler.sync_dirs,
-                input_msg,
-                sync_tempdir,
-                prefix=chroot.path,
+            stack.enter_context(
+                field_handler.sync_dirs(
+                    input_msg,
+                    sync_tempdir,
+                    prefix=chroot.path,
+                )
             )
 
             # Parse goma.
