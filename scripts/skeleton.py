@@ -61,3 +61,4 @@ def main(argv: Optional[List[str]]) -> Optional[int]:
     # commandline.RunInsideChroot()
 
     opts = parse_arguments(argv)
+    print(opts)
