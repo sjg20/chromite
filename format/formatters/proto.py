@@ -5,14 +5,15 @@
 """Provides utility for formatting proto definitions."""
 
 import os
+from pathlib import Path
 from typing import Optional, Union
 
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 
 
 def Data(
     data: str,
-    # pylint: disable=unused-argument
     path: Optional[Union[str, os.PathLike]] = None,
 ) -> str:
     """Format proto definitions |data|.
@@ -24,8 +25,14 @@ def Data(
     Returns:
         Formatted data.
     """
+    if path is None:
+        path = "format.proto"
     result = cros_build_lib.run(
-        ["clang-format", "--style=file", "--assume-filename=format.proto"],
+        [
+            Path(constants.CHROMITE_SCRIPTS_DIR, "clang-format"),
+            "--style=file",
+            f"--assume-filename={path}",
+        ],
         capture_output=True,
         input=data,
         encoding="utf-8",
