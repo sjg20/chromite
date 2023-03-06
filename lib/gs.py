@@ -1693,8 +1693,12 @@ wheel: <
         """
         with tempfile.NamedTemporaryFile() as f:
             self.Copy(src_uri, f.name, acl=acl)
+            # NOTE: LoadFile accepts an already-open file, but we need to pass
+            # `f.name` here anyway: gsutil writes to a tempfile which it
+            # renames over `f.name`, so the file object that `f.fileno`
+            # references is useless after `Copy` completes.
             return key_value_store.LoadFile(
-                f, ignore_missing=ignore_missing, multiline=multiline
+                f.name, ignore_missing=ignore_missing, multiline=multiline
             )
 
 
