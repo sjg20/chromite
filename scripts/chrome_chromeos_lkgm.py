@@ -189,7 +189,6 @@ class ChromeLKGMCommitter:
         "chromeos-kevin-chrome",
         "chromeos-octopus-chrome",
         "chromeos-reven-chrome",
-        "lacros-amd64-generic-chrome",
     )
     # Files needed in a local checkout to successfully update the LKGM. The
     # OWNERS file allows the --tbr-owners mechanism to select an appropriate
