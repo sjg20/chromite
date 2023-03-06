@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/clang_format_merge_driver.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

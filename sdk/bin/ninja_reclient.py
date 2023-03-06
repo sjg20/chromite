@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/ninja_reclient.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

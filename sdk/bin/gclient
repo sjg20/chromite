@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/gclient
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

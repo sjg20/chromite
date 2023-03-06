@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/upload_to_google_storage.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

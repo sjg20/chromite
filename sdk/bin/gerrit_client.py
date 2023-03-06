@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/gerrit_client.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

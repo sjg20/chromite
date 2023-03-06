@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/git_upstream_diff.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

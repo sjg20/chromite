@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/repo_launcher
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/git_map_branches.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

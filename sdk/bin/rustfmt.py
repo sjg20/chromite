@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/rustfmt.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

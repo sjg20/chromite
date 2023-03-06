@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/roll-dep
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/git_cl.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/my_activity.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

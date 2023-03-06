@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/post_build_ninja_summary.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

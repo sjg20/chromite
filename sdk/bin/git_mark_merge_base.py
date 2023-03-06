@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/git_mark_merge_base.py
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"

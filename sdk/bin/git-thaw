@@ -1,1 +1,2 @@
-/mnt/host/depot_tools/git-thaw
+#!/bin/sh
+exec /mnt/host/depot_tools/"$(basename "$0")" "$@"
