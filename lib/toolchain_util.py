@@ -1682,34 +1682,7 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         bench = self._FindLatestAFDOArtifact(
             bench_locs, self._ValidBenchmarkProfileVersion
         )
-        try:
-            cwp = self._FindLatestAFDOArtifact(cwp_locs, _RankValidCWPProfiles)
-        except NoProfilesInGsBucketError:
-            # Missing arm profiles will be handled below.
-            if self.arch == "arm":
-                cwp = None
-            else:
-                raise
-        # If there are no new arm profiles use cwp profiles from atom.
-        # TODO(b/243198050): Remove workaround when the issue with Arm CWP
-        # profiles is fixed.
-        if (
-            not cwp
-            or _GetProfileAge(
-                os.path.split(cwp)[1].replace(".afdo.xz", ""), "cwp"
-            )
-            > CHROME_ARM_CWP_ALLOWED_STALE_DAYS
-        ):
-            cwp_atom_locs = [os.path.join(CWP_AFDO_GS_URL, "atom")]
-            logging.warning(
-                "No arm profiles found at %s or profiles are too old. "
-                "Will use the latest profile from %s.",
-                cwp_locs,
-                cwp_atom_locs,
-            )
-            cwp = self._FindLatestAFDOArtifact(
-                cwp_atom_locs, _RankValidCWPProfiles
-            )
+        cwp = self._FindLatestAFDOArtifact(cwp_locs, _RankValidCWPProfiles)
         bench_name = os.path.split(bench)[1]
         cwp_name = os.path.split(cwp)[1]
 
@@ -1720,14 +1693,16 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
             "VerifiedReleaseAfdoFile", [RELEASE_PROFILE_VETTED_URL]
         )[0]
         profile = self.profile
-        # Arm has two variants: arm and arm32. Regardless of the name both use
-        # the same unvetted profile from arm (which is arm64) architecture.
-        # The difference is the target where the profile is tested and hence
-        # merged profile is created.
-        # -arm-armv7a- means that profile was generated on arm arch and verified
-        # on arm32 target. This profile is not used on production.
-        if self.arch == "arm":
-            profile = "armv7a" if self.profile == "arm32" else "none"
+        if self.arch == "arm" and self.profile == "arm":
+            # arm/arm profile is generated on arm64 and used on all arm
+            # production devices. Profile rollers track the -arm-none- verified
+            # profiles.
+            # All other arm profile variants are intended only for testing or
+            # experiments. Merged profiles with variants will be stored in gs
+            # bucket but ignored by the production pipeline.
+            # For example arm32 profiles are generated on arm arch (arm64) and
+            # verified on arm32 target. This profile is not used on production.
+            profile = "none"
         merged_name = MERGED_AFDO_NAME.format(
             arch=self.arch,
             name=_GetCombinedAFDOName(
