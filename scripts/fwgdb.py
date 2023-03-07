@@ -139,7 +139,7 @@ def FindSymbols(firmware_dir, board):
 
     raise ValueError(
         "Could not find depthcharge symbol file (dev.elf)! "
-        "(You can use -s to supply it manually.)"
+        "(You can use -y to supply it manually.)"
     )
 
 
@@ -253,7 +253,7 @@ def main(argv):
                 raise ValueError(
                     "Could not auto-detect board! Please use -b option."
                 )
-            opts.board = matches[-1]
+            opts.board = matches[-1].decode().lower()
             logging.info(
                 "Auto-detected board as %s from DUT console output.", opts.board
             )
