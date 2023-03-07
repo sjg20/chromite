@@ -13,9 +13,11 @@ from typing import Dict, List, Optional, Set
 
 from chromite.cli import command
 from chromite.lib import build_target_lib
+from chromite.lib import chromite_config
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.lib.parser import pms_dependency
@@ -87,6 +89,9 @@ class CleanOutdatedCommand(command.CliCommand):
     @classmethod
     def ProcessOptions(cls, parser, options):
         """Post process options."""
+        if options.auto is not None:
+            return
+
         if not options.board and not options.host:
             parser.error("--host or --board=BOARD required")
 
@@ -431,9 +436,29 @@ class CleanOutdatedCommand(command.CliCommand):
             min_version,
         )
 
+    def control_automatic(self, enable_automation: bool) -> None:
+        # Since this config will be used by a shell and a python script,
+        # use a presence/absence of a file to control.
+        if enable_automation:
+            chromite_config.AUTO_COP_CONFIG.touch()
+            logging.notice(
+                "From now on, clean-outdated-pkgs will be run "
+                "automatically during update_chroot and build_packages."
+            )
+        else:
+            osutils.SafeUnlink(chromite_config.AUTO_COP_CONFIG)
+            logging.notice(
+                "From now on, clean-outdated-pkgs will NOT be run "
+                "automatically during update_chroot and build_packages."
+            )
+
     def Run(self):
         """Perform the command."""
         commandline.RunInsideChroot(self)
+
+        if self.options.auto is not None:
+            self.control_automatic(self.options.auto)
+            return
 
         # Require qmerge from app-portage/portage-utils version >= 0.95.
         self.ensure_pkg_min_version(
@@ -513,6 +538,12 @@ class CleanOutdatedCommand(command.CliCommand):
         parser.add_argument(
             "-b", "--board", "--build-target", default=None, help="Board name."
         )
+        auto_parser = parser.add_mutually_exclusive_group(required=False)
+        auto_parser.add_argument(
+            "--auto", dest="auto", default=None, action="store_true"
+        )
+        auto_parser.add_argument("--no-auto", dest="auto", action="store_false")
+
         parser.add_argument(
             "--host",
             default=False,

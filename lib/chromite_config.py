@@ -30,6 +30,8 @@ GERRIT_CONFIG = DIR / "gerrit.cfg"
 
 AUTO_SET_GOV_CONFIG = DIR / "autosetgov"
 
+AUTO_COP_CONFIG = DIR / "autocop"
+
 
 def initialize():
     """Initialize the config dir for use.
