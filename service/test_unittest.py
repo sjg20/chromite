@@ -6,6 +6,7 @@
 
 import json
 import os
+from pathlib import Path
 import shutil
 from typing import List
 from unittest import mock
@@ -320,13 +321,15 @@ class BundleCodeCoverageLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
 
     def setUp(self):
         """Set up the class for tests."""
-        chroot_dir = os.path.join(self.tempdir, "chroot")
-        osutils.SafeMakedirs(chroot_dir)
-        osutils.SafeMakedirs(os.path.join(chroot_dir, "tmp"))
-        self.chroot = chroot_lib.Chroot(chroot_dir)
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
 
-        sysroot_path = os.path.join(chroot_dir, "build", "board")
-        osutils.SafeMakedirs(sysroot_path)
+        chroot_dir = self.tempdir / "chroot"
+        osutils.SafeMakedirs(chroot_dir)
+        self.chroot = chroot_lib.Chroot(chroot_dir)
+        osutils.SafeMakedirs(self.chroot.tmp)
+
+        sysroot_path = os.path.join(os.path.sep, "build", "board")
+        osutils.SafeMakedirs(self.chroot.full_path(sysroot_path))
         self.sysroot = sysroot_lib.Sysroot(sysroot_path)
 
         self.output_dir = os.path.join(self.tempdir, "output")
@@ -476,13 +479,15 @@ class BundleCodeCoverageRustLlvmJsonTest(cros_test_lib.MockTempDirTestCase):
 
     def setUp(self):
         """Set up the class for tests."""
-        chroot_dir = os.path.join(self.tempdir, "chroot")
-        osutils.SafeMakedirs(chroot_dir)
-        osutils.SafeMakedirs(os.path.join(chroot_dir, "tmp"))
-        self.chroot = chroot_lib.Chroot(chroot_dir)
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
 
-        sysroot_path = os.path.join(chroot_dir, "build", "board")
-        osutils.SafeMakedirs(sysroot_path)
+        chroot_dir = self.tempdir / "chroot"
+        osutils.SafeMakedirs(chroot_dir)
+        self.chroot = chroot_lib.Chroot(chroot_dir)
+        osutils.SafeMakedirs(self.chroot.tmp)
+
+        sysroot_path = os.path.join(os.path.sep, "build", "board")
+        osutils.SafeMakedirs(self.chroot.full_path(sysroot_path))
         self.sysroot = sysroot_lib.Sysroot(sysroot_path)
 
         self.output_dir = os.path.join(self.tempdir, "output")
@@ -777,7 +782,7 @@ class FindMetadataTestCase(cros_test_lib.MockTestCase):
 
     build_target_name = "coral"
     sysroot_path = "/build/coral"
-    chroot_path = "/usr/chroot"
+    chroot_path = Path("/usr/chroot")
 
     expected_autotest_metadata_file = (
         "/usr/chroot/build/coral/usr/local/build/autotest/autotest_metadata.pb"
@@ -816,11 +821,14 @@ class BundleHwqualTarballTest(cros_test_lib.MockTempDirTestCase):
     def setUp(self):
         self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
         # Create the chroot and sysroot instances.
-        self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
+        self.chroot_path = self.tempdir / "chroot_dir"
+        self.out_path = self.tempdir / "out_dir"
         self.chroot = chroot_lib.Chroot(path=self.chroot_path)
-        self.sysroot_path = os.path.join(self.chroot_path, "sysroot_dir")
+        osutils.SafeMakedirs(self.chroot.path)
+        osutils.SafeMakedirs(self.chroot.tmp)
+        self.sysroot_path = "/sysroot_dir"
         self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
-        osutils.SafeMakedirs(self.sysroot_path)
+        osutils.SafeMakedirs(self.chroot.full_path(self.sysroot_path))
 
         # Create the output directory.
         self.output_dir = os.path.join(self.tempdir, "output_dir")

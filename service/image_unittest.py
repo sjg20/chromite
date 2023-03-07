@@ -572,14 +572,16 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
     """Unittests for create_factory_image_zip."""
 
     def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
         # Create a chroot_path.
         self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
         self.chroot = chroot_lib.Chroot(path=self.chroot_path)
-        self.sysroot_path = os.path.join(self.chroot_path, "build", "target")
+        self.sysroot_path = os.path.join("build", "target")
         self.sysroot = sysroot_lib.Sysroot(path=self.sysroot_path)
 
         # Create appropriate sysroot structure.
-        osutils.SafeMakedirs(self.sysroot_path)
+        osutils.SafeMakedirs(self.chroot.full_path(self.sysroot_path))
         factory_bundle_path = self.chroot.full_path(
             self.sysroot.path, "usr", "local", "factory", "bundle"
         )
@@ -640,15 +642,14 @@ class TestCreateStrippedPackagesTar(cros_test_lib.MockTempDirTestCase):
     """Unittests for create_stripped_packages_tar."""
 
     def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
         # Create a chroot_path.
         self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
         self.chroot = chroot_lib.Chroot(path=self.chroot_path)
-        self.sysroot_path = os.path.join(self.chroot_path, "build", "target")
-        self.sysroot = sysroot_lib.Sysroot(path=self.sysroot_path)
 
         # Create build target.
         self.build_target = build_target_lib.BuildTarget(
-            "target", build_root=self.sysroot_path
+            "target", build_root="/build/target"
         )
 
         # Create output dir.
@@ -669,7 +670,9 @@ class TestCreateStrippedPackagesTar(cros_test_lib.MockTempDirTestCase):
             ],
         )
         # Drop "stripped packages".
-        pkg_dir = os.path.join(self.build_target.root, "stripped-packages")
+        pkg_dir = self.chroot.full_path(
+            self.build_target.root, "stripped-packages"
+        )
         osutils.Touch(
             os.path.join(pkg_dir, "chromeos-base", "chrome-1-r0.tbz2"),
             makedirs=True,

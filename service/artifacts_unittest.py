@@ -35,14 +35,15 @@ class BundleAutotestFilesTest(cros_test_lib.MockTempDirTestCase):
         self.output_dir = os.path.join(self.tempdir, "output_dir")
         self.archive_dir = os.path.join(self.tempdir, "archive_base_dir")
 
-        sysroot_path = os.path.join(self.tempdir, "sysroot")
         self.chroot = chroot_lib.Chroot(self.tempdir)
+        sysroot_path = self.chroot.full_path("sysroot")
         self.sysroot = sysroot_lib.Sysroot("sysroot")
         self.sysroot_dne = sysroot_lib.Sysroot("sysroot_DNE")
 
         # Make sure we have the valid paths.
         osutils.SafeMakedirs(self.output_dir)
         osutils.SafeMakedirs(sysroot_path)
+        osutils.SafeMakedirs(self.chroot.tmp)
 
     def testInvalidOutputDirectory(self):
         """Test invalid output directory."""
@@ -67,8 +68,8 @@ class BundleAutotestFilesTest(cros_test_lib.MockTempDirTestCase):
 
     def testSuccess(self):
         """Test a successful call handling."""
-        ab_path = os.path.join(
-            self.tempdir, self.sysroot.path, constants.AUTOTEST_BUILD_PATH
+        ab_path = self.chroot.full_path(
+            self.sysroot.path, constants.AUTOTEST_BUILD_PATH
         )
         osutils.SafeMakedirs(ab_path)
 
@@ -93,10 +94,14 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     """ArchiveChromeEbuildEnv tests."""
 
     def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
         # Create the chroot and sysroot instances.
-        self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
+        self.chroot_path = self.tempdir / "chroot_dir"
         self.chroot = chroot_lib.Chroot(path=self.chroot_path)
-        self.sysroot_path = os.path.join(self.chroot_path, "sysroot_dir")
+        # NB: sysroot_lib.Sysroot is a bit ambiguous on whether these are full
+        # host paths, or chroot-relative paths. But ArchiveChromeEbuildEnv()
+        # definitely treas these as full host paths.
+        self.sysroot_path = self.chroot.full_path("sysroot_dir")
         self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
 
         # Create the output directory.
@@ -208,10 +213,10 @@ class CreateChromeRootTest(cros_test_lib.RunCommandTempDirTestCase):
         self.build_target = build_target_lib.BuildTarget("board")
 
         # Create the chroot.
-        self.chroot_dir = os.path.join(self.tempdir, "chroot")
-        self.chroot_tmp = os.path.join(self.chroot_dir, "tmp")
-        osutils.SafeMakedirs(self.chroot_tmp)
+        self.chroot_dir = self.tempdir / "chroot"
         self.chroot = chroot_lib.Chroot(path=self.chroot_dir)
+        self.chroot_tmp = self.chroot.tmp
+        osutils.SafeMakedirs(self.chroot_tmp)
 
         # Create the output directory.
         self.output_dir = os.path.join(self.tempdir, "output_dir")
@@ -268,13 +273,13 @@ class BundleEBuildLogsTarballTest(cros_test_lib.TempDirTestCase):
         """Verifies that the correct EBuild tar files are bundled."""
         board = "samus"
         # Create chroot object and sysroot object
-        chroot_path = os.path.join(self.tempdir, "chroot")
+        chroot_path = self.tempdir / "chroot"
         chroot = chroot_lib.Chroot(path=chroot_path)
         sysroot_path = os.path.join("build", board)
         sysroot = sysroot_lib.Sysroot(sysroot_path)
 
         # Create parent dir for logs
-        log_parent_dir = os.path.join(chroot.path, "build")
+        log_parent_dir = chroot.full_path("build")
 
         # Names of log files typically found in a build directory.
         log_files = (
@@ -317,7 +322,7 @@ class BundleChromeOSConfigTest(cros_test_lib.MockTempDirTestCase):
 
         self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
         # Create chroot object and sysroot object
-        chroot_path = os.path.join(self.tempdir, "chroot")
+        chroot_path = self.tempdir / "chroot"
         self.chroot = chroot_lib.Chroot(path=chroot_path)
         sysroot_path = os.path.join("build", self.board)
         self.sysroot = sysroot_lib.Sysroot(sysroot_path)
@@ -327,7 +332,7 @@ class BundleChromeOSConfigTest(cros_test_lib.MockTempDirTestCase):
     def testBundleChromeOSConfig(self):
         """Verifies that the correct ChromeOS config file is bundled."""
         # Create parent dir for ChromeOS Config output.
-        config_parent_dir = os.path.join(self.chroot.path, "build")
+        config_parent_dir = self.chroot.full_path("build")
 
         # Names of ChromeOS Config files typically found in a build directory.
         config_files = (
@@ -389,7 +394,7 @@ class BundleVmFilesTest(cros_test_lib.TempDirTestCase):
     def testBundleVmFiles(self):
         """Verifies that the correct files are bundled"""
         # Create the chroot instance.
-        chroot_path = os.path.join(self.tempdir, "chroot")
+        chroot_path = self.tempdir / "chroot"
         chroot = chroot_lib.Chroot(path=chroot_path)
 
         # Create the test_results_dir
@@ -403,7 +408,7 @@ class BundleVmFilesTest(cros_test_lib.TempDirTestCase):
         cros_test_lib.CreateOnDiskHierarchy(target_test_dir, vm_files)
 
         # Create the output directory.
-        output_dir = os.path.join(self.tempdir, "output_dir")
+        output_dir = self.tempdir / "output_dir"
         osutils.SafeMakedirs(output_dir)
 
         archives = artifacts.BundleVmFiles(chroot, test_results_dir, output_dir)
@@ -440,7 +445,7 @@ class BuildFirmwareArchiveTest(cros_test_lib.TempDirTestCase):
         cros_test_lib.CreateOnDiskHierarchy(fw_files_root, fw_files)
 
         # Create the chroot and sysroot instances.
-        chroot_path = os.path.join(self.tempdir, "chroot")
+        chroot_path = self.tempdir / "chroot"
         chroot = chroot_lib.Chroot(path=chroot_path)
         sysroot = sysroot_lib.Sysroot("/build/link")
 
@@ -471,7 +476,7 @@ class BundleFpmcuUnittestsTest(cros_test_lib.TempDirTestCase):
         )
         cros_test_lib.CreateOnDiskHierarchy(unittest_files_root, unittest_files)
 
-        chroot_path = os.path.join(self.tempdir, "chroot")
+        chroot_path = self.tempdir / "chroot"
         chroot = chroot_lib.Chroot(path=chroot_path)
         sysroot = sysroot_lib.Sysroot("/build/%s" % board)
 
@@ -1035,7 +1040,7 @@ class GenerateCpeExportTest(cros_test_lib.RunCommandTempDirTestCase):
         self.sysroot = sysroot_lib.Sysroot("/build/board")
         self.chroot = chroot_lib.Chroot(self.tempdir)
 
-        self.chroot_tempdir = osutils.TempDir(base_dir=self.tempdir)
+        self.chroot_tempdir = self.chroot.tempdir
         self.PatchObject(
             self.chroot, "tempdir", return_value=self.chroot_tempdir
         )
