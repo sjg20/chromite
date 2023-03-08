@@ -8,17 +8,19 @@ import functools
 import os
 from typing import Optional, Union
 
-from chromite.lib import constants
+from chromite.lib import cipd
 from chromite.lib import cros_build_lib
 
 
 @functools.lru_cache(maxsize=None)
 def _find_gn() -> str:
     """Find the `gn` tool."""
-    if cros_build_lib.IsInsideChroot():
-        return "gn"
-    else:
-        return os.path.join(constants.DEFAULT_CHROOT_PATH, "usr", "bin", "gn")
+    path = cipd.InstallPackage(
+        cipd.GetCIPDFromCache(),
+        "gn/gn/linux-amd64",
+        "latest",
+    )
+    return os.path.join(path, "gn")
 
 
 def Data(
