@@ -136,6 +136,7 @@
     bob-release
     brask-release
     brya-arc-t-release
+    brya-connectivitynext-release
     brya-gki-release
     brya-hibernate-release
     brya-kernelnext-release
@@ -414,6 +415,7 @@
   brya-arc-t-llvm-toolchain-tryjob
   brya-arc-t-payloads-tryjob
   brya-arc-t-release-tryjob
+  brya-connectivitynext-release-tryjob
   brya-factory-brya-14517.B-factorybranch-tryjob
   brya-factory-brya-14909.124.B-factorybranch-tryjob
   brya-factory-brya-15231.B-factorybranch-tryjob
@@ -1011,6 +1013,7 @@
     bob-release-tryjob
     brask-release-tryjob
     brya-arc-t-release-tryjob
+    brya-connectivitynext-release-tryjob
     brya-gki-release-tryjob
     brya-hibernate-release-tryjob
     brya-kernelnext-release-tryjob
