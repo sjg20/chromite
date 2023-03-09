@@ -3283,7 +3283,10 @@ def BuildTastBundleTarball(buildroot, cwd, tarball_dir):
     Returns:
       Path of the generated tarball, or None if there is no private test bundles.
     """
-    chroot = chroot_lib.Chroot(os.path.join(buildroot, "chroot"))
+    chroot = chroot_lib.Chroot(
+        path=os.path.join(buildroot, "chroot"),
+        out_path=buildroot / constants.DEFAULT_OUT_DIR,
+    )
     sysroot_path = cwd.replace(chroot.path, "", 1)
     sysroot_path = sysroot_path.rstrip("build").rstrip(os.sep)
     sysroot = sysroot_lib.Sysroot(sysroot_path)
@@ -3674,7 +3677,10 @@ def BuildEbuildLogsTarball(buildroot, board, archive_dir):
       The file name of the output tarball, None if no package found.
     """
     sysroot = sysroot_lib.Sysroot(os.path.join("build", board))
-    chroot = chroot_lib.Chroot(path=os.path.join(buildroot, "chroot"))
+    chroot = chroot_lib.Chroot(
+        path=os.path.join(buildroot, "chroot"),
+        out_path=buildroot / constants.DEFAULT_OUT_DIR,
+    )
     return artifacts_service.BundleEBuildLogsTarball(
         chroot, sysroot, archive_dir
     )
@@ -3727,7 +3733,10 @@ def BuildFirmwareArchive(
       not have firmware from source.
     """
     sysroot = sysroot_lib.Sysroot(os.path.join("build", board))
-    chroot = chroot_lib.Chroot(path=os.path.join(buildroot, "chroot"))
+    chroot = chroot_lib.Chroot(
+        path=os.path.join(buildroot, "chroot"),
+        out_path=buildroot / constants.DEFAULT_OUT_DIR,
+    )
 
     archive_file = artifacts_service.BuildFirmwareArchive(
         chroot, sysroot, archive_dir
@@ -3752,7 +3761,10 @@ def BuildFpmcuUnittestsArchive(buildroot, board, tarball_dir):
       not have fingerprint MCU unittest binaries.
     """
     sysroot = sysroot_lib.Sysroot(os.path.join("build", board))
-    chroot = chroot_lib.Chroot(path=os.path.join(buildroot, "chroot"))
+    chroot = chroot_lib.Chroot(
+        path=os.path.join(buildroot, "chroot"),
+        out_path=buildroot / constants.DEFAULT_OUT_DIR,
+    )
 
     return artifacts_service.BundleFpmcuUnittests(chroot, sysroot, tarball_dir)
 
