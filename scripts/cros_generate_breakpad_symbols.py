@@ -21,7 +21,10 @@ import ctypes
 import enum
 import logging
 import multiprocessing
+import multiprocessing.sharedctypes
 import os
+import re
+from typing import Optional
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import build_target_lib
@@ -52,9 +55,109 @@ EXPECTED_POOR_SYMBOLIZATION_FILES = ALLOWED_DEBUG_ONLY_FILES | {
     # https://skia.googlesource.com/buildbot/+/refs/heads/main/gold-client/, no
     # need to resymbolize.
     "usr/bin/goldctl",
-    # This is complete for --board=eve
+    # TODO(b/273620044): The following 44 binaries are from
+    # app-benchmarks/lmbench; they hardcode some compiler options which prevent
+    # us from generating STACK records. Fix the package.
+    "usr/bin/lat_unix",
+    "usr/bin/lat_select",
+    "usr/bin/line.lmbench",
+    "usr/bin/lat_rpc",
+    "usr/bin/hello",
+    "usr/bin/lmhttp",
+    "usr/bin/lat_syscall",
+    "usr/bin/par_mem",
+    "usr/bin/lat_http",
+    "usr/bin/lat_proc",
+    "usr/bin/stream.lmbench",
+    "usr/bin/enough",
+    "usr/bin/lat_mem_rd",
+    "usr/bin/mhz",
+    "usr/bin/lat_fs",
+    "usr/bin/lat_sem",
+    "usr/bin/lmdd",
+    "usr/bin/lat_fcntl",
+    "usr/bin/lat_pipe",
+    "usr/bin/lat_mmap",
+    "usr/bin/bw_file_rd",
+    "usr/bin/bw_unix",
+    "usr/bin/lat_tcp",
+    "usr/bin/flushdisk",
+    "usr/bin/bw_pipe",
+    "usr/bin/msleep",
+    "usr/bin/bw_mmap_rd",
+    "usr/bin/bw_tcp",
+    "usr/bin/lat_ops",
+    "usr/bin/loop_o",
+    "usr/bin/bw_mem",
+    "usr/bin/lat_pagefault",
+    "usr/bin/lat_connect",
+    "usr/bin/timing_o",
+    "usr/bin/lat_ctx",
+    "usr/bin/tlb",
+    "usr/bin/lat_fifo",
+    "usr/bin/disk",
+    "usr/bin/lat_unix_connect",
+    "usr/bin/par_ops",
+    "usr/bin/lat_sig",
+    "usr/bin/lat_udp",
+    "usr/bin/lat_ops",
+    "usr/bin/memsize",
+    # This is complete for --board=eve and --board=kevin
     # TODO(b/241470012): Complete for other boards.
 }
+
+# Allowlist of patterns for ELF files that symbolize (dump_syms exits with
+# success) but don't pass symbol file validation. Note that ELFs listed in
+# EXPECTED_POOR_SYMBOLIZATION_FILES do not have their symbol files validated and
+# do not need to be repeated here.
+ALLOWLIST_NO_SYMBOL_FILE_VALIDATION = {
+    # Built in a weird way, see comments at top of
+    # https://source.chromium.org/chromium/chromium/src/+/main:native_client/src/trusted/service_runtime/linux/nacl_bootstrap.x
+    "opt/google/chrome/nacl_helper_bootstrap",
+    # TODO(b/273543528): Investigate why this doesn't have stack records on
+    # kevin builds.
+    "build/rootfs/dlc-scaled/screen-ai/package/root/libchromescreenai.so",
+}
+# Same but patterns not exact paths.
+ALLOWLIST_NO_SYMBOL_FILE_VALIDATION_RE = tuple(
+    re.compile(x)
+    for x in (
+        # Only has code if use.camera_feature_effects. Otherwise will have no
+        # STACK records.
+        r"usr/lib[^/]*/libcros_ml_core\.so",
+        # Prebuilt closed-source library.
+        r"usr/lib[^/]*/python[0-9]\.[0-9]/site-packages/.*/x_ignore_nofocus.so",
+        # b/273577373: Rarely used, and only by few programs that do
+        # non-standard encoding conversions
+        r"lib[^/]*/libnss_files\.so\.[0-9.]+",
+        r"lib[^/]*/libnss_dns\.so\.[0-9.]+",
+        r"usr/lib[^/]*/gconv/libISOIR165\.so",
+        r"usr/lib[^/]*/gconv/libGB\.so",
+        r"usr/lib[^/]*/gconv/libKSC\.so",
+        r"usr/lib[^/]*/gconv/libCNS\.so",
+        r"usr/lib[^/]*/gconv/libJISX0213\.so",
+        r"usr/lib[^/]*/gconv/libJIS\.so",
+        # TODO(b/273579075): Figure out why libcares.so is not getting STACK
+        # records on kevin.
+        r"usr/lib[^/]*/libcares\.so[0-9.]*",
+        # libevent-2.1.so.7.0.1 does not have executable code and thus no
+        # STACK records. See libevent-2.1.12-libevent-shrink.patch.
+        r"usr/lib[^/]*/libevent-[0-9.]+\.so[0-9.]*",
+        # TODO(b/273599604): Figure out why libdcerpc-samr.so.0.0.1 is not
+        # getting STACK records on kevin.
+        r"usr/lib[^/]*/libdcerpc-samr\.so[0-9.]*",
+        # TODO(b/272613635): Figure out why these libabsl shared libraries are
+        # not getting STACK records.
+        r"usr/lib[^/]*/libabsl_bad_variant_access\.so\.[0-9.]+",
+        r"usr/lib[^/]*/libabsl_random_internal_platform\.so\.[0-9.]+",
+        r"usr/lib[^/]*/libabsl_flags\.so\.[0-9.]+",
+        r"usr/lib[^/]*/libabsl_bad_any_cast_impl\.so\.[0-9.]+",
+        r"usr/lib[^/]*/libabsl_bad_optional_access\.so\.[0-9.]+",
+        # TODO(b/273607289): Figure out why libgrpc++_error_details.so.1.43.0 is
+        # not getting STACK records on kevin.
+        r"usr/lib[^/]*/libgrpc\+\+_error_details\.so\.[0-9.]+",
+    )
+)
 
 SymbolHeader = collections.namedtuple(
     "SymbolHeader",
@@ -78,8 +181,323 @@ class SymbolGenerationResult(enum.Enum):
     EXPECTED_FAILURE = 3
 
 
+class ExpectedFiles(enum.Enum):
+    """The files always expect to see dump_syms run on.
+
+    We do extra validation on a few, semi-randomly chosen files. If we do not
+    create symbol files for these ELFs, something is very wrong.
+    """
+
+    ASH_CHROME = enum.auto()
+    LIBC = enum.auto()
+    CRASH_REPORTER = enum.auto()
+    LIBMETRICS = enum.auto()
+
+
+ALL_EXPECTED_FILES = frozenset(
+    (
+        ExpectedFiles.ASH_CHROME,
+        ExpectedFiles.LIBC,
+        ExpectedFiles.CRASH_REPORTER,
+        ExpectedFiles.LIBMETRICS,
+    )
+)
+
+
+class SymbolFileLineCounts:
+    """Counts of the various types of lines in a .sym file"""
+
+    LINE_NUMBER_REGEX = re.compile(r"^([0-9a-f]+)")
+
+    def __init__(self, sym_file: str, elf_file: str):
+        # https://chromium.googlesource.com/breakpad/breakpad/+/HEAD/docs/symbol_files.md
+        # explains what these line types are.
+        self.module_lines = 0
+        self.file_lines = 0
+        self.inline_origin_lines = 0
+        self.func_lines = 0
+        self.inline_lines = 0
+        self.line_number_lines = 0
+        self.public_lines = 0
+        self.stack_lines = 0
+        # Not listed in the documentation but still present.
+        self.info_lines = 0
+
+        with open(sym_file, mode="r", encoding="utf-8") as f:
+            for line in f:
+                words = line.split()
+                expected_words_max = None
+                if not words:
+                    raise ValueError(
+                        f"{elf_file}: symbol file has unexpected blank line"
+                    )
+
+                line_type = words[0]
+                if line_type == "MODULE":
+                    self.module_lines += 1
+                    expected_words_min = 5
+                    expected_words_max = 5
+                elif line_type == "FILE":
+                    self.file_lines += 1
+                    expected_words_min = 3
+                    # No max, filenames can have spaces.
+                elif line_type == "INLINE_ORIGIN":
+                    self.inline_origin_lines += 1
+                    expected_words_min = 3
+                    # No max, function parameter lists can have spaces.
+                elif line_type == "FUNC":
+                    self.func_lines += 1
+                    expected_words_min = 5
+                    # No max, function parameter lists can have spaces.
+                elif line_type == "INLINE":
+                    self.inline_lines += 1
+                    expected_words_min = 5
+                    # No max, INLINE can have multiple address pairs.
+                elif SymbolFileLineCounts.LINE_NUMBER_REGEX.match(line_type):
+                    self.line_number_lines += 1
+                    expected_words_min = 4
+                    expected_words_max = 4
+                    line_type = "line number"
+                elif line_type == "PUBLIC":
+                    self.public_lines += 1
+                    expected_words_min = 4
+                    if os.path.basename(elf_file).startswith("libc.so"):
+                        # TODO(b/251003272): libc.so sometimes produces PUBLIC
+                        # records with no symbol name. This is an error but is
+                        # not affecting our ability to decode stacks.
+                        expected_words_min = 3
+                    # No max, function parameter lists can have spaces.
+                elif line_type == "STACK":
+                    self.stack_lines += 1
+                    expected_words_min = 5
+                    # No max, expressions can be complex.
+                elif line_type == "INFO":
+                    self.info_lines += 1
+                    # Not documented, so unclear what the min & max are
+                    expected_words_min = None
+                else:
+                    raise ValueError(
+                        f"{elf_file}: symbol file has unknown line type "
+                        f"{line_type}"
+                    )
+
+                if expected_words_max is not None:
+                    if not (
+                        expected_words_min <= len(words) <= expected_words_max
+                    ):
+                        raise ValueError(
+                            f"{elf_file}: symbol file has {line_type} line "
+                            f"with {len(words)} words (expected "
+                            f"{expected_words_min} - {expected_words_max})"
+                        )
+                elif expected_words_min is not None:
+                    if len(words) < expected_words_min:
+                        raise ValueError(
+                            f"{elf_file}: symbol file has {line_type} line "
+                            f"with {len(words)} words (expected "
+                            f"{expected_words_min} or more)"
+                        )
+
+
+def ValidateSymbolFile(
+    sym_file: str,
+    elf_file: str,
+    sysroot: Optional[str],
+    found_files: Optional[multiprocessing.managers.ListProxy],
+) -> bool:
+    """Checks that the given sym_file has enough info for us to get good stacks.
+
+    Validates that the given sym_file has enough information for us to get
+    good error reports -- enough STACK records to unwind the stack and enough
+    FUNC or PUBLIC records to turn the function addresses into human-readable
+    names.
+
+    Args:
+        sym_file: The complete path to the breakpad symbol file to validate
+        elf_file: The complete path to the elf file which was the source of the
+            symbol file.
+        sysroot: If not None, the root of the build directory ('/build/eve', for
+            instance).
+        found_files: A multiprocessing.managers.ListProxy list containing
+            ExpectedFiles, representing which of the "should always be present"
+            files have been processed.
+
+    Returns:
+        True if the symbol file passes validation.
+    """
+    if sysroot is not None:
+        relative_path = os.path.relpath(elf_file, sysroot)
+    else:
+        relative_path = os.path.relpath(elf_file, "/")
+
+    if relative_path in ALLOWLIST_NO_SYMBOL_FILE_VALIDATION:
+        return True
+    for regex in ALLOWLIST_NO_SYMBOL_FILE_VALIDATION_RE:
+        if regex.match(relative_path):
+            return True
+
+    counts = SymbolFileLineCounts(sym_file, elf_file)
+
+    errors = False
+    if counts.stack_lines == 0:
+        # Use the elf_file in error messages; sym_file is still a temporary
+        # file with a meaningless-to-humans name right now.
+        logging.warning("%s: Symbol file has no STACK records", elf_file)
+        errors = True
+    if counts.module_lines != 1:
+        logging.warning(
+            "%s: Symbol file has %d MODULE lines", elf_file, counts.module_lines
+        )
+        errors = True
+    # Many shared object files have only PUBLIC functions. In theory,
+    # executables should always have at least one FUNC (main) and some line
+    # numbers, but for reasons I'm unclear on, C-based executables often just
+    # have PUBLIC records. dump_syms does not support line numbers after
+    # PUBLIC records, only FUNC records, so such executables will also have
+    # no line numbers.
+    if counts.public_lines == 0 and counts.func_lines == 0:
+        logging.warning(
+            "%s: Symbol file has no FUNC or PUBLIC records", elf_file
+        )
+        errors = True
+    # However, if we get a FUNC record, we do want line numbers for it.
+    if counts.func_lines > 0 and counts.line_number_lines == 0:
+        logging.warning(
+            "%s: Symbol file has FUNC records but no line numbers", elf_file
+        )
+        errors = True
+
+    if counts.line_number_lines > 0 and counts.file_lines == 0:
+        logging.warning(
+            "%s: Symbol file has line number records but no FILE records",
+            elf_file,
+        )
+        errors = True
+    if counts.inline_lines > 0 and counts.file_lines == 0:
+        logging.warning(
+            "%s: Symbol file has INLINE records but no FILE records", elf_file
+        )
+        errors = True
+
+    if counts.inline_lines > 0 and counts.inline_origin_lines == 0:
+        logging.warning(
+            "%s: Symbol file has INLINE records but no INLINE_ORIGIN records",
+            elf_file,
+        )
+        errors = True
+
+    def _AddFoundFile(files, found):
+        """Add another file to the list of expected files we've found."""
+        if files is not None:
+            files.append(found)
+
+    # Extra validation for a few ELF files which are special. Either these are
+    # unusually important to the system (chrome binary, which is where a large
+    # fraction of our crashes occur, and libc.so, which is in every stack), or
+    # they are some hand-chosen ELF files which stand in for "normal" platform2
+    # binaries. Not all ELF files would pass the extra validation, so we can't
+    # run these checks on every ELF, but we want to make sure we don't end up
+    # with, say, a chrome build or a platform2 build with just one or two FUNC
+    # records on every binary.
+    if relative_path == "opt/google/chrome/chrome":
+        _AddFoundFile(found_files, ExpectedFiles.ASH_CHROME)
+        if counts.func_lines < 100000:
+            logging.warning(
+                "chrome should have at least 100,000 FUNC records, found %d",
+                counts.func_lines,
+            )
+            errors = True
+        if counts.stack_lines < 1000000:
+            logging.warning(
+                "chrome should have at least 1,000,000 STACK records, found %d",
+                counts.stack_lines,
+            )
+            errors = True
+        if counts.line_number_lines < 1000000:
+            logging.warning(
+                "chrome should have at least 1,000,000 line number records, "
+                "found %d",
+                counts.line_number_lines,
+            )
+            errors = True
+    # Lacros symbol files are not generated as part of the ChromeOS build and
+    # can't be validated here.
+    # TODO(b/273836486): Add similar logic to the code that generates Lacros
+    # symbols.
+    elif os.path.basename(relative_path).startswith("libc.so"):
+        _AddFoundFile(found_files, ExpectedFiles.LIBC)
+        if counts.public_lines < 100:
+            logging.warning(
+                "%s should have at least 100 PUBLIC records, found %d",
+                elf_file,
+                counts.public_lines,
+            )
+            errors = True
+        if counts.stack_lines < 10000:
+            logging.warning(
+                "%s should have at least 10000 STACK records, found %d",
+                elf_file,
+                counts.stack_lines,
+            )
+            errors = True
+    elif relative_path == "sbin/crash_reporter":
+        # Representative platform2 executable.
+        _AddFoundFile(found_files, ExpectedFiles.CRASH_REPORTER)
+        if counts.stack_lines < 1000:
+            logging.warning(
+                "crash_reporter should have at least 1000 STACK records, "
+                "found %d",
+                counts.stack_lines,
+            )
+            errors = True
+        if counts.func_lines < 1000:
+            logging.warning(
+                "crash_reporter should have at least 1000 FUNC records, "
+                "found %d",
+                counts.func_lines,
+            )
+            errors = True
+        if counts.line_number_lines < 10000:
+            logging.warning(
+                "crash_reporter should have at least 10,000 line number "
+                "records, found %d",
+                counts.line_number_lines,
+            )
+            errors = True
+    elif os.path.basename(relative_path) == "libmetrics.so":
+        # Representative platform2 shared library.
+        _AddFoundFile(found_files, ExpectedFiles.LIBMETRICS)
+        if counts.func_lines < 100:
+            logging.warning(
+                "libmetrics should have at least 100 FUNC records, found %d",
+                counts.func_lines,
+            )
+            errors = True
+        if counts.public_lines == 0:
+            logging.warning(
+                "libmetrics should have at least 1 PUBLIC record, found %d",
+                counts.public_lines,
+            )
+            errors = True
+        if counts.stack_lines < 1000:
+            logging.warning(
+                "libmetrics should have at least 1000 STACK records, found %d",
+                counts.stack_lines,
+            )
+            errors = True
+        if counts.line_number_lines < 5000:
+            logging.warning(
+                "libmetrics should have at least 5000 line number records, "
+                "found %d",
+                counts.line_number_lines,
+            )
+            errors = True
+
+    return not errors
+
+
 def _ExpectGoodSymbols(elf_file, sysroot):
-    """Determines if we expect dump_syms to create good symbols
+    """Determines if we expect dump_syms to create good symbols.
 
     We know that certain types of files never generate good symbols. Distinguish
     those from the majority of elf files which should generate good symbols.
@@ -87,7 +505,7 @@ def _ExpectGoodSymbols(elf_file, sysroot):
     Args:
         elf_file: The complete path to the file which we will pass to dump_syms
         sysroot: If not None, the root of the build directory ('/build/eve', for
-                 instance)
+            instance)
 
     Returns:
         True if the elf file should generate good symbols, False if not.
@@ -160,6 +578,7 @@ def GenerateBreakpadSymbol(
     strip_cfi=False,
     sysroot=None,
     num_errors=None,
+    found_files=None,
     dump_syms_cmd="dump_syms",
 ):
     """Generate the symbols for |elf_file| using |debug_file|
@@ -171,6 +590,9 @@ def GenerateBreakpadSymbol(
       strip_cfi: Do not generate CFI data
       sysroot: Path to the sysroot with the elf_file under it
       num_errors: An object to update with the error count (needs a .value member)
+      found_files: A multiprocessing.managers.ListProxy list containing
+          ExpectedFiles, representing which of the "should always be present"
+          files have been processed.
       dump_syms_cmd: Command to use for dumping symbols.
 
     Returns:
@@ -220,7 +642,7 @@ def GenerateBreakpadSymbol(
             logging.warning("output:\n%s", result.stderr.decode("utf-8"))
 
     def _DumpAllowingBasicFallback():
-        """Dump symbols for a executable when we do NOT expect to get good symbols.
+        """Dump symbols for an ELF when we do NOT expect to get good symbols.
 
         Returns:
             A SymbolGenerationResult
@@ -267,7 +689,7 @@ def GenerateBreakpadSymbol(
         return SymbolGenerationResult.SUCCESS
 
     def _DumpExpectingSymbols():
-        """Dump symbols for a executable when we expect to get good symbols.
+        """Dump symbols for an ELF when we expect to get good symbols.
 
         Returns:
             A SymbolGenerationResult. We never expect failure, so the result
@@ -282,6 +704,24 @@ def GenerateBreakpadSymbol(
         if result.returncode:
             _CrashCheck(result, [elf_file, debug_file], "unexpected failure")
             return SymbolGenerationResult.UNEXPECTED_FAILURE
+
+        # TODO(b/270240549): Remove try/except, allow exceptions to just
+        # fail the script. The try/except is just here until we are sure this
+        # will not break the build.
+        try:
+            if not ValidateSymbolFile(
+                temp.name, elf_file, sysroot, found_files
+            ):
+                logging.warning("%s: symbol file failed validation", elf_file)
+                return SymbolGenerationResult.UNEXPECTED_FAILURE
+        except ValueError as e:
+            logging.warning(
+                "%s: symbol file failed validation due to exception %s",
+                elf_file,
+                e,
+            )
+            return SymbolGenerationResult.UNEXPECTED_FAILURE
+
         return SymbolGenerationResult.SUCCESS
 
     osutils.SafeMakedirs(breakpad_dir)
@@ -430,31 +870,48 @@ def GenerateBreakpadSymbols(
 
             targets.append((os.path.getsize(debug_file), elf_file, debug_file))
 
-    bg_errors = parallel.WrapMultiprocessing(multiprocessing.Value, "i")
-    if file_filter:
-        files_not_found = [x for x, found in file_filter.items() if not found]
-        bg_errors.value += len(files_not_found)
-        if files_not_found:
-            logging.error("Failed to find requested files: %s", files_not_found)
+    with multiprocessing.Manager() as mp_manager:
+        bg_errors = parallel.WrapMultiprocessing(multiprocessing.Value, "i")
+        found_files = parallel.WrapMultiprocessing(mp_manager.list)
+        if file_filter:
+            files_not_found = [
+                x for x, found in file_filter.items() if not found
+            ]
+            bg_errors.value += len(files_not_found)
+            if files_not_found:
+                logging.error(
+                    "Failed to find requested files: %s", files_not_found
+                )
 
-    # Now start generating symbols for the discovered elfs.
-    with parallel.BackgroundTaskRunner(
-        GenerateBreakpadSymbol,
-        breakpad_dir=breakpad_dir,
-        strip_cfi=strip_cfi,
-        num_errors=bg_errors,
-        processes=num_processes,
-        sysroot=sysroot,
-    ) as queue:
-        for _, elf_file, debug_file in sorted(targets, reverse=True):
-            if generate_count == 0:
-                break
-
-            queue.put([elf_file, debug_file])
-            if generate_count is not None:
-                generate_count -= 1
+        # Now start generating symbols for the discovered elfs.
+        with parallel.BackgroundTaskRunner(
+            GenerateBreakpadSymbol,
+            breakpad_dir=breakpad_dir,
+            strip_cfi=strip_cfi,
+            num_errors=bg_errors,
+            processes=num_processes,
+            sysroot=sysroot,
+            found_files=found_files,
+        ) as queue:
+            for _, elf_file, debug_file in sorted(targets, reverse=True):
                 if generate_count == 0:
                     break
+
+                queue.put([elf_file, debug_file])
+                if generate_count is not None:
+                    generate_count -= 1
+                    if generate_count == 0:
+                        break
+
+        missing = ALL_EXPECTED_FILES - frozenset(found_files)
+        if missing and not file_filter and generate_count is None:
+            logging.warning(
+                "Not all expected files were processed successfully, "
+                "missing %s",
+                missing,
+            )
+            # TODO(b/270240549): Increment bg_errors.value here once we check
+            # that this isn't going to fail any current builds.
 
     return bg_errors.value
 

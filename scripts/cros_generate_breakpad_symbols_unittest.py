@@ -6,7 +6,10 @@
 
 import ctypes
 import io
+import logging
+import multiprocessing
 import os
+import pathlib
 from unittest import mock
 
 from chromite.lib import cros_test_lib
@@ -298,7 +301,13 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
             "/lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, "
             "BuildID[sha1]=cf9a21fa6b14bfb2dfcb76effd713c4536014d95, stripped"
         )
-        self.rc.SetDefaultCmdResult(stdout="MODULE OS CPU ID NAME")
+        # A symbol file which would pass validation.
+        MINIMAL_SYMBOL_FILE = (
+            "MODULE OS CPU ID NAME\n"
+            "PUBLIC f10 0 func\n"
+            "STACK CFI INIT f10 22 .cfa: $rsp 8 + .ra: .cfa -8 + ^\n"
+        )
+        self.rc.SetDefaultCmdResult(stdout=MINIMAL_SYMBOL_FILE)
         self.rc.AddCmdResult(
             ["/usr/bin/file", self.elf_file], stdout=self.FILE_OUT
         )
@@ -469,8 +478,8 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         FILE_OUT_GO = go_binary + (
             ": ELF 64-bit LSB executable, x86-64, "
             "version 1 (SYSV), statically linked, "
-            "Go BuildID=KKXVlL66E8Qmngr4qll9/5kOKGZw9I7TmNhoqKLqq/SiYVJam6w5Fo39B3BtDo/ba8_ceezZ-3R4qEv6_-K, "
-            "not stripped"
+            "Go BuildID=KKXVlL66E8Qmngr4qll9/5kOKGZw9I7TmNhoqKLqq/SiYVJam6w5Fo"
+            "39B3BtDo/ba8_ceezZ-3R4qEv6_-K, not stripped"
         )
         self.rc.AddCmdResult(["/usr/bin/file", go_binary], stdout=FILE_OUT_GO)
         self.rc.AddCmdResult(
@@ -553,6 +562,616 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
     def testUsrLocalSkip(self):
         """Binaries in /usr/local should call _DumpAllowingBasicFallback()"""
         self._testBinaryIsInLocalFallback("usr/local", "minidump_stackwalk")
+
+
+class ValidateSymbolFileTest(cros_test_lib.TempDirTestCase):
+    """Tests ValidateSymbolFile"""
+
+    def _GetTestdataFile(self, filename: str) -> str:
+        """Gets the path to a file in the testdata directory.
+
+        Args:
+            filename: The base filename of the file.
+
+        Returns:
+            A string with the complete path to the file.
+        """
+        return os.path.join(os.path.dirname(__file__), "testdata", filename)
+
+    def testValidSymbolFiles(self):
+        """Make sure ValidateSymbolFile passes on valid files"""
+
+        # All files are in the testdata/ subdirectory.
+        VALID_SYMBOL_FILES = [
+            # A "normal" symbol file from an executable.
+            "basic.sym",
+            # A "normal" symbol file from a shared library.
+            "basic_lib.sym",
+            # A symbol file with PUBLIC records but no FUNC records.
+            "public_only.sym",
+            # A symbol file with FUNC records but no PUBLIC records.
+            "func_only.sym",
+            # A symbol file with at least one of every line type.
+            "all_line_types.sym",
+        ]
+
+        for file in VALID_SYMBOL_FILES:
+            with self.subTest(
+                file=file
+            ), multiprocessing.Manager() as mp_manager:
+                found_files = mp_manager.list()
+                self.assertTrue(
+                    cros_generate_breakpad_symbols.ValidateSymbolFile(
+                        self._GetTestdataFile(file),
+                        "/build/board/bin/foo",
+                        "/build/board",
+                        found_files,
+                    )
+                )
+                self.assertFalse(found_files)
+
+    def testInvalidSymbolFiles(self):
+        """Make sure ValidateSymbolFile fails on invalid files.
+
+        This test only covers cases that return false, not cases that raise
+        exceptions.
+        """
+
+        class InvalidSymbolFile:
+            """The name of an invalid symbol file + the expected error msg."""
+
+            def __init__(self, filename, expected_errors):
+                self.filename = filename
+                self.expected_errors = expected_errors
+
+        INVALID_SYMBOL_FILES = [
+            InvalidSymbolFile(
+                "bad_no_func_or_public.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has no FUNC or PUBLIC records"
+                ],
+            ),
+            InvalidSymbolFile(
+                "bad_no_stack.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has no STACK records"
+                ],
+            ),
+            InvalidSymbolFile(
+                "bad_no_module.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has 0 MODULE lines"
+                ],
+            ),
+            InvalidSymbolFile(
+                "bad_two_modules.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has 2 MODULE lines"
+                ],
+            ),
+            InvalidSymbolFile(
+                "bad_func_no_line_numbers.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has FUNC records but no line numbers"
+                ],
+            ),
+            InvalidSymbolFile(
+                "bad_line_numbers_no_file.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has line number records but no FILE records"
+                ],
+            ),
+            InvalidSymbolFile(
+                "bad_inline_no_files.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has INLINE records but no FILE records"
+                ],
+            ),
+            InvalidSymbolFile(
+                "bad_inline_no_origins.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has INLINE records but no INLINE_ORIGIN "
+                    "records"
+                ],
+            ),
+            InvalidSymbolFile(
+                "blank.sym",
+                [
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has no STACK records",
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has 0 MODULE lines",
+                    "WARNING:root:/build/board/bin/foo: "
+                    "Symbol file has no FUNC or PUBLIC records",
+                ],
+            ),
+        ]
+
+        for file in INVALID_SYMBOL_FILES:
+            with self.subTest(
+                file=file.filename
+            ), multiprocessing.Manager() as mp_manager:
+                found_files = mp_manager.list()
+                with self.assertLogs(level=logging.WARNING) as cm:
+                    self.assertFalse(
+                        cros_generate_breakpad_symbols.ValidateSymbolFile(
+                            self._GetTestdataFile(file.filename),
+                            "/build/board/bin/foo",
+                            "/build/board",
+                            found_files,
+                        )
+                    )
+                self.assertEqual(file.expected_errors, cm.output)
+                self.assertFalse(found_files)
+
+    def testInvalidSymbolFilesWhichRaise(self):
+        """Test ValidateSymbolFile raise exceptions on certain files"""
+
+        class InvalidSymbolFile:
+            """The invalid symbol file + the expected exception message"""
+
+            def __init__(self, filename, expected_exception_regex):
+                self.filename = filename
+                self.expected_exception_regex = expected_exception_regex
+
+        INVALID_SYMBOL_FILES = [
+            InvalidSymbolFile(
+                "bad_unknown_line_type.sym",
+                "symbol file has unknown line type UNKNOWN",
+            ),
+            InvalidSymbolFile(
+                "bad_blank_line.sym",
+                "symbol file has unexpected blank line",
+            ),
+            InvalidSymbolFile(
+                "bad_short_func.sym",
+                r"symbol file has FUNC line with 2 words "
+                r"\(expected 5 or more\)",
+            ),
+            InvalidSymbolFile(
+                "bad_short_line_number.sym",
+                r"symbol file has line number line with 3 words "
+                r"\(expected 4 - 4\)",
+            ),
+            InvalidSymbolFile(
+                "bad_long_line_number.sym",
+                r"symbol file has line number line with 5 words "
+                r"\(expected 4 - 4\)",
+            ),
+        ]
+
+        for file in INVALID_SYMBOL_FILES:
+            with self.subTest(
+                file=file.filename
+            ), multiprocessing.Manager() as mp_manager:
+                found_files = mp_manager.list()
+                self.assertRaisesRegex(
+                    ValueError,
+                    file.expected_exception_regex,
+                    cros_generate_breakpad_symbols.ValidateSymbolFile,
+                    self._GetTestdataFile(file.filename),
+                    "/build/board/bin/foo",
+                    "/build/board",
+                    found_files,
+                )
+
+    def testAllowlist(self):
+        """Test that ELFs on the allowlist are allowed to pass."""
+        with multiprocessing.Manager() as mp_manager:
+            found_files = mp_manager.list()
+            self.assertTrue(
+                cros_generate_breakpad_symbols.ValidateSymbolFile(
+                    self._GetTestdataFile("bad_no_stack.sym"),
+                    "/build/board/opt/google/chrome/nacl_helper_bootstrap",
+                    "/build/board",
+                    found_files,
+                )
+            )
+            self.assertFalse(found_files)
+
+    def testAllowlistRegex(self):
+        """Test that ELFs on the regex-based allowlist are allowed to pass."""
+        with multiprocessing.Manager() as mp_manager:
+            found_files = mp_manager.list()
+            self.assertTrue(
+                cros_generate_breakpad_symbols.ValidateSymbolFile(
+                    self._GetTestdataFile("bad_no_stack.sym"),
+                    "/build/board/usr/lib/libcros_ml_core.so",
+                    "/build/board",
+                    found_files,
+                )
+            )
+            self.assertFalse(found_files)
+
+    def _CreateSymbolFile(
+        self,
+        sym_file: pathlib.Path,
+        func_lines: int = 0,
+        public_lines: int = 0,
+        stack_lines: int = 0,
+        line_number_lines: int = 0,
+    ) -> None:
+        """Creates a symbol file.
+
+        Creates a symbol file with the given number of lines (and enough other
+        lines to pass validation) in the temp directory.
+
+        To pass validation, chrome.sym files must be huge; create them
+        programmatically during the test instead of checking in a real 800MB+
+        chrome symbol file.
+        """
+        with sym_file.open(mode="w", encoding="utf-8") as f:
+            f.write("MODULE OS CPU ID NAME\n")
+            f.write("FILE 0 /path/to/source.cc\n")
+            for func in range(0, func_lines):
+                f.write(f"FUNC {func} 1 0 function{func}\n")
+            for public in range(0, public_lines):
+                f.write(f"PUBLIC {public} 0 Public{public}\n")
+            for line in range(0, line_number_lines):
+                f.write(f"{line} 1 {line} 0\n")
+            for stack in range(0, stack_lines):
+                f.write(f"STACK CFI {stack} .cfa: $esp {stack} +\n")
+
+    def testValidChromeSymbolFile(self):
+        """Test that a chrome symbol file can pass the additional checks"""
+        sym_file = self.tempdir / "chrome.sym"
+        self._CreateSymbolFile(
+            sym_file,
+            func_lines=100000,
+            public_lines=10,
+            stack_lines=1000000,
+            line_number_lines=1000000,
+        )
+        with multiprocessing.Manager() as mp_manager:
+            found_files = mp_manager.list()
+            self.assertTrue(
+                cros_generate_breakpad_symbols.ValidateSymbolFile(
+                    str(sym_file),
+                    "/build/board/opt/google/chrome/chrome",
+                    "/build/board",
+                    found_files,
+                )
+            )
+            self.assertEqual(
+                list(found_files),
+                [cros_generate_breakpad_symbols.ExpectedFiles.ASH_CHROME],
+            )
+
+    def testInvalidChromeSymbolFile(self):
+        """Test that a chrome symbol file is held to higher standards."""
+
+        class ChromeSymbolFileTest:
+            """Defines the subtest for an invalid Chrome symbol file."""
+
+            def __init__(
+                self,
+                name,
+                expected_error,
+                func_lines=100000,
+                stack_lines=1000000,
+                line_number_lines=1000000,
+            ):
+                self.name = name
+                self.expected_error = expected_error
+                self.func_lines = func_lines
+                self.stack_lines = stack_lines
+                self.line_number_lines = line_number_lines
+
+        CHROME_SYMBOL_TESTS = [
+            ChromeSymbolFileTest(
+                name="Insufficient FUNC records",
+                func_lines=10000,
+                expected_error="chrome should have at least 100,000 FUNC "
+                "records, found 10000",
+            ),
+            ChromeSymbolFileTest(
+                name="Insufficient STACK records",
+                stack_lines=100000,
+                expected_error="chrome should have at least 1,000,000 STACK "
+                "records, found 100000",
+            ),
+            ChromeSymbolFileTest(
+                name="Insufficient line number records",
+                line_number_lines=100000,
+                expected_error="chrome should have at least 1,000,000 "
+                "line number records, found 100000",
+            ),
+        ]
+        for test in CHROME_SYMBOL_TESTS:
+            with self.subTest(
+                name=test.name
+            ), multiprocessing.Manager() as mp_manager:
+                sym_file = self.tempdir / "chrome.sym"
+                self._CreateSymbolFile(
+                    sym_file,
+                    func_lines=test.func_lines,
+                    public_lines=10,
+                    stack_lines=test.stack_lines,
+                    line_number_lines=test.line_number_lines,
+                )
+                found_files = mp_manager.list()
+                with self.assertLogs(level=logging.WARNING) as cm:
+                    self.assertFalse(
+                        cros_generate_breakpad_symbols.ValidateSymbolFile(
+                            str(sym_file),
+                            "/build/board/opt/google/chrome/chrome",
+                            "/build/board",
+                            found_files,
+                        )
+                    )
+                self.assertIn(test.expected_error, cm.output[0])
+                self.assertEqual(len(cm.output), 1)
+
+    def testValidLibcSymbolFile(self):
+        """Test that a libc.so symbol file can pass the additional checks."""
+        with multiprocessing.Manager() as mp_manager:
+            sym_file = self.tempdir / "libc.so.sym"
+            self._CreateSymbolFile(
+                sym_file, public_lines=200, stack_lines=20000
+            )
+            found_files = mp_manager.list()
+            self.assertTrue(
+                cros_generate_breakpad_symbols.ValidateSymbolFile(
+                    str(sym_file),
+                    "/build/board/lib64/libc.so.6",
+                    "/build/board",
+                    found_files,
+                )
+            )
+            self.assertEqual(
+                list(found_files),
+                [cros_generate_breakpad_symbols.ExpectedFiles.LIBC],
+            )
+
+    def testInvalidLibcSymbolFile(self):
+        """Test that a libc.so symbol file is held to higher standards."""
+
+        class LibcSymbolFileTest:
+            """Defines the subtest for an invalid libc symbol file."""
+
+            def __init__(
+                self,
+                name,
+                expected_error,
+                public_lines=200,
+                stack_lines=20000,
+            ):
+                self.name = name
+                self.expected_error = expected_error
+                self.public_lines = public_lines
+                self.stack_lines = stack_lines
+
+        LIBC_SYMBOL_TESTS = [
+            LibcSymbolFileTest(
+                name="Insufficient PUBLIC records",
+                public_lines=50,
+                expected_error="/build/board/lib64/libc.so.6 should have at "
+                "least 100 PUBLIC records, found 50",
+            ),
+            LibcSymbolFileTest(
+                name="Insufficient STACK records",
+                stack_lines=1000,
+                expected_error="/build/board/lib64/libc.so.6 should have at "
+                "least 10000 STACK records, found 1000",
+            ),
+        ]
+        for test in LIBC_SYMBOL_TESTS:
+            with self.subTest(
+                name=test.name
+            ), multiprocessing.Manager() as mp_manager:
+                sym_file = self.tempdir / "libc.so.sym"
+                self._CreateSymbolFile(
+                    sym_file,
+                    public_lines=test.public_lines,
+                    stack_lines=test.stack_lines,
+                )
+                found_files = mp_manager.list()
+                with self.assertLogs(level=logging.WARNING) as cm:
+                    self.assertFalse(
+                        cros_generate_breakpad_symbols.ValidateSymbolFile(
+                            str(sym_file),
+                            "/build/board/lib64/libc.so.6",
+                            "/build/board",
+                            found_files,
+                        )
+                    )
+                self.assertIn(test.expected_error, cm.output[0])
+                self.assertEqual(len(cm.output), 1)
+
+    def testValidCrashReporterSymbolFile(self):
+        """Test a crash_reporter symbol file can pass the additional checks."""
+        with multiprocessing.Manager() as mp_manager:
+            sym_file = self.tempdir / "crash_reporter.sym"
+            self._CreateSymbolFile(
+                sym_file,
+                func_lines=2000,
+                public_lines=10,
+                stack_lines=2000,
+                line_number_lines=20000,
+            )
+            found_files = mp_manager.list()
+            self.assertTrue(
+                cros_generate_breakpad_symbols.ValidateSymbolFile(
+                    str(sym_file),
+                    "/build/board/sbin/crash_reporter",
+                    "/build/board",
+                    found_files,
+                )
+            )
+            self.assertEqual(
+                list(found_files),
+                [cros_generate_breakpad_symbols.ExpectedFiles.CRASH_REPORTER],
+            )
+
+    def testInvalidCrashReporterSymbolFile(self):
+        """Test that a crash_reporter symbol file is held to higher standards"""
+
+        class CrashReporterSymbolFileTest:
+            """Defines the subtest for an invalid crash_reporter symbol file."""
+
+            def __init__(
+                self,
+                name,
+                expected_error,
+                func_lines=2000,
+                stack_lines=2000,
+                line_number_lines=20000,
+            ):
+                self.name = name
+                self.expected_error = expected_error
+                self.func_lines = func_lines
+                self.stack_lines = stack_lines
+                self.line_number_lines = line_number_lines
+
+        CRASH_REPORTER_SYMBOL_TESTS = [
+            CrashReporterSymbolFileTest(
+                name="Insufficient FUNC records",
+                func_lines=500,
+                expected_error="crash_reporter should have at least 1000 FUNC "
+                "records, found 500",
+            ),
+            CrashReporterSymbolFileTest(
+                name="Insufficient STACK records",
+                stack_lines=100,
+                expected_error="crash_reporter should have at least 1000 STACK "
+                "records, found 100",
+            ),
+            CrashReporterSymbolFileTest(
+                name="Insufficient line number records",
+                line_number_lines=2000,
+                expected_error="crash_reporter should have at least 10,000 "
+                "line number records, found 2000",
+            ),
+        ]
+        for test in CRASH_REPORTER_SYMBOL_TESTS:
+            with self.subTest(
+                name=test.name
+            ), multiprocessing.Manager() as mp_manager:
+                sym_file = self.tempdir / "crash_reporter.sym"
+                self._CreateSymbolFile(
+                    sym_file,
+                    func_lines=test.func_lines,
+                    stack_lines=test.stack_lines,
+                    line_number_lines=test.line_number_lines,
+                )
+                found_files = mp_manager.list()
+                with self.assertLogs(level=logging.WARNING) as cm:
+                    self.assertFalse(
+                        cros_generate_breakpad_symbols.ValidateSymbolFile(
+                            str(sym_file),
+                            "/build/board/sbin/crash_reporter",
+                            "/build/board",
+                            found_files,
+                        )
+                    )
+                self.assertIn(test.expected_error, cm.output[0])
+                self.assertEqual(len(cm.output), 1)
+
+    def testValidLibMetricsSymbolFile(self):
+        """Test a libmetrics.so symbol file can pass the additional checks."""
+        with multiprocessing.Manager() as mp_manager:
+            sym_file = self.tempdir / "libmetrics.so.sym"
+            self._CreateSymbolFile(
+                sym_file,
+                func_lines=200,
+                public_lines=2,
+                stack_lines=2000,
+                line_number_lines=10000,
+            )
+            found_files = mp_manager.list()
+            self.assertTrue(
+                cros_generate_breakpad_symbols.ValidateSymbolFile(
+                    str(sym_file),
+                    "/build/board/usr/lib64/libmetrics.so",
+                    "/build/board",
+                    found_files,
+                )
+            )
+            self.assertEqual(
+                list(found_files),
+                [cros_generate_breakpad_symbols.ExpectedFiles.LIBMETRICS],
+            )
+
+    def testInvalidLibMetricsSymbolFile(self):
+        """Test that a libmetrics.so symbol file is held to higher standards."""
+
+        class LibMetricsSymbolFileTest:
+            """Defines the subtest for an invalid libmetrics.so symbol file."""
+
+            def __init__(
+                self,
+                name,
+                expected_error,
+                func_lines=200,
+                public_lines=2,
+                stack_lines=2000,
+                line_number_lines=10000,
+            ):
+                self.name = name
+                self.expected_error = expected_error
+                self.func_lines = func_lines
+                self.public_lines = public_lines
+                self.stack_lines = stack_lines
+                self.line_number_lines = line_number_lines
+
+        LIBMETRICS_SYMBOL_TESTS = [
+            LibMetricsSymbolFileTest(
+                name="Insufficient FUNC records",
+                func_lines=10,
+                expected_error="libmetrics should have at least 100 FUNC "
+                "records, found 10",
+            ),
+            LibMetricsSymbolFileTest(
+                name="Insufficient PUBLIC records",
+                public_lines=0,
+                expected_error="libmetrics should have at least 1 PUBLIC "
+                "record, found 0",
+            ),
+            LibMetricsSymbolFileTest(
+                name="Insufficient STACK records",
+                stack_lines=500,
+                expected_error="libmetrics should have at least 1000 STACK "
+                "records, found 500",
+            ),
+            LibMetricsSymbolFileTest(
+                name="Insufficient line number records",
+                line_number_lines=2000,
+                expected_error="libmetrics should have at least 5000 "
+                "line number records, found 2000",
+            ),
+        ]
+        for test in LIBMETRICS_SYMBOL_TESTS:
+            with self.subTest(
+                name=test.name
+            ), multiprocessing.Manager() as mp_manager:
+                sym_file = self.tempdir / "libmetrics.so.sym"
+                self._CreateSymbolFile(
+                    sym_file,
+                    func_lines=test.func_lines,
+                    public_lines=test.public_lines,
+                    stack_lines=test.stack_lines,
+                    line_number_lines=test.line_number_lines,
+                )
+                found_files = mp_manager.list()
+                with self.assertLogs(level=logging.WARNING) as cm:
+                    self.assertFalse(
+                        cros_generate_breakpad_symbols.ValidateSymbolFile(
+                            str(sym_file),
+                            "/build/board/usr/lib64/libmetrics.so",
+                            "/build/board",
+                            found_files,
+                        )
+                    )
+                self.assertIn(test.expected_error, cm.output[0])
+                self.assertEqual(len(cm.output), 1)
 
 
 class UtilsTestDir(cros_test_lib.TempDirTestCase):
