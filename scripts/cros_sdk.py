@@ -684,7 +684,9 @@ def main(argv):
         )
 
     goma = (
-        goma_lib.Goma(options.goma_dir, chroot_dir=options.chroot)
+        goma_lib.Goma(
+            options.goma_dir, chroot_dir=options.chroot, out_dir=options.out_dir
+        )
         if options.goma_dir
         else None
     )

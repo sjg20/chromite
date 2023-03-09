@@ -27,7 +27,9 @@ class BuildSdkTarballTest(cros_test_lib.MockTestCase):
 
     def testSuccess(self):
         builder_lib = self.PatchObject(sdk_builder_lib, "BuildSdkTarball")
-        sdk.BuildSdkTarball(chroot_lib.Chroot("/test/chroot"))
+        sdk.BuildSdkTarball(
+            chroot_lib.Chroot("/test/chroot", out_path="/test/out")
+        )
         builder_lib.assert_called_with(Path("/test/chroot/build/amd64-host"))
 
 
@@ -287,13 +289,17 @@ class DeleteTest(cros_test_lib.RunCommandTestCase):
     def testDeleteWithChroot(self):
         """Test with chroot provided."""
         path = "/some/path"
-        sdk.Delete(chroot=chroot_lib.Chroot(path))
+        out_path = "/some/out"
+        sdk.Delete(chroot=chroot_lib.Chroot(path, out_path=out_path))
         self.assertCommandContains(["--delete", "--chroot", path])
 
     def testDeleteWithChrootAndForce(self):
         """Test with chroot and force provided."""
         path = "/some/path"
-        sdk.Delete(chroot=chroot_lib.Chroot(path), force=True)
+        out_path = "/some/out"
+        sdk.Delete(
+            chroot=chroot_lib.Chroot(path, out_path=out_path), force=True
+        )
         self.assertCommandContains(["--delete", "--force", "--chroot", path])
 
 
@@ -322,12 +328,16 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
     """Test the implementation of BuildSdkToolchain()."""
 
     _chroot_path = "/test/chroot"
+    _out_path = Path("/test/out")
     _filenames_to_find = ["foo.tar.gz", "bar.txt"]
 
     @staticmethod
     def _Chroot() -> chroot_lib.Chroot:
         """Return a mock chroot for testing."""
-        return chroot_lib.Chroot(BuildSdkToolchainTest._chroot_path)
+        return chroot_lib.Chroot(
+            path=BuildSdkToolchainTest._chroot_path,
+            out_path=BuildSdkToolchainTest._out_path,
+        )
 
     @staticmethod
     def _ExpectedFoundFiles() -> List[common_pb2.Path]:

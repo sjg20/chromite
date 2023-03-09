@@ -248,7 +248,11 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
 
     def setUp(self):
         self.board = "chell"
-        self.chroot = chroot_lib.Chroot(os.path.join(self.tempdir, "chroot"))
+        self.chroot = chroot_lib.Chroot(
+            os.path.join(self.tempdir, "chroot"),
+            out_path=self.tempdir / Path("out"),
+        )
+        osutils.SafeMakedirs(self.chroot.path)
         osutils.SafeMakedirs(self.chroot.tmp)
         self.sysroot = f"/build/{self.board}"
         self.sysroot_full_path = os.path.join(

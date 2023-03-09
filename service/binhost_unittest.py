@@ -430,8 +430,11 @@ class RegenBuildCacheTest(cros_test_lib.MockTempDirTestCase):
 
     def testCallsRegenPortageCache(self):
         """Test that overlays=None works."""
-        (self.tempdir / "tmp").mkdir()
-        overlays_found = [os.path.join(self.tempdir, "path/to")]
+        chroot = chroot_lib.Chroot(
+            path=self.tempdir / "chroot", out_path=self.tempdir / "out"
+        )
+        osutils.SafeMakedirs(chroot.tmp)
+        overlays_found = [os.path.join(chroot.path, "path/to")]
         for o in overlays_found:
             osutils.SafeMakedirs(o)
         self.PatchObject(
@@ -439,9 +442,7 @@ class RegenBuildCacheTest(cros_test_lib.MockTempDirTestCase):
         )
 
         with parallel_unittest.ParallelMock():
-            binhost.RegenBuildCache(
-                chroot_lib.Chroot(self.tempdir), constants.PUBLIC_OVERLAYS
-            )
+            binhost.RegenBuildCache(chroot, constants.PUBLIC_OVERLAYS)
 
 
 class ReadDevInstallPackageFileTest(cros_test_lib.MockTempDirTestCase):

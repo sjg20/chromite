@@ -188,17 +188,22 @@ class CreateSimpleChromeSysrootTest(cros_test_lib.MockTempDirTestCase):
         osutils.SafeMakedirs(self.source_root)
         self.PatchObject(constants, "SOURCE_ROOT", new=self.source_root)
 
-        # Create a chroot_path that also includes a chroot tmp dir.
+        # Configure {chroot,out}_path.
         self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
-        osutils.SafeMakedirs(os.path.join(self.chroot_path, "tmp"))
+        self.out_path = self.tempdir / "out_dir"
 
         # Create output dir.
         self.output_dir = os.path.join(self.tempdir, "output_dir")
         osutils.SafeMakedirs(self.output_dir)
 
         # Create chroot and build_target objs.
-        self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+        self.chroot = chroot_lib.Chroot(
+            path=self.chroot_path, out_path=self.out_path
+        )
         self.build_target = build_target_lib.BuildTarget("target")
+
+        # Create the tmp dir.
+        osutils.SafeMakedirs(self.chroot.tmp)
 
     def testCreateSimpleChromeSysroot(self):
         # Mock the artifact copy.
@@ -240,17 +245,22 @@ class CreateFuzzerSysrootTest(cros_test_lib.MockTempDirTestCase):
         osutils.SafeMakedirs(self.source_root)
         self.PatchObject(constants, "SOURCE_ROOT", new=self.source_root)
 
-        # Create a chroot_path that also includes a chroot tmp dir.
+        # Configure {chroot,out}_path.
         self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
-        osutils.SafeMakedirs(os.path.join(self.chroot_path, "tmp"))
+        self.out_path = self.tempdir / "out_dir"
 
         # Create output dir.
         self.output_dir = os.path.join(self.tempdir, "output_dir")
         osutils.SafeMakedirs(self.output_dir)
 
         # Create chroot and build_target objs.
-        self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+        self.chroot = chroot_lib.Chroot(
+            path=self.chroot_path, out_path=self.out_path
+        )
         self.build_target = build_target_lib.BuildTarget("target")
+
+        # Create the tmp dir.
+        osutils.SafeMakedirs(self.chroot.tmp)
 
     def testCreateFuzzerSysroot(self):
         """Test the CreateFuzzerSysroot function under normal operation."""
@@ -287,7 +297,10 @@ class ArchiveChromeEbuildEnvTest(cros_test_lib.MockTempDirTestCase):
     def setUp(self):
         # Create the chroot and sysroot instances.
         self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
-        self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+        self.out_path = self.tempdir / "out_dir"
+        self.chroot = chroot_lib.Chroot(
+            path=self.chroot_path, out_path=self.out_path
+        )
         self.sysroot_path = os.path.join(self.chroot_path, "sysroot_dir")
         self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
 
@@ -1141,24 +1154,29 @@ class BundleDebugSymbolsTest(cros_test_lib.MockTempDirTestCase):
     """Unittests for BundleDebugSymbols."""
 
     def setUp(self):
-        # Create a chroot_path that also includes a chroot tmp dir.
+        # Configure {chroot,out,syroot}_path.
         self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
+        self.out_path = self.tempdir / "out_dir"
         self.sysroot_path = os.path.join(self.chroot_path, "build/target")
 
         # Has to be run outside the chroot.
         self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
 
         osutils.SafeMakedirs(self.sysroot_path)
-        osutils.SafeMakedirs(os.path.join(self.chroot_path, "tmp"))
 
         # Create output dir.
         self.output_dir = os.path.join(self.tempdir, "output_dir")
         osutils.SafeMakedirs(self.output_dir)
 
         # Create chroot, sysroot, and build_target objs.
-        self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+        self.chroot = chroot_lib.Chroot(
+            path=self.chroot_path, out_path=self.out_path
+        )
         self.sysroot = sysroot_lib.Sysroot(path=self.sysroot_path)
         self.build_target = build_target_lib.BuildTarget("target")
+
+        # Create the tmp dir.
+        osutils.SafeMakedirs(self.chroot.tmp)
 
     def testBundleBreakpadDebugSymbols(self):
         """BundleBreakpadSymbols calls cbuildbot/commands with correct args."""

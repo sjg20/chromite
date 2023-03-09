@@ -93,6 +93,7 @@ class Goma(object):
         stage_name: Optional[str] = None,
         chromeos_goma_dir: Optional[Union[str, os.PathLike]] = None,
         chroot_dir: Optional[Union[str, os.PathLike]] = None,
+        out_dir: Optional[os.PathLike] = None,
         goma_approach: Optional[GomaApproach] = None,
         log_dir: Optional[Union[str, os.PathLike]] = None,
         stats_filename: Optional[Union[str, os.PathLike]] = None,
@@ -118,6 +119,8 @@ class Goma(object):
                 goma_dir will be used instead.
             chroot_dir: The base chroot path to use when the chroot path is not
                 at the default location.
+            out_dir: The base out path to use when the out path is not at the
+                default location.
             goma_approach: Indicates some extra environment variables to set
                 when testing alternative goma approaches.
             log_dir: Allows explicitly setting the log directory. Used for the
@@ -165,7 +168,7 @@ class Goma(object):
                 f"GOMA_TMP_DIR does not point a directory: {goma_tmp_dir}"
             )
 
-        chroot = chroot_lib.Chroot(path=chroot_dir)
+        chroot = chroot_lib.Chroot(path=chroot_dir, out_path=out_dir)
         self.linux_goma_dir = goma_dir
         self.chromeos_goma_dir = chromeos_goma_dir
         self.goma_approach = goma_approach

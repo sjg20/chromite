@@ -1081,7 +1081,9 @@ class FindFingerprintsTest(cros_test_lib.RunCommandTempDirTestCase):
             self.tempdir,
             "src/build/images/test-board/latest/cheets-fingerprint.txt",
         )
-        self.chroot = Chroot(self.tempdir)
+        self.chroot = Chroot(
+            path=self.tempdir / "chroot", out_path=self.tempdir / "out"
+        )
         osutils.WriteFile(
             fingerprint_path, self.fingerprint_contents, makedirs=True
         )

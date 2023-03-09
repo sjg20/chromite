@@ -576,7 +576,10 @@ class TestCreateFactoryImageZip(cros_test_lib.MockTempDirTestCase):
 
         # Create a chroot_path.
         self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
-        self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+        self.out_path = self.tempdir / "out_dir"
+        self.chroot = chroot_lib.Chroot(
+            path=self.chroot_path, out_path=self.out_path
+        )
         self.sysroot_path = os.path.join("build", "target")
         self.sysroot = sysroot_lib.Sysroot(path=self.sysroot_path)
 
@@ -645,7 +648,10 @@ class TestCreateStrippedPackagesTar(cros_test_lib.MockTempDirTestCase):
         self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
         # Create a chroot_path.
         self.chroot_path = os.path.join(self.tempdir, "chroot_dir")
-        self.chroot = chroot_lib.Chroot(path=self.chroot_path)
+        self.out_path = self.tempdir / "out_dir"
+        self.chroot = chroot_lib.Chroot(
+            path=self.chroot_path, out_path=self.out_path
+        )
 
         # Create build target.
         self.build_target = build_target_lib.BuildTarget(

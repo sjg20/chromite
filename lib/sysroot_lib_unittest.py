@@ -150,7 +150,7 @@ baz
 
     def testExistsInChroot(self):
         """Test the Exists method with a chroot."""
-        chroot = chroot_lib.Chroot(self.tempdir)
+        chroot = chroot_lib.Chroot(self.tempdir, out_path=self.tempdir / "out")
         self.assertTrue(self.relative_sysroot.Exists(chroot=chroot))
 
     def testEquals(self):

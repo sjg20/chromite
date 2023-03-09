@@ -249,7 +249,9 @@ class GetArtifactsTest(
                 image_service, func.__name__
             )
         self.chroot = chroot_lib.Chroot(
-            path=self.tempdir, chrome_root=self.tempdir
+            path=self.tempdir / "chroot",
+            chrome_root=self.tempdir,
+            out_path=self.tempdir / "out",
         )
         board = "chell"
         sysroot_path = "/build/%s" % board

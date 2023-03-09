@@ -25,6 +25,7 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
     def setUp(self):
         self.goma_dir = self.tempdir / "goma"
         self.chroot_dir = self.tempdir / "chroot"
+        self.out_dir = self.tempdir / "out"
         self.chroot_tmp = self.chroot_dir / "tmp"
         self.log_dir = self.chroot_tmp / "log_dir"
 
@@ -42,6 +43,7 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
         goma = goma_lib.Goma(
             self.goma_dir,
             chroot_dir=self.chroot_dir,
+            out_dir=self.out_dir,
             log_dir=self.log_dir,
             stats_filename=stats_filename,
             counterz_filename=counterz_filename,
@@ -89,6 +91,7 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
         goma = goma_lib.Goma(
             self.goma_dir,
             chroot_dir=self.chroot_dir,
+            out_dir=self.out_dir,
             goma_approach=goma_approach,
         )
         env = goma.GetExtraEnv()
