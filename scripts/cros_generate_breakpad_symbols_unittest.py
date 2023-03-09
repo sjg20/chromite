@@ -507,12 +507,11 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertNotExists(self.sym_file)
         self.assertEqual(num_errors.value, 0)
 
-    def testAllowlist(self):
-        """Binaries in the allowlist should call _DumpAllowingBasicFallback()"""
-        binary = os.path.join(self.tempdir, "usr/bin/goldctl")
+    def _testBinaryIsInLocalFallback(self, directory, filename):
+        binary = os.path.join(self.tempdir, directory, filename)
         osutils.Touch(binary, makedirs=True)
-        debug_dir = os.path.join(self.debug_dir, "usr/bin")
-        debug_file = os.path.join(debug_dir, "goldctl.debug")
+        debug_dir = os.path.join(self.debug_dir, directory)
+        debug_file = os.path.join(debug_dir, f"{filename}.debug")
         osutils.Touch(debug_file, makedirs=True)
         self.rc.AddCmdResult(["/usr/bin/file", binary], stdout=self.FILE_OUT)
         self.rc.AddCmdResult(
@@ -546,6 +545,14 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertCommandArgs(3, ["dump_syms", "-v", binary])
         self.assertNotExists(self.sym_file)
         self.assertEqual(num_errors.value, 0)
+
+    def testAllowlist(self):
+        """Binaries in the allowlist should call _DumpAllowingBasicFallback()"""
+        self._testBinaryIsInLocalFallback("usr/bin", "goldctl")
+
+    def testUsrLocalSkip(self):
+        """Binaries in /usr/local should call _DumpAllowingBasicFallback()"""
+        self._testBinaryIsInLocalFallback("usr/local", "minidump_stackwalk")
 
 
 class UtilsTestDir(cros_test_lib.TempDirTestCase):

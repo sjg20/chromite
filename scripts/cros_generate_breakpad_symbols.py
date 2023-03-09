@@ -106,9 +106,15 @@ def _ExpectGoodSymbols(elf_file, sysroot):
     if sysroot is not None:
         relative_path = os.path.relpath(elf_file, sysroot)
     else:
-        relative_path = elf_file
+        relative_path = os.path.relpath(elf_file, "/")
 
     if relative_path in EXPECTED_POOR_SYMBOLIZATION_FILES:
+        return False
+
+    # Binaries in /usr/local are not actually shipped to end-users, so we
+    # don't care if they get good symbols -- we should never get crash reports
+    # for them anyways.
+    if relative_path.startswith("usr/local"):
         return False
 
     return True
