@@ -15,6 +15,7 @@ import errno
 import glob
 import logging
 import os
+from pathlib import Path
 
 from chromite.cli import command
 from chromite.lib import chroot_lib
@@ -147,6 +148,13 @@ class CleanCommand(command.CliCommand):
             help="The sdk (chroot) path. This only needs to be provided if "
             "your chroot is not in the default location.",
         )
+        group.add_argument(
+            "--out-path",
+            type="path",
+            default=constants.DEFAULT_OUT_PATH,
+            help="The sdk state/output path. This only needs to be provided if"
+            " your sdk state is not in the default location.",
+        )
 
     def __init__(self, options):
         """Initializes cros clean."""
@@ -194,7 +202,9 @@ class CleanCommand(command.CliCommand):
     @timer.timed("Cros Clean", logging.debug)
     def Run(self):
         """Perform the cros clean command."""
-        chroot = chroot_lib.Chroot(self.options.sdk_path)
+        chroot = chroot_lib.Chroot(
+            self.options.sdk_path, out_path=Path(self.options.out_path)
+        )
 
         cros_build_lib.AssertOutsideChroot()
 
