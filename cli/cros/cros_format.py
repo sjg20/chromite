@@ -50,6 +50,7 @@ _EXT_TOOL_MAP = {
     _SHELL_EXT: (formatters.whitespace.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
+    frozenset({".textproto"}): (formatters.textproto.Data,),
     frozenset({".grd", ".svg", ".xml", ".xtb"}): (formatters.xml.Data,),
     # TODO(build): Switch .toml to rustfmt when available.
     # https://github.com/rust-lang/rustfmt/issues/4091
@@ -86,8 +87,7 @@ _FILENAME_PATTERNS_TOOL_MAP = {
             "use.mask",
         }
     ): (formatters.whitespace.Data,),
-    # TODO(build): Add a formatter for this.
-    frozenset({"DIR_METADATA"}): (formatters.whitespace.Data,),
+    frozenset({"DIR_METADATA"}): (formatters.textproto.Data,),
     # TODO(build): Add a formatter for this.
     frozenset({"OWNERS*"}): (formatters.whitespace.Data,),
 }

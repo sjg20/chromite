@@ -21,6 +21,7 @@ locals().update(
         "repo_manifest",
         "rust",
         "star",
+        "textproto",
         "whitespace",
         "xml",
     )
