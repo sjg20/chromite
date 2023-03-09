@@ -185,6 +185,7 @@
     guybrush-kernelnext-release
     guybrush-release
     hades-release
+    hana-arc64-release
     hana-kernelnext-release
     hana-release
     hatch-arc-r-userdebug-release
@@ -819,6 +820,11 @@
   hades-llvm-toolchain-tryjob
   hades-payloads-tryjob
   hades-release-tryjob
+  hana-arc64-full-tryjob
+  hana-arc64-llvm-next-toolchain-tryjob
+  hana-arc64-llvm-toolchain-tryjob
+  hana-arc64-payloads-tryjob
+  hana-arc64-release-tryjob
   hana-factory-oak-8182.B-factorybranch-tryjob
   hana-full-tryjob
   hana-kernelnext-full-tryjob
@@ -1062,6 +1068,7 @@
     guybrush-kernelnext-release-tryjob
     guybrush-release-tryjob
     hades-release-tryjob
+    hana-arc64-release-tryjob
     hana-kernelnext-release-tryjob
     hana-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
