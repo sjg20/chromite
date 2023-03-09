@@ -343,6 +343,9 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
             for filename in BuildSdkToolchainTest._filenames_to_find
         ]
 
+    def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
     def testSuccess(self):
         """Check that a standard call performs expected logic.
 
@@ -353,15 +356,14 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
         4. Return any generated filepaths
         """
         # Arrange
-        output_dir = os.path.join(
-            self._chroot_path, constants.SDK_TOOLCHAINS_OUTPUT
-        )
+        chroot = self._Chroot()
+        output_dir = chroot.full_path(constants.SDK_TOOLCHAINS_OUTPUT)
         rmdir_patch = self.PatchObject(osutils, "RmDir")
         listdir_patch = self.PatchObject(os, "listdir")
         listdir_patch.return_value = self._filenames_to_find
 
         # Act
-        found_files = sdk.BuildSdkToolchain(self._Chroot())
+        found_files = sdk.BuildSdkToolchain(chroot)
 
         # Assert
         self.assertCommandCalled(
@@ -391,16 +393,15 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
         should NOT use the USE flag.
         """
         # Arrange
-        output_dir = os.path.join(
-            self._chroot_path, constants.SDK_TOOLCHAINS_OUTPUT
-        )
+        chroot = self._Chroot()
+        output_dir = chroot.full_path(constants.SDK_TOOLCHAINS_OUTPUT)
         rmdir_patch = self.PatchObject(osutils, "RmDir")
         listdir_patch = self.PatchObject(os, "listdir")
         listdir_patch.return_value = self._filenames_to_find
 
         # Act
         found_files = sdk.BuildSdkToolchain(
-            self._Chroot(), extra_env={"USE": "llvm-next"}
+            chroot, extra_env={"USE": "llvm-next"}
         )
 
         # Assert

@@ -532,7 +532,7 @@ def BuildSdkToolchain(
     Returns:
         List of generated filepaths.
     """
-    toolchain_dir = os.path.join(chroot.path, constants.SDK_TOOLCHAINS_OUTPUT)
+    toolchain_dir = chroot.full_path(constants.SDK_TOOLCHAINS_OUTPUT)
 
     def _SetupToolchains(flags: List[str], include_extra_env: bool):
         """Run the cros_setup_toolchains binary."""
@@ -545,7 +545,7 @@ def BuildSdkToolchain(
 
     _SetupToolchains(["--nousepkg"], True)
     osutils.RmDir(
-        os.path.join(chroot.path, constants.SDK_TOOLCHAINS_OUTPUT),
+        chroot.full_path(constants.SDK_TOOLCHAINS_OUTPUT),
         ignore_missing=True,
         sudo=True,
     )
