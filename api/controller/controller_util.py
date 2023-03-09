@@ -51,6 +51,7 @@ def ParseChroot(chroot_message: common_pb2.Chroot) -> chroot_lib.Chroot:
     path = chroot_message.path or constants.DEFAULT_CHROOT_PATH
     cache_dir = chroot_message.cache_dir
     chrome_root = chroot_message.chrome_dir
+    out_path = chroot_message.out_path or constants.DEFAULT_OUT_PATH
 
     use_flags = [u.flag for u in chroot_message.env.use_flags]
     features = [f.feature for f in chroot_message.env.features]
@@ -67,7 +68,11 @@ def ParseChroot(chroot_message: common_pb2.Chroot) -> chroot_lib.Chroot:
         env["FEATURES"] = " ".join(features)
 
     chroot = chroot_lib.Chroot(
-        path=path, cache_dir=cache_dir, chrome_root=chrome_root, env=env
+        path=path,
+        out_path=out_path,
+        cache_dir=cache_dir,
+        chrome_root=chrome_root,
+        env=env,
     )
 
     return chroot
@@ -104,7 +109,7 @@ def ParseRemoteexecConfig(remoteexec_message: common_pb2.RemoteexecConfig):
     )
 
 
-def ParseGomaConfig(goma_message, chroot_path):
+def ParseGomaConfig(goma_message, chroot_path, out_path):
     """Parse a goma config message."""
     assert isinstance(goma_message, common_pb2.GomaConfig)
 
@@ -136,6 +141,7 @@ def ParseGomaConfig(goma_message, chroot_path):
         stage_name="BuildAPI",
         chromeos_goma_dir=chromeos_goma_dir,
         chroot_dir=chroot_path,
+        out_dir=out_path,
         goma_approach=goma_approach,
         stats_filename=stats_filename,
         counterz_filename=counterz_filename,

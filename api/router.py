@@ -385,7 +385,9 @@ class Router(object):
             )
 
             # Parse goma.
-            chroot.goma = field_handler.handle_goma(input_msg, chroot.path)
+            chroot.goma = field_handler.handle_goma(
+                input_msg, chroot.path, chroot.out_path
+            )
 
             # Parse remoteexec.
             chroot.remoteexec = field_handler.handle_remoteexec(input_msg)
