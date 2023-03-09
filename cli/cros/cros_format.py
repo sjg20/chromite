@@ -50,6 +50,8 @@ _EXT_TOOL_MAP = {
     _SHELL_EXT: (formatters.whitespace.Data,),
     # TODO(build): Add a formatter for this (SELinux policies).
     frozenset({".te"}): (formatters.whitespace.Data,),
+    # NB: We don't list all the variations in filenames as .textproto is the
+    # only one that should be used, and `cros lint` enforces that.
     frozenset({".textproto"}): (formatters.textproto.Data,),
     frozenset({".grd", ".svg", ".xml", ".xtb"}): (formatters.xml.Data,),
     # TODO(build): Switch .toml to rustfmt when available.

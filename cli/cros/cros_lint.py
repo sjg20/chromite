@@ -361,6 +361,23 @@ def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool):
     return ret
 
 
+def _TextprotoLintFile(
+    path, _output_format, _debug, _relaxed: bool
+) -> cros_build_lib.CompletedProcess:
+    """Run lints on OWNERS files."""
+    ret = cros_build_lib.CompletedProcess(f'cros lint "{path}"', returncode=0)
+    # go/textformat-spec#text-format-files says to use .textproto.
+    if os.path.splitext(path)[1] != ".textproto":
+        logging.error(
+            "%s: use '.textproto' extension for text proto messages", path
+        )
+        ret.returncode = 1
+    # TODO(build): Assert file header has `proto-file:` and `proto-message:`
+    # keywords in it.  Also allow `proto-import:`, but ban all other `proto-`
+    # directives (in case of typos).  go/textformat-schema
+    return ret
+
+
 def _WhitespaceLintFile(path, _output_format, _debug, _relaxed: bool):
     """Returns result of running basic whitespace checks on |path|."""
     result = cros_build_lib.CompletedProcess(
@@ -438,6 +455,27 @@ _EXT_TOOL_MAP = {
         _NonExecLintFile,
     ),
     frozenset({".md"}): (_MarkdownLintFile, _NonExecLintFile),
+    # Yes, there's a lot of variations here.  We catch these specifically to
+    # throw errors and force people to use the single correct name.
+    frozenset(
+        {
+            ".pb",
+            ".pb.txt",
+            ".pb.text",
+            ".pbtxt",
+            ".pbtext",
+            ".protoascii",
+            ".prototxt",
+            ".prototext",
+            ".textpb",
+            ".txtpb",
+            ".textproto",
+            ".txtproto",
+        }
+    ): (
+        _TextprotoLintFile,
+        _NonExecLintFile,
+    ),
     frozenset({".policy"}): (
         _SeccompPolicyLintFile,
         _WhitespaceLintFile,
