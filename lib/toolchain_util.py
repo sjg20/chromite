@@ -690,6 +690,7 @@ class _CommonPrepareBundle(object):
         self,
         gs_urls: Iterable[str],
         rank_func: Callable[[str], Any],
+        arch: str = None,
     ) -> str:
         """Find the latest AFDO artifact in a bucket.
 
@@ -700,6 +701,8 @@ class _CommonPrepareBundle(object):
                 negative: less preferred.
                 zero: equally preferred.
                 positive: more preferred.
+          arch: Profile architecture, default is self.arch which is passed from
+              recipe.
 
         Returns:
           The path of the latest eligible AFDO artifact.
@@ -709,8 +712,14 @@ class _CommonPrepareBundle(object):
           RuntimeError: If no valid latest profiles.
           ValueError: if regex is not valid.
         """
+        if not arch:
+            arch = self.arch
 
-        def _FilesOnBranch(all_files, branch):
+        def _FilesOnBranch(
+            all_files: Iterable[str],
+            branch: str,
+            arch: str,
+        ):
             """Return the files that are on this branch.
 
             Legacy PFQ results look like: latest-chromeos-chrome-amd64-79.afdo.
@@ -719,18 +728,17 @@ class _CommonPrepareBundle(object):
             - chromeos-chrome-amd64-78.0.3877.0 for benchmark profiles
 
             Args:
-              all_files: (list(string)) list of files from GS.
-              branch: (string) branch number.
+              all_files: list of files from GS.
+              branch: branch number.
+              arch: profile architecture.
 
             Returns:
               Files matching the branch.
             """
-            profile_type = "field" if self.arch == "amd64" else self.arch
+            profile_type = "field" if arch == "amd64" else arch
             cwp_afdo_pattern = re.compile(rf"R{branch}")
             # Search by the arch and branch number.
-            bench_afdo_pattern = re.compile(
-                rf"chromeos-chrome-{self.arch}-{branch}"
-            )
+            bench_afdo_pattern = re.compile(rf"chromeos-chrome-{arch}-{branch}")
             # Search for the benchmark branch version and ignore the cwp version.
             # When main branch switches from 100 to 101 and we are checking 100
             # branch we have to ignore "-field-100-*-benchmark-101-" profiles
@@ -760,12 +768,12 @@ class _CommonPrepareBundle(object):
             except gs.GSNoSuchKey:
                 pass
 
-        results = _FilesOnBranch(all_files, self.chrome_branch)
+        results = _FilesOnBranch(all_files, self.chrome_branch, arch)
         if not results:
             # If no results found, it's maybe because we just branched.
             # Try to find the latest profile from last branch.
             results = _FilesOnBranch(
-                all_files, str(int(self.chrome_branch) - 1)
+                all_files, str(int(self.chrome_branch) - 1), arch
             )
 
         if not results:
@@ -1682,10 +1690,21 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
             "UnverifiedChromeCwpAfdoFile", [CWP_AFDO_GS_URL]
         )
 
+        # AFDO Experiment can tweak both the source of benchmark and CWP
+        # profiles.
+        # -<arch> suffix forces use of the specified architecture for
+        # the benchmark profile. For example exp-amd64 is going to use
+        # benchmark profiles from amd64.
+        bench_arch = self.arch
+        if self.profile.startswith("exp-"):
+            bench_arch = self.profile.replace("exp-", "", 1)
+
         # This will raise a NoProfilesInGsBucketError if no artifact is found.
         bench = self._FindLatestAFDOArtifact(
-            bench_locs, self._ValidBenchmarkProfileVersion
+            bench_locs, self._ValidBenchmarkProfileVersion, bench_arch
         )
+        # CWP source in the AFDO Experiment is configured directly from recipe
+        # there is no dependency on the architecture here.
         cwp = self._FindLatestAFDOArtifact(cwp_locs, _RankValidCWPProfiles)
         bench_name = os.path.split(bench)[1]
         cwp_name = os.path.split(cwp)[1]
@@ -1696,6 +1715,7 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         published_loc = self.input_artifacts.get(
             "VerifiedReleaseAfdoFile", [RELEASE_PROFILE_VETTED_URL]
         )[0]
+
         profile = self.profile
         if self.arch == "arm" and self.profile == "arm":
             # arm/arm profile is generated on arm64 and used on all arm
@@ -1707,6 +1727,9 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
             # For example arm32 profiles are generated on arm arch (arm64) and
             # verified on arm32 target. This profile is not used on production.
             profile = "none"
+        # Strip suffix from experimental profile.
+        if profile.startswith("exp"):
+            profile = "exp"
         merged_name = MERGED_AFDO_NAME.format(
             arch=self.arch,
             name=_GetCombinedAFDOName(
