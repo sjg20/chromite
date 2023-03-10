@@ -541,6 +541,7 @@ def BuildSdkToolchain(
             cmd,
             extra_env=extra_env if include_extra_env else None,
             enter_chroot=True,
+            chroot_args=chroot.get_enter_args(),
         )
 
     _SetupToolchains(["--nousepkg"], True)

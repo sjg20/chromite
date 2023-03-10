@@ -379,6 +379,12 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
         self.assertCommandCalled(
             ["sudo", "--", "cros_setup_toolchains", "--nousepkg"],
             enter_chroot=True,
+            chroot_args=[
+                "--chroot",
+                chroot.path,
+                "--out-dir",
+                str(chroot.out_path),
+            ],
         )
         rmdir_patch.assert_any_call(output_dir, ignore_missing=True, sudo=True)
         self.assertCommandCalled(
@@ -392,6 +398,12 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
                 os.path.join("/", constants.SDK_TOOLCHAINS_OUTPUT),
             ],
             enter_chroot=True,
+            chroot_args=[
+                "--chroot",
+                chroot.path,
+                "--out-dir",
+                str(chroot.out_path),
+            ],
         )
         self.assertEqual(found_files, self._ExpectedFoundFiles())
 
@@ -424,6 +436,12 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
                 "--nousepkg",
             ],
             enter_chroot=True,
+            chroot_args=[
+                "--chroot",
+                chroot.path,
+                "--out-dir",
+                str(chroot.out_path),
+            ],
         )
         rmdir_patch.assert_any_call(output_dir, ignore_missing=True, sudo=True)
         self.assertCommandCalled(
@@ -437,5 +455,11 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
                 os.path.join("/", constants.SDK_TOOLCHAINS_OUTPUT),
             ],
             enter_chroot=True,
+            chroot_args=[
+                "--chroot",
+                chroot.path,
+                "--out-dir",
+                str(chroot.out_path),
+            ],
         )
         self.assertEqual(found_files, self._ExpectedFoundFiles())
