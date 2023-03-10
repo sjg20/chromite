@@ -8,7 +8,7 @@ import collections
 import os
 from pathlib import Path
 import tempfile
-from typing import Iterator, List, Optional
+from typing import Callable, Iterator, List, Optional, Union
 
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
@@ -56,10 +56,10 @@ class ChrootPathResolver(object):
 
     def __init__(
         self,
-        source_path=None,
-        source_from_path_repo=True,
-        chroot_path=None,
-        out_path=None,
+        source_path: Optional[Union[str, os.PathLike]] = None,
+        source_from_path_repo: bool = True,
+        chroot_path: Optional[Union[str, os.PathLike]] = None,
+        out_path: Optional[os.PathLike] = None,
     ):
         if chroot_path and source_path:
             raise AssertionError(
@@ -76,7 +76,7 @@ class ChrootPathResolver(object):
             constants.SOURCE_ROOT if source_path is None else source_path
         )
         if chroot_path and self._TranslatePath(
-            chroot_path, self._source_path, ""
+            str(chroot_path), self._source_path, ""
         ):
             # chroot_path is inside of source_path, so assume a non-custom
             # chroot_path.
@@ -110,11 +110,15 @@ class ChrootPathResolver(object):
 
     @classmethod
     @memoize.MemoizedSingleCall
-    def _GetCachePath(cls):
+    def _GetCachePath(cls) -> str:
         """Returns the cache directory."""
         return os.path.realpath(GetCacheDir())
 
-    def _GetSourcePathChroot(self, source_path, custom_chroot_path=None):
+    def _GetSourcePathChroot(
+        self,
+        source_path: Optional[str],
+        custom_chroot_path: Optional[str] = None,
+    ) -> Optional[str]:
         """Returns path to the chroot directory of a given source root."""
         if custom_chroot_path:
             return custom_chroot_path
@@ -150,7 +154,15 @@ class ChrootPathResolver(object):
 
         return link
 
-    def _TranslatePath(self, path, src_root, dst_root_input):
+    def _TranslatePath(
+        self,
+        path: str,
+        src_root: Union[os.PathLike, str],
+        dst_root_input: Union[
+            Callable[[], Optional[Union[str, os.PathLike]]],
+            Optional[Union[str, os.PathLike]],
+        ],
+    ) -> Optional[str]:
         """If |path| starts with |src_root|, replace it using |dst_root_input|.
 
         Args:
@@ -177,7 +189,7 @@ class ChrootPathResolver(object):
             dst_root, path[len(str(src_root)) :].lstrip(os.path.sep)
         ).rstrip(os.path.sep)
 
-    def _GetChrootPath(self, path):
+    def _GetChrootPath(self, path) -> str:
         """Translates a fully-expanded host |path| into a chroot equivalent.
 
         This checks path prefixes in order from the most to least "contained": the
@@ -230,7 +242,7 @@ class ChrootPathResolver(object):
 
         raise ValueError("Path is not reachable from the chroot")
 
-    def _GetHostPath(self, path):
+    def _GetHostPath(self, path) -> str:
         """Translates a fully-expanded chroot |path| into a host equivalent.
 
         We first attempt translation of known roots (source). If any is successful,
@@ -270,7 +282,7 @@ class ChrootPathResolver(object):
 
         return new_path
 
-    def _ConvertPath(self, path, get_converted_path):
+    def _ConvertPath(self, path, get_converted_path) -> str:
         """Expands |path|; if outside the chroot, applies |get_converted_path|.
 
         Args:
@@ -306,11 +318,11 @@ class ChrootPathResolver(object):
         except ValueError as e:
             raise ValueError("%s: %s" % (e, path))
 
-    def ToChroot(self, path):
+    def ToChroot(self, path: Union[str, os.PathLike]) -> str:
         """Resolves current environment |path| for use in the chroot."""
         return self._ConvertPath(path, self._GetChrootPath)
 
-    def FromChroot(self, path):
+    def FromChroot(self, path: Union[str, os.PathLike]) -> str:
         """Resolves chroot |path| for use in the current environment."""
         return self._ConvertPath(path, self._GetHostPath)
 
@@ -355,7 +367,7 @@ def DetermineCheckout(cwd=None):
     return CheckoutInfo(checkout_type, root, chrome_src_dir)
 
 
-def FindCacheDir():
+def FindCacheDir() -> str:
     """Returns the cache directory location based on the checkout type."""
     checkout = DetermineCheckout()
     if checkout.type == CHECKOUT_TYPE_REPO:
@@ -368,12 +380,17 @@ def FindCacheDir():
         raise AssertionError("Unexpected type %s" % checkout.type)
 
 
-def GetCacheDir():
+def GetCacheDir() -> str:
     """Returns the current cache dir."""
     return os.environ.get(constants.SHARED_CACHE_ENVVAR, FindCacheDir())
 
 
-def ToChrootPath(path, source_path=None, chroot_path=None, out_path=None):
+def ToChrootPath(
+    path: Optional[Union[str, os.PathLike]],
+    source_path: Optional[Union[str, os.PathLike]] = None,
+    chroot_path: Optional[Union[str, os.PathLike]] = None,
+    out_path: Optional[os.PathLike] = None,
+) -> str:
     """Resolves current environment |path| for use in the chroot.
 
     Args:
@@ -393,7 +410,12 @@ def ToChrootPath(path, source_path=None, chroot_path=None, out_path=None):
     ).ToChroot(path)
 
 
-def FromChrootPath(path, source_path=None, chroot_path=None, out_path=None):
+def FromChrootPath(
+    path: Optional[Union[str, os.PathLike]],
+    source_path: Optional[Union[str, os.PathLike]] = None,
+    chroot_path: Optional[Union[str, os.PathLike]] = None,
+    out_path: Optional[os.PathLike] = None,
+) -> str:
     """Resolves chroot |path| for use in the current environment.
 
     Args:
