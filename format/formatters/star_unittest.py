@@ -7,7 +7,6 @@
 import pytest
 
 from chromite.format.formatters import star
-from chromite.lib import cros_test_lib
 
 
 @pytest.mark.parametrize(
@@ -19,7 +18,6 @@ from chromite.lib import cros_test_lib
         ('workspace(name="foo")\n', 'workspace(name = "foo")\n'),
     ),
 )
-@cros_test_lib.pytestmark_network_test  # requires CIPD
 def test_check_format(data, exp):
     """Verify inputs match expected outputs."""
     if exp is None:
@@ -52,6 +50,5 @@ SPECIALIZED_OUTPUT = """cc_library(
         ("defs.bzl", UNSPECIALIZED_OUTPUT),
     ),
 )
-@cros_test_lib.pytestmark_network_test  # requires CIPD
 def test_path_specialization(path, exp):
     assert star.Data(SPECIALIZATION_INPUT, path) == exp

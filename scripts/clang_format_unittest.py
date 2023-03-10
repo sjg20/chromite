@@ -9,7 +9,6 @@ from chromite.lib import cros_test_lib
 from chromite.scripts import clang_format
 
 
-@cros_test_lib.pytestmark_network_test
 class ClangFormatTest(cros_test_lib.TestCase):
     """Tests the clang-format wrapper."""
 

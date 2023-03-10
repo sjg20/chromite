@@ -27,11 +27,13 @@ import sys
 import pytest  # pylint: disable=import-error
 
 from chromite.api import compile_build_api_proto
+from chromite.format import formatters
 from chromite.lib import commandline
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import namespaces
+from chromite.scripts import clang_format
 
 
 def main(argv):
@@ -94,6 +96,8 @@ def main(argv):
 
 def precache():
     """Do some network-dependent stuff before we disallow network access."""
+    # pylint: disable=protected-access
+
     # This is a cheesy hack to make sure gsutil is populated in the cache before
     # we run tests. This is a partial workaround for crbug.com/468838.
     gs.GSContext.InitializeCache()
@@ -101,6 +105,11 @@ def precache():
     compile_build_api_proto.InstallProtoc(
         compile_build_api_proto.ProtocVersion.CHROMITE
     )
+    # Ensure various tools are available.
+    formatters.star._find_buildifier()
+    formatters.textproto._find_txtpbfmt()
+    with clang_format.ClangFormat():
+        pass
 
 
 def re_execute_inside_chroot(argv):

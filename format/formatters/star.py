@@ -18,7 +18,7 @@ def _find_buildifier() -> str:
     path = cipd.InstallPackage(
         cipd.GetCIPDFromCache(),
         "infra/3pp/tools/buildifier/linux-amd64",
-        "latest",
+        "version:2@6.0.1",
     )
     return os.path.join(path, "buildifier")
 

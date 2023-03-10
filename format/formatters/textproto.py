@@ -19,7 +19,7 @@ def _find_txtpbfmt() -> str:
     path = cipd.InstallPackage(
         cipd.GetCIPDFromCache(),
         "infra/3pp/tools/txtpbfmt/linux-amd64",
-        "latest",
+        "ZFbTNfGMUzHt-xzwXMftKeDb0pL6ODNW4x3EYfTiw3oC",
     )
     return os.path.join(path, "txtpbfmt")
 

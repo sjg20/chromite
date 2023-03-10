@@ -7,7 +7,6 @@
 import pytest
 
 from chromite.format.formatters import cpp
-from chromite.lib import cros_test_lib
 
 
 # None means input is already formatted to avoid having to repeat.
@@ -19,7 +18,6 @@ from chromite.lib import cros_test_lib
         ("int main(){return 0;}", "int main() { return 0; }"),
     ),
 )
-@cros_test_lib.pytestmark_network_test
 def test_check_format(data, exp):
     """Verify inputs match expected outputs."""
     if exp is None:
