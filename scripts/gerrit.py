@@ -1210,6 +1210,7 @@ class ActionAccount(_ActionSimpleParallelCLs):
             else:
                 print_one("detail", detail)
                 for field in (
+                    "external.ids",
                     "groups",
                     "capabilities",
                     "preferences",
