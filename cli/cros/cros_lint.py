@@ -213,10 +213,6 @@ def _JsonLintFile(path, _output_format, _debug, _relaxed: bool):
         result.returncode = 1
         logging.notice("%s: %s", path, e)
 
-    # Check whitespace.
-    if not linters.whitespace.LintData(path, data):
-        result.returncode = 1
-
     return result
 
 
