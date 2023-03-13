@@ -36,7 +36,7 @@ _EXT_TOOL_MAP = {
     frozenset({".c", ".cc", ".cpp", ".cxx", ".h"}): (formatters.cpp.Data,),
     frozenset({".gn", ".gni"}): (formatters.gn.Data,),
     frozenset({".go"}): (formatters.go.Data,),
-    frozenset({".json"}): (formatters.json.Data,),
+    frozenset({".json", ".jsonproto"}): (formatters.json.Data,),
     # TODO(build): Add a formatter for this.
     frozenset({".ebuild", ".eclass"}): (formatters.whitespace.Data,),
     # TODO(build): Add a formatter for this.

@@ -429,7 +429,7 @@ _EXT_TOOL_MAP = {
     frozenset({".cc", ".cpp", ".h"}): (_CpplintFile, _NonExecLintFile),
     frozenset({".conf", ".conf.in"}): (_ConfLintFile, _NonExecLintFile),
     frozenset({".gn", ".gni"}): (_GnlintFile, _NonExecLintFile),
-    frozenset({".json"}): (_JsonLintFile, _NonExecLintFile),
+    frozenset({".json", ".jsonproto"}): (_JsonLintFile, _NonExecLintFile),
     frozenset({".py"}): (_PylintFile,),
     frozenset({".go"}): (_GolintFile, _NonExecLintFile),
     frozenset({".sh"}): (_ShellLintFile,),
