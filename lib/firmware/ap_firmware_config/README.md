@@ -1,4 +1,17 @@
-# AP Firmware tooling configuration guide:
+# AP Firmware tooling configuration guide
+
+> ## **DO NOT ADD NEW CONFIGURATION HERE**
+>
+> The use of board-specific AP firmware flashing configuration in Chromite is
+> ***deprecated***, do not add new config files here!
+>
+> AP firmware flashing prep and unprep configuration belongs in the `cpu_fw_spi`
+> and `ccd_cpu_fw_spi` servod controls for the board.  They will get used
+> automatically by `futility --servo` *and* by `cros ap flash`.  Example CL
+> adding those controls for a board: https://crrev.com/c/4129143
+>
+> The `cros ap flash` and `cros ap read` commands are *not* deprecated, they
+> will continue to wrap `futility --servo`.
 
 This guide covers how to write configuration files for `cros ap` tooling.
 If you're interested in `cros ap` tooling usage guide, please refer to
