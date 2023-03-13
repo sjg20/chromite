@@ -101,7 +101,6 @@ class ClearcutSpanExporter(SpanExporter):
                 data=logrequest.SerializeToString(),
                 method="POST",
             )
-
             logresponse = clientanalytics_pb2.LogResponse()
 
             try:
@@ -133,12 +132,9 @@ class ClearcutSpanExporter(SpanExporter):
         log_request.client_info.client_type = _CLIENT_TYPE
         log_request.log_source = self._log_source
 
-        events = []
         for span in spans:
-            log_event = clientanalytics_pb2.LogEvent()
+            log_event = log_request.log_event.add()
             log_event.event_time_ms = int(time.time() * 1000)
             log_event.source_extension = span.SerializeToString()
-            events.append(log_event)
 
-        log_request.log_event.extend(events)
         return log_request
