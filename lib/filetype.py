@@ -58,8 +58,8 @@ class FileTypeDecoder(object):
         """Initializes the internal state.
 
         Args:
-          root: Path to the root directory where all the files live. This will be
-          assumed as the root directory for absolute symlinks.
+            root: Path to the root directory where all the files live. This will
+                be assumed as the root directory for absolute symlinks.
         """
         self._root = root
         self._mime = magic.open(magic.MIME_TYPE)
@@ -72,21 +72,21 @@ class FileTypeDecoder(object):
         """Return the file type of the passed file.
 
         Does a best-effort attempt to infer the file type of the passed file. If
-        only rel_path is provided, the stat_struct information and parsed ELF data
-        will be computed. If the information is already available, such as if the
-        ELF file is already parsed, passing st and elf will speed up the file
-        detection.
+        only rel_path is provided, the stat_struct information and parsed ELF
+        data will be computed. If the information is already available, such as
+        if the ELF file is already parsed, passing st and elf will speed up the
+        file detection.
 
         Args:
-          rel_path: The path to the file, used to detect the filetype from the
-              contents of the file.
-          st: The stat_result struct of the file.
-          elf: The result of parseelf.ParseELF().
+            rel_path: The path to the file, used to detect the filetype from the
+                contents of the file.
+            st: The stat_result struct of the file.
+            elf: The result of parseelf.ParseELF().
 
         Returns:
-          A string with the file type classified in categories separated by /. For
-          example, a dynamic library will return 'binary/elf/dynamic-so'. If the
-          type can't be inferred it returns None.
+            A string with the file type classified in categories separated by /.
+            For example, a dynamic library will return 'binary/elf/dynamic-so'.
+            If the type can't be inferred it returns None.
         """
         # Analysis based on inode data.
         if st is None:
@@ -117,18 +117,19 @@ class FileTypeDecoder(object):
     def _GetTypeFromContent(self, rel_path, fobj, fmap):
         """Return the file path based on the file contents.
 
-        This helper function detect the file type based on the contents of the file.
+        This helper function detect the file type based on the contents of the
+        file.
 
         Args:
-          rel_path: The path to the file, used to detect the filetype from the
-              contents of the file.
-          fobj: a file() object for random access to rel_path.
-          fmap: a mmap object mapping the whole rel_path file for reading.
+            rel_path: The path to the file, used to detect the filetype from the
+                contents of the file.
+            fobj: a file() object for random access to rel_path.
+            fmap: a mmap object mapping the whole rel_path file for reading.
         """
 
-        # Detect if the file is binary based on the presence of non-ASCII chars. We
-        # include some the first 32 chars often used in text files but we exclude
-        # the rest.
+        # Detect if the file is binary based on the presence of non-ASCII chars.
+        # We include some the first 32 chars often used in text files, but we
+        # exclude the rest.
         ascii_chars = set(b"\a\b\t\n\v\f\r\x1b")
         ascii_chars.update(range(32, 128))
         is_binary = any(
@@ -142,8 +143,8 @@ class FileTypeDecoder(object):
 
         # Binary files.
         if is_binary:
-            # The elf argument was not passed, so compute it now if the file is an
-            # ELF.
+            # The elf argument was not passed, so compute it now if the file is
+            # an ELF.
             if first_kib.startswith(b"\x7fELF"):
                 return self._GetELFType(
                     parseelf.ParseELF(self._root, rel_path, parse_symbols=False)
@@ -155,9 +156,9 @@ class FileTypeDecoder(object):
             if len(first_kib) >= 512 and first_kib[510:512] == b"\x55\xaa":
                 return "binary/bootsector/x86"
 
-            # Firmware file depend on the technical details of the device they run on,
-            # so there's no easy way to detect them. We use the filename to guess that
-            # case.
+            # Firmware file depend on the technical details of the device they
+            # run on, so there's no easy way to detect them. We use the filename
+            # to guess that case.
             if "/firmware/" in rel_path and (
                 rel_path.endswith(".fw")
                 or rel_path[-4:] in (".bin", ".cis", ".csp", ".dsp")
@@ -186,9 +187,9 @@ class FileTypeDecoder(object):
 
         # Text files.
         # Read the first couple of lines used in the following checks. This will
-        # only read the required lines, with the '\n' char at the end of each line
-        # except on the last one if it is not present on that line. At this point
-        # we know that the file is not empty, so at least one line existst.
+        # only read the required lines, with the '\n' char at the end of each
+        # line except on the last one if it is not present on that line. At this
+        # point we know that the file is not empty, so at least one line exists.
         fmap.seek(0)
         first_lines = list(itertools.islice(iter(fmap.readline, b""), 0, 10))
         head_line = first_lines[0]
@@ -204,8 +205,9 @@ class FileTypeDecoder(object):
             prog_name = os.path.basename(prog_name)
             args = args.split()
             if prog_name == "env":
-                # If "env" is called, we skip all the arguments passed to env (flags,
-                # VAR=value) and treat the program name as the program to use.
+                # If "env" is called, we skip all the arguments passed to env
+                # (flags, VAR=value) and treat the program name as the program
+                # to use.
                 for i, arg in enumerate(args):
                     if arg == "--" and (i + 1) < len(args):
                         prog_name = args[i + 1]
@@ -215,7 +217,7 @@ class FileTypeDecoder(object):
                     prog_name = arg
                     break
 
-            # Strip the version number from comon programs like "python2.7".
+            # Strip the version number from common programs like "python2.7".
             prog_name = prog_name.rstrip("0123456789-.")
 
             if prog_name in (
@@ -236,8 +238,9 @@ class FileTypeDecoder(object):
         # PEM files.
         if head_line.strip() == b"-----BEGIN CERTIFICATE-----":
             return "text/pem/cert"
-        # NB: The split string is to bypass automated git checks that think we have
-        # a real private key embedded in the source code and then reject the commit.
+        # NB: The split string is to bypass automated git checks that think we
+        # have a real private key embedded in the source code and then reject
+        # the commit.
         if head_line.strip() == b"-----BEGIN " b"RSA PRIVATE KEY-----":
             return "text/pem/rsa-private"
 
@@ -261,7 +264,7 @@ class FileTypeDecoder(object):
         """Returns the file type for ELF files.
 
         Args:
-          elf: The result of parseelf.ParseELF().
+            elf: The result of parseelf.ParseELF().
         """
         if elf["type"] == "ET_REL":
             elf_type = "object"
@@ -281,14 +284,15 @@ class FileTypeDecoder(object):
     def DecodeFile(cls, path):
         """Decodes the file type of the passed file.
 
-        This function is a wrapper to the FileTypeDecoder class to decode the type
-        of a single file. If you need to decode multiple files please use
+        This function is a wrapper to the FileTypeDecoder class to decode the
+        type of a single file. If you need to decode multiple files please use
         FileTypeDecoder class instead.
 
         Args:
-          path: The path to the file or directory.
+            path: The path to the file or directory.
 
         Returns:
-          A string with the decoded file type or None if it couldn't be decoded.
+            A string with the decoded file type or None if it couldn't be
+            decoded.
         """
         return cls(".").GetType(path)

@@ -41,11 +41,11 @@ def SetNS(fd, nstype):
     """Binding to the Linux setns system call. See setns(2) for details.
 
     Args:
-      fd: An open file descriptor or path to one.
-      nstype: Namespace to enter; one of CLONE_*.
+        fd: An open file descriptor or path to one.
+        nstype: Namespace to enter; one of CLONE_*.
 
     Raises:
-      OSError: if setns failed.
+        OSError: if setns failed.
     """
     try:
         fp = None
@@ -66,10 +66,10 @@ def Unshare(flags):
     """Binding to the Linux unshare system call. See unshare(2) for details.
 
     Args:
-      flags: Namespaces to unshare; bitwise OR of CLONE_* flags.
+        flags: Namespaces to unshare; bitwise OR of CLONE_* flags.
 
     Raises:
-      OSError: if unshare failed.
+        OSError: if unshare failed.
     """
     libc = ctypes.CDLL(ctypes.util.find_library("c"), use_errno=True)
     if libc.unshare(ctypes.c_int(flags)) != 0:
@@ -81,10 +81,10 @@ def _ReapChildren(pid):
     """Reap all children that get reparented to us until we see |pid| exit.
 
     Args:
-      pid: The main child to watch for.
+        pid: The main child to watch for.
 
     Returns:
-      The wait status of the |pid| child.
+        The wait status of the |pid| child.
     """
 
     while True:
@@ -95,9 +95,9 @@ def _ReapChildren(pid):
         except OSError as e:
             if e.errno == errno.ECHILD:
                 raise ValueError(
-                    "All children of the current processes have been reaped, but %u "
-                    "was not one of them. This means that %u is not a child of the "
-                    "current processes." % (pid)
+                    "All children of the current processes have been reaped, "
+                    "but %u was not one of them. This means that %u is not a "
+                    "child of the current processes." % (pid)
                 )
             elif e.errno != errno.EINTR:
                 raise
@@ -120,7 +120,7 @@ def _SafeTcSetPgrp(fd, pgrp):
 
 
 def _ForwardToChildPid(pid, signal_to_forward):
-    """Setup a signal handler that forwards the given signal to the given pid."""
+    """Setup a signal handler that forwards the given signal to |pid|."""
 
     def _ForwardingHandler(signum, _frame):
         try:
@@ -148,19 +148,19 @@ def CreatePidNs():
     A note about the processes generated as a result of calling this function:
     You call CreatePidNs() in pid X
     - X launches Pid Y,
-      - Pid X will now do nothing but wait for Pid Y to finish and then sys.exit()
-        with that return code
+      - Pid X will now do nothing but wait for Pid Y to finish and then
+        sys.exit() with that return code
       - Y launches Pid Z
         - Pid Y will now do nothing but wait for Pid Z to finish and then
           sys.exit() with that return code
         - **Pid Z returns from CreatePidNs**. So, the caller of this function
           continues in a different process than the one that made the call.
-            - All SIGTERM/SIGINT signals are forwarded down from pid X to pid Z to
-              handle.
+            - All SIGTERM/SIGINT signals are forwarded down from pid X to pid Z
+              to handle.
             - SIGKILL will only kill pid X, and leak Pid Y and Z.
 
     Returns:
-      The last pid outside of the namespace. (i.e., pid X)
+        The last pid outside of the namespace. (i.e., pid X)
     """
     first_pid = os.getpid()
 
@@ -187,12 +187,14 @@ def CreatePidNs():
     if pid:
         proctitle.settitle("pid ns", "external init")
 
-        # We forward termination signals to the child and trust the child to respond
-        # sanely. Later, ExitAsStatus propagates the exit status back up.
+        # We forward termination signals to the child and trust the child to
+        # respond sanely. Later, ExitAsStatus propagates the exit status back
+        # up.
         _ForwardToChildPid(pid, signal.SIGINT)
         _ForwardToChildPid(pid, signal.SIGTERM)
 
-        # Forward the control of the terminal to the child so it can manage input.
+        # Forward the control of the terminal to the child so it can manage
+        # input.
         _SafeTcSetPgrp(sys.stdin.fileno(), pid)
 
         # Signal our child it can move forward.
@@ -235,23 +237,26 @@ def CreatePidNs():
             proctitle.settitle("pid ns", "init")
 
             # We forward termination signals to the child and trust the child to
-            # respond sanely. Later, ExitAsStatus propagates the exit status back up.
+            # respond sanely. Later, ExitAsStatus propagates the exit status
+            # back up.
             _ForwardToChildPid(pid, signal.SIGINT)
             _ForwardToChildPid(pid, signal.SIGTERM)
 
-            # Now that we're in a new pid namespace, start a new process group so that
-            # children have something valid to use.  Otherwise getpgrp/etc... will get
-            # back 0 which tends to confuse -- you can't setpgrp(0) for example.
+            # Now that we're in a new pid namespace, start a new process group
+            # so that children have something valid to use.  Otherwise
+            # getpgrp/etc... will get back 0 which tends to confuse -- you can't
+            # setpgrp(0) for example.
             os.setpgrp()
 
-            # Forward the control of the terminal to the child so it can manage input.
+            # Forward the control of the terminal to the child so it can manage
+            # input.
             _SafeTcSetPgrp(sys.stdin.fileno(), pid)
 
             # Signal our child it can move forward.
             lock.Post()
             del lock
 
-            # Watch all of the children.  We need to act as the master inside the
+            # Watch all the children.  We need to act as the master inside the
             # namespace and reap old processes.
             process_util.ExitAsStatus(_ReapChildren(pid))
 
@@ -307,12 +312,12 @@ def SimpleUnshare(
     If support for any namespace type is not available, we'll silently skip it.
 
     Args:
-      mount: Create a mount namespace.
-      uts: Create a UTS namespace.
-      ipc: Create an IPC namespace.
-      net: Create a net namespace.
-      pid: Create a pid namespace.
-      cgroup: Create a cgroup namespace.
+        mount: Create a mount namespace.
+        uts: Create a UTS namespace.
+        ipc: Create an IPC namespace.
+        net: Create a net namespace.
+        pid: Create a pid namespace.
+        cgroup: Create a cgroup namespace.
     """
     # The mount namespace is the only one really guaranteed to exist --
     # it's been supported forever and it cannot be turned off.
@@ -365,10 +370,10 @@ def ReExecuteWithNamespace(
     """Re-execute as root so we can unshare resources.
 
     Args:
-      argv: Command line arguments to run as root user.
-      preserve_env: If True, preserve existing environment variables when
-          running as root user.
-      network: If False, disable access to the network.
+        argv: Command line arguments to run as root user.
+        preserve_env: If True, preserve existing environment variables when
+            running as root user.
+        network: If False, disable access to the network.
     """
     # Re-run the command as a root user in order to create the namespaces.
     # Ideally, we can rework this logic to swap to the root user in a way that

@@ -94,26 +94,27 @@ def OutputPerfValue(
     information sent to chromeperf.appspot.com.
 
     Args:
-      filename: A path to the output file. Data will be appended to this file.
-      description: A string describing the measured perf value. Must
-        be maximum length 256, and may only contain letters, numbers,
-        periods, dashes, and underscores.  For example:
-        "page_load_time", "scrolling-frame-rate".
-      value: A number representing the measured perf value, or a list of
-        measured values if a test takes multiple measurements. Measured perf
-        values can be either ints or floats.
-      units: A string describing the units associated with the measured perf
-        value(s). Must be maximum length 32, and may only contain letters,
-        numbers, periods, dashes, and uderscores. For example: "msec", "fps".
-      higher_is_better: A boolean indicating whether or not a higher measured
-        perf value is considered better. If False, it is assumed that a "lower"
-        measured value is better.
-      graph: A string indicating the name of the graph on which the perf value
-        will be subsequently displayed on the chrome perf dashboard. This
-        allows multiple metrics to be grouped together on the same graph.
-        Default to None, perf values should be graphed individually on separate
-        graphs.
-      stdio_uri: A URL relevant to this data point (e.g. the buildbot log).
+        filename: A path to the output file. Data will be appended to this file.
+        description: A string describing the measured perf value. Must
+            be maximum length 256, and may only contain letters, numbers,
+            periods, dashes, and underscores.  For example:
+            "page_load_time", "scrolling-frame-rate".
+        value: A number representing the measured perf value, or a list of
+            measured values if a test takes multiple measurements. Measured perf
+            values can be either ints or floats.
+        units: A string describing the units associated with the measured perf
+            value(s). Must be maximum length 32, and may only contain letters,
+            numbers, periods, dashes, and underscores.
+            For example: "msec", "fps".
+        higher_is_better: A boolean indicating whether a higher measured perf
+            value is considered better. If False, it is assumed that a "lower"
+            measured value is better.
+        graph: A string indicating the name of the graph on which the perf value
+            will be subsequently displayed on the chrome perf dashboard. This
+            allows multiple metrics to be grouped together on the same graph.
+            Default to None, perf values should be graphed individually on
+            separate graphs.
+        stdio_uri: A URL relevant to this data point (e.g. the buildbot log).
     """
 
     def ValidateString(param_name, value, max_len):
@@ -163,10 +164,10 @@ def _AggregateIterations(perf_values):
     aggregated across multiple iterations.
 
     Args:
-      perf_values: A list of PerformanceValue objects.
+        perf_values: A list of PerformanceValue objects.
 
     Returns:
-      A dictionary mapping each unique measured perf value (keyed by tuple of
+        A dictionary mapping each unique measured perf value (keyed by tuple of
         its description and graph name) to information about that perf value
         (in particular, the value is a list of values for each iteration).
     """
@@ -193,12 +194,12 @@ def _MeanAndStddev(data, precision=4):
     """Computes mean and standard deviation from a list of numbers.
 
     Args:
-      data: A list of numeric values.
-      precision: The integer number of decimal places to which to
-        round the results.
+        data: A list of numeric values.
+        precision: The integer number of decimal places to which to
+            round the results.
 
     Returns:
-      A 2-tuple (mean, standard_deviation), in which each value is
+        A 2-tuple (mean, standard_deviation), in which each value is
         rounded to |precision| decimal places.
     """
     n = len(data)
@@ -221,9 +222,9 @@ def _ComputeAvgStddev(perf_data):
     then store the updated information in the dictionary (in place).
 
     Args:
-      perf_data: A dictionary of measured perf data as computed by
-        _AggregateIterations(), except each "value" is now a single value, not
-        a list of values.
+        perf_data: A dictionary of measured perf data as computed by
+            _AggregateIterations(), except each "value" is now a single value,
+            not a list of values.
     """
     for perf in perf_data.values():
         perf["value"], perf["stddev"] = _MeanAndStddev(perf["value"])
@@ -239,10 +240,10 @@ def _GetPresentationInfo(test_name):
     """Get presentation info for |test_name| from config file.
 
     Args:
-      test_name: The test name.
+        test_name: The test name.
 
     Returns:
-      A PresentationInfo object for this test.
+        A PresentationInfo object for this test.
     """
     infos = osutils.ReadFile(_PRESENTATION_CONFIG_FILE)
     infos = json.loads(infos)
@@ -279,21 +280,22 @@ def _FormatForUpload(
     server side handler.
 
     Args:
-      platform_name: The string name of the platform.
-      perf_data: A dictionary of measured perf data. This is keyed by
-        (description, graph name) tuple.
-      presentation_info: A PresentationInfo object of the given test.
-      revision: The raw X-axis value; normally it represents a VCS repo, but may
-        be any monotonic increasing value integer.
-      cros_version: A string identifying Chrome OS version e.g. '6052.0.0'.
-      chrome_version: A string identifying Chrome version e.g. '38.0.2091.2'.
-      test_prefix: Arbitrary string to automatically prefix to the test name.
-        If None, then 'cbuildbot.' is used to guarantee namespacing.
-      platform_prefix: Arbitrary string to automatically prefix to
-        |platform_name|. If None, then 'cros-' is used to guarantee namespacing.
+        platform_name: The string name of the platform.
+        perf_data: A dictionary of measured perf data. This is keyed by
+            (description, graph name) tuple.
+        presentation_info: A PresentationInfo object of the given test.
+        revision: The raw X-axis value; normally it represents a VCS repo, but
+            may be any monotonic increasing value integer.
+        cros_version: A string identifying Chrome OS version e.g. '6052.0.0'.
+        chrome_version: A string identifying Chrome version e.g. '38.0.2091.2'.
+        test_prefix: Arbitrary string to automatically prefix to the test name.
+            If None, then 'cbuildbot.' is used to guarantee namespacing.
+        platform_prefix: Arbitrary string to automatically prefix to
+            |platform_name|. If None, then 'cros-' is used to guarantee
+            namespacing.
 
     Returns:
-      A dictionary containing the formatted information ready to upload
+        A dictionary containing the formatted information ready to upload
         to the performance dashboard.
     """
     if test_prefix is None:
@@ -345,11 +347,11 @@ def _SendToDashboard(data_obj, dashboard=DASHBOARD_URL):
     """Sends formatted perf data to the perf dashboard.
 
     Args:
-      data_obj: A formatted data object as returned by _FormatForUpload().
-      dashboard: The dashboard to upload data to.
+        data_obj: A formatted data object as returned by _FormatForUpload().
+        dashboard: The dashboard to upload data to.
 
     Raises:
-      PerfUploadingError if an exception was raised when uploading.
+        PerfUploadingError if an exception was raised when uploading.
     """
     upload_url = os.path.join(dashboard, "add_point")
     encoded = urllib.parse.urlencode(data_obj).encode("utf-8")
@@ -394,18 +396,18 @@ def _ComputeRevisionFromVersions(chrome_version, cros_version):
     allowed by AppEngine NDB for an integer (64-bit signed value).
 
     For example:
-      Chrome version: 27.0.1452.2 (shortest unambiguous name: 1452.2)
-      ChromeOS version: 27.3906.0.0 (shortest unambiguous name: 3906.0.0)
-      concatenated together with padding for fixed-width columns:
-          ('01452' + '002') + ('03906' + '000' + '00') = '014520020390600000'
-      Final integer ID: 14520020390600000
+        Chrome version: 27.0.1452.2 (shortest unambiguous name: 1452.2)
+        ChromeOS version: 27.3906.0.0 (shortest unambiguous name: 3906.0.0)
+        concatenated together with padding for fixed-width columns:
+            ('01452' + '002') + ('03906' + '000' + '00') = '014520020390600000'
+        Final integer ID: 14520020390600000
 
     Args:
-      chrome_version: The Chrome version number as a string.
-      cros_version: The ChromeOS version number as a string.
+        chrome_version: The Chrome version number as a string.
+        cros_version: The ChromeOS version number as a string.
 
     Returns:
-      A unique integer ID associated with the two given version numbers.
+        A unique integer ID associated with the two given version numbers.
     """
     # Number of digits to use from each part of the version string for Chrome
     # and Chrome OS versions when building a point ID out of these two versions.
@@ -440,13 +442,13 @@ def _RetryIfServerError(perf_exc):
     """Exception handler to retry an upload if error code is 5xx.
 
     Args:
-      perf_exc: The exception from _SendToDashboard.
+        perf_exc: The exception from _SendToDashboard.
 
     Returns:
-      True if the cause of |perf_exc| is HTTP 5xx error.
+        True if the cause of |perf_exc| is HTTP 5xx error.
     """
     # If the exception is one we packaged, see if we want to retry.
-    # Otherwise if something else went wrong, give up right away.
+    # Otherwise, if something else went wrong, give up right away.
     if isinstance(perf_exc, PerfUploadingError):
         return (
             isinstance(perf_exc.orig_exc, urllib.error.HTTPError)
@@ -476,22 +478,24 @@ def UploadPerfValues(
     |chrome_version| must both be specified.
 
     Args:
-      perf_values: List of PerformanceValue objects.
-      platform_name: A string identifying platform e.g. 'x86-release'. 'cros-'
-        will be prepended to |platform_name| internally, by _FormatForUpload.
-      test_name: A string identifying the test
-      revision: The raw X-axis value; normally it represents a VCS repo, but may
-        be any monotonic increasing value integer.
-      cros_version: A string identifying Chrome OS version e.g. '6052.0.0'.
-      chrome_version: A string identifying Chrome version e.g. '38.0.2091.2'.
-      dashboard: The dashboard to upload data to.
-      main_name: The "main" field to use; by default it is looked up in the
-        perf_dashboard_config.json database.
-      test_prefix: Arbitrary string to automatically prefix to the test name.
-        If None, then 'cbuildbot.' is used to guarantee namespacing.
-      platform_prefix: Arbitrary string to automatically prefix to
-        |platform_name|. If None, then 'cros-' is used to guarantee namespacing.
-      dry_run: Do everything but upload the data to the server.
+        perf_values: List of PerformanceValue objects.
+        platform_name: A string identifying platform e.g. 'x86-release'. 'cros-'
+            will be prepended to |platform_name| internally, by
+            _FormatForUpload.
+        test_name: A string identifying the test
+        revision: The raw X-axis value; normally it represents a VCS repo, but
+            may be any monotonic increasing value integer.
+        cros_version: A string identifying Chrome OS version e.g. '6052.0.0'.
+        chrome_version: A string identifying Chrome version e.g. '38.0.2091.2'.
+        dashboard: The dashboard to upload data to.
+        main_name: The "main" field to use; by default it is looked up in the
+            perf_dashboard_config.json database.
+        test_prefix: Arbitrary string to automatically prefix to the test name.
+            If None, then 'cbuildbot.' is used to guarantee namespacing.
+        platform_prefix: Arbitrary string to automatically prefix to
+            |platform_name|. If None, then 'cros-' is used to guarantee
+            namespacing.
+        dry_run: Do everything but upload the data to the server.
     """
     if not perf_values:
         return
@@ -507,7 +511,8 @@ def UploadPerfValues(
 
     # Format the perf data for the upload, then upload it.
     if revision is None:
-        # No "revision" field, calculate one. Chrome and CrOS fields must be given.
+        # No "revision" field, calculate one. Chrome and CrOS fields must be
+        # given.
         cros_version = (
             chrome_version[: chrome_version.find(".") + 1] + cros_version
         )

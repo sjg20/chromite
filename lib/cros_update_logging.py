@@ -34,7 +34,7 @@ class loggingConfig(object):
         """Set console handler for logging.
 
         Args:
-          stream: The input stream, could be stdout/stderr.
+            stream: The input stream, could be stdout/stderr.
         """
         handler = logging.StreamHandler(stream)
         handler.setLevel(self.CONSOLE_LEVEL)
@@ -49,7 +49,7 @@ class loggingConfig(object):
         """Set file handler for logging.
 
         Args:
-          file_name: The file to save logs into.
+            file_name: The file to save logs into.
         """
         handler = logging.FileHandler(file_name)
         handler.setLevel(self.FILE_LEVEL)
