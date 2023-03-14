@@ -287,10 +287,6 @@
     "rm \"${EVENTS_FILE}\"",
     "touch \"${EVENTS_FILE}\""
   ],
-  "missived.conf": [
-    "chown missived:missived /var/cache/reporting",
-    "mkdir -p /var/cache/reporting"
-  ],
   "ml-service.conf": [
     "chown -R ml-service:ml-service /var/lib/ml_service",
     "mkdir -m 0755 -p /var/lib/ml_service/metrics"
