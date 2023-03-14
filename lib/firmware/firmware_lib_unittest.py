@@ -115,7 +115,20 @@ class FlashTest(cros_test_lib.RunCommandTestCase):
         run_mock.assert_has_calls(
             [
                 mock.call(
-                    ["dut-control", f"--port={self.servo_port}", mock.ANY],
+                    [
+                        "dut-control",
+                        f"--port={self.servo_port}",
+                        "ec_uart_timeout:10",
+                    ],
+                    print_cmd=False,
+                    dryrun=False,
+                ),
+                mock.call(
+                    [
+                        "dut-control",
+                        f"--port={self.servo_port}",
+                        "ccd_cpu_fw_spi:on",
+                    ],
                     print_cmd=False,
                     dryrun=False,
                 ),
@@ -126,12 +139,21 @@ class FlashTest(cros_test_lib.RunCommandTestCase):
                         "futility",
                         "update",
                         "-p",
-                        "raiden_debug_spi:target=AP,serial=123456ab",
+                        "raiden_debug_spi:target=AP,custom_rst=true,serial=123456ab",
                         "-i",
                         mock.ANY,
                         "--force",
                         "--wp=0",
                         "--fast",
+                    ],
+                    print_cmd=False,
+                    dryrun=False,
+                ),
+                mock.call(
+                    [
+                        "dut-control",
+                        f"--port={self.servo_port}",
+                        "ccd_cpu_fw_spi:off",
                     ],
                     print_cmd=False,
                     dryrun=False,

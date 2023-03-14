@@ -87,21 +87,27 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
                 where cmd1 will be run before cmd2.
             programmer=programmer argument (-p) for flashrom and futility.
     """
-    # TODO: modify defaults according to the board needs.
-    # TODO: raise UnsupportedServoVersionError for servos that are not supported.
-    dut_control_on = [["cpu_fw_spi:on"]]
-    dut_control_off = [["cpu_fw_spi:off"]]
+    # TODO: Use `futility --servo`.  Stop using dut-control here.  Stop
+    # specifying --programmer.  Let futility handle those things.
     if servo.is_v2:
-        programmer = "ft2232_spi:type=google-servo-v2,serial=%s" % servo.serial
+        dut_control_on = [["cpu_fw_spi:on"]]
+        dut_control_off = [["cpu_fw_spi:off"]]
+        programmer = "ft2232_spi:type=google-servo-v2,serial=%s" % (
+            servo.serial,
+        )
     elif servo.is_micro or servo.is_c2d2:
-        programmer = "raiden_debug_spi:serial=%s" % servo.serial
+        dut_control_on = [["cpu_fw_spi:on"]]
+        dut_control_off = [["cpu_fw_spi:off"]]
+        programmer = "raiden_debug_spi:serial=%s" % (servo.serial,)
     elif servo.is_ccd:
-        dut_control_on = []
-        dut_control_off = []
-        programmer = "raiden_debug_spi:target=AP,serial=%s" % servo.serial
+        dut_control_on = [["ccd_cpu_fw_spi:on"]]
+        dut_control_off = [["ccd_cpu_fw_spi:off"]]
+        programmer = "raiden_debug_spi:target=AP,custom_rst=true,serial=%s" % (
+            servo.serial,
+        )
     else:
         raise servo_lib.UnsupportedServoVersionError(
-            "%s not supported" % servo.version
+            "%s not supported" % (servo.version,)
         )
 
     return servo_lib.ServoConfig(dut_control_on, dut_control_off, programmer)
