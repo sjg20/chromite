@@ -1371,6 +1371,33 @@ class TarballTests(cros_test_lib.TempDirTestCase):
         )
         cros_build_lib.ExtractTarball(path, self.tempdir)
 
+    def testCreateExtractSuccessWithCompressionProgram(self):
+        """Create a tarfile with compression, then extract it."""
+        tar_files = [
+            "test.tar.gz",
+            "test.tar.bz2",
+            "test.tar.xz",
+            "test.tar.zst",
+        ]
+        dir_path = self.tempdir / "dir"
+        dir_path.mkdir()
+        D = cros_test_lib.Directory
+        dir_structure = [
+            D(".", []),
+            D("test", ["file1.txt"]),
+            D("foo", ["file1.txt"]),
+            D("bar", ["file1.txt", "file2.c"]),
+        ]
+        cros_test_lib.CreateOnDiskHierarchy(dir_path, dir_structure)
+
+        for tar_file in tar_files:
+            tar_file_path = self.tempdir / tar_file
+            comp = cros_build_lib.CompressionExtToType(tar_file)
+            cros_build_lib.CreateTarball(
+                tar_file_path, dir_path, compression=comp
+            )
+            cros_test_lib.VerifyTarball(tar_file_path, dir_structure)
+
     def testExtractFailureWithMissingFile(self):
         """Verify that stderr from tar is printed if in encounters an error."""
         tarball = "a-tarball-which-does-not-exist.tar.gz"
@@ -1386,6 +1413,8 @@ class TarballTests(cros_test_lib.TempDirTestCase):
         self.assertTrue(cros_build_lib.IsTarball("file.tar"))
         self.assertTrue(cros_build_lib.IsTarball("file.tar.bz2"))
         self.assertTrue(cros_build_lib.IsTarball("file.tar.gz"))
+        self.assertTrue(cros_build_lib.IsTarball("file.tar.xz"))
+        self.assertTrue(cros_build_lib.IsTarball("file.tar.zst"))
         self.assertTrue(cros_build_lib.IsTarball("file.tbz"))
         self.assertTrue(cros_build_lib.IsTarball("file.txz"))
         self.assertFalse(cros_build_lib.IsTarball("file.txt"))

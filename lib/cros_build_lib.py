@@ -1158,7 +1158,7 @@ def FindCompressor(
     elif compression == CompressionType.BZIP2:
         possible_progs = ["lbzip2", "pbzip2", "bzip2"]
     elif compression == CompressionType.ZSTD:
-        return "zstd"
+        possible_progs = ["zstdmt", "zstd"]
     elif compression == CompressionType.NONE:
         return "cat"
     else:
@@ -1492,7 +1492,7 @@ def IsTarball(path: str) -> bool:
         return True
 
     if parts[-2] == "tar":
-        return parts[-1] in ("bz2", "gz", "xz")
+        return parts[-1] in ("bz2", "gz", "xz", "zst")
 
     return parts[-1] in ("tbz2", "tbz", "tgz", "txz")
 

@@ -6,6 +6,7 @@
 
 import logging
 import os
+from pathlib import Path
 import subprocess
 from typing import List, Optional, TYPE_CHECKING, Union
 
@@ -320,9 +321,10 @@ class ToolchainInstaller(object):
         """
         compression = cros_build_lib.CompressionDetectType(libc_path)
         compressor = cros_build_lib.FindCompressor(compression)
-        if compressor.endswith("pbzip2"):
+        compressor_algo = Path(compressor).name
+        if compressor_algo == "pbzip2":
             compressor = "%s --ignore-trailing-garbage=1" % compressor
-        elif compressor.endswith("zstd"):
+        elif compressor_algo.startswith("zstd"):
             compressor += " -f"
 
         with osutils.TempDir(sudo_rm=True) as tempdir:
