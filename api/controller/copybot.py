@@ -89,10 +89,11 @@ def RunCopybot(input_proto, output_proto, _config_proto):
         try:
             cros_build_lib.run(cmd)
         except cros_build_lib.RunCommandError:
-            # In case of failure, load details about the error from CopyBot's JSON
-            # output into the output protobuf. (If CopyBot ran successfully, the
-            # default values are simply used). CopyBot's output matches the JSON
-            # representation of the RunCopybotResponse protobuf.
+            # In case of failure, load details about the error from CopyBot's
+            # JSON output into the output protobuf. (If CopyBot ran
+            # successfully, the default values are simply used). CopyBot's
+            # output matches the JSON representation of the RunCopybotResponse
+            # protobuf.
 
             if not json_output_path.exists():
                 return controller.RETURN_CODE_UNRECOVERABLE
