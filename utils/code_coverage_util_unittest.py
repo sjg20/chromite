@@ -132,7 +132,7 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
     """Unit tests for GenerateZeroCoverageLlvm"""
 
     def testGenerateZeroCoverageLlvmSuccess(self):
-        """Verify that zero code coverage is being generated for all src files."""
+        """Verify zero code coverage is being generated for all src files."""
 
         path_to_src_directory = os.path.join(self.tempdir, "src")
         osutils.SafeMakedirs(path_to_src_directory)
@@ -171,9 +171,9 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
 
         coverageJson = code_coverage_util.GenerateZeroCoverageLlvm(
             path_to_src_directories=[path_to_src_directory],
-            src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS[
-                "CPP"
-            ],
+            src_file_extensions=(
+                constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS["CPP"]
+            ),
             exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES[
                 "CPP"
             ],
@@ -341,9 +341,9 @@ class GenerateZeroCoverageLlvmTest(cros_test_lib.TempDirTestCase):
 
         coverageJson = code_coverage_util.GenerateZeroCoverageLlvm(
             path_to_src_directories=[path_to_src_directory],
-            src_file_extensions=constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS[
-                "CPP"
-            ],
+            src_file_extensions=(
+                constants.ZERO_COVERAGE_FILE_EXTENSIONS_TO_PROCESS["CPP"]
+            ),
             exclude_line_prefixes=constants.ZERO_COVERAGE_EXCLUDE_LINE_PREFIXES[
                 "CPP"
             ],

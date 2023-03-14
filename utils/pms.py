@@ -130,8 +130,8 @@ def _cmp_numbers(v1: str, v2: str):
     #   the first.
     for p1, p2 in zip(v1_parts[1:], v2_parts[1:]):
         if p1.startswith("0") or p2.startswith("0"):
-            # Algorithm 3.3 L1-8: Compare as strings with stripped trailing 0s when
-            # either begins with 0.
+            # Algorithm 3.3 L1-8: Compare as strings with stripped trailing 0s
+            # when either begins with 0.
             cmp = _cmp(p1.rstrip("0"), p2.rstrip("0"))
         else:
             # Algorithm 3.3 L9-15: Otherwise compare as ints.
@@ -172,10 +172,12 @@ def _cmp_suffixes(s1: str, s2: str):
         # Algorithm 3.6 L9-13: Compare suffixes according to:
         #   _alpha < _beta < _pre < _rc < _p
         # As it happens, they're inverse ordered by length, so we just use that.
-        # Invert the order in the _cmp call to get inverse length comparison, i.e.:
+        # Invert the order in the _cmp call to get inverse length comparison,
+        # i.e.:
         #   a > b == len(b) > len(a)
-        # Algorithm 3.6 L1-8: When suffix is the same, do an integer comparison of
-        #   the numeric parts. Cast to ints and default 0 done in parsing above.
+        # Algorithm 3.6 L1-8: When suffix is the same, do an integer comparison
+        # of the numeric parts. Cast to ints and default 0 done in parsing
+        # above.
         cmp = _cmp(len(s2_sfx), len(s1_sfx)) or _cmp(s1_n, s2_n)
         if cmp:
             return cmp

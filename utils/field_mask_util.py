@@ -27,9 +27,10 @@ def _MergeDictWithPathParts(
 
     if cur_part not in source:
         # There are cases when a field is specified that is not part of the JSON
-        # source. For example, ChromeOS Config payloads are filtered by specifying
-        # a field mask that will be applied to each device config, and a field might
-        # only be set in some device configs. I.e. there could be a payload
+        # source. For example, ChromeOS Config payloads are filtered by
+        # specifying a field mask that will be applied to each device config,
+        # and a field might only be set in some device configs. I.e. there could
+        # be a payload
         #
         # {
         #   "chromeos": {
@@ -42,8 +43,8 @@ def _MergeDictWithPathParts(
         #
         # and a field mask "bluetooth,modem".
         #
-        # In this case, log a warning (as this might be caused by a mistake in the
-        # config) and move on.
+        # In this case, log a warning (as this might be caused by a mistake in
+        # the config) and move on.
         logging.warning("Field %s not found.", cur_part)
         return
 

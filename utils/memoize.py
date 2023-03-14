@@ -11,10 +11,11 @@ import sys
 def MemoizedSingleCall(functor):
     """Decorator for simple functor targets, caching the results
 
-    The functor must accept no arguments beyond either a class or self (depending
-    on if this is used in a classmethod/instancemethod context).  Results of the
-    wrapped method will be written to the class/instance namespace in a specially
-    named cached value.  All future invocations will just reuse that value.
+    The functor must accept no arguments beyond either a class or self
+    (depending on if this is used in a classmethod/instancemethod context).
+    Results of the wrapped method will be written to the class/instance
+    namespace in a specially named cached value.  All future invocations will
+    just reuse that value.
 
     Note that this cache is per-process, so sibling and parent processes won't
     notice updates to the cache.
@@ -39,10 +40,11 @@ def Memoize(f):
     """Decorator for memoizing a function.
 
     Caches all calls to the function using a ._memo_cache dict mapping (args,
-    kwargs) to the results of the first function call with those args and kwargs.
+    kwargs) to the results of the first function call with those args and
+    kwargs.
 
-    If any of args or kwargs are not hashable, trying to store them in a dict will
-    cause a ValueError.
+    If any of args or kwargs are not hashable, trying to store them in a dict
+    will cause a ValueError.
 
     Note that this cache is per-process, so sibling and parent processes won't
     notice updates to the cache.
@@ -52,8 +54,8 @@ def Memoize(f):
 
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
-        # Make sure that the key is hashable... as long as the contents of args and
-        # kwargs are hashable.
+        # Make sure that the key is hashable... as long as the contents of args
+        # and kwargs are hashable.
         # TODO(phobbs) we could add an option to use the id(...) of an object if
         # it's not hashable.  Then "MemoizedSingleCall" would be obsolete.
         key = (tuple(args), tuple(sorted(kwargs.items())))

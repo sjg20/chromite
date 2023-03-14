@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 @contextlib.contextmanager
 def Open(obj: Union[str, "os.PathLike", TextIO], mode: str = "r", **kwargs):
-    """Convenience ctx that accepts a file path or an already open file object."""
+    """Convenience ctx that accepts a file path or an opened file object."""
     if isinstance(obj, str):
         with open(obj, mode=mode, **kwargs) as f:
             yield f

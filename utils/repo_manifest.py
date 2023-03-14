@@ -129,8 +129,9 @@ class Manifest(object):
     def Includes(self):
         """Yield an Include for each <include> element in the manifest.
 
-        This class does NOT process includes, so they are considered an unsupported
-        feature. You must set allow_unsupported_features to use this function.
+        This class does NOT process includes, so they are considered an
+        unsupported feature. You must set allow_unsupported_features to use this
+        function.
         """
         if not self._allow_unsupported_features:
             raise UnsupportedFeature(
@@ -168,7 +169,8 @@ class Manifest(object):
             branch: The optional branch to search (without the 'refs/heads/').
 
         Raises:
-            ValueError: If there is not exactly one Project with the given name/branch
+            ValueError: If there is not exactly one Project with the given
+                name/branch.
         """
         projects = []
         for project in self.Projects():

@@ -195,7 +195,7 @@ class ManifestTest(cros_test_lib.TempDirTestCase, XMLTestCase):
             self.manifest.GetUniqueProject("missing/project")
 
     def testGetUniqueProjectMissingBranch(self):
-        """Test Manifest.GetUniqueProject with valid project, missing <branch>."""
+        """Test Manifest.GetUniqueProject with valid project, missing branch."""
         with self.assertRaises(ValueError):
             self.manifest.GetUniqueProject("complex/project", "wrong_branch")
 

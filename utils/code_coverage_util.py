@@ -136,7 +136,8 @@ def _GenerateZeroCoverageLLVMForFile(
                 line_index += 1
 
             if line_index < len(lines):
-                # Instrumented code block started. Add a open segment to indicate that
+                # Instrumented code block started. Add an open segment to
+                # indicate that.
                 segments.append(_CreateOpenSegment(line_index + 1))
 
             # Search for next un-instrumented line
@@ -497,7 +498,8 @@ def GenerateZeroCoverageLlvm(
     More details on how to generate zero coverage: go/chromeos-zero-coverage.
 
     Args:
-        path_to_src_directories: Dir to look for files to generate zero coverage.
+        path_to_src_directories: Dir to look for files to generate zero
+            coverage.
         src_file_extensions: Filter files based on these extensions.
         exclude_line_prefixes: Used to determine un-instrumented code.
         exclude_files: files to exclude from zero coverage.
@@ -580,7 +582,8 @@ def GetZeroCoverageDirectories(
     Returns:
         List of directories that we should generate zero coverage for.
     """
-    # TODO(b/244365763): Get this mapping dynamically instead of the static json.
+    # TODO(b/244365763): Get this mapping dynamically instead of the static
+    #   json.
     owners_path = (
         Path(src_prefix_path)
         / CHROMITE_UTILS_PATH
