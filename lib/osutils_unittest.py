@@ -774,7 +774,8 @@ class TempDirTests(cros_test_lib.TestCase):
         # Show that the exception exited the context.
         self.assertTrue(was_raised)
 
-        # Verify the tempdir object no longer contains a reference to the tempdir.
+        # Verify the tempdir object no longer contains a reference to the
+        # tempdir.
         self.assertIsNone(tempdir_obj.tempdir)
 
         # Cleanup the dir leaked by our mock exception.
@@ -799,7 +800,8 @@ class TempDirTests(cros_test_lib.TestCase):
         # Show that the exception exited the context.
         self.assertTrue(was_raised)
 
-        # Verify the tempdir object no longer contains a reference to the tempdir.
+        # Verify the tempdir object no longer contains a reference to the
+        # tempdir.
         self.assertIsNone(tempdir_obj.tempdir)
 
         # Cleanup the dir leaked by our mock exception.
@@ -1126,7 +1128,7 @@ class MountOverlayTest(cros_test_lib.MockTempDirTestCase):
             umount_call.assert_any_call(self.mergeddir, cleanup=cleanup)
 
     def testMountFailFallback(self):
-        """Test that mount failure with overlay fs_type fallsback to overlayfs."""
+        """Verify mount failure with overlay fs_type falls back to overlayfs."""
 
         def _FailOverlay(*_args, **kwargs):
             if kwargs["fs_type"] == "overlay":
@@ -1168,7 +1170,7 @@ class MountOverlayTest(cros_test_lib.MockTempDirTestCase):
             umount_call.assert_any_call(self.mergeddir, cleanup=cleanup)
 
     def testNoValidWorkdirFallback(self):
-        """Test that we fallback to overlayfs when no valid workdir is found.."""
+        """Test that we fallback to overlayfs when no valid workdir is found."""
 
         def _FailFileSystemCheck(_path1, _path2):
             return False
@@ -1440,8 +1442,8 @@ class MoveDirContentsTestCase(cros_test_lib.TempDirTestCase):
             D("a", ["a.txt", ".hidden", "b.txt"]),
             "top.txt",
             ".hidden",
-            # test a directory in source directory having a file with same name in
-            # destination.
+            # test a directory in source directory having a file with same name
+            # in destination.
             "b",
         )
         cros_test_lib.CreateOnDiskHierarchy(self.from_dir, src_layout)
@@ -1546,7 +1548,7 @@ class CopyDirContentsTestCase(cros_test_lib.TempDirTestCase):
             osutils.CopyDirContents(in_dir, out_dir)
 
     def testDestinationDirNonEmptyAllowNonEmptySet(self):
-        """Copying to a non-empty destination with allow_nonempty does not raise."""
+        """Copying to a non-empty destination with allow_nonempty succeeds."""
         in_dir = os.path.join(self.tempdir, "input")
         out_dir = os.path.join(self.tempdir, "output")
         osutils.SafeMakedirsNonRoot(in_dir)
@@ -1704,8 +1706,8 @@ class UmaskTests(cros_test_lib.TestCase):
     @staticmethod
     def getUmask():
         """Return the current umask setting."""
-        # Testing this is messy because there is no syscall to look this up without
-        # side-effects.  os.umask sets & queries at once.
+        # Testing this is messy because there is no syscall to look this up
+        # without side-effects.  os.umask sets & queries at once.
         m = re.search(
             r"^Umask:\s+([0-7]+)",
             osutils.ReadFile("/proc/self/status"),

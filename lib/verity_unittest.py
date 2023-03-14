@@ -24,7 +24,8 @@ class VerityTest(cros_test_lib.TempDirTestCase):
             table,
             "0 128 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=128 "
             f"alg=sha256 root_hexdigest={root_hexdigest} "
-            "salt=471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c",
+            "salt="
+            "471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c",
         )
         self.assertEqual(verity.ExtractRootHexdigest(table), root_hexdigest)
 

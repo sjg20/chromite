@@ -43,7 +43,8 @@ class QemuTests(cros_test_lib.TestCase):
     def testArmRegisterStr(self):
         """Make sure the register string is exact.
 
-        We don't check every arch, just one to make sure the general logic is OK.
+        We don't check every arch, just one to make sure the general logic is
+        OK.
         """
         exp = (
             b":foo:M::"

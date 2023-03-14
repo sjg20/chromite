@@ -99,7 +99,7 @@ class AccountDatabaseTest(cros_test_lib.MockTestCase):
         return db
 
     def _ParseSpecs(self, specs):
-        """Return a AccountDatabase based on the account database stack in |specs|.
+        """Return a AccountDatabase from the account database stack in |specs|.
 
         Args:
             specs: list of json fragments (encoded as strings) to compose into a
@@ -124,7 +124,7 @@ class AccountDatabaseTest(cros_test_lib.MockTestCase):
         self._ParseSpec(EMPTY_ACCOUNTS_DB_WITH_COMMENTS)
 
     def testRejectsUnkownDbKeys(self):
-        """Test that we check the set of keys specified in the account database."""
+        """Verify we check the set of keys specified in the account database."""
         self.assertRaises(
             ValueError,
             self._ParseSpec,

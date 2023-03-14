@@ -10,7 +10,7 @@ from chromite.lib import failure_message_lib
 class BuildFailureMessage(object):
     """Message indicating that changes failed to be validated.
 
-    A failure message for a failed build, which is used to trige failures and
+    A failure message for a failed build, which is used to triage failures and
     detect bad changes.
     """
 
@@ -38,7 +38,7 @@ class BuildFailureMessage(object):
         return self.message_summary
 
     def BuildFailureMessageToStr(self):
-        """Return a string presenting the information in the BuildFailureMessage."""
+        """Return a string representation of the BuildFailureMessage."""
         to_str = (
             "[builder] %s [message summary] %s [reason] %s [internal] %s\n"
             % (self.builder, self.message_summary, self.reason, self.internal)
@@ -49,14 +49,14 @@ class BuildFailureMessage(object):
         return to_str
 
     def MatchesExceptionCategories(self, exception_categories):
-        """Check if all of the failure_messages match the exception_categories.
+        """Check if all the failure_messages match the exception_categories.
 
         Args:
             exception_categories: A set of exception categories (members of
                 constants.EXCEPTION_CATEGORY_ALL_CATEGORIES).
 
         Returns:
-            True if all of the failure_messages match a member in
+            True if all the failure_messages match a member in
             exception_categories; else, False.
         """
         for failure in self.failure_messages:

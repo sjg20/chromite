@@ -46,7 +46,9 @@ PATH boo/baz.tbz2
     @cros_test_lib.pytestmark_network_test
     def testFetchRealPackages(self):
         """Actually fetch a real binhost from the network."""
+        # pylint: disable=line-too-long
         uri = "gs://chromeos-prebuilt/board/lumpy/paladin-R37-5905.0.0-rc2/packages"
+        # pylint: enable=line-too-long
         binpkg.FetchTarballs([uri], self.tempdir)
 
 

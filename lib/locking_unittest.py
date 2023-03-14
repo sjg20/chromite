@@ -29,7 +29,7 @@ class LockingTest(cros_test_lib.TempDirTestCase):
         self.lock_file = os.path.join(self.tempdir, "lockfile")
 
     def _HelperSingleLockTest(self, blocking, shared, locktype):
-        """Helper method that runs a basic test with/without blocking/sharing."""
+        """Helper method to run a basic test with/without blocking/sharing."""
         self.assertNotExists(self.lock_file)
 
         lock = locking.FileLock(
@@ -81,8 +81,8 @@ class LockingTest(cros_test_lib.TempDirTestCase):
         )
         p.start()
 
-        # It's highly probably that p will have tried to grab the lock before the
-        # timer expired, but not certain.
+        # It's highly probably that p will have tried to grab the lock before
+        # the timer expired, but not certain.
         time.sleep(0.1)
 
         return p
@@ -342,8 +342,8 @@ class PipeLockTest(cros_test_lib.TestCase):
         read_lock = locking.PipeLock()
 
         with osutils.TempDir() as tempdir:
-            # Let the child create a file, but make sure the parent holds us off.
-            # Then make the parent wait for the child to tell us it's done.
+            # Let the child create a file, but make sure the parent holds us
+            # off. Then make the parent wait for the child to tell us it's done.
             flag_file = os.path.join(tempdir, "foo")
 
             pid = os.fork()
@@ -359,7 +359,8 @@ class PipeLockTest(cros_test_lib.TestCase):
                 except Exception:
                     os._exit(1)
                 finally:
-                    # No matter what happens, we must exit w/out running handlers.
+                    # No matter what happens, we must exit w/out running
+                    # handlers.
                     os._exit(0)
             else:
                 # Parent.

@@ -128,8 +128,8 @@ class GceTest(cros_test_lib.MockTempDirTestCase):
     def _MockOutBuildRetriableRequest(self, mock_http):
         """Returns a mock closure of _BuildRetriableRequest.
 
-        Fake a GceContext._BuildRetriableRequest() that always uses |mock_http| as
-        transport.
+        Fake a GceContext._BuildRetriableRequest() that always uses |mock_http|
+        as transport.
         """
 
         def _BuildRetriableRequest(
