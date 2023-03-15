@@ -84,6 +84,7 @@ class CrosFlashTest(
             "force": False,
             "debug": False,
             "delta": False,
+            "reboot_timeout": cros_flash.FlashCommand.DEFAULT_REBOOT_TIMEOUT,
         }
         # Overwrite defaults with any variations in this test.
         expected_kwargs.update(kwargs)

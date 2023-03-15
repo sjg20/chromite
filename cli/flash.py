@@ -378,6 +378,7 @@ def Flash(
     debug=False,
     clear_tpm_owner=False,
     delta=False,
+    reboot_timeout=None,
 ):
     """Flashes a device, USB drive, or file with an image.
 
@@ -411,6 +412,7 @@ def Flash(
         debug: Print additional debugging messages.
         version: Default version.
         delta: Whether to use delta compression when transferring image bytes.
+        reboot_timeout: The timeout for reboot.
 
     Raises:
         FlashError: An unrecoverable error occurred.
@@ -448,6 +450,7 @@ def Flash(
                 clobber_stateful=clobber_stateful,
                 clear_tpm_owner=clear_tpm_owner,
                 delta=delta,
+                reboot_timeout=reboot_timeout,
             ).Run()
     elif device.scheme == commandline.DEVICE_SCHEME_USB:
         path = osutils.ExpandPath(device.path) if device.path else ""

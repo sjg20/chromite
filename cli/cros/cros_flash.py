@@ -4,6 +4,7 @@
 
 """Install/copy the image to the device."""
 
+import datetime
 import logging
 
 from chromite.cli import command
@@ -69,6 +70,9 @@ Examples:
     # Override base class property to use cache related commandline options.
     use_caching_options = True
 
+    # The default reboot timeout.
+    DEFAULT_REBOOT_TIMEOUT = datetime.timedelta(seconds=300)
+
     @classmethod
     def AddParser(cls, parser):
         """Add parser arguments."""
@@ -124,6 +128,12 @@ Examples:
             dest="reboot",
             default=True,
             help="Do not reboot after update. Default is always reboot.",
+        )
+        update.add_argument(
+            "--reboot-timeout",
+            default=cls.DEFAULT_REBOOT_TIMEOUT,
+            type="timedelta",
+            help="Timeout (sec) to wait for reboot. (Default: %(default)s)",
         )
         update.add_argument(
             "--no-wipe",
@@ -286,6 +296,7 @@ Examples:
                     yes=self.options.yes,
                     force=self.options.force,
                     debug=self.options.debug,
+                    reboot_timeout=self.options.reboot_timeout,
                 )
             logging.notice("cros flash completed successfully in %s", t)
         except dev_server_wrapper.ImagePathError:

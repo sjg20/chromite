@@ -5,6 +5,7 @@
 """Library containing functions to install an image on a Chromium OS device."""
 
 import abc
+import datetime
 import enum
 from io import BytesIO
 import logging
@@ -86,6 +87,7 @@ class DeviceImager(object):
         clobber_stateful: bool = False,
         clear_tpm_owner: bool = False,
         delta: bool = False,
+        reboot_timeout: datetime.timedelta = None,
     ):
         """Initialize DeviceImager for flashing a Chromium OS device.
 
@@ -104,6 +106,7 @@ class DeviceImager(object):
             clear_tpm_owner: If true, it will clear the TPM owner on reboot.
             delta: Whether to use delta compression when transferring image
                 bytes.
+            reboot_timeout: The timeout for reboot.
         """
 
         self._device = device
@@ -117,6 +120,7 @@ class DeviceImager(object):
         self._disable_verification = disable_verification
         self._clobber_stateful = clobber_stateful
         self._clear_tpm_owner = clear_tpm_owner
+        self._reboot_timeout = reboot_timeout
 
         self._image_type = None
         self._inactive_state = None
@@ -154,7 +158,9 @@ class DeviceImager(object):
 
         if self._disable_verification:
             # DisableRootfsVerification internally invokes Reboot().
-            self._device.DisableRootfsVerification()
+            self._device.DisableRootfsVerification(
+                timeout_sec=self._reboot_timeout.total_seconds()
+            )
             self._VerifyBootExpectations()
         elif not self._no_reboot:
             self._Reboot()
@@ -340,7 +346,9 @@ class DeviceImager(object):
     def _Reboot(self):
         """Reboots the device."""
         try:
-            self._device.Reboot(timeout_sec=300)
+            self._device.Reboot(
+                timeout_sec=self._reboot_timeout.total_seconds()
+            )
         except remote_access.RebootError:
             raise Error(
                 "Could not recover from reboot. Once example reason"
