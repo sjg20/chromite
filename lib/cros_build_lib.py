@@ -289,9 +289,15 @@ class CalledProcessError(subprocess.CalledProcessError):
         Returns:
             A summary string for this result.
         """
-        items = [
-            "return code: %s; command: %s" % (self.returncode, self.cmdstr),
-        ]
+        if self.returncode and self.returncode < 0:
+            try:
+                msg = f"died with {signal.Signals(-self.returncode)!r}"
+            except ValueError:
+                msg = f"died with unknown signal {-self.returncode}"
+        else:
+            msg = f"return code: {self.returncode}"
+        items = [f"{msg}; command: {self.cmdstr}"]
+
         if stderr and self.stderr:
             stderr = self.stderr
             if isinstance(stderr, bytes):
