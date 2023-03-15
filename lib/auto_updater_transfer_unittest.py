@@ -226,7 +226,7 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
         """
         self.PatchObject(os.path, "exists", return_value=True)
         with remote_access.ChromiumOSDeviceHandler(
-            remote_access.TEST_IP
+            remote_access.TEST_IP, private_key=remote_access.TEST_PRIVATE_KEY
         ) as device:
             transfer = self.CreateInstance(
                 device, payload_name="exists", payload_dir="/test/payload/dir"

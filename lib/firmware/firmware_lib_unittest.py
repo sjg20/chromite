@@ -191,10 +191,7 @@ class FlashTest(cros_test_lib.RunCommandTestCase):
                     mock.call(
                         [
                             "scp",
-                            "-i",
-                            mock.ANY,
-                            "-i",
-                            mock.ANY,
+                            *ssh_keys_expected,
                             "-P",
                             self.ssh_port,
                             "-o",

@@ -27,6 +27,15 @@ def test_execute():
             "/mnt/host/source/src/private-overlays/chipset-picasso-private",
             "/mnt/host/source/src/third_party/portage-stable",
         ],
+    ), mock.patch(
+        "chromite.lib.portage_util.GetOverlayName",
+        side_effect=[
+            "baseboard-brya",
+            "elm",
+            "chipset-picasso-private",
+            "elm-private",
+            "portage-stable",
+        ],
     ):
         test_output = spiderlib.SpiderOutput()
         get_overlays_spider.execute(test_output)
