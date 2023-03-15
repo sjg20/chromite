@@ -1606,7 +1606,7 @@ class ChromiumOSDevice(RemoteDevice):
 
         return False
 
-    def DisableRootfsVerification(self):
+    def DisableRootfsVerification(self, timeout_sec=REBOOT_MAX_WAIT):
         """Disables device rootfs verification."""
         logging.info("Disabling rootfs verification on device...")
         self.run(
@@ -1616,7 +1616,7 @@ class ChromiumOSDevice(RemoteDevice):
         )
         # TODO(yjhong): Make sure an update is not pending.
         logging.info("Need to reboot to actually disable the verification.")
-        self.Reboot()
+        self.Reboot(timeout_sec=timeout_sec)
         # After reboot, the rootfs is mounted read-only, so remount as read-write.
         self._RemountRootfsAsWritable()
 
