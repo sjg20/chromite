@@ -197,6 +197,18 @@ class InterfaceTest(cros_test_lib.OutputTestCase):
         options = _ParseCommandLine(argv)
         self.assertEqual(options.private_key, "/foo/bar/key")
 
+    def testUnlockPassword(self):
+        argv = list(_REGULAR_TO) + [
+            "--board",
+            _TARGET_BOARD,
+            "--unlock-password",
+            "letmein",
+            "--build-dir",
+            "/path/to/nowhere",
+        ]
+        options = _ParseCommandLine(argv)
+        self.assertEqual(options.unlock_password, "letmein")
+
 
 class DeployChromeMock(partial_mock.PartialMock):
     """Deploy Chrome Mock Class."""
@@ -451,6 +463,39 @@ class TestUiJobStarted(DeployTest):
         """Correct results with a running job."""
         self.MockStatusUiCmd(stdout="ui start/running, process 297")
         self.assertTrue(self.deploy._CheckUiJobStarted())
+
+
+class TestUnlockPassword(DeployTest):
+    """Test that unlock password is sent."""
+
+    def _GetDeployChrome(self, args):
+        args.append("--unlock-password=letmein")
+        return super(TestUnlockPassword, self)._GetDeployChrome(args)
+
+    def testUnlock(self):
+        """Test that unlock password is sent."""
+        self.deploy._stopped_ui = True
+
+        # Update LAST_LOGIN_COMMAND to return a different value.
+        def SideEffect(*args, **kwargs):
+            # pylint: disable=unused-argument
+            self.deploy_mock.rsh_mock.AddCmdResult(
+                deploy_chrome.LAST_LOGIN_COMMAND, stdout="2.0"
+            )
+
+        # LAST_LOGIN_COMMAND returns 1.0 the first time it is called, then 2.0.
+        self.deploy_mock.rsh_mock.AddCmdResult(
+            deploy_chrome.LAST_LOGIN_COMMAND,
+            stdout="1.0",
+            side_effect=SideEffect,
+        )
+        with mock.patch.object(remote_access.ChromiumOSDevice, "CopyToDevice"):
+            with mock.patch.object(time, "sleep"):
+                self.deploy._Deploy()
+        # Ensure unlock command was called.
+        self.deploy_mock.rsh_mock.assertCommandContains(
+            deploy_chrome.UNLOCK_PASSWORD_COMMAND % "letmein"
+        )
 
 
 class StagingTest(cros_test_lib.MockTempDirTestCase):

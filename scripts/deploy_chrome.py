@@ -54,6 +54,8 @@ MOUNT_RW_COMMAND = "mount -o remount,rw /"
 LSOF_COMMAND_CHROME = "lsof %s/chrome"
 LSOF_COMMAND = "lsof %s"
 DBUS_RELOAD_COMMAND = "killall -HUP dbus-daemon"
+LAST_LOGIN_COMMAND = "bootstat_get_last login-prompt-visible"
+UNLOCK_PASSWORD_COMMAND = "inject-keys.py -s %s -k enter"
 
 _ANDROID_DIR = "/system/chrome"
 _ANDROID_DIR_EXTRACT_PATH = "system/chrome/*"
@@ -460,8 +462,26 @@ class DeployChrome(object):
         self.device.run(DBUS_RELOAD_COMMAND, check=False)
 
         if self.options.startui and self._stopped_ui:
+            last_login = self._GetLastLogin()
             logging.info("Starting UI...")
             self.device.run("start ui")
+
+            if self.options.unlock_password:
+                logging.info("Unlocking...")
+
+                @retry_util.WithRetry(max_retry=5, sleep=1)
+                def WaitForUnlockScreen():
+                    if self._GetLastLogin() == last_login:
+                        raise DeployFailure("Unlock screen not shown")
+
+                WaitForUnlockScreen()
+                self.device.run(
+                    UNLOCK_PASSWORD_COMMAND % self.options.unlock_password
+                )
+
+    def _GetLastLogin(self):
+        """Returns last login time"""
+        return self.device.run(LAST_LOGIN_COMMAND).stdout.strip()
 
     def _DeployTestBinaries(self):
         """Deploys any local test binary to _CHROME_TEST_BIN_DIR on the device.
@@ -751,6 +771,11 @@ def _CreateParser():
         dest="startui",
         default=True,
         help="Don't restart the ui daemon after deployment.",
+    )
+    parser.add_argument(
+        "--unlock-password",
+        default=None,
+        help="Password to use to unlock after deployment and restart.",
     )
     parser.add_argument(
         "--nostrip",
