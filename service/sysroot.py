@@ -899,7 +899,10 @@ def BuildPackages(
             except cros_build_lib.RunCommandError as e:
                 failed_pkgs = portage_util.ParseDieHookStatusFile(tempdir)
                 raise sysroot_lib.PackageInstallError(
-                    str(e), e.result, exception=e, packages=failed_pkgs
+                    "Merging board packages failed",
+                    e.result,
+                    exception=e,
+                    packages=failed_pkgs,
                 )
 
         if run_configs.install_debug_symbols:
