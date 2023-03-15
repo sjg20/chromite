@@ -406,7 +406,9 @@ _COPY_PATHS_CHROME = (
     Path("chrome_crashpad_handler", exe=True, optional=True),
     Path("dbus/", optional=True),
     Path("keyboard_resources.pak"),
+    Path("libassistant.so", exe=True, optional=True),
     Path("libmojo_core.so", exe=True),
+    Path("libondeviceassistant.so", exe=True, optional=True),
     Path(
         "liboptimization_guide_internal.so",
         exe=True,
