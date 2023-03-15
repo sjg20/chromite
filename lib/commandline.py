@@ -160,6 +160,25 @@ def ParseDate(value):
         raise
 
 
+def ParseTimedelta(value: str):
+    """Parse timedelta argument into datetime.timedelta object.
+
+    Args:
+        value: String in seconds.
+
+    Returns:
+        A datetime.timedelta object.
+    """
+    try:
+        seconds = int(value)
+        if seconds < 0:
+            raise ValueError("Timedelta is expected to be a positive integer.")
+        return datetime.timedelta(seconds=seconds)
+    except ValueError:
+        logging.error("Timedelta is expected to be a positive integer.")
+        raise
+
+
 def NormalizeUri(value):
     """Normalize a local path or URI."""
     o = urllib.parse.urlparse(value)
@@ -572,6 +591,7 @@ VALID_TYPES = {
     "gs_path": NormalizeGSPath,
     "local_or_gs_path": NormalizeLocalOrGSPath,
     "path_or_uri": NormalizeUri,
+    "timedelta": ParseTimedelta,
 }
 
 VALID_ACTIONS = {

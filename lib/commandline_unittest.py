@@ -5,6 +5,7 @@
 """Test the commandline module."""
 
 import argparse
+import datetime
 import enum
 import logging
 import os
@@ -32,6 +33,36 @@ class TestShutDownException(cros_test_lib.TestCase):
         ex2 = pickle.loads(pickle.dumps(ex))
         self.assertEqual(ex.signal, ex2.signal)
         self.assertEqual(str(ex), str(ex2))
+
+
+class TimedeltaTest(cros_test_lib.TestCase):
+    """Test type=timedelta is supported correctly."""
+
+    def setUp(self):
+        """Create a parser for testing."""
+        self.parser = commandline.ArgumentParser()
+        self.parser.add_argument(
+            "--timedelta",
+            type="timedelta",
+            help="Some timedelta help message.",
+        )
+
+    def testInvalidTimedelta(self):
+        """Test invalid timedelta values. (invalid)"""
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["--timedelta", "foobar"])
+
+    def testNegativeTimedelta(self):
+        """Test negative integer timedelta values. (invalid)"""
+        with self.assertRaises(SystemExit):
+            self.parser.parse_args(["--timedelta", "-1"])
+
+    def testPositiveTimedelta(self):
+        """Test positive integer timedelta values. (valid)"""
+        opts = self.parser.parse_args(["--timedelta", "1"])
+        self.assertEqual(opts.timedelta, datetime.timedelta(seconds=1))
+        opts = self.parser.parse_args(["--timedelta", "0"])
+        self.assertEqual(opts.timedelta, datetime.timedelta(seconds=0))
 
 
 class GSPathTest(cros_test_lib.OutputTestCase):
