@@ -71,7 +71,9 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         bki_mock.assert_called_once_with(
             os.path.join(self.tempdir, minios.MINIOS_KERNEL_IMAGE),
-            boot_args="noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios",
+            boot_args=(
+                "noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios"
+            ),
             serial="foo-tty",
             keys_dir="foo-keys-dir",
             public_key="foo-public-key",
@@ -113,7 +115,9 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         bki_mock.assert_called_once_with(
             os.path.join(self.tempdir, minios.MINIOS_KERNEL_IMAGE),
-            boot_args="noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios",
+            boot_args=(
+                "noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios"
+            ),
             serial="foo-tty",
             keys_dir="foo-keys-dir",
             public_key="foo-public-key",
@@ -156,8 +160,10 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         bki_mock.assert_called_once_with(
             os.path.join(self.tempdir, minios.MINIOS_KERNEL_IMAGE),
-            boot_args="noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios"
-            " cros_debug",
+            boot_args=(
+                "noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios "
+                "cros_debug"
+            ),
             serial="foo-tty",
             keys_dir="foo-keys-dir",
             public_key="foo-public-key",
@@ -189,8 +195,10 @@ class BuilderTest(cros_test_lib.RunCommandTempDirTestCase):
         bck_mock.assert_not_called()
         bki_mock.assert_called_once_with(
             os.path.join(self.tempdir, minios.MINIOS_KERNEL_IMAGE),
-            boot_args="noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios"
-            " cros_debug",
+            boot_args=(
+                "noinitrd panic=60 cros_minios_version=0.0.0.0 cros_minios "
+                "cros_debug"
+            ),
             serial="foo-tty",
             keys_dir="foo-keys-dir",
             public_key="foo-public-key",

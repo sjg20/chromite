@@ -80,10 +80,10 @@ def HashFile(file_path):
     """Calculate the sha256 hash of a file.
 
     Args:
-      file_path: (str) path to the file.
+        file_path: (str) path to the file.
 
     Returns:
-      [str]: The sha256 hash of the file.
+        [str]: The sha256 hash of the file.
     """
     sha256 = hashlib.sha256()
     with open(file_path, "rb") as f:
@@ -92,14 +92,13 @@ def HashFile(file_path):
     return sha256.hexdigest()
 
 
-def GetValueInJsonFile(json_path, key, default_value=None):
+def GetValueInJsonFile(json_path: str, key: str, default_value=None):
     """Reads file containing JSON and returns value or default_value for key.
 
     Args:
-      json_path: (str) File containing JSON.
-      key: (str) The desired key to lookup.
-      default_value: (default:None) The default value returned in case of missing
-        key.
+        json_path: File containing JSON.
+        key: The desired key to lookup.
+        default_value: The default value returned in case of missing key.
     """
     with open(json_path, "rb") as fd:
         return json.load(fd).get(key, default_value)
@@ -109,25 +108,25 @@ class EbuildParams(object):
     """Object to store and retrieve DLC ebuild parameters.
 
     Attributes:
-      dlc_id: (str) DLC ID.
-      dlc_package: (str) DLC package.
-      fs_type: (str) file system type.
-      pre_allocated_blocks: (int) number of blocks pre-allocated on device.
-      version: (str) DLC version.
-      name: (str) DLC name.
-      description: (str) DLC description.
-      preload: (bool) allow for preloading DLC.
-      factory_install: (bool) allow factory installing the DLC.
-      mount_file_required: (bool) allow for mount file generation for DLC.
-      used_by: (str) The user of this DLC, e.g. "system" or "user"
-      days_to_purge: (int) The number of days to keep a DLC after uninstall and
-          before it is purged.
-      reserved: (bool) always reserve space for DLC on disk.
-      critical_update: (bool) DLC always updates with the OS.
-      fullnamerev: (str) The full package & version name.
-      loadpin_verity_digest: (bool) DLC digest is part of LoadPin trusted
-          dm-verity digest.
-      scaled: (bool) DLC will be fed through scaling design.
+        dlc_id: (str) DLC ID.
+        dlc_package: (str) DLC package.
+        fs_type: (str) file system type.
+        pre_allocated_blocks: (int) number of blocks pre-allocated on device.
+        version: (str) DLC version.
+        name: (str) DLC name.
+        description: (str) DLC description.
+        preload: (bool) allow for preloading DLC.
+        factory_install: (bool) allow factory installing the DLC.
+        mount_file_required: (bool) allow for mount file generation for DLC.
+        used_by: (str) The user of this DLC, e.g. "system" or "user"
+        days_to_purge: (int) The number of days to keep a DLC after uninstall
+            and before it is purged.
+        reserved: (bool) always reserve space for DLC on disk.
+        critical_update: (bool) DLC always updates with the OS.
+        fullnamerev: (str) The full package & version name.
+        loadpin_verity_digest: (bool) DLC digest is part of LoadPin trusted
+            dm-verity digest.
+        scaled: (bool) DLC will be fed through scaling design.
     """
 
     def __init__(
@@ -152,10 +151,10 @@ class EbuildParams(object):
     ):
         """Initializes the object.
 
-        When adding a new variable in here, always set a default value. The reason
-        is that this class is sometimes used to load a pre-existing ebuild params
-        JSON file (through bin packages) and that file may not contain the new
-        arguemnt. So the build will fail.
+        When adding a new variable in here, always set a default value. The
+        reason is that this class is sometimes used to load a pre-existing
+        ebuild params JSON file (through bin packages) and that file may not
+        contain the new argument. So the build will fail.
         """
         self.dlc_id = dlc_id
         self.dlc_package = dlc_package
@@ -178,12 +177,12 @@ class EbuildParams(object):
     def StoreDlcParameters(self, install_root_dir, sudo):
         """Store DLC parameters defined in the ebuild.
 
-        Store DLC parameters defined in the ebuild in a temporary file so they can
-        be retrieved in the build_image phase.
+        Store DLC parameters defined in the ebuild in a temporary file so they
+        can be retrieved in the build_image phase.
 
         Args:
-          install_root_dir: (str) The path to the root installation directory.
-          sudo: (bool) Use sudo to write the file.
+            install_root_dir: (str) The path to the root installation directory.
+            sudo: (bool) Use sudo to write the file.
         """
         ebuild_params_path = EbuildParams.GetParamsPath(
             install_root_dir,
@@ -203,13 +202,13 @@ class EbuildParams(object):
         """Get the path to the file storing the ebuild parameters.
 
         Args:
-          install_root_dir: (str) The path to the root installation directory.
-          dlc_id: (str) DLC ID.
-          dlc_package: (str) DLC package.
-          scaled: (bool) Scaled DLC option.
+            install_root_dir: (str) The path to the root installation directory.
+            dlc_id: (str) DLC ID.
+            dlc_package: (str) DLC package.
+            scaled: (bool) Scaled DLC option.
 
         Returns:
-          [str]: Path to |EBUILD_PARAMETERS|.
+            [str]: Path to |EBUILD_PARAMETERS|.
         """
         return os.path.join(
             install_root_dir,
@@ -224,13 +223,13 @@ class EbuildParams(object):
         """Read the stored ebuild parameters file and return a class instance.
 
         Args:
-          dlc_id: (str) DLC ID.
-          dlc_package: (str) DLC package.
-          sysroot: (str) The path to the build root directory.
-          scaled: (bool) Scaled DLC option.
+            dlc_id: (str) DLC ID.
+            dlc_package: (str) DLC package.
+            sysroot: (str) The path to the build root directory.
+            scaled: (bool) Scaled DLC option.
 
         Returns:
-          [bool] : True if |ebuild_params_path| exists, False otherwise.
+            [bool] : True if |ebuild_params_path| exists, False otherwise.
         """
         path = cls.GetParamsPath(sysroot, dlc_id, dlc_package, scaled)
         if not os.path.exists(path):
@@ -263,14 +262,14 @@ class DlcGenerator(object):
         """Object initializer.
 
         Args:
-          sysroot: (str) The path to the build root directory.
-          ebuild_params: (EbuildParams) Ebuild variables.
-          board: (str) The target board we are building for.
-          src_dir: (str) Optional path to the DLC source root directory. When None,
-                   the default directory in |DLC_BUILD_DIR| is used.
+            sysroot: (str) The path to the build root directory.
+            ebuild_params: (EbuildParams) Ebuild variables.
+            board: (str) The target board we are building for.
+            src_dir: (str) Optional path to the DLC source root directory. When
+                None, the default directory in |DLC_BUILD_DIR| is used.
         """
-        # Use a temporary directory to avoid having to use sudo every time we write
-        # into the build directory.
+        # Use a temporary directory to avoid having to use sudo every time we
+        # write into the build directory.
         self.temp_root = osutils.TempDir(prefix="dlc", sudo_rm=True)
         self.src_dir = src_dir
         self.sysroot = sysroot
@@ -327,7 +326,7 @@ class DlcGenerator(object):
         """Squash the owernships & permissions for files.
 
         Args:
-          path: (str) path that contains all files to be processed.
+            path: (str) path that contains all files to be processed.
         """
         cros_build_lib.sudo_run(["chown", "-R", "0:0", path])
         cros_build_lib.sudo_run(
@@ -402,8 +401,8 @@ class DlcGenerator(object):
                 capture_output=True,
             )
 
-            # Verity cannot create hashes for device images which are less than two
-            # pages in size. So fix this squashfs image if it's too small.
+            # Verity cannot create hashes for device images which are less than
+            # two pages in size. So fix this squashfs image if it's too small.
             # Check out b/187725419 for details.
             if os.path.getsize(self.dest_image) < self._BLOCK_SIZE * 2:
                 logging.warning(
@@ -419,7 +418,7 @@ class DlcGenerator(object):
         """Prepares the directory dlc_dir with all the files a DLC needs.
 
         Args:
-          dlc_dir: (str) The path to where to setup files inside the DLC.
+            dlc_dir: (str) The path to where to setup files inside the DLC.
         """
         dlc_root_dir = os.path.join(dlc_dir, self._DLC_ROOT_DIR)
         osutils.SafeMakedirs(dlc_root_dir)
@@ -435,7 +434,7 @@ class DlcGenerator(object):
         This file is used dropping some identification parameters for the DLC.
 
         Args:
-          dlc_dir: (str) The path to the mounted point during image creation.
+            dlc_dir: (str) The path to the mounted point during image creation.
         """
         app_id = None
         platform_lsb_rel_path = os.path.join(self.sysroot, LSB_RELEASE)
@@ -459,9 +458,9 @@ class DlcGenerator(object):
             (DLC_ID_KEY, self.ebuild_params.dlc_id),
             (DLC_PACKAGE_KEY, self.ebuild_params.dlc_package),
             (DLC_NAME_KEY, self.ebuild_params.name),
-            # The DLC appid is generated by concatenating the platform appid with
-            # the DLC ID using an underscore. This pattern should never be changed
-            # once set otherwise it can break a lot of things!
+            # The DLC appid is generated by concatenating the platform appid
+            # with the DLC ID using an underscore. This pattern should never be
+            # changed once set otherwise it can break a lot of things!
             (
                 DLC_APPID_KEY,
                 "%s_%s" % (app_id if app_id else "", self.ebuild_params.dlc_id),
@@ -477,7 +476,7 @@ class DlcGenerator(object):
         """Add the licensing file for this DLC.
 
         Args:
-          dlc_dir: (str) The path to the mounted point during image creation.
+            dlc_dir: (str) The path to the mounted point during image creation.
         """
         if not self.ebuild_params.fullnamerev:
             return
@@ -505,7 +504,7 @@ class DlcGenerator(object):
         Look at the documentation around _EXTRA_RESOURCES.
 
         Args:
-          dlc_dir: (str) The path to the mounted point during image creation.
+            dlc_dir: (str) The path to the mounted point during image creation.
         """
         for r in _EXTRA_RESOURCES:
             source_path = os.path.join(self.sysroot, r)
@@ -536,11 +535,11 @@ class DlcGenerator(object):
         # preallocated space.
         if preallocated_bytes < image_bytes:
             raise ValueError(
-                "The DLC_PREALLOC_BLOCKS (%s) value set in DLC ebuild resulted in a "
-                "max size of DLC_PREALLOC_BLOCKS * 4K (%s) bytes the DLC image is "
-                "allowed to occupy. The value is smaller than the actual image size "
-                "(%s) required. Increase DLC_PREALLOC_BLOCKS in your ebuild to at "
-                "least %d."
+                "The DLC_PREALLOC_BLOCKS (%s) value set in DLC ebuild resulted "
+                "in a max size of DLC_PREALLOC_BLOCKS * 4K (%s) bytes the DLC "
+                "image is allowed to occupy. The value is smaller than the "
+                "actual image size (%s) required. Increase DLC_PREALLOC_BLOCKS "
+                "in your ebuild to at least %d."
                 % (
                     self.ebuild_params.pre_allocated_blocks,
                     preallocated_bytes,
@@ -554,7 +553,8 @@ class DlcGenerator(object):
         # Warn if the DLC image size is nearing the preallocated size.
         if image_size_ratio <= _IMAGE_SIZE_NEARING_RATIO:
             logging.warning(
-                "The %s DLC image size (%s) is nearing the preallocated size (%s).",
+                "The %s DLC image size (%s) is nearing the preallocated size "
+                "(%s).",
                 self.ebuild_params.dlc_id,
                 image_bytes,
                 preallocated_bytes,
@@ -564,8 +564,8 @@ class DlcGenerator(object):
         if image_size_ratio >= _IMAGE_SIZE_GROWTH_RATIO:
             logging.warning(
                 "The %s DLC image size (%s) is significantly less than the "
-                "preallocated size (%s). Reduce the DLC_PREALLOC_BLOCKS in your "
-                "ebuild",
+                "preallocated size (%s). Reduce the DLC_PREALLOC_BLOCKS in "
+                "your ebuild",
                 self.ebuild_params.dlc_id,
                 image_bytes,
                 preallocated_bytes,
@@ -579,12 +579,12 @@ class DlcGenerator(object):
         """Return the content of imageloader.json file.
 
         Args:
-          image_hash: (str) sha256 hash of the DLC image.
-          table_hash: (str) sha256 hash of the DLC table file.
-          blocks: (int) number of blocks in the DLC image.
+            image_hash: (str) sha256 hash of the DLC image.
+            table_hash: (str) sha256 hash of the DLC table file.
+            blocks: (int) number of blocks in the DLC image.
 
         Returns:
-          [str]: content of imageloader.json file.
+            [str]: content of imageloader.json file.
         """
         return {
             "fs-type": self.ebuild_params.fs_type,
@@ -679,9 +679,9 @@ class DlcGenerator(object):
         # Copy the files from |self.temp_root| into the build directory.
         self.CopyTempContentsToBuildDir()
 
-        # Now that the image was successfully generated, delete |ebuild_params_path|
-        # to indicate that the image in the build directory is in sync with the
-        # files installed during the build_package phase.
+        # Now that the image was successfully generated, delete
+        # |ebuild_params_path| to indicate that the image in the build directory
+        # is in sync with the files installed during the build_package phase.
         ebuild_params_path = EbuildParams.GetParamsPath(
             self.sysroot,
             self.ebuild_params.dlc_id,
@@ -695,9 +695,9 @@ def IsFieldAllowed(dlc_id: str, dlc_build_dir: str, field: str):
     """Checks if a field is allowed.
 
     Args:
-      dlc_id: TheDLC ID.
-      dlc_build_dir: The root path where DLC build files reside.
-      field: The field name in the metadata json.
+        dlc_id: TheDLC ID.
+        dlc_build_dir: The root path where DLC build files reside.
+        field: The field name in the metadata json.
     """
     dlc_id_dir = os.path.join(dlc_build_dir, dlc_id)
     if not os.path.exists(dlc_id_dir):
@@ -721,8 +721,8 @@ def IsDlcPreloadingAllowed(dlc_id: str, dlc_build_dir: str):
     """Validates that DLC is built with DLC_PRELOAD=true.
 
     Args:
-      dlc_id: The DLC ID.
-      dlc_build_dir: The root path where DLC build files reside.
+        dlc_id: The DLC ID.
+        dlc_build_dir: The root path where DLC build files reside.
     """
     return IsFieldAllowed(dlc_id, dlc_build_dir, "preload-allowed")
 
@@ -731,8 +731,8 @@ def IsFactoryInstallAllowed(dlc_id: str, dlc_build_dir: str):
     """Validates that DLC is built with DLC_FACTORY_INSTALL=true.
 
     Args:
-      dlc_id: The DLC ID.
-      dlc_build_dir: The root path where DLC build files reside.
+        dlc_id: The DLC ID.
+        dlc_build_dir: The root path where DLC build files reside.
     """
     return IsFieldAllowed(dlc_id, dlc_build_dir, "factory-install")
 
@@ -741,11 +741,11 @@ def IsLoadPinVerityDigestAllowed(dlc_id: str, dlc_build_dir: str) -> bool:
     """Checks that DLC is built with DLC_LOADPIN_VERITY_DIGEST set to true.
 
     Args:
-      dlc_id: The DLC ID.
-      dlc_build_dir: The root path where DLC build files reside.
+        dlc_id: The DLC ID.
+        dlc_build_dir: The root path where DLC build files reside.
 
     Returns:
-      Boolean based on field being true or false.
+        Boolean based on field being true or false.
     """
     return IsFieldAllowed(dlc_id, dlc_build_dir, "loadpin-verity-digest")
 
@@ -764,22 +764,22 @@ def InstallDlcImages(
     """Copies all DLC image files into the images directory.
 
     Copies the DLC image files in the given build directory into the given DLC
-    image directory. If the DLC build directory does not exist, or there is no DLC
-    for that board, this function does nothing.
+    image directory. If the DLC build directory does not exist, or there is no
+    DLC for that board, this function does nothing.
 
     Args:
-      sysroot: Path to directory containing DLC images, e.g /build/<board>.
-      board: The target board we are building for.
-      dlc_id: (str) DLC ID. If None, all the DLCs will be installed.
-      install_root_dir: Path to DLC output directory, e.g.
-        src/build/images/<board>/<version>. If None, the image will be generated
-        but will not be copied to a destination.
-      preload: When true, only copies DLC(s) if built with DLC_PRELOAD=true.
-      factory_install: When true, copies DLC(s) built with
-        DLC_FACTORY_INSTALL=true.
-      rootfs: (str) Path to the platform rootfs.
-      stateful: (str) Path to the platform stateful.
-      src_dir: (str) Path to the DLC source root directory.
+        sysroot: Path to directory containing DLC images, e.g /build/<board>.
+        board: The target board we are building for.
+        dlc_id: (str) DLC ID. If None, all the DLCs will be installed.
+        install_root_dir: Path to DLC output directory, e.g.
+            src/build/images/<board>/<version>. If None, the image will be
+            generated but will not be copied to a destination.
+        preload: When true, only copies DLC(s) if built with DLC_PRELOAD=true.
+        factory_install: When true, copies DLC(s) built with
+            DLC_FACTORY_INSTALL=true.
+        rootfs: (str) Path to the platform rootfs.
+        stateful: (str) Path to the platform stateful.
+        src_dir: (str) Path to the DLC source root directory.
     """
     build_dir = os.path.join(sysroot, DLC_BUILD_DIR)
     build_dir_scaled = os.path.join(sysroot, DLC_BUILD_DIR_SCALED)
@@ -836,10 +836,11 @@ def InstallDlcImages(
                     dlc_package=d_package,
                     scaled=scaled,
                 )
-                # Because portage sandboxes every ebuild package during build_packages
-                # phase, we cannot delete the old image during that phase, but we can use
-                # the existence of the file |EBUILD_PARAMETERS| to know if the image
-                # has to be generated or not.
+                # Because portage sandboxes every ebuild package during
+                # build_packages phase, we cannot delete the old image during
+                # that phase, but we can use the existence of the file
+                # |EBUILD_PARAMETERS| to know if the image has to be generated
+                # or not.
                 if not params:
                     logging.debug(
                         "The ebuild parameters file (%s) for DLC (%s) does not "
@@ -865,8 +866,9 @@ def InstallDlcImages(
                         d_id, dlc_build_dir
                     ):
                         logging.debug(
-                            "Skipping installation of DLC %s because the preload "
-                            "flag is set and the DLC does not support preloading.",
+                            "Skipping installation of DLC %s because the "
+                            "preload flag is set and the DLC does not "
+                            "support preloading.",
                             d_id,
                         )
                     else:
@@ -936,8 +938,8 @@ def InstallDlcImages(
 
                     # Change the owner + group of factory install directory.
                     # Refer to
-                    # http://cs/chromeos_public/src/third_party/eclass-overlay or
-                    # DLC/dlcservice related uid + gid.
+                    # http://cs/chromeos_public/src/third_party/eclass-overlay
+                    # or DLC/dlcservice related uid + gid.
                     cros_build_lib.sudo_run(
                         [
                             "chown",
@@ -963,7 +965,8 @@ def InstallDlcImages(
                         meta_dir_src,
                         meta_rootfs,
                     )
-                    # Use sudo_run since osutils.CopyDirContents doesn't support sudo.
+                    # Use sudo_run since osutils.CopyDirContents doesn't support
+                    # sudo.
                     cros_build_lib.sudo_run(
                         [
                             "cp",
@@ -975,7 +978,8 @@ def InstallDlcImages(
                         stderr=True,
                     )
 
-                    # Only allow if explicitly set when emerge'ing the DLC ebuild.
+                    # Only allow if explicitly set when emerge'ing the DLC
+                    # ebuild.
                     if IsLoadPinVerityDigestAllowed(d_id, dlc_build_dir):
                         # Append the DLC root dm-verity digest.
                         root_hexdigest = verity.ExtractRootHexdigest(
@@ -983,8 +987,8 @@ def InstallDlcImages(
                         )
                         if not root_hexdigest:
                             raise Exception(
-                                f"Could not find root dm-verity digest of {d_id} in"
-                                " dm-verity table"
+                                f"Could not find root dm-verity digest of "
+                                f"{d_id} in dm-verity table"
                             )
                         trusted_verity_digests = os.path.join(
                             rootfs,
@@ -992,7 +996,8 @@ def InstallDlcImages(
                             DLC_LOADPIN_TRUSTED_VERITY_DIGESTS,
                         )
 
-                        # Create the initial digests file with correct LoadPin header.
+                        # Create the initial digests file with correct LoadPin
+                        # header.
                         if not os.path.exists(trusted_verity_digests):
                             osutils.WriteFile(
                                 trusted_verity_digests,
@@ -1016,13 +1021,15 @@ def InstallDlcImages(
                             )
                     else:
                         logging.debug(
-                            "Skipping addition of LoadPin dm-verity digest of %s.",
+                            "Skipping addition of LoadPin dm-verity digest of "
+                            "%s.",
                             d_id,
                         )
 
                 else:
                     logging.debug(
-                        "rootfs value was not provided. Copying metadata skipped."
+                        "rootfs value was not provided. Copying metadata "
+                        "skipped."
                     )
 
     logging.debug("Done installing DLCs.")
@@ -1041,7 +1048,7 @@ def ValidateDlcIdentifier(name):
     https://chromium.googlesource.com/chromiumos/platform2/+/HEAD/dlcservice/docs/developer.md#create-a-dlc-module
 
     Args:
-      name: The value of the string to be validated.
+        name: The value of the string to be validated.
     """
     errors = []
     if not name:

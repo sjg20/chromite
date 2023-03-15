@@ -60,20 +60,22 @@ class _Lock(cros_build_lib.PrimaryPidContextManager):
             parallel/multiprocess libraries
 
         Use FLOCK (BSD locks) if these scenarios apply:
-          - you need to lock a file between shell scripts running the flock program
+          - you need to lock a file between shell scripts running the flock
+            program
           - you need the lock to be bound to the fd and thus inheritable across
             execs
 
-        Note: These two locks are completely independent; using one on a path will
-              not block using the other on the same path.
+        Note: These two locks are completely independent; using one on a path
+            will not block using the other on the same path.
 
         Args:
-          path: On disk pathway to lock.  Can be a directory or a file.
-          description: A description for this lock- what is it protecting?
-          verbose: Verbose logging?
-          locktype: Type of lock to use (lockf or flock).
-          blocking: If True, use a blocking lock.
-          blocking_timeout: If not None, time is seconds to wait on blocking calls.
+            path: On disk pathway to lock.  Can be a directory or a file.
+            description: A description for this lock- what is it protecting?
+            verbose: Verbose logging?
+            locktype: Type of lock to use (lockf or flock).
+            blocking: If True, use a blocking lock.
+            blocking_timeout: If not None, time is seconds to wait on blocking
+                calls.
         """
         cros_build_lib.PrimaryPidContextManager.__init__(self)
         self._verbose = verbose
@@ -153,14 +155,14 @@ class _Lock(cros_build_lib.PrimaryPidContextManager):
         Any existing lock will be updated if need be.
 
         Args:
-          shared: If True make the lock shared.
+            shared: If True make the lock shared.
 
         Returns:
-          self, allowing it to be used as a `with` target.
+            self, allowing it to be used as a `with` target.
 
         Raises:
-          IOError if the operation fails in some way.
-          LockNotAcquiredError if the lock couldn't be acquired (non-blocking
+            IOError if the operation fails in some way.
+            LockNotAcquiredError if the lock couldn't be acquired (non-blocking
             mode only).
         """
         self._enforce_lock(
@@ -173,13 +175,13 @@ class _Lock(cros_build_lib.PrimaryPidContextManager):
         """Take a read lock (shared), downgrading from write if required.
 
         Args:
-          message: A description of what/why this lock is being taken.
+            message: A description of what/why this lock is being taken.
 
         Returns:
-          self, allowing it to be used as a `with` target.
+            self, allowing it to be used as a `with` target.
 
         Raises:
-          IOError if the operation fails in some way.
+            IOError if the operation fails in some way.
         """
         self._enforce_lock(fcntl.LOCK_SH, message)
         return self
@@ -194,13 +196,13 @@ class _Lock(cros_build_lib.PrimaryPidContextManager):
         gotten at the critical resource in between for this reason.
 
         Args:
-          message: A description of what/why this lock is being taken.
+            message: A description of what/why this lock is being taken.
 
         Returns:
-          self, allowing it to be used as a `with` target.
+            self, allowing it to be used as a `with` target.
 
         Raises:
-          IOError if the operation fails in some way.
+            IOError if the operation fails in some way.
         """
         self._enforce_lock(fcntl.LOCK_EX, message)
         return self
@@ -209,7 +211,7 @@ class _Lock(cros_build_lib.PrimaryPidContextManager):
         """Release any locks held.  Noop if no locks are held.
 
         Raises:
-          IOError if the operation fails in some way.
+            IOError if the operation fails in some way.
         """
         if self._fd is not None:
             self.locking_mechanism(self._fd, fcntl.LOCK_UN)
@@ -225,9 +227,9 @@ class _Lock(cros_build_lib.PrimaryPidContextManager):
             self._fd = None
 
     def _enter(self):
-        # Force the fd to be opened via touching the property.
-        # We do this to ensure that even if entering a context w/out a lock
-        # held, we can do locking in that critical section if the code requests it.
+        # Force the fd to be opened via touching the property. We do this to
+        # ensure that even if entering a context w/out a lock held, we can do
+        # locking in that critical section if the code requests it.
         # pylint: disable=pointless-statement
         self.fd
         return self
@@ -259,14 +261,15 @@ class FileLock(_Lock):
         """Initializer for FileLock.
 
         Args:
-          path: On disk pathway to lock.  Can be a directory or a file.
-          description: A description for this lock- what is it protecting?
-          verbose: Verbose logging?
-          locktype: Type of lock to use (lockf or flock).
-          world_writable: If true, the lock file will be created as root and be made
-            writable to all users.
-          blocking: If True, use a blocking lock.
-          blocking_timeout: If not None, time is seconds to wait on blocking calls.
+            path: On disk pathway to lock.  Can be a directory or a file.
+            description: A description for this lock- what is it protecting?
+            verbose: Verbose logging?
+            locktype: Type of lock to use (lockf or flock).
+            world_writable: If true, the lock file will be created as root and
+                be made writable to all users.
+            blocking: If True, use a blocking lock.
+            blocking_timeout: If not None, time is seconds to wait on blocking
+                calls.
         """
         if description is None:
             description = "lock %s" % (path,)
@@ -323,10 +326,10 @@ class ProcessLock(_Lock):
     def _GetFd(self):
         with tempfile.TemporaryFile() as f:
             # We don't want to hold onto the object indefinitely; we just want
-            # the fd to a temporary inode, preferably one that isn't vfs accessible.
-            # Since TemporaryFile closes the fd once the object is GC'd, we just
-            # dupe the fd so we retain a copy, while the original TemporaryFile
-            # goes away.
+            # the fd to a temporary inode, preferably one that isn't vfs
+            # accessible. Since TemporaryFile closes the fd once the object is
+            # GC'd, we just dupe the fd so we retain a copy, while the original
+            # TemporaryFile goes away.
             return os.dup(f.fileno())
 
 
@@ -341,10 +344,10 @@ class PortableLinkLock(object):
         """Construct an instance.
 
         Args:
-          path: path to file to lock on.  Multiple processes attempting to lock the
-            same path will compete for a system wide lock.
-          max_retry: maximum number of times to attempt to acquire the lock.
-          sleep: See retry_util.GenericRetry's sleep parameter.
+            path: path to file to lock on.  Multiple processes attempting to
+                lock the same path will compete for a system-wide lock.
+            max_retry: maximum number of times to attempt to acquire the lock.
+            sleep: See retry_util.GenericRetry's sleep parameter.
         """
         self._path = path
         self._target_path = None
@@ -387,10 +390,10 @@ class PortableLinkLock(object):
 class PipeLock(object):
     """A simple one-way lock based on pipe().
 
-    This is used when code is calling os.fork() directly and needs to synchronize
-    behavior between the two.  The same process should not try to use Wait/Post
-    as it will just see its own results.  If you need bidirection locks, you'll
-    need to create two yourself.
+    This is used when code is calling os.fork() directly and needs to
+    synchronize behavior between the two.  The same process should not try to
+    use Wait/Post as it will just see its own results.  If you need
+    bidirectional locks, you'll need to create two yourself.
 
     Be sure to delete the lock when you're done to prevent fd leakage.
     """
@@ -412,11 +415,11 @@ class PipeLock(object):
         """Read |size| bytes from the pipe.
 
         Args:
-          size: How many bytes to read.  It must match the length of |data| passed
-            by the other end during its call to Post.
+            size: How many bytes to read.  It must match the length of |data|
+                passed by the other end during its call to Post.
 
         Returns:
-          The data read back.
+            The data read back.
         """
         return os.read(self.read_fd, size)
 
@@ -424,8 +427,8 @@ class PipeLock(object):
         """Write |data| to the pipe.
 
         Args:
-          data: The data to send to the other side calling Wait.  It must be of the
-            exact length that is passed to Wait.
+            data: The data to send to the other side calling Wait.  It must be
+                of the exact length that is passed to Wait.
         """
         os.write(self.write_fd, data)
 

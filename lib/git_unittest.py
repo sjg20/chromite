@@ -156,6 +156,7 @@ Change-Id: %s
 
     def testLsTree(self):
         files = ["exec.sh", "file.txt", "sym"]
+        # pylint: disable=line-too-long
         self.rc.AddCmdResult(
             partial_mock.In("ls-tree"),
             stdout=(
@@ -164,6 +165,7 @@ Change-Id: %s
                 "120000 blob 702f5b64cc06d3ccc44e840c1e0714c043978c83\tsym\0"
             ),
         )
+        # pylint: enable=line-too-long
         ret = git.LsTree(cwd=self.fake_path, commit="HEAD", files=files)
         self.assertCommandContains(["ls-tree", "-r", "-z"])
         self.assertCommandContains(["--", "HEAD", "--"])
@@ -442,7 +444,7 @@ Change-Id: Ia7b712c42ff83c52c0fb5d88d1ef6c62f49da88d
         self.assertEqual(changeid, "Ia7b712c42ff83c52c0fb5d88d1ef6c62f49da88d")
 
     def testSpecificSHA(self):
-        """Test the parsing of the git.GetChangeId function for a specific SHA."""
+        """Test the parsing of git.GetChangeId function for a specific SHA."""
 
         sha = "235511fbd7158c6d02c070944eb59cf47b37fcb5"
         log_output = """
@@ -493,7 +495,7 @@ Compare the Change-Id printed by the python code with that shown
         self.assertIsNone(changeid)
 
     def testChangeIdInTextCol1(self):
-        """Test git.GetChangeId when 'Change-Id' is in the text, not as a key."""
+        """Test git.GetChangeId when 'Change-Id' is in the text."""
 
         log_output = """
 new_variant: track branch name and change-id
@@ -517,7 +519,7 @@ Change-Id: Ib71696f76dc80f1a76b8e7a73493c6c2668e2c6f
         self.assertRaises(ValueError, git.GetChangeId, "git/repo/path")
 
     def testChangeIdInTextNotCol1(self):
-        """Test git.GetChangeId when 'Change-Id' is in the text, not as a key."""
+        """Test git.GetChangeId when 'Change-Id' is in the text."""
 
         log_output = """
 new_variant: track branch name and change-id
@@ -583,7 +585,7 @@ class RawDiffTest(cros_test_lib.MockTestCase):
 
     def testRawDiff(self):
         """Test the parsing of the git.RawDiff function."""
-
+        # pylint: disable=line-too-long
         diff_output = """
 :100644 100644 ac234b2... 077d1f8... M\tchromeos-base/chromeos-chrome/Manifest
 :100644 100644 9e5d11b... 806bf9b... R099\tchromeos-base/chromeos-chrome/chromeos-chrome-40.0.2197.0_rc-r1.ebuild\tchromeos-base/chromeos-chrome/chromeos-chrome-40.0.2197.2_rc-r1.ebuild
@@ -591,6 +593,7 @@ class RawDiffTest(cros_test_lib.MockTestCase):
 :100644 100644 be445f9... be445f9... R100\tchromeos-base/chromium-source/chromium-source-40.0.2197.0_rc-r1.ebuild\tchromeos-base/chromium-source/chromium-source-40.0.2197.2_rc-r1.ebuild
 :100644 100644 d02943a... 114bc47... M\tchromeos-base/chromeos-chrome/User Data.txt
 """
+        # pylint: enable=line-too-long
         result = cros_build_lib.CompletedProcess(stdout=diff_output)
         self.PatchObject(git, "RunGit", return_value=result)
 
@@ -739,7 +742,7 @@ class RawDiffTest(cros_test_lib.MockTestCase):
             ],
         )
 
-    def testMutipleMergeDiff(self):
+    def testMultipleMergeDiff(self):
         """Verify a merge with more than 2 parents."""
         diff_output = (
             ":::::100644 100644 100644 100644 100644 100644"
@@ -816,8 +819,8 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
         "fatal: remote error: Internal Server Error",
         # crbug.com/298189
         (
-            "error: gnutls_handshake() failed: A TLS packet with unexpected length "
-            "was received. while accessing "
+            "error: gnutls_handshake() failed: A TLS packet with unexpected "
+            "length was received. while accessing "
             "http://localhost/repo.git/info/refs?service=git-upload-pack\n"
             "fatal: HTTP request failed"
         ),
@@ -852,7 +855,7 @@ class GitPushTest(cros_test_lib.RunCommandTestCase):
             encoding="utf-8",
         )
 
-    def testGitPushComplix(self):
+    def testGitPushComplex(self):
         """Test GitPush with some arguments."""
         git.GitPush(
             "git_path",
@@ -894,8 +897,8 @@ class GitIntegrationTest(cros_test_lib.TempDirTestCase):
     def setUp(self):
         self.source = os.path.join(self.tempdir, "src")
         git.Init(self.source)
-        # Nerf any hooks the OS might have installed on us as they aren't going to
-        # be useful to us, just slow things down.
+        # Nerf any hooks the OS might have installed on us as they aren't going
+        # to be useful to us, just slow things down.
         shutil.rmtree(os.path.join(self.source, ".git", "hooks"))
         cros_build_lib.run(
             ["git", "commit", "--allow-empty", "-m", "initial commit"],
@@ -933,7 +936,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
 
         # TODO(evanhernandez): This is a hack. Find a way to simplify this test.
         # We used to use the current checkout's manifests.git, but that caused
-        # problems in production environemnts.
+        # problems in production environments.
         remote_manifests = os.path.join(self.tempdir, "remote", "manifests.git")
         osutils.SafeMakedirs(remote_manifests)
         git.Init(remote_manifests)
@@ -948,8 +951,8 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
         git.CreateBranch(remote_manifests, "release-R23-2913.B")
         git.CreateBranch(remote_manifests, "release-R23-2913.B-suffix")
         git.CreateBranch(remote_manifests, "firmware-link-")
-        # This must come last as it sets up HEAD for the default branch, and repo
-        # uses that to figure out which branch to check out.
+        # This must come last as it sets up HEAD for the default branch, and
+        # repo uses that to figure out which branch to check out.
         git.CreateBranch(remote_manifests, "master")
 
         # Create a copy of our existing manifests.git, but rewrite it so it
@@ -993,7 +996,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
             os.path.join(self.tempdir, ".repo", "manifest.xml")
         )
 
-    # TODO(b/245813531): Renable when repo v2.29 is stable.
+    # TODO(b/245813531): Re-enable when repo v2.29 is stable.
     @unittest.skip("Skip until staging and prod are on repo v2.29 b/245333797")
     def testManifestInheritance(self):
         osutils.WriteFile(
@@ -1029,7 +1032,7 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
         self.assertEqual(list(manifest.checkouts_by_name), ["monkeys"])
         self.assertEqual(list(manifest.remotes), ["foon"])
 
-    # TODO(b/245813531): Renable when repo v2.29 is stable.
+    # TODO(b/245813531): Re-enable when repo v2.29 is stable.
     @unittest.skip("Skip until staging and prod are on repo v2.29 b/245333797")
     def testGetManifestsBranch(self):
         # pylint: disable=protected-access
@@ -1085,8 +1088,8 @@ class ManifestCheckoutTest(cros_test_lib.TempDirTestCase):
         git.RunGit(manifest, ["checkout", "--detach", "test"])
         assertExcept("It should be checked out to 'default'")
 
-        # Finally, ensure that if the default branch is non-existant, we still throw
-        # a usable exception.
+        # Finally, ensure that if the default branch is non-existent, we still
+        # throw a usable exception.
         git.RunGit(manifest, ["branch", "-d", "default"])
         assertExcept("It should be checked out to 'default'")
 

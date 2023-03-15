@@ -250,7 +250,8 @@ class AuthorizedHttp(object):
             kwargs_copy = dict(self.kwargs, force_token_renew=True)
             self.token = self.get_access_token(**kwargs_copy)
 
-            # TODO(phobbs): delete the "access_token" key from the token file used.
+            # TODO(phobbs): delete the "access_token" key from the token file
+            #   used.
             headers["Authorization"] = "Bearer %s" % self.token
             resp, content = self.http.request(*args, **kwargs)
 

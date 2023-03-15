@@ -28,8 +28,8 @@ class SudoKeepAlive(cros_build_lib.PrimaryPidContextManager):
         """Run sudo with a noop, to reset the sudo timestamp.
 
         Args:
-          ttyless_sudo: Whether to update the tty-less cookie.
-          repeat_interval: In minutes, the frequency to run the update.
+            ttyless_sudo: Whether to update the tty-less cookie.
+            repeat_interval: In minutes, the frequency to run the update.
         """
         cros_build_lib.PrimaryPidContextManager.__init__(self)
         self._ttyless_sudo = ttyless_sudo
@@ -52,8 +52,8 @@ class SudoKeepAlive(cros_build_lib.PrimaryPidContextManager):
         """Discern which TTYs require sudo keep alive code.
 
         Returns:
-          A string representing the set of ttys we need daemons for.
-          This will be the empty string if no daemon is needed.
+            A string representing the set of ttys we need daemons for.
+            This will be the empty string if no daemon is needed.
         """
         existing = os.environ.get("CROS_SUDO_KEEP_ALIVE")
         needed = set([self._IdentifyTTY()])
@@ -96,14 +96,16 @@ class SudoKeepAlive(cros_build_lib.PrimaryPidContextManager):
                 else:
                     url = "https://goo.gl/fz9YW"
 
-                # If ttyless sudo is not strictly required for this script, don't
-                # prompt for a password a second time. Instead, just complain.
+                # If ttyless sudo is not strictly required for this script,
+                # don't prompt for a password a second time. Instead, just
+                # complain.
                 if idx > 0:
                     logging.error(tty_msg, url)
                     if not self._ttyless_sudo:
                         break
 
-                # We need to go interactive and allow sudo to ask for credentials.
+                # We need to go interactive and allow sudo to ask for
+                # credentials.
                 interactive_cmd = cmd.replace(" -n", "")
                 cros_build_lib.run(interactive_cmd, shell=True, print_cmd=False)
 

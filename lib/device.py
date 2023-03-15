@@ -28,7 +28,7 @@ class Device(object):
         """Initialize Device.
 
         Args:
-          opts: command line options.
+            opts: command line options.
         """
         self.device = opts.device.hostname if opts.device else None
         self.ssh_port = opts.device.port if opts.device else None
@@ -83,12 +83,12 @@ class Device(object):
         """Run a remote command.
 
         Args:
-          cmd: command to run.
-          stream_output: Stream output of long-running commands.
-          kwargs: additional args (see documentation for RemoteDevice.run).
+            cmd: command to run.
+            stream_output: Stream output of long-running commands.
+            kwargs: additional args (see documentation for RemoteDevice.run).
 
         Returns:
-          cros_build_lib.CompletedProcess object.
+            cros_build_lib.CompletedProcess object.
         """
         kwargs.setdefault("check", False)
         if stream_output:
@@ -106,10 +106,10 @@ class Device(object):
         Wait 2 min before dropping the SSH connection.
 
         Args:
-          connect_timeout: SSH ConnectTimeout setting.
+            connect_timeout: SSH ConnectTimeout setting.
 
         Returns:
-          List of arguments to pass to SSH.
+            List of arguments to pass to SSH.
         """
         return remote_access.CompileSSHConnectSettings(
             ConnectTimeout=connect_timeout,
@@ -131,10 +131,10 @@ class Device(object):
         """Parse a list of args.
 
         Args:
-          argv: list of command line arguments.
+            argv: list of command line arguments.
 
         Returns:
-          List of parsed opts.
+            List of parsed opts.
         """
         parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
         parser.add_argument(

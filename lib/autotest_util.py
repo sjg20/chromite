@@ -27,8 +27,8 @@ class AutotestTarballBuilder(object):
     # with Server-Side Packaging are stored.
     _TAST_SSP_SUBDIR = "tast"
 
-    # Tast files and directories to include in AUTOTEST_SERVER_PACKAGE relative to
-    # the build root.
+    # Tast files and directories to include in AUTOTEST_SERVER_PACKAGE relative
+    # to the build root.
     _TAST_SSP_CHROOT_FILES = [
         "/usr/bin/tast",  # Main Tast executable.
         "/usr/bin/remote_test_runner",  # Runs remote tests.
@@ -191,8 +191,8 @@ class AutotestTarballBuilder(object):
         """Returns Tast server files and corresponding tar transform flags.
 
         The returned paths should be included in AUTOTEST_SERVER_PACKAGE. The
-        --transform arguments should be passed to GNU tar to convert the paths to
-        appropriate destinations in the tarball.
+        --transform arguments should be passed to GNU tar to convert the paths
+        to appropriate destinations in the tarball.
 
         Returns:
             (files, transforms), where files is a list of absolute paths to Tast

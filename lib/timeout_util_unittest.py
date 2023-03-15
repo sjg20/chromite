@@ -48,7 +48,8 @@ class TestTimeouts(cros_test_lib.MockTestCase):
         with timeout_util.Timeout(0.5):
             pass
 
-        # The timeout should be fraction, rather than rounding up to int seconds.
+        # The timeout should be fraction, rather than rounding up to int
+        # seconds.
         self.assertEqual(
             mock_setitimer.call_args_list,
             [
@@ -93,7 +94,7 @@ class TestWaitFors(cros_test_lib.TestCase):
         self.timestop = None
 
     def GetFunc(self, return_values):
-        """Return a functor that returns given values in sequence with each call."""
+        """Return a functor that returns given values in sequence each call."""
         self.values_ix = 0
         self.timestart = None
         self.timestop = None
@@ -205,7 +206,7 @@ class TestWaitFors(cros_test_lib.TestCase):
         self.assertTrue(side_effect_called[0])
 
     def testWaitForCallbackSleepsLong(self):
-        """Verify a long running side effect doesn't call time.sleep(<negative>)."""
+        """Verify a long running side effect doesn't sleep negative time."""
         side_effect_called = [False]
 
         def _SideEffect(_remaining):
@@ -223,7 +224,7 @@ class TestWaitFors(cros_test_lib.TestCase):
         self.assertTrue(side_effect_called[0])
 
     def testWaitForCallbackAfterTimeout(self):
-        """If side_effect is called after the timeout, remaining should be zero."""
+        """Verify remaining is zero when side_effect called after timeout."""
         side_effect_called = [False]
 
         def _SideEffect(remaining):

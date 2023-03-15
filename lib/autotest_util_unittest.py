@@ -58,7 +58,7 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
         tar_mock.assert_called_once_with(["autotest/test_suites"], tar_path)
 
     def testBuildAutotestControlFilesTarball(self):
-        """Tests that generating the autotest control files tarball is correct."""
+        """Verify generating the autotest control files tarball is correct."""
         control_file_list = [
             "autotest/client/site_tests/testA/control",
             "autotest/server/site_tests/testB/control",
@@ -79,7 +79,7 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
         )
 
     def testBuildAutotestServerPackageTarball(self):
-        """Tests that generating the autotest server package tarball is correct."""
+        """Verify generating the autotest server package tarball is correct."""
         file_list = [
             "autotest/server/site_tests/testA/control",
             "autotest/server/site_tests/testB/control",
@@ -98,8 +98,8 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
             expected_files.append(path)
             ssp_files.append(path)
 
-        # Skip touching the source Tast files so we can verify they're not included
-        # in the tar command.
+        # Skip touching the source Tast files so we can verify they're not
+        # included in the tar command.
         for p in self.builder._TAST_SSP_SOURCE_FILES:
             path = "%s%s" % (self.basedir, p)
             ssp_files.append(path)
