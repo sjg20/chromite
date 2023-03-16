@@ -97,6 +97,8 @@
     sarien-factory-sarien-12033.B-factorybranch
   factory-scarlet-10211.B-buildspec
     scarlet-factory-scarlet-10211.B-factorybranch
+  factory-skyrim-15384.B-buildspec
+    skyrim-factory-skyrim-15384.B-factorybranch
   factory-soraka-10323.39.B-buildspec
     soraka-factory-soraka-10323.39.B-factorybranch
   factory-strongbad-13963.B-buildspec
@@ -713,6 +715,8 @@
     sarien-factory-sarien-12033.B-factorybranch-tryjob
   factory-scarlet-10211.B-buildspec-tryjob
     scarlet-factory-scarlet-10211.B-factorybranch-tryjob
+  factory-skyrim-15384.B-buildspec-tryjob
+    skyrim-factory-skyrim-15384.B-factorybranch-tryjob
   factory-soraka-10323.39.B-buildspec-tryjob
     soraka-factory-soraka-10323.39.B-factorybranch-tryjob
   factory-strongbad-13963.B-buildspec-tryjob
@@ -1343,6 +1347,7 @@
   skyrim-chausie-llvm-toolchain-tryjob
   skyrim-chausie-payloads-tryjob
   skyrim-chausie-release-tryjob
+  skyrim-factory-skyrim-15384.B-factorybranch-tryjob
   skyrim-full-tryjob
   skyrim-kernelnext-full-tryjob
   skyrim-kernelnext-llvm-next-toolchain-tryjob
