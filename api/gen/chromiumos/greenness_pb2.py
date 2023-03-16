@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumos',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1a\x63hromiumos/greenness.proto\x12\nchromiumos\"\x8f\x02\n\x12\x41ggregateGreenness\x12\x18\n\x10\x61ggregate_metric\x18\x01 \x01(\x03\x12\x42\n\x10target_greenness\x18\x02 \x03(\x0b\x32(.chromiumos.AggregateGreenness.Greenness\x1a\x9a\x01\n\tGreenness\x12\x0e\n\x06target\x18\x01 \x01(\t\x12\x0e\n\x06metric\x18\x02 \x01(\x03\x12\x41\n\x07\x63ontext\x18\x03 \x01(\x0e\x32\x30.chromiumos.AggregateGreenness.Greenness.Context\"*\n\x07\x43ontext\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0e\n\nIRRELEVANT\x10\x01\x42Y\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
+  serialized_pb=b'\n\x1a\x63hromiumos/greenness.proto\x12\nchromiumos\"\xc5\x02\n\x12\x41ggregateGreenness\x12\x18\n\x10\x61ggregate_metric\x18\x01 \x01(\x03\x12\x42\n\x10target_greenness\x18\x02 \x03(\x0b\x32(.chromiumos.AggregateGreenness.Greenness\x12\x1e\n\x16\x61ggregate_build_metric\x18\x03 \x01(\x03\x1a\xb0\x01\n\tGreenness\x12\x0e\n\x06target\x18\x01 \x01(\t\x12\x0e\n\x06metric\x18\x02 \x01(\x03\x12\x41\n\x07\x63ontext\x18\x03 \x01(\x0e\x32\x30.chromiumos.AggregateGreenness.Greenness.Context\x12\x14\n\x0c\x62uild_metric\x18\x04 \x01(\x03\"*\n\x07\x43ontext\x12\x0f\n\x0bUNSPECIFIED\x10\x00\x12\x0e\n\nIRRELEVANT\x10\x01\x42Y\n!com.google.chrome.crosinfra.protoZ4go.chromium.org/chromiumos/infra/proto/go/chromiumosb\x06proto3'
 )
 
 
@@ -44,8 +44,8 @@ _AGGREGATEGREENNESS_GREENNESS_CONTEXT = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=272,
-  serialized_end=314,
+  serialized_start=326,
+  serialized_end=368,
 )
 _sym_db.RegisterEnumDescriptor(_AGGREGATEGREENNESS_GREENNESS_CONTEXT)
 
@@ -79,6 +79,13 @@ _AGGREGATEGREENNESS_GREENNESS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='build_metric', full_name='chromiumos.AggregateGreenness.Greenness.build_metric', index=3,
+      number=4, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -92,8 +99,8 @@ _AGGREGATEGREENNESS_GREENNESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=160,
-  serialized_end=314,
+  serialized_start=192,
+  serialized_end=368,
 )
 
 _AGGREGATEGREENNESS = _descriptor.Descriptor(
@@ -118,6 +125,13 @@ _AGGREGATEGREENNESS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='aggregate_build_metric', full_name='chromiumos.AggregateGreenness.aggregate_build_metric', index=2,
+      number=3, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -131,7 +145,7 @@ _AGGREGATEGREENNESS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=43,
-  serialized_end=314,
+  serialized_end=368,
 )
 
 _AGGREGATEGREENNESS_GREENNESS.fields_by_name['context'].enum_type = _AGGREGATEGREENNESS_GREENNESS_CONTEXT

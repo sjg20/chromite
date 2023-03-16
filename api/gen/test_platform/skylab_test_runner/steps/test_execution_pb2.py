@@ -23,7 +23,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZPgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner/steps',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n;test_platform/skylab_test_runner/steps/test_execution.proto\x12&test_platform.skylab_test_runner.steps\x1a-test_platform/skylab_test_runner/config.proto\x1a.test_platform/skylab_test_runner/request.proto\x1a\x32test_platform/skylab_test_runner/cft_request.proto\x1a\x34test_platform/skylab_test_runner/common_config.proto\"\x9a\x02\n\x0fRunTestsRequest\x12:\n\x07request\x18\x01 \x01(\x0b\x32).test_platform.skylab_test_runner.Request\x12\x38\n\x06\x63onfig\x18\x02 \x01(\x0b\x32(.test_platform.skylab_test_runner.Config\x12J\n\x10\x63\x66t_test_request\x18\x03 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.CFTTestRequest\x12\x45\n\rcommon_config\x18\x04 \x01(\x0b\x32..test_platform.skylab_test_runner.CommonConfig\"2\n\x10RunTestsResponse\x12\x1e\n\x16\x65rror_summary_markdown\x18\x01 \x01(\tBRZPgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner/stepsb\x06proto3'
+  serialized_pb=b'\n;test_platform/skylab_test_runner/steps/test_execution.proto\x12&test_platform.skylab_test_runner.steps\x1a-test_platform/skylab_test_runner/config.proto\x1a.test_platform/skylab_test_runner/request.proto\x1a\x32test_platform/skylab_test_runner/cft_request.proto\x1a\x34test_platform/skylab_test_runner/common_config.proto\"\x9a\x02\n\x0fRunTestsRequest\x12:\n\x07request\x18\x01 \x01(\x0b\x32).test_platform.skylab_test_runner.Request\x12\x38\n\x06\x63onfig\x18\x02 \x01(\x0b\x32(.test_platform.skylab_test_runner.Config\x12J\n\x10\x63\x66t_test_request\x18\x03 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.CFTTestRequest\x12\x45\n\rcommon_config\x18\x04 \x01(\x0b\x32..test_platform.skylab_test_runner.CommonConfig\"`\n\x10RunTestsResponse\x12\x1e\n\x16\x65rror_summary_markdown\x18\x01 \x01(\t\x12,\n\x11\x63ompressed_result\x18\x02 \x01(\tR\x11\x63ompressed_resultBRZPgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner/stepsb\x06proto3'
   ,
   dependencies=[test__platform_dot_skylab__test__runner_dot_config__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_request__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_cft__request__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_common__config__pb2.DESCRIPTOR,])
 
@@ -98,6 +98,13 @@ _RUNTESTSRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='compressed_result', full_name='test_platform.skylab_test_runner.steps.RunTestsResponse.compressed_result', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, json_name='compressed_result', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -111,7 +118,7 @@ _RUNTESTSRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=589,
-  serialized_end=639,
+  serialized_end=685,
 )
 
 _RUNTESTSREQUEST.fields_by_name['request'].message_type = test__platform_dot_skylab__test__runner_dot_request__pb2._REQUEST
