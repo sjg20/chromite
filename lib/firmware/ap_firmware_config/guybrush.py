@@ -52,6 +52,7 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
         dut_control_on.append(["spi2_vref:pp1800"])
         dut_control_off.append(["spi2_vref:off"])
         dut_control_off.append(["ap_flash_select:off"])
+        dut_control_off.append(["power_state:reset"])
         programmer = "raiden_debug_spi:serial=%s" % servo.serial
     elif servo.is_ccd:
         dut_control_off.append(["power_state:reset"])
