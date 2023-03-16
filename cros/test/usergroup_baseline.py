@@ -130,7 +130,15 @@ GROUP_BASELINE = dict(
             },
         ),
         GroupEntry(
-            group="lp", gid=7, users={"lp", "lpadmin", "cups", "chronos"}
+            group="lp",
+            gid=7,
+            users={
+                "lp",
+                "lpadmin",
+                "cups",
+                "chronos",
+                "printscanmgr",
+            },
         ),
         GroupEntry(group="mem", gid=8),
         GroupEntry(group="kmem", gid=9),
@@ -232,7 +240,15 @@ GROUP_BASELINE = dict(
             group="buffet", gid=264, users={"chronos", "buffet", "power"}
         ),
         GroupEntry(group="webservd", gid=266, users={"buffet", "webservd"}),
-        GroupEntry(group="lpadmin", gid=269, users={"cups", "lpadmin"}),
+        GroupEntry(
+            group="lpadmin",
+            gid=269,
+            users={
+                "cups",
+                "lpadmin",
+                "printscanmgr",
+            },
+        ),
         # FUSE-based filesystem daemons.
         GroupEntry(
             group="policy-readers",
