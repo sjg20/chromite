@@ -1687,6 +1687,9 @@ class ChromeSDKCommand(command.CliCommand):
         else:
             gn_args.pop("is_official_build", None)
 
+        if not options.internal:
+            gn_args.pop("enable_hevc_parser_and_hw_decoder", None)
+
         target_tc_path = sdk_ctx.key_map[self.sdk.TARGET_TOOLCHAIN_KEY].path
         for env_path in self.EBUILD_ENV_PATHS:
             env[env_path] = self._AbsolutizeBinaryPath(
