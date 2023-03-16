@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=b'Z<go.chromium.org/chromiumos/infra/proto/go/chromite/telemetry',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n#chromite/telemetry/trace_span.proto\x12\x12\x63hromite.telemetry\x1a\x1cgoogle/protobuf/struct.proto\"\xa2\x11\n\tTraceSpan\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x07\x63ontext\x18\x02 \x01(\x0b\x32%.chromite.telemetry.TraceSpan.Context\x12\x16\n\x0eparent_span_id\x18\x03 \x01(\t\x12\x39\n\tspan_kind\x18\x04 \x01(\x0e\x32&.chromite.telemetry.TraceSpan.SpanKind\x12\x19\n\x11start_time_millis\x18\x05 \x01(\x03\x12\x17\n\x0f\x65nd_time_millis\x18\x06 \x01(\x03\x12+\n\nattributes\x18\x07 \x01(\x0b\x32\x17.google.protobuf.Struct\x12\x33\n\x06\x65vents\x18\x08 \x03(\x0b\x32#.chromite.telemetry.TraceSpan.Event\x12\x31\n\x05links\x18\t \x03(\x0b\x32\".chromite.telemetry.TraceSpan.Link\x12\x34\n\x06status\x18\n \x01(\x0b\x32$.chromite.telemetry.TraceSpan.Status\x12\x38\n\x08resource\x18\x0b \x01(\x0b\x32&.chromite.telemetry.TraceSpan.Resource\x12Q\n\x15instrumentation_scope\x18\x0c \x01(\x0b\x32\x32.chromite.telemetry.TraceSpan.InstrumentationScope\x12\x41\n\rtelemetry_sdk\x18\r \x01(\x0b\x32*.chromite.telemetry.TraceSpan.TelemetrySdk\x1a?\n\x0cTelemetrySdk\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x0f\n\x07version\x18\x02 \x02(\t\x12\x10\n\x08language\x18\x03 \x02(\t\x1a\x65\n\x06System\x12\x0f\n\x07os_name\x18\x01 \x02(\t\x12\x12\n\nos_version\x18\x02 \x01(\t\x12\x0f\n\x07os_type\x18\x03 \x01(\t\x12\x0b\n\x03\x63pu\x18\x04 \x01(\t\x12\x18\n\x10\x63pu_architecture\x18\x05 \x02(\t\x1a\xd0\x02\n\x07Process\x12\x0b\n\x03pid\x18\x01 \x01(\t\x12\x17\n\x0f\x65xecutable_name\x18\x02 \x01(\t\x12\x17\n\x0f\x65xecutable_path\x18\x03 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x04 \x01(\t\x12\x14\n\x0c\x63ommand_args\x18\x05 \x03(\t\x12\x15\n\rowner_is_root\x18\x06 \x01(\x08\x12\x14\n\x0cruntime_name\x18\x07 \x01(\t\x12\x17\n\x0fruntime_version\x18\x08 \x01(\t\x12\x1b\n\x13runtime_description\x18\t \x01(\t\x12\x13\n\x0b\x61pi_version\x18\n \x01(\t\x12;\n\x03\x65nv\x18\x0b \x03(\x0b\x32..chromite.telemetry.TraceSpan.Process.EnvEntry\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xa5\x01\n\x08Resource\x12\x36\n\x07process\x18\x01 \x01(\x0b\x32%.chromite.telemetry.TraceSpan.Process\x12\x34\n\x06system\x18\x02 \x01(\x0b\x32$.chromite.telemetry.TraceSpan.System\x12+\n\nattributes\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\x1a\x35\n\x14InstrumentationScope\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07version\x18\x02 \x01(\t\x1a]\n\x05\x45vent\x12\x19\n\x11\x65vent_time_millis\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\x12+\n\nattributes\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\x1a\x62\n\nStackFrame\x12\x15\n\rfunction_name\x18\x01 \x02(\t\x12\x11\n\tfile_name\x18\x02 \x02(\t\x12\x13\n\x0bline_number\x18\x03 \x01(\x03\x12\x15\n\rcolumn_number\x18\x04 \x01(\x03\x1a\x83\x01\n\nStackTrace\x12>\n\x0cstack_frames\x18\x01 \x03(\x0b\x32(.chromite.telemetry.TraceSpan.StackFrame\x12\x1c\n\x14\x64ropped_frames_count\x18\x02 \x01(\x03\x12\x17\n\x0fstacktrace_hash\x18\x03 \x01(\t\x1a\xee\x01\n\x06Status\x12\x44\n\x0bstatus_code\x18\x01 \x01(\x0e\x32/.chromite.telemetry.TraceSpan.Status.StatusCode\x12\x0f\n\x07message\x18\x02 \x01(\t\x12=\n\x0bstack_trace\x18\x03 \x01(\x0b\x32(.chromite.telemetry.TraceSpan.StackTrace\"N\n\nStatusCode\x12\x15\n\x11STATUS_CODE_UNSET\x10\x00\x12\x12\n\x0eSTATUS_CODE_OK\x10\x01\x12\x15\n\x11STATUS_CODE_ERROR\x10\x02\x1a\x41\n\x07\x43ontext\x12\x10\n\x08trace_id\x18\x01 \x01(\t\x12\x0f\n\x07span_id\x18\x02 \x01(\t\x12\x13\n\x0btrace_state\x18\x03 \x01(\t\x1ak\n\x04Link\x12\x36\n\x07\x63ontext\x18\x01 \x01(\x0b\x32%.chromite.telemetry.TraceSpan.Context\x12+\n\nattributes\x18\x02 \x01(\x0b\x32\x17.google.protobuf.Struct\"i\n\x08SpanKind\x12\x19\n\x15SPAN_KIND_UNSPECIFIED\x10\x00\x12\x16\n\x12SPAN_KIND_INTERNAL\x10\x01\x12\x14\n\x10SPAN_KIND_SERVER\x10\x02\x12\x14\n\x10SPAN_KIND_CLIENT\x10\x03\x42>Z<go.chromium.org/chromiumos/infra/proto/go/chromite/telemetry'
+  serialized_pb=b'\n#chromite/telemetry/trace_span.proto\x12\x12\x63hromite.telemetry\x1a\x1cgoogle/protobuf/struct.proto\"\xa3\x11\n\tTraceSpan\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x36\n\x07\x63ontext\x18\x02 \x01(\x0b\x32%.chromite.telemetry.TraceSpan.Context\x12\x16\n\x0eparent_span_id\x18\x03 \x01(\t\x12\x39\n\tspan_kind\x18\x04 \x01(\x0e\x32&.chromite.telemetry.TraceSpan.SpanKind\x12\x19\n\x11start_time_millis\x18\x05 \x01(\x03\x12\x17\n\x0f\x65nd_time_millis\x18\x06 \x01(\x03\x12+\n\nattributes\x18\x07 \x01(\x0b\x32\x17.google.protobuf.Struct\x12\x33\n\x06\x65vents\x18\x08 \x03(\x0b\x32#.chromite.telemetry.TraceSpan.Event\x12\x31\n\x05links\x18\t \x03(\x0b\x32\".chromite.telemetry.TraceSpan.Link\x12\x34\n\x06status\x18\n \x01(\x0b\x32$.chromite.telemetry.TraceSpan.Status\x12\x38\n\x08resource\x18\x0b \x01(\x0b\x32&.chromite.telemetry.TraceSpan.Resource\x12Q\n\x15instrumentation_scope\x18\x0c \x01(\x0b\x32\x32.chromite.telemetry.TraceSpan.InstrumentationScope\x12\x41\n\rtelemetry_sdk\x18\r \x01(\x0b\x32*.chromite.telemetry.TraceSpan.TelemetrySdk\x1a?\n\x0cTelemetrySdk\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07version\x18\x02 \x01(\t\x12\x10\n\x08language\x18\x03 \x01(\t\x1a\x66\n\x06System\x12\x0f\n\x07os_name\x18\x01 \x01(\t\x12\x12\n\nos_version\x18\x02 \x01(\t\x12\x0f\n\x07os_type\x18\x03 \x01(\t\x12\x0b\n\x03\x63pu\x18\x04 \x01(\t\x12\x19\n\x11host_architecture\x18\x05 \x01(\t\x1a\xd0\x02\n\x07Process\x12\x0b\n\x03pid\x18\x01 \x01(\t\x12\x17\n\x0f\x65xecutable_name\x18\x02 \x01(\t\x12\x17\n\x0f\x65xecutable_path\x18\x03 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x04 \x01(\t\x12\x14\n\x0c\x63ommand_args\x18\x05 \x03(\t\x12\x15\n\rowner_is_root\x18\x06 \x01(\x08\x12\x14\n\x0cruntime_name\x18\x07 \x01(\t\x12\x17\n\x0fruntime_version\x18\x08 \x01(\t\x12\x1b\n\x13runtime_description\x18\t \x01(\t\x12\x13\n\x0b\x61pi_version\x18\n \x01(\t\x12;\n\x03\x65nv\x18\x0b \x03(\x0b\x32..chromite.telemetry.TraceSpan.Process.EnvEntry\x1a*\n\x08\x45nvEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x1a\xa5\x01\n\x08Resource\x12\x36\n\x07process\x18\x01 \x01(\x0b\x32%.chromite.telemetry.TraceSpan.Process\x12\x34\n\x06system\x18\x02 \x01(\x0b\x32$.chromite.telemetry.TraceSpan.System\x12+\n\nattributes\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\x1a\x35\n\x14InstrumentationScope\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0f\n\x07version\x18\x02 \x01(\t\x1a]\n\x05\x45vent\x12\x19\n\x11\x65vent_time_millis\x18\x01 \x01(\x03\x12\x0c\n\x04name\x18\x02 \x01(\t\x12+\n\nattributes\x18\x03 \x01(\x0b\x32\x17.google.protobuf.Struct\x1a\x62\n\nStackFrame\x12\x15\n\rfunction_name\x18\x01 \x01(\t\x12\x11\n\tfile_name\x18\x02 \x01(\t\x12\x13\n\x0bline_number\x18\x03 \x01(\x03\x12\x15\n\rcolumn_number\x18\x04 \x01(\x03\x1a\x83\x01\n\nStackTrace\x12>\n\x0cstack_frames\x18\x01 \x03(\x0b\x32(.chromite.telemetry.TraceSpan.StackFrame\x12\x1c\n\x14\x64ropped_frames_count\x18\x02 \x01(\x03\x12\x17\n\x0fstacktrace_hash\x18\x03 \x01(\t\x1a\xee\x01\n\x06Status\x12\x44\n\x0bstatus_code\x18\x01 \x01(\x0e\x32/.chromite.telemetry.TraceSpan.Status.StatusCode\x12\x0f\n\x07message\x18\x02 \x01(\t\x12=\n\x0bstack_trace\x18\x03 \x01(\x0b\x32(.chromite.telemetry.TraceSpan.StackTrace\"N\n\nStatusCode\x12\x15\n\x11STATUS_CODE_UNSET\x10\x00\x12\x12\n\x0eSTATUS_CODE_OK\x10\x01\x12\x15\n\x11STATUS_CODE_ERROR\x10\x02\x1a\x41\n\x07\x43ontext\x12\x10\n\x08trace_id\x18\x01 \x01(\t\x12\x0f\n\x07span_id\x18\x02 \x01(\t\x12\x13\n\x0btrace_state\x18\x03 \x01(\t\x1ak\n\x04Link\x12\x36\n\x07\x63ontext\x18\x01 \x01(\x0b\x32%.chromite.telemetry.TraceSpan.Context\x12+\n\nattributes\x18\x02 \x01(\x0b\x32\x17.google.protobuf.Struct\"i\n\x08SpanKind\x12\x19\n\x15SPAN_KIND_UNSPECIFIED\x10\x00\x12\x16\n\x12SPAN_KIND_INTERNAL\x10\x01\x12\x14\n\x10SPAN_KIND_SERVER\x10\x02\x12\x14\n\x10SPAN_KIND_CLIENT\x10\x03\x42>Z<go.chromium.org/chromiumos/infra/proto/go/chromite/telemetry'
   ,
   dependencies=[google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,])
 
@@ -51,8 +51,8 @@ _TRACESPAN_STATUS_STATUSCODE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=1939,
-  serialized_end=2017,
+  serialized_start=1940,
+  serialized_end=2018,
 )
 _sym_db.RegisterEnumDescriptor(_TRACESPAN_STATUS_STATUSCODE)
 
@@ -86,8 +86,8 @@ _TRACESPAN_SPANKIND = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=2195,
-  serialized_end=2300,
+  serialized_start=2196,
+  serialized_end=2301,
 )
 _sym_db.RegisterEnumDescriptor(_TRACESPAN_SPANKIND)
 
@@ -102,21 +102,21 @@ _TRACESPAN_TELEMETRYSDK = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='name', full_name='chromite.telemetry.TraceSpan.TelemetrySdk.name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
+      number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='version', full_name='chromite.telemetry.TraceSpan.TelemetrySdk.version', index=1,
-      number=2, type=9, cpp_type=9, label=2,
+      number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='language', full_name='chromite.telemetry.TraceSpan.TelemetrySdk.language', index=2,
-      number=3, type=9, cpp_type=9, label=2,
+      number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -147,7 +147,7 @@ _TRACESPAN_SYSTEM = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='os_name', full_name='chromite.telemetry.TraceSpan.System.os_name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
+      number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -174,8 +174,8 @@ _TRACESPAN_SYSTEM = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
-      name='cpu_architecture', full_name='chromite.telemetry.TraceSpan.System.cpu_architecture', index=4,
-      number=5, type=9, cpp_type=9, label=2,
+      name='host_architecture', full_name='chromite.telemetry.TraceSpan.System.host_architecture', index=4,
+      number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -193,7 +193,7 @@ _TRACESPAN_SYSTEM = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=784,
-  serialized_end=885,
+  serialized_end=886,
 )
 
 _TRACESPAN_PROCESS_ENVENTRY = _descriptor.Descriptor(
@@ -230,8 +230,8 @@ _TRACESPAN_PROCESS_ENVENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1182,
-  serialized_end=1224,
+  serialized_start=1183,
+  serialized_end=1225,
 )
 
 _TRACESPAN_PROCESS = _descriptor.Descriptor(
@@ -331,8 +331,8 @@ _TRACESPAN_PROCESS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=888,
-  serialized_end=1224,
+  serialized_start=889,
+  serialized_end=1225,
 )
 
 _TRACESPAN_RESOURCE = _descriptor.Descriptor(
@@ -376,8 +376,8 @@ _TRACESPAN_RESOURCE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1227,
-  serialized_end=1392,
+  serialized_start=1228,
+  serialized_end=1393,
 )
 
 _TRACESPAN_INSTRUMENTATIONSCOPE = _descriptor.Descriptor(
@@ -414,8 +414,8 @@ _TRACESPAN_INSTRUMENTATIONSCOPE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1394,
-  serialized_end=1447,
+  serialized_start=1395,
+  serialized_end=1448,
 )
 
 _TRACESPAN_EVENT = _descriptor.Descriptor(
@@ -459,8 +459,8 @@ _TRACESPAN_EVENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1449,
-  serialized_end=1542,
+  serialized_start=1450,
+  serialized_end=1543,
 )
 
 _TRACESPAN_STACKFRAME = _descriptor.Descriptor(
@@ -473,14 +473,14 @@ _TRACESPAN_STACKFRAME = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='function_name', full_name='chromite.telemetry.TraceSpan.StackFrame.function_name', index=0,
-      number=1, type=9, cpp_type=9, label=2,
+      number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='file_name', full_name='chromite.telemetry.TraceSpan.StackFrame.file_name', index=1,
-      number=2, type=9, cpp_type=9, label=2,
+      number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=b"".decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -511,8 +511,8 @@ _TRACESPAN_STACKFRAME = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1544,
-  serialized_end=1642,
+  serialized_start=1545,
+  serialized_end=1643,
 )
 
 _TRACESPAN_STACKTRACE = _descriptor.Descriptor(
@@ -556,8 +556,8 @@ _TRACESPAN_STACKTRACE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1645,
-  serialized_end=1776,
+  serialized_start=1646,
+  serialized_end=1777,
 )
 
 _TRACESPAN_STATUS = _descriptor.Descriptor(
@@ -602,8 +602,8 @@ _TRACESPAN_STATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1779,
-  serialized_end=2017,
+  serialized_start=1780,
+  serialized_end=2018,
 )
 
 _TRACESPAN_CONTEXT = _descriptor.Descriptor(
@@ -647,8 +647,8 @@ _TRACESPAN_CONTEXT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2019,
-  serialized_end=2084,
+  serialized_start=2020,
+  serialized_end=2085,
 )
 
 _TRACESPAN_LINK = _descriptor.Descriptor(
@@ -685,8 +685,8 @@ _TRACESPAN_LINK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=2086,
-  serialized_end=2193,
+  serialized_start=2087,
+  serialized_end=2194,
 )
 
 _TRACESPAN = _descriptor.Descriptor(
@@ -802,7 +802,7 @@ _TRACESPAN = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=90,
-  serialized_end=2300,
+  serialized_end=2301,
 )
 
 _TRACESPAN_TELEMETRYSDK.containing_type = _TRACESPAN

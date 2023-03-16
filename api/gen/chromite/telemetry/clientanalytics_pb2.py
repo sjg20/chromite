@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=b'Z<go.chromium.org/chromiumos/infra/proto/go/chromite/telemetry',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n(chromite/telemetry/clientanalytics.proto\x12\x12\x63hromite.telemetry\"<\n\x08LogEvent\x12\x15\n\revent_time_ms\x18\x01 \x01(\x03\x12\x19\n\x10source_extension\x18\xa6\t \x01(\x0c\"!\n\nClientInfo\x12\x13\n\x0b\x63lient_type\x18\x01 \x01(\x05\"\x9f\x01\n\nLogRequest\x12\x33\n\x0b\x63lient_info\x18\x01 \x01(\x0b\x32\x1e.chromite.telemetry.ClientInfo\x12\x12\n\nlog_source\x18\x02 \x01(\x05\x12\x17\n\x0frequest_time_ms\x18\x04 \x01(\x03\x12/\n\tlog_event\x18\x03 \x03(\x0b\x32\x1c.chromite.telemetry.LogEvent\"/\n\x0bLogResponse\x12 \n\x18next_request_wait_millis\x18\x01 \x01(\x03\x42>Z<go.chromium.org/chromiumos/infra/proto/go/chromite/telemetry'
+  serialized_pb=b'\n(chromite/telemetry/clientanalytics.proto\x12\x12\x63hromite.telemetry\";\n\x08LogEvent\x12\x15\n\revent_time_ms\x18\x01 \x01(\x03\x12\x18\n\x10source_extension\x18\x06 \x01(\x0c\"!\n\nClientInfo\x12\x13\n\x0b\x63lient_type\x18\x01 \x01(\x05\"\x9f\x01\n\nLogRequest\x12\x33\n\x0b\x63lient_info\x18\x01 \x01(\x0b\x32\x1e.chromite.telemetry.ClientInfo\x12\x12\n\nlog_source\x18\x02 \x01(\x05\x12\x17\n\x0frequest_time_ms\x18\x04 \x01(\x03\x12/\n\tlog_event\x18\x03 \x03(\x0b\x32\x1c.chromite.telemetry.LogEvent\"/\n\x0bLogResponse\x12 \n\x18next_request_wait_millis\x18\x01 \x01(\x03\x42>Z<go.chromium.org/chromiumos/infra/proto/go/chromite/telemetry'
 )
 
 
@@ -42,7 +42,7 @@ _LOGEVENT = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
     _descriptor.FieldDescriptor(
       name='source_extension', full_name='chromite.telemetry.LogEvent.source_extension', index=1,
-      number=1190, type=12, cpp_type=9, label=1,
+      number=6, type=12, cpp_type=9, label=1,
       has_default_value=False, default_value=b"",
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -60,7 +60,7 @@ _LOGEVENT = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=64,
-  serialized_end=124,
+  serialized_end=123,
 )
 
 
@@ -91,8 +91,8 @@ _CLIENTINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=126,
-  serialized_end=159,
+  serialized_start=125,
+  serialized_end=158,
 )
 
 
@@ -144,8 +144,8 @@ _LOGREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=162,
-  serialized_end=321,
+  serialized_start=161,
+  serialized_end=320,
 )
 
 
@@ -176,8 +176,8 @@ _LOGRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=323,
-  serialized_end=370,
+  serialized_start=322,
+  serialized_end=369,
 )
 
 _LOGREQUEST.fields_by_name['client_info'].message_type = _CLIENTINFO
