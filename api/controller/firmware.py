@@ -37,6 +37,7 @@ def get_fw_loc(fw_loc: int) -> str:
         common_pb2.PLATFORM_ZEPHYR: "src/platform/ec/zephyr/",
         common_pb2.PLATFORM_TI50: "src/platform/ti50/common/",
         common_pb2.PLATFORM_CR50: "src/platform/cr50/",
+        common_pb2.PLATFORM_CHAMELEON: "src/platform/chameleon/v3/ec/",
     }.get(fw_loc, "")
 
 
