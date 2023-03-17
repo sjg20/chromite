@@ -61,7 +61,7 @@ _ANDROID_DIR = "/system/chrome"
 _ANDROID_DIR_EXTRACT_PATH = "system/chrome/*"
 
 _CHROME_DIR = "/opt/google/chrome"
-_CHROME_DIR_MOUNT = "/mnt/stateful_partition/deploy_rootfs/opt/google/chrome"
+_CHROME_DIR_MOUNT = "/usr/local/opt/google/chrome"
 _CHROME_DIR_STAGING_TARBALL_ZSTD = "chrome.tar.zst"
 _CHROME_TEST_BIN_DIR = "/usr/local/libexec/chrome-binary-tests"
 
