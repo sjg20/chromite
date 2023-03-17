@@ -153,6 +153,7 @@
     chell-release
     cherry-release
     cherry64-release
+    constitution-release
     coral-arc-r-release
     coral-release
     corsola-kernelnext-release
@@ -505,6 +506,11 @@
   chromiumos-sdk-llvm-next-tryjob
   chromiumos-sdk-tryjob
   config-updater-tryjob
+  constitution-full-tryjob
+  constitution-llvm-next-toolchain-tryjob
+  constitution-llvm-toolchain-tryjob
+  constitution-payloads-tryjob
+  constitution-release-tryjob
   coral-arc-r-full-tryjob
   coral-arc-r-llvm-next-toolchain-tryjob
   coral-arc-r-llvm-toolchain-tryjob
@@ -1036,6 +1042,7 @@
     chell-release-tryjob
     cherry-release-tryjob
     cherry64-release-tryjob
+    constitution-release-tryjob
     coral-arc-r-release-tryjob
     coral-release-tryjob
     corsola-kernelnext-release-tryjob
