@@ -123,6 +123,7 @@ def GetArtifacts(
         in_proto.ArtifactType.BREAKPAD_DEBUG_SYMBOLS: sysroot.BundleBreakpadSymbols,
         in_proto.ArtifactType.DEBUG_SYMBOLS: sysroot.BundleDebugSymbols,
         in_proto.ArtifactType.FUZZER_SYSROOT: sysroot.CreateFuzzerSysroot,
+        in_proto.ArtifactType.SYSROOT_ARCHIVE: sysroot.ArchiveSysroot,
     }
     # pylint: enable=line-too-long
 
@@ -156,8 +157,8 @@ def GetArtifacts(
                 if result:
                     generated.append(
                         {
-                            "paths": [result]
-                            if isinstance(result, str)
+                            "paths": [str(result)]
+                            if isinstance(result, (os.PathLike, str))
                             else result,
                             "type": artifact_type,
                         }

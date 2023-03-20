@@ -1358,3 +1358,45 @@ class RemoteExecutionTest(cros_test_lib.MockLoggingTestCase):
             pass
         self.remoteexec_mock.assert_not_called()
         self.goma_mock.assert_not_called()
+
+
+class ArchiveSysrootTest(cros_test_lib.TempDirTestCase):
+    """ArchiveSysroot tests."""
+
+    def setUp(self):
+        chroot_path = self.tempdir / "chroot"
+        self.chroot = chroot_lib.Chroot(path=chroot_path)
+        sysroot_path = chroot_path / "build" / "testBoard"
+        self.sysroot = sysroot_lib.Sysroot(sysroot_path)
+        self.dir_structure = [
+            cros_test_lib.Directory(".", []),
+            cros_test_lib.Directory("test", ["foo.bar"]),
+        ]
+
+    def testArchiveSysroot(self):
+        """Archive a sample folder and verify its contents."""
+        cros_test_lib.CreateOnDiskHierarchy(
+            self.chroot.full_path(self.sysroot.path), self.dir_structure
+        )
+
+        archive_file = sysroot.ArchiveSysroot(
+            self.chroot,
+            self.sysroot,
+            build_target_lib.BuildTarget("testBoard"),
+            self.tempdir,
+        )
+        self.assertTrue(Path(archive_file).exists())
+        self.assertEqual(
+            archive_file, self.tempdir / sysroot.SYSROOT_ARCHIVE_FILE
+        )
+        cros_test_lib.VerifyTarball(archive_file, self.dir_structure)
+
+    def testArchiveSysrootFailure(self):
+        """Archive a sample folder that doesnt exists."""
+        archive_file = sysroot.ArchiveSysroot(
+            self.chroot,
+            self.sysroot,
+            build_target_lib.BuildTarget("testBoard"),
+            self.tempdir,
+        )
+        self.assertIsNone(archive_file)

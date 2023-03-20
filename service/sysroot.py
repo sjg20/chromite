@@ -71,6 +71,8 @@ _PACKAGE_LIST = List[Optional[str]]
 # update_chroot.
 BACKTRACK_DEFAULT = 10
 
+SYSROOT_ARCHIVE_FILE = "sysroot.tar.zst"
+
 
 class Error(Exception):
     """Base error class for the module."""
@@ -1510,3 +1512,38 @@ def RemoteExecution(use_goma: bool, use_remoteexec: bool) -> Iterator[None]:
         elif goma_instance:
             logging.info("Stopping goma compiler_proxy.")
             goma_instance.Stop()
+
+
+def ArchiveSysroot(
+    chroot: "chroot_lib.Chroot",
+    sysroot: "sysroot_lib.Sysroot",
+    _build_target: "build_target_lib.BuildTarget",
+    output_dir: os.PathLike,
+) -> Optional[os.PathLike]:
+    """Archive the given sysroot.
+
+    Args:
+        chroot: The chroot in which the sysroot exists.
+        sysroot: Sysroot that needs to be archived.
+        output_dir: Directory in which the generated archive will be placed.
+
+    Returns:
+        The archive file path or None if the archive directory doesnt exists.
+    """
+    sysroot_path = Path(chroot.full_path(sysroot.path))
+    if not sysroot_path.is_dir():
+        return None
+
+    osutils.SafeMakedirs(output_dir)
+    archive_path = Path(output_dir) / SYSROOT_ARCHIVE_FILE
+
+    compression_type = cros_build_lib.CompressionExtToType(SYSROOT_ARCHIVE_FILE)
+    cros_build_lib.CreateTarball(
+        archive_path,
+        sysroot_path,
+        compression=compression_type,
+        chroot=chroot.path,
+        sudo=True,
+    )
+
+    return archive_path
