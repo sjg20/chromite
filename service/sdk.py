@@ -8,7 +8,6 @@ import json
 import logging
 import os
 from pathlib import Path
-import re
 import tempfile
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 
@@ -21,6 +20,7 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sdk_builder_lib
+from chromite.utils import key_value_store
 
 
 if TYPE_CHECKING:
@@ -356,13 +356,14 @@ def GetLatestVersion() -> str:
         suburl="cros-sdk-latest.conf",
     )
     contents = gs.GSContext().Cat(uri).decode()
-    version_re = re.compile(r'LATEST_SDK="([\d.]+)"')
-    m = version_re.match(contents)
-    if m is None:
+    contents_dict = key_value_store.LoadData(
+        contents, source="remote latest SDK file"
+    )
+    if "LATEST_SDK" not in contents_dict:
         raise ValueError(
             f"Failed to parse latest SDK file ({uri}) contents:\n{contents}"
         )
-    return m.group(1)
+    return contents_dict["LATEST_SDK"]
 
 
 def UprevSdkAndPrebuilts(
