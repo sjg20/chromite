@@ -531,19 +531,22 @@ class PrebuiltUploader(object):
         existing_keyval = self._gs_context.LoadKeyValueStore(
             remote_pointerfile, acl=self._acl
         )
-        if not all(
-            key in existing_keyval
-            for key in ("LATEST_SDK", "LATEST_SDK_UPREV_TARGET")
-        ):
-            raise ValueError(
-                f"Remote pointerfile missing expected keys:\n{existing_keyval}"
-            )
+
+        # TODO(b/274196697): When LATEST_SDK_UPREV_TARGET is more reliably found
+        # in the remote latest file, require that key too.
+        for required_key in ("LATEST_SDK",):
+            if required_key not in existing_keyval:
+                raise ValueError(
+                    f"Remote pointer file {remote_pointerfile} missing expected key {required_key}:\n{existing_keyval}"
+                )
 
         # If any values were not specified in args, use the existing values.
         if latest_sdk is None:
             latest_sdk = existing_keyval["LATEST_SDK"]
         if latest_sdk_uprev_target is None:
-            latest_sdk_uprev_target = existing_keyval["LATEST_SDK_UPREV_TARGET"]
+            latest_sdk_uprev_target = existing_keyval.get(
+                "LATEST_SDK_UPREV_TARGET", None
+            )
 
         # Write a new local latest file with target values, and upload.
         new_file_contents = self._CreateRemoteSdkLatestFileContents(
