@@ -56,7 +56,7 @@ class TestIndirectMetrics(cros_test_lib.MockTestCase):
         )
 
     def patchTime(self):
-        """Simulate time passing to force a Flush() every time a metric is sent."""
+        """Patch time to force a Flush() every time a metric is sent."""
 
         def TimeIterator():
             t = 0
@@ -84,14 +84,14 @@ class TestIndirectMetrics(cros_test_lib.MockTestCase):
     @unittest.skipIf(sys.version_info.major < 3, "Requires py3")
     def testResetAfter(self):
         """Tests that the reset_after flag works to send metrics only once."""
-        # By mocking out its "time" module, the forked flushing process will think
-        # it should call Flush() whenever we send a metric.
+        # By mocking out its "time" module, the forked flushing process will
+        # think it should call Flush() whenever we send a metric.
         self.patchTime()
 
         with tempfile.NamedTemporaryFile(dir="/var/tmp") as out:
             # * The indirect=True flag is required for reset_after to work.
-            # * Using debug_file, we send metrics to the temporary file instead of
-            # sending metrics to production via PubSub.
+            # * Using debug_file, we send metrics to the temporary file instead
+            # of sending metrics to production via PubSub.
             with ts_mon_config.SetupTsMonGlobalState(
                 "metrics_unittest", indirect=True, debug_file=out.name
             ):
@@ -101,8 +101,9 @@ class TestIndirectMetrics(cros_test_lib.MockTestCase):
 
                 # Each of these .set() calls will result in a Flush() call.
                 for i in range(7):
-                    # any extra streams with different fields and reset_after=False
-                    # will be cleared only if the below metric is cleared.
+                    # any extra streams with different fields and
+                    # reset_after=False will be cleared only if the below metric
+                    # is cleared.
                     metrics.Boolean(MetricName(i, True), reset_after=False).set(
                         True, fields={"original": False}
                     )
@@ -122,9 +123,10 @@ class TestIndirectMetrics(cros_test_lib.MockTestCase):
             # The reset metrics should be sent only three times, because:
             # * original=False is sent twice
             # * original=True is sent once.
-            # The second flush() only results in one occurance of the string
-            # MetricName(i, True) because both data points are in a "metrics_data_set"
-            # block, like so:
+            #
+            # The second flush() only results in one occurrence of the string
+            # MetricName(i, True) because both data points are in a
+            # "metrics_data_set" block, like so:
             # metrics_collection {
             #   ... etc ...
             #   metrics_data_set {
@@ -182,7 +184,7 @@ class TestSecondsTimer(cros_test_lib.MockTestCase):
         self.assertEqual(self._mockMetric.add.call_count, 1)
 
     def testContextManagerWithUpdate(self):
-        """Tests that timing context manager with a field update emits metric."""
+        """Verify timing context manager with a field update emits metric."""
         with metrics.SecondsTimer("fooname", fields={"foo": "bar"}) as c:
             c["foo"] = "qux"
         self._mockMetric.add.assert_called_with(mock.ANY, fields={"foo": "qux"})
@@ -234,7 +236,7 @@ class TestSecondsInstanceTimer(cros_test_lib.MockTestCase):
         self.assertEqual(self._mockMetric.set.call_count, 1)
 
     def testContextManagerWithUpdate(self):
-        """Tests that timing context manager with a field update emits metric."""
+        """Verify timing context manager with a field update emits metric."""
         with metrics.SecondsInstanceTimer(
             "fooname", fields={"foo": "bar"}
         ) as c:
@@ -486,11 +488,10 @@ class TestRuntimeBreakdownTimer(cros_test_lib.MockTestCase):
             metrics.CumulativeMetric.call_args[0][0], "fubar/bucketing_loss"
         )
         self.assertEqual(self._mockCumulativeMetric.increment_by.call_count, 1)
-        # Each steps is roughly 1/300 ~ .33%.
-        # Our bucket resolution is 0.1 % so we expect to lose ~ 0.033% each report.
-        # Total # of reports = 300. So we'll lose ~9.99%
-        # Let's loosely bound that number to allow for floating point computation
-        # errors.
+        # Each step is roughly 1/300 ~ .33%.
+        # Our bucket resolution is 0.1 % so we expect to lose ~ 0.033% each
+        # report. Total # of reports = 300. So we'll lose ~9.99% Let's loosely
+        # bound that number to allow for floating point computation errors.
         error = self._mockCumulativeMetric.increment_by.call_args[0][0]
         self.assertGreater(error, 9.6)
         self.assertLess(error, 10.2)

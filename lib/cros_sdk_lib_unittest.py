@@ -220,8 +220,8 @@ class ChrootUpdaterTest(cros_test_lib.MockTestCase, VersionHookTestCase):
 
         # The current behavior is that outside processes writing to the file
         # does not affect our view after we've already read it. This shouldn't
-        # generally be a problem since run_chroot_version_hooks should be the only
-        # process writing to it.
+        # generally be a problem since run_chroot_version_hooks should be the
+        # only process writing to it.
         osutils.WriteFile(self.version_file, "10")
         self.assertEqual(5, self.chroot.GetVersion())
 
