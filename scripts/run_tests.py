@@ -106,6 +106,14 @@ def precache():
         compile_build_api_proto.ProtocVersion.CHROMITE
     )
     # Ensure various tools are available.
+    cros_build_lib.dbg_run(
+        [os.path.join(constants.CHROMITE_DIR, "scripts", "black"), "--version"],
+        capture_output=True,
+    )
+    cros_build_lib.dbg_run(
+        [os.path.join(constants.CHROMITE_DIR, "scripts", "isort"), "--version"],
+        capture_output=True,
+    )
     formatters.star._find_buildifier()
     formatters.textproto._find_txtpbfmt()
     with clang_format.ClangFormat():
