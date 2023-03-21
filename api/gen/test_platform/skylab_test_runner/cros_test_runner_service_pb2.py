@@ -23,7 +23,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'ZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runner',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n?test_platform/skylab_test_runner/cros_test_runner_service.proto\x12 test_platform.skylab_test_runner\x1a\x1btest_platform/request.proto\x1a!chromiumos/test/lab/api/dut.proto\x1a\x32test_platform/skylab_test_runner/cft_request.proto\x1a-test_platform/skylab_test_runner/result.proto\"\xad\x01\n CrosTestRunnerServerStartRequest\x12\x11\n\thost_name\x18\x01 \x01(\t\x12\x18\n\x10log_data_gs_root\x18\x02 \x01(\t\x12 \n\x18\x64ocker_key_file_location\x18\x03 \x01(\t\x12:\n\x0c\x64ut_topology\x18\x04 \x01(\x0b\x32$.chromiumos.test.lab.api.DutTopology\"\xaa\x01\n\x0e\x45xecuteRequest\x12\x32\n\ttest_plan\x18\x01 \x01(\x0b\x32\x1f.test_platform.Request.TestPlan\x12J\n\x10\x63\x66t_test_request\x18\x02 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.CFTTestRequest\x12\x18\n\x10\x63tr_cipd_version\x18\x03 \x01(\t\"K\n\x0f\x45xecuteResponse\x12\x38\n\x06result\x18\x01 \x01(\x0b\x32(.test_platform.skylab_test_runner.Result2\x87\x01\n\x15\x43rosTestRunnerService\x12n\n\x07\x45xecute\x12\x30.test_platform.skylab_test_runner.ExecuteRequest\x1a\x31.test_platform.skylab_test_runner.ExecuteResponseBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3'
+  serialized_pb=b'\n?test_platform/skylab_test_runner/cros_test_runner_service.proto\x12 test_platform.skylab_test_runner\x1a\x1btest_platform/request.proto\x1a!chromiumos/test/lab/api/dut.proto\x1a\x32test_platform/skylab_test_runner/cft_request.proto\x1a-test_platform/skylab_test_runner/result.proto\"\xad\x01\n CrosTestRunnerServerStartRequest\x12\x11\n\thost_name\x18\x01 \x01(\t\x12\x18\n\x10log_data_gs_root\x18\x02 \x01(\t\x12 \n\x18\x64ocker_key_file_location\x18\x03 \x01(\t\x12:\n\x0c\x64ut_topology\x18\x04 \x01(\x0b\x32$.chromiumos.test.lab.api.DutTopology\"\xc2\x01\n\x0e\x45xecuteRequest\x12\x32\n\ttest_plan\x18\x01 \x01(\x0b\x32\x1f.test_platform.Request.TestPlan\x12J\n\x10\x63\x66t_test_request\x18\x02 \x01(\x0b\x32\x30.test_platform.skylab_test_runner.CFTTestRequest\x12\x18\n\x10\x63tr_cipd_version\x18\x03 \x01(\t\x12\x16\n\x0e\x61rtifacts_path\x18\x04 \x01(\t\"K\n\x0f\x45xecuteResponse\x12\x38\n\x06result\x18\x01 \x01(\x0b\x32(.test_platform.skylab_test_runner.Result2\x87\x01\n\x15\x43rosTestRunnerService\x12n\n\x07\x45xecute\x12\x30.test_platform.skylab_test_runner.ExecuteRequest\x1a\x31.test_platform.skylab_test_runner.ExecuteResponseBLZJgo.chromium.org/chromiumos/infra/proto/go/test_platform/skylab_test_runnerb\x06proto3'
   ,
   dependencies=[test__platform_dot_request__pb2.DESCRIPTOR,chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_cft__request__pb2.DESCRIPTOR,test__platform_dot_skylab__test__runner_dot_result__pb2.DESCRIPTOR,])
 
@@ -112,6 +112,13 @@ _EXECUTEREQUEST = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='artifacts_path', full_name='test_platform.skylab_test_runner.ExecuteRequest.artifacts_path', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -125,7 +132,7 @@ _EXECUTEREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=441,
-  serialized_end=611,
+  serialized_end=635,
 )
 
 
@@ -156,8 +163,8 @@ _EXECUTERESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=613,
-  serialized_end=688,
+  serialized_start=637,
+  serialized_end=712,
 )
 
 _CROSTESTRUNNERSERVERSTARTREQUEST.fields_by_name['dut_topology'].message_type = chromiumos_dot_test_dot_lab_dot_api_dot_dut__pb2._DUTTOPOLOGY
@@ -200,8 +207,8 @@ _CROSTESTRUNNERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=691,
-  serialized_end=826,
+  serialized_start=715,
+  serialized_end=850,
   methods=[
   _descriptor.MethodDescriptor(
     name='Execute',
