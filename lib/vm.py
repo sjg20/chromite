@@ -785,8 +785,7 @@ class VM(device.Device):
         parser.add_argument(
             "--qemu-cpu",
             type=str,
-            # disable f16c as a workaround for https://crbug.com/1406875
-            default="Haswell-noTSX,-f16c,-invpcid,-tsc-deadline",
+            default="Haswell-noTSX,-invpcid,-tsc-deadline",
             help="CPU argument that will be passed to qemu.",
         )
         parser.add_argument(
