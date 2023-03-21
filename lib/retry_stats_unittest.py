@@ -75,7 +75,8 @@ class TestRetryStats(cros_test_lib.MockTestCase):
 
         retry_stats.ReportCategoryStats(out, self.CAT)
 
-        expected = """************************************************************
+        expected = """\
+************************************************************
 ** Performance Statistics for Test Service A
 **
 ** Success: 0
@@ -119,7 +120,8 @@ class TestRetryStats(cros_test_lib.MockTestCase):
         retry_stats.ReportStats(out)
 
         # Expecting reports for both CAT and CAT_B used above.
-        expected = """************************************************************
+        expected = """\
+************************************************************
 ** Performance Statistics for Test Service A
 **
 ** Success: 1

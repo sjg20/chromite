@@ -24,7 +24,8 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
     def setUp(self):
         """Setup the test environment."""
         self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
-        # Fake being root to avoid running all filesystem commands with sudo_run.
+        # Fake being root to avoid running all filesystem commands with
+        # sudo_run.
         self.PatchObject(osutils, "IsRootUser", return_value=True)
         sysroot_path = os.path.join(self.tempdir, "sysroot")
         osutils.SafeMakedirs(sysroot_path)
@@ -41,13 +42,13 @@ class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
     ) -> Tuple[List[str], List[str]]:
         """Helper function to write board and portdir overlays for the sysroot.
 
-        By default uses one fake board overlay, and the chromiumos and portage
+        By default, uses one fake board overlay, and the chromiumos and portage
         stable overlays. Set the arguments to an empty list to set no values for
-        that field. When not explicitly set, |portdir_overlays| includes all values
-        in |board_overlays|.
+        that field. When not explicitly set, |portdir_overlays| includes all
+        values in |board_overlays|.
 
         Returns:
-          The board overlays, and the portdir overlays.
+            The board overlays, and the portdir overlays.
         """
         if board_overlays is None:
             board_overlays = ["overlay/board"]
@@ -271,7 +272,8 @@ class SysrootLibInstallConfigTest(cros_test_lib.MockTempDirTestCase):
 
     def setUp(self):
         """Setup the test environment."""
-        # Fake being root to avoid running all filesystem commands with sudo_run.
+        # Fake being root to avoid running all filesystem commands with
+        # sudo_run.
         self.PatchObject(osutils, "IsRootUser", return_value=True)
         self.sysroot = sysroot_lib.Sysroot(self.tempdir)
         self.make_conf_generic_target = os.path.join(

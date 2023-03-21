@@ -47,8 +47,8 @@ class TruthTableTest(cros_test_lib.TestCase):
         """Run the given truth table through basic smoke checks.
 
         Args:
-          tt: A TruthTable object.
-          lines: The expect input lines, in order (list of tuples).
+            tt: A TruthTable object.
+            lines: The expected input lines, in order (list of tuples).
         """
         # Check that more than one iterable can be used at once.
         iter1 = iter(tt)
@@ -57,7 +57,7 @@ class TruthTableTest(cros_test_lib.TestCase):
         self.assertEqual(lines[0], next(iter2))
         self.assertEqual(lines[1], next(iter2))
 
-        # Check that iteration again works again.
+        # Check that iteration works again.
         for ix, line in enumerate(tt):
             self.assertEqual(lines[ix], line)
 
@@ -136,7 +136,7 @@ class VerifyTarballTest(cros_test_lib.MockTempDirTestCase):
         """Mock out tarball content list call.
 
         Args:
-          files: A list of contents to return.
+            files: A list of contents to return.
         """
         self.rc_mock.AddCmdResult(
             partial_mock.ListRegex("tar -tf"), stdout="\n".join(files)
@@ -202,8 +202,8 @@ class MockTestCaseTest(cros_test_lib.TestCase):
 
         patcher.stop = abort
         self.assertRaises(RuntimeError, tc.tearDown)
-        # Make sure that even though exception is raised for stopping 'patcher', we
-        # continue to stop 'patcher2', and run patcher.stopall().
+        # Make sure that even though exception is raised for stopping 'patcher',
+        # we continue to stop 'patcher2', and run patcher.stopall().
         self.assertEqual(self.Mockable.TO_BE_MOCKED2, 10)
         self.assertEqual(self.Mockable.TO_BE_MOCKED3, 20)
 
@@ -215,7 +215,7 @@ class TestCaseTest(unittest.TestCase):
         """Test that test cases are interrupted when they are hanging."""
 
         class TimeoutTestCase(cros_test_lib.TestCase):
-            """Test case that raises a TimeoutError because it takes too long."""
+            """Raises a TimeoutError because it takes too long."""
 
             TEST_CASE_TIMEOUT = 1
 
@@ -298,7 +298,7 @@ class RunCommandTestCase(cros_test_lib.RunCommandTestCase):
     """Verify the test case behavior."""
 
     def testPopenMockEncodingEmptyStrings(self):
-        """Verify our automatic encoding in PopenMock works with default output."""
+        """Verify automatic encoding in PopenMock works with default output."""
         self.rc.AddCmdResult(["/x"])
         result = cros_build_lib.run(["/x"], capture_output=True)
         self.assertEqual(b"", result.stdout)

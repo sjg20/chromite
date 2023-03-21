@@ -272,7 +272,7 @@ class UprevManagerTest(cros_test_lib.MockTestCase):
         manager._clean_stale_packages()
 
         # Make sure we aren't doing any work.
-        # TODO(crbug/1065172): Invalid assertion that had previously been mocked.
+        # TODO(crbug/1065172): Invalid assertion that was previously mocked.
         # patch.assert_not_called()
 
     def test_clean_stale_packages_chroot_not_exists(self):
@@ -286,7 +286,7 @@ class UprevManagerTest(cros_test_lib.MockTestCase):
         manager._clean_stale_packages()
 
         # Make sure we aren't doing any work.
-        # TODO(crbug/1065172): Invalid assertion that had previously been mocked.
+        # TODO(crbug/1065172): Invalid assertion that was previously mocked.
         # patch.assert_not_called()
 
     def test_clean_stale_packages_no_build_targets(self):
@@ -393,7 +393,7 @@ def test_basic_chrome_uprev(overlay_stack):
 
 
 def test_chrome_uprev_revision_bump(overlay_stack):
-    """Test that an uprev with the same major version just increments revision."""
+    """Verify an uprev with the same major version just increments revision."""
     NEW_CHROME_VERSION = "80.0.1234.0"
 
     (overlay,) = overlay_stack(1)
@@ -659,7 +659,7 @@ def test_simple_uprev_workon_ebuild_to_version(overlay_stack, monkeypatch):
 def test_uprev_workon_ebuild_to_version_newer_exists(
     overlay_stack, monkeypatch
 ):
-    """Test no uprev occurs when downrev not allowed and newer version exists."""
+    """Test no uprev when downrev not allowed and newer version exists."""
     (overlay,) = overlay_stack(1)
     unstable_ebuild = cr.test.Package(
         "chromeos-base",

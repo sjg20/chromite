@@ -25,7 +25,7 @@ class ELFParsingTest(cros_test_lib.TempDirTestCase):
         self.assertTrue(elf["is_lib"])
 
     def testNotIsLib(self):
-        """Tests the 'is_lib' attribute is inferred correctly for executables."""
+        """Verify 'is_lib' attribute is inferred correctly for executables."""
         unittest_lib.BuildELF(
             os.path.join(self.tempdir, "abc_main"), executable=True
         )
@@ -127,8 +127,8 @@ class ELFParsingTest(cros_test_lib.TempDirTestCase):
                     continue
                 self.assertFalse(lib[path].startswith("/"))
                 self.assertFalse(lib[path].startswith(str(self.tempdir)))
-                # Linked lib paths should be relative to the working directory or is the
-                # ld dynamic loader.
+                # Linked lib paths should be relative to the working directory
+                # or is the ld dynamic loader.
                 self.assertTrue(
                     lib[path] == elf["interp"]
                     or os.path.exists(os.path.join(self.tempdir, lib[path]))
