@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 import re
 import shutil
-from typing import Any, Callable, Iterable, List, Optional
+from typing import Any, Callable, Iterable, List, Optional, Tuple
 
 from chromite.lib import alerts
 from chromite.lib import constants
@@ -157,7 +157,7 @@ MERGED_PROFILE_NAME_REGEX = r"""
       -(?:orderfile|amd64|arm)                   # prefix for either orderfile
                                                  # or release profile.
       # CWP parts
-      -(?:field|atom|bigcore|none|arm)           # Valid names
+      -(?:\w+)                                   # Profile type
       -(\d+)                                     # Major
       -(\d+)                                     # Build
       \.(\d+)                                    # Patch
@@ -276,7 +276,9 @@ def _ParseCWPProfileName(profile_name):
     return CWPProfileVersion(*[int(x) for x in match.groups()])
 
 
-def _ParseMergedProfileName(artifact_name):
+def _ParseMergedProfileName(
+    artifact_name: str,
+) -> Tuple[BenchmarkProfileVersion, CWPProfileVersion]:
     """Parse the name of an orderfile or a release profile for Chrome.
 
     Examples:
@@ -483,8 +485,8 @@ class _CommonPrepareBundle(object):
         self.build_target = build_target
         self.input_artifacts = input_artifacts or {}
         self.profile_info = profile_info or {}
-        self.profile = self.profile_info.get("chrome_cwp_profile")
-        self.arch = self.profile_info.get("arch")
+        self.profile = self.profile_info.get("chrome_cwp_profile", "")
+        self.arch = self.profile_info.get("arch", "")
         if profile_info and not self.arch:
             raise ValueError("No 'arch' specified in ArtifactProfileInfo")
         self._ebuild_info = {}
@@ -664,13 +666,16 @@ class _CommonPrepareBundle(object):
         )
         logging.info("Orderfile artifact version = %s", artifact_version)
         benchmark_afdo, cwp_afdo = _ParseMergedProfileName(artifact_version)
-        profile_type = "field" if self.arch == "amd64" else self.arch
+        profile_type = self.profile
+        if self.profile in ("", "atom", "bigcore"):
+            # Keep "field" as the default and backward compatible type.
+            profile_type = "field"
         combined_name = _GetCombinedAFDOName(
             cwp_afdo, profile_type, benchmark_afdo
         )
         return f"chromeos-chrome-orderfile-{combined_name}"
 
-    def _FindLatestOrderfileArtifact(self, gs_urls):
+    def _FindLatestOrderfileArtifact(self, gs_urls: Iterable[str]) -> str:
         """Find the latest Ordering file artifact in a bucket.
 
         Args:
@@ -690,7 +695,7 @@ class _CommonPrepareBundle(object):
         self,
         gs_urls: Iterable[str],
         rank_func: Callable[[str], Any],
-        arch: str = None,
+        arch: str = "",
     ) -> str:
         """Find the latest AFDO artifact in a bucket.
 
@@ -716,9 +721,8 @@ class _CommonPrepareBundle(object):
             arch = self.arch
 
         def _FilesOnBranch(
-            all_files: Iterable[str],
+            all_files: Iterable[gs.GSListResult],
             branch: str,
-            arch: str,
         ):
             """Return the files that are on this branch.
 
@@ -730,12 +734,14 @@ class _CommonPrepareBundle(object):
             Args:
               all_files: list of files from GS.
               branch: branch number.
-              arch: profile architecture.
 
             Returns:
               Files matching the branch.
             """
-            profile_type = "field" if arch == "amd64" else arch
+            profile_type = self.profile
+            if self.profile in ("", "atom", "bigcore"):
+                # Keep "field" as the default and backward compatible type.
+                profile_type = "field"
             cwp_afdo_pattern = re.compile(rf"R{branch}")
             # Search by the arch and branch number.
             bench_afdo_pattern = re.compile(rf"chromeos-chrome-{arch}-{branch}")
@@ -768,12 +774,12 @@ class _CommonPrepareBundle(object):
             except gs.GSNoSuchKey:
                 pass
 
-        results = _FilesOnBranch(all_files, self.chrome_branch, arch)
+        results = _FilesOnBranch(all_files, self.chrome_branch)
         if not results:
             # If no results found, it's maybe because we just branched.
             # Try to find the latest profile from last branch.
             results = _FilesOnBranch(
-                all_files, str(int(self.chrome_branch) - 1), arch
+                all_files, str(int(self.chrome_branch) - 1)
             )
 
         if not results:

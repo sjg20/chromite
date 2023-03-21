@@ -179,6 +179,14 @@ class ProfilesNameHelperTest(cros_test_lib.MockTempDirTestCase):
                 ),
             ),
         )
+        # Test parse a custom profile name
+        afdo_name = (
+            "chromeos-chrome-orderfile-test-77-3809.38-1562580965"
+            "-benchmark-77.0.3849.0-r1-redacted.afdo.xz"
+        )
+        # Check that _ParseMergedProfileName doesn't raise an error with the
+        # "test" profile type.
+        toolchain_util._ParseMergedProfileName(afdo_name)
 
     def testCompressAFDOFiles(self):
         """Test _CompressAFDOFiles()."""
