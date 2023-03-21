@@ -10,6 +10,7 @@ import os
 from unittest import mock
 
 from chromite.lib import cros_test_lib
+from chromite.lib import dlc_allowlist
 from chromite.lib import dlc_lib
 from chromite.lib import osutils
 from chromite.lib import partial_mock
@@ -70,7 +71,7 @@ class UtilsTest(cros_test_lib.TempDirTestCase):
         )
 
 
-class EbuildParamsTest(cros_test_lib.TempDirTestCase):
+class EbuildParamsTest(cros_test_lib.MockTempDirTestCase):
     """Tests EbuildParams functions."""
 
     def GetVaryingEbuildParams(self):
@@ -187,7 +188,7 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
         critical_update=False,
         fullnamerev=_FULLNAME_REV,
         scaled=False,
-    ):
+    ) -> dlc_lib.EbuildParams:
         """Creates and Stores DLC params at install_root_dir"""
         params = dlc_lib.EbuildParams(
             dlc_id=dlc_id,
@@ -208,9 +209,31 @@ class EbuildParamsTest(cros_test_lib.TempDirTestCase):
             fullnamerev=fullnamerev,
             scaled=scaled,
         )
-        return params.StoreDlcParameters(
-            install_root_dir=install_root_dir, sudo=False
+        params.StoreDlcParameters(install_root_dir=install_root_dir, sudo=False)
+        return params
+
+    def testVerifyDlcParametersFactoryInstallable(self):
+        """Tests EbuildParams.VerifyDlcParameters"""
+        dlc_allowlist_mock = self.PatchObject(
+            dlc_allowlist, "IsFactoryInstallAllowlisted", return_value=True
         )
+        params = self.GenerateParams(os.path.join(self.tempdir, "build_root"))
+        params.dlc_id = "foo"
+        params.factory_install = True
+        params.VerifyDlcParameters()
+        dlc_allowlist_mock.assert_called_once_with(params.dlc_id)
+
+    def testVerifyDlcParametersNotAllowedToFactoryInstall(self):
+        """Tests EbuildParams.VerifyDlcParameters"""
+        dlc_allowlist_mock = self.PatchObject(
+            dlc_allowlist, "IsFactoryInstallAllowlisted", return_value=False
+        )
+        params = self.GenerateParams(os.path.join(self.tempdir, "build_root"))
+        params.dlc_id = "foo"
+        params.factory_install = True
+        with self.assertRaises(Exception):
+            params.VerifyDlcParameters()
+        dlc_allowlist_mock.assert_called_once_with(params.dlc_id)
 
     def testStoreDlcParameters(self):
         """Tests EbuildParams.StoreDlcParameters"""

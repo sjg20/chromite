@@ -16,6 +16,7 @@ import shutil
 
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
+from chromite.lib import dlc_allowlist
 from chromite.lib import osutils
 from chromite.lib import verity
 from chromite.licensing import licenses_lib
@@ -173,6 +174,16 @@ class EbuildParams(object):
         self.critical_update = critical_update
         self.loadpin_verity_digest = loadpin_verity_digest
         self.scaled = scaled
+
+    def VerifyDlcParameters(self):
+        """Verifies certain DLC parameters are valid and allowed."""
+        if self.factory_install:
+            if not dlc_allowlist.IsFactoryInstallAllowlisted(self.dlc_id):
+                err_msg = (
+                    f"DLC={self.dlc_id} is not allowed to be factory installed."
+                )
+                logging.error(err_msg)
+                raise Exception(err_msg)
 
     def StoreDlcParameters(self, install_root_dir, sudo):
         """Store DLC parameters defined in the ebuild.
@@ -727,14 +738,25 @@ def IsDlcPreloadingAllowed(dlc_id: str, dlc_build_dir: str):
     return IsFieldAllowed(dlc_id, dlc_build_dir, "preload-allowed")
 
 
-def IsFactoryInstallAllowed(dlc_id: str, dlc_build_dir: str):
+def IsFactoryInstallAllowed(dlc_id: str, dlc_build_dir: str) -> bool:
     """Validates that DLC is built with DLC_FACTORY_INSTALL=true.
 
     Args:
         dlc_id: The DLC ID.
         dlc_build_dir: The root path where DLC build files reside.
+
+    Returns:
+        Whether the factory installation for the DLC is allowed.
     """
-    return IsFieldAllowed(dlc_id, dlc_build_dir, "factory-install")
+    if not IsFieldAllowed(dlc_id, dlc_build_dir, "factory-install"):
+        return False
+
+    if not dlc_allowlist.IsFactoryInstallAllowlisted(dlc_id):
+        err_msg = f"DLC={dlc_id} is not allowed to be factory installed."
+        logging.error(err_msg)
+        raise Exception(err_msg)
+
+    return True
 
 
 def IsLoadPinVerityDigestAllowed(dlc_id: str, dlc_build_dir: str) -> bool:
