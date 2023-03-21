@@ -378,7 +378,7 @@ class UpdateConfigStage(generic_stages.BuilderStage):
         logging.debug(
             "Running chromeos_config_unittest, to confirm sane state."
         )
-        test_runner = os.path.join(constants.CHROMITE_DIR, "run_tests")
+        test_runner = constants.CHROMITE_DIR / "run_tests"
         # run_tests re-executes itself inside the chroot and sets its own working
         # directory to chromite, so using a relative path to the unittest works fine
         # here.
@@ -479,7 +479,7 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
         logging.debug(
             "Running chromeos_config_unittest, to confirm sane state."
         )
-        test_runner = os.path.join(constants.CHROMITE_DIR, "run_tests")
+        test_runner = constants.CHROMITE_DIR / "run_tests"
         # run_tests re-executes itself inside the chroot and sets its own working
         # directory to chromite, so using a relative path to the unittest works fine
         # here.
@@ -515,8 +515,8 @@ class DeployLuciSchedulerStage(generic_stages.BuilderStage):
         )
 
     def _UpdateLuciProject(self):
-        chromite_source_file = os.path.join(
-            constants.CHROMITE_DIR, "config", "luci-scheduler.cfg"
+        chromite_source_file = (
+            constants.CHROMITE_DIR / "config" / "luci-scheduler.cfg"
         )
         generated_source_file = os.path.join(
             self.project_dir, "generated", "luci-scheduler.cfg"

@@ -205,7 +205,7 @@ def GetScriptShell() -> str:
         A string containing the skeleton script
     """
 
-    script_shell_path = Path(constants.CHROMITE_DIR) / "sdk/cgpt_shell.sh"
+    script_shell_path = constants.CHROMITE_DIR / "sdk" / "cgpt_shell.sh"
     with open(script_shell_path, "r", encoding="utf-8") as f:
         script_shell = "".join(f.readlines())
 

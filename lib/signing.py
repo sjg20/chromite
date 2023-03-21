@@ -10,7 +10,7 @@ import os
 from chromite.lib import constants
 
 
-SIGNING_DIR = os.path.join(constants.CHROMITE_DIR, "signing")
+SIGNING_DIR = constants.CHROMITE_DIR / "signing"
 INPUT_INSN_DIR_REL = os.path.join("crostools", "signer_instructions")
 TEST_INPUT_INSN_DIR = os.path.join(SIGNING_DIR, "signer_instructions")
 

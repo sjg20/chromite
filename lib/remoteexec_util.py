@@ -48,7 +48,7 @@ class Remoteexec(object):
         # by recipes rather than committed.
         if not reproxy_cfg_file.exists():
             reproxy_cfg_file = (
-                Path(constants.CHROMITE_DIR)
+                constants.CHROMITE_DIR
                 / "sdk"
                 / "reclient_cfgs"
                 / reproxy_cfg_file

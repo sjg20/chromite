@@ -119,8 +119,8 @@ class PaygenSigner(object):
             # Otherwise use a private key for signing and verifying the payload. If
             # no private_key was provided, use a test key.
             if not self._private_key:
-                self._private_key = os.path.join(
-                    constants.CHROMITE_DIR, "ssh_keys", "testing_rsa"
+                self._private_key = (
+                    constants.CHROMITE_DIR / "ssh_keys" / "testing_rsa"
                 )
             self._signer = (
                 signer_payloads_client.UnofficialSignerPayloadsClient(

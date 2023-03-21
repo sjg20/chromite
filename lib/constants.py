@@ -8,6 +8,9 @@ import os
 from pathlib import Path
 
 
+THIS_FILE = Path(__file__).resolve()
+
+
 def _FindSourceRoot():
     """Try and find the root check out of the chromiumos tree"""
     source_root = path = os.path.realpath(
@@ -29,9 +32,7 @@ CHROOT_CACHE_ROOT = "/var/cache/chromeos-cache"
 DEPOT_TOOLS_SUBPATH = "src/chromium/depot_tools"
 
 CROSUTILS_DIR = os.path.join(SOURCE_ROOT, "src/scripts")
-CHROMITE_DIR = os.path.realpath(
-    os.path.join(os.path.abspath(__file__), "..", "..")
-)
+CHROMITE_DIR = THIS_FILE.parent.parent
 BOOTSTRAP_DIR = os.path.join(CHROMITE_DIR, "bootstrap")
 DEPOT_TOOLS_DIR = os.path.join(SOURCE_ROOT, DEPOT_TOOLS_SUBPATH)
 CHROMITE_BIN_SUBDIR = "chromite/bin"

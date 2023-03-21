@@ -33,7 +33,7 @@ except ImportError:
 
 log = logging.getLogger(__name__)
 
-CIDB_MIGRATIONS_DIR = os.path.join(constants.CHROMITE_DIR, "cidb", "migrations")
+CIDB_MIGRATIONS_DIR = constants.CHROMITE_DIR / "cidb" / "migrations"
 
 _RETRYABLE_OPERATIONAL_ERROR_CODES = frozenset(
     [
@@ -716,7 +716,7 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
     ):
         super().__init__(
             "cidb",
-            CIDB_MIGRATIONS_DIR,
+            str(CIDB_MIGRATIONS_DIR),
             db_credentials_dir,
             for_service=for_service,
             query_retry_args=query_retry_args,

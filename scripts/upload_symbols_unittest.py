@@ -37,7 +37,7 @@ from chromite.lib import constants
 # we can use isolateserver for deduping.
 # TODO: If we ever sort out third_party/ handling and make it per-script opt-in,
 # we can purge this logic.
-third_party = os.path.join(constants.CHROMITE_DIR, "third_party")
+third_party = str(constants.CHROMITE_DIR / "third_party")
 while True:
     try:
         sys.path.remove(third_party)

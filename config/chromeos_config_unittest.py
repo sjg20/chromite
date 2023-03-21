@@ -78,9 +78,7 @@ class ConfigDumpTest(ChromeosConfigTestBase):
 
         # luci-scheduler.cfg
         # We run this as a sep program to avoid the config cache.
-        cmd = os.path.join(
-            constants.CHROMITE_DIR, "scripts", "gen_luci_scheduler"
-        )
+        cmd = constants.CHROMITE_DIR / "scripts" / "gen_luci_scheduler"
         result = cros_build_lib.run(
             [cmd], capture_output=True, encoding="utf-8"
         )

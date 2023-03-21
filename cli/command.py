@@ -58,7 +58,7 @@ def ImportCommand(name):
         _SUBCOMMAND_MODULE_DIRECTORY, "cros_%s" % (name.replace("-", "_"),)
     )
     import_path = os.path.relpath(
-        os.path.realpath(module_path), os.path.dirname(constants.CHROMITE_DIR)
+        os.path.realpath(module_path), constants.CHROMITE_DIR.parent
     )
     module_parts = import_path.split(os.path.sep)
     importlib.import_module(".".join(module_parts))

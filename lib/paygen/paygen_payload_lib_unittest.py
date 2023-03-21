@@ -214,7 +214,7 @@ class PaygenSignerTest(PaygenLibTest):
         )
         self.assertEqual(
             signer._private_key,
-            os.path.join(constants.CHROMITE_DIR, "ssh_keys", "testing_rsa"),
+            constants.CHROMITE_DIR / "ssh_keys" / "testing_rsa",
         )
         pubkey_extract_mock.assert_called_once_with("/foo/public_key.pem")
 

@@ -172,9 +172,7 @@ class SyncStageTest(WorkspaceStageBase):
         self.assertEqual(self.rc.call_count, 1)
         self.rc.assertCommandCalled(
             [
-                os.path.join(
-                    constants.CHROMITE_DIR, "scripts", "repo_sync_manifest"
-                ),
+                constants.CHROMITE_DIR / "scripts" / "repo_sync_manifest",
                 "--repo-root",
                 "/root",
                 "--manifest-versions-int",
@@ -196,9 +194,7 @@ class SyncStageTest(WorkspaceStageBase):
         self.assertEqual(self.rc.call_count, 1)
         self.rc.assertCommandCalled(
             [
-                os.path.join(
-                    constants.CHROMITE_DIR, "scripts", "repo_sync_manifest"
-                ),
+                constants.CHROMITE_DIR / "scripts" / "repo_sync_manifest",
                 "--repo-root",
                 "/root",
                 "--manifest-versions-int",
@@ -222,9 +218,7 @@ class SyncStageTest(WorkspaceStageBase):
         self.assertEqual(self.rc.call_count, 1)
         self.rc.assertCommandCalled(
             [
-                os.path.join(
-                    constants.CHROMITE_DIR, "scripts", "repo_sync_manifest"
-                ),
+                constants.CHROMITE_DIR / "scripts" / "repo_sync_manifest",
                 "--repo-root",
                 "/root",
                 "--manifest-versions-int",
@@ -256,9 +250,7 @@ class SyncStageTest(WorkspaceStageBase):
         self.assertEqual(self.rc.call_count, 1)
         self.rc.assertCommandCalled(
             [
-                os.path.join(
-                    constants.CHROMITE_DIR, "scripts", "repo_sync_manifest"
-                ),
+                constants.CHROMITE_DIR / "scripts" / "repo_sync_manifest",
                 "--repo-root",
                 "/root",
                 "--manifest-versions-int",
@@ -297,9 +289,7 @@ class SyncStageTest(WorkspaceStageBase):
         self.assertEqual(self.rc.call_count, 1)
         self.rc.assertCommandCalled(
             [
-                os.path.join(
-                    constants.CHROMITE_DIR, "scripts", "repo_sync_manifest"
-                ),
+                constants.CHROMITE_DIR / "scripts" / "repo_sync_manifest",
                 "--repo-root",
                 "/root",
                 "--manifest-versions-int",

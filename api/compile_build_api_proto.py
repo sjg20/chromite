@@ -52,13 +52,13 @@ class ProtocVersion(enum.Enum):
     def get_gen_dir(self) -> Path:
         """Get the chromite/api directory path."""
         if self is ProtocVersion.SDK:
-            return Path(constants.CHROMITE_DIR) / "api" / "gen_sdk"
+            return constants.CHROMITE_DIR / "api" / "gen_sdk"
         else:
-            return Path(constants.CHROMITE_DIR) / "api" / "gen"
+            return constants.CHROMITE_DIR / "api" / "gen"
 
     def get_proto_dir(self) -> Path:
         """Get the proto directory for the target protoc."""
-        return Path(constants.CHROMITE_DIR) / "infra" / "proto"
+        return constants.CHROMITE_DIR / "infra" / "proto"
 
     def get_protoc_command(self, cipd_root: Optional[Path] = None) -> Path:
         """Get protoc command path."""

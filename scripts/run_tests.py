@@ -108,11 +108,11 @@ def precache():
     )
     # Ensure various tools are available.
     cros_build_lib.dbg_run(
-        [os.path.join(constants.CHROMITE_DIR, "scripts", "black"), "--version"],
+        [constants.CHROMITE_DIR / "scripts" / "black", "--version"],
         capture_output=True,
     )
     cros_build_lib.dbg_run(
-        [os.path.join(constants.CHROMITE_DIR, "scripts", "isort"), "--version"],
+        [constants.CHROMITE_DIR / "scripts" / "isort", "--version"],
         capture_output=True,
     )
     formatters.gn._find_gn()
@@ -127,7 +127,7 @@ def re_execute_inside_chroot(argv):
     if cros_build_lib.IsInsideChroot():
         return
 
-    target = os.path.join(constants.CHROMITE_DIR, "scripts", "run_tests")
+    target = constants.CHROMITE_DIR / "scripts" / "run_tests"
     relpath = os.path.relpath(target, ".")
     # If we're in the scripts dir, make sure we always have a relative path,
     # otherwise cros_sdk will search $PATH and fail.

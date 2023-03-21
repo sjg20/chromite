@@ -4,8 +4,6 @@
 
 """API information controller."""
 
-import os
-
 from chromite.api import faux
 from chromite.api import router as router_lib
 from chromite.api import validate
@@ -32,9 +30,7 @@ def _CompileProtoSuccess(_input_proto, output_proto, _config):
 @validate.validation_complete
 def CompileProto(_input_proto, output_proto, _config):
     """Compile the Build API proto, returning the list of modified files."""
-    cmd = [
-        os.path.join(constants.CHROMITE_DIR, "api", "compile_build_api_proto")
-    ]
+    cmd = [constants.CHROMITE_DIR / "api" / "compile_build_api_proto"]
     cros_build_lib.run(cmd)
     result = cros_build_lib.run(
         ["git", "status", "--porcelain=v1"],
@@ -46,8 +42,8 @@ def CompileProto(_input_proto, output_proto, _config):
         if not line:
             continue
         path = line.split()[-1]
-        output_proto.modified_files.add().path = os.path.join(
-            constants.CHROMITE_DIR, path
+        output_proto.modified_files.add().path = str(
+            constants.CHROMITE_DIR / path
         )
 
 

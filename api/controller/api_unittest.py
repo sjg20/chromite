@@ -4,8 +4,6 @@
 
 """API controller tests."""
 
-import os
-
 from chromite.api import api_config
 from chromite.api import router
 from chromite.api.controller import api as api_controller
@@ -26,7 +24,7 @@ class CompileProtoTest(
     def testCompileProto(self):
         """Quick CompileProto functional check."""
         self.rc.SetDefaultCmdResult(stdout=" M foo/bar.py")
-        expected = [os.path.join(constants.CHROMITE_DIR, "foo/bar.py")]
+        expected = [str(constants.CHROMITE_DIR / "foo" / "bar.py")]
 
         api_controller.CompileProto(
             self.request, self.response, self.api_config

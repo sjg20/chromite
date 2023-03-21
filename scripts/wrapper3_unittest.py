@@ -39,11 +39,11 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
         self.scripts_dir.mkdir()
         for subdir in ("api", "cbuildbot", "lib", "third_party", "utils"):
             (self.chromite_dir / subdir).symlink_to(
-                Path(constants.CHROMITE_DIR) / subdir
+                constants.CHROMITE_DIR / subdir
             )
         for subfile in ("__init__.py",):
             (self.chromite_dir / subfile).symlink_to(
-                Path(constants.CHROMITE_DIR) / subfile
+                constants.CHROMITE_DIR / subfile
             )
         for subfile in ("PRESUBMIT.cfg",):
             (self.chromite_dir / subfile).touch()

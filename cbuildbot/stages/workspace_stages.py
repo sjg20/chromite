@@ -217,9 +217,7 @@ class SyncStage(WorkspaceStageBase):
         logging.info("SubWorkspaceSync")
 
         cmd = [
-            os.path.join(
-                constants.CHROMITE_DIR, "scripts", "repo_sync_manifest"
-            ),
+            constants.CHROMITE_DIR / "scripts" / "repo_sync_manifest",
             "--repo-root",
             self._build_root,
             "--manifest-versions-int",

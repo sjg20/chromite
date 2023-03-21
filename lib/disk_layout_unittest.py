@@ -5,7 +5,6 @@
 """Test chromite.lib.disk_layout"""
 
 import os
-from pathlib import Path
 
 from chromite.lib import constants
 from chromite.lib import cros_test_lib
@@ -1089,7 +1088,7 @@ class UtilityTest(cros_test_lib.MockTestCase):
         data = disk_layout.GetScriptShell()
         self.assertIn("#!/bin/sh", data)
         self.assertIn(
-            str(Path(constants.CHROMITE_DIR) / "sdk/cgpt_shell.sh"), data
+            str(constants.CHROMITE_DIR / "sdk" / "cgpt_shell.sh"), data
         )
 
     def testParseProduce(self):

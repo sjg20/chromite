@@ -240,7 +240,7 @@ def ChromiteUnitTest() -> bool:
         True iff all tests passed, False otherwise.
     """
     cmd = [
-        os.path.join(constants.CHROMITE_DIR, "run_tests"),
+        constants.CHROMITE_DIR / "run_tests",
         constants.CHROMITE_DIR,
     ]
     result = cros_build_lib.run(cmd, check=False)

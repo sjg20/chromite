@@ -204,9 +204,7 @@ def RunLocal(options):
         return 1
 
     # Define the command to run.
-    launcher = os.path.join(
-        constants.CHROMITE_DIR, "scripts", "cbuildbot_launch"
-    )
+    launcher = constants.CHROMITE_DIR / "scripts" / "cbuildbot_launch"
     cmd = [launcher] + args + options.build_configs
 
     # Run the tryjob.

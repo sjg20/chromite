@@ -69,7 +69,7 @@ def _GetPylintrc(path: Path) -> Path:
     )
     if ret:
         return ret if ret.exists() else ret.with_name(".pylintrc")
-    return Path(constants.CHROMITE_DIR) / "pylintrc"
+    return constants.CHROMITE_DIR / "pylintrc"
 
 
 def _GetPylintGroups(paths):

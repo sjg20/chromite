@@ -33,12 +33,12 @@ def _random():
     return random.randint(1, 1000000000)
 
 
-SERIES_0_TEST_DATA_PATH = os.path.join(
-    constants.CHROMITE_DIR, "cidb", "test_data", "series_0"
+SERIES_0_TEST_DATA_PATH = (
+    constants.CHROMITE_DIR / "cidb" / "test_data" / "series_0"
 )
 
-SERIES_1_TEST_DATA_PATH = os.path.join(
-    constants.CHROMITE_DIR, "cidb", "test_data", "series_1"
+SERIES_1_TEST_DATA_PATH = (
+    constants.CHROMITE_DIR / "cidb" / "test_data" / "series_1"
 )
 
 
@@ -294,7 +294,7 @@ class SchemaDumpTest(CIDBIntegrationTest):
 
     def testDump(self):
         """Ensure generated file is up to date."""
-        DUMP_FILE = os.path.join(constants.CHROMITE_DIR, "cidb", "schema.dump")
+        DUMP_FILE = constants.CHROMITE_DIR / "cidb" / "schema.dump"
 
         self._PrepareFreshDatabase()
 

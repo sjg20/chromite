@@ -31,7 +31,7 @@ def _find_pyproject_toml(
             if dir_path == project_root:
                 break
 
-    return Path(constants.CHROMITE_DIR) / "pyproject.toml"
+    return constants.CHROMITE_DIR / "pyproject.toml"
 
 
 def _custom_format_data(data: str) -> str:
@@ -88,7 +88,7 @@ def Data(
         [
             Path(constants.CHROMITE_SCRIPTS_DIR) / "isort",
             "--settings-file",
-            Path(constants.CHROMITE_DIR) / ".isort.cfg",
+            constants.CHROMITE_DIR / ".isort.cfg",
             "-",
             "-d",
         ],

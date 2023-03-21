@@ -308,10 +308,8 @@ class CleanCommand(command.CliCommand):
         if self.options.chromite:
             logging.debug("Clean chromite workdirs.")
             with timer.timer("Clean chromite workdirs", logging.debug):
-                Clean(os.path.join(constants.CHROMITE_DIR, "venv", "venv"))
-                Clean(
-                    os.path.join(constants.CHROMITE_DIR, "venv", ".venv_lock")
-                )
+                Clean(constants.CHROMITE_DIR / "venv" / "venv")
+                Clean(constants.CHROMITE_DIR / "venv" / ".venv_lock")
 
         if self.options.deploy:
             logging.debug("Clean up the cros deploy cache.")
@@ -377,7 +375,7 @@ class CleanCommand(command.CliCommand):
             logging.debug("Clean package workdirs.")
             with timer.timer("Clean package workdirs", logging.debug):
                 Clean(os.path.join(chroot_dir, "var", "tmp", "portage"))
-                Clean(os.path.join(constants.CHROMITE_DIR, "venv", "venv"))
+                Clean(constants.CHROMITE_DIR / "venv" / "venv")
                 for d in glob.glob(
                     os.path.join(chroot_dir, "build", "*", "tmp", "portage")
                 ):

@@ -24,8 +24,8 @@ from chromite.lib import osutils
 # embedded in boto in the wrapped FixBotoCerts context. Relative to chromite/.
 BOTO_CACERTS_PATH = "third_party/boto/boto/cacerts/cacerts.txt"
 
-BOTO_CACERTS_ABS_PATH = os.path.join(
-    constants.CHROMITE_DIR, os.path.normpath(BOTO_CACERTS_PATH)
+BOTO_CACERTS_ABS_PATH = str(
+    constants.CHROMITE_DIR / os.path.normpath(BOTO_CACERTS_PATH)
 )
 
 
