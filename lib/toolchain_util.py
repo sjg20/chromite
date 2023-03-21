@@ -105,7 +105,7 @@ AFDO_ALERT_RECIPIENTS = ["chromeos-toolchain-oncall1@google.com"]
 
 # Full path to the chromiumos-overlay directory.
 _CHROMIUMOS_OVERLAY = os.path.join(
-    constants.CHROMITE_DIR, "..", constants.CHROMIUMOS_OVERLAY_DIR
+    constants.SOURCE_ROOT, constants.CHROMIUMOS_OVERLAY_DIR
 )
 
 # RegExps
