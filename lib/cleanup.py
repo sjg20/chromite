@@ -73,9 +73,9 @@ class EnforcedCleanupSection(cros_build_lib.PrimaryPidContextManager):
         # to init.
         os.setsid()
 
-        # Since we share stdin/stdout/whatever, suppress sigint should we somehow
-        # become the foreground process in the session group.
-        # pylint: disable=protected-access
+        # Since we share stdin/stdout/whatever, suppress sigint should we
+        # somehow become the foreground process in the session group. pylint:
+        # disable=protected-access
         signal.signal(signal.SIGINT, signal.SIG_IGN)
         # Child code.  We lose the lock via lockf/fork semantics.
         self._is_child = True
@@ -91,16 +91,17 @@ class EnforcedCleanupSection(cros_build_lib.PrimaryPidContextManager):
             # We have no way of knowing the state of the parent if this locking
             # fails- failure means a code bug.  Specifically, we don't know if
             # cleanup code was run, thus just flat out bail.
-            os._exit(1)
+            os._exit(1)  # pylint: disable=protected-access
 
-        # Check if the parent exited cleanly; if so, we don't need to do anything.
+        # Check if the parent exited cleanly; if so, we don't need to do
+        # anything.
         if self._read_pipe.poll() and self._read_pipe.recv_bytes():
             for handle in (sys.__stdin__, sys.__stdout__, sys.__stderr__):
                 try:
                     handle.flush()
                 except EnvironmentError:
                     pass
-            os._exit(0)
+            os._exit(0)  # pylint: disable=protected-access
 
         # Allow primary PID context managers to run in this case, since we're
         # explicitly designed for this cleanup.

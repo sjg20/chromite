@@ -92,7 +92,8 @@ class UpgradeTableTest(cros_test_lib.TestCase):
             self.assertTrue(t1.HasColumn(col))
             self.assertTrue(t2.HasColumn(col))
 
-        # The UPGRADED column should only be in the table with upgrade_mode=True.
+        # The UPGRADED column should only be in the table with
+        # upgrade_mode=True.
         col = t1.COL_UPGRADED
         self.assertFalse(t1.HasColumn(col))
         self.assertTrue(t2.HasColumn(col))

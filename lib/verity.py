@@ -17,10 +17,10 @@ def ExtractRootHexdigest(verity_table: str) -> Optional[str]:
     """Extract the root hexdigest from dm-verity table.
 
     Args:
-      verity_table: Path to the dm-verity table.
+        verity_table: Path to the dm-verity table.
 
     Returns:
-      The str of root hexdigest, otherwise None.
+        The str of root hexdigest, otherwise None.
     """
     m = ROOT_HEXDIGEST_RE.search(osutils.ReadFile(verity_table))
     return m.group(1) if m else None

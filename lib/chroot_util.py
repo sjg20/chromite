@@ -102,9 +102,9 @@ def Emerge(
     if use_binary:
         cmd += ["-g", "--with-bdeps=y"]
         if sysroot == "/":
-            # Only update toolchains in the chroot when binpkgs are available. The
-            # toolchain rollout process only takes place when the chromiumos sdk
-            # builder finishes a successful build and pushes out binpkgs.
+            # Only update toolchains in the chroot when binpkgs are available.
+            # The toolchain rollout process only takes place when the chromiumos
+            # sdk builder finishes a successful build and pushes out binpkgs.
             cmd += ["--useoldpkg-atoms=%s" % " ".join(_GetToolchainPackages())]
 
     if rebuild_deps:
@@ -242,8 +242,8 @@ def TempDirInChroot(**kwargs):
         sudo_rm: See osutils.TempDir documentation.
 
     Yields:
-        A host path (not chroot path) to a tempdir inside the chroot. This tempdir
-        is cleaned up when exiting the context.
+        A host path (not chroot path) to a tempdir inside the chroot. This
+        tempdir is cleaned up when exiting the context.
     """
     base_dir = kwargs.pop("base_dir", "/tmp")
     kwargs["base_dir"] = path_util.FromChrootPath(base_dir)

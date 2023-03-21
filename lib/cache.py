@@ -31,8 +31,8 @@ def EntryLock(f):
     """Decorator that provides monitor access control."""
 
     def new_f(self, *args, **kwargs):
-        # Ensure we don't have a read lock before potentially blocking while trying
-        # to access the monitor.
+        # Ensure we don't have a read lock before potentially blocking while
+        # trying to access the monitor.
         if self.read_locked:
             raise AssertionError(
                 "Cannot call %s while holding a read lock." % f.__name__
@@ -106,7 +106,7 @@ class CacheReference(object):
         self._lock.__enter__()
 
     def Release(self):
-        """Release the cache reference.  Causes any held locks to be released."""
+        """Release the cache reference. Causes any held locks to be released."""
         if not self.acquired:
             raise AssertionError(
                 "Attempting to release an unacquired reference."
@@ -275,8 +275,9 @@ class DiskCache(object):
             for f in dirs + files:
                 key_path = os.path.join(root, f)
                 if os.path.exists(key_path + self._lock_suffix):
-                    # Test for the presence of the key's lock file to determine if this
-                    # is the root key path, or some file nested within a key's dir.
+                    # Test for the presence of the key's lock file to determine
+                    # if this is the root key path, or some file nested within a
+                    # key's dir.
                     keys.append(self.GetKey(key_path))
         return keys
 
@@ -285,7 +286,7 @@ class DiskCache(object):
         return CacheReference(self, key)
 
     def DeleteStale(self, max_age):
-        """Removes any item from the cache that was modified after a given lifetime.
+        """Removes any item from the cache that was modified after |max_age|.
 
         Args:
             max_age: An instance of datetime.timedelta. Any item not modified
@@ -330,9 +331,9 @@ class RemoteCache(DiskCache):
             hash_sha1: If set, check for the SHA-1 sum.
             mode: If set, the file is chmod-ed to mode.
         """
-        # We have to nest the import because gs.GSContext uses us to cache its own
-        # gsutil tarball.  We know we won't get into a recursive loop though as it
-        # only fetches files via non-gs URIs.
+        # We have to nest the import because gs.GSContext uses us to cache its
+        # own gsutil tarball.  We know we won't get into a recursive loop though
+        # as it only fetches files via non-gs URIs.
         from chromite.lib import gs
 
         if gs.PathIsGs(url):
@@ -415,8 +416,8 @@ class TarballCache(RemoteCache):
     def _KeyExists(self, key):
         """Specialized DiskCache._KeyExits that ignores empty directories.
 
-        The normal _KeyExists just checks to see if the key path exists in the cache
-        directory. Many tests mock out run then fetch a tarball. The mock
+        The normal _KeyExists just checks to see if the key path exists in the
+        cache directory. Many tests mock out run then fetch a tarball. The mock
         blocks untarring into it. This leaves behind an empty dir which blocks
         future untarring in non-test scripts.
 

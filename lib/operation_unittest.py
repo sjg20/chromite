@@ -59,7 +59,7 @@ class ProgressBarOperationTest(
     def _VerifyProgressBar(
         self, width, percent, expected_shaded, expected_unshaded
     ):
-        """Helper to test progress bar with different percentages and lengths."""
+        """Helper to test progress bar with different percentages, lengths."""
         terminal_width = width + (
             operation.ProgressBarOperation._PROGRESS_BAR_BORDER_SIZE
         )
@@ -81,13 +81,13 @@ class ProgressBarOperationTest(
         self._VerifyProgressBar(10, 0, 0, 10)
         self._VerifyProgressBar(10, 1, 10, 0)
         self._VerifyProgressBar(1, 0.9, 0, 1)
-        # If width of progress bar is less than _PROGRESS_BAR_BORDER_SIZE, the width
-        # defaults to 1.
+        # If width of progress bar is less than _PROGRESS_BAR_BORDER_SIZE, the
+        # width defaults to 1.
         self._VerifyProgressBar(-5, 0, 0, 1)
         self._VerifyProgressBar(-5, 1, 1, 0)
 
     def testWaitUntilComplete(self):
-        """Test WaitUntilComplete returns False if background task isn't complete.
+        """Test WaitUntilComplete returns False if background task not complete.
 
         As the background task is not started in this test, we expect it not to
         complete.
@@ -121,12 +121,13 @@ class ProgressBarOperationTest(
 
         # Check that foo is executed and its output is captured.
         self.AssertOutputContainsLine(expected_output)
-        # Check that ParseOutput is executed at least once. It can be called twice:
+        # Check that ParseOutput is executed at least once. It can be called
+        # twice:
         #   Once in the while loop.
         #   Once after the while loop.
-        #   However, it is possible for func to execute and finish before the while
-        #   statement is executed even once in which case ParseOutput would only be
-        #   called once.
+        #   However, it is possible for func to execute and finish before the
+        #   while statement is executed even once in which case ParseOutput
+        #   would only be called once.
         self.AssertOutputContainsLine("Calling ParseOutput")
 
     def testExceptionHandling(self):
@@ -167,8 +168,8 @@ class ProgressBarOperationTest(
         with self.OutputCapturer():
             op.Run(func, update_period=0.05, log_level=func_log_level)
 
-        # Check that OutputCapturer contains the expected output. This means that
-        # the log level was changed.
+        # Check that OutputCapturer contains the expected output. This means
+        # that the log level was changed.
         self.AssertOutputContainsLine(expected_output)
         # Check that the log level was restored after the function executed.
         self.assertEqual(
@@ -205,7 +206,7 @@ class ProgressBarOperationTest(
         self.AssertLogsContain(logs, "No packages to build.")
 
     def testParallelEmergeOperationParseOutputTotalNonZero(self):
-        """Test that ParallelEmergeOperation.ParseOutput's progress bar updates."""
+        """Verify ParallelEmergeOperation.ParseOutput's progress bar updates."""
 
         def func(queue):
             print("Total: 2 packages.")

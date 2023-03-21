@@ -87,7 +87,7 @@ class BuildTarget(object):
 
 
 def get_default_sysroot_path(build_target_name=None):
-    """Get the default sysroot location or '/' if |build_target_name| is None."""
+    """Get the default sysroot location or / if |build_target_name| is None."""
     if build_target_name is None:
         return "/"
     return os.path.join("/build", build_target_name)

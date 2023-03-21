@@ -110,7 +110,8 @@ def test_create_valid_depgraph_duplicate_nodes():
     assert pkg_node == pkg_node2 == pkg_node3
     assert len(list(dep_node.reverse_dependencies)) == 1
 
-    # Add multiple instances of the same node instance, plus multiple equal nodes.
+    # Add multiple instances of the same node instance, plus multiple equal
+    # nodes.
     packages = (pkg_node, pkg_node, pkg_node2, pkg_node3, dep_node)
     graph = dependency_graph.DependencyGraph(
         packages, sysroot=sysroot, root_packages=[pkg]
@@ -252,7 +253,8 @@ def test_dependency_graph_get_nodes_multi_version_package():
     assert all(p.pkg_info.cpvr == pkg2.cpvr for p in graph.get_nodes([pkg2]))
 
     atom = package_info.parse(pkg1.atom)
-    # Should get both instances of cat/pkg-1.0 and both instances of cat/pkg-2.0.
+    # Should get both instances of cat/pkg-1.0 and both instances of
+    # cat/pkg-2.0.
     assert len(graph.get_nodes([atom])) == 4
     assert len(graph.get_nodes([atom.atom])) == 4
     assert all(p.pkg_info.atom == atom.atom for p in graph.get_nodes([atom]))

@@ -160,8 +160,8 @@ class TestDisk(cros_test_lib.RunCommandTestCase):
         ):
             self.assertEqual(disk.GetPartitionByLabel(label).part_num, part_num)
 
-    def testGetPartitionByLabelMulitpleLabels(self):
-        """Test MultiplePartitionLabel is raised on duplicate label 'reserved'."""
+    def testGetPartitionByLabelMultipleLabels(self):
+        """Test MultiplePartitionLabel raised on duplicate label 'reserved'."""
         disk = self.getMockDisk()
 
         with self.assertRaises(cgpt.MultiplePartitionLabel):

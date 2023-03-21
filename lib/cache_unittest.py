@@ -205,14 +205,14 @@ class DiskCacheTest(CacheTestCase):
         self.assertIn(("key2",), keys)
 
     def testDeleteStale(self):
-        """Ensures that DeleteStale removes a sufficiently old item in the cache."""
+        """Verify DeleteStale removes a sufficiently old item in the cache."""
         osutils.Touch(os.path.join(self.tempdir, "file1"))
         cache_ref = cache.CacheReference(self.cache, ("key1",))
         cache_ref.Assign(os.path.join(self.tempdir, "file1"))
         now = datetime.datetime.now()
 
-        # 'Now' will be 10 days in the future, but max_age is 20 days. So no items
-        # should be deleted.
+        # 'Now' will be 10 days in the future, but max_age is 20 days. So no
+        # items should be deleted.
         ten_days_ahead = now + datetime.timedelta(days=10)
         with mock.patch("chromite.lib.cache.datetime") as mock_datetime:
             mock_datetime.datetime.now.return_value = ten_days_ahead

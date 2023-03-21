@@ -262,7 +262,7 @@ class DeviceParseTest(cros_test_lib.OutputTestCase):
         )
 
     def testSshSchemeUsernameHostnamePort(self):
-        """Test SSH scheme, username, hostname, and port device specification."""
+        """Test SSH, username, hostname, and port device specification."""
         self._CheckDeviceParse(
             "ssh://me@foo_host:4500",
             scheme=commandline.DEVICE_SCHEME_SSH,
@@ -273,8 +273,8 @@ class DeviceParseTest(cros_test_lib.OutputTestCase):
 
     def testEmptyServoScheme(self):
         """Test empty servo scheme."""
-        # Everything should be None so the underlying programs (e.g. dut-control)
-        # can use their defaults.
+        # Everything should be None so the underlying programs (e.g.
+        # dut-control) can use their defaults.
         self._CheckDeviceParseFails("servo:")
 
     def testServoPort(self):
@@ -498,7 +498,7 @@ class EnumActionTest(cros_test_lib.TestCase):
         self.assertEqual(opts.size, Size.LARGE)
 
     def testParseInvalidCase(self):
-        """Test when the enum was given in all uppercase (should be lowercase)."""
+        """Test the enum given in all uppercase (should be lowercase)."""
         with self.assertRaises(SystemExit) as e:
             self.parser.parse_args(["--size", "SMALL"])
             self.assertNotEqual(e.status, 0)
@@ -695,8 +695,8 @@ class ParseArgsTest(cros_test_lib.TestCase):
             options, args = parsed
             self.assertEqual(["foobar"], args)
         else:
-            # argparse returns just options.  Options configured above to have the
-            # args stored at option "args".
+            # argparse returns just options.  Options configured above to have
+            # the args stored at option "args".
             options = parsed
             self.assertEqual(["foobar"], parsed.args)
 
@@ -790,12 +790,12 @@ class ScriptWrapperMainTest(cros_test_lib.MockTestCase):
 
     SYS_ARGV = ["/cmd", "/cmd", "arg1", "arg2"]
     CMD_ARGS = ["/cmd", "arg1", "arg2"]
-    # The exact flags here don't matter as we don't invoke the underlying script.
-    # Lets pick something specifically invalid just in case we do.
+    # The exact flags here don't matter as we don't invoke the underlying
+    # script. Let's pick something specifically invalid just in case we do.
     CHROOT_ARGS = ["--some-option", "foo"]
 
     def testRestartInChrootPreserveArgs(self):
-        """Verify args to ScriptWrapperMain are passed through to chroot.."""
+        """Verify args to ScriptWrapperMain are passed through to chroot."""
         # Setup Mocks/Fakes
         rc = self.StartPatcher(cros_test_lib.RunCommandMock())
         rc.SetDefaultCmdResult()
@@ -912,7 +912,7 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
         self._VerifyRunInsideChroot(["/inside/cmd", "arg1", "arg2"])
 
     def testRunInsideChrootWithoutCommand(self):
-        """Test that RunInsideChroot can get by without the |command| parameter."""
+        """Verify RunInsideChroot can get by without the |command| parameter."""
         self.mock_inside_chroot.return_value = False
         self.cmd = None
         self._VerifyRunInsideChroot(["/inside/cmd", "arg1", "arg2"])
@@ -1176,7 +1176,7 @@ class PathExistsTest(cros_test_lib.TempDirTestCase):
         self.assertRaises2(SystemExit, self._ParseFileExists, "no/such/file")
 
     def testExistingPathIsNotDirectory(self):
-        """Test that an error occurs when an existing path is not a directory."""
+        """Verify an error occurs when an existing path is not a directory."""
         self.assertRaises2(
             SystemExit, self._ParseDirectoryExists, self.file_path
         )

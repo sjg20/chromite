@@ -161,8 +161,8 @@ class VersionInfo(object):
 
         git.RunGit(git_repo, ["add", "-A"])
 
-        # It's possible that while we are running on dry_run, someone has already
-        # committed our change.
+        # It's possible that while we are running on dry_run, someone has
+        # already committed our change.
         try:
             git.RunGit(git_repo, ["commit", "-m", message])
         except cros_build_lib.RunCommandError:
@@ -260,8 +260,9 @@ class VersionInfo(object):
                 shutil.copyfile(temp_fh.name, self.version_file)
                 self._PushGitChanges(repo_dir, message, dry_run, push_to)
             finally:
-                # Update to the remote version that contains our changes. This is needed
-                # to ensure that we don't build a release using a local commit.
+                # Update to the remote version that contains our changes. This
+                # is needed to ensure that we don't build a release using a
+                # local commit.
                 git.CleanAndCheckoutUpstream(repo_dir)
 
     def VersionString(self):
@@ -315,7 +316,7 @@ class VersionInfo(object):
     __hash__ = None
 
     def BuildPrefix(self):
-        """Returns the build prefix to match the buildspecs in  manifest-versions"""
+        """Get the build prefix to match the buildspecs in manifest-versions."""
         if self.incr_type == "branch":
             if self.patch_number == "0":
                 return "%s." % self.build_number

@@ -250,7 +250,9 @@ class BuildStore(object):
                     for message in self.cidb_conn.GetBuildMessages(
                         build_identifier.cidb_id,
                         message_type=constants.MESSAGE_TYPE_IGNORED_REASON,
-                        message_subtype=constants.MESSAGE_SUBTYPE_SELF_DESTRUCTION,
+                        message_subtype=(
+                            constants.MESSAGE_SUBTYPE_SELF_DESTRUCTION
+                        ),
                     )
                 ]
 
@@ -267,8 +269,8 @@ class BuildStore(object):
     ):
         """Returns basic information about most recent builds for build config.
 
-        By default this function returns the most recent builds. Some arguments can
-        restrict the result to older builds.
+        By default, this function returns the most recent builds. Some arguments
+        can restrict the result to older builds.
 
         Args:
             build_config: config name of the build to get history.
@@ -641,7 +643,8 @@ class BuildStore(object):
         """Retrieve the build statuses of list of builds.
 
         The two arguments are to be mutually exclusive. If both are provided,
-        an error will be raised. If both are absent, an empty list will be returned.
+        an error will be raised. If both are absent, an empty list will be
+        returned.
 
         Args:
             buildbucket_ids: list of buildbucket_id's to query.
@@ -661,8 +664,8 @@ class BuildStore(object):
                 "GetBuildStatuses: Cannot process both "
                 "buildbucket_ids and build_ids."
             )
-        # build_ids have to serviced from CIDB. This codepath will be defunct after
-        # CQ is shut down.
+        # build_ids have to serviced from CIDB. This codepath will be defunct
+        # after CQ is shut down.
         if build_ids:
             return self.cidb_conn.GetBuildStatuses(build_ids)
         elif not buildbucket_ids:

@@ -282,7 +282,7 @@ class ReplicateTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testReplicateNonChromeOSConfig(self):
-        """Tests replicating a JSON file that is not a ChromeOS Config payload."""
+        """Test replicating a non ChromeOS Config payload JSON file."""
         src_path = os.path.join("src", "other.json")
         dst_path = os.path.join("dst", "other.json")
         self.WriteTempFile(src_path, json.dumps({"a": 1, "b": 2}))

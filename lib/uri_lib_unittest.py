@@ -121,7 +121,8 @@ class ShortenUriTests(cros_test_lib.TestCase):
             ),
             (
                 "https://crbug.com/google-breakpad/123",
-                "https://bugs.chromium.org/p/google-breakpad/issues/detail?id=123",
+                "https://bugs.chromium.org/p/google-breakpad/issues/"
+                "detail?id=123",
             ),
         )
         for exp, uri in TESTS:
@@ -133,7 +134,8 @@ class ShortenUriTests(cros_test_lib.TestCase):
             ("http://t/123", "https://gutsv3.corp.google.com/#ticket/123"),
             (
                 "http://t/#search/default/My%20Requests/0",
-                "https://gutsv3.corp.google.com/#search/default/My%20Requests/0",
+                "https://gutsv3.corp.google.com/#search/default/"
+                "My%20Requests/0",
             ),
         )
         for exp, uri in TESTS:
@@ -169,7 +171,10 @@ class ConstructUrlTests(cros_test_lib.TestCase):
     def testConstructViceroyBuildDetailsUri(self):
         """Test generating Viceroy build details URIs."""
         actual = uri_lib.ConstructViceroyBuildDetailsUri(123)
-        expected = "https://viceroy.corp.google.com/chromeos/build_details?build_id=123"
+        expected = (
+            "https://viceroy.corp.google.com/chromeos/build_details?"
+            "build_id=123"
+        )
         self.assertEqual(actual, expected)
 
     def testConstructGoldenEyeBuildDetailsUri(self):

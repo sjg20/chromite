@@ -610,8 +610,8 @@ class DmConfigTest(cros_test_lib.TestCase):
 
     def testNotEqual(self):
         """Test that unequal instances are unequal."""
-        # Start with duplicated instances, and change fields to verify that all the
-        # fields matter.
+        # Start with duplicated instances, and change fields to verify that all
+        # the fields matter.
         arg = "2 v1 u1 f1 1,0 1 t1 a1, v2 u2 f2 2,3 4 t2 a2,5 6 t3 a3"
         dc1 = kernel_cmdline.DmConfig(arg)
         self.assertNotEqual(dc1, "")

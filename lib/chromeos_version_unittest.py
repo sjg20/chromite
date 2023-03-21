@@ -34,7 +34,7 @@ class VersionInfoTest(cros_test_lib.MockTempDirTestCase):
     def WriteFakeVersionFile(
         cls, version_file, version=None, chrome_branch=None
     ):
-        """Helper method to write a version file from specified version number."""
+        """Helper method to write a version file for |version|."""
         if version is None:
             version = FAKE_VERSION_STRING
         if chrome_branch is None:
@@ -46,7 +46,7 @@ class VersionInfoTest(cros_test_lib.MockTempDirTestCase):
 
     @classmethod
     def CreateFakeVersionFile(cls, tmpdir, version=None, chrome_branch=None):
-        """Helper method to create a version file from specified version number."""
+        """Helper method to create a version file for |version|."""
         version_file = tempfile.mktemp(dir=tmpdir)
         cls.WriteFakeVersionFile(
             version_file, version=version, chrome_branch=chrome_branch

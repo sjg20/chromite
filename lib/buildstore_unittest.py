@@ -456,7 +456,7 @@ class TestBuildStore(cros_test_lib.MockTestCase):
             )
 
     def testInsertBoardPerBuildWithoutMetadata(self):
-        """Tests the InsertBoardPerBuild function when metadata isn't available."""
+        """Tests InsertBoardPerBuild function when metadata isn't available."""
         self.PatchObject(BuildStore, "InitializeClients", return_value=True)
         bs = BuildStore(_write_to_cidb=True, _write_to_bb=True)
         bs.cidb_conn = mock.MagicMock()

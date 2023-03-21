@@ -78,8 +78,8 @@ class BuildSummary(object):
     def from_json(self, raw_json):
         """Merge the state encoded in |raw_json| into this object.
 
-        Unknown keys will be ignored (with a warning).  Values for missing keys will
-        remain unchanged.
+        Unknown keys will be ignored (with a warning).  Values for missing keys
+        will remain unchanged.
 
         Args:
             raw_json: String containing valid JSON representing a BuildSummary.
@@ -101,9 +101,9 @@ class BuildSummary(object):
     def to_json(self):
         """Serialize this object to JSON.
 
-        Attributes that have an empty/zero value are omitted from the output.  The
-        output of this function can be passed to from_json() to get back another
-        BuildSummary with the same values.
+        Attributes that have an empty/zero value are omitted from the output.
+        The output of this function can be passed to from_json() to get back
+        another BuildSummary with the same values.
 
         Returns:
             A string containing a JSON-encoded representation of this object.
@@ -123,10 +123,12 @@ class BuildSummary(object):
         """Get a human-readable description of which build id is set.
 
         If multiple fields are set, buildbucket is preferred.  The result can be
-        used for logging or display, but should not be parsed for database lookups.
+        used for logging or display, but should not be parsed for database
+        lookups.
 
         Returns:
-            String describing which build id is set, or "local build" if none are set.
+            String describing which build id is set, or "local build" if none
+            are set.
         """
         if self.buildbucket_id:
             return "buildbucket_id=%s" % self.buildbucket_id

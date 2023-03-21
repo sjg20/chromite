@@ -61,7 +61,8 @@ class Chroot(object):
         self.goma = goma
         self.remoteexec = remoteexec
         # String in proto are '' when not set, but testing and comparing is much
-        # easier when the "unset" value is consistent, so do an explicit "or None".
+        # easier when the "unset" value is consistent, so do an explicit "or
+        # None".
         self.cache_dir = cache_dir or None
         self.chrome_root = chrome_root or None
 
@@ -126,8 +127,8 @@ class Chroot(object):
         # TODO(build): Delete this once sdk_lib/enter_chroot.sh is gone.
         sep = "_" if for_shell else "-"
 
-        # This check isn't strictly necessary, always passing the --chroot argument
-        # is valid, but it's nice for cleaning up commands in logs.
+        # This check isn't strictly necessary, always passing the --chroot
+        # argument is valid, but it's nice for cleaning up commands in logs.
         if not self._is_default_path:
             args.extend(["--chroot", self.path])
         if self.cache_dir:

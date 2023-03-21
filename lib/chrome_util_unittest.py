@@ -45,7 +45,7 @@ class CopyTest(cros_test_lib.TempDirTestCase):
 
 
 class FileCopyTest(CopyTest):
-    """Testing the file copying/globbing/renaming functionality of Path class."""
+    """Verify file copying/globbing/renaming functionality of Path class."""
 
     ELEMENT_SRC_NAME = "file1"
     ELEMENT_SRC = ELEMENT_SRC_NAME
@@ -163,7 +163,7 @@ class FileCopyTest(CopyTest):
         )
 
     def testNoElementSloppy(self):
-        """No error raised when a non optional path cannot be found with --sloppy"""
+        """No error raised when a required path cannot be found with --sloppy"""
         src_struct = self.BAD_ELEMENTS
         path = chrome_util.Path(self.ELEMENT_SRC_NAME)
         self._CopyAndVerify(path, src_struct, [], sloppy=True)
@@ -215,7 +215,7 @@ class SloppyFileCopyTest(FileCopyTest):
 
 
 class DirCopyTest(FileCopyTest):
-    """Testing directory copying/globbing/renaming functionality of Path class."""
+    """Testing directory copying/globbing/renaming of Path class."""
 
     FILES = ["file1", "file2", "file3"]
     ELEMENT_SRC_NAME = "monkey1/"

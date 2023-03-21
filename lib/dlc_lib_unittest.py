@@ -347,7 +347,7 @@ class DlcGeneratorTest(
         )
 
     def testCreateSquashfsImage(self):
-        """Test that creating squashfs commands are run with correct parameters."""
+        """Verify creating squashfs commands are run with correct parameters."""
         self.PatchObject(os.path, "getsize", return_value=(_BLOCK_SIZE * 2))
         copy_dir_mock = self.PatchObject(osutils, "CopyDirContents")
 
@@ -533,7 +533,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
         self.ExpectRootOwnedFiles()
 
     def testInstallDlcImagesLegacy(self):
-        """Tests InstallDlcImages to make sure all legacy DLCs are copied correctly"""
+        """Verify InstallDlcImages copies all legacy DLCs correctly."""
         sysroot = os.path.join(self.tempdir, "sysroot")
         osutils.WriteFile(
             os.path.join(
@@ -560,7 +560,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testInstallDlcImagesScaled(self):
-        """Tests InstallDlcImages to make sure all scaled DLCs are copied correctly"""
+        """Verifies InstallDlcImages copies all scaled DLCs correctly."""
         sysroot = os.path.join(self.tempdir, "sysroot")
         osutils.WriteFile(
             os.path.join(
@@ -589,7 +589,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testInstallDlcImagesAll(self):
-        """Tests InstallDlcImages to make sure all types of DLCs are copied correctly"""
+        """Verifies InstallDlcImages copies all types of DLCs correctly."""
         sysroot = os.path.join(self.tempdir, "sysroot")
         for p, _id in (
             (dlc_lib.DLC_BUILD_DIR, _ID),
@@ -736,7 +736,8 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
             ),
             "0 128 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=128 "
             f"alg=sha256 root_hexdigest={root_hexdigest} "
-            "salt=471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c",
+            "salt="
+            "471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c",
             makedirs=True,
         )
         output = os.path.join(self.tempdir, "output")
@@ -753,7 +754,7 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testInstallDlcImagesMultiDlcTrustedVerityDigests(self):
-        """Tests InstallDlcImages to verify multiple verity digests are written."""
+        """Verifies InstallDlcImages writes multiple verity digests."""
         sysroot = self.tempdir / "sysroot"
         osutils.WriteFile(
             os.path.join(
@@ -781,7 +782,8 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
             ),
             "0 128 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=128 "
             f"alg=sha256 root_hexdigest={root_hexdigest1} "
-            "salt=471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c",
+            "salt="
+            "471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c",
             makedirs=True,
         )
         osutils.WriteFile(
@@ -807,7 +809,8 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
             ),
             "0 128 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=128 "
             f"alg=sha256 root_hexdigest={root_hexdigest1} "
-            "salt=471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c",
+            "salt="
+            "471347ffffff2f4a1cff1224ff7b04ffff68ff19ff2dffff63ff47ffffff387c",
             makedirs=True,
         )
         osutils.WriteFile(
@@ -834,9 +837,11 @@ class FinalizeDlcsTest(cros_test_lib.MockTempDirTestCase):
                 dlc_lib.DLC_TMP_META_DIR,
                 dlc_lib.DLC_VERITY_TABLE,
             ),
-            "0 196184 verity payload=ROOT_DEV hashtree=HASH_DEV hashstart=196184 "
+            "0 196184 verity payload=ROOT_DEV hashtree=HASH_DEV "
+            "hashstart=196184 "
             f"alg=sha256 root_hexdigest={root_hexdigest2} "
-            "salt=44ff73ff18ff59ff765aff4fffffff45ff2b60ffff2915ff3fffffffff3aff33",
+            "salt="
+            "44ff73ff18ff59ff765aff4fffffff45ff2b60ffff2915ff3fffffffff3aff33",
             makedirs=True,
         )
         output = self.tempdir / "output"

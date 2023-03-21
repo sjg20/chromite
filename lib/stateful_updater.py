@@ -6,7 +6,7 @@
 
 Use this module to update the stateful partition given a stateful payload
 (e.g. stateful.tgz) on the device. This module untars/uncompresses the payload
-on the device into var_new and dev_image_new directories. Optinonally, you can
+on the device into var_new and dev_image_new directories. Optionally, you can
 ask this module to reset a stateful partition by preparing it to be clobbered on
 reboot.
 """
@@ -38,8 +38,8 @@ class StatefulUpdater(object):
         """Initializes the module.
 
         Args:
-          device: The ChromiumOsDevice to be updated.
-          stateful_dir: The stateful directory on the Chromium OS device.
+            device: The ChromiumOsDevice to be updated.
+            stateful_dir: The stateful directory on the Chromium OS device.
         """
         self._device = device
         self._stateful_dir = stateful_dir
@@ -55,12 +55,12 @@ class StatefulUpdater(object):
         """Updates the stateful partition given the update file.
 
         Args:
-          payload_path: The path to the stateful update (stateful.tgz). It can also
-             be just a file descriptor.
-          is_payload_on_device: True if the payload is on the device. False if it
-            is on the workstation.
-          update_type: The type of the stateful update to be marked. Accepted
-            values: 'standard' (default) and 'clobber'.
+            payload_path: The path to the stateful update (stateful.tgz). It can
+                also be just a file descriptor.
+            is_payload_on_device: True if the payload is on the device. False
+                if it is on the workstation.
+            update_type: The type of the stateful update to be marked. Accepted
+                values: 'standard' (default) and 'clobber'.
         """
         try:
             cmd = [
@@ -104,7 +104,7 @@ class StatefulUpdater(object):
         """Marks the type of the update.
 
         Args:
-          update_type: The type of the update to be marked. See Update()
+            update_type: The type of the update to be marked. See Update()
         """
         if update_type not in (
             self.UPDATE_TYPE_CLOBBER,
