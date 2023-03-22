@@ -55,7 +55,7 @@ LSOF_COMMAND_CHROME = "lsof %s/chrome"
 LSOF_COMMAND = "lsof %s"
 DBUS_RELOAD_COMMAND = "killall -HUP dbus-daemon"
 LAST_LOGIN_COMMAND = "bootstat_get_last login-prompt-visible"
-UNLOCK_PASSWORD_COMMAND = "inject-keys.py -s %s -k enter"
+UNLOCK_PASSWORD_COMMAND = "python -m uinput.cros_type_keys $'%s\\n'"
 
 _ANDROID_DIR = "/system/chrome"
 _ANDROID_DIR_EXTRACT_PATH = "system/chrome/*"
