@@ -502,7 +502,7 @@ class TestSyncPrebuilts(cros_test_lib.MockTestCase):
                 report,
             )
             uploader.SyncBoardPrebuilts(
-                self.key, True, True, True, None, None, None, None, None
+                self.key, True, True, True, None, None, None, None, None, True
             )
         determine_mock.assert_has_calls(
             [
@@ -577,6 +577,7 @@ class TestMain(cros_test_lib.MockTestCase):
         options.packages = []
         options.sync_host = True
         options.git_sync = True
+        options.sync_remote_latest_sdk_file = True
         options.upload_board_tarball = True
         options.prepackaged_tarball = None
         options.toolchains_overlay_tarballs = []
@@ -641,6 +642,7 @@ class TestMain(cros_test_lib.MockTestCase):
             "",
             [],
             "",
+            options.sync_remote_latest_sdk_file,
         )
         host_mock.assert_called_once_with(
             options.key, options.git_sync, options.sync_binhost_conf
@@ -741,6 +743,7 @@ class TestSdk(cros_test_lib.MockTestCase):
             to_upload_path,
             tc_tarballs,
             tc_upload_path,
+            True,
         )
         self.upload_mock.assert_has_calls(upload_calls)
 

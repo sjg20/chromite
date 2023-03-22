@@ -451,6 +451,7 @@ class PrebuiltUploader(object):
         toolchains_overlay_upload_path,
         toolchain_tarballs,
         toolchain_upload_path,
+        sync_remote_latest_sdk_file: bool,
     ):
         """Upload a tarball of the sdk at the specified path to Google Storage.
 
@@ -466,6 +467,8 @@ class PrebuiltUploader(object):
               toolchains overlay tarballs.
           toolchain_tarballs: List of toolchain tarballs to upload.
           toolchain_upload_path: Path under the bucket to place toolchain tarballs.
+          sync_remote_latest_sdk_file: If True, update the remote latest SDK
+              file in Google Storage to point to the newly uploaded SDK.
         """
         remote_location = "%s/%s" % (
             self._upload_location.rstrip("/"),
@@ -505,7 +508,8 @@ class PrebuiltUploader(object):
 
         # Finally, also update the pointer to the latest SDK on which polling
         # scripts rely.
-        self._UpdateRemoteSdkLatestFile(latest_sdk=version_str)
+        if sync_remote_latest_sdk_file:
+            self._UpdateRemoteSdkLatestFile(latest_sdk=version_str)
 
     def _UpdateRemoteSdkLatestFile(
         self,
@@ -657,6 +661,7 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
         toolchains_overlay_upload_path,
         toolchain_tarballs,
         toolchain_upload_path,
+        sync_remote_latest_sdk_file: bool,
     ):
         """Synchronize board prebuilt files.
 
@@ -675,6 +680,8 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
               toolchains overlay tarballs.
           toolchain_tarballs: A list of toolchain tarballs to upload.
           toolchain_upload_path: Path under the bucket to place toolchain tarballs.
+          sync_remote_latest_sdk_file: If True, update the remote latest SDK
+              file in Google Storage to point to the newly uploaded SDK.
         """
         updated_binhosts = set()
         for target in self._GetTargets():
@@ -713,6 +720,7 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
                             toolchains_overlay_upload_path,
                             toolchain_tarballs,
                             toolchain_upload_path,
+                            sync_remote_latest_sdk_file,
                         ),
                     )
                     tar_process.start()
@@ -896,6 +904,17 @@ def ParseOptions(argv):
         help="Enable git version sync (This commits to a repo.) "
         "This is used by full builders to commit directly "
         "to board overlays.",
+    )
+    parser.add_argument(
+        "--sync-remote-latest-sdk-file",
+        action="store_true",
+        help="Sync the remote latest SDK file on GS://. (Default)",
+    )
+    parser.add_argument(
+        "--no-sync-remote-latest-sdk-file",
+        dest="sync_remote_latest_sdk_file",
+        action="store_false",
+        help="Skip syncing the remote latest SDK file on GS://.",
     )
     parser.add_argument("-u", "--upload", help="Upload location")
     parser.add_argument(
@@ -1110,6 +1129,7 @@ def main(argv):
             options.toolchains_overlay_upload_path,
             options.toolchain_tarballs,
             options.toolchain_upload_path,
+            options.sync_remote_latest_sdk_file,
         )
 
     if options.output:

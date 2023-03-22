@@ -751,7 +751,9 @@ class UploadPrebuiltsStage(generic_stages.BoardSpecificBuilderStage):
         if self._run.config.git_sync and self._run.options.publish:
             # Git sync should never be set for pfq type builds.
             assert not config_lib.IsPFQType(self._prebuilt_type)
-            generated_args.extend(["--git-sync"])
+            generated_args.append("--git-sync")
+        if not self._run.options.publish:
+            generated_args.append("--no-sync-remote-latest-sdk-file")
 
         return generated_args
 
