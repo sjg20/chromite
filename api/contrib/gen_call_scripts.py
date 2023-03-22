@@ -169,8 +169,9 @@ def GetParser():
         "--build-target",
         dest="build_target_name",
         default="amd64-generic",
-        help="Generate the configs with the given build target. Implies --force "
-        "when generating for a new build target. Defaults to amd64-generic.",
+        help="Generate the configs with the given build target. Implies "
+        "--force when generating for a new build target. Defaults to "
+        "amd64-generic.",
     )
 
     call_type_group = parser.add_mutually_exclusive_group()

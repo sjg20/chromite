@@ -45,17 +45,17 @@ def GetParser():
     parser.add_argument(
         "packages",
         nargs="+",
-        help='The packages to search for. They must be in the "category/package" '
-        "format. At least 2 packages are required, but any number can be "
-        "given.",
+        help="The packages to search for. They must be in the "
+        '"category/package" format. At least 2 packages are required, but any '
+        "number can be given.",
     )
     parser.add_argument(
         "-d",
         "--depgraph",
         type="path",
         default=default_depgraph,
-        help="The json output file containing the depgraph. By default uses the "
-        "dependency__get_build_dependency_graph call_scripts output file.",
+        help="The json output file containing the depgraph. By default uses "
+        "the dependency__get_build_dependency_graph call_scripts output file.",
     )
     parser.add_argument(
         "-b",

@@ -58,7 +58,8 @@ def GetParser():
         "--raw",
         default=False,
         action="store_true",
-        help="Do not do any processing of field values before writing the input.",
+        help="Do not do any processing of field values before writing the "
+        "input.",
     )
 
     return parser
@@ -106,8 +107,8 @@ def main(argv):
     endpoint_re = re.compile(r"(chromite\.api\.\w+/\w+)")
     reader = csv.DictReader(result.stdout.split("\r\n"))
     for row in reader:
-        # Each row will have a step_name, and all the requests, but only one request
-        # will actually be populated.
+        # Each row will have a step_name, and all the requests, but only one
+        # request will actually be populated.
         m = endpoint_re.search(row["step_name"])
         if not m:
             logging.warning("No endpoint identified in %s", row["step_name"])
@@ -120,8 +121,8 @@ def main(argv):
                 # Wrong column, or empty request.
                 continue
 
-            # Strip {} from around the message to account for extra layer of nesting
-            # when the analysis service serializes it.
+            # Strip {} from around the message to account for extra layer of
+            # nesting when the analysis service serializes it.
             text_format.Parse(v[1:-1], request)
 
             # Figure out which input.json needs to be written.
@@ -132,8 +133,8 @@ def main(argv):
             file_name = f"{service}__{method}_input.json"
 
             if not opts.raw:
-                # Dump chroot's directory fields since they're definitely going to be
-                # builder paths that aren't usable.
+                # Dump chroot's directory fields since they're definitely going
+                # to be builder paths that aren't usable.
                 if request.HasField("chroot"):
                     request.chroot.path = ""
                     request.chroot.chrome_dir = ""
