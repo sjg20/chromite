@@ -610,14 +610,14 @@ def run(
             arguments, and shell must be false.
         print_cmd: prints the command before running it.
         stdout: Where to send stdout.  This may be many things to control
-        redirection:
-            * None is the default; the existing stdout is used.
-            * An existing file object (must be opened with mode 'w' or 'wb').
-            * A string to a file (will be truncated & opened automatically).
-            * subprocess.PIPE to capture & return the output.
-            * A boolean to indicate whether to capture the output. True will
-                capture the output via a tempfile (good for large output).
-            * An open file descriptor (as a positive integer).
+            redirection:
+                * None is the default; the existing stdout is used.
+                * An existing file object. Must be opened with mode 'w' or 'wb'.
+                * A string to a file (will be truncated & opened automatically).
+                * subprocess.PIPE to capture & return the output.
+                * A boolean to indicate whether to capture the output. True will
+                    capture the output via a tempfile (good for large output).
+                * An open file descriptor (as a positive integer).
         stderr: Where to send stderr.  See |stdout| for possible values. This
             also may be subprocess.STDOUT to indicate stderr & stdout should be
             combined.
