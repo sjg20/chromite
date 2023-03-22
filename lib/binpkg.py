@@ -29,6 +29,7 @@ from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import parallel
 from chromite.lib import sysroot_lib
+from chromite.utils import key_value_store
 
 
 TWO_WEEKS = 60 * 60 * 24 * 7 * 2
@@ -525,69 +526,6 @@ def FetchTarballs(binhost_urls, pkgdir):
             queue.put((urls.values(), category_dir))
 
 
-def UpdateKeyInLocalFile(
-    filename: str, value: str, key: str = "PORTAGE_BINHOST"
-) -> bool:
-    """Update a key in a key-value store file with the value passed.
-
-    File format:
-        key="value"
-    Note that quotes are added automatically.
-
-    Args:
-        filename: Name of file to modify.
-        value: Value to write with the key.
-        key: The variable key to update. (Default: PORTAGE_BINHOST)
-
-    Returns:
-        True if changes were made to the file.
-    """
-
-    keyval_str = "%(key)s=%(value)s"
-
-    # Add quotes around the value, if missing.
-    if not value or value[0] != '"' or value[-1] != '"':
-        value = f'"{value}"'
-
-    # new_lines is the content to be used to overwrite/create the config file
-    # at the end of this function.
-    made_changes = False
-    new_lines = []
-
-    # Read current lines.
-    try:
-        current_lines = osutils.ReadFile(filename).splitlines()
-    except FileNotFoundError:
-        current_lines = []
-        print(f"Creating new file {filename}")
-
-    # Scan current lines, copy all vars to new_lines, change the line with |key|.
-    found = False
-    for line in current_lines:
-        # Strip newlines from end of line. We already add newlines below.
-        line = line.rstrip("\n")
-        if len(line.split("=")) != 2:
-            # Skip any line that doesn't fit key=val.
-            new_lines.append(line)
-            continue
-        file_var, file_val = line.split("=")
-        if file_var == key:
-            found = True
-            print(f"Updating {file_var}={file_val} to {key}={value}")
-            made_changes |= file_val != value
-            new_lines.append(keyval_str % {"key": key, "value": value})
-        else:
-            new_lines.append(keyval_str % {"key": file_var, "value": file_val})
-    if not found:
-        print(f"Adding new variable {key}={value}")
-        made_changes = True
-        new_lines.append(keyval_str % {"key": key, "value": value})
-
-    # Write out new file.
-    osutils.WriteFile(filename, "\n".join(new_lines) + "\n")
-    return made_changes
-
-
 def UpdateAndSubmitKeyValueFile(
     filename: str,
     data: Dict[str, str],
@@ -619,7 +557,7 @@ def UpdateAndSubmitKeyValueFile(
     print("Revving git file %s" % filename)
     git.CreatePushBranch(prebuilt_branch, cwd)
     for key, value in data.items():
-        UpdateKeyInLocalFile(filename, value, key)
+        key_value_store.UpdateKeyInLocalFile(filename, key, value)
     git.RunGit(cwd, ["add", filename])
     git.RunGit(cwd, ["commit", "-m", description])
 

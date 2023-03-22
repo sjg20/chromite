@@ -236,27 +236,27 @@ def DeterminePrebuiltConfFile(build_path, target):
     return make_path
 
 
-def UpdateBinhostConfFile(path, key, value):
-    """Update binhost config file file with key=value.
+def UpdateBinhostConfFile(filepath: str, key: str, value: str) -> None:
+    """Update binhost config file with key=value.
+
+    The updated file will be committed, but not submitted.
 
     Args:
-      path: Filename to update.
+      filepath: Path to the key-value store file to update.
       key: Key to update.
       value: New value for key.
     """
-    cwd, filename = os.path.split(os.path.abspath(path))
-    osutils.SafeMakedirs(cwd)
-    if not git.GetCurrentBranch(cwd):
-        git.CreatePushBranch(constants.STABLE_EBUILD_BRANCH, cwd, sync=False)
-    osutils.WriteFile(path, "", mode="a")
-    if binpkg.UpdateKeyInLocalFile(path, value, key):
-        desc = "%s: %s %s" % (
-            filename,
-            "updating" if value else "clearing",
-            key,
+    dirname, basename = os.path.split(os.path.abspath(filepath))
+    osutils.SafeMakedirs(dirname)
+    if not git.GetCurrentBranch(dirname):
+        git.CreatePushBranch(
+            constants.STABLE_EBUILD_BRANCH, dirname, sync=False
         )
-        git.AddPath(path)
-        git.Commit(cwd, desc)
+    osutils.WriteFile(filepath, "", mode="a")
+    if binpkg.UpdateKeyInLocalFile(filepath, key, value):
+        desc = f"{basename}: {'updating' if value else 'clearing'} {key}"
+        git.AddPath(filepath)
+        git.Commit(dirname, desc)
 
 
 def GenerateHtmlIndex(files, index, board, version, remote_location):

@@ -8,7 +8,16 @@ import contextlib
 import errno
 import io
 import os
-from typing import Dict, Generator, Union
+import re
+from typing import Dict, Generator, Optional, Tuple, Union
+
+from chromite.lib import osutils
+
+
+# Simple quote chars we'll use often, to avoid confusion like "'" vs. '"'.
+SINGLE_QUOTE = "'"
+DOUBLE_QUOTE = '"'
+QUOTE_CHARS = [SINGLE_QUOTE, DOUBLE_QUOTE]
 
 
 @contextlib.contextmanager
@@ -70,10 +79,10 @@ def LoadData(
             )
         key = chunks[0].strip()
         val = chunks[1].strip()
-        if len(val) >= 2 and val[0] in "\"'" and val[0] == val[-1]:
+        if len(val) >= 2 and val[0] in QUOTE_CHARS and val[0] == val[-1]:
             # Strip matching quotes on the same line.
             val = val[1:-1]
-        elif val and multiline and val[0] in "\"'":
+        elif val and multiline and val[0] in QUOTE_CHARS:
             # Unmatched quote here indicates a multiline value. Do not
             # strip the '\n' at the end of the line.
             in_quotes = val[0]
@@ -112,3 +121,115 @@ def LoadFile(
             raise
 
     return {}
+
+
+def UpdateKeyInLocalFile(filepath: str, key: str, value: str) -> bool:
+    """Update a key in a local key-value store file with the value passed.
+
+    File format:
+        key="value"
+    Note that quotes are added automatically.
+
+    If `filepath` does not already exist, it will be created.
+
+    If the key-value store does not already contain |key|, it will be appended.
+
+    Args:
+        filepath: Name of file to modify.
+        key: The variable key to update.
+        value: Value to write with the key.
+
+    Returns:
+        True if changes were made to the file.
+
+    Raises:
+        ValueError: If the key already exists in the file with a multiline
+            value. This is valid in some key-value stores, but so far it hasn't
+            been necessary to make this function compatible with that.
+            If you hit this error in production, consider adding that feature!
+        ValueError: If the new value is multiline. Again, if you hit this error
+            in production, consider adding this feature!
+        ValueError: If the new value has a single quote on one side and a double
+            quote on the other side, and thus cannot be wrapped.
+    """
+    if "\n" in value:
+        raise ValueError(
+            f"Cannot update multi-line value in key-value store: {value}"
+        )
+
+    # Pre-construct the new key=value string.
+    # Start by figuring out whether to wrap it in single or double quotes.
+    quote_char: str
+    if not value:  # Avoid IndexError with value[0]
+        quote_char = DOUBLE_QUOTE
+    elif (
+        value[0] in QUOTE_CHARS
+        and value[-1] in QUOTE_CHARS
+        and value[0] != value[-1]
+    ):
+        raise ValueError(
+            f"Cannot wrap string with mismatched quotes on the ends: {value}"
+        )
+    elif DOUBLE_QUOTE in (value[0], value[-1]):
+        quote_char = SINGLE_QUOTE
+    else:
+        quote_char = DOUBLE_QUOTE
+    new_keyval_line = f"{key}={quote_char}{value}{quote_char}"
+
+    # re_any_key_value should match any key="value" line.
+    # The value can be wrapped in either single-quotes or double-quotes.
+    # Either the key or the quoted value can be padded by whitespace.
+    re_any_key_value = re.compile(
+        r"^\s*(?P<key>[A-Za-z-_.]+)\s*=\s*(?P<quote>['\"])(?P<value>.*)(?P=quote)\s*$",
+    )
+
+    def _extract_key_value(line: str) -> Optional[Tuple[str, str]]:
+        """If the line looks like key="value", return the key and value.
+
+        Returns None if the line does not have the expected format.
+        """
+        m = re_any_key_value.match(line)
+        if not m:
+            return None
+        return (m.group("key"), m.group("value"))
+
+    # new_lines is the content to be used to overwrite/create the config file
+    # at the end of this function.
+    made_changes = False
+    new_lines = []
+
+    # Read current lines.
+    try:
+        current_lines = osutils.ReadFile(filepath).splitlines()
+    except FileNotFoundError:
+        current_lines = []
+        print(f"Creating new file {filepath}")
+
+    # Scan current lines, copy all vars to new_lines, change the line with |key|.
+    found = False
+    for line in current_lines:
+        # Strip newlines from end of line. We already add newlines below.
+        line = line.rstrip("\n")
+        file_keyval = _extract_key_value(line)
+        # Skip any line that doesn't look like a key=value line.
+        if file_keyval is None:
+            new_lines.append(line)
+            continue
+        # Skip any keyval line that has a different key.
+        file_key, file_value = file_keyval
+        if file_key != key:
+            new_lines.append(line)
+            continue
+        # Replace the line with our new line.
+        found = True
+        print(f"Updating {file_key}={file_value} to {key}={value}")
+        made_changes |= file_value != value
+        new_lines.append(new_keyval_line)
+    if not found:
+        print(f"Adding new variable {key}={value}")
+        made_changes = True
+        new_lines.append(new_keyval_line)
+
+    # Write out new file.
+    osutils.WriteFile(filepath, "\n".join(new_lines) + "\n")
+    return made_changes
