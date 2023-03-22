@@ -24,13 +24,13 @@ class CrosVMTest(command_vm_test.CommandVMTest):
         """Builds a cros command.
 
         Args:
-          command: The subcommand to build on (e.g. 'flash', 'deploy').
-          device: The device's address for the command.
-          pos_args: A list of positional arguments for the command.
-          opt_args: A list of optional arguments for the command.
+            command: The subcommand to build on (e.g. 'flash', 'deploy').
+            device: The device's address for the command.
+            pos_args: A list of positional arguments for the command.
+            opt_args: A list of optional arguments for the command.
 
         Returns:
-          A full cros command as a list.
+            A full cros command as a list.
         """
         cmd = ["cros", command]
         if opt_args:
