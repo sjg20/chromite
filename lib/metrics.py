@@ -137,7 +137,7 @@ class MockMetric(object):
 
 
 def _ImportSafe(fn):
-    """Decorator which causes |fn| to return MockMetric if ts_mon not imported."""
+    """Decorator causing |fn| to return MockMetric if ts_mon not imported."""
 
     @wraps(fn)
     def wrapper(*args, **kwargs):
@@ -178,12 +178,12 @@ class FieldSpecAdapter(object):
         """Return a wrapper which constructs the metric object on demand.
 
         Args:
-          prop: The property name
+            prop: The property name
 
         Returns:
-          If self._instance has been created, the instance's .|prop| property,
-          otherwise, a wrapper function which creates the ._instance and then
-          calls the |prop| method on the instance.
+            If self._instance has been created, the instance's .|prop| property,
+            otherwise, a wrapper function which creates the ._instance and then
+            calls the |prop| method on the instance.
         """
         if self._instance is not _MISSING:
             return getattr(self._instance, prop)
@@ -206,9 +206,9 @@ class FieldSpecAdapter(object):
         """Infers the fields argument.
 
         Args:
-          method_name: The method called.
-          args: The args list
-          kwargs: The keyword args
+            method_name: The method called.
+            args: The args list
+            kwargs: The keyword args
         """
         if "fields" in kwargs:
             return kwargs["fields"]
@@ -224,7 +224,7 @@ class FieldSpecAdapter(object):
         """Infers the fields types from the given fields.
 
         Args:
-          fields: A dictionary with metric fields.
+            fields: A dictionary with metric fields.
         """
         if not fields or not ts_mon:
             return None
@@ -241,9 +241,9 @@ def _OptionalFieldSpec(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
         kwargs = dict(**kwargs)  # It's bad practice to mutate **kwargs
-        # Slightly different than .setdefault, this line sets a default even when
-        # the key is present (as long as the value is not truthy). Empty or None is
-        # not allowed for descriptions.
+        # Slightly different than .setdefault, this line sets a default even
+        # when the key is present (as long as the value is not truthy). Empty or
+        # None is not allowed for descriptions.
         kwargs["description"] = kwargs.get("description") or "No description."
         if "field_spec" in kwargs and kwargs["field_spec"] is not _MISSING:
             return fn(*args, **kwargs)
@@ -408,11 +408,13 @@ def CumulativeSecondsDistribution(
     (e.g. scale=0.1 covers a range from .1 seconds to 3.2 days).
 
     Args:
-      name: string name of metric
-      scale: scaling factor of buckets, and size of the first bucket. default: 1
-      reset_after: Should the metric be reset after reporting.
-      description: A string description of the metric.
-      field_spec: A sequence of ts_mon.Field objects to specify the field schema.
+        name: string name of metric
+        scale: scaling factor of buckets, and size of the first bucket.
+            default: 1
+        reset_after: Should the metric be reset after reporting.
+        description: A string description of the metric.
+        field_spec: A sequence of ts_mon.Field objects to specify the field
+            schema.
     """
     b = ts_mon.GeometricBucketer(
         growth_factor=_SECONDS_BUCKET_FACTOR, scale=scale
@@ -439,18 +441,19 @@ def PercentageDistribution(
 ):
     """Returns a metric handle for a cumulative distribution for percentage.
 
-    The distribution handle returned by this method is better suited for reporting
-    percentage values than the default one. The bucketing is optimized for values
-    in [0,100].
+    The distribution handle returned by this method is better suited for
+    reporting percentage values than the default one. The bucketing is optimized
+    for values in [0,100].
 
     Args:
-      name: The name of this metric.
-      num_buckets: This metric buckets the percentage values before
-          reporting. This argument controls the number of the bucket the range
-          [0,100] is divided in. The default gives you 0.1% resolution.
-      reset_after: Should the metric be reset after reporting.
-      description: A string description of the metric.
-      field_spec: A sequence of ts_mon.Field objects to specify the field schema.
+        name: The name of this metric.
+        num_buckets: This metric buckets the percentage values before
+            reporting. This argument controls the number of the bucket the range
+            [0,100] is divided in. The default gives you 0.1% resolution.
+        reset_after: Should the metric be reset after reporting.
+        description: A string description of the metric.
+        field_spec: A sequence of ts_mon.Field objects to specify the field
+            schema.
     """
     # The last bucket actually covers [100, 100 + 1.0/num_buckets), so it
     # corresponds to values that exactly match 100%.
@@ -473,45 +476,56 @@ def SecondsTimer(
 ):
     """Record the time of an operation to a CumulativeSecondsDistributionMetric.
 
-    Records the time taken inside of the context block, to the
+    Records the time taken inside the context block, to the
     CumulativeSecondsDistribution named |name|, with the given fields.
 
     Examples:
-      # Time the doSomething() call, with field values that are independent of the
-      # results of the operation.
-      with SecondsTimer('timer/name', fields={'foo': 'bar'},
-                        description='My timer',
-                        field_spec=[ts_mon.StringField('foo'),
-                                    ts_mon.BooleanField('success')]):
-        doSomething()
+        # Time the doSomething() call, with field values that are independent of
+        # the results of the operation.
+        with SecondsTimer(
+            "timer/name",
+            fields={"foo": "bar"},
+            description="My timer",
+            field_spec=[
+                ts_mon.StringField("foo"),
+                ts_mon.BooleanField("success"),
+            ],
+        ):
+            doSomething()
 
-      # Time the doSomethingElse call, with field values that depend on the
-      # results of that operation. Note that it is important that a default value
-      # is specified for these fields, in case an exception is thrown by
-      # doSomethingElse()
-      f = {'success': False, 'foo': 'bar'}
-      with SecondsTimer('timer/name', fields=f, description='My timer',
-                        field_spec=[ts_mon.StringField('foo')]) as c:
-        doSomethingElse()
-        c['success'] = True
+        # Time the doSomethingElse call, with field values that depend on the
+        # results of that operation. Note that it is important that a default
+        # value is specified for these fields, in case an exception is thrown by
+        # doSomethingElse()
+        f = {'success': False, 'foo': 'bar'}
+        with SecondsTimer(
+            "timer/name",
+            fields=f,
+            description="My timer",
+            field_spec=[ts_mon.StringField("foo")],
+        ) as c:
+            doSomethingElse()
+            c["success"] = True
 
-      # Incorrect Usage!
-      with SecondsTimer('timer/name', description='My timer') as c:
-        doSomething()
-        c['foo'] = bar # 'foo' is not a valid field, because no default
-                       # value for it was specified in the context constructor.
-                       # It will be silently ignored.
+        # Incorrect Usage!
+        with SecondsTimer('timer/name', description='My timer') as c:
+            doSomething()
+            c['foo'] = bar  # 'foo' is not a valid field, because no default
+                            # value for it was specified in the context
+                            # constructor. It will be silently ignored.
 
     Args:
-      name: The name of the metric to create
-      fields: The fields of the metric to create.
-      description: A string description of the metric.
-      field_spec: A sequence of ts_mon.Field objects to specify the field schema.
-      scale: A float to scale the CumulativeSecondsDistribution buckets by.
-      record_on_exception: Whether to record metrics if an exception is raised.
-      add_exception_field: Whether to add a BooleanField('encountered_exception')
-          to the FieldSpec provided, and set its value to True iff an exception
-          was raised in the context.
+        name: The name of the metric to create
+        fields: The fields of the metric to create.
+        description: A string description of the metric.
+        field_spec: A sequence of ts_mon.Field objects to specify the field
+            schema.
+        scale: A float to scale the CumulativeSecondsDistribution buckets by.
+        record_on_exception: Whether to record metrics if an exception is
+            raised.
+        add_exception_field: Whether to add a
+            BooleanField('encountered_exception') to the FieldSpec provided, and
+            set its value to True iff an exception was raised in the context.
     """
     if field_spec is not None and field_spec is not _MISSING:
         field_spec.append(ts_mon.BooleanField("encountered_exception"))
@@ -534,9 +548,9 @@ def SecondsTimer(
             f.setdefault("encountered_exception", error)
         # Filter out keys that were not part of the initial key set. This is to
         # avoid inconsistent fields.
-        # TODO(akeshet): Doing this filtering isn't super efficient. Would be better
-        # to implement some key-restricted subclass or wrapper around dict, and just
-        # yield that above rather than yielding a regular dict.
+        # TODO(akeshet): Doing this filtering isn't super efficient. Would be
+        #   better to implement some key-restricted subclass or wrapper around
+        #   dict, and just yield that above rather than yielding a regular dict.
         if record_on_exception or not error:
             dt = _GetSystemClock() - t0
             # TODO(ayatane): Handle backward clock jumps.  See _GetSystemClock.
@@ -556,30 +570,38 @@ def SecondsTimerDecorator(
     """Decorator to time the duration of function calls.
 
     Examples:
-      @SecondsTimerDecorator('timer/name', fields={'foo': 'bar'},
-                             description='My timer',
-                             field_spec=[ts_mon.StringField('foo')])
-      def Foo(bar):
-        return doStuff()
+        @SecondsTimerDecorator(
+            "timer/name",
+            fields={"foo": "bar"},
+            description="My timer",
+            field_spec=[ts_mon.StringField("foo")],
+        )
+        def Foo(bar):
+            return doStuff()
 
-      is equivalent to
+        is equivalent to
 
-      def Foo(bar):
-        with SecondsTimer('timer/name', fields={'foo': 'bar'},
-                          description='My timer',
-                          field_spec=[ts_mon.StringField('foo')])
-          return doStuff()
+        def Foo(bar):
+            with SecondsTimer(
+                "timer/name",
+                fields={"foo": "bar"},
+                description="My timer",
+                field_spec=[ts_mon.StringField("foo")],
+            ):
+                return doStuff()
 
     Args:
-      name: The name of the metric to create
-      fields: The fields of the metric to create
-      description: A string description of the metric.
-      field_spec: A sequence of ts_mon.Field objects to specify the field schema.
-      scale: A float to scale the distrubtion by
-      record_on_exception: Whether to record metrics if an exception is raised.
-      add_exception_field: Whether to add a BooleanField('encountered_exception')
-          to the FieldSpec provided, and set its value to True iff an exception
-          was raised in the context.
+        name: The name of the metric to create.
+        fields: The fields of the metric to create.
+        description: A string description of the metric.
+        field_spec: A sequence of ts_mon.Field objects to specify the field
+            schema.
+        scale: A float to scale the distribution by.
+        record_on_exception: Whether to record metrics if an exception is
+            raised.
+        add_exception_field: Whether to add a
+            BooleanField('encountered_exception') to the FieldSpec provided, and
+            set its value to True iff an exception was raised in the context.
     """
 
     def decorator(fn):
@@ -619,43 +641,54 @@ def SecondsInstanceTimer(
     to provide flexibility in the future for higher accuracy.
 
     Examples:
-      # Time the doSomething() call, with field values that are independent of the
-      # results of the operation.
-      with SecondsInstanceTimer('timer/name', fields={'foo': 'bar'},
-                                description='My timer',
-                                field_spec=[ts_mon.StringField('foo'),
-                                            ts_mon.BooleanField('success')]):
-        doSomething()
+        # Time the doSomething() call, with field values that are independent of
+        # the results of the operation.
+        with SecondsInstanceTimer(
+            "timer/name",
+            fields={"foo": "bar"},
+            description="My timer",
+            field_spec=[
+                ts_mon.StringField("foo"),
+                ts_mon.BooleanField("success"),
+            ],
+        ):
+            doSomething()
 
-      # Time the doSomethingElse call, with field values that depend on the
-      # results of that operation. Note that it is important that a default value
-      # is specified for these fields, in case an exception is thrown by
-      # doSomethingElse()
-      f = {'success': False, 'foo': 'bar'}
-      with SecondsInstanceTimer('timer/name', fields=f, description='My timer',
-                                field_spec=[ts_mon.StringField('foo')]) as c:
-        doSomethingElse()
-        c['success'] = True
+        # Time the doSomethingElse call, with field values that depend on the
+        # results of that operation. Note that it is important that a default
+        # value is specified for these fields, in case an exception is thrown by
+        # doSomethingElse()
+        f = {"success": False, "foo": "bar"}
+        with SecondsInstanceTimer(
+            "timer/name",
+            fields=f,
+            description="My timer",
+            field_spec=[ts_mon.StringField("foo")],
+        ) as c:
+            doSomethingElse()
+            c["success"] = True
 
-      # Incorrect Usage!
-      with SecondsInstanceTimer('timer/name', description='My timer') as c:
-        doSomething()
-        c['foo'] = bar # 'foo' is not a valid field, because no default
-                       # value for it was specified in the context constructor.
-                       # It will be silently ignored.
+        # Incorrect Usage!
+        with SecondsInstanceTimer('timer/name', description='My timer') as c:
+            doSomething()
+            c['foo'] = bar  # 'foo' is not a valid field, because no default
+                            # value for it was specified in the context
+                            # constructor. It will be silently ignored.
 
     Args:
-      name: The name of the metric to create
-      fields: The fields of the metric to create.
-      description: A string description of the metric.
-      field_spec: A sequence of ts_mon.Field objects to specify the field schema.
-      record_on_exception: Whether to record metrics if an exception is raised.
-      add_exception_field: Whether to add a BooleanField('encountered_exception')
-          to the FieldSpec provided, and set its value to True iff an exception
-          was raised in the context.
+        name: The name of the metric to create
+        fields: The fields of the metric to create.
+        description: A string description of the metric.
+        field_spec: A sequence of ts_mon.Field objects to specify the field
+            schema.
+        record_on_exception: Whether to record metrics if an exception is
+            raised.
+        add_exception_field: Whether to add a
+            BooleanField('encountered_exception') to the FieldSpec provided, and
+            set its value to True iff an exception was raised in the context.
 
     Yields:
-      Float based metric measing the duration of execution.
+        Float based metric measuring the duration of execution.
     """
     if field_spec is not None and field_spec is not _MISSING:
         field_spec.append(ts_mon.BooleanField("encountered_exception"))
@@ -675,9 +708,9 @@ def SecondsInstanceTimer(
             f.setdefault("encountered_exception", error)
         # Filter out keys that were not part of the initial key set. This is to
         # avoid inconsistent fields.
-        # TODO(akeshet): Doing this filtering isn't super efficient. Would be better
-        # to implement some key-restricted subclass or wrapper around dict, and just
-        # yield that above rather than yielding a regular dict.
+        # TODO(akeshet): Doing this filtering isn't super efficient. Would be
+        #   better to implement some key-restricted subclass or wrapper around
+        #   dict, and just yield that above rather than yielding a regular dict.
         if record_on_exception or not error:
             dt = _GetSystemClock() - t0
             m.set(dt, fields={k: f[k] for k in keys})
@@ -694,35 +727,46 @@ def SecondsInstanceTimerDecorator(
     """Decorator to time the gauge duration of function calls.
 
     Examples:
-      @SecondsInstanceTimerDecorator('timer/name', fields={'foo': 'bar'},
-                                     description='My timer',
-                                     field_spec=[ts_mon.StringField('foo'),
-                                                 ts_mon.BooleanField('success')]):
+        @SecondsInstanceTimerDecorator(
+            "timer/name",
+            fields={"foo": "bar"},
+            description="My timer",
+            field_spec=[
+                ts_mon.StringField("foo"),
+                ts_mon.BooleanField("success"),
+            ],
+        )
+        def Foo(bar):
+            return doStuff()
 
-      def Foo(bar):
-        return doStuff()
+        is equivalent to
 
-      is equivalent to
-
-      def Foo(bar):
-        with SecondsInstanceTimer('timer/name', fields={'foo': 'bar'},
-                                  description='My timer',
-                                  field_spec=[ts_mon.StringField('foo'),
-                                              ts_mon.BooleanField('success')]):
-          return doStuff()
+        def Foo(bar):
+            with SecondsInstanceTimer(
+                "timer/name",
+                fields={"foo": "bar"},
+                description="My timer",
+                field_spec=[
+                    ts_mon.StringField("foo"),
+                    ts_mon.BooleanField("success"),
+                ],
+            ):
+                return doStuff()
 
     Args:
-      name: The name of the metric to create
-      fields: The fields of the metric to create
-      description: A string description of the metric.
-      field_spec: A sequence of ts_mon.Field objects to specify the field schema.
-      record_on_exception: Whether to record metrics if an exception is raised.
-      add_exception_field: Whether to add a BooleanField('encountered_exception')
-          to the FieldSpec provided, and set its value to True iff an exception
-          was raised in the context.
+        name: The name of the metric to create
+        fields: The fields of the metric to create
+        description: A string description of the metric.
+        field_spec: A sequence of ts_mon.Field objects to specify the field
+            schema.
+        record_on_exception: Whether to record metrics if an exception is
+            raised.
+        add_exception_field: Whether to add a
+            BooleanField('encountered_exception') to the FieldSpec provided, and
+            set its value to True iff an exception was raised in the context.
 
     Returns:
-      A SecondsInstanceTimer metric decorator.
+        A SecondsInstanceTimer metric decorator.
     """
 
     def decorator(fn):
@@ -748,10 +792,11 @@ def SuccessCounter(name, fields=None, description=None, field_spec=_MISSING):
     """Create a counter that tracks if something succeeds.
 
     Args:
-      name: The name of the metric to create
-      fields: The fields of the metric
-      description: A string description of the metric.
-      field_spec: A sequence of ts_mon.Field objects to specify the field schema.
+        name: The name of the metric to create
+        fields: The fields of the metric
+        description: A string description of the metric.
+        field_spec: A sequence of ts_mon.Field objects to specify the field
+            schema.
     """
     c = Counter(name)
     f = fields or {}
@@ -772,8 +817,8 @@ def SuccessCounter(name, fields=None, description=None, field_spec=_MISSING):
 def Presence(name, fields=None, description=None, field_spec=_MISSING):
     """A counter of 'active' things.
 
-    This keeps track of how many name's are active at any given time. However,
-    it's only suitable for long running tasks, since the initial true value may
+    This keeps track of how many names are active at any given time. However,
+    it's only suitable for long-running tasks, since the initial true value may
     never be written out if the task doesn't run for at least a minute.
     """
     b = Boolean(name, description=None, field_spec=field_spec)
@@ -788,36 +833,40 @@ class RuntimeBreakdownTimer(object):
     """Record the time of an operation and the breakdown into sub-steps.
 
     Examples:
-      with RuntimeBreakdownTimer('timer/name', fields={'foo':'bar'},
-                                 description='My timer',
-                                 field_spec=[ts_mon.StringField('foo')]) as timer:
-        with timer.Step('first_step'):
-          doFirstStep()
-        with timer.Step('second_step'):
-          doSecondStep()
-        # The time spent next will show up under .../timer/name/breakdown_no_step
-        doSomeNonStepWork()
+        with RuntimeBreakdownTimer(
+            "timer/name",
+            fields={"foo": "bar"},
+            description="My timer",
+            field_spec=[ts_mon.StringField("foo")],
+        ) as timer:
+            with timer.Step("first_step"):
+                doFirstStep()
+            with timer.Step("second_step"):
+                doSecondStep()
+            # The time spent next will show up under
+            # .../timer/name/breakdown_no_step
+            doSomeNonStepWork()
 
     This will emit the following metrics:
     - .../timer/name/total_duration - A CumulativeSecondsDistribution metric for
-          the time spent inside the outer with block.
+        the time spent inside the outer with block.
     - .../timer/name/breakdown/first_step and
-      .../timer/name/breakdown/second_step - PercentageDistribution metrics for
-          the fraction of time devoted to each substep.
-    - .../timer/name/breakdown_unaccounted - PercentageDistribution metric for the
-          fraction of time that is not accounted for in any of the substeps.
-    - .../timer/name/bucketing_loss - PercentageDistribution metric buckets values
-          before reporting them as distributions. This causes small errors in the
-          reported values because they are rounded to the reported buckets lower
-          bound. This is a CumulativeMetric measuring the total rounding error
-          accrued in reporting all the percentages. The worst case bucketing loss
-          for x steps is (x+1)/10. So, if you time across 9 steps, you should
-          expect no more than 1% rounding error.
+        .../timer/name/breakdown/second_step - PercentageDistribution metrics
+        for the fraction of time devoted to each substep.
+    - .../timer/name/breakdown_unaccounted - PercentageDistribution metric for
+        the fraction of time that is not accounted for in any of the substeps.
+    - .../timer/name/bucketing_loss - PercentageDistribution metric buckets
+        values before reporting them as distributions. This causes small errors
+        in the reported values because they are rounded to the reported buckets
+        lower bound. This is a CumulativeMetric measuring the total rounding
+        error accrued in reporting all the percentages. The worst case bucketing
+        loss for x steps is (x+1)/10. So, if you time across 9 steps, you should
+        expect no more than 1% rounding error.
     [experimental]
-    - .../timer/name/duration_breakdown - A Float metric, with one stream per Step
-          indicating the ratio of time spent in that step. The different steps are
-          differentiated via a field with key 'step_name'. Since some of the time
-          can be spent outside any steps, these ratios will sum to <= 1.
+    - .../timer/name/duration_breakdown - A Float metric, with one stream per
+        Step indicating the ratio of time spent in that step. The different
+        steps are differentiated via a field with key 'step_name'. Since some of
+        the time can be spent outside any steps, these ratios will sum to <= 1.
 
     NB: This helper can only be used if the field values are known at the
     beginning of the outer context and do not change as a result of any of the
@@ -865,8 +914,9 @@ class RuntimeBreakdownTimer(object):
 
             fields = dict(self._fields) if self._fields is not None else dict()
             fields["step_name"] = name
-            # TODO(pprabhu): Convert _GetStepBreakdowns() to return ratios instead of
-            # percentage when the old PercentageDistribution reporting is deleted.
+            # TODO(pprabhu): Convert _GetStepBreakdowns() to return ratios
+            # instead of percentage when the old PercentageDistribution
+            # reporting is deleted.
             Float("%s/duration_breakdown" % self._name).set(
                 percent / 100, fields=fields
             )
@@ -897,12 +947,12 @@ class RuntimeBreakdownTimer(object):
         Note that it is not possible to start a step inside a step. i.e.,
 
         with RuntimeBreakdownTimer('timer') as timer:
-          with timer.Step('outer_step'):
-            with timer.Step('inner_step'):
-              # will by design raise an exception.
+            with timer.Step('outer_step'):
+                with timer.Step('inner_step'):
+                    # will by design raise an exception.
 
         Args:
-          step_name: The name of the step being timed.
+            step_name: The name of the step being timed.
         """
         if self._inside_step:
             logging.error(
@@ -937,7 +987,7 @@ class RuntimeBreakdownTimer(object):
         }
 
     def _GetUnaccountedBreakdown(self):
-        """Returns the percentage time spent outside of all steps.
+        """Returns the percentage time spent outside all steps.
 
         Must be called after |_RecordTotalTime|.
         """
@@ -975,7 +1025,7 @@ def Flush(reset_after=()):
     """Flushes metrics, but warns on transient errors.
 
     Args:
-      reset_after: A list of metrics to reset after flushing.
+        reset_after: A list of metrics to reset after flushing.
     """
     if not ts_mon:
         return

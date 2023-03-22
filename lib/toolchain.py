@@ -50,10 +50,10 @@ class ToolchainInstallError(Error, cros_build_lib.RunCommandError):
         """ToolchainInstallError init.
 
         Args:
-          msg: Error message.
-          result: The command result.
-          exception: The original exception.
-          tc_info: A list of the failed packages' package_info.PackageInfo.
+            msg: Error message.
+            result: The command result.
+            exception: The original exception.
+            tc_info: A list of the failed packages' package_info.PackageInfo.
         """
         super().__init__(msg, result, exception)
         self.failed_toolchain_info = tc_info
@@ -70,7 +70,7 @@ def GetAllTargets():
     """Get the complete list of targets.
 
     Returns:
-      The list of cross targets for the current tree
+        The list of cross targets for the current tree
     """
     targets = GetToolchainsForBoard("all")
 
@@ -83,11 +83,11 @@ def GetToolchainsForBoard(board, buildroot=constants.SOURCE_ROOT):
     """Get a dictionary mapping toolchain targets to their options for a board.
 
     Args:
-      board: board name in question (e.g. 'daisy').
-      buildroot: path to buildroot.
+        board: board name in question (e.g. 'daisy').
+        buildroot: path to buildroot.
 
     Returns:
-      The list of toolchain tuples for the given board
+        The list of toolchain tuples for the given board
     """
     overlays = portage_util.FindOverlays(
         constants.BOTH_OVERLAYS,
@@ -105,11 +105,12 @@ def GetToolchainTupleForBoard(board, buildroot=constants.SOURCE_ROOT):
     """Gets a tuple for the default and non-default toolchains for a board.
 
     Args:
-      board: board name in question (e.g. 'daisy').
-      buildroot: path to buildroot.
+        board: board name in question (e.g. 'daisy').
+        buildroot: path to buildroot.
 
     Returns:
-      The tuples of toolchain targets ordered default, non-default for the board.
+        The tuples of toolchain targets ordered default, non-default for the
+        board.
     """
     toolchains = GetToolchainsForBoard(board, buildroot)
     return list(FilterToolchains(toolchains, "default", True)) + list(
@@ -121,13 +122,13 @@ def FilterToolchains(targets, key, value):
     """Filter out targets based on their attributes.
 
     Args:
-      targets: dict of toolchains
-      key: metadata to examine
-      value: expected value for metadata
+        targets: dict of toolchains
+        key: metadata to examine
+        value: expected value for metadata
 
     Returns:
-      dict where all targets whose metadata |key| does not match |value|
-      have been deleted
+        dict where all targets whose metadata |key| does not match |value|
+        have been deleted
     """
     return dict((k, v) for k, v in targets.items() if v[key] == value)
 
@@ -136,11 +137,11 @@ def GetSdkURL(for_gsutil=False, suburl=""):
     """Construct a Google Storage URL for accessing SDK related archives
 
     Args:
-      for_gsutil: Do you want a URL for passing to `gsutil`?
-      suburl: A url fragment to tack onto the end
+        for_gsutil: Do you want a URL for passing to `gsutil`?
+        suburl: A url fragment to tack onto the end
 
     Returns:
-      The fully constructed URL
+        The fully constructed URL
     """
     return gs.GetGsURL(
         constants.SDK_GS_BUCKET, for_gsutil=for_gsutil, suburl=suburl
@@ -151,7 +152,7 @@ def GetArchForTarget(target):
     """Returns the arch used by the given toolchain.
 
     Args:
-      target: a toolchain.
+        target: a toolchain.
     """
     ret = cros_build_lib.dbg_run(
         ["crossdev", "--show-target-cfg", target],
@@ -192,7 +193,7 @@ class ToolchainInstaller(object):
     This class installs the toolchain into the given sysroots.
     """
 
-    def __init__(self, force, configure, cbuild, pkgdir):
+    def __init__(self, force: bool, configure: bool, cbuild: str, pkgdir: str):
         """ToolchainInstaller configuration.
 
         |force| and |configure| alter the installer's behavior (details below).
@@ -200,15 +201,15 @@ class ToolchainInstaller(object):
         which packages to install and how to fetch them.
 
         See:
-          https://wiki.gentoo.org/wiki/CHOST
+            https://wiki.gentoo.org/wiki/CHOST
 
         Args:
-          force: bool - Whether to force the installation if already up to date.
-          configure: bool - Whether to write out the config files in the sysroot
-              when complete.
-          cbuild: str - The CHOST value of the chroot SDK itself.
-          pkgdir: str - The PKGDIR value of the chroot; the path at which package
-              archives are stored.
+            force: Whether to force the installation if already up to date.
+            configure: Whether to write out the config files in the sysroot
+                when complete.
+            cbuild: The CHOST value of the chroot SDK itself.
+            pkgdir: The PKGDIR value of the chroot; the path at which package
+                archives are stored.
         """
         self.force = force
         self.configure = configure
@@ -219,20 +220,20 @@ class ToolchainInstaller(object):
         """Toolchain installation process.
 
         Install most recent glibc version in the sysroot.
-        If the configure option passed to __init__ is True; the gcc and go packages
-        are listed in the sysroot's package.provided, and the glibc version is
-        stored in sysroot's LIBC_VERSION cached field. Otherwise all are left
-        untouched.
+        If the configure option passed to __init__ is True; the gcc and go
+        packages are listed in the sysroot's package.provided, and the glibc
+        version is stored in sysroot's LIBC_VERSION cached field. Otherwise, all
+        are left untouched.
 
         Note: Must be run inside the chroot. Not currently asserted because
         InstallToolchain is the preferred entry point.
 
         Args:
-          sysroot: sysroot_lib.Sysroot - Must be a valid sysroot,
-              e.g. use setup_board to initialize one.
-          board_chost: str|None - The CHOST value to use for the board. If not
-              explicitly provided as an argument, must be set in the sysroot's
-              CHOST standard field.
+            sysroot: sysroot_lib.Sysroot - Must be a valid sysroot,
+                e.g. use setup_board to initialize one.
+            board_chost: str|None - The CHOST value to use for the board. If not
+                explicitly provided as an argument, must be set in the sysroot's
+                CHOST standard field.
         """
         # Determine the toolchain we'll be installing; e.g. i686-pc-linux-gnu,
         # armv7a-softfloat-linux-gnueabi.
@@ -262,12 +263,14 @@ class ToolchainInstaller(object):
         self._WriteConfigs(sysroot, tc_info)
         self._UpdateProvided(sysroot, tc_info)
 
-    def _InstallLibc(self, sysroot, tc_info):
+    def _InstallLibc(
+        self, sysroot: "sysroot_lib.Sysroot", tc_info: "ToolchainInfo"
+    ):
         """Install the libc package to the sysroot.
 
         Args:
-          sysroot: sysroot_lib.Sysroot - The sysroot where it's being installed.
-          tc_info: ToolchainInfo - The toolchain being installed.
+            sysroot: The sysroot where it's being installed.
+            tc_info: The toolchain being installed.
         """
         if not tc_info.IsCrossCompiler():
             # Host and target toolchains match, install standard packages.
@@ -290,8 +293,8 @@ class ToolchainInstaller(object):
                     tc_info=[tc_info.libc_pkg_info],
                 )
         else:
-            # They do not match, install appropriate cross-toolchain variant package.
-            # See ToolchainInfo for alternate package name build outs.
+            # They do not match, install appropriate cross-toolchain variant
+            # package. See ToolchainInfo for alternate package name build outs.
             libc_path = os.path.join(self.pkgdir, "%s.tbz2" % tc_info.libc_cpf)
 
             if not os.path.exists(libc_path):
@@ -305,13 +308,15 @@ class ToolchainInstaller(object):
                 e.failed_toolchain_info = [tc_info.libc_pkg_info]
                 raise e
 
-    def _ExtractLibc(self, sysroot, board_chost, libc_path):
+    def _ExtractLibc(
+        self, sysroot: "sysroot_lib.Sysroot", board_chost: str, libc_path: str
+    ):
         """Extract the libc archive to the sysroot.
 
         Args:
-          sysroot: sysroot_lib.Sysroot - The sysroot where it's being installed.
-          board_chost: str - The board's CHOST value.
-          libc_path: str - The location of the libc archive.
+            sysroot: The sysroot where it's being installed.
+            board_chost: The board's CHOST value.
+            libc_path: The location of the libc archive.
         """
         compression = cros_build_lib.CompressionDetectType(libc_path)
         compressor = cros_build_lib.FindCompressor(compression)
@@ -335,8 +340,8 @@ class ToolchainInstaller(object):
                     f"Error extracting libc: {result.stdout}", result
                 )
 
-            # Sync the files to the sysroot to install.
-            # Trailing / on source to sync contents instead of the directory itself.
+            # Sync the files to the sysroot to install. Trailing / on source to
+            # sync contents instead of the directory itself.
             source = os.path.join(tempdir, "usr", board_chost)
             cmd = [
                 "rsync",
@@ -427,12 +432,12 @@ class ToolchainInfo(object):
         _PKG_RPCSVC: "net-libs/rpcsvc-proto",
     }
 
-    def __init__(self, target, cbuild):
+    def __init__(self, target: str, cbuild: str):
         """ToolchainInfo init.
 
         Args:
-          target: str - The target cross-compiler tuple, i.e. the board's CHOST.
-          cbuild: str - The CHOST value of the chroot SDK itself.
+            target: The target cross-compiler tuple, i.e. the board's CHOST.
+            cbuild: The CHOST value of the chroot SDK itself.
         """
         self.target = target
         self.cbuild = cbuild
@@ -541,14 +546,14 @@ class ToolchainInfo(object):
         """Get the full 'category/package-version-revision'."""
         return getattr(self._get_pkg(pkg), "cpvr", None)
 
-    def LibcVersionsMatch(self, sysroot):
+    def LibcVersionsMatch(self, sysroot: "sysroot_lib.Sysroot"):
         """Check if the two libc package versions match.
 
         Args:
-          sysroot: sysroot_lib.Sysroot - The sysroot whose libc version is checked.
+            sysroot: The sysroot whose libc version is checked.
 
         Returns:
-          bool - True iff same version installed in sdk and sysroot.
+            bool - True iff same version installed in sdk and sysroot.
         """
         board_version = sysroot.GetCachedField("LIBC_VERSION")
         toolchain_version = self.libc_version

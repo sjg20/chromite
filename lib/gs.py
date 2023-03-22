@@ -92,8 +92,8 @@ def CanonicalizeURL(url, strict=False):
     """Convert provided URL to gs:// URL, if it follows a known format.
 
     Args:
-      url: URL to canonicalize.
-      strict: Raises exception if URL cannot be canonicalized.
+        url: URL to canonicalize.
+        strict: Raises exception if URL cannot be canonicalized.
     """
     for prefix in (
         PUBLIC_BASE_HTTPS_URL,
@@ -115,13 +115,13 @@ def GetGsURL(bucket, for_gsutil=False, public=True, suburl=""):
     """Construct a Google Storage URL
 
     Args:
-      bucket: The Google Storage bucket to use
-      for_gsutil: Do you want a URL for passing to `gsutil`?
-      public: Do we want the public or private url
-      suburl: A url fragment to tack onto the end
+        bucket: The Google Storage bucket to use
+        for_gsutil: Do you want a URL for passing to `gsutil`?
+        public: Do we want the public or private url
+        suburl: A url fragment to tack onto the end
 
     Returns:
-      The fully constructed URL
+        The fully constructed URL
     """
     url = "gs://%s/%s" % (bucket, suburl)
 
@@ -137,21 +137,21 @@ def GsUrlToHttp(path, public=True, directory=False):
     Because the HTTP Urls are not fixed (and may not always be simple prefix
     replacements), use this method to centralize the conversion.
 
-    Directories need to have different URLs from files, because the Web UIs for GS
-    are weird and really inconsistent. Also public directories probably
+    Directories need to have different URLs from files, because the Web UIs for
+    GS are weird and really inconsistent. Also, public directories probably
     don't work, and probably never will (permissions as well as UI).
 
     e.g. 'gs://chromeos-image-archive/path/file' ->
          'https://pantheon/path/file'
 
     Args:
-      path: GS URL to convert.
-      public: Is this URL for Googler access, or publicly visible?
-      directory: Force this URL to be treated as a directory?
-                 We try to autodetect on False.
+        path: GS URL to convert.
+        public: Is this URL for Googler access, or publicly visible?
+        directory: Force this URL to be treated as a directory?
+            We try to autodetect on False.
 
     Returns:
-      https URL as a string.
+        https URL as a string.
     """
     assert PathIsGs(path)
     directory = directory or path.endswith("/")
@@ -246,8 +246,8 @@ class GSCounter(object):
         """Create a counter object.
 
         Args:
-          ctx: A GSContext object.
-          path: The path to the counter in Google Storage.
+            ctx: A GSContext object.
+            path: The path to the counter in Google Storage.
         """
         self.ctx = ctx
         self.path = path
@@ -263,13 +263,13 @@ class GSCounter(object):
         """Atomically set the counter value using |operation|.
 
         Args:
-          default_value: Default value to use for counter, if counter
-                         does not exist.
-          operation: Function that takes the current counter value as a
-                     parameter, and returns the new desired value.
+            default_value: Default value to use for counter, if counter does not
+                exist.
+            operation: Function that takes the current counter value as a
+                parameter, and returns the new desired value.
 
         Returns:
-          The new counter value. None if value could not be set.
+            The new counter value. None if value could not be set.
         """
         generation, _ = self.ctx.GetGeneration(self.path)
         for _ in range(self.ctx.retries + 1):
@@ -282,10 +282,11 @@ class GSCounter(object):
                 )
                 return value
             except (GSContextPreconditionFailed, GSNoSuchKey):
-                # GSContextPreconditionFailed is thrown if another builder is also
-                # trying to update the counter and we lost the race. GSNoSuchKey is
-                # thrown if another builder deleted the counter. In either case, fetch
-                # the generation again, and, if it has changed, try the copy again.
+                # GSContextPreconditionFailed is thrown if another builder is
+                # also trying to update the counter, and we lost the race.
+                # GSNoSuchKey is thrown if another builder deleted the counter.
+                # In either case, fetch the generation again, and, if it has
+                # changed, try the copy again.
                 new_generation, _ = self.ctx.GetGeneration(self.path)
                 if new_generation == generation:
                     raise
@@ -295,7 +296,7 @@ class GSCounter(object):
         """Increment the counter.
 
         Returns:
-          The new counter value. None if value could not be set.
+            The new counter value. None if value could not be set.
         """
         return self.AtomicCounterOperation(1, lambda x: x + 1)
 
@@ -303,7 +304,7 @@ class GSCounter(object):
         """Decrement the counter.
 
         Returns:
-          The new counter value. None if value could not be set.
+            The new counter value. None if value could not be set.
         """
         return self.AtomicCounterOperation(-1, lambda x: x - 1)
 
@@ -311,7 +312,7 @@ class GSCounter(object):
         """Reset the counter to zero.
 
         Returns:
-          The new counter value. None if value could not be set.
+            The new counter value. None if value could not be set.
         """
         return self.AtomicCounterOperation(0, lambda x: 0)
 
@@ -319,7 +320,7 @@ class GSCounter(object):
         """Increment the counter if it is positive, otherwise set it to 1.
 
         Returns:
-          The new counter value. None if value could not be set.
+            The new counter value. None if value could not be set.
         """
         return self.AtomicCounterOperation(1, lambda x: x + 1 if x > 0 else 1)
 
@@ -327,7 +328,7 @@ class GSCounter(object):
         """Decrement the counter if it is negative, otherwise set it to -1.
 
         Returns:
-          The new counter value. None if value could not be set.
+            The new counter value. None if value could not be set.
         """
         return self.AtomicCounterOperation(-1, lambda x: x - 1 if x < 0 else -1)
 
@@ -440,9 +441,10 @@ class GSContext(object):
     def _DetermineCrcmodStrategy(cls, path: Path):
         """Figure out how we'll get a compiled crcmod.
 
-        The compiled crcmod code is much faster than the python implementation, and
-        enables some more features (otherwise gsutil internally disables them).
-        Try to compile the module on demand in the crcmod tree bundled with gsutil.
+        The compiled crcmod code is much faster than the python implementation,
+        and enables some more features (otherwise gsutil internally disables
+        them). Try to compile the module on demand in the crcmod tree bundled
+        with gsutil.
 
         If that's not working, we'll try to fall back to vpython when available.
 
@@ -450,13 +452,14 @@ class GSContext(object):
         https://cloud.google.com/storage/docs/gsutil/addlhelp/CRC32CandInstallingcrcmod
 
         Args:
-          path: The path to our local copy of gsutil.
+            path: The path to our local copy of gsutil.
 
         Returns:
-          'import' if the active python has it available already (whoo!).
-          'bundle' if we were able to build the bundled copy in the gsutil source.
-          'vpython' if we need to use vpython to pull a wheel on the fly.
-          'missing' if we weren't able to find a compiled version.
+            'import' if the active python has it available already (whoo!).
+            'bundle' if we were able to build the bundled copy in the gsutil
+                source.
+            'vpython' if we need to use vpython to pull a wheel on the fly.
+            'missing' if we weren't able to find a compiled version.
         """
         if cls._CRCMOD_METHOD is not None:
             return cls._CRCMOD_METHOD
@@ -551,10 +554,11 @@ class GSContext(object):
                     pass
 
             if not copied:
-                # If the module compile failed (missing compiler/headers/whatever),
-                # then the setup.py build command above would have passed, but there
-                # won't actually be a _crcfunext.so module.  Check for it here to
-                # disambiguate other errors from shutil.copy2.
+                # If the module compile failed (missing
+                # compiler/headers/whatever), then the setup.py build command
+                # above would have passed, but there won't actually be a
+                # _crcfunext.so module.  Check for it here to disambiguate other
+                # errors from shutil.copy2.
                 logging.debug(
                     "No crcmod module produced (missing host compiler?)"
                 )
@@ -581,8 +585,8 @@ wheel: <
         try:
             osutils.WriteFile(spec, data, mode="wb", atomic=True)
         except OSError:
-            # If the cache already existed, as root, but hadn't had the spec written,
-            # do it as root now.
+            # If the cache already existed, as root, but hadn't had the spec
+            # written, do it as root now.
             osutils.WriteFile(spec, data, mode="wb", atomic=True, sudo=True)
         return True
 
@@ -601,21 +605,22 @@ wheel: <
         """Constructor.
 
         Args:
-          boto_file: Fully qualified path to user's .boto credential file.
-          cache_dir: The absolute path to the cache directory. Use the default
-            fallback if not given.
-          acl: If given, a canned ACL. It is not valid to pass in an ACL file
-            here, because most gsutil commands do not accept ACL files. If you
-            would like to use an ACL file, use the SetACL command instead.
-          dry_run: Testing mode that prints commands that would be run.
-          gsutil_bin: If given, the absolute path to the gsutil binary.  Else
-            the default fallback will be used.
-          init_boto: If set to True, GSContext will check during __init__ if a
-            valid boto config is configured, and if not, will attempt to ask the
-            user to interactively set up the boto config.
-          retries: Number of times to retry a command before failing.
-          sleep: Amount of time to sleep between failures.
-          cache_user: user for creating cache_dir for gsutil. Default is None.
+            boto_file: Fully qualified path to user's .boto credential file.
+            cache_dir: The absolute path to the cache directory. Use the default
+                fallback if not given.
+            acl: If given, a canned ACL. It is not valid to pass in an ACL file
+                here, because most gsutil commands do not accept ACL files. If
+                you would like to use an ACL file, use the SetACL command
+                instead.
+            dry_run: Testing mode that prints commands that would be run.
+            gsutil_bin: If given, the absolute path to the gsutil binary.  Else
+                the default fallback will be used.
+            init_boto: If set to True, GSContext will check during __init__ if a
+                valid boto config is configured, and if not, will attempt to ask
+                the user to interactively set up the boto config.
+            retries: Number of times to retry a command before failing.
+            sleep: Amount of time to sleep between failures.
+            cache_user: user for creating cache_dir for gsutil. Default is None.
         """
         if gsutil_bin is None:
             self.InitializeCache(cache_dir=cache_dir, cache_user=cache_user)
@@ -631,9 +636,9 @@ wheel: <
         # The version of gsutil is retrieved on demand and cached here.
         self._gsutil_version = None
 
-        # Increase the number of retries. With 10 retries, Boto will try a total of
-        # 11 times and wait up to 2**11 seconds (~30 minutes) in total, not
-        # not including the time spent actually uploading or downloading.
+        # Increase the number of retries. With 10 retries, Boto will try a total
+        # of 11 times and wait up to 2**11 seconds (~30 minutes) in total, not
+        # including the time spent actually uploading or downloading.
         self.gsutil_flags = ["-o", "Boto:num_retries=10"]
 
         # Set HTTP proxy if environment variable http_proxy is set
@@ -691,13 +696,14 @@ wheel: <
             else:
                 cmd = ["-q", "version"]
 
-                # gsutil has been known to return version to stderr in the past, so
-                # use stderr=subprocess.STDOUT.
+                # gsutil has been known to return version to stderr in the past,
+                # so use stderr=subprocess.STDOUT.
                 result = self.DoCommand(
                     cmd, stdout=True, stderr=subprocess.STDOUT
                 )
 
-                # Expect output like: 'gsutil version 3.35' or 'gsutil version: 4.5'.
+                # Expect output like: 'gsutil version 3.35' or
+                # 'gsutil version: 4.5'.
                 match = re.search(
                     r"^\s*gsutil\s+version:?\s+([\d.]+)",
                     result.stdout,
@@ -717,8 +723,8 @@ wheel: <
         """Pre-flight check for valid inputs.
 
         Args:
-          errmsg: Error message to display.
-          afile: Fully qualified path to test file existance.
+            errmsg: Error message to display.
+            afile: Fully qualified path to test file existence.
         """
         if not os.path.isfile(afile):
             raise GSContextException("%s, %s is not a file" % (errmsg, afile))
@@ -776,7 +782,8 @@ wheel: <
         encoding = kwargs.setdefault("encoding", None)
         errors = kwargs.setdefault("errors", None)
         if not PathIsGs(path):
-            # gsutil doesn't support cat-ting a local path, so read it ourselves.
+            # gsutil doesn't support cat-ting a local path, so read it
+            # ourselves.
             mode = "rb" if encoding is None else "r"
             try:
                 return osutils.ReadFile(
@@ -798,16 +805,16 @@ wheel: <
         """Returns the content of a GS file as a stream.
 
         Unlike Cat or Copy, this function doesn't support any internal retry or
-        validation by computing checksum of downloaded data. Users should perform
-        their own validation, or use Cat() instead.
+        validation by computing checksum of downloaded data. Users should
+        perform their own validation, or use Cat() instead.
 
         Args:
-          path: Full gs:// path of the src file.
-          chunksize: At most how much data read from upstream and yield to callers
-            at a time. The default value is 1 MB.
+            path: Full gs:// path of the src file.
+            chunksize: At most how much data read from upstream and yield to
+                callers at a time. The default value is 1 MB.
 
         Yields:
-          The file content, chunk by chunk, as bytes.
+            The file content, chunk by chunk, as bytes.
         """
         assert PathIsGs(path)
 
@@ -849,14 +856,15 @@ wheel: <
         """Upload a local file into a directory in google storage.
 
         Args:
-          local_path: Local file path to copy.
-          remote_dir: Full gs:// url of the directory to transfer the file into.
-          filename: If given, the filename to place the content at; if not given,
-            it's discerned from basename(local_path).
-          **kwargs: See Copy() for documentation.
+            local_path: Local file path to copy.
+            remote_dir: Full gs:// url of the directory to transfer the file
+                into.
+            filename: If given, the filename to place the content at; if not
+                given, it's discerned from basename(local_path).
+            **kwargs: See Copy() for documentation.
 
         Returns:
-          The generation of the remote file.
+            The generation of the remote file.
         """
         filename = filename if filename is not None else local_path
         # Basename it even if an explicit filename was given; we don't want
@@ -875,10 +883,10 @@ wheel: <
         function does not handle parallel uploads.
 
         Args:
-          dest_path: Either a GS path or an absolute local path.
+            dest_path: Either a GS path or an absolute local path.
 
         Returns:
-          The list of potential tracker filenames.
+            The list of potential tracker filenames.
         """
         dest = urllib.parse.urlsplit(dest_path)
         filenames = []
@@ -918,9 +926,9 @@ wheel: <
         """Returns whether to retry RunCommandError exception |e|.
 
         Args:
-          e: Exception object to filter. Exception may be re-raised as
-             as different type, if _RetryFilter determines a more appropriate
-             exception type based on the contents of |e|.
+            e: Exception object to filter. Exception may be re-raised as a
+                different type, if _RetryFilter determines a more appropriate
+                exception type based on the contents of |e|.
         """
         error_details = self._MatchKnownError(e)
         if error_details.exception:
@@ -931,10 +939,11 @@ wheel: <
         """Function to match known RunCommandError exceptions.
 
         Args:
-          e: Exception object to filter.
+            e: Exception object to filter.
 
         Returns:
-          An ErrorDetails instance with details about the message pattern found.
+            An ErrorDetails instance with details about the message pattern
+            found.
         """
         if not retry_util.ShouldRetryCommandCommon(e):
             if not isinstance(e, cros_build_lib.RunCommandError):
@@ -962,9 +971,10 @@ wheel: <
             if isinstance(error, str):
                 error = error.encode("utf-8")
 
-            # gsutil usually prints PreconditionException when a precondition fails.
-            # It may also print "ResumableUploadAbortException: 412 Precondition
-            # Failed", so the logic needs to be a little more general.
+            # gsutil usually prints PreconditionException when a precondition
+            # fails. It may also print "ResumableUploadAbortException: 412
+            # Precondition Failed", so the logic needs to be a little more
+            # general.
             if (
                 b"PreconditionException" in error
                 or b"412 Precondition Failed" in error
@@ -975,10 +985,10 @@ wheel: <
                     exception=GSContextPreconditionFailed(e),
                 )
 
-            # If the file does not exist, one of the following errors occurs. The
-            # "stat" command leaves off the "CommandException: " prefix, but it also
-            # outputs to stdout instead of stderr and so will not be caught here
-            # regardless.
+            # If the file does not exist, one of the following errors occurs.
+            # The "stat" command leaves off the "CommandException: " prefix, but
+            # it also outputs to stdout instead of stderr and so will not be
+            # caught here regardless.
             if (
                 b"CommandException: No URLs matched" in error
                 or b"NotFoundException:" in error
@@ -999,11 +1009,12 @@ wheel: <
                 error, self.RESUMABLE_ERROR_MESSAGE
             )
             if resumable_error:
-                # Only remove the tracker files if we try to upload/download a file.
+                # Only remove the tracker files if we try to upload/download a
+                # file.
                 if "cp" in e.cmd[:-2]:
-                    # Assume a command: gsutil [options] cp [options] src_path dest_path
-                    # dest_path needs to be a fully qualified local path, which is already
-                    # required for GSContext.Copy().
+                    # Assume a command: gsutil [options] cp [options] src_path
+                    # dest_path dest_path needs to be a fully qualified local
+                    # path, which is already required for GSContext.Copy().
                     tracker_filenames = self.GetTrackerFilenames(e.cmd[-1])
                     logging.info(
                         "Potential list of tracker files: %s", tracker_filenames
@@ -1014,7 +1025,8 @@ wheel: <
                         )
                         if os.path.exists(tracker_file_path):
                             logging.info(
-                                "Deleting gsutil tracker file %s before retrying.",
+                                "Deleting gsutil tracker file %s before "
+                                "retrying.",
                                 tracker_file_path,
                             )
                             logging.info(
@@ -1053,23 +1065,25 @@ wheel: <
         """Run a gsutil command, suppressing output, and setting retry/sleep.
 
         Args:
-          gsutil_cmd: The (mostly) constructed gsutil subcommand to run.
-          headers: A list of raw headers to pass down.
-          parallel: Whether gsutil should enable parallel copy/update of multiple
-            files. NOTE: This option causes gsutil to use significantly more
-            memory, even if gsutil is only uploading one file.
-          retries: How many times to retry this command (defaults to setting given
-            at object creation).
-          version: If given, the generation; essentially the timestamp of the last
-            update.  Note this is not the same as sequence-number; it's
-            monotonically increasing bucket wide rather than reset per file.
-            The usage of this is if we intend to replace/update only if the version
-            is what we expect.  This is useful for distributed reasons- for example,
-            to ensure you don't overwrite someone else's creation, a version of
-            0 states "only update if no version exists".
+            gsutil_cmd: The (mostly) constructed gsutil subcommand to run.
+            headers: A list of raw headers to pass down.
+            parallel: Whether gsutil should enable parallel copy/update of
+                multiple files. NOTE: This option causes gsutil to use
+                significantly more memory, even if gsutil is only uploading one
+                file.
+            retries: How many times to retry this command (defaults to setting
+                given at object creation).
+            version: If given, the generation; essentially the timestamp of the
+                last update.  Note this is not the same as sequence-number; it's
+                monotonically increasing bucket wide rather than reset per file.
+                The usage of this is if we intend to replace/update only if the
+                version is what we expect.  This is useful for distributed
+                reasons - for example, to ensure you don't overwrite someone
+                else's creation, a version of 0 states "only update if no
+                version exists".
 
         Returns:
-          A CompletedProcess object.
+            A CompletedProcess object.
         """
         kwargs = kwargs.copy()
         if "capture_output" not in kwargs:
@@ -1136,28 +1150,29 @@ wheel: <
         https://developers.google.com/storage/docs/accesscontrol#applyacls
 
         Args:
-          src_path: Fully qualified local path or full gs:// path of the src file.
-          dest_path: Fully qualified local path or full gs:// path of the dest
-                     file.
-          acl: One of the google storage canned_acls to apply.
-          recursive: Whether to copy recursively.
-          skip_symlinks: Skip symbolic links when copying recursively.
-          auto_compress: Automatically compress with gzip when uploading.
+            src_path: Fully qualified local path or full gs:// path of the src
+                file.
+            dest_path: Fully qualified local path or full gs:// path of the dest
+                file.
+            acl: One of the Google Storage canned_acls to apply.
+            recursive: Whether to copy recursively.
+            skip_symlinks: Skip symbolic links when copying recursively.
+            auto_compress: Automatically compress with gzip when uploading.
 
         Returns:
-          The generation of the remote file.
+            The generation of the remote file.
 
         Raises:
-          RunCommandError if the command failed despite retries.
+            RunCommandError if the command failed despite retries.
         """
         # -v causes gs://bucket/path#generation to be listed in output.
         cmd = ["cp", "-v"]
 
-        # Certain versions of gsutil (at least 4.3) assume the source of a copy is
-        # a directory if the -r option is used. If it's really a file, gsutil will
-        # look like it's uploading it but not actually do anything. We'll work
-        # around that problem by surpressing the -r flag if we detect the source
-        # is a local file.
+        # Certain versions of gsutil (at least 4.3) assume the source of a copy
+        # is a directory if the -r option is used. If it's really a file, gsutil
+        # will look like it's uploading it but not actually do anything. We'll
+        # work around that problem by suppressing the -r flag if we detect the
+        # source is a local file.
         if recursive and not os.path.isfile(src_path):
             cmd.append("-r")
             if skip_symlinks:
@@ -1171,9 +1186,9 @@ wheel: <
             cmd += ["-a", acl]
 
         with contextlib.ExitStack() as stack:
-            # Write the input into a tempfile if possible. This is needed so that
-            # gsutil can retry failed requests.  We allow the input to be a string
-            # or bytes regardless of the output encoding.
+            # Write the input into a tempfile if possible. This is needed so
+            # that gsutil can retry failed requests.  We allow the input to be a
+            # string or bytes regardless of the output encoding.
             if src_path == "-" and kwargs.get("input") is not None:
                 f = stack.enter_context(tempfile.NamedTemporaryFile(mode="wb"))
                 data = kwargs["input"]
@@ -1198,17 +1213,18 @@ wheel: <
                 if self.dry_run:
                     return None
 
-                # Now we parse the output for the current generation number.  Example:
-                #   Created: gs://chromeos-throw-away-bucket/foo#1360630664537000.1
+                # Now we parse the output for the current generation number.
+                # Example:
+                #   Created: gs://example-bucket/foo#1360630664537000.1
                 m = re.search(r"Created: .*#(\d+)([.](\d+))?\n", result.stderr)
                 if m:
                     return int(m.group(1))
                 else:
                     return None
             except GSNoSuchKey as e:
-                # If the source was a local file, the error is a quirk of gsutil 4.5
-                # and should be ignored. If the source was remote, there might
-                # legitimately be no such file. See crbug.com/393419.
+                # If the source was a local file, the error is a quirk of gsutil
+                # 4.5 and should be ignored. If the source was remote, there
+                # might legitimately be no such file. See crbug.com/393419.
                 if os.path.isfile(src_path):
                     return None
 
@@ -1227,12 +1243,12 @@ wheel: <
         """Creates the specified file with specified contents.
 
         Args:
-          gs_uri: The URI of a file on Google Storage.
-          contents: String or bytes with contents to write to the file.
-          kwargs: See additional options that Copy takes.
+            gs_uri: The URI of a file on Google Storage.
+            contents: String or bytes with contents to write to the file.
+            kwargs: See additional options that Copy takes.
 
         Raises:
-          See Copy.
+            See Copy.
         """
         self.Copy("-", gs_uri, input=contents, **kwargs)
 
@@ -1241,12 +1257,12 @@ wheel: <
         """Does a directory listing of the given gs path.
 
         Args:
-          path: The path to get a listing of.
-          kwargs: See options that DoCommand takes.
+            path: The path to get a listing of.
+            kwargs: See options that DoCommand takes.
 
         Returns:
-          A list of paths that matched |path|.  Might be more than one if a
-          directory or path include wildcards/etc...
+            A list of paths that matched |path|.  Might be more than one if a
+            directory or path include wildcards/etc...
         """
         if self.dry_run:
             return []
@@ -1268,14 +1284,14 @@ wheel: <
         """Does a directory listing of the given gs path.
 
         Args:
-          path: The path to get a listing of.
-          details: Whether to include size/timestamp info.
-          generation: Whether to include metadata info & historical versions.
-          kwargs: See options that DoCommand takes.
+            path: The path to get a listing of.
+            details: Whether to include size/timestamp info.
+            generation: Whether to include metadata info & historical versions.
+            kwargs: See options that DoCommand takes.
 
         Returns:
-          A list of GSListResult objects that matched |path|.  Might be more
-          than one if a directory or path include wildcards/etc...
+            A list of GSListResult objects that matched |path|.  Might be more
+            than one if a directory or path include wildcards/etc...
         """
         ret = []
         if self.dry_run:
@@ -1295,8 +1311,8 @@ wheel: <
         else:
             cmd.extend(path)
 
-        # We always request the extended details as the overhead compared to a plain
-        # listing is negligible.
+        # We always request the extended details as the overhead compared to a
+        # plain listing is negligible.
         kwargs["stdout"] = True
         lines = self.DoCommand(cmd, **kwargs).stdout.splitlines()
 
@@ -1345,9 +1361,11 @@ wheel: <
         """Move/rename to/from GS bucket.
 
         Args:
-          src_path: Fully qualified local path or full gs:// path of the src file.
-          dest_path: Fully qualified local path or full gs:// path of the dest file.
-          kwargs: See options that DoCommand takes.
+            src_path: Fully qualified local path or full gs:// path of the src
+                file.
+            dest_path: Fully qualified local path or full gs:// path of the dest
+                file.
+            kwargs: See options that DoCommand takes.
         """
         cmd = ["mv", "--", src_path, dest_path]
         return self.DoCommand(cmd, **kwargs)
@@ -1356,9 +1374,9 @@ wheel: <
         """Set access on a file already in google storage.
 
         Args:
-          path: gs:// url that will have acl applied to it.
-          acl: An ACL permissions file or canned ACL.
-          kwargs: See options that DoCommand takes.
+            path: gs:// url that will have acl applied to it.
+            acl: An ACL permissions file or canned ACL.
+            kwargs: See options that DoCommand takes.
         """
         if acl is None:
             if not self.acl:
@@ -1381,15 +1399,14 @@ wheel: <
         """Change access on a file already in google storage with "acl ch".
 
         Args:
-          upload_url: gs:// url that will have acl applied to it.
-          acl_args_file: A file with arguments to the gsutil acl ch command. The
-                         arguments can be spread across multiple lines. Comments
-                         start with a # character and extend to the end of the
-                         line. Exactly one of this argument or acl_args must be
-                         set.
-          acl_args: A list of arguments for the gsutil acl ch command. Exactly
-                    one of this argument or acl_args must be set.
-          kwargs: See options that DoCommand takes.
+            upload_url: gs:// url that will have acl applied to it.
+            acl_args_file: A file with arguments to the gsutil acl ch command.
+                The arguments can be spread across multiple lines. Comments
+                start with a # character and extend to the end of the line.
+                Exactly one of this argument or acl_args must be set.
+            acl_args: A list of arguments for the gsutil acl ch command. Exactly
+                one of this argument or acl_args must be set.
+            kwargs: See options that DoCommand takes.
         """
         if acl_args_file and acl_args:
             raise GSContextException(
@@ -1423,11 +1440,11 @@ wheel: <
         """Checks whether the given object exists.
 
         Args:
-          path: Local path or gs:// url to check.
-          kwargs: Flags to pass to DoCommand.
+            path: Local path or gs:// url to check.
+            kwargs: Flags to pass to DoCommand.
 
         Returns:
-          True if the path exists; otherwise returns False.
+            True if the path exists; otherwise returns False.
         """
         if not PathIsGs(path):
             return os.path.exists(path)
@@ -1443,10 +1460,10 @@ wheel: <
         """Remove the specified file.
 
         Args:
-          path: Full gs:// url of the file to delete.
-          recursive: Remove recursively starting at path.
-          ignore_missing: Whether to suppress errors about missing files.
-          kwargs: Flags to pass to DoCommand.
+            path: Full gs:// url of the file to delete.
+            recursive: Remove recursively starting at path.
+            ignore_missing: Whether to suppress errors about missing files.
+            kwargs: Flags to pass to DoCommand.
         """
         cmd = ["rm"]
         if "recurse" in kwargs:
@@ -1468,7 +1485,7 @@ wheel: <
         """Get the generation and metageneration of the given |path|.
 
         Returns:
-          A tuple of the generation and metageneration.
+            A tuple of the generation and metageneration.
         """
         try:
             res = self.Stat(path)
@@ -1481,14 +1498,14 @@ wheel: <
         """Stat a GS file, and get detailed information.
 
         Args:
-          path: A GS path for files to Stat. Wildcards are NOT supported.
-          kwargs: Flags to pass to DoCommand.
+            path: A GS path for files to Stat. Wildcards are NOT supported.
+            kwargs: Flags to pass to DoCommand.
 
         Returns:
-          A GSStatResult object with all fields populated.
+            A GSStatResult object with all fields populated.
 
         Raises:
-          Assorted GSContextException exceptions.
+            Assorted GSContextException exceptions.
         """
         try:
             res = self.DoCommand(["stat", "--", path], stdout=True, **kwargs)
@@ -1522,9 +1539,9 @@ wheel: <
                 metageneration=0,
             )
 
-        # We expect Stat output like the following. However, the Content-Language
-        # line appears to be optional based on how the file in question was
-        # created.
+        # We expect Stat output like the following. However, the
+        # Content-Language line appears to be optional based on how the file in
+        # question was created.
         #
         # gs://bucket/path/file:
         #     Creation time:      Sat, 23 Aug 2014 06:53:20 GMT
@@ -1568,7 +1585,7 @@ wheel: <
         """Return a GSCounter object pointing at a |path| in Google Storage.
 
         Args:
-          path: The path to the counter in Google Storage.
+            path: The path to the counter in Google Storage.
         """
         return GSCounter(self, path)
 
@@ -1576,14 +1593,15 @@ wheel: <
         """Wait until a list of files exist in GS.
 
         Args:
-          paths: The list of files to wait for.
-          timeout: Max seconds to wait for file to appear.
-          period: How often to check for files while waiting.
+            paths: The list of files to wait for.
+            timeout: Max seconds to wait for file to appear.
+            period: How often to check for files while waiting.
 
         Raises:
-          timeout_util.TimeoutError if the timeout is reached.
+            timeout_util.TimeoutError if the timeout is reached.
         """
-        # Copy the list of URIs to wait for, so we don't modify the callers context.
+        # Copy the list of URIs to wait for, so we don't modify the caller's
+        # context.
         pending_paths = paths[:]
 
         def _CheckForExistence():
@@ -1601,40 +1619,42 @@ wheel: <
         """Checks whether url_string contains a wildcard.
 
         Args:
-          url: URL string to check.
+            url: URL string to check.
 
         Returns:
-          True if |url| contains a wildcard.
+            True if |url| contains a wildcard.
         """
         return bool(WILDCARD_REGEX.search(url))
 
     def GetGsNamesWithWait(
         self, pattern, url, timeout=600, period=10, is_regex_pattern=False
     ):
-        """Returns the google storage names specified by the given pattern.
+        """Returns the Google Storage names specified by the given pattern.
 
         This method polls Google Storage until the target files specified by the
-        pattern is available or until the timeout occurs. Because we may not know
-        the exact name of the target files, the method accepts a filename pattern,
-        to identify whether a file whose name matches the pattern exists
-        (e.g. use pattern '*_full_*' to search for the full payload
-        'chromeos_R17-1413.0.0-a1_x86-mario_full_dev.bin'). Returns the name only
-        if found before the timeout.
+        pattern is available or until the timeout occurs. Because we may not
+        know the exact name of the target files, the method accepts a filename
+        pattern, to identify whether a file whose name matches the pattern
+        exists (e.g. use pattern '*_full_*' to search for the full payload
+        'chromeos_R17-1413.0.0-a1_x86-mario_full_dev.bin'). Returns the name
+        only if found before the timeout.
 
-        Warning: GS listing are not perfect, and are eventually consistent. Doing a
-        search for file existence is a 'best effort'. Calling code should be aware
-        and ready to handle that.
+        Warning: GS listing are not perfect, and are eventually consistent.
+        Doing a search for file existence is a 'best effort'. Calling code
+        should be aware and ready to handle that.
 
         Args:
-          pattern: a path pattern (glob or regex) identifying the files we need.
-          url: URL of the Google Storage bucket.
-          timeout: how many seconds are we allowed to keep trying.
-          period: how many seconds to wait between attempts.
-          is_regex_pattern: Whether the pattern is a regex (otherwise a glob).
+            pattern: a path pattern (glob or regex) identifying the files we
+                need.
+            url: URL of the Google Storage bucket.
+            timeout: how many seconds are we allowed to keep trying.
+            period: how many seconds to wait between attempts.
+            is_regex_pattern: Whether the pattern is a regex (otherwise a glob).
 
         Returns:
-          The list of files matching the pattern in Google Storage bucket or None
-          if the files are not found and hit the timeout_util.TimeoutError.
+            The list of files matching the pattern in Google Storage bucket or
+            None if the files are not found and hit the
+            timeout_util.TimeoutError.
         """
 
         def _GetGsName():
@@ -1706,19 +1726,19 @@ def _FirstMatch(predicate, elems):
     """Returns the first element matching the given |predicate|.
 
     Args:
-      predicate: A function which takes an element and returns a bool
-      elems: A sequence of elements.
+        predicate: A function which takes an element and returns a bool
+        elems: A sequence of elements.
     """
     matches = [x for x in elems if predicate(x)]
     return matches[0] if matches else None
 
 
 def _FirstSubstring(superstring, haystack):
-    """Returns the first elem of |haystack| which is a substring of |superstring|.
+    """Return the first elem of |haystack|, a substring of |superstring|.
 
     Args:
-      superstring: A string to search for substrings of.
-      haystack: A sequence of strings to search through.
+        superstring: A string to search for substrings of.
+        haystack: A sequence of strings to search through.
     """
     return _FirstMatch(lambda s: s in superstring, haystack)
 
