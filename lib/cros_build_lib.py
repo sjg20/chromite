@@ -24,7 +24,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import List, Optional, Union
+from typing import List, NoReturn, Optional, Union
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import constants
@@ -1004,7 +1004,7 @@ class DieSystemExit(SystemExit):
     """Custom Exception used so we can intercept this if necessary."""
 
 
-def Die(message, *args, **kwargs):
+def Die(message, *args, **kwargs) -> NoReturn:
     """Emits an error message with a stack trace and halts execution.
 
     Args:
