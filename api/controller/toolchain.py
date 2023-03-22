@@ -16,6 +16,7 @@ from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import toolchain_pb2
 from chromite.api.gen.chromite.api.artifacts_pb2 import PrepareForBuildResponse
 from chromite.api.gen.chromiumos.builder_config_pb2 import BuilderConfig
+from chromite.api.gen.chromiumos.common_pb2 import PackageInfo
 from chromite.lib import toolchain as toolchain_lib
 from chromite.lib import toolchain_util
 from chromite.service import toolchain
@@ -467,7 +468,11 @@ def EmergeWithLinting(
                 message=finding.message,
                 locations=locations,
                 linter=LINTER_CODES[finding.linter],
-                package=finding.package,
+                package=PackageInfo(
+                    category=finding.package.category,
+                    package_name=finding.package.package,
+                    version=finding.package.version,
+                ),
             )
         )
 
