@@ -266,14 +266,6 @@ Supported file names: %s
         )
 
     def Run(self):
-        files = self.options.files
-        if not files:
-            # Running with no arguments is allowed to make the repo upload hook
-            # simple, but print a warning so that if someone runs this manually
-            # they are aware that nothing was changed.
-            logging.warning("No files provided to format.  Doing nothing.")
-            return 0
-
         # Ignore symlinks.
         files = []
         syms = []
@@ -291,6 +283,12 @@ Supported file names: %s
                     files.append(f)
         if syms:
             logging.info("Ignoring symlinks: %s", syms)
+        if not files:
+            # Running with no arguments is allowed to make the repo upload hook
+            # simple, but print a warning so that if someone runs this manually
+            # they are aware that nothing happened.
+            logging.warning("No files found to process.  Doing nothing.")
+            return 0
 
         # Ignore generated files.  Some tools can do this for us, but not all,
         # and it'd be faster if we just never spawned the tools in the first
