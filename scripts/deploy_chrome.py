@@ -49,6 +49,7 @@ KERNEL_B_PARTITION = 4
 
 KILL_PROC_MAX_WAIT = 10
 POST_KILL_WAIT = 2
+POST_UNLOCK_WAIT = 3
 
 MOUNT_RW_COMMAND = "mount -o remount,rw /"
 LSOF_COMMAND_CHROME = "lsof %s/chrome"
@@ -475,6 +476,7 @@ class DeployChrome(object):
                         raise DeployFailure("Unlock screen not shown")
 
                 WaitForUnlockScreen()
+                time.sleep(POST_UNLOCK_WAIT)
                 self.device.run(
                     UNLOCK_PASSWORD_COMMAND % self.options.unlock_password
                 )
