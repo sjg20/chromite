@@ -266,11 +266,20 @@ Supported file names: %s
         )
 
     def Run(self):
+        # Hack "pre-submit" to "HEAD" when being run by repohooks/pre-upload.py
+        # --pre-submit.  We should drop support for this once we merge repohooks
+        # into `cros` with proper preupload/presubmit.
+        commit = (
+            "HEAD"
+            if self.options.commit == "pre-submit"
+            else self.options.commit
+        )
+
         # Ignore symlinks.
         files = []
         syms = []
-        if self.options.commit:
-            for f in git.LsTree(None, self.options.commit, self.options.files):
+        if commit:
+            for f in git.LsTree(None, commit, self.options.files):
                 if f.is_symlink:
                     syms.append(f.name)
                 else:
@@ -315,7 +324,7 @@ Supported file names: %s
             self.options.debug,
             self.options.diff,
             self.options.dryrun,
-            self.options.commit,
+            commit,
         )
 
         # If we filtered out all files, do nothing.
