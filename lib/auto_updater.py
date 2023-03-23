@@ -491,8 +491,8 @@ class ChromiumOSUpdater(BaseUpdater):
         try:
             nebraska.Start()
 
-            # Use the localhost IP address (default) to ensure that update engine
-            # client can connect to the nebraska.
+            # Use the localhost IP address (default) to ensure that update
+            # engine client can connect to the nebraska.
             nebraska_url = nebraska.GetURL(critical_update=True)
             cmd = [
                 self.REMOTE_UPDATE_ENGINE_BIN_FILENAME,
@@ -502,7 +502,8 @@ class ChromiumOSUpdater(BaseUpdater):
 
             self.device.run(cmd, **self._cmd_kwargs)
 
-            # If we are using a progress bar, update it every 0.5s instead of 10s.
+            # If we are using a progress bar, update it every 0.5s instead of
+            # 10s.
             if command.UseProgressBar():
                 update_check_interval = self.UPDATE_CHECK_INTERVAL_PROGRESSBAR
                 oper = operation.ProgressBarOperation()
@@ -564,8 +565,9 @@ class ChromiumOSUpdater(BaseUpdater):
                         end_message_not_printed = False
 
                 time.sleep(update_check_interval)
-        # TODO(ahassani): Scope the Exception to finer levels. For example we don't
-        # need to revert the boot partition if the Nebraska fails to start, etc.
+        # TODO(ahassani): Scope the Exception to finer levels. For example we
+        #   don't need to revert the boot partition if the Nebraska fails to
+        #   start, etc.
         except Exception as e:
             logging.error("Rootfs update failed %s", e)
             self.RevertBootPartition()
@@ -615,8 +617,8 @@ class ChromiumOSUpdater(BaseUpdater):
             )
 
             if self._copy_payloads_to_device:
-                # Delete the stateful update file on success so it doesn't occupy extra
-                # disk space. On failure it will get cleaned up.
+                # Delete the stateful update file on success, so it doesn't
+                # occupy extra disk space. On failure, it will get cleaned up.
                 self.device.DeletePath(stateful_update_payload)
         except stateful_updater.Error as e:
             error_msg = "Stateful update failed with error: %s" % str(e)
@@ -632,9 +634,9 @@ class ChromiumOSUpdater(BaseUpdater):
         3. Do root updating.
         """
 
-        # SetupRootfsUpdate() may reboot the device and therefore should be called
-        # before any payloads are transferred to the device and only if rootfs
-        # update is required.
+        # SetupRootfsUpdate() may reboot the device and therefore should be
+        # called before any payloads are transferred to the device and only if
+        # rootfs update is required.
         self.SetupRootfsUpdate()
 
         if self._resolve_app_id_mismatch:
@@ -656,17 +658,18 @@ class ChromiumOSUpdater(BaseUpdater):
         """Reboot and verify the remote device.
 
         1. Reboot the remote device. If _clobber_stateful (--clobber-stateful)
-        is executed, the stateful partition is wiped, and the working directory
-        on the remote device no longer exists. So, recreate the working directory
-        for this remote device.
+            is executed, the stateful partition is wiped, and the working
+            directory on the remote device no longer exists. So, recreate the
+            working directory for this remote device.
         2. Verify the remote device, by checking that whether the root device
-        changed after reboot.
+            changed after reboot.
         """
         logging.notice("Rebooting device...")
-        # Record the current root device. This must be done after SetupRootfsUpdate
-        # and before reboot, since SetupRootfsUpdate may reboot the device if there
-        # is a pending update, which changes the root device, and reboot will
-        # definitely change the root device if update successfully finishes.
+        # Record the current root device. This must be done after
+        # SetupRootfsUpdate and before reboot, since SetupRootfsUpdate may
+        # reboot the device if there is a pending update, which changes the root
+        # device, and reboot will definitely change the root device if update
+        # successfully finishes.
         old_root_dev = self.GetRootDev()
         self.device.Reboot()
         if self._clobber_stateful:
@@ -688,19 +691,19 @@ class ChromiumOSUpdater(BaseUpdater):
             if new_root_dev == old_root_dev:
                 raise AutoUpdateVerifyError(
                     "Failed to boot into the new version. Possibly there was a "
-                    "signing problem, or an automated rollback occurred because "
-                    "your new image failed to boot."
+                    "signing problem, or an automated rollback occurred "
+                    "because your new image failed to boot."
                 )
 
     def _ResolveAPPIDMismatchIfAny(self):
         """Resolves and APP ID mismatch between the payload and device.
 
-        If the APP ID of the payload is different than the device, then the nebraska
-        will fail. We empty the payload's App ID so nebraska can do partial APP ID
-        matching.
+        If the APP ID of the payload is different from the device, then the
+        nebraska will fail. We empty the payload's App ID so nebraska can do
+        partial APP ID matching.
         """
         if not self.device.app_id:
-            logging.warning("Device does not have a propper APP ID!")
+            logging.warning("Device does not have a proper APP ID!")
             return
 
         prop_file = os.path.join(
@@ -710,7 +713,8 @@ class ChromiumOSUpdater(BaseUpdater):
             content = json.load(fp)
             payload_app_id = content.get("appid", "")
             if not payload_app_id:
-                # Payload's App ID is empty, we don't care, it is already partial match.
+                # Payload's App ID is empty, we don't care, it is already
+                # partial match.
                 return
 
         if self.device.app_id != payload_app_id:
@@ -846,8 +850,9 @@ class ChromiumOSUpdater(BaseUpdater):
         if not self.update_version:
             return False
 
-        # Use CHROMEOS_RELEASE_BUILDER_PATH to match the build version if it exists
-        # in lsb-release, otherwise, continue using CHROMEOS_RELEASE_VERSION.
+        # Use CHROMEOS_RELEASE_BUILDER_PATH to match the build version if it
+        # exists in lsb-release, otherwise, continue using
+        # CHROMEOS_RELEASE_VERSION.
         release_builder_path = self._GetReleaseBuilderPath()
         if release_builder_path:
             return self.update_version == release_builder_path
@@ -968,7 +973,8 @@ class ChromiumOSUpdater(BaseUpdater):
                 test_file_path = os.path.join(
                     folder, self.REMOTE_STATEFUL_TEST_FILENAME
                 )
-                # If stateful update succeeds, these test files should not exist.
+                # If stateful update succeeds, these test files should not
+                # exist.
                 if self.device.IfFileExists(
                     test_file_path, **self._cmd_kwargs_omit_error
                 ):
@@ -980,8 +986,8 @@ class ChromiumOSUpdater(BaseUpdater):
         """Check whether update-utils package is well installed.
 
         There's a chance that nebraska package is removed in the middle of
-        auto-update process. This function double check it and transfer it if it's
-        removed.
+        auto-update process. This function double check it and transfer it if
+        it's removed.
         """
         logging.info(
             "Checking whether nebraska files are still on the device..."
@@ -1067,8 +1073,9 @@ class ChromiumOSUpdater(BaseUpdater):
                 start_verify_time = time.time()
                 self._VerifyBootExpectations(
                     self.inactive_kernel,
-                    rollback_message="Build %s failed to boot on %s; system rolled back to previous "
-                    "build" % (self.update_version, self.device.hostname),
+                    rollback_message="Build %s failed to boot on %s; system "
+                    "rolled back to previous build"
+                    % (self.update_version, self.device.hostname),
                 )
 
                 # Check that we've got the build we meant to install.

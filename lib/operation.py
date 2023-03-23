@@ -37,26 +37,26 @@ _TerminalSize = collections.namedtuple("_TerminalSize", ("lines", "columns"))
 
 
 class _BackgroundTaskComplete(object):
-    """Sentinal object to indicate that the background task is complete."""
+    """Sentinel object to indicate that the background task is complete."""
 
 
 class ProgressBarOperation(object):
     """Wrapper around long running functions to show progress.
 
-    This class is intended to capture the output of a long running fuction, parse
-    the output, and display a progress bar.
+    This class is intended to capture the output of a long running function,
+    parse the output, and display a progress bar.
 
     To display a progress bar for a function foo with argument foo_args, this is
     the usage case:
-      1) Create a class that inherits from ProgressBarOperation (e.g.
-      FooTypeOperation. In this class, override the ParseOutput method to parse
-      the output of foo.
-      2) op = operation.FooTypeOperation()
-         op.Run(foo, foo_args)
+        1) Create a class that inherits from ProgressBarOperation (e.g.
+            FooTypeOperation. In this class, override the ParseOutput method to
+            parse the output of foo.
+        2)  op = operation.FooTypeOperation()
+            op.Run(foo, foo_args)
     """
 
-    # Subtract 10 characters from the width of the terminal because these are used
-    # to display the percentage as well as other spaces.
+    # Subtract 10 characters from the width of the terminal because these are
+    # used to display the percentage as well as other spaces.
     _PROGRESS_BAR_BORDER_SIZE = 10
 
     # By default, update the progress bar every 100 ms.
@@ -87,8 +87,8 @@ class ProgressBarOperation(object):
         If not in a terminal, we do not display a progress bar.
 
         Args:
-          progress: a float between 0 and 1 that represents the fraction of the
-            current progress.
+            progress: a float between 0 and 1 that represents the fraction of
+                the current progress.
         """
         if not self._isatty:
             return
@@ -114,8 +114,8 @@ class ProgressBarOperation(object):
     def Cleanup(self):
         """Method to cleanup progress bar.
 
-        If progress bar has been printed, then we make sure it displays 100% before
-        exiting.
+        If progress bar has been printed, then we make sure it displays 100%
+        before exiting.
         """
         if self._progress_bar_displayed:
             self.ProgressBar(1)
@@ -125,25 +125,25 @@ class ProgressBarOperation(object):
     def ParseOutput(self, output=None):
         """Method to parse output and update progress bar.
 
-        This method should be overridden to read and parse the lines in _stdout and
-        _stderr.
+        This method should be overridden to read and parse the lines in _stdout
+        and _stderr.
 
         One example use of this method could be to detect 'foo' in stdout and
         increment the progress bar every time foo is seen.
 
         def ParseOutput(self):
-          stdout = self._stdout.read()
-          if 'foo' in stdout:
-            # Increment progress bar.
+            stdout = self._stdout.read()
+            if 'foo' in stdout:
+                # Increment progress bar.
 
         Args:
-          output: Pass in output to parse instead of reading from self._stdout and
-            self._stderr.
+            output: Pass in output to parse instead of reading from self._stdout
+                and self._stderr.
         """
         raise NotImplementedError("Subclass must override this method.")
 
-    # TODO(ralphnathan): Deprecate this function and use parallel._BackgroundTask
-    # instead (brbug.com/863)
+    # TODO(ralphnathan): Deprecate this function and use
+    #   parallel._BackgroundTask instead (brbug.com/863)
     def WaitUntilComplete(self, update_period):
         """Return True if running background task has completed."""
         try:
@@ -157,10 +157,10 @@ class ProgressBarOperation(object):
         """Launch func in background and capture its output.
 
         Args:
-          func: Function to execute in the background and whose output is to be
-            captured.
-          log_level: Logging level to run the func at. By default, it runs at log
-            level info.
+            func: Function to execute in the background and whose output is to
+                be captured.
+            log_level: Logging level to run the func at. By default, it runs at
+                log level info.
         """
         log_level = kwargs.pop("log_level", logging.INFO)
         restore_log_level = logging.getLogger().getEffectiveLevel()
@@ -181,19 +181,19 @@ class ProgressBarOperation(object):
         """Run func, parse its output, and update the progress bar.
 
         Args:
-          func: Function to execute in the background and whose output is to be
-            captured.
-          update_period: Optional argument to specify the period that output should
-            be read.
-          log_level: Logging level to run the func at. By default, it runs at log
-            level info.
+            func: Function to execute in the background and whose output is to
+                be captured.
+            update_period: Optional argument to specify the period that output
+                should be read.
+            log_level: Logging level to run the func at. By default, it runs at
+                log level info.
         """
         update_period = kwargs.pop(
             "update_period", self._PROGRESS_BAR_UPDATE_INTERVAL
         )
 
-        # If we are not running in a terminal device, do not display the progress
-        # bar.
+        # If we are not running in a terminal device, do not display the
+        # progress bar.
         if not self._isatty:
             log_level = kwargs.pop("log_level", logging.INFO)
             restore_log_level = logging.getLogger().getEffectiveLevel()
@@ -225,8 +225,8 @@ class ProgressBarOperation(object):
                 # by ParseOutput
                 self.Cleanup()
             except:
-                # Add a blank line before the logging message so the message isn't
-                # touching the progress bar.
+                # Add a blank line before the logging message so the message
+                # isn't touching the progress bar.
                 sys.stdout.write("\n")
                 logging.error("Oops. Something went wrong.")
                 # Raise the exception so it can be caught again.
@@ -260,19 +260,19 @@ class ParallelEmergeOperation(ProgressBarOperation):
     def ParseOutput(self, output=None):
         """Parse the output of emerge to determine how to update progress bar.
 
-        1) Figure out how many packages exist. If the total number of packages to be
-        built is zero, then we do not display the progress bar.
-        2) Whenever a package is downloaded or built, 'Fetched' and 'Completed' are
-        printed respectively. By counting counting 'Fetched's and 'Completed's, we
-        can determine how much to update the progress bar by.
+        1) Figure out how many packages exist. If the total number of packages
+            to be built is zero, then we do not display the progress bar.
+        2) Whenever a package is downloaded or built, 'Fetched' and 'Completed'
+            are printed respectively. By counting 'Fetched's and 'Completed's,
+            we can determine how much to update the progress bar by.
 
         Args:
-          output: Pass in output to parse instead of reading from self._stdout and
-            self._stderr.
+            output: Pass in output to parse instead of reading from self._stdout
+                and self._stderr.
 
         Returns:
-          A fraction between 0 and 1 indicating the level of the progress bar. If
-          the progress bar isn't displayed, then the return value is -1.
+            A fraction between 0 and 1 indicating the level of the progress bar.
+            If the progress bar isn't displayed, then the return value is -1.
         """
         if output is None:
             stdout = self._stdout.read()
@@ -312,7 +312,7 @@ class Operation(object):
 
     This class is created to handle stdio for a running subprocess. It filters
     it looking for errors and progress information. Optionally it can output the
-    stderr and stdout to the terminal, but it is normally supressed.
+    stderr and stdout to the terminal, but it is normally suppressed.
 
     Progress information is garnered from the subprocess output based on
     knowledge of the legacy scripts, but at some point will move over to using
@@ -326,27 +326,28 @@ class Operation(object):
     =================
 
     verbose: True / False
-      In verbose mode all output from subprocesses is displayed, otherwise
-      this output is normally supressed, unless we think it indicates an error.
+        In verbose mode all output from subprocesses is displayed, otherwise
+        this output is normally suppressed, unless we think it indicates an
+        error.
 
     progress: True / False
-      The output from subprocesses can be analysed in a very basic manner to
-      try to present progress information to the user.
+        The output from subprocesses can be analysed in a very basic manner to
+        try to present progress information to the user.
 
     explicit_verbose: True / False
-      False if we are not just using default verbosity. In that case we allow
-      verbosity to be enabled on request, since the user has not explicitly
-      disabled it. This is used by commands that the user issues with the
-      expectation that output would ordinarily be visible.
+        False if we are not just using default verbosity. In that case we allow
+        verbosity to be enabled on request, since the user has not explicitly
+        disabled it. This is used by commands that the user issues with the
+        expectation that output would ordinarily be visible.
     """
 
     def __init__(self, name, color=None):
         """Create a new operation.
 
         Args:
-          name: Operation name in a form to be displayed for the user.
-          color: Determines policy for sending color to stdout; see terminal.Color
-            for details on interpretation on the value.
+            name: Operation name in a form to be displayed for the user.
+            color: Determines policy for sending color to stdout; see
+                terminal.Color for details on interpretation on the value.
         """
         self._name = name  # Operation name.
         self.verbose = False  # True to echo subprocess output.
@@ -388,8 +389,8 @@ class Operation(object):
         """Returns whether any errors have been detected.
 
         Returns:
-          True if any errors have been detected in subprocess output so far.
-          False otherwise
+            True if any errors have been detected in subprocess output so far.
+            False otherwise
         """
         return self._error_count > 0
 
@@ -397,7 +398,7 @@ class Operation(object):
         """Set the name of the operation as displayed to the user.
 
         Args:
-          name: Operation name.
+            name: Operation name.
         """
         self._name = name
 
@@ -405,12 +406,12 @@ class Operation(object):
         """Filter a line of output to look for and display errors.
 
         This uses a few regular expression searches to spot common error reports
-        from subprocesses. A count of these is kept so we know how many occurred.
-        Optionally they are displayed in red on the terminal.
+        from subprocesses. A count of these is kept so we know how many
+        occurred. Optionally they are displayed in red on the terminal.
 
         Args:
-          line: the output line to filter, as a string.
-          print_error: True to print the error, False to just record it.
+            line: the output line to filter, as a string.
+            print_error: True to print the error, False to just record it.
         """
         bad_things = ["Cannot GET", "ERROR", "!!!", "FAILED"]
         for bad_thing in bad_things:
@@ -421,13 +422,14 @@ class Operation(object):
                     break
 
     def _FilterOutputForProgress(self, line):
-        """Filter a line of output to look for and dispay progress information.
+        """Filter a line of output to look for and display progress information.
 
-        This uses a simple regular expression search to spot progress information
-        coming from subprocesses. This is sent to the _Progress() method.
+        This uses a simple regular expression search to spot progress
+        information coming from subprocesses. This is sent to the _Progress()
+        method.
 
         Args:
-          line: the output line to filter, as a string.
+            line: the output line to filter, as a string.
         """
         match = re.match(r"Pending (\d+).*Total (\d+)", line)
         if match:
@@ -439,8 +441,8 @@ class Operation(object):
         """Record and optionally display progress information.
 
         Args:
-          upto: which step we are up to in the operation (integer, from 0).
-          total: total number of steps in operation,
+            upto: which step we are up to in the operation (integer, from 0).
+            total: total number of steps in operation,
         """
         if total > 0:
             update_str = "%s...%d%% (%d of %d)" % (
@@ -450,12 +452,13 @@ class Operation(object):
                 total,
             )
             if self.progress:
-                # Finish the current line, print progress, and remember its length.
+                # Finish the current line, print progress, and remember its
+                # length.
                 self._FinishLine(self.verbose)
 
-                # Sometimes the progress string shrinks and in this case we need to
-                # blank out the characters at the end of the line that will not be
-                # overwritten by the new line
+                # Sometimes the progress string shrinks and in this case we need
+                # to blank out the characters at the end of the line that will
+                # not be overwritten by the new line
                 pad = max(self._update_len - len(update_str), 0)
                 sys.stdout.write(update_str + (" " * pad) + "\r")
                 self._update_len = len(update_str)
@@ -463,17 +466,17 @@ class Operation(object):
     def _FinishLine(self, display, final=False):
         """Finish off the current line and prepare to start a new one.
 
-        If a new line is pending from the previous line, then this will be output,
-        along with a color reset if needed.
+        If a new line is pending from the previous line, then this will be
+        output, along with a color reset if needed.
 
         We also handle removing progress messages from the output. This is done
         using a carriage return character, following by spaces.
 
         Args:
-          display: True to display output, False to suppress it
-          final: True if this is the final output before we exit, in which case
-              we must clean up any remaining progress message by overwriting
-              it with spaces, then carriage return
+            display: True to display output, False to suppress it
+            final: True if this is the final output before we exit, in which
+                case we must clean up any remaining progress message by
+                overwriting it with spaces, then carriage return
         """
         if display:
             if self._pending_nl != -1:
@@ -488,24 +491,26 @@ class Operation(object):
 
         # If this is the last thing that this operation will print, we need to
         # close things off. So if there is some text on the current line but not
-        # enough to overwrite all the progress information we have sent, add some
-        # more spaces.
+        # enough to overwrite all the progress information we have sent, add
+        # some more spaces.
         if final and self._update_len:
             print(" " * self._update_len, "\r", end="")
 
         self._pending_nl = -1
 
     def _CheckStreamAndColor(self, stream, display):
-        """Check that we're writing to the same stream as last call.  No?  New line.
+        """Check that we're writing to the same stream as last call.
+
+        If not, start a new line.
 
         If starting a new line, set the color correctly:
-          stdout  Magenta
-          stderr  Red
-          other   White / no colors
+            stdout  Magenta
+            stderr  Red
+            other   White / no colors
 
         Args:
-          stream: The stream we're going to write to.
-          display: True to display it on terms, False to suppress it.
+            stream: The stream we're going to write to.
+            display: True to display it on terms, False to suppress it.
         """
         if self._column > 0 and stream != self._cur_stream:
             self._FinishLine(display)
@@ -532,34 +537,35 @@ class Operation(object):
     def _Out(self, stream, text, display, newline=False, do_output_filter=True):
         """Output some text received from a child, or generated internally.
 
-        This method is the guts of the Operation class since it understands how to
-        convert a series of output requests on different streams into something
-        coherent for the user.
+        This method is the guts of the Operation class since it understands how
+        to convert a series of output requests on different streams into
+        something coherent for the user.
 
         If the stream has changed, then a new line is started even if we were
         still halfway through the previous line. This prevents stdout and stderr
         becoming mixed up quite so badly.
 
-        We use color to indicate lines which are stdout and stderr. If the output
-        received from the child has color codes in it already, we pass these
-        through, so our colors can be overridden. If output is redirected then we
-        do not add color by default. Note that nothing stops the child from adding
-        it, but since we present ourselves as a terminal to the child, one might
-        hope that the child will not generate color.
+        We use color to indicate lines which are stdout and stderr. If the
+        output received from the child has color codes in it already, we pass
+        these through, so our colors can be overridden. If output is redirected
+        then we do not add color by default. Note that nothing stops the child
+        from adding it, but since we present ourselves as a terminal to the
+        child, one might hope that the child will not generate color.
 
         If display is False, then we will not actually send this text to the
         terminal. This is uses when verbose is required to be False.
 
         Args:
-          stream: stream on which the text was received:
-            sys.stdout    - received on stdout
-            sys.stderr    - received on stderr
-            None          - generated by us / internally
-          text: text to output
-          display: True to display it on terms, False to suppress it
-          newline: True to start a new line after this text, False to put the next
-            lot of output immediately after this.
-          do_output_filter: True to look through output for errors and progress.
+            stream: stream on which the text was received:
+                sys.stdout    - received on stdout
+                sys.stderr    - received on stderr
+                None          - generated by us / internally
+            text: text to output
+            display: True to display it on terms, False to suppress it
+            newline: True to start a new line after this text, False to put the
+                next lot of output immediately after this.
+            do_output_filter: True to look through output for errors and
+                progress.
         """
         self._CheckStreamAndColor(stream, display)
 
@@ -584,21 +590,20 @@ class Operation(object):
     def Output(self, stream, data):
         r"""Handle the output of a block of text from the subprocess.
 
-        All subprocess output should be sent through this method. It is split into
-        lines which are processed separately using the _Out() method.
+        All subprocess output should be sent through this method. It is split
+        into lines which are processed separately using the _Out() method.
 
         Args:
-          stream: Which file the output come in on:
-            sys.stdout: stdout
-            sys.stderr: stderr
-            None: Our own internal output
-          data: Output data as a big string, potentially containing many lines of
-            text. Each line should end with \r\n. There is no requirement to send
-            whole lines - this method happily handles fragments and tries to
-            present then to the user as early as possible
-
-        #TODO(sjg): Just use a list as the input parameter to avoid the split.
+            stream: Which file the output come in on:
+                sys.stdout: stdout
+                sys.stderr: stderr
+                None: Our own internal output
+            data: Output data as a big string, potentially containing many lines
+                of text. Each line should end with \r\n. There is no requirement
+                to send whole lines - this method happily handles fragments and
+                tries to present then to the user as early as possible
         """
+        # TODO(sjg): Just use a list as the input parameter to avoid the split.
         # We cannot use splitlines() here as we need this exact behavior
         lines = data.split("\r\n")
 
@@ -617,12 +622,12 @@ class Operation(object):
     def Outline(self, line):
         r"""Output a line of text to the display.
 
-        This outputs text generated internally, such as a warning message or error
-        summary. It ensures that our message plays nicely with child output if
-        any.
+        This outputs text generated internally, such as a warning message or
+        error summary. It ensures that our message plays nicely with child
+        output if any.
 
         Args:
-          line: text to output (without \n on the end)
+            line: text to output (without \n on the end)
         """
         self._Out(None, line, display=True, newline=True)
         self._FinishLine(display=True)
@@ -631,7 +636,7 @@ class Operation(object):
         r"""Output a line of information text to the display in verbose mode.
 
         Args:
-          line: text to output (without \n on the end)
+            line: text to output (without \n on the end)
         """
         self._Out(
             None,
@@ -646,7 +651,7 @@ class Operation(object):
         r"""Output a line of notification text to the display.
 
         Args:
-          line: text to output (without \n on the end)
+            line: text to output (without \n on the end)
         """
         self._Out(
             None,
@@ -661,7 +666,7 @@ class Operation(object):
         r"""Output a line of warning text to the display.
 
         Args:
-          line: text to output (without \n on the end)
+            line: text to output (without \n on the end)
         """
         self._Out(
             None,
@@ -676,7 +681,7 @@ class Operation(object):
         r"""Output a line of error text to the display.
 
         Args:
-          line: text to output (without \n on the end)
+            line: text to output (without \n on the end)
         """
         self._Out(
             None,
@@ -691,7 +696,7 @@ class Operation(object):
         r"""Output a line of error text to the display and die.
 
         Args:
-          line: text to output (without \n on the end)
+            line: text to output (without \n on the end)
         """
         self.Error(line)
         sys.exit(1)
@@ -702,11 +707,12 @@ class Operation(object):
 
         This is intended to be used with something like:
 
-          with oper.RequestVerbose(True):
-            ... do some things that generate output
+            with oper.RequestVerbose(True):
+                ... do some things that generate output
 
         Args:
-          request: True to request verbose mode if available, False to do nothing.
+            request: True to request verbose mode if available, False to do
+                nothing.
         """
         old_verbose = self.verbose
         if request and not self.explicit_verbose:

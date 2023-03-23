@@ -225,16 +225,16 @@ def _ParseBenchmarkProfileName(profile_name):
     """Parse the name of a benchmark profile for Chrome.
 
     Examples:
-      with input: profile_name='chromeos-chrome-amd64-77.0.3849.0_rc-r1.afdo'
-      the function returns:
-      BenchmarkProfileVersion(
-        major=77, minor=0, build=3849, patch=0, revision=1, is_merged=False)
+        with input: profile_name='chromeos-chrome-amd64-77.0.3849.0_rc-r1.afdo'
+        the function returns:
+        BenchmarkProfileVersion(
+            major=77, minor=0, build=3849, patch=0, revision=1, is_merged=False)
 
     Args:
-      profile_name: The name of a benchmark profile.
+        profile_name: The name of a benchmark profile.
 
     Returns:
-      Named tuple of BenchmarkProfileVersion if the profile is parsable
+        Named tuple of BenchmarkProfileVersion if the profile is parsable
 
     Raises if the name is not parsable.
     """
@@ -257,15 +257,15 @@ def _ParseCWPProfileName(profile_name):
     """Parse the name of a CWP profile for Chrome.
 
     Examples:
-      With input profile_name='R77-3809.38-1562580965.afdo',
-      the function returns:
-      CWPProfileVersion(major=77, build=3809, patch=38, clock=1562580965)
+        With input profile_name='R77-3809.38-1562580965.afdo',
+        the function returns:
+        CWPProfileVersion(major=77, build=3809, patch=38, clock=1562580965)
 
     Args:
-      profile_name: The name of a CWP profile.
+        profile_name: The name of a CWP profile.
 
     Returns:
-      Named tuple of CWPProfileVersion.
+        Named tuple of CWPProfileVersion.
     """
     pattern = re.compile(CWP_PROFILE_NAME_REGEX, re.VERBOSE)
     match = pattern.match(profile_name)
@@ -282,19 +282,27 @@ def _ParseMergedProfileName(
     """Parse the name of an orderfile or a release profile for Chrome.
 
     Examples:
-      With input: profile_name='chromeos-chrome-orderfile
-      -field-77-3809.38-1562580965
-      -benchmark-77.0.3849.0_rc-r1.orderfile.xz'
-      the function returns:
-      (BenchmarkProfileVersion(
-       major=77, minor=0, build=3849, patch=0, revision=1, is_merged=False),
-       CWPProfileVersion(major=77, build=3809, patch=38, clock=1562580965))
+        With input: profile_name='chromeos-chrome-orderfile
+        -field-77-3809.38-1562580965
+        -benchmark-77.0.3849.0_rc-r1.orderfile.xz'
+        the function returns:
+        (
+            BenchmarkProfileVersion(
+                major=77,
+                minor=0,
+                build=3849,
+                patch=0,
+                revision=1,
+                is_merged=False,
+            ),
+            CWPProfileVersion(major=77, build=3809, patch=38, clock=1562580965)
+        )
 
     Args:
-      artifact_name: The name of an orderfile, or a release AFDO profile.
+        artifact_name: The name of an orderfile, or a release AFDO profile.
 
     Returns:
-      A tuple of (BenchmarkProfileVersion, CWPProfileVersion)
+        A tuple of (BenchmarkProfileVersion, CWPProfileVersion)
     """
     pattern = re.compile(MERGED_PROFILE_NAME_REGEX, re.VERBOSE)
     match = pattern.match(artifact_name)
@@ -317,22 +325,22 @@ def _GetCombinedAFDOName(cwp_versions, cwp_arch, benchmark_versions):
     """Construct a name mixing CWP and benchmark AFDO names.
 
     Examples:
-      If benchmark AFDO is BenchmarkProfileVersion(
-        major=77, minor=0, build=3849, patch=0, revision=1, is_merged=False)
-      and CWP AFDO is CWPProfileVersion(
-        major=77, build=3809, patch=38, clock=1562580965),
-      and cwp_arch is 'atom',
-      the returned name is:
-      atom-77-3809.38-1562580965-benchmark-77.0.3849.0-r1
+        If benchmark AFDO is BenchmarkProfileVersion(
+            major=77, minor=0, build=3849, patch=0, revision=1, is_merged=False)
+        and CWP AFDO is CWPProfileVersion(
+            major=77, build=3809, patch=38, clock=1562580965),
+        and cwp_arch is 'atom',
+        the returned name is:
+        atom-77-3809.38-1562580965-benchmark-77.0.3849.0-r1
 
     Args:
-      cwp_versions: CWP profile as a namedtuple CWPProfileVersion.
-      cwp_arch: Architecture used to differentiate CWP profiles.
-      benchmark_versions: Benchmark profile as a namedtuple
-      BenchmarkProfileVersion.
+        cwp_versions: CWP profile as a namedtuple CWPProfileVersion.
+        cwp_arch: Architecture used to differentiate CWP profiles.
+        benchmark_versions: Benchmark profile as a namedtuple
+            BenchmarkProfileVersion.
 
     Returns:
-      A name using the combination of CWP + benchmark AFDO names.
+        A name using the combination of CWP + benchmark AFDO names.
     """
     cwp_piece = "%s-%d-%d.%d-%d" % (
         cwp_arch,
@@ -357,17 +365,17 @@ def _CompressAFDOFiles(
     """Compress files using AFDO compression type.
 
     Args:
-      targets: List of files to compress. Only the basename is needed.
-      input_dir: Paths to the targets (outside chroot). If None, use
-      the targets as full path.
-      output_dir: Paths to save the compressed file (outside chroot).
-      suffix: Compression suffix.
+        targets: List of files to compress. Only the basename is needed.
+        input_dir: Paths to the targets (outside chroot). If None, use
+            the targets as full path.
+        output_dir: Paths to save the compressed file (outside chroot).
+        suffix: Compression suffix.
 
     Returns:
-      List of full paths of the generated tarballs.
+        List of full paths of the generated tarballs.
 
     Raises:
-      RuntimeError if the file to compress does not exist.
+        RuntimeError if the file to compress does not exist.
     """
     ret = []
     for t in targets:
@@ -396,11 +404,11 @@ def _RankValidCWPProfiles(name: str) -> int:
     """Calculate a value used to rank valid CWP profiles.
 
     Args:
-      name: A name or a full path of a possible CWP profile.
+        name: A name or a full path of a possible CWP profile.
 
     Returns:
-      The "clock" part of the CWP profile, used for ranking if the
-      name is a valid CWP profile. Otherwise, returns None.
+        The "clock" part of the CWP profile, used for ranking if the
+        name is a valid CWP profile. Otherwise, returns None.
     """
     try:
         return _ParseCWPProfileName(os.path.basename(name)).clock
@@ -412,16 +420,16 @@ def _GetProfileAge(profile: str, artifact_type: str) -> int:
     """Tell the age of profile_version in days.
 
     Args:
-      profile: Name of the profile. Different artifact_type has different
-      format. For kernel_afdo, it looks like: R78-12371.11-1565602499.
-      The last part is the timestamp.
-      artifact_type: Only 'kernel_afdo' and 'cwp' are supported now.
+        profile: Name of the profile. Different artifact_type has different
+            format. For kernel_afdo, it looks like: R78-12371.11-1565602499.
+            The last part is the timestamp.
+        artifact_type: Only 'kernel_afdo' and 'cwp' are supported now.
 
     Returns:
-      Age of profile_version in days.
+        Age of profile_version in days.
 
     Raises:
-      ValueError: if the artifact_type is not supported.
+        ValueError: if the artifact_type is not supported.
     """
     if artifact_type in ("kernel_afdo", "cwp"):
         return (
@@ -442,8 +450,8 @@ def _WarnDetectiveAboutKernelProfileExpiration(
     """Send emails to toolchain detective to warn the soon expired profiles.
 
     Args:
-      kver: Kernel version.
-      profile_path: Absolute path to the profile.
+        kver: Kernel version.
+        profile_path: Absolute path to the profile.
     """
     subject_msg = (
         f"[Test Async builder] Kernel AutoFDO profile too old for kernel {kver}"
@@ -508,14 +516,14 @@ class _CommonPrepareBundle(object):
     def _GetEbuildInfo(
         self, package: str, category: Optional[str] = None
     ) -> _EbuildInfo:
-        """Get the ebuild info for a cataegory/package in chromiumos-overlay.
+        """Get the ebuild info for a category/package in chromiumos-overlay.
 
         Args:
-          package: package name (e.g. chromeos-chrome or chromeos-kernel-4_4)
-          category: category (e.g. chromeos-base, or sys-kernel)
+            package: package name (e.g. chromeos-chrome or chromeos-kernel-4_4)
+            category: category (e.g. chromeos-base, or sys-kernel)
 
         Returns:
-          _EbuildInfo for the stable ebuild.
+            _EbuildInfo for the stable ebuild.
         """
         if package in self._ebuild_info:
             return self._ebuild_info[package]
@@ -590,18 +598,21 @@ class _CommonPrepareBundle(object):
         """Find the version (name) of AFDO artifact from GoB.
 
         Args:
-          profile_arch: There are two AFDO profiles in chromium: atom or bigcore.
+            profile_arch: There are two AFDO profiles in chromium: atom or
+                bigcore.
 
         Returns:
-          The name of the AFDO artifact found on GoB, or None if not found.
+            The name of the AFDO artifact found on GoB, or None if not found.
 
         Raises:
-          ValueError: when "profile_arch" is not a supported.
-          RuntimeError: when the file containing AFDO profile_arch name can't be found.
+            ValueError: when "profile_arch" is not a supported.
+            RuntimeError: when the file containing AFDO profile_arch name can't
+                be found.
         """
         if profile_arch not in list(CHROME_AFDO_VERIFIER_BOARDS.values()):
             raise ValueError(
-                f"Invalid architecture {profile_arch} to use in AFDO profile_arch"
+                f"Invalid architecture {profile_arch} to use in AFDO "
+                "profile_arch"
             )
 
         chrome_info = self._GetEbuildInfo(constants.CHROME_PN)
@@ -609,8 +620,8 @@ class _CommonPrepareBundle(object):
         if version.endswith("_rc"):
             version = version[:-3]
         profile_path = (
-            f"chromium/src/+/refs/tags/{version}/chromeos/profiles/{profile_arch}"
-            ".afdo.newest.txt?format=text"
+            f"chromium/src/+/refs/tags/{version}/chromeos/profiles/"
+            f"{profile_arch}.afdo.newest.txt?format=text"
         )
 
         contents = gob_util.FetchUrl(constants.EXTERNAL_GOB_HOST, profile_path)
@@ -626,11 +637,12 @@ class _CommonPrepareBundle(object):
         """Find the version (name) of AFDO artifact from the ebuild.
 
         Args:
-          package: name of the package (such as, 'chromeos-chrome')
-          variable: name of the variable to find.
+            package: name of the package (such as, 'chromeos-chrome')
+            variable: name of the variable to find.
 
         Returns:
-          The name of the AFDO artifact found in the ebuild, or None if not found.
+            The name of the AFDO artifact found in the ebuild, or None if not
+            found.
         """
         info = self._GetEbuildInfo(package)
         ebuild = info.path
@@ -651,10 +663,10 @@ class _CommonPrepareBundle(object):
         """Get the name of the orderfile.
 
         Returns:
-          The orderfile base name derived from the GoB release AFDO.
+            The orderfile base name derived from the GoB release AFDO.
 
         Raises:
-          ValueError if self.profile is not set.
+            ValueError if self.profile is not set.
         """
         if not self.profile:
             raise ValueError(
@@ -679,13 +691,13 @@ class _CommonPrepareBundle(object):
         """Find the latest Ordering file artifact in a bucket.
 
         Args:
-          gs_urls: List of full gs:// directory paths to check.
+            gs_urls: List of full gs:// directory paths to check.
 
         Returns:
-          The path of the latest eligible ordering file artifact.
+            The path of the latest eligible ordering file artifact.
 
         Raises:
-          See _FindLatestAFDOArtifact.
+            See _FindLatestAFDOArtifact.
         """
         return self._FindLatestAFDOArtifact(
             gs_urls, self._ValidOrderfileVersion
@@ -700,22 +712,23 @@ class _CommonPrepareBundle(object):
         """Find the latest AFDO artifact in a bucket.
 
         Args:
-          gs_urls: List of full gs:// directory paths to check.
-          rank_func: A function to compare two URLs.  It is passed two URLs, and
-              returns whether the first is more or less preferred than the second:
-                negative: less preferred.
-                zero: equally preferred.
-                positive: more preferred.
-          arch: Profile architecture, default is self.arch which is passed from
-              recipe.
+            gs_urls: List of full gs:// directory paths to check.
+            rank_func: A function to compare two URLs.  It is passed two URLs,
+                and returns whether the first is more or less preferred than the
+                second:
+                    negative: less preferred.
+                    zero: equally preferred.
+                    positive: more preferred.
+            arch: Profile architecture, default is self.arch which is passed
+                from recipe.
 
         Returns:
-          The path of the latest eligible AFDO artifact.
+            The path of the latest eligible AFDO artifact.
 
         Raises:
-          NoProfilesInGsBucketError: If no profiles in GS bucket.
-          RuntimeError: If no valid latest profiles.
-          ValueError: if regex is not valid.
+            NoProfilesInGsBucketError: If no profiles in GS bucket.
+            RuntimeError: If no valid latest profiles.
+            ValueError: if regex is not valid.
         """
         if not arch:
             arch = self.arch
@@ -732,11 +745,11 @@ class _CommonPrepareBundle(object):
             - chromeos-chrome-amd64-78.0.3877.0 for benchmark profiles
 
             Args:
-              all_files: list of files from GS.
-              branch: branch number.
+                all_files: list of files from GS.
+                branch: branch number.
 
             Returns:
-              Files matching the branch.
+                Files matching the branch.
             """
             profile_type = self.profile
             if self.profile in ("", "atom", "bigcore"):
@@ -745,10 +758,11 @@ class _CommonPrepareBundle(object):
             cwp_afdo_pattern = re.compile(rf"R{branch}")
             # Search by the arch and branch number.
             bench_afdo_pattern = re.compile(rf"chromeos-chrome-{arch}-{branch}")
-            # Search for the benchmark branch version and ignore the cwp version.
-            # When main branch switches from 100 to 101 and we are checking 100
-            # branch we have to ignore "-field-100-*-benchmark-101-" profiles
-            # which are going to come from main.
+            # Search for the benchmark branch version and ignore the cwp
+            # version. When main branch switches from 100 to 101 and we are
+            # checking 100 branch we have to ignore
+            # "-field-100-*-benchmark-101-" profiles which are going to come
+            # from main.
             orderfile_pattern = re.compile(
                 rf"chromeos-chrome-orderfile-{profile_type}-[0-9\-.]+-"
                 rf"benchmark-{branch}"
@@ -808,10 +822,10 @@ class _CommonPrepareBundle(object):
         """Return the directory for benchmark-afdo-generate artifacts.
 
         Args:
-          path: path relative to the directory.
+            path: path relative to the directory.
 
         Returns:
-          Path to the directory.
+            Path to the directory.
         """
         gen_dir = "/tmp/benchmark-afdo-generate"
         if path:
@@ -823,11 +837,11 @@ class _CommonPrepareBundle(object):
         """Find an artifact |name|, from a list of |gs_urls|.
 
         Args:
-          name: The name of the artifact (supports wildcards).
-          gs_urls: List of full gs:// directory paths to check.
+            name: The name of the artifact (supports wildcards).
+            gs_urls: List of full gs:// directory paths to check.
 
         Returns:
-          The url of the located artifact, or None.
+            The url of the located artifact, or None.
         """
         for url in gs_urls:
             path = os.path.join(url, name)
@@ -835,7 +849,8 @@ class _CommonPrepareBundle(object):
             if found_paths:
                 if len(found_paths) > 1:
                     raise PrepareForBuildHandlerError(
-                        f"Found {found_paths} artifacts at {url}. Expected ONE file."
+                        f"Found {found_paths} artifacts at {url}. Expected ONE "
+                        "file."
                     )
                 return found_paths[0]
         return None
@@ -844,13 +859,13 @@ class _CommonPrepareBundle(object):
         """Patch an ebuild file, possibly uprevving it.
 
         Args:
-          info: _EbuildInfo describing the ebuild file.
-          rules: dict of key:value pairs to apply to the ebuild.
-          uprev: whether to increment the revision.  Should be False for 9999
-              ebuilds, and True otherwise.
+            info: _EbuildInfo describing the ebuild file.
+            rules: dict of key:value pairs to apply to the ebuild.
+            uprev: whether to increment the revision.  Should be False for 9999
+                ebuilds, and True otherwise.
 
         Returns:
-          Updated CPV for the ebuild.
+            Updated CPV for the ebuild.
         """
         logging.info("Patching %s with %s", info.path, str(rules))
         old_name = info.path
@@ -882,13 +897,17 @@ class _CommonPrepareBundle(object):
                     "Unable to update %s in the ebuild", [x.sub for x in want]
                 )
                 raise UpdateEbuildWithAFDOArtifactsError(
-                    "Ebuild file does not have appropriate marker for AFDO/orderfile."
+                    "Ebuild file does not have appropriate marker for "
+                    "AFDO/orderfile."
                 )
 
         CPV = info.CPV
         if uprev:
             assert CPV.version != "9999"
-            new_CPV = f"{CPV.category}/{CPV.package}-{CPV.version}-r{CPV.revision + 1}"
+            new_CPV = (
+                f"{CPV.category}/{CPV.package}-{CPV.version}"
+                f"-r{CPV.revision + 1}"
+            )
             new_path = os.path.join(
                 os.path.dirname(info.path),
                 "%s.ebuild" % os.path.basename(new_CPV),
@@ -921,7 +940,8 @@ class _CommonPrepareBundle(object):
             bench, cwp = _ParseMergedProfileName(os.path.basename(url))
             if bench.is_merged:
                 raise ValueError(
-                    "-merged should not appear in orderfile or release AFDO name."
+                    "-merged should not appear in orderfile or release AFDO "
+                    "name."
                 )
             return bench, cwp
         except ProfilesNameHelperError:
@@ -932,12 +952,12 @@ class _CommonPrepareBundle(object):
         """Calculate a value used to rank valid benchmark profiles.
 
         Args:
-          name: A name or a full path of a possible benchmark profile.
+            name: A name or a full path of a possible benchmark profile.
 
         Returns:
-          A BenchmarkProfileNamedTuple used for ranking if the name
-          of the benchmark profile is valid and it's not merged.
-          Otherwise, returns None.
+            A BenchmarkProfileNamedTuple used for ranking if the name
+            of the benchmark profile is valid and it's not merged.
+            Otherwise, returns None.
         """
         try:
             version = _ParseBenchmarkProfileName(os.path.basename(name))
@@ -957,14 +977,14 @@ class _CommonPrepareBundle(object):
         one, and redact all ICF symbols.
 
         Args:
-          cwp_url: Full (GS) path to the discovered CWP file to use.
-          bench_url: Full (GS) path to the verified benchmark profile.
-          output_dir: A directory to store the created artifact.  Must be inside of
-              the chroot.
-          merged_name: Basename for the merged profile.
+            cwp_url: Full (GS) path to the discovered CWP file to use.
+            bench_url: Full (GS) path to the verified benchmark profile.
+            output_dir: A directory to store the created artifact.  Must be
+                inside the chroot.
+            merged_name: Basename for the merged profile.
 
         Returns:
-          Full path to a generated release AFDO profile.
+            Full path to a generated release AFDO profile.
         """
         # Download the compressed profiles from GS.
         cwp_compressed = os.path.join(output_dir, os.path.basename(cwp_url))
@@ -1007,16 +1027,16 @@ class _CommonPrepareBundle(object):
         """Merges the given profile list.
 
         This is ultimately derived from afdo.py, but runs OUTSIDE of the chroot.
-        It converts paths to chroot-relative paths, and runs llvm-profdata in the
-        chroot.
+        It converts paths to chroot-relative paths, and runs llvm-profdata in
+        the chroot.
 
         Args:
-          profile_list: a list of (profile_path, profile_weight).
-            Profile_weight is an int that tells us how to weight the profile
-            relative to everything else.
-          output_profile: where to store the result profile.
-          use_compbinary: whether to use the new compressed binary AFDO profile
-            format.
+            profile_list: a list of (profile_path, profile_weight).
+                Profile_weight is an int that tells us how to weight the profile
+                relative to everything else.
+            output_profile: where to store the result profile.
+            use_compbinary: whether to use the new compressed binary AFDO
+                profile format.
         """
         if not profile_list:
             raise ValueError("Need profiles to merge")
@@ -1024,8 +1044,8 @@ class _CommonPrepareBundle(object):
         # A regular llvm-profdata command looks like:
         # llvm-profdata merge [-sample] -output=/path/to/output input1 [...]
         #
-        # Alternatively, we can specify inputs by `-weighted-input=A,file`, where A
-        # is a multiplier of the sample counts in the profile.
+        # Alternatively, we can specify inputs by `-weighted-input=A,file`,
+        # where A is a multiplier of the sample counts in the profile.
         merge_command = [
             "llvm-profdata",
             "merge",
@@ -1058,19 +1078,20 @@ class _CommonPrepareBundle(object):
         This function runs outside of the chroot, and enters the chroot.
 
         Args:
-          input_path: Full path (outside chroot) to input AFDO profile.
-          output_path: Full path (outside chroot) to output AFDO profile.
-          redact: Redact ICF'ed symbols from AFDO profiles.
-            ICF can cause inflation on AFDO sampling results, so we want to remove
-            them from AFDO profiles used for Chrome.
-            See http://crbug.com/916024 for more details.
-          remove: Remove indirect call targets from the given profile.
-          reduce_functions: Remove the cold functions in the profile until the
-            given number is met.
-          compbinary: Whether to convert the final profile into compbinary type.
+            input_path: Full path (outside chroot) to input AFDO profile.
+            output_path: Full path (outside chroot) to output AFDO profile.
+            redact: Redact ICF'ed symbols from AFDO profiles.
+                ICF can cause inflation on AFDO sampling results, so we want to
+                remove them from AFDO profiles used for Chrome.
+                See http://crbug.com/916024 for more details.
+            remove: Remove indirect call targets from the given profile.
+            reduce_functions: Remove the cold functions in the profile until the
+                given number is met.
+            compbinary: Whether to convert the final profile into compbinary
+                type.
 
         Raises:
-          BundleArtifactsHandlerError: If the output profile is empty.
+            BundleArtifactsHandlerError: If the output profile is empty.
         """
         profdata_command_base = ["llvm-profdata", "merge", "-sample"]
         # Convert the compbinary profiles to text profiles.
@@ -1112,8 +1133,8 @@ class _CommonPrepareBundle(object):
             current_input_file = removed_temp
 
         if reduce_functions:
-            # Remove cold functions in the profile. Trim the profile to contain 20k
-            # functions, as our current profile has ~20k functions so this
+            # Remove cold functions in the profile. Trim the profile to contain
+            # 20k functions, as our current profile has ~20k functions so this
             # modification brings less impact on prod.
             reduced_tmp = input_path + ".reduced.tmp"
             cros_build_lib.run(
@@ -1152,7 +1173,8 @@ class _CommonPrepareBundle(object):
         # Normal profiles are usually >1MB.
         if profile_size < 4096:
             raise BundleArtifactsHandlerError(
-                f"_ProcessAFDOProfile produced empty AFDO profile, {profile_size}"
+                "_ProcessAFDOProfile produced empty AFDO profile, "
+                f"{profile_size}"
             )
 
     def _CreateAndUploadMergedAFDOProfile(
@@ -1161,17 +1183,17 @@ class _CommonPrepareBundle(object):
         """Create a merged AFDO profile from recent AFDO profiles and upload it.
 
         Args:
-          unmerged_profile: Path to the AFDO profile we've just created. No
-            profiles whose names are lexicographically ordered after this are
-            candidates for selection.
-          output_dir: Path to location to store merged profiles for uploading.
-          recent_to_merge: The maximum number of profiles to merge (include the
-            current profile).
-          max_age_days: Don't merge profiles older than max_age_days days old.
+            unmerged_profile: Path to the AFDO profile we've just created. No
+                profiles whose names are lexicographically ordered after this
+                are candidates for selection.
+            output_dir: Path to location to store merged profiles for uploading.
+            recent_to_merge: The maximum number of profiles to merge (include
+                the current profile).
+            max_age_days: Don't merge profiles older than max_age_days days old.
 
         Returns:
-          The name of a merged profile if the AFDO profile is a candidate for
-          merging and ready to be merged and uploaded. Otherwise, None.
+            The name of a merged profile if the AFDO profile is a candidate for
+            merging and ready to be merged and uploaded. Otherwise, None.
         """
         if recent_to_merge == 1:
             # Merging the unmerged_profile into itself is a NOP.
@@ -1204,9 +1226,10 @@ class _CommonPrepareBundle(object):
         def _GetOrderedMergeableProfiles(
             benchmark_listing: Iterable[gs.GSListResult],
         ) -> Iterable[gs.GSListResult]:
-            """Returns a list of mergeable profiles ordered by increasing version."""
-            # Exclude merged profiles, because merging merged profiles into merged
-            # profiles is likely bad. _ValidBenchmarkProfileVersion takes care of it.
+            """Get list of mergeable profiles ordered by increasing version."""
+            # Exclude merged profiles, because merging merged profiles into
+            # merged profiles is likely bad. _ValidBenchmarkProfileVersion takes
+            # care of it.
             profile_versions = [
                 (self._ValidBenchmarkProfileVersion(x.url), x)
                 for x in benchmark_listing
@@ -1250,9 +1273,9 @@ class _CommonPrepareBundle(object):
         merge_candidates = merge_candidates[-(recent_to_merge - 1) :]
 
         # This should never happen, but be sure we're not merging a profile into
-        # itself anyway. It's really easy for that to silently slip through, and can
-        # lead to overrepresentation of a single profile, which just causes more
-        # noise.
+        # itself anyway. It's really easy for that to silently slip through, and
+        # can lead to overrepresentation of a single profile, which just causes
+        # more noise.
         assert len(set(p.url for p in merge_candidates)) == len(
             merge_candidates
         )
@@ -1268,8 +1291,8 @@ class _CommonPrepareBundle(object):
         afdo_files = []
         for candidate in merge_candidates:
             # It would be slightly less complex to just name these off as
-            # profile-1.afdo, profile-2.afdo, ... but the logs are more readable if we
-            # keep the basename from gs://.
+            # profile-1.afdo, profile-2.afdo, ... but the logs are more readable
+            # if we keep the basename from gs://.
             candidate_name = os.path.basename(candidate.url)
             candidate_uncompressed = candidate_name[
                 : -len(BZ2_COMPRESSION_SUFFIX)
@@ -1337,8 +1360,8 @@ class _CommonPrepareBundle(object):
         """Cleanup a directory before build so we can safely use the artifacts.
 
         Args:
-          src_dir: A temp path holding the possible artifacts. It needs to be an
-          absolute path.
+            src_dir: A temp path holding the possible artifacts. It needs to be
+                an absolute path.
         """
         assert os.path.isabs(src_dir), (
             "%s needs to be an absolute path " % src_dir
@@ -1406,16 +1429,16 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
     def _PrepareVerifiedChromeLlvmOrderfile(self):
         """Prepare to verify an unvetted ordering file."""
         ret = PrepareForBuildReturn.NEEDED
-        # We will look for the input artifact in the given path, but we only check
-        # for the vetted artifact in the first location given.
+        # We will look for the input artifact in the given path, but we only
+        # check for the vetted artifact in the first location given.
         locations = self.input_artifacts.get(
             "UnverifiedChromeLlvmOrderfile", [ORDERFILE_GS_URL_UNVETTED]
         )
         path = self._FindLatestOrderfileArtifact(locations)
         loc, name = os.path.split(path)
 
-        # If not given as an input_artifact, the vetted location is determined from
-        # the first location given for the unvetted artifact.
+        # If not given as an input_artifact, the vetted location is determined
+        # from the first location given for the unvetted artifact.
         vetted_loc = self.input_artifacts.get(
             "VerifiedChromeLlvmOrderfile", [None]
         )[0]
@@ -1446,8 +1469,8 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         return PrepareForBuildReturn.NEEDED
 
     def _PrepareUnverifiedLlvmPgoFile(self):
-        # If we have a chroot, make sure that the toolchain is set up to generate
-        # the artifact.  Raise an error if we know it will fail.
+        # If we have a chroot, make sure that the toolchain is set up to
+        # generate the artifact.  Raise an error if we know it will fail.
         if self.chroot:
             llvm_pkg = "sys-devel/llvm"
             use_flags = portage_util.GetInstalledPackageUseFlags(llvm_pkg)[
@@ -1465,17 +1488,17 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
     def _UnverifiedAfdoFileExists(self):
         """Check if the unverified AFDO benchmark file exists.
 
-        This is used by both the UnverifiedChromeBenchmark Perf and Afdo file prep
-        methods.
+        This is used by both the UnverifiedChromeBenchmark Perf and Afdo file
+        prep methods.
 
-          PrepareForBuildReturn.
+            PrepareForBuildReturn.
         """
         # We do not check for the existence of the (intermediate) perf.data file
         # since that is tied to the build, and the orchestrator decided that we
         # should run (no build to recycle).
         #
-        # Check if there is already a published AFDO artifact for this version of
-        # Chrome.
+        # Check if there is already a published AFDO artifact for this version
+        # of Chrome.
         return self._CommonPrepareBasedOnGsPathExists(
             name=self._GetBenchmarkAFDOName() + BZ2_COMPRESSION_SUFFIX,
             url=BENCHMARK_AFDO_GS_URL,
@@ -1490,16 +1513,18 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         """Prepare to build an Unverified Chrome benchmark AFDO file."""
         ret = self._UnverifiedAfdoFileExists()
         if self.chroot:
-            # Fetch the CHROME_DEBUG_BINARY and UNVERIFIED_CHROME_BENCHMARK_PERF_FILE
-            # artifacts and unpack them for the Bundle call.
+            # Fetch the CHROME_DEBUG_BINARY and
+            # UNVERIFIED_CHROME_BENCHMARK_PERF_FILE artifacts and unpack them
+            # for the Bundle call.
             workdir_full = self.chroot.full_path(self._AfdoTmpPath())
             # Clean out the workdir.
             osutils.RmDir(workdir_full, ignore_missing=True, sudo=True)
             osutils.SafeMakedirs(workdir_full)
 
-            # We don't need a strict version from ebuild because it can change in the
-            # timeframe between afdo-generate and afdo-process (right, it happens!).
-            # Another edge case is revbump of chrome with patches in 9999.
+            # We don't need a strict version from ebuild because it can change
+            # in the timeframe between afdo-generate and afdo-process (right, it
+            # happens!). Another edge case is revbump of chrome with patches in
+            # 9999.
             bin_name = (
                 self._GetBenchmarkAFDOName(
                     CHROME_DEBUG_BINARY_NAME, wildcard_version=True
@@ -1715,9 +1740,9 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         bench_name = os.path.split(bench)[1]
         cwp_name = os.path.split(cwp)[1]
 
-        # Check to see if we already have a verified AFDO profile.
-        # We only look at the first path in the list of vetted locations, since that
-        # is where we will publish the verified profile.
+        # Check to see if we already have a verified AFDO profile. We only look
+        # at the first path in the list of vetted locations, since that is where
+        # we will publish the verified profile.
         published_loc = self.input_artifacts.get(
             "VerifiedReleaseAfdoFile", [RELEASE_PROFILE_VETTED_URL]
         )[0]
@@ -1820,7 +1845,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         """Make sure the arguments received are correct."""
         if not os.path.isdir(self.output_dir):
             raise BundleArtifactsHandlerError(
-                f"Non-existent directory '{self.output_dir}' specified for --out-dir"
+                f"Non-existent directory '{self.output_dir}' specified for "
+                "--out-dir"
             )
 
         chrome_binary_path_outside = self.chroot.full_path(
@@ -1880,15 +1906,15 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         This command runs inside chroot.
 
         Args:
-          input_orderfile: Chroot path to the input orderfile.
-          chrome_nm: Chroot path to the chrome symbols file.
-          output_orderfile_name: Basename of the output orderfile.
+            input_orderfile: Chroot path to the input orderfile.
+            chrome_nm: Chroot path to the chrome symbols file.
+            output_orderfile_name: Basename of the output orderfile.
 
         Returns:
-          Chroot path to the generated orderfile.
+            Chroot path to the generated orderfile.
 
         Raises:
-          BundleArtifactsHandlerError if generation fails.
+            BundleArtifactsHandlerError if generation fails.
         """
         output_orderfile_path = os.path.join(
             self.chroot.chroot_path(self.chroot.tmp),
@@ -1945,7 +1971,8 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         )
         if not orderfile_name:
             raise BundleArtifactsHandlerError(
-                f"Could not find UNVETTED_ORDERFILE version in {constants.CHROME_PN}"
+                "Could not find UNVETTED_ORDERFILE version in "
+                f"{constants.CHROME_PN}"
             )
         orderfile_name += XZ_COMPRESSION_SUFFIX
 
@@ -1989,10 +2016,10 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         This function is for ease in test writing.
 
         Args:
-          datadir: Absolute path to build/coverage_data in the sysroot.
+            datadir: Absolute path to build/coverage_data in the sysroot.
 
         Returns:
-          list of chroot-relative paths to profiles found.
+            list of chroot-relative paths to profiles found.
         """
         return [
             self.chroot.chroot_path(os.path.join(dir_name, file_name))
@@ -2028,9 +2055,9 @@ class BundleArtifactHandler(_CommonPrepareBundle):
             .stdout.splitlines()[0]
             .strip()
         )
-        # TODO(crbug.com/1132918): There's a git-r3 bug that caused the LLVM build
-        # failed to find the upstream URL, so use the string contains the local
-        # path to clang source instead.
+        # TODO(crbug.com/1132918): There's a git-r3 bug that caused the LLVM
+        #   build failed to find the upstream URL, so use the string contains
+        #   the local path to clang source instead.
         match = re.search(
             r"(?:llvm-project|clang) ([A-Fa-f0-9]{40})\)$", clang_version_str
         )
@@ -2049,7 +2076,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         pformat.json({"head_sha": head_sha}, fp=metadata_path, compact=True)
         files.append(metadata_path)
 
-        # Create a tarball with the merged profile data.  The name will be of the
+        # Create a tarball with the merged profile data. The name will be of the
         # form '{llvm-package-pv}-{clang-head_sha}.llvm_profdata.tar.zx.
         with self.chroot.tempdir() as tempdir:
             raw_list = os.path.join(tempdir, "profraw_list")
@@ -2106,7 +2133,7 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         """Bundle a benchmark Chrome AFDO profile.
 
         Raises:
-          BundleArtifactsHandlerError: If the output profile is empty.
+            BundleArtifactsHandlerError: If the output profile is empty.
         """
         files = []
         # If the name of the provided binary is not 'chrome.unstripped', then
@@ -2288,14 +2315,14 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         """Collect the files with any of file_exts from path to working_dir.
 
         Args:
-          src_dir: the path to the directory to copy files from.
-          dest_dir: the path of the directory to copy files to (will be created if
-                    it doesn't exist and files need to be copied).
-          include_file: a callable that returns True if a file should be copied;
-                        False otherwise.
+            src_dir: the path to the directory to copy files from.
+            dest_dir: the path of the directory to copy files to (will be
+                created if it doesn't exist and files need to be copied).
+            include_file: a callable that returns True if a file should be
+                copied; False otherwise.
 
         Returns:
-          A list of all files that were copied, relative to `src_dir`.
+            A list of all files that were copied, relative to `src_dir`.
         """
         check_dirs = [
             self.chroot.full_path(x)
@@ -2345,15 +2372,15 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         """Bundle the files from src_dir into a tar.xz file.
 
         Args:
-          src_dir: the path to the directory to copy files from.
-          tarball: name of the generated tarballfile (build target, time stamp,
-            and .tar.xz extension will be added automatically)
-          destination: path to create tarball in
-          extension: type of file to search for in src_dir.
+            src_dir: the path to the directory to copy files from.
+            tarball: name of the generated tarballfile (build target, time
+                stamp, and .tar.xz extension will be added automatically).
+            destination: path to create tarball in
+            extension: type of file to search for in src_dir.
             If extension is None (default), all file types will be allowed.
 
         Returns:
-          Path to the generated tar.xz file
+            Path to the generated tar.xz file
         """
 
         def FilterFile(file_path):
@@ -2441,15 +2468,16 @@ def PrepareForBuild(
     This code is called OUTSIDE the chroot, before it is set up.
 
     Args:
-      artifact_name: artifact name
-      chroot: chroot_lib.Chroot instance for chroot.
-      sysroot_path: path to sysroot, relative to chroot path, or None.
-      build_target: name of build target, or None.
-      input_artifacts: List(InputArtifactInfo) of available artifact locations.
-      profile_info: dict(key=value)  See ArtifactProfileInfo.
+        artifact_name: artifact name
+        chroot: chroot_lib.Chroot instance for chroot.
+        sysroot_path: path to sysroot, relative to chroot path, or None.
+        build_target: name of build target, or None.
+        input_artifacts: List(InputArtifactInfo) of available artifact
+            locations.
+        profile_info: dict(key=value)  See ArtifactProfileInfo.
 
     Returns:
-      PrepareForBuildReturn
+        PrepareForBuildReturn
     """
 
     return PrepareForBuildHandler(
@@ -2470,16 +2498,15 @@ def BundleArtifacts(
     This code is called OUTSIDE the chroot, after it is set up.
 
     Args:
-      name: artifact name
-      chroot: chroot_lib.Chroot instance for chroot.
-      sysroot_path: path to sysroot, relative to chroot path.
-      chrome_root: path to chrome root.
-      build_target: name of build target
-      output_dir: path in which to place the artifacts.
-      profile_info: dict(key=value)  See ArtifactProfileInfo.
+        name: artifact name
+        chroot: chroot_lib.Chroot instance for chroot.
+        sysroot_path: path to sysroot, relative to chroot path.
+        build_target: name of build target
+        output_dir: path in which to place the artifacts.
+        profile_info: dict(key=value)  See ArtifactProfileInfo.
 
     Returns:
-      list of artifacts, relative to output_dir.
+        list of artifacts, relative to output_dir.
     """
     return BundleArtifactHandler(
         name,
@@ -2549,7 +2576,8 @@ class GetUpdatedFilesHandler(object):
         )
         files = self._UpdateKernelMetadata(kernel_version, profile_version)
         commit_message = (
-            f"afdo_metadata: Publish new kernel profiles for {kernel_version}\n\n"
+            "afdo_metadata: Publish new kernel profiles for "
+            f"{kernel_version}\n\n"
             f"Update {kernel_version} to {profile_version}\n\n"
             "Automatically generated in kernel verifier.\n\n"
             "BUG=None\n"

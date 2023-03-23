@@ -28,8 +28,8 @@ class Color(object):
         """Create a new Color object, optionally disabling color output.
 
         Args:
-          enabled: True if color output should be enabled. If False then this
-            class will not add color codes at all.
+            enabled: True if color output should be enabled. If False then this
+                class will not add color codes at all.
         """
         self._enabled = enabled
         if self._enabled is None:
@@ -41,11 +41,11 @@ class Color(object):
         """Returns a start color code.
 
         Args:
-          color: Color to use, .e.g BLACK, RED, etc.
+            color: Color to use, .e.g BLACK, RED, etc.
 
         Returns:
-          If color is enabled, returns an ANSI sequence to start the given color,
-          otherwise returns empty string
+            If color is enabled, returns an ANSI sequence to start the given
+            color, otherwise returns empty string
         """
         if self._enabled:
             return self.COLOR_START % (color + 30)
@@ -55,8 +55,8 @@ class Color(object):
         """Returns a stop color code.
 
         Returns:
-          If color is enabled, returns an ANSI color reset sequence, otherwise
-          returns empty string
+            If color is enabled, returns an ANSI color reset sequence, otherwise
+            returns empty string
         """
         if self._enabled:
             return self.RESET
@@ -66,14 +66,16 @@ class Color(object):
         """Returns text with conditionally added color escape sequences.
 
         Keyword arguments:
-          color: Text color -- one of the color constants defined in this class.
-          text: The text to color.
-          background_color: Background highlight color -- one of the color
-            constants defined in this class.
+            color: Text color -- one of the color constants defined in this
+                class.
+            text: The text to color.
+            background_color: Background highlight color -- one of the color
+                constants defined in this class.
 
         Returns:
-          If self._enabled is False, returns the original text. If it's True,
-          returns text with color escape sequences based on the value of color.
+            If self._enabled is False, returns the original text. If it's True,
+            returns text with color escape sequences based on the value of
+            color.
         """
         if not self._enabled:
             return text
@@ -89,7 +91,10 @@ class Color(object):
 
     @staticmethod
     def UserEnabled():
-        """See if the global colorization preference is enabled ($NOCOLOR env)"""
+        """See if the global colorization preference is enabled.
+
+        Uses the $NOCOLOR envvar.
+        """
         is_disabled = cros_build_lib.BooleanShellValue(
             os.environ.get("NOCOLOR"),
             msg="$NOCOLOR env var is invalid",

@@ -33,8 +33,8 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
 
     def setUp(self):
         """Common set up method for all tests."""
-        # Pick a port that is valid, but we can't bind normally, and is unlikely to
-        # be used in general.
+        # Pick a port that is valid, but we can't bind normally, and is unlikely
+        # to be used in general.
         opts = vm.VM.GetParser().parse_args(["--ssh-port=1"])
         opts.enable_kvm = True
         with mock.patch.object(multiprocessing, "cpu_count", return_value=8):
@@ -73,11 +73,11 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
         """Checks the called commands to see if the path is present.
 
         Args:
-          args: List of called commands.
-          path: Path to check if present in the called commands.
+            args: List of called commands.
+            path: Path to check if present in the called commands.
 
         Returns:
-          Whether the path is found in the called commands.
+            Whether the path is found in the called commands.
         """
         for call in args:
             # A typical call looks like:
@@ -145,7 +145,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
 
     @mock.patch("chromite.lib.device.Device.WaitForBoot")
     def testStartRetriesSuccess(self, mock_wait):
-        """Start() should return normally if WaitForBoot fails transiently once."""
+        """Start() returns normally if WaitForBoot fails transiently once."""
         mock_wait.side_effect = (
             device.DeviceError("error"),
             True,
@@ -154,7 +154,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
 
     @mock.patch("chromite.lib.device.Device.WaitForBoot")
     def testStartRetriesFailure(self, mock_wait):
-        """Start() should raise a DeviceError if WaitForBoot fails all attempts."""
+        """Start() raises a DeviceError if WaitForBoot fails all attempts."""
         mock_wait.side_effect = (
             device.DeviceError("error"),
             device.DeviceError("error"),
@@ -162,7 +162,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
         self.assertRaises(device.DeviceError, self._vm.Start)
 
     def testStartWithVMX(self):
-        """Verify vmx is enabled if the host supports nested virtualizaton."""
+        """Verify vmx is enabled if the host supports nested virtualization."""
         osutils.WriteFile(self.nested_kvm_file, "1")
         self._vm.Start()
         self.assertCommandContains(
@@ -220,7 +220,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
         )
 
     def testVMImageNotFound(self):
-        """Verify that VMError is raised when a fake board image cannot be found."""
+        """Verify VMError is raised when a fake board image cannot be found."""
         self._vm.image_path = None
         self._vm.board = "fake_board_name"
         self.assertRaises(vm.VMError, self._vm.Start)
@@ -231,7 +231,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
         self.assertRaises(vm.VMError, self._vm.Start)
 
     def testAppendBinFile(self):
-        """When image-path points to a directory, we should append the bin file."""
+        """Verify bin file appended when image-path points to a directory."""
         self._vm.image_path = self.tempdir
         self._vm.Start()
         self.assertEqual(
@@ -339,7 +339,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
 
     @mock.patch("chromite.lib.osutils.SafeMakedirs", return_value=False)
     def testCreateVMDirError(self, make_dir_mock):
-        """Verify that an error is raised when vm_dir is not a valid directory."""
+        """Verify an error is raised when vm_dir is not a valid directory."""
         self._vm.vm_dir = "/not/a/valid/dir"
         self.assertRaises(AssertionError, self._vm._CreateVMDir)
         make_dir_mock.assert_called()
@@ -364,7 +364,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
         make_dir_mock.assert_called()
 
     def testQemuVersionError(self):
-        """Verify that VMError is raised without an expected QEMU version number."""
+        """Verify VMError is raised without an expected QEMU version number."""
         version_str = "Fake Version String"
         self.rc.AddCmdResult(partial_mock.In("--version"), stdout=version_str)
         self.assertRaises(vm.VMError, self._vm._SetQemuPath)
@@ -515,8 +515,8 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
         pid_message = "chrome pids: []\n"
         self.assertTrue(logger.LogsContain(pid_message * 6))
         self.assertIn(
-            "_WaitForProcs failed: timed out while waiting for 8 chrome processes "
-            "to start.",
+            "_WaitForProcs failed: timed out while waiting for 8 chrome "
+            "processes to start.",
             str(e),
         )
         pid_mocker.assert_called()
@@ -540,7 +540,7 @@ class VMTester(cros_test_lib.RunCommandTempDirTestCase):
     @mock.patch("chromite.lib.device.Device.WaitForBoot")
     @mock.patch("chromite.lib.vm.VM.Start")
     def testWaitForBoot(self, start_mock, boot_mock, procs_mock):
-        """Verify that we wait for the VM to boot up under different conditions."""
+        """Verify we wait for the VM to boot up under different conditions."""
         # Testing with an existing VM directory and hardware emulation.
         self._vm.vm_dir = self.TempFilePath("vm_dir")
         osutils.SafeMakedirs(self._vm.vm_dir)

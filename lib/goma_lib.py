@@ -54,24 +54,26 @@ class Goma(object):
         # goma runs only a few local fallback tasks in parallel at once.
         # The value is the threshold of the number of local fallback failures
         # to enter the mode.
-        # Note that 30 is just heuristically chosen by discussion with goma team.
+        # Note that 30 is just heuristically chosen by discussion with goma
+        # team.
         #
         # Specifically, this is short-term workaround of the case that all
-        # compile processes get local fallback. Otherwise, because goma uses only
-        # several processes for local fallback by default, it causes significant
-        # slow down of the build.
+        # compile processes get local fallback. Otherwise, because goma uses
+        # only several processes for local fallback by default, it causes
+        # significant slow down of the build.
         # Practically, this happens when toolchain is updated in repository,
         # but prebuilt package is not yet ready. (cf. crbug.com/728971)
         "GOMA_MAX_COMPILER_DISABLED_TASKS": "30",
         # Disable goma soft stickiness.
         # Goma was historically using `soft stickiness cookie` so that uploaded
         # file cache is available as much as possible. However, such sticky
-        # requests are causing unbalanced server load, and the disadvantage of the
-        # unbalance cannot be negligible now. According to chrome's
-        # experiment, the disadvantage of disabling soft stickiness is negligible,
-        # and achieving balanced server load will have more advantage for entire
-        # build. (cf. crbug.com/730962)
-        # TODO(shinyak): This will be removed after crbug.com/730962 is resolved.
+        # requests are causing unbalanced server load, and the disadvantage of
+        # the unbalance cannot be negligible now. According to chrome's
+        # experiment, the disadvantage of disabling soft stickiness is
+        # negligible, and achieving balanced server load will have more
+        # advantage for entire build. (cf. crbug.com/730962)
+        # TODO(shinyak): This will be removed after crbug.com/730962 is
+        #   resolved.
         "GOMA_BACKEND_SOFT_STICKINESS": "false",
         # Enable DepsCache. DepsCache is a cache that holds a file list that
         # compiler_proxy sends to goma server for each compile. This can
@@ -102,34 +104,36 @@ class Goma(object):
         creates it).
 
         Args:
-          goma_dir: Path to the Goma client used for simplechrome (outside of
-            chroot).
-          goma_tmp_dir: Path to the GOMA_TMP_DIR to be passed to goma programs. If
-            given, it is used. If not given, creates a directory under /tmp in the
-            chroot, expecting that the directory is removed in the next run's clean
-            up phase on bots.
-          stage_name: optional name of the currently running stage. E.g.
-            "build_packages" or "test_simple_chrome_workflow". If this is set deps
-            cache is enabled.
-          chromeos_goma_dir: Path to the Goma client used for build package. path
-            should be represented as outside of chroot. If None, goma_dir will be
-            used instead.
-          chroot_dir: The base chroot path to use when the chroot path is not at the
-            default location.
-          goma_approach: Indicates some extra environment variables to set when
-            testing alternative goma approaches.
-          log_dir: Allows explicitly setting the log directory. Used for the Build
-            API for extracting the logs afterwords. Should be the log directory
-            inside the chroot, based on the chroot path when outside the chroot.
-          stats_filename: The name of the file to use for the GOMA_DUMP_STATS_FILE
-            setting. The file will be created in the log directory.
-          counterz_filename: The name of the file to use for the
-            GOMA_DUMP_COUNTERZ_FILE setting. The file will be created in the log
-            directory.
+            goma_dir: Path to the Goma client used for simplechrome (outside the
+                chroot).
+            goma_tmp_dir: Path to the GOMA_TMP_DIR to be passed to goma
+                programs. If given, it is used. If not given, creates a
+                directory under /tmp in the chroot, expecting that the directory
+                is removed in the next run's clean up phase on bots.
+            stage_name: optional name of the currently running stage. E.g.
+                "build_packages" or "test_simple_chrome_workflow". If this is
+                set deps cache is enabled.
+            chromeos_goma_dir: Path to the Goma client used for build package.
+                path should be represented as outside the chroot. If None,
+                goma_dir will be used instead.
+            chroot_dir: The base chroot path to use when the chroot path is not
+                at the default location.
+            goma_approach: Indicates some extra environment variables to set
+                when testing alternative goma approaches.
+            log_dir: Allows explicitly setting the log directory. Used for the
+                Build API for extracting the logs afterwords. Should be the log
+                directory inside the chroot, based on the chroot path when
+                outside the chroot.
+            stats_filename: The name of the file to use for the
+                GOMA_DUMP_STATS_FILE setting. The file will be created in the
+                log directory.
+            counterz_filename: The name of the file to use for the
+                GOMA_DUMP_COUNTERZ_FILE setting. The file will be created in the
+                log directory.
 
         Raises:
-          ValueError if 1) |goma_dir| does not point to a directory, or 2)
-          if |goma_tmp_dir| is given but it does not point to a directory.
+            ValueError if 1) |goma_dir| does not point to a directory, or 2)
+            if |goma_tmp_dir| is given, but it does not point to a directory.
         """
         # Sanity checks of given paths.
         goma_dir = Path(goma_dir)
@@ -313,14 +317,14 @@ class Goma(object):
         """Uploads INFO files related to goma.
 
         Args:
-          cbb_config_name: name of cbb_config.
+            cbb_config_name: name of cbb_config.
 
         Returns:
-          URL to the compiler_proxy log visualizer. None if unavailable.
+            URL to the compiler_proxy log visualizer. None if unavailable.
         """
-        # TODO(rchandrasekar): The only client that uses UploadLogs is cbuildbot.
-        # Once it is removed, assess if we need to use LogsArchiver instead or
-        # remove this interface.
+        # TODO(rchandrasekar): The only client that uses UploadLogs is
+        #   cbuildbot. Once it is removed, assess if we need to use LogsArchiver
+        #   instead or remove this interface.
         uploader = goma_util.GomaLogUploader(
             self.goma_log_dir, cbb_config_name=cbb_config_name
         )
@@ -330,19 +334,20 @@ class Goma(object):
 class LogsArchiver(object):
     """Manages archiving goma log files.
 
-    The LogsArchiver was migrated from GomaLogUploader in cbuildbot/goma_util.py.
-    Unlike the GomaLogUploader, it does not interact with GoogleStorage at all.
-    Instead it copies Goma files to a client-specified archive directory.
+    The LogsArchiver was migrated from GomaLogUploader in
+    cbuildbot/goma_util.py. Unlike the GomaLogUploader, it does not interact
+    with GoogleStorage at all. Instead, it copies Goma files to a
+    client-specified archive directory.
     """
 
     def __init__(self, log_dir, dest_dir, stats_file=None, counterz_file=None):
         """Initializes the archiver.
 
         Args:
-          log_dir: path to the directory containing goma's INFO log files.
-          dest_dir: path to the target directory to which logs are written.
-          stats_file: name of stats file in the log_dir.
-          counterz_file: name of the counterz file in the log dir.
+            log_dir: path to the directory containing goma's INFO log files.
+            dest_dir: path to the target directory to which logs are written.
+            stats_file: name of stats file in the log_dir.
+            counterz_file: name of the counterz file in the log dir.
         """
         self._log_dir = log_dir
         self._stats_file = stats_file
@@ -352,19 +357,20 @@ class LogsArchiver(object):
         osutils.SafeMakedirs(self._dest_dir)
 
     def Archive(self):
-        """Archives all goma log files, stats file, and counterz file to dest_dir.
+        """Archives goma log files, stats file, and counterz file to dest_dir.
 
         Returns:
-          ArchivedFiles named tuple, which includes stats_file, counterz_file, and
-          list of log files. All files in the tuple were copied to dest_dir.
+            ArchivedFiles named tuple, which includes stats_file, counterz_file,
+            and list of log files. All files in the tuple were copied to
+            dest_dir.
         """
         archived_log_files = []
         archived_stats_file = None
         archived_counterz_file = None
         # Find log file names containing compiler_proxy-subproc.INFO.
         # _ArchiveInfoFiles returns a list of tuples of (info_file_path,
-        # archived_file_name). We expect only 1 to be found, and add the filename
-        # for that tuple to archived_log_files.
+        # archived_file_name). We expect only 1 to be found, and add the
+        # filename for that tuple to archived_log_files.
         compiler_proxy_subproc_paths = self._ArchiveInfoFiles(
             "compiler_proxy-subproc"
         )
@@ -380,7 +386,7 @@ class LogsArchiver(object):
         # _ArchiveInfoFiles returns a list of tuples of (info_file_path,
         # archived_file_name). We expect only 1 to be found, and then need
         # to use the first tuple value of the list of 1 for the full path, and
-        # the filename of the tupe is added to archived_log_files.
+        # the filename of the tuple is added to archived_log_files.
         compiler_proxy_path = None
         compiler_proxy_paths = self._ArchiveInfoFiles("compiler_proxy")
         if len(compiler_proxy_paths) != 1:
@@ -414,10 +420,10 @@ class LogsArchiver(object):
         """Copies expected goma files (stats, counterz).
 
         Args:
-          filename: File to copy.
+            filename: File to copy.
 
         Returns:
-          The filename on success, None on error.
+            The filename on success, None on error.
         """
         file_path = os.path.join(self._log_dir, filename)
         if not os.path.isfile(file_path):
@@ -437,10 +443,10 @@ class LogsArchiver(object):
         """Archives INFO files matched with pattern, with gzip'ing.
 
         Args:
-          pattern: matching path pattern.
+            pattern: matching path pattern.
 
         Returns:
-          A list of tuples of (info_file_path, archived_file_name).
+            A list of tuples of (info_file_path, archived_file_name).
         """
         # Find files matched with the pattern in |log_dir|. Sort for
         # stabilization.
@@ -463,12 +469,12 @@ class LogsArchiver(object):
         """Archives gomacc INFO files, with gzip'ing.
 
         Returns:
-          Archived file path. If failed, None.
+            Archived file path. If failed, None.
         """
 
-        # Since the number of gomacc logs can be large, we'd like to compress them.
-        # Otherwise, archive will take long (> 10 mins).
-        # Each gomacc logs file size must be small (around 4KB).
+        # Since the number of gomacc logs can be large, we'd like to compress
+        # them. Otherwise, archive will take long (> 10 mins). Each gomacc logs
+        # file size must be small (around 4KB).
 
         # Find files matched with the pattern in |log_dir|.
         # The paths were themselves used as the inputs for the create
@@ -499,11 +505,11 @@ class LogsArchiver(object):
         '# end of ninja log' marker.
 
         Args:
-          compiler_proxy_path: Path to the compiler proxy, which will be contained
-            in the metadata.
+            compiler_proxy_path: Path to the compiler proxy, which will be
+                contained in the metadata.
 
         Returns:
-          The name of the archived file.
+            The name of the archived file.
         """
         ninja_log_path = os.path.join(self._log_dir, "ninja_log")
         if not os.path.exists(ninja_log_path):
@@ -547,14 +553,14 @@ class LogsArchiver(object):
     def _BuildNinjaInfo(self, compiler_proxy_path):
         """Reads metadata for the ninja run.
 
-        Each metadata should be written into a dedicated file in the log directory.
-        Read the info, and build the dict containing metadata.
+        Each metadata should be written into a dedicated file in the log
+        directory. Read the info, and build the dict containing metadata.
 
         Args:
-          compiler_proxy_path: Path to the compiler_proxy log file.
+            compiler_proxy_path: Path to the compiler_proxy log file.
 
         Returns:
-          A dict of the metadata.
+            A dict of the metadata.
         """
 
         info = {"platform": "chromeos"}

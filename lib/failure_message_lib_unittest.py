@@ -538,9 +538,11 @@ class FailureMessageManagerTests(cros_test_lib.TestCase):
         entry_3 = StageFailureHelper.GetStageFailure(failure_id=3)
         failure_entries = [entry_1, entry_2, entry_3]
 
+        # pylint: disable=line-too-long
         failures = failure_message_lib.FailureMessageManager.ConstructStageFailureMessages(
             failure_entries
         )
+        # pylint: enable=line-too-long
 
         self.assertEqual(len(failures), 3)
         failure_ids = [f.failure_id for f in failures]
@@ -557,9 +559,11 @@ class FailureMessageManagerTests(cros_test_lib.TestCase):
         )
         failure_entries = [entry_1, entry_2, entry_3]
 
+        # pylint: disable=line-too-long
         failures = failure_message_lib.FailureMessageManager.ConstructStageFailureMessages(
             failure_entries
         )
+        # pylint: enable=line-too-long
 
         self.assertEqual(len(failures), 1)
         f = failures[0]
