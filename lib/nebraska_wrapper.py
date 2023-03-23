@@ -71,21 +71,21 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
         """Initializes the nebraska wrapper.
 
         Args:
-          remote_device: A remote_access.RemoteDevice object.
-          nebraska_bin: The path to the nebraska binary.
-          update_payloads_address: The root address where the payloads will be
-              served.  it can either be a local address (file://) or a remote
-              address (http://)
-          update_metadata_dir: A directory where json files for payloads required
-              for update are located.
-          install_payloads_address: Same as update_payloads_address for install
-              operations.
-          install_metadata_dir: Similar to update_metadata_dir but for install
-              payloads.
-          ignore_appid: True to tell Nebraska to ignore the update request's
-              App ID. This allows mismatching the source and target version boards.
-              One specific use case is updating between <board> and
-              <board>-kernelnext images.
+            remote_device: A remote_access.RemoteDevice object.
+            nebraska_bin: The path to the nebraska binary.
+            update_payloads_address: The root address where the payloads will be
+                served.  it can either be a local address (file://) or a remote
+                address (http://)
+            update_metadata_dir: A directory where json files for payloads
+                required for update are located.
+            install_payloads_address: Same as update_payloads_address for
+                install operations.
+            install_metadata_dir: Similar to update_metadata_dir but for install
+                payloads.
+            ignore_appid: True to tell Nebraska to ignore the update request's
+                App ID. This allows mismatching the source and target version
+                boards. One specific use case is updating between <board> and
+                <board>-kernelnext images.
         """
         super().__init__()
 
@@ -111,8 +111,8 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
         """Runs a remote shell command.
 
         Args:
-          *args: See remote_access.RemoteDevice documentation.
-          **kwargs: See remote_access.RemoteDevice documentation.
+            *args: See remote_access.RemoteDevice documentation.
+            **kwargs: See remote_access.RemoteDevice documentation.
         """
         kwargs.setdefault("debug_level", logging.DEBUG)
         return self._device.run(*args, **kwargs)
@@ -158,8 +158,8 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
             self._port,
             "health_check",
         )
-        # Running curl through SSH because the port on the device is not accessible
-        # by default.
+        # Running curl through SSH because the port on the device is not
+        # accessible by default.
         result = self._RemoteCommand(
             ["curl", url, "-o", "/dev/null"], check=False
         )
@@ -259,15 +259,15 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
         """Returns the URL which the devserver is running on.
 
         Args:
-          ip: The ip of running nebraska if different than localhost.
-          critical_update: Whether nebraska has to instruct the update_engine that
-              the update is a critical one or not.
-          no_update: Whether nebraska has to give a noupdate response even if it
-              detected an update.
+            ip: The ip of running nebraska if different from localhost.
+            critical_update: Whether nebraska has to instruct the update_engine
+                that the update is a critical one or not.
+            no_update: Whether nebraska has to give a noupdate response even if
+                it detected an update.
 
         Returns:
-          An HTTP URL that can be passed to the update_engine_client in --omaha_url
-              flag.
+            An HTTP URL that can be passed to the update_engine_client in
+                --omaha_url flag.
         """
         query_dict = {}
         if critical_update:
@@ -308,7 +308,7 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
         """Copies the nebraska logs from the device.
 
         Args:
-          target_log: The file to copy the log to from the device.
+            target_log: The file to copy the log to from the device.
         """
         try:
             self._device.CopyFromDevice(self._log_file, target_log)
@@ -324,8 +324,8 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
     def CheckNebraskaCanRun(self):
         """Checks to see if we can start nebraska.
 
-        If the stateful partition is corrupted, Python or other packages needed for
-        rootfs update may be missing on |device|.
+        If the stateful partition is corrupted, Python or other packages needed
+        for rootfs update may be missing on |device|.
 
         This will also use `ldconfig` to update library paths on the target
         device if it looks like that's causing problems, which is necessary
@@ -334,9 +334,9 @@ class RemoteNebraskaWrapper(multiprocessing.Process):
         Raise NebraskaStartupError if nebraska cannot start.
         """
 
-        # Try to capture the output from the command so we can dump it in the case
-        # of errors. Note that this will not work if we were requested to redirect
-        # logs to a |log_file|.
+        # Try to capture the output from the command, so we can dump it in the
+        # case of errors. Note that this will not work if we were requested to
+        # redirect logs to a |log_file|.
         cmd_kwargs = {"stdout": True, "stderr": subprocess.STDOUT}
         cmd = ["python", self._nebraska_bin, "--help"]
         logging.info("Checking if we can run nebraska on the device...")

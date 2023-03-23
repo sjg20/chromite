@@ -113,8 +113,8 @@ class ParallelMock(partial_mock.PartialMock):
 
         try:
             while True:
-                # Wait for a new item to show up on the queue. This is a blocking wait,
-                # so if there's nothing to do, we just sit here.
+                # Wait for a new item to show up on the queue. This is a
+                # blocking wait, so if there's nothing to do, we just sit here.
                 x = queue.get()
                 if isinstance(x, parallel._AllTasksComplete):
                     # All tasks are complete, so we should exit.
@@ -209,7 +209,7 @@ class TestBackgroundWrapper(cros_test_lib.TestCase):
 
 
 class TestUnicodeContinuation(TestBackgroundWrapper):
-    """Test handling unicode continuation output from background environments."""
+    """Test handling unicode continuation output from background envs."""
 
     def setUp(self):
         self.printed_message = multiprocessing.Event()
@@ -306,7 +306,8 @@ class BackgroundHelloWorldTests(TestBackgroundWrapper):
 def _BackgroundTaskRunnerArgs(results, arg1, arg2, kwarg1=None, kwarg2=None):
     """Helper for TestBackgroundTaskRunnerArgs
 
-    We specifically want a module function to test against and not a class member.
+    We specifically want a module function to test against and not a class
+    member.
     """
     results.put((arg1, arg2, kwarg1, kwarg2))
 
@@ -384,7 +385,7 @@ class TestRunParallelSteps(cros_test_lib.TestCase):
         self.assertEqual(return_values, [1, 2, None])
 
     def testLargeReturnValues(self):
-        """Test that the managed queue prevents hanging on large return values."""
+        """Verify the managed queue prevents hanging on large return values."""
 
         def f1():
             return ret_value
@@ -494,7 +495,7 @@ class TestExceptions(cros_test_lib.MockOutputTestCase):
             )
 
     def testFailedPickleOnReturn(self):
-        """PicklingError should be thrown when a return value fails to pickle."""
+        """Verify PicklingError thrown when a return value fails to pickle."""
         with self.assertRaises(parallel.BackgroundFailure):
             parallel.RunParallelSteps([self._BadPickler], return_values=True)
 
@@ -511,11 +512,11 @@ class TestHalting(cros_test_lib.MockOutputTestCase, TestBackgroundWrapper):
         self.passed = multiprocessing.Event()
 
     def _GetKillChildrenTimeout(self):
-        """Return a timeout that is long enough for _BackgroundTask._KillChildren.
+        """Return a timeout that triggers _BackgroundTask._KillChildren.
 
-        This unittest is not meant to restrict which signal succeeds in killing the
-        background process, so use a long enough timeout whenever asserting that the
-        background process is killed, keeping buffer for slow builders.
+        This unittest is not meant to restrict which signal succeeds in killing
+        the background process, so use a long enough timeout whenever asserting
+        that the background process is killed, keeping buffer for slow builders.
         """
         return (
             parallel._BackgroundTask.SIGTERM_TIMEOUT
@@ -557,7 +558,7 @@ class TestHalting(cros_test_lib.MockOutputTestCase, TestBackgroundWrapper):
         self.assertFalse(self.failed.is_set())
 
     def testForegroundExceptionRaising(self):
-        """Test that BackgroundTaskRunner halts tasks on a foreground exception."""
+        """Verify BackgroundTaskRunner halts tasks on a foreground exception."""
         with self.assertRaises(_TestForegroundException):
             with parallel.BackgroundTaskRunner(
                 self._PassEventually, processes=1, halt_on_error=True
@@ -603,15 +604,16 @@ class TestConstants(cros_test_lib.TestCase):
 
     def testSilentTimeout(self):
         """Verify the silent timeout is small enough."""
-        # Enforce that the default timeout is less than 9000, the default timeout
-        # set in build/scripts/master/factory/chromeos_factory.py:ChromiteFactory
-        # in the Chrome buildbot source code.
+        # Enforce that the default timeout is less than 9000, the default
+        # timeout set in
+        # build/scripts/master/factory/chromeos_factory.py:ChromiteFactory in
+        # the Chrome buildbot source code.
         self.assertLess(
             parallel._BackgroundTask.SILENT_TIMEOUT,
             9000,
             "Do not increase this timeout. Instead, print regular progress "
-            "updates, so that buildbot (and cbuildbot) will will know that your "
-            "program has not hung.",
+            "updates, so that buildbot (and cbuildbot) will will know that "
+            "your program has not hung.",
         )
 
 
@@ -619,7 +621,10 @@ class TestExitWithParent(cros_test_lib.TestCase):
     """Tests ExitWithParent."""
 
     def testChildExits(self):
-        """Create a child and a grandchild. The child should die with the parent."""
+        """Create a child and a grandchild.
+
+        The child should die with the parent.
+        """
 
         def GrandChild():
             parallel.ExitWithParent()
@@ -643,8 +648,8 @@ class TestExitWithParent(cros_test_lib.TestCase):
 
         # (shortly) after we kill the child, the grandchild should kill itself.
         # We can't use os.waitpid because the grandchild process is not a child
-        # process of ours. Just wait 20 seconds - this should be enough even if the
-        # machine is under load.
+        # process of ours. Just wait 20 seconds - this should be enough even if
+        # the machine is under load.
         timeout_util.WaitForReturnTrue(
             lambda: not os.path.isdir("/proc/%d" % grand_child_pid),
             20,

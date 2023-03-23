@@ -76,7 +76,7 @@ target=foo
 
     @mock.patch("chromite.lib.toolchain.portage_util.FindOverlays")
     def testReadsBoardToolchains(self, find_overlays_mock):
-        """Tests that we correctly parse toolchain configs for an overlay stack."""
+        """Verify we correctly parse toolchain configs for an overlay stack."""
         # Create some fake overlays and put toolchain confs in a subset of them.
         overlays = [
             os.path.join(self.tempdir, "overlay%d" % i) for i in range(3)
@@ -432,7 +432,8 @@ class ToolchainInstallerTest(cros_test_lib.MockTempDirTestCase):
             # pylint: disable=protected-access
             self.updater._InstallLibc(self.sysroot, self.different_toolchain)
         except toolchain.ToolchainInstallError as e:
-            # Make sure it did in fact modify the error to include the glibc CPV.
+            # Make sure it did in fact modify the error to include the glibc
+            # CPV.
             self.assertTrue(e.failed_toolchain_info)
             self.assertEqual(
                 self.go_toolchain.libc_cpf, e.failed_toolchain_info[0].cpf

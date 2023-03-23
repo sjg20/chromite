@@ -36,10 +36,10 @@ def VMIsUpdatable(path):
     """Check if the existing VM image is updatable.
 
     Args:
-      path: Path to the VM image.
+        path: Path to the VM image.
 
     Returns:
-      True if VM is updatable; False otherwise.
+        True if VM is updatable; False otherwise.
     """
     table = {p.name: p for p in image_lib.GetImageDiskPartitionInfo(path)}
     # Assume if size of the two root partitions match, the image
@@ -57,12 +57,12 @@ def CreateVMImage(image=None, board=None, updatable=True, dest_dir=None):
     |dest_dir|.
 
     Args:
-      image: Path to the (non-VM) image. Defaults to None to use the latest
+        image: Path to the (non-VM) image. Defaults to None to use the latest
         image for the board.
-      board: Board that the image was built with. If None, attempts to use the
+        board: Board that the image was built with. If None, attempts to use the
         configured default board.
-      updatable: Create a VM image that supports AU.
-      dest_dir: If set, create/copy the VM image to |dest|; otherwise,
+        updatable: Create a VM image that supports AU.
+        dest_dir: If set, create/copy the VM image to |dest|; otherwise,
         use the folder where |image| resides.
     """
     if not image and not board:
@@ -160,7 +160,7 @@ class VM(device.Device):
         """Initialize VM.
 
         Args:
-          opts: command line options.
+            opts: command line options.
         """
         super().__init__(opts)
 
@@ -225,7 +225,8 @@ class VM(device.Device):
     def _CreateVMDir(self):
         """Safely create vm_dir."""
         if not osutils.SafeMakedirs(self.vm_dir):
-            # For security, ensure that vm_dir is not a symlink, and is owned by us.
+            # For security, ensure that vm_dir is not a symlink, and is owned by
+            # us.
             error_str = (
                 "VM state dir is misconfigured; please recreate: %s"
                 % self.vm_dir
@@ -240,7 +241,7 @@ class VM(device.Device):
         This image will get removed on VM shutdown.
 
         Returns:
-          Tuple of (path to qcow2 image, format of qcow2 image)
+            Tuple of (path to qcow2 image, format of qcow2 image)
         """
         cow_image_path = os.path.join(self.vm_dir, "qcow2.img")
         qemu_img_args = [
@@ -265,7 +266,7 @@ class VM(device.Device):
         """Determine QEMU version.
 
         Returns:
-          QEMU version.
+            QEMU version.
         """
         version_str = cros_build_lib.run(
             [self.qemu_path, "--version"],
@@ -274,13 +275,14 @@ class VM(device.Device):
             encoding="utf-8",
         ).stdout
         # version string looks like one of these:
-        # QEMU emulator version 2.0.0 (Debian 2.0.0+dfsg-2ubuntu1.36), Copyright (c)
-        # 2003-2008 Fabrice Bellard
+        # QEMU emulator version 2.0.0 (Debian 2.0.0+dfsg-2ubuntu1.36),
+        # Copyright (c) 2003-2008 Fabrice Bellard
         #
         # QEMU emulator version 2.6.0, Copyright (c) 2003-2008 Fabrice Bellard
         #
         # qemu-x86_64 version 2.10.1
-        # Copyright (c) 2003-2017 Fabrice Bellard and the QEMU Project developers
+        # Copyright (c) 2003-2017 Fabrice Bellard and the QEMU Project
+        # developers
         m = re.search(r"version ([0-9.]+)", version_str)
         if not m:
             raise VMError(
@@ -386,7 +388,8 @@ class VM(device.Device):
                 "No VM image found. Use cros chrome-sdk --download-vm."
             )
         if not os.path.isfile(self.image_path):
-            # Checks if the image path points to a directory containing the bin file.
+            # Checks if the image path points to a directory containing the bin
+            # file.
             image_path = os.path.join(self.image_path, constants.TEST_IMAGE_BIN)
             if os.path.isfile(image_path):
                 self.image_path = image_path
@@ -401,7 +404,7 @@ class VM(device.Device):
         SDK environment variable, cros default board.
 
         Raises:
-          DieSystemExit: If a board cannot be found.
+            DieSystemExit: If a board cannot be found.
         """
         if self.board:
             return
@@ -437,7 +440,7 @@ class VM(device.Device):
             raise VMError("SSH port %d in use" % self.ssh_port)
 
     def Run(self):
-        """Performs an action, one of start, stop, or run a command in the VM."""
+        """Perform an action, one of start, stop, or run a command in the VM."""
         if not self.start and not self.stop and not self.cmd:
             raise VMError("Must specify one of start, stop, or cmd.")
 
@@ -454,15 +457,15 @@ class VM(device.Device):
         """Returns the args to qemu used to launch the VM.
 
         Args:
-          image_path: Path to QEMU image.
-          image_format: Format of the image.
+            image_path: Path to QEMU image.
+            image_format: Format of the image.
         """
         # Append 'check' to warn if the requested CPU is not fully supported.
         if "check" not in self.qemu_cpu.split(","):
             self.qemu_cpu += ",check"
         # Append 'vmx=on' if the host supports nested virtualization. It can be
-        # enabled via 'vmx+' or 'vmx=on' (or similarly disabled) so just test for
-        # the presence of 'vmx'. For more details, see:
+        # enabled via 'vmx+' or 'vmx=on' (or similarly disabled) so just test
+        # for the presence of 'vmx'. For more details, see:
         # https://www.kernel.org/doc/Documentation/virtual/kvm/nested-vmx.txt
         if "vmx" not in self.qemu_cpu and self.enable_kvm:
             for f in glob.glob(self.NESTED_KVM_GLOB):
@@ -538,7 +541,8 @@ class VM(device.Device):
         """Start the VM.
 
         Args:
-          retries: Number of times to retry launching the VM if it fails to boot-up.
+            retries: Number of times to retry launching the VM if it fails to
+                boot-up.
         """
         if not self.enable_kvm:
             logging.warning("KVM is not supported; Chrome VM will be slow")
@@ -583,7 +587,7 @@ class VM(device.Device):
         """Get the pid of the VM.
 
         Returns:
-          pid of the VM.
+            pid of the VM.
         """
         if not os.path.exists(self.vm_dir):
             logging.debug("%s not present.", self.vm_dir)
@@ -606,7 +610,7 @@ class VM(device.Device):
         """Returns True if there's a running VM.
 
         Returns:
-          True if there's a running VM.
+            True if there's a running VM.
         """
         pid = self._GetVMPid()
         if not pid:
@@ -616,24 +620,24 @@ class VM(device.Device):
         return os.path.isdir("/proc/%i" % pid)
 
     def SaveVMImageOnShutdown(self, output_dir):
-        """Takes a VM snapshot via savevm and signals to save the VM image later.
+        """Take a VM snapshot via savevm and signal to save the VM image later.
 
         Args:
-          output_dir: A path specifying the directory that the VM image should be
-              saved to.
+            output_dir: A path specifying the directory that the VM image should
+                be saved to.
         """
         logging.debug("Taking VM snapshot")
         self.copy_image_on_shutdown = True
         self.image_copy_dir = output_dir
         if not self.copy_on_write:
             logging.warning(
-                "Attempting to take a VM snapshot without --copy-on-write. Saved "
-                "VM image may not contain the desired snapshot."
+                "Attempting to take a VM snapshot without --copy-on-write. "
+                "Saved VM image may not contain the desired snapshot."
             )
         with open(self.kvm_pipe_in, "w", encoding="utf-8") as monitor_pipe:
-            # Saving the snapshot will take an indeterminate amount of time, so also
-            # send a fake command that the monitor will complain about so we can know
-            # when the snapshot saving is done.
+            # Saving the snapshot will take an indeterminate amount of time, so
+            # also send a fake command that the monitor will complain about so
+            # we can know when the snapshot saving is done.
             monitor_pipe.write("savevm chromite_lib_vm_snapshot\n")
             monitor_pipe.write("thisisafakecommand\n")
         with open(self.kvm_pipe_out, encoding="utf-8") as monitor_pipe:
@@ -716,17 +720,17 @@ class VM(device.Device):
                     "%d %s processes to start." % (numpids, exe)
                 )
 
-        # We could also wait for session_manager, nacl_helper, etc, but chrome is
-        # the long pole. We expect the parent, 2 zygotes, gpu-process,
+        # We could also wait for session_manager, nacl_helper, etc., but chrome
+        # is the long pole. We expect the parent, 2 zygotes, gpu-process,
         # utility-process, 3 renderers.
         _WaitForProc("chrome", 8)
 
     def WaitForBoot(self, max_retry=3, sleep=5):
         """Wait for the VM to boot up.
 
-        Wait for ssh connection to become active, and wait for all expected chrome
-        processes to be launched. Set max_retry to a lower value since we can easily
-        restart the VM if something is stuck and timing out.
+        Wait for ssh connection to become active, and wait for all expected
+        chrome processes to be launched. Set max_retry to a lower value since we
+        can easily restart the VM if something is stuck and timing out.
         """
         if not os.path.exists(self.vm_dir):
             self.Start()
@@ -741,11 +745,8 @@ class VM(device.Device):
     def GetParser():
         """Parse a list of args.
 
-        Args:
-          argv: list of command line arguments.
-
         Returns:
-          List of parsed opts.
+            commandline.ArgumentParser
         """
         parser = device.Device.GetParser()
         parser.add_argument(

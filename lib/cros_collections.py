@@ -9,16 +9,16 @@ def GroupByKey(input_iter, key):
     """Split an iterable of dicts, based on value of a key.
 
     GroupByKey([{'a': 1}, {'a': 2}, {'a': 1, 'b': 2}], 'a') =>
-      {1: [{'a': 1}, {'a': 1, 'b': 2}], 2: [{'a': 2}]}
+        {1: [{'a': 1}, {'a': 1, 'b': 2}], 2: [{'a': 2}]}
 
     Args:
-      input_iter: An iterable of dicts.
-      key: A string specifying the key name to split by.
+        input_iter: An iterable of dicts.
+        key: A string specifying the key name to split by.
 
     Returns:
-      A dictionary, mapping from each unique value for |key| that
-      was encountered in |input_iter| to a list of entries that had
-      that value.
+        A dictionary, mapping from each unique value for |key| that
+        was encountered in |input_iter| to a list of entries that had
+        that value.
     """
     split_dict = dict()
     for entry in input_iter:
@@ -30,13 +30,13 @@ def GroupNamedtuplesByKey(input_iter, key):
     """Split an iterable of namedtuples, based on value of a key.
 
     Args:
-      input_iter: An iterable of namedtuples.
-      key: A string specifying the key name to split by.
+        input_iter: An iterable of namedtuples.
+        key: A string specifying the key name to split by.
 
     Returns:
-      A dictionary, mapping from each unique value for |key| that
-      was encountered in |input_iter| to a list of entries that had
-      that value.
+        A dictionary, mapping from each unique value for |key| that
+        was encountered in |input_iter| to a list of entries that had
+        that value.
     """
     split_dict = {}
     for entry in input_iter:
@@ -52,10 +52,10 @@ def InvertDictionary(origin_dict):
     {'val1': {'key1', 'key2'}, 'val2': {'key1'}, 'val3': {'key2', 'key3'}}
 
     Args:
-      origin_dict: A dict mapping each key to a group (collection) of values.
+        origin_dict: A dict mapping each key to a group (collection) of values.
 
     Returns:
-      An inverted dict mapping each key to a set of its values.
+        An inverted dict mapping each key to a set of its values.
     """
     new_dict = {}
     for origin_key, origin_values in origin_dict.items():

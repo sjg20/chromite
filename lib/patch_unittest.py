@@ -232,8 +232,8 @@ I am the first commit.
             capture_output=True,
         )
 
-        # Nerf any hooks the OS might have installed on us as they aren't going to
-        # be useful to us, just slow things down.
+        # Nerf any hooks the OS might have installed on us as they aren't going
+        # to be useful to us, just slow things down.
         shutil.rmtree(os.path.join(bare_path, "hooks"))
 
         # Add an initial commit then wipe the working tree.
@@ -265,8 +265,8 @@ I am the first commit.
         os.chdir(self.default_cwd)
 
     def _MkPatch(self, source, sha1, ref="refs/heads/main", **kwargs):
-        # This arg is used by inherited versions of _MkPatch. Pop it to make this
-        # _MkPatch compatible with them.
+        # This arg is used by inherited versions of _MkPatch. Pop it to make
+        # this _MkPatch compatible with them.
         site_params = config_lib.GetSiteParams()
         kwargs.pop("suppress_branch", None)
         return self.patch_kls(
@@ -307,8 +307,8 @@ I am the first commit.
             remote = config_lib.GetSiteParams().EXTERNAL_REMOTE
         cmd += ["--origin", remote]
         self._run(cmd)
-        # Nerf any hooks the OS might have installed on us as they aren't going to
-        # be useful to us, just slow things down.
+        # Nerf any hooks the OS might have installed on us as they aren't going
+        # to be useful to us, just slow things down.
         shutil.rmtree(os.path.join(path, ".git", "hooks"))
         return path
 
@@ -626,8 +626,8 @@ class TestGitRepoPatch(GitRepoPatchTestCase):
             check_attrs={"inflight": False, "trivial": False},
         )
 
-        # Now test conflicts since we're still at ToT; note that this is an actual
-        # conflict because the fuzz anchors have changed.
+        # Now test conflicts since we're still at ToT; note that this is an
+        # actual conflict because the fuzz anchors have changed.
         self.assertRaises2(
             cros_patch.ApplyPatchException,
             patch3.Apply,
@@ -752,7 +752,9 @@ class TestGerritFetchOnlyPatch(cros_test_lib.MockTestCase):
             cros_patch.ATTR_BRANCH: "main",
             cros_patch.ATTR_REMOTE: "cros-internal",
             cros_patch.ATTR_COMMIT: "7181e4b5e182b6f7d68461b04253de095bad74f9",
-            cros_patch.ATTR_CHANGE_ID: "I47ea30385af60ae4cc2acc5d1a283a46423bc6e1",
+            cros_patch.ATTR_CHANGE_ID: (
+                "I47ea30385af60ae4cc2acc5d1a283a46423bc6e1"
+            ),
             cros_patch.ATTR_GERRIT_NUMBER: "12345",
             cros_patch.ATTR_PATCH_NUMBER: "4",
             cros_patch.ATTR_OWNER_EMAIL: "foo@chromium.org",
@@ -768,7 +770,9 @@ class TestGerritFetchOnlyPatch(cros_test_lib.MockTestCase):
             cros_patch.ATTR_BRANCH: "main",
             cros_patch.ATTR_REMOTE: "cros-internal",
             cros_patch.ATTR_COMMIT: "7181e4b5e182b6f7d68461b04253de095bad74f9",
-            cros_patch.ATTR_CHANGE_ID: "I47ea30385af60ae4cc2acc5d1a283a46423bc6e1",
+            cros_patch.ATTR_CHANGE_ID: (
+                "I47ea30385af60ae4cc2acc5d1a283a46423bc6e1"
+            ),
             cros_patch.ATTR_GERRIT_NUMBER: "12345",
             cros_patch.ATTR_PATCH_NUMBER: "4",
             cros_patch.ATTR_OWNER_EMAIL: "foo@chromium.org",
@@ -818,7 +822,9 @@ class TestGerritFetchOnlyPatch(cros_test_lib.MockTestCase):
             cros_patch.ATTR_BRANCH: "main",
             cros_patch.ATTR_REMOTE: "cros-internal",
             cros_patch.ATTR_COMMIT: "7181e4b5e182b6f7d68461b04253de095bad74f9",
-            cros_patch.ATTR_CHANGE_ID: "I47ea30385af60ae4cc2acc5d1a283a46423bc6e1",
+            cros_patch.ATTR_CHANGE_ID: (
+                "I47ea30385af60ae4cc2acc5d1a283a46423bc6e1"
+            ),
             cros_patch.ATTR_GERRIT_NUMBER: "12345",
             cros_patch.ATTR_PATCH_NUMBER: "4",
             cros_patch.ATTR_OWNER_EMAIL: "foo@chromium.org",
@@ -1267,7 +1273,7 @@ class TestGerritPatch(TestGitRepoPatch):
                     )
 
                     # there may be pre-existing footers.  This asserts that we
-                    # can Get all of the footers after we Set them.
+                    # can Get all the footers after we Set them.
                     self.assertFalse(
                         bool(
                             set(footers)
@@ -1635,9 +1641,9 @@ class MockPatchFactory(object):
         """Get a sequential list of patches.
 
         Args:
-          how_many: How many patches to return.
-          always_use_list: Whether to use a list for a single item list.
-          **kwargs: Keyword arguments for self.MockPatch.
+            how_many: How many patches to return.
+            always_use_list: Whether to use a list for a single item list.
+            **kwargs: Keyword arguments for self.MockPatch.
         """
         patches = [self.MockPatch(**kwargs) for _ in range(how_many)]
         if self.patch_mock:
@@ -1661,7 +1667,7 @@ class DependencyErrorTests(cros_test_lib.MockTestCase):
         self.assertEqual(ex_3.GetRootError(), ex_1)
 
     def testGetRootErrorOnCircurlarError(self):
-        """Test GetRootError on circular"""
+        """Test GetRootError on circular."""
         p_1, p_2, p_3 = MockPatchFactory().GetPatches(how_many=3)
         ex_1 = cros_patch.DependencyError(
             p_2, cros_patch.ApplyPatchException(p_1)

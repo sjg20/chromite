@@ -86,7 +86,7 @@ class ReExecuteWithNamespaceTests(cros_test_lib.MockTestCase):
     """Tests for ReExecuteWithNamespace()."""
 
     def testReExecuteWithNamespace(self):
-        """Test that SimpleUnshare is called and the non-root user is restored."""
+        """Verify SimpleUnshare is called and the non-root user is restored."""
         self.PatchDict(
             os.environ,
             {

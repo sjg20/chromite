@@ -15,11 +15,11 @@ def GetExitStatus(status):
     """Get the exit status of a child from an os.waitpid call.
 
     Args:
-      status: The return value of os.waitpid(pid, 0)[1]
+        status: The return value of os.waitpid(pid, 0)[1]
 
     Returns:
-      The exit status of the process. If the process exited with a signal,
-      the return value will be 128 plus the signal number.
+        The exit status of the process. If the process exited with a signal,
+        the return value will be 128 plus the signal number.
     """
     if os.WIFSIGNALED(status):
         return 128 + os.WTERMSIG(status)
@@ -37,7 +37,7 @@ def ExitAsStatus(status):
     See http://www.cons.org/cracauer/sigint.html for more details.
 
     Args:
-      status: A status as returned by os.wait type funcs.
+        status: A status as returned by os.wait type funcs.
     """
     exit_status = os.WEXITSTATUS(status)
 

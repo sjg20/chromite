@@ -123,7 +123,7 @@ class TestRetries(cros_test_lib.MockTempDirTestCase):
         """Test which exception gets raised by repeated failure."""
 
         def _GetTestMain():
-            """Get function that fails once with ValueError, Then AssertionError."""
+            """Get func that fails once with ValueError, then AssertionError."""
             source = itertools.count()
 
             def _TestMain():

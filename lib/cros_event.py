@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Cros Eventing library, for tracking tasks using a shared eventing system"""
+"""Cros Eventing library, for tracking tasks using a shared eventing system."""
 
 import atexit
 import json
@@ -30,7 +30,7 @@ EVENT_KIND_ROOT = "Root"
 
 # Helper functions
 def EventIdGenerator():
-    """Returns multiprocess safe iterator that  generates locally unique id"""
+    """Returns multiprocess safe iterator that  generates locally unique id."""
     eid = parallel.WrapMultiprocessing(multiprocessing.Value, "i", 1)
 
     while True:
@@ -48,13 +48,13 @@ class Failure(Exception):
     """Exception to raise while running an event."""
 
     def __init__(self, message=None, status=EVENT_STATUS_FAIL):
-        """Create event with an optional message, status can be overridden"""
+        """Create event with an optional message, status can be overridden."""
         super().__init__(message, status)
         self.msg = message
         self.status = status
 
     def __dict__(self):
-        """Return dictionary"""
+        """Return dictionary."""
         d = {EVENT_STATUS: self.status}
 
         if self.msg:
@@ -63,21 +63,21 @@ class Failure(Exception):
         return d
 
     def __repr__(self):
-        """Return failure message"""
+        """Return failure message."""
         return self.msg if self.msg else self.status
 
 
 class Event(dict):
-    """Stores metadata of an Event that is logged during a set of tasks"""
+    """Stores metadata of an Event that is logged during a set of tasks."""
 
     def __init__(self, eid=None, data=None, emit_func=None):
-        """Create an Event, and populate metadata
+        """Create an Event, and populate metadata.
 
         Args:
-          eid: Unique id number for a given set of events.
-          data: Metadata associated with the given Event.
-          emit_func: Callback function to be called when event is complete.
-            The function will be passed current event as sole argument.
+            eid: Unique id number for a given set of events.
+            data: Metadata associated with the given Event.
+            emit_func: Callback function to be called when event is complete.
+                The function will be passed current event as sole argument.
         """
         super().__init__()
 
@@ -91,11 +91,11 @@ class Event(dict):
         self.emit_func = emit_func
 
     def fail(self, message=None, status=EVENT_STATUS_FAIL):
-        """Call to mark event as failed
+        """Call to mark event as failed.
 
         Args:
-          message: Message to be set in the event.
-          status: Override the default status 'failure'.
+            message: Message to be set in the event.
+            status: Override the default status 'failure'.
         """
         self[EVENT_STATUS] = status
 
@@ -103,12 +103,12 @@ class Event(dict):
             self[EVENT_FAIL_MSG] = message
 
     def __enter__(self):
-        """Called in Context Manager, does nothing"""
+        """Called in Context Manager, does nothing."""
         self[EVENT_STATUS] = EVENT_STATUS_RUNNING
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        """Writes event to emit_func, if given"""
+        """Writes event to emit_func, if given."""
         self[EVENT_FINISH_TIME] = time()
 
         if (
@@ -132,15 +132,15 @@ class Event(dict):
 
 
 class EventLogger(object):
-    """Logger to be generate, and emit multiple Events"""
+    """Logger to be generate, and emit multiple Events."""
 
     def __init__(self, emit_func, default_kind=EVENT_KIND_ROOT, data=None):
-        """Initialize EventLogger
+        """Initialize EventLogger.
 
         Args:
-          emit_func: Function called with the Event that has occurred.
-          default_kind: Kind that will be used to generate id list [kind, id].
-          data: Metadata that will be copied to all Events generate.
+            emit_func: Function called with the Event that has occurred.
+            default_kind: Kind that will be used to generate id list [kind, id].
+            data: Metadata that will be copied to all Events generate.
         """
 
         self.emit_func = emit_func
@@ -152,11 +152,11 @@ class EventLogger(object):
         self.idGen = EventIdGenerator()
 
     def Event(self, kind=None, data=None):
-        """Returns new Event with with given Data
+        """Returns new Event with given Data.
 
         Args:
-          kind: String used in the event's id, see gCloud's datastore doc.
-          data: Dictionary of additional data to be included.
+            kind: String used in the event's id, see gCloud's datastore doc.
+            data: Dictionary of additional data to be included.
         """
 
         kind = kind if kind else self.default_kind
@@ -177,20 +177,22 @@ class EventLogger(object):
 
 
 def getEventFileLogger(file_name, data=None, encoder_func=json.dumps):
-    """Returns an EventFileLogger using the given file name"""
-    file_out = open(file_name, "w", encoding="utf-8")
+    """Returns an EventFileLogger using |file_name|."""
+    file_out = open(  # pylint: disable=consider-using-with
+        file_name, "w", encoding="utf-8"
+    )
     event_logger = EventFileLogger(
         file_out, data=data, encoder_func=encoder_func
     )
 
-    # make sure the file is closed on exit
+    # Make sure the file is closed on exit.
     atexit.register(event_logger.shutdown)
 
     return event_logger
 
 
 class EventFileLogger(EventLogger):
-    """Event Logger that writes to a file"""
+    """Event Logger that writes to a file."""
 
     def __init__(self, file_out, data=None, encoder_func=json.dumps):
         self.file_out = file_out
@@ -198,18 +200,18 @@ class EventFileLogger(EventLogger):
         super().__init__(self.write_event, data=data)
 
     def write_event(self, event):
-        """Writes Event(dict) to file"""
+        """Writes Event(dict) to file."""
         self.file_out.write(self.encoder_func(event) + "\n")
         self.file_out.flush()
 
     def shutdown(self):
-        """Close given file object"""
+        """Close given file object."""
         super().shutdown()
         self.file_out.close()
 
 
 class EventStubLogger(EventLogger):
-    """Event Logger that does not write event to anything"""
+    """Event Logger that does not write event to anything."""
 
     def __init__(self):
         def nop(event):
@@ -224,7 +226,7 @@ root = EventStubLogger()
 
 
 def setEventLogger(logger):
-    """Set the root EventLogger"""
+    """Set the root EventLogger."""
     if not isinstance(logger, EventLogger):
         raise TypeError("not an instance of EventLogger")
 
@@ -234,12 +236,12 @@ def setEventLogger(logger):
 
 
 def setKind(kind):
-    """Set new default kind for root EventLogger"""
+    """Set new default kind for root EventLogger."""
     root.setKind(kind)
 
 
 def newEvent(kind=None, **kwargs):
-    """Return a new Event object using root EventLogger"""
+    """Return a new Event object using root EventLogger."""
     if kind:
         return root.Event(kind=kind, data=kwargs)
     else:

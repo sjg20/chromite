@@ -12,8 +12,8 @@ def RelaySignal(handler, signum, frame):
     """Notify a listener returned from getsignal of receipt of a signal.
 
     Returns:
-      True if it was relayed to the target, False otherwise.
-      False in particular occurs if the target isn't relayable.
+        True if it was relayed to the target, False otherwise.
+        False in particular occurs if the target isn't relayable.
     """
     if handler in (None, signal.SIG_IGN):
         return True
@@ -30,11 +30,11 @@ def DeferSignals(*args):
     """Context Manger to defer signals during a critical block.
 
     If a signal comes in for the masked signals, the original handler
-    is ran after the  critical block has exited.
+    is run after the critical block has exited.
 
     Args:
-      args: Which signals to ignore.  If none are given, defaults to
-        SIGINT and SIGTERM.
+        args: Which signals to ignore.  If none are given, defaults to
+            SIGINT and SIGTERM.
     """
     signals = args
     if not signals:
@@ -73,10 +73,10 @@ def StrSignal(sig_num):
     the same signal number, it's impossible to say which one is right.
 
     Args:
-      sig_num: The numeric signal you wish to convert
+        sig_num: The numeric signal you wish to convert
 
     Returns:
-      A string of the signal name(s)
+        A string of the signal name(s)
     """
     # Handle realtime signals first since they are unnamed.
     if sig_num >= signal.SIGRTMIN and sig_num < signal.SIGRTMAX:

@@ -20,11 +20,11 @@ class StepFailure(Exception):
 
     Exceptions that derive from StepFailure should meet the following
     criteria:
-      1) The failure indicates that a cbuildbot step failed.
-      2) The necessary information to debug the problem has already been
-         printed in the logs for the stage that failed.
-      3) __str__() should be brief enough to include in a Commit Queue
-         failure message.
+        1) The failure indicates that a cbuildbot step failed.
+        2) The necessary information to debug the problem has already been
+            printed in the logs for the stage that failed.
+        3) __str__() should be brief enough to include in a Commit Queue
+            failure message.
     """
 
     # The constants.EXCEPTION_CATEGORY_ALL_CATEGORIES values that this exception
@@ -33,7 +33,10 @@ class StepFailure(Exception):
     EXCEPTION_CATEGORY = constants.EXCEPTION_CATEGORY_UNKNOWN
 
     def EncodeExtraInfo(self):
-        """Encode extra_info into a json string, can be overwritten by subclasses"""
+        """Encode extra_info into a json string.
+
+        Can be overwritten by subclasses.
+        """
 
     def ConvertToStageFailureMessage(
         self, build_stage_id, stage_name, stage_prefix_name=None
@@ -41,13 +44,13 @@ class StepFailure(Exception):
         """Convert StepFailure to StageFailureMessage.
 
         Args:
-          build_stage_id: The id of the build stage.
-          stage_name: The name (string) of the failed stage.
-          stage_prefix_name: The prefix name (string) of the failed stage,
-              default to None.
+            build_stage_id: The id of the build stage.
+            stage_name: The name (string) of the failed stage.
+            stage_prefix_name: The prefix name (string) of the failed stage,
+                default to None.
 
         Returns:
-          An instance of failure_message_lib.StageFailureMessage.
+            An instance of failure_message_lib.StageFailureMessage.
         """
         stage_failure = failure_message_lib.StageFailure(
             None,
@@ -84,15 +87,15 @@ def CreateExceptInfo(exception, tb):
 
     Creates an ExceptInfo object from |exception| and |tb|. If
     |exception| is a CompoundFailure with non-empty list of exc_infos,
-    simly returns exception.exc_infos. Note that we do not preserve type
+    simply returns exception.exc_infos. Note that we do not preserve type
     of |exception| in this case.
 
     Args:
-      exception: The exception.
-      tb: The textual traceback.
+        exception: The exception.
+        tb: The textual traceback.
 
     Returns:
-      A list of ExceptInfo objects.
+        A list of ExceptInfo objects.
     """
     if isinstance(exception, CompoundFailure) and exception.exc_infos:
         return exception.exc_infos
@@ -107,8 +110,8 @@ class CompoundFailure(StepFailure):
         """Initializes an CompoundFailure instance.
 
         Args:
-          message: A string describing the failure.
-          exc_infos: A list of ExceptInfo objects.
+            message: A string describing the failure.
+            exc_infos: A list of ExceptInfo objects.
         """
         self.exc_infos = exc_infos if exc_infos else []
         if not message:
@@ -154,10 +157,10 @@ class CompoundFailure(StepFailure):
         """Determine if there are non-exempted failures.
 
         Args:
-          exempt_exception_list: A list of exempted exception types.
+            exempt_exception_list: A list of exempted exception types.
 
         Returns:
-          Returns True if any failure is not in |exempt_exception_list|.
+            Returns True if any failure is not in |exempt_exception_list|.
         """
         if not exempt_exception_list:
             return not self.HasEmptyList()
@@ -176,13 +179,13 @@ class CompoundFailure(StepFailure):
         """Convert CompoundFailure to StageFailureMessage.
 
         Args:
-          build_stage_id: The id of the build stage.
-          stage_name: The name (string) of the failed stage.
-          stage_prefix_name: The prefix name (string) of the failed stage,
-              default to None.
+            build_stage_id: The id of the build stage.
+            stage_name: The name (string) of the failed stage.
+            stage_prefix_name: The prefix name (string) of the failed stage,
+                default to None.
 
         Returns:
-          An instance of failure_message_lib.StageFailureMessage.
+            An instance of failure_message_lib.StageFailureMessage.
         """
         stage_failure = failure_message_lib.StageFailure(
             None,
@@ -263,12 +266,13 @@ class SetFailureType(object):
         """Initializes the decorator.
 
         Args:
-          category_exception: The exception type to re-raise as. It must be
-            a subclass of CompoundFailure.
-          source_exception: The exception types to re-raise. By default, re-raise
-            all Exception classes.
-          exclude_exceptions: Do not set the type of the exception if it's subclass
-            of one exception in exclude_exceptions. Default to EXCLUSIVE_EXCEPTIONS.
+            category_exception: The exception type to re-raise as. It must be
+                a subclass of CompoundFailure.
+            source_exception: The exception types to re-raise. By default,
+                re-raise all Exception classes.
+            exclude_exceptions: Do not set the type of the exception if it's
+                subclass of one exception in exclude_exceptions. Default to
+                EXCLUSIVE_EXCEPTIONS.
         """
         assert issubclass(category_exception, CompoundFailure)
         self.category_exception = category_exception
@@ -323,8 +327,8 @@ class BuildScriptFailure(StepFailure):
         """Construct a BuildScriptFailure object.
 
         Args:
-          exception: A RunCommandError object.
-          shortname: Short name for the command we're running.
+            exception: A RunCommandError object.
+            shortname: Short name for the command we're running.
         """
         StepFailure.__init__(self)
         assert isinstance(exception, cros_build_lib.RunCommandError)
@@ -344,7 +348,7 @@ class BuildScriptFailure(StepFailure):
         """Encode extra_info into a json string.
 
         Returns:
-          A json string containing shortname.
+            A json string containing shortname.
         """
         extra_info_dict = {
             "shortname": self.shortname,
@@ -366,9 +370,9 @@ class PackageBuildFailure(BuildScriptFailure):
         """Construct a PackageBuildFailure object.
 
         Args:
-          exception: The underlying exception.
-          shortname: Short name for the command we're running.
-          failed_packages: List of packages that failed to build.
+            exception: The underlying exception.
+            shortname: Short name for the command we're running.
+            failed_packages: List of packages that failed to build.
         """
         BuildScriptFailure.__init__(self, exception, shortname)
         self.failed_packages = set(failed_packages)
@@ -384,7 +388,7 @@ class PackageBuildFailure(BuildScriptFailure):
         """Encode extra_info into a json string.
 
         Returns:
-          A json string containing shortname and failed_packages.
+            A json string containing shortname and failed_packages.
         """
         extra_info_dict = {
             "shortname": self.shortname,
@@ -396,7 +400,7 @@ class PackageBuildFailure(BuildScriptFailure):
         """Build proto BuildCompileFailureOutput compatible JSON output.
 
         Returns:
-          A json string with BuildCompileFailureOutput proto as json.
+            A json string with BuildCompileFailureOutput proto as json.
         """
         failures = []
         for pkg in self.failed_packages:
@@ -490,14 +494,14 @@ def GetStageFailureMessageFromException(
     """Get StageFailureMessage from an exception.
 
     Args:
-      stage_name: The name (string) of the failed stage.
-      build_stage_id: The id of the failed build stage.
-      exception: The BaseException instance to convert to StageFailureMessage.
-      stage_prefix_name: The prefix name (string) of the failed stage,
-          default to None.
+        stage_name: The name (string) of the failed stage.
+        build_stage_id: The id of the failed build stage.
+        exception: The BaseException instance to convert to StageFailureMessage.
+        stage_prefix_name: The prefix name (string) of the failed stage,
+            default to None.
 
     Returns:
-      An instance of failure_message_lib.StageFailureMessage.
+        An instance of failure_message_lib.StageFailureMessage.
     """
     if isinstance(exception, StepFailure):
         return exception.ConvertToStageFailureMessage(

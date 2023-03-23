@@ -11,13 +11,13 @@ def IntersectIntervals(intervals):
     """Gets the intersection of a set of intervals.
 
     Args:
-      intervals: A list of interval groups, where each interval group is itself
-                 a list of (start, stop) tuples (ordered by start time and
-                 non-overlapping).
+        intervals: A list of interval groups, where each interval group is
+            itself a list of (start, stop) tuples (ordered by start time and
+            non-overlapping).
 
     Returns:
-      An interval group, as a list of (start, stop) tuples, corresponding to the
-      intersection (i.e. overlap) of the given |intervals|.
+        An interval group, as a list of (start, stop) tuples, corresponding to
+        the intersection (i.e. overlap) of the given |intervals|.
     """
     if not intervals:
         return []
@@ -47,14 +47,14 @@ def SplitToChunks(input_iter, chunk_size):
     walk past that chunk until necessary.
 
     Examples:
-      list(SplitToChunks([1, 2, 3, 4, 5], 3)) -> [[1, 2, 3], [4, 5]
+        list(SplitToChunks([1, 2, 3, 4, 5], 3)) -> [[1, 2, 3], [4, 5]
 
     Args:
-      input_iter: iterable or generator to be split into chunks
-      chunk_size: the maximum size of each chunk
+        input_iter: iterable or generator to be split into chunks
+        chunk_size: the maximum size of each chunk
 
     Returns:
-      An iterable of chunks, where each chunk is of maximum size chunk_size.
+        An iterable of chunks, where each chunk is of maximum size chunk_size.
     """
     count = 0
     l = []

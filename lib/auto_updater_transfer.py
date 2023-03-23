@@ -142,7 +142,7 @@ class Transfer(object, metaclass=abc.ABCMeta):
         """Verify that all required payloads are in |self.payload_dir|."""
 
     def TransferUpdateUtilsPackage(self):
-        """Transfer update-utils package to work directory of the remote device."""
+        """Transfer update-utils pkg to work directory of the remote device."""
         retry_util.RetryException(
             cros_build_lib.RunCommandError,
             _MAX_RETRY,
@@ -177,7 +177,7 @@ class Transfer(object, metaclass=abc.ABCMeta):
         )
 
     def _EnsureDeviceDirectory(self, directory):
-        """Mkdir the directory no matther whether this directory exists on host.
+        """Mkdir the directory no matter whether this directory exists on host.
 
         Args:
             directory: The directory to be made on the device.
@@ -189,7 +189,7 @@ class LocalTransfer(Transfer):
     """Abstracts logic that handles transferring local files to the DUT."""
 
     def __init__(self, *args, **kwargs):
-        """Initialize LocalTransfer to handle transferring files from local to DUT.
+        """Initialize LocalTransfer for transferring files from local to DUT.
 
         Args:
             *args: The list of arguments to be passed. See Base class for a
@@ -224,13 +224,14 @@ class LocalTransfer(Transfer):
                 )
 
     def _TransferUpdateUtilsPackage(self):
-        """Transfer update-utils package to work directory of the remote device."""
+        """Transfer update-utils pkg to work directory of the remote device."""
         logging.notice("Copying update script to device...")
         source_dir = os.path.join(self._tempdir, "src")
         osutils.SafeMakedirs(source_dir)
         nebraska_wrapper.RemoteNebraskaWrapper.GetNebraskaSrcFile(source_dir)
 
-        # Make sure the device.work_dir exists after any installation and reboot.
+        # Make sure the device.work_dir exists after any installation and
+        # reboot.
         self._EnsureDeviceDirectory(self._device.work_dir)
         # Python packages are plain text files.
         self._device.CopyToWorkDir(
@@ -318,8 +319,8 @@ class LabEndToEndPayloadTransfer(Transfer):
             self._RemoteDevserverCall(cmd)
         except cros_build_lib.RunCommandError as e:
             raise ChromiumOSTransferError(
-                "Could not verify if %s was staged at %s. Received exception: %s"
-                % (payload_name, payload_url, e)
+                f"Could not verify if {payload_name} was staged at "
+                f"{payload_url}. Received exception: {e}"
             )
 
     def CheckPayloads(self):
@@ -363,7 +364,7 @@ class LabEndToEndPayloadTransfer(Transfer):
     def _GetCurlCmdForPayloadDownload(
         self, payload_dir, payload_filename, build_id=None
     ):
-        """Returns a valid curl command to download payloads into device tmp dir.
+        """Return a valid curl command to download payloads into device tmp dir.
 
         Args:
             payload_dir: Path to the payload directory on the device.
@@ -413,21 +414,23 @@ class LabEndToEndPayloadTransfer(Transfer):
             )
         )
 
-        # Make sure the device.work_dir exists after any installation and reboot.
+        # Make sure the device.work_dir exists after any installation and
+        # reboot.
         self._EnsureDeviceDirectory(self._device.work_dir)
 
     def _TransferStatefulUpdate(self):
         """Transfer files for stateful update.
 
         The stateful update bin and the corresponding payloads are copied to the
-        target remote device for stateful update from the staging server via curl.
+        target remote device for stateful update from the staging server via
+        curl.
         """
         self._EnsureDeviceDirectory(self._device_payload_dir)
 
         # TODO(crbug.com/1024639): Another way to make the payloads available is
-        # to make update_engine download it directly from the staging_server. This
-        # will avoid a disk copy but has the potential to be harder to debug if
-        # update engine does not report the error clearly.
+        #   to make update_engine download it directly from the staging_server.
+        #   This will avoid a disk copy but has the potential to be harder to
+        #   debug if update engine does not report the error clearly.
 
         logging.notice("Copying target stateful payload to device...")
         self._device.run(
@@ -449,9 +452,9 @@ class LabEndToEndPayloadTransfer(Transfer):
         logging.notice("Copying rootfs payload to device...")
 
         # TODO(crbug.com/1024639): Another way to make the payloads available is
-        # to make update_engine download it directly from the staging_server. This
-        # will avoid a disk copy but has the potential to be harder to debug if
-        # update engine does not report the error clearly.
+        #   to make update_engine download it directly from the staging_server.
+        #   This will avoid a disk copy but has the potential to be harder to
+        #   debug if update engine does not report the error clearly.
 
         self._device.run(
             self._GetCurlCmdForPayloadDownload(

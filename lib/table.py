@@ -305,7 +305,7 @@ class Table(object):
             row[name] = value if value is not None else self.EMPTY_CELL
 
     def AppendColumn(self, name, value=None):
-        """Same as InsertColumn, but new column is appended after existing ones."""
+        """Like InsertColumn, but new column is appended after existing ones."""
         self.InsertColumn(self.GetNumColumns(), name, value)
 
     def ProcessRows(self, row_processor):
@@ -323,30 +323,34 @@ class Table(object):
         reverse=False,
         new_name=None,
     ):
-        """Merge |other_table| into this table, identifying rows by |id_columns|.
+        """Merge |other_table| into self, identifying rows by |id_columns|.
 
-        The |id_columns| argument can either be a list of identifying columns names
-        or a single column name (string).  The values in these columns will be used
-        to identify the existing row that each row in |other_table| should be
-        merged into.
+        The |id_columns| argument can either be a list of identifying columns
+        names or a single column name (string).  The values in these columns
+        will be used to identify the existing row that each row in |other_table|
+        should be merged into.
 
-        The |merge_rules| specify what to do when there is a merge conflict.  Every
-        column where a conflict is anticipated should have an entry in the
+        The |merge_rules| specify what to do when there is a merge conflict.
+        Every column where a conflict is anticipated should have an entry in the
         |merge_rules| dict.  The value should be one of:
-        'join_with:<text>| = Join the two conflicting values with <text>
-        'accept_this_val' = Keep value in 'this' table and discard 'other' value.
-        'accept_other_val' = Keep value in 'other' table and discard 'this' value.
-        function = Keep return value from function(col_name, this_val, other_val)
+            'join_with:<text>| = Join the two conflicting values with <text>.
+            'accept_this_val' = Keep value in 'this' table and discard 'other'
+                value.
+            'accept_other_val' = Keep value in 'other' table and discard 'this'
+                value.
+            function = Keep return value from
+                function(col_name, this_val, other_val)
 
         A default merge rule can be specified with the key '__DEFAULT__' in
         |merge_rules|.
 
-        By default, the |other_table| must not have any columns that don't already
-        exist in this table.  To allow new columns to be creating by virtue of their
-        presence in |other_table| set |allow_new_columns| to true.
+        By default, the |other_table| must not have any columns that don't
+        already exist in this table.  To allow new columns to be creating by
+        virtue of their presence in |other_table| set |allow_new_columns| to
+        true.
 
-        To sort the final merged table, supply |key| and |reverse| arguments exactly
-        as they work with the Sort method.
+        To sort the final merged table, supply |key| and |reverse| arguments
+        exactly as they work with the Sort method.
         """
         # If requested, allow columns in other_table to create new columns
         # in this table if this table does not already have them.
@@ -399,7 +403,8 @@ class Table(object):
             row = self.GetRowByIndex(row_index)
             for col in other_row:
                 if col in row:
-                    # Find the merge rule that applies to this column, if there is one.
+                    # Find the merge rule that applies to this column, if there
+                    # is one.
                     merge_rule = None
                     if merge_rules:
                         merge_rule = merge_rules.get(col, None)

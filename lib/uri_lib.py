@@ -61,10 +61,10 @@ def _ShortenGob(o):
     """Shorten a Gerrit-on-Borg URI.
 
     Args:
-      o: The named tuple from a urllib.parse.urlsplit call.
+        o: The named tuple from a urllib.parse.urlsplit call.
 
     Returns:
-      A new named tuple that can be passed to urllib.parse.urlunsplit.
+        A new named tuple that can be passed to urllib.parse.urlunsplit.
     """
     parts = _ExtractGobClAndSubpath(o)
     if parts is None:
@@ -92,10 +92,10 @@ def _ShortenCrosReview(o):
     """Shorten old review to new review hosts.
 
     Args:
-      o: The named tuple from a urllib.parse.urlsplit call.
+        o: The named tuple from a urllib.parse.urlsplit call.
 
     Returns:
-      A new named tuple that can be passed to urllib.parse.urlunsplit.
+        A new named tuple that can be passed to urllib.parse.urlunsplit.
     """
     m = re.match(r"^/(i/)?([0-9]+)", o.path)
     if m:
@@ -111,10 +111,10 @@ def _ShortenRietveld(o):
     """Shorten a rietveld URI.
 
     Args:
-      o: The named tuple from a urllib.parse.urlsplit call.
+        o: The named tuple from a urllib.parse.urlsplit call.
 
     Returns:
-      A new named tuple that can be passed to urllib.parse.urlunsplit.
+        A new named tuple that can be passed to urllib.parse.urlunsplit.
     """
     m = re.match(r"^/([0-9]+)", o.path)
     if m:
@@ -127,10 +127,10 @@ def _ShortenBuganizer(o):
     """Shorten a buganizer URI.
 
     Args:
-      o: The named tuple from a urllib.parse.urlsplit call.
+        o: The named tuple from a urllib.parse.urlsplit call.
 
     Returns:
-      A new named tuple that can be passed to urllib.parse.urlunsplit.
+        A new named tuple that can be passed to urllib.parse.urlunsplit.
     """
     if o.path == "/issue":
         # http://b.corp.google.com/issue?id=123
@@ -148,10 +148,10 @@ def _ShortenChromiumBug(o):
     """Shorten a Chromium bug URI.
 
     Args:
-      o: The named tuple from a urllib.parse.urlsplit call.
+        o: The named tuple from a urllib.parse.urlsplit call.
 
     Returns:
-      A new named tuple that can be passed to urllib.parse.urlunsplit.
+        A new named tuple that can be passed to urllib.parse.urlunsplit.
     """
     # https://bugs.chromium.org/p/chromium/issues/detail?id=123
     # https://bugs.chromium.org/p/google-breakpad/issues/list
@@ -179,10 +179,10 @@ def _ShortenGutsTicket(o):
     """Shorten a Google GUTS ticket URI.
 
     Args:
-      o: The named tuple from a urllib.parse.urlsplit call.
+        o: The named tuple from a urllib.parse.urlsplit call.
 
     Returns:
-      A new named tuple that can be passed to urllib.parse.urlunsplit.
+        A new named tuple that can be passed to urllib.parse.urlunsplit.
     """
     # https://gutsv3.corp.google.com/#ticket/123
     m = re.match(r"^ticket/([0-9]+)", o.fragment)
@@ -211,11 +211,11 @@ def ShortenUri(uri, omit_scheme=False):
     Thus this can be safely used as a pass-through for anything.
 
     Args:
-      uri: Any valid URI.
-      omit_scheme: Whether to include the scheme (e.g. http:// or https://).
+        uri: Any valid URI.
+        omit_scheme: Whether to include the scheme (e.g. http:// or https://).
 
     Returns:
-      A (hopefully shorter) URI pointing to the same resource as |uri|.
+        A (hopefully shorter) URI pointing to the same resource as |uri|.
     """
     o = urllib.parse.urlsplit(uri)
 
@@ -258,13 +258,13 @@ def ConstructMiloBuildUri(buildbucket_id):
     """Return a Milo build URL.
 
     Args:
-      buildbucket_id: Buildbucket id of the build to link.
+        buildbucket_id: Buildbucket id of the build to link.
 
     Returns:
-      The fully formed URI.
+        The fully formed URI.
     """
-    # Only local tryjobs will not have a buildbucket_id but they also do not have
-    # a web UI to point at. Generate a fake URL.
+    # Only local tryjobs will not have a buildbucket_id, but they also do not
+    # have a web UI to point at. Generate a fake URL.
     buildbucket_id = buildbucket_id or "fake_bb_id"
     return _MILO_BUILD_URL % {"buildbucket_id": buildbucket_id}
 
@@ -273,12 +273,12 @@ def ConstructDashboardUri(buildbot_primary_name, builder_name, build_number):
     """Return the dashboard (luci-milo) URL for this run
 
     Args:
-      buildbot_primary_name: Name of buildbot primary, e.g. chromeos
-      builder_name: Builder name on buildbot dashboard.
-      build_number: Build number for this validation attempt.
+        buildbot_primary_name: Name of buildbot primary, e.g. chromeos
+        builder_name: Builder name on buildbot dashboard.
+        build_number: Build number for this validation attempt.
 
     Returns:
-      The fully formed URI.
+        The fully formed URI.
     """
     url_suffix = "%s/%s" % (builder_name, str(build_number))
     url_suffix = urllib.parse.quote(url_suffix)
@@ -291,11 +291,11 @@ def ConstructLogDogUri(build_number, stage):
     """Return the logdog URL for the given build number and stage.
 
     Args:
-      build_number: The build ID.
-      stage: The name of the stage to view logs for.
+        build_number: The build ID.
+        stage: The name of the stage to view logs for.
 
     Returns:
-      The fully formed URI.
+        The fully formed URI.
     """
     return _LOGDOG_URL % (str(build_number), stage)
 
@@ -304,10 +304,10 @@ def ConstructViceroyBuildDetailsUri(build_id):
     """Return the dashboard (viceroy) URL for this run.
 
     Args:
-      build_id: CIDB id for the primary build.
+        build_id: CIDB id for the primary build.
 
     Returns:
-      The fully formed URI.
+        The fully formed URI.
     """
     _link = (
         "https://viceroy.corp.google.com/"
@@ -320,10 +320,10 @@ def ConstructGoldenEyeBuildDetailsUri(build_id):
     """Return the dashboard (goldeneye) URL for this run.
 
     Args:
-      build_id: CIDB id for the build.
+        build_id: CIDB id for the build.
 
     Returns:
-      The fully formed URI.
+        The fully formed URI.
     """
     _link = (
         "http://go/goldeneye/"

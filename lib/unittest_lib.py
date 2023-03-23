@@ -25,18 +25,20 @@ def BuildELF(
 ):
     """Builds a dynamic ELF with the provided import and exports.
 
-    Compiles and links a dynamic program that exports some functions, as libraries
-    do, and requires some symbols from other libraries. Dependencies shoud live
-    in the same directory as the result. This function
+    Compiles and links a dynamic program that exports some functions, as
+    libraries do, and requires some symbols from other libraries. Dependencies
+    should live in the same directory as the result. This function
 
     Args:
-      filename: The output filename where the ELF is created.
-      defined_symbols: The list of symbols this ELF exports.
-      undefined_symbols: The list of symbols this ELF requires from other ELFs.
-      used_libs: The list of libraries this ELF loads dynamically, including only
-          the name of the library. For example, 'bz2' rather than 'libbz2.so.1.0'.
-      executable: Whether the file has a main() function.
-      static: Whether the file is statically linked (implies executable=True).
+        filename: The output filename where the ELF is created.
+        defined_symbols: The list of symbols this ELF exports.
+        undefined_symbols: The list of symbols this ELF requires from other
+            ELFs.
+        used_libs: The list of libraries this ELF loads dynamically, including
+            only the name of the library. For example, 'bz2' rather than
+            'libbz2.so.1.0'.
+        executable: Whether the file has a main() function.
+        static: Whether the file is statically linked (implies executable=True).
     """
     if defined_symbols is None:
         defined_symbols = []
@@ -95,15 +97,15 @@ int main() {
 
 
 def create_stub_make_conf(sysroot: os.PathLike):
-    """Creates a stub sysroot_lib._MAKE_CONF for tests to correctly read configs.
+    """Create a stub sysroot_lib._MAKE_CONF for tests to correctly read configs.
 
     sysroot_lib expects sysroot_lib._MAKE_CONF (etc/make.conf) to exist and to
-    source sysroot_lib._MAKE_CONF_BOARD_SETUP (etc/make.conf.board_setup) to read
-    the config.  For tests to read their expected config, a stub _MAKE_CONF needs
-    to be created if they are using sysroot_lib.WriteConfig().
+    source sysroot_lib._MAKE_CONF_BOARD_SETUP (etc/make.conf.board_setup) to
+    read the config.  For tests to read their expected config, a stub _MAKE_CONF
+    needs to be created if they are using sysroot_lib.WriteConfig().
 
     Args:
-      sysroot: The path to the sysroot
+        sysroot: The path to the sysroot
     """
     # pylint: disable=protected-access
     osutils.WriteFile(

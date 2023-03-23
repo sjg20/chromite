@@ -42,11 +42,11 @@ class PackageNode:
     """A package vertex in the depgraph.
 
     Attributes:
-      pkg_info: The package the node represents.
-      root: The root where the package is to be installed.
-      _deps: The set of packages this package depends on.
-      _rev_deps: The set of packages that depend on this package.
-      source_paths: The list of source paths the package uses to build.
+        pkg_info: The package the node represents.
+        root: The root where the package is to be installed.
+        _deps: The set of packages this package depends on.
+        _rev_deps: The set of packages that depend on this package.
+        source_paths: The list of source paths the package uses to build.
     """
 
     pkg_info: package_info.PackageInfo
@@ -149,20 +149,20 @@ class PackageNode:
     def add_reverse_dependency(self, dependency: "PackageNode"):
         """Add a reverse dependency.
 
-        This method is not generally meant to be used directly. Use add_dependency
-        to build out a DependencyGraph.
+        This method is not generally meant to be used directly. Use
+        add_dependency to build out a DependencyGraph.
         """
         self._rev_deps.add(dependency)
 
     def is_relevant(self, src_path: Union[str, os.PathLike]) -> bool:
         """Check if |src_path| is relevant to the node.
 
-        Relevant here means a change in a file in the source paths could affect the
-        result of building the package.
+        Relevant here means a change in a file in the source paths could affect
+        the result of building the package.
         """
         if not self.source_paths:
-            # By definition every package has at least 1 relevant path, the ebuild
-            # itself, so no paths must mean the info wasn't provided.
+            # By definition every package has at least 1 relevant path, the
+            # ebuild itself, so no paths must mean the info wasn't provided.
             raise NoSourcePathsError(
                 f"{self.pkg_info} does not have source paths. "
                 "Must add source paths to nodes to perform this operation."
@@ -202,32 +202,34 @@ class DependencyGraph:
     package atoms. The behavior of other package specs (e.g. CPV) is undefined.
 
     Attributes:
-      _pkg_dict: A dictionary of packages indexed by their full CPVR/CPF, i.e.
-        category/package_name-version-revision, then by the package's target root,
-        e.g. /build/eve, or /. This allows differentiating between packages
-        installed to the sysroot, and those installed to the SDK (DEPEND/deps vs
-        BDEPEND/bdeps).
-      _atom_list: A dictionary of packages indexed by their package atom, i.e.
-        category/package_name. The dictionary contains a list of nodes that have
-        the given atom. This can include the same package installed to multiple
-        roots, and/or different versions of the same package.
-      _roots: The different roots to which packages in the graph would be
-        installed. This will always contain at most 2 entries, the SDK root (/),
-        and a build target's sysroot (e.g. /build/eve). Graphs containing just one
-        of the two are also common.
-      _len: The number of distinct nodes in the graph. The count is NOT the number
-        of distinct packages in the graph. If foo/bar-1.0 is installed to both the
-        sysroot and the SDK root, it will be counted as 2 distinct nodes.
-      sdk_root: The SDK root path if a build target graph has nodes installed to
-        it, otherwise None. Note: The SDK graph's sdk_root will be None because
-        its sysroot is the SDK's root path.
-      sysroot_path: The sysroot path if any nodes install to one, otherwise None.
-        The sysroot path will almost always be set, but it can be None if a
-        build target's depgraph only has bdeps that need to be installed.
-      _root_package_nodes: The nodes of the packages passed as the
-        |root_packages|. This is the list of packages used to create the graph,
-        and so is a superset of the root nodes of the directed graph that only
-        includes the dependency edges.
+        _pkg_dict: A dictionary of packages indexed by their full CPVR/CPF, i.e.
+            category/package_name-version-revision, then by the package's target
+            root, e.g. /build/eve, or /. This allows differentiating between
+            packages installed to the sysroot, and those installed to the SDK
+            (DEPEND/deps vs BDEPEND/bdeps).
+        _atom_list: A dictionary of packages indexed by their package atom, i.e.
+            category/package_name. The dictionary contains a list of nodes that
+            have the given atom. This can include the same package installed to
+            multiple roots, and/or different versions of the same package.
+        _roots: The different roots to which packages in the graph would be
+            installed. This will always contain at most 2 entries, the SDK root
+            (/), and a build target's sysroot (e.g. /build/eve). Graphs
+            containing just one of the two are also common.
+        _len: The number of distinct nodes in the graph. The count is NOT the
+            number of distinct packages in the graph. If foo/bar-1.0 is
+            installed to both the sysroot and the SDK root, it will be counted
+            as 2 distinct nodes.
+        sdk_root: The SDK root path if a build target graph has nodes installed
+            to it, otherwise None. Note: The SDK graph's sdk_root will be None
+            because its sysroot is the SDK's root path.
+        sysroot_path: The sysroot path if any nodes install to one, otherwise
+            None. The sysroot path will almost always be set, but it can be None
+            if a build target's depgraph only has bdeps that need to be
+            installed.
+        _root_package_nodes: The nodes of the packages passed as the
+            |root_packages|. This is the list of packages used to create the
+            graph, and so is a superset of the root nodes of the directed graph
+            that only includes the dependency edges.
     """
 
     def __init__(
@@ -241,20 +243,21 @@ class DependencyGraph:
         The |nodes| are expected to already have their dependencies added.
 
         Args:
-          nodes: The PackageNodes for the depgraph.
-          sysroot: The sysroot the dependency graph was built from.
-          root_packages: The packages emerged to create this depgraph.
+            nodes: The PackageNodes for the depgraph.
+            sysroot: The sysroot the dependency graph was built from.
+            root_packages: The packages emerged to create this depgraph.
         """
-        ### Add all of the nodes to our internal structure.
-        # The pkg/atom_dict are nested dictionaries. The first key is the package
-        # CPF (category/package-version-revision). The next key is the package's
-        # target root. This allows identifying packages that are installed to both
-        # the sysroot and the SDK.
+        ### Add all the nodes to our internal structure.
+        # The pkg/atom_dict are nested dictionaries. The first key is the
+        # package CPF (category/package-version-revision). The next key is the
+        # package's target root. This allows identifying packages that are
+        # installed to both the sysroot and the SDK.
         self._pkg_dict = collections.defaultdict(dict)
         # The atom_list is a dictionary containing the list of packages that map
-        # to a specific atom. Many packages will have a single entry, but the list
-        # may contain multiple when a package is installed to both the sysroot
-        # and the SDK root, and/or could contain multiple versions of a package.
+        # to a specific atom. Many packages will have a single entry, but the
+        # list may contain multiple when a package is installed to both the
+        # sysroot and the SDK root, and/or could contain multiple versions of a
+        # package.
         self._atom_list = collections.defaultdict(list)
         self._roots = set()
         self._len = 0
@@ -268,11 +271,13 @@ class DependencyGraph:
         # depgraph is empty.
         assert 0 <= len(self._roots) <= 2, "Unexpected roots: {self._roots}"
 
-        # Figure out which roots we have roots, and that they're the ones we expect.
+        # Figure out which roots we have roots, and that they're the ones we
+        # expect.
         given_sysroot = os.path.normpath(getattr(sysroot, "path", sysroot))
         sdk_root = build_target_lib.get_default_sysroot_path()
         is_sdk_graph = given_sysroot == sdk_root
-        # Store the SDK (bdeps) root when present and it's not the SDK's depgraph.
+        # Store the SDK (bdeps) root when present, and it's not the SDK's
+        # depgraph.
         self.sdk_root = (
             sdk_root if sdk_root in self._roots and not is_sdk_graph else None
         )
@@ -281,20 +286,21 @@ class DependencyGraph:
         )
 
         if not self.sysroot_path:
-            # Given sysroot could not be confirmed. It could mean we were given a bad
-            # value, or just that nothing needed to be installed to the sysroot.
+            # Given sysroot could not be confirmed. It could mean we were given
+            # a bad value, or just that nothing needed to be installed to the
+            # sysroot.
 
-            # found_sysroot should always be either empty, or a set with exactly one
-            # element in it.
+            # found_sysroot should always be either empty, or a set with exactly
+            # one element in it.
             found_sysroot = self._roots - {self.sdk_root}
             if found_sysroot:
                 raise SysrootValueError(
-                    f"Found sysroot {found_sysroot} does not match given sysroot "
-                    f"({given_sysroot})."
+                    f"Found sysroot {found_sysroot} does not match given "
+                    f"sysroot ({given_sysroot})."
                 )
             else:
-                # Since it's valid no packages could be installed to it, just notify
-                # the user.
+                # Since it's valid no packages could be installed to it, just
+                # notify the user.
                 logging.info(
                     "Given %s but depgraph did not contain any packages "
                     "installed to it.",
@@ -396,7 +402,8 @@ class DependencyGraph:
     ) -> List[PackageNode]:
         """Get all nodes matching the given packages and root type.
 
-        If no |pkgs| are specified will return all nodes for the given root_type.
+        If no |pkgs| are specified will return all nodes for the given
+        root_type.
         """
         roots = self._get_roots(root_type)
         if not pkgs:
@@ -419,11 +426,11 @@ class DependencyGraph:
         """Check if |dep_pkg| is in the dependency graph of |src_pkg|.
 
         Args:
-          dep_pkg: The potential dependency package.
-          src_pkg: The root of the subgraph to search for |dep_pkg|.
-          dep_root_type: Filters the root when finding |dep_pkg|.
-          src_root_type: Filters the root when finding |src_pkg|.
-          direct: Only search direct dependencies when set to True.
+            dep_pkg: The potential dependency package.
+            src_pkg: The root of the subgraph to search for |dep_pkg|.
+            dep_root_type: Filters the root when finding |dep_pkg|.
+            src_root_type: Filters the root when finding |src_pkg|.
+            direct: Only search direct dependencies when set to True.
         """
         dep_pkg_nodes = self.get_nodes([dep_pkg], dep_root_type)
         src_pkg_nodes = self.get_nodes([src_pkg], src_root_type)
@@ -452,10 +459,10 @@ class DependencyGraph:
     ) -> Iterator[PackageNode]:
         """Get the dependencies for a package.
 
-        Use |root_type| to differentiate between the instances installed to the SDK
-        and sysroot. Generates an empty list for packages not in the graph (or when
-        filtered to a root the package isn't installed to). Does not ensure a
-        unique list when multiple nodes are found.
+        Use |root_type| to differentiate between the instances installed to the
+        SDK and sysroot. Generates an empty list for packages not in the graph
+        (or when filtered to a root the package isn't installed to). Does not
+        ensure a unique list when multiple nodes are found.
         """
         for node in self.get_nodes([pkg], root_type):
             yield from node.dependencies
@@ -467,8 +474,8 @@ class DependencyGraph:
     ) -> Iterator[PackageNode]:
         """Get the reverse dependencies for a package.
 
-        Like get_dependencies(), but get the reverse dependencies for the package.
-        See get_dependencies() for more information.
+        Like get_dependencies(), but get the reverse dependencies for the
+        package. See get_dependencies() for more information.
         """
         for node in self.get_nodes([pkg], root_type):
             yield from node.reverse_dependencies
@@ -480,7 +487,7 @@ class DependencyGraph:
     def any_relevant(
         self, src_paths: Iterable[Union[str, os.PathLike]]
     ) -> bool:
-        """Check if any of the paths in |src_paths| are relevant to any nodes."""
+        """Check if any paths in |src_paths| are relevant to any nodes."""
         return any(self.is_relevant(p) for p in src_paths)
 
     def get_relevant_nodes(
@@ -488,7 +495,7 @@ class DependencyGraph:
         src_paths: Iterable[Union[str, os.PathLike]],
         root_type: RootType = RootType.ALL,
     ) -> List[PackageNode]:
-        """Get nodes where any path in |src_paths| is relevant and root matches."""
+        """Get nodes with matching root where any |src_paths| is relevant."""
         return [
             x
             for x in self.get_nodes(root_type=root_type)

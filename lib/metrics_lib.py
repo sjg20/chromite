@@ -44,9 +44,9 @@ class MetricEvent(NamedTuple):
     """Data class for metric events.
 
     MetricEvent stores one of a few different types of metric events. The 'arg'
-    parameter is an overloaded value which is discriminated by the 'op' parameter.
-    Timers utilize 'arg' as a key value for disambiguation, and gauges and
-    counters use the arg as their gauge value.
+    parameter is an overloaded value which is discriminated by the 'op'
+    parameter. Timers utilize 'arg' as a key value for disambiguation, and
+    gauges and counters use the arg as their gauge value.
     """
 
     timestamp_epoch_millis: int
@@ -76,13 +76,14 @@ def parse_timer(terms):
     """Parse a timer line.
 
     Args:
-      terms: A list of the subdimensions of the MetricEvent type.
+        terms: A list of the subdimensions of the MetricEvent type.
 
     Returns:
-      A MetricEvent from the content of the terms.
+        A MetricEvent from the content of the terms.
 
     Raises:
-      ParseMetricError: An error occurred parsing the data from the list of terms.
+        ParseMetricError: An error occurred parsing the data from the list of
+            terms.
     """
     if len(terms) != 4:
         raise ParseMetricError(
@@ -98,13 +99,15 @@ def parse_named_event(terms):
     """Parse a named event line.
 
     Args:
-      terms: A list of the subdimensions of the MetricEvent type, omitting "arg".
+        terms: A list of the subdimensions of the MetricEvent type, omitting
+            "arg".
 
     Returns:
-      A MetricEvent from the content of the terms.
+        A MetricEvent from the content of the terms.
 
     Raises:
-      ParseMetricError: An error occurred parsing the data from the list of terms.
+        ParseMetricError: An error occurred parsing the data from the list of
+            terms.
     """
     if len(terms) != 3:
         raise ParseMetricError(
@@ -120,14 +123,15 @@ def parse_gauge(terms):
     """Parse a gauge, which is an event with an associated integer value.
 
     Args:
-      terms: A list of the subdimensions of the MetricEvent type, leveraging |arg|
-             as a container for the actual gauge value.
+        terms: A list of the subdimensions of the MetricEvent type, leveraging
+            |arg| as a container for the actual gauge value.
 
     Returns:
-      A MetricEvent from the content of the terms.
+        A MetricEvent from the content of the terms.
 
     Raises:
-      ParseMetricError: An error occurred parsing the data from the list of terms.
+        ParseMetricError: An error occurred parsing the data from the list of
+            terms.
     """
     if len(terms) != 4:
         raise ParseMetricError(
@@ -193,10 +197,12 @@ def collect_metrics(functor):
         """Wrapped function which implements collect_metrics behavior."""
         metrics_logfile = os.environ.get(UTILS_METRICS_LOG_ENVVAR)
         if metrics_logfile:
-            # We are in a reentrant scenario, let's just pass the logfile name along.
+            # We are in a reentrant scenario, let's just pass the logfile name
+            # along.
             return functor(*args, **kwargs)
         else:
-            # Let's manage the lifetime of a logfile for consumption within functor.
+            # Let's manage the lifetime of a logfile for consumption within
+            # functor.
             tmp_prefix = "build-metrics-"
             with tempfile.NamedTemporaryFile(prefix=tmp_prefix) as temp_file:
                 os.environ[UTILS_METRICS_LOG_ENVVAR] = temp_file.name
@@ -219,10 +225,10 @@ def append_metrics_log(timestamp, name, op, arg=None):
     If the environment does not specify a metrics log, then skip silently.
 
     Args:
-      timestamp: A millisecond epoch timestamp.
-      name: A period-separated string describing the event.
-      op: One of the OP_* values, determining which type of event this is.
-      arg: An accessory value for use based on the related |op|.
+        timestamp: A millisecond epoch timestamp.
+        name: A period-separated string describing the event.
+        op: One of the OP_* values, determining which type of event this is.
+        arg: An accessory value for use based on the related |op|.
     """
     metrics_log = os.environ.get(UTILS_METRICS_LOG_ENVVAR)
     terms = [timestamp, name.replace("|", "_"), op]
@@ -242,10 +248,10 @@ def timer(name):
     """A context manager to emit start/stop events.
 
     Args:
-      name: A name for the timer event.
+        name: A name for the timer event.
 
     Yields:
-      Context for context manager surrounding event emission.
+        Context for context manager surrounding event emission.
     """
     # Timer events use a |arg| to disambiguate in case of multiple concurrent or
     # overlapping timers with the same name.
@@ -280,6 +286,6 @@ def event(name):
     """Emit a counter event.
 
     Args:
-      name: A name for the timer event.
+        name: A name for the timer event.
     """
     append_metrics_log(current_milli_time(), name, OP_NAMED_EVENT)

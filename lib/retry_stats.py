@@ -66,19 +66,19 @@ def _RetryCount(entry):
 def CategoryStats(category):
     """Return stats numbers for a given category.
 
-    success is the number of times a given command succeeded, even if it had to be
-    retried.
+    success is the number of times a given command succeeded, even if it had to
+    be retried.
 
-    failure is the number of times we exhausting all retries without success.
+    failure is the number of times we exhausted all retries without success.
 
-    retry is the total number of times we retried a command, unrelated to eventual
-    success or failure.
+    retry is the total number of times we retried a command, unrelated to
+    eventual success or failure.
 
     Args:
-      category: A string that defines the 'namespace' for these stats.
+        category: A string that defines the 'namespace' for these stats.
 
     Returns:
-      succuess, failure, retry values as integers.
+        succuess, failure, retry values as integers.
     """
     # Convert the multiprocess proxy list into a local simple list.
     local_stats_collection = list(_STATS_COLLECTION)
@@ -97,8 +97,8 @@ def ReportCategoryStats(out, category):
     """Dump stats reports for a given category.
 
     Args:
-      out: Output stream to write to (e.g. sys.stdout).
-      category: A string that defines the 'namespace' for these stats.
+        out: Output stream to write to (e.g. sys.stdout).
+        category: A string that defines the 'namespace' for these stats.
     """
     success, failure, retry = CategoryStats(category)
 
@@ -119,8 +119,7 @@ def ReportStats(out):
     """Dump stats reports for a given category.
 
     Args:
-      out: Output stream to write to (e.g. sys.stdout).
-      category: A string that defines the 'namespace' for these stats.
+        out: Output stream to write to (e.g. sys.stdout).
     """
     categories = sorted(set(e.category for e in _STATS_COLLECTION))
 
@@ -138,18 +137,18 @@ def RetryWithStats(category, handler, max_retry, functor, *args, **kwargs):
     All other arguments are blindly passed to retry_util.GenericRetry.
 
     Args:
-      category: A string that defines the 'namespace' for these stats.
-      handler: See retry_util.GenericRetry.
-      max_retry: See retry_util.GenericRetry.
-      functor: See retry_util.GenericRetry.
-      args: See retry_util.GenericRetry.
-      kwargs: See retry_util.GenericRetry.
+        category: A string that defines the 'namespace' for these stats.
+        handler: See retry_util.GenericRetry.
+        max_retry: See retry_util.GenericRetry.
+        functor: See retry_util.GenericRetry.
+        args: See retry_util.GenericRetry.
+        kwargs: See retry_util.GenericRetry.
 
     Returns:
-      See retry_util.GenericRetry raises.
+        See retry_util.GenericRetry raises.
 
     Raises:
-      See retry_util.GenericRetry raises.
+        See retry_util.GenericRetry raises.
     """
     statEntry = StatEntry(category, attempts=[])
 
