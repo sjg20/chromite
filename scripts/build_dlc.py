@@ -245,7 +245,6 @@ def main(argv):
             fullnamerev=opts.fullnamerev,
             scaled=opts.scaled,
         )
-        params.VerifyDlcParameters()
         params.StoreDlcParameters(
             install_root_dir=opts.install_root_dir, sudo=True
         )
