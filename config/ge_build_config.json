@@ -2287,16 +2287,18 @@
         },
         {
           "board_name": "brya-kernelnext",
-          "name": "anahera4es",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
           "name": "banshee",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2306,24 +2308,6 @@
         {
           "board_name": "brya-kernelnext",
           "name": "brya",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
-          "name": "brya4es",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
-          "name": "brya4esti50",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2342,6 +2326,17 @@
         {
           "board_name": "brya-kernelnext",
           "name": "crota360",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2390,15 +2385,6 @@
         },
         {
           "board_name": "brya-kernelnext",
-          "name": "gimble4es",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
           "name": "kano",
           "test_suites": [
             "sanity",
@@ -2420,6 +2406,17 @@
         {
           "board_name": "brya-kernelnext",
           "name": "marasov",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2429,6 +2426,17 @@
         {
           "board_name": "brya-kernelnext",
           "name": "mithrax",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2438,6 +2446,17 @@
         {
           "board_name": "brya-kernelnext",
           "name": "osiris",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2466,15 +2485,6 @@
         },
         {
           "board_name": "brya-kernelnext",
-          "name": "primus4es",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
           "name": "redrix",
           "test_suites": [
             "sanity",
@@ -2495,25 +2505,18 @@
         },
         {
           "board_name": "brya-kernelnext",
-          "name": "redrix4es",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
           "name": "skolas",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
-          "name": "skolas4es",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2542,25 +2545,18 @@
         },
         {
           "board_name": "brya-kernelnext",
-          "name": "taeko4es",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
           "name": "taniks",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
-          "name": "tarlo",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2570,6 +2566,17 @@
         {
           "board_name": "brya-kernelnext",
           "name": "vell",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2579,6 +2586,17 @@
         {
           "board_name": "brya-kernelnext",
           "name": "volmar",
+          "test_suites": [
+            "sanity",
+            "bvt-inline",
+            "bvt-tast-cq",
+            "bvt-installer",
+            "bvt-arc",
+            "au",
+            "bvt-cq",
+            "bvt-perbuild",
+            "bvt-tast-informational"
+          ],
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
@@ -2588,15 +2606,6 @@
         {
           "board_name": "brya-kernelnext",
           "name": "zavala",
-          "cq_test_enabled": false,
-          "release_builder_test_pool": "bvt",
-          "board_id": 7230,
-          "is_active": true,
-          "is_experimental": false
-        },
-        {
-          "board_name": "brya-kernelnext",
-          "name": "zydron",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
           "board_id": 7230,
