@@ -97,6 +97,7 @@ def main(argv):
 def precache():
     """Do some network-dependent stuff before we disallow network access."""
     # pylint: disable=protected-access
+    logging.notice("Caching tools from network (cipd/vpython/etc...)")
 
     # This is a cheesy hack to make sure gsutil is populated in the cache before
     # we run tests. This is a partial workaround for crbug.com/468838.
@@ -114,6 +115,7 @@ def precache():
         [os.path.join(constants.CHROMITE_DIR, "scripts", "isort"), "--version"],
         capture_output=True,
     )
+    formatters.gn._find_gn()
     formatters.star._find_buildifier()
     formatters.textproto._find_txtpbfmt()
     with clang_format.ClangFormat():

@@ -18,7 +18,7 @@ def _find_gn() -> str:
     path = cipd.InstallPackage(
         cipd.GetCIPDFromCache(),
         "gn/gn/linux-amd64",
-        "latest",
+        "git_revision:41fef642de70ecdcaaa26be96d56a0398f95abd4",
     )
     return os.path.join(path, "gn")
 
