@@ -406,7 +406,6 @@ _COPY_PATHS_CHROME = (
     Path("chrome_crashpad_handler", exe=True, optional=True),
     Path("dbus/", optional=True),
     Path("keyboard_resources.pak"),
-    Path("libmojo_core.so", exe=True),
     Path(
         "liboptimization_guide_internal.so",
         exe=True,
@@ -415,10 +414,6 @@ _COPY_PATHS_CHROME = (
     ),
     Path("libEGL.so", exe=True, optional=True),
     Path("libGLESv2.so", exe=True, optional=True),
-    # The ARC++ mojo_core libraries are pre-stripped and don't play well with
-    # the binutils stripping tools, hence stripping is disabled here.
-    Path("libmojo_core_arc32.so", exe=True, strip=False),
-    Path("libmojo_core_arc64.so", exe=True, strip=False),
     # Widevine CDM is already pre-stripped.  In addition, it doesn't
     # play well with the binutils stripping tools, so skip stripping.
     # Optional for arm64 builds (http://crbug.com/881022)
