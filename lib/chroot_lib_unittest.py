@@ -55,9 +55,9 @@ class ChrootTest(cros_test_lib.MockTempDirTestCase):
         expected.extend(
             [
                 "--reproxy-cfg-file",
-                reclient_dir,
+                str(reclient_dir),
                 "--reclient-dir",
-                reproxy_cfg_file,
+                str(reproxy_cfg_file),
             ]
         )
 

@@ -153,16 +153,16 @@ class Chroot(object):
             args.extend(
                 [
                     f"--goma{sep}dir",
-                    self.goma.linux_goma_dir,
+                    str(self.goma.linux_goma_dir),
                 ]
             )
         if self.remoteexec:
             args.extend(
                 [
                     f"--reclient{sep}dir",
-                    self.remoteexec.reclient_dir,
+                    str(self.remoteexec.reclient_dir),
                     f"--reproxy{sep}cfg{sep}file",
-                    self.remoteexec.reproxy_cfg_file,
+                    str(self.remoteexec.reproxy_cfg_file),
                 ]
             )
 
