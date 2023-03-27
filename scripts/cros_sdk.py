@@ -186,7 +186,7 @@ def _SudoCommand():
 
     # Pass in the path to the depot_tools so that users can access them from
     # within the chroot.
-    cmd += ["DEPOT_TOOLS=%s" % constants.DEPOT_TOOLS_DIR]
+    cmd += [f"DEPOT_TOOLS={constants.DEPOT_TOOLS_DIR}"]
 
     return cmd
 

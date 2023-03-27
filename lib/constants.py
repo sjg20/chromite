@@ -29,11 +29,11 @@ SOURCE_ROOT = _FindSourceRoot()
 CHROOT_SOURCE_ROOT = "/mnt/host/source"
 CHROOT_OUT_ROOT = Path("/mnt/host/out")
 CHROOT_CACHE_ROOT = "/var/cache/chromeos-cache"
-DEPOT_TOOLS_SUBPATH = "src/chromium/depot_tools"
+DEPOT_TOOLS_SUBPATH = Path("src/chromium/depot_tools")
 
 CROSUTILS_DIR = Path(SOURCE_ROOT) / "src/scripts"
 CHROMITE_DIR = THIS_FILE.parent.parent
-DEPOT_TOOLS_DIR = os.path.join(SOURCE_ROOT, DEPOT_TOOLS_SUBPATH)
+DEPOT_TOOLS_DIR = SOURCE_ROOT / DEPOT_TOOLS_SUBPATH
 CHROMITE_BIN_SUBDIR = "chromite/bin"
 CHROMITE_BIN_DIR = os.path.join(CHROMITE_DIR, "bin")
 CHROMITE_SCRIPTS_DIR = os.path.join(CHROMITE_DIR, "scripts")

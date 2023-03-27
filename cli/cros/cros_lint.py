@@ -174,7 +174,7 @@ def _cpplint_module():
     lot of unrelated Python module we don't want polluting our normal search.
     """
     modname = "cpplint"
-    cpplint = os.path.join(constants.DEPOT_TOOLS_DIR, "cpplint.py")
+    cpplint = str(constants.DEPOT_TOOLS_DIR / "cpplint.py")
     loader = importlib.machinery.SourceFileLoader(modname, cpplint)
     spec = importlib.util.spec_from_loader(modname, loader)
     module = importlib.util.module_from_spec(spec)
@@ -407,7 +407,7 @@ def _UpstartLintFile(path, _output_format, _debug, relaxed: bool, commit: str):
 def _DirMdLintFile(path, _output_format, debug, _relaxed: bool, _commit: str):
     """Run the dirmd linter."""
     return _ToolRunCommand(
-        [os.path.join(constants.DEPOT_TOOLS_DIR, "dirmd"), "validate", path],
+        [constants.DEPOT_TOOLS_DIR / "dirmd", "validate", path],
         debug,
         capture_output=not debug,
     )

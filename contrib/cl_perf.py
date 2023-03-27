@@ -51,7 +51,7 @@ def get_led() -> Path:
         ):
             return installed_led
 
-    checkout_led = Path(constants.DEPOT_TOOLS_DIR) / "led"
+    checkout_led = constants.DEPOT_TOOLS_DIR / "led"
     if not os.access(str(checkout_led), os.X_OK):
         cros_build_lib.Die("Install led utility and put it in your PATH")
 

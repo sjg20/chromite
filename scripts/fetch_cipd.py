@@ -13,7 +13,6 @@ chromiumos/infra/tclint/linux-amd64 is the path sent to cipd tool,
 and ${version} is the version defined in CIPD.
 """
 
-import os
 import urllib.parse
 
 from chromite.lib import commandline
@@ -52,7 +51,7 @@ def main(argv):
     try:
         cros_build_lib.run(
             [
-                os.path.join(constants.DEPOT_TOOLS_DIR, "cipd"),
+                constants.DEPOT_TOOLS_DIR / "cipd",
                 "pkg-fetch",
                 "-out",
                 options.output,

@@ -6,7 +6,6 @@
 
 import argparse
 import logging
-import os
 
 from chromite.lib import commandline
 from chromite.lib import constants
@@ -82,7 +81,7 @@ def main(argv):
         parser.error("--gclient can not be an empty string!")
     gclient_path = options.gclient or osutils.Which("gclient")
     if not gclient_path:
-        gclient_path = os.path.join(constants.DEPOT_TOOLS_DIR, "gclient")
+        gclient_path = constants.DEPOT_TOOLS_DIR / "gclient"
 
     try:
         if options.reset:
