@@ -13,7 +13,7 @@ produce incorrect outputs if missed.
 import functools
 import logging
 import os
-from typing import Callable, Iterable, List, Optional, Union
+from typing import Any, Callable, Iterable, List, Optional, Union
 
 from chromite.third_party.google.protobuf import message as protobuf_message
 
@@ -75,6 +75,39 @@ def exists(*fields: str):
             return func(input_proto, output_proto, config, *args, **kwargs)
 
         return _exists
+
+    return decorator
+
+
+def eq(field: str, expected_value: Any):
+    """Validate |field| is set to |expected_value|.
+
+    Args:
+        field: The field being checked. May be a `.` separated field.
+        expected_value: The value to which the field must be equal.
+    """
+    assert field
+
+    def decorator(func):
+        @functools.wraps(func)
+        def _eq(input_proto, output_proto, config, *args, **kwargs):
+            if config.do_validation:
+                logging.debug(
+                    "Validating %s is equal to %r", field, expected_value
+                )
+                actual_value = _value(field, input_proto)
+
+                if actual_value != expected_value:
+                    cros_build_lib.Die(
+                        "%s (%r) must be equal to %r",
+                        field,
+                        actual_value,
+                        expected_value,
+                    )
+
+            return func(input_proto, output_proto, config, *args, **kwargs)
+
+        return _eq
 
     return decorator
 

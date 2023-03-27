@@ -58,6 +58,63 @@ class ExistsTest(cros_test_lib.TempDirTestCase, api_config.ApiConfigMixin):
         impl(common_pb2.Chroot(), None, self.no_validate_config)
 
 
+class EqTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
+    """Tests for the eq validator."""
+
+    def test_eq(self):
+        """Test a valid value."""
+
+        @validate.eq("location", common_pb2.Path.Location.OUTSIDE)
+        def impl(_input_proto, _output_proto, _config):
+            pass
+
+        impl(
+            common_pb2.Path(
+                path="/", location=common_pb2.Path.Location.OUTSIDE
+            ),
+            None,
+            self.api_config,
+        )
+
+    def test_not_eq(self):
+        """Test an invalid value."""
+
+        @validate.eq("location", common_pb2.Path.Location.OUTSIDE)
+        def impl(_input_proto, _output_proto, _config):
+            pass
+
+        # Should be failing on the invalid value.
+        with self.assertRaises(cros_build_lib.DieSystemExit):
+            impl(
+                common_pb2.Path(
+                    path="/", location=common_pb2.Path.Location.INSIDE
+                ),
+                None,
+                self.api_config,
+            )
+
+    def test_not_set(self):
+        """Test an unset value."""
+
+        @validate.eq("location", common_pb2.Path.Location.OUTSIDE)
+        def impl(_input_proto, _output_proto, _config):
+            pass
+
+        # Should be failing without a value set.
+        with self.assertRaises(cros_build_lib.DieSystemExit):
+            impl(common_pb2.Path(path="/"), None, self.api_config)
+
+    def test_skip_validation(self):
+        """Test skipping validation case."""
+
+        @validate.eq("location", common_pb2.Path.Location.OUTSIDE)
+        def impl(_input_proto, _output_proto, _config):
+            pass
+
+        # This would otherwise raise an error for an invalid path.
+        impl(common_pb2.Path(path="/"), None, self.no_validate_config)
+
+
 class IsInTest(cros_test_lib.TestCase, api_config.ApiConfigMixin):
     """Tests for the is_in validator."""
 
