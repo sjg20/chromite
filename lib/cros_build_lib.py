@@ -819,7 +819,7 @@ def run(
             # relative to cwd. Generally cwd will be the buildroot therefore we
             # want to use {cwd}/chromite/bin/cros_sdk. For more info PTAL at
             # crbug.com/432620
-            path = os.path.join(cwd, constants.CHROMITE_BIN_SUBDIR, "cros_sdk")
+            path = cwd / constants.CHROMITE_BIN_SUBDIR / "cros_sdk"
             if os.path.exists(path):
                 wrapper = [path]
 
