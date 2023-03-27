@@ -6,7 +6,6 @@
 
 import copy
 import json
-import os
 import re
 from unittest import mock
 
@@ -54,9 +53,7 @@ class ConfigDumpTest(ChromeosConfigTestBase):
 
         # watefall_layout_dump.txt
         # We run this as a sep program to avoid the config cache.
-        cmd = os.path.join(
-            constants.CHROMITE_BIN_DIR, "cros_show_waterfall_layout"
-        )
+        cmd = constants.CHROMITE_BIN_DIR / "cros_show_waterfall_layout"
         result = cros_build_lib.run(
             [cmd], capture_output=True, encoding="utf-8"
         )

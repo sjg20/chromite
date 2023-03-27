@@ -686,7 +686,7 @@ class BuildPackagesTest(
         )
 
         self.base_command = [
-            Path(constants.CHROMITE_BIN_DIR) / "parallel_emerge",
+            constants.CHROMITE_BIN_DIR / "parallel_emerge",
             f"--sysroot={self.sysroot.path}",
             f"--root={self.sysroot.path}",
         ]
@@ -779,8 +779,7 @@ class BuildPackagesTest(
 
             self.assertCommandContains(
                 [
-                    Path(constants.CHROMITE_BIN_DIR)
-                    / "cros_install_debug_syms",
+                    constants.CHROMITE_BIN_DIR / "cros_install_debug_syms",
                     f"--board={self.build_target_name_mock}",
                     "--all",
                 ]

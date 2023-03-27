@@ -9,7 +9,6 @@ Handles test related functionality.
 import json
 import logging
 import os
-from pathlib import Path
 import shutil
 import traceback
 from typing import (
@@ -424,7 +423,7 @@ def _TestDeployChrome(sdk_cmd: commands.ChromeSDK, out_board_dir: str) -> None:
         # Use the TOT deploy_chrome.
         sdk_cmd.Run(
             [
-                Path(constants.CHROMITE_BIN_DIR) / "deploy_chrome",
+                constants.CHROMITE_BIN_DIR / "deploy_chrome",
                 "--build-dir",
                 out_board_dir,
                 "--staging-only",

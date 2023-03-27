@@ -1629,7 +1629,7 @@ class ChromeSDKCommand(command.CliCommand):
 
         # Add managed components to the PATH.
         path = os.environ["PATH"].split(os.pathsep)
-        path.insert(0, constants.CHROMITE_BIN_DIR)
+        path.insert(0, str(constants.CHROMITE_BIN_DIR))
         env["PATH"] = os.pathsep.join(path)
 
         # Export internally referenced variables.

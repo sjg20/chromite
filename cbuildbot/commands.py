@@ -146,7 +146,7 @@ def RunBuildScript(buildroot, cmd, chromite_cmd=False, **kwargs):
 
     if chromite_cmd:
         cmd = cmd[:]
-        cmd[0] = os.path.join(buildroot, constants.CHROMITE_BIN_SUBDIR, cmd[0])
+        cmd[0] = str(buildroot / constants.CHROMITE_BIN_SUBDIR / cmd[0])
         if enter_chroot:
             cmd[0] = path_util.ToChrootPath(cmd[0])
 

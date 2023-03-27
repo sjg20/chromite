@@ -32,7 +32,7 @@ if cros_build_lib.IsInsideChroot():
     import portage
 
 
-EMERGE_CMD = os.path.join(constants.CHROMITE_BIN_DIR, "parallel_emerge")
+EMERGE_CMD = constants.CHROMITE_BIN_DIR / "parallel_emerge"
 PACKAGE_STABLE = "[stable]"
 
 CHROMIUMOS_OVERLAY = os.path.join(

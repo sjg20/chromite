@@ -281,7 +281,7 @@ class SimpleChromeWorkflowTestTest(cros_test_lib.MockTempDirTestCase):
 
         # Create expected paths from constants so that the tests work inside or
         # outside the SDK.
-        deploy_chrome_path = Path(constants.CHROMITE_BIN_DIR) / "deploy_chrome"
+        deploy_chrome_path = constants.CHROMITE_BIN_DIR / "deploy_chrome"
         image_dir_symlink = image_lib.GetLatestImageLink(self.build_target)
         image_path = os.path.join(image_dir_symlink, constants.VM_IMAGE_BIN)
 

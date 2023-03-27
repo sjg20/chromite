@@ -777,7 +777,7 @@ class WorkspaceBuildPackagesStageTest(WorkspaceStageBase):
         self.assertEqual(self.rc.call_count, 1)
         self.rc.assertCommandCalled(
             [
-                os.path.join(constants.CHROMITE_BIN_DIR, "build_packages"),
+                str(constants.CHROMITE_BIN_DIR / "build_packages"),
                 "--board=board",
                 "--accept-licenses=@CHROMEOS",
                 "--withdebugsymbols",

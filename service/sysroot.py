@@ -914,8 +914,7 @@ def BuildPackages(
                 #   lib instead of calling a binary.
                 cros_build_lib.run(
                     [
-                        Path(constants.CHROMITE_BIN_DIR)
-                        / "cros_install_debug_syms",
+                        constants.CHROMITE_BIN_DIR / "cros_install_debug_syms",
                         f"--board={sysroot.build_target_name}",
                         "--all",
                     ]
@@ -1029,7 +1028,7 @@ def _GetEmergeCommand(
     """Get the emerge command to use with build_packages."""
     # TODO(xcl): Convert to directly importing and calling a Python lib instead
     # of calling a binary.
-    cmd = [Path(constants.CHROMITE_BIN_DIR) / "parallel_emerge"]
+    cmd = [constants.CHROMITE_BIN_DIR / "parallel_emerge"]
     if sysroot:
         cmd.extend(
             [

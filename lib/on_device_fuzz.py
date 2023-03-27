@@ -16,9 +16,7 @@ from chromite.lib import portage_util
 from chromite.lib import remote_access
 
 
-_CROS_GENERATE_SYSROOT = Path(
-    constants.CHROMITE_BIN_DIR, "cros_generate_sysroot"
-)
+_CROS_GENERATE_SYSROOT = constants.CHROMITE_BIN_DIR / "cros_generate_sysroot"
 
 # TODO(b/255365294): remove duplicate cros_fuzz and
 # on device code.

@@ -225,7 +225,7 @@ class CrOSTest(object):
         if self._device.ssh_port:
             device_name += ":" + str(self._device.ssh_port)
         flash_cmd = [
-            os.path.join(constants.CHROMITE_BIN_DIR, "cros"),
+            constants.CHROMITE_BIN_DIR / "cros",
             "flash",
             device_name,
             flash_path,

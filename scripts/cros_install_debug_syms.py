@@ -400,9 +400,7 @@ def main(argv):
 
     options = ParseArgs(argv)
 
-    cmd = [
-        os.path.join(constants.CHROMITE_BIN_DIR, "cros_install_debug_syms")
-    ] + argv
+    cmd = [constants.CHROMITE_BIN_DIR / "cros_install_debug_syms"] + argv
     if osutils.IsNonRootUser():
         cros_build_lib.sudo_run(cmd)
         return

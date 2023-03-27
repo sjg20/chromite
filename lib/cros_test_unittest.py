@@ -101,7 +101,7 @@ class CrOSTester(CrOSTesterBase):
         self._tester.Run()
         self.assertCommandContains(
             [
-                os.path.join(constants.CHROMITE_BIN_DIR, "cros"),
+                constants.CHROMITE_BIN_DIR / "cros",
                 "flash",
                 "ssh://localhost:9222",
                 "xbuddy://remote/octopus/latest",
@@ -113,7 +113,7 @@ class CrOSTester(CrOSTesterBase):
         self._tester.Run()
         self.assertCommandContains(
             [
-                os.path.join(constants.CHROMITE_BIN_DIR, "cros"),
+                constants.CHROMITE_BIN_DIR / "cros",
                 "flash",
                 "ssh://localhost:9222",
                 "xbuddy://remote/octopus/R82-12901.0.0",
@@ -141,7 +141,7 @@ class CrOSTester(CrOSTesterBase):
         self._tester.Run()
         self.assertCommandContains(
             [
-                os.path.join(constants.CHROMITE_BIN_DIR, "cros"),
+                constants.CHROMITE_BIN_DIR / "cros",
                 "flash",
                 "ssh://localhost:9222",
                 "gs://chromiumos-image-archive/octopus-public/12345.0.0",
@@ -153,7 +153,7 @@ class CrOSTester(CrOSTesterBase):
         self._tester.Run()
         self.assertCommandContains(
             [
-                os.path.join(constants.CHROMITE_BIN_DIR, "cros"),
+                constants.CHROMITE_BIN_DIR / "cros",
                 "flash",
                 "ssh://localhost:9222",
                 "gs://chromeos-image-archive/octopus-release/12345.0.0",
@@ -171,7 +171,7 @@ class CrOSTester(CrOSTesterBase):
         self._tester.Run()
         self.assertCommandContains(
             [
-                os.path.join(constants.CHROMITE_BIN_DIR, "cros"),
+                constants.CHROMITE_BIN_DIR / "cros",
                 "flash",
                 "localhost",
                 "xbuddy://remote/octopus/R82-12901.0.0",
@@ -194,7 +194,7 @@ class CrOSTester(CrOSTesterBase):
         self._tester.Run()
         self.assertCommandContains(
             [
-                os.path.join(constants.CHROMITE_BIN_DIR, "cros"),
+                constants.CHROMITE_BIN_DIR / "cros",
                 "flash",
                 "ssh://localhost:9222",
                 "xbuddy://remote/octopus/latest",

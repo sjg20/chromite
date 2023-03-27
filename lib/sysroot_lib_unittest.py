@@ -357,9 +357,7 @@ class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
         self.PatchObject(osutils, "IsRootUser", return_value=True)
 
         self.sysroot = sysroot_lib.Sysroot(self.tempdir)
-        self.emerge = os.path.join(
-            constants.CHROMITE_BIN_DIR, "parallel_emerge"
-        )
+        self.emerge = constants.CHROMITE_BIN_DIR / "parallel_emerge"
 
     def testDefaultUpdateToolchain(self):
         """Test the default path."""

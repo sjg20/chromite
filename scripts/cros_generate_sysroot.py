@@ -64,9 +64,7 @@ def ParseCommandLine(argv):
 class GenerateSysroot(object):
     """Wrapper for generation functionality."""
 
-    PARALLEL_EMERGE = os.path.join(
-        constants.CHROMITE_BIN_DIR, "parallel_emerge"
-    )
+    PARALLEL_EMERGE = constants.CHROMITE_BIN_DIR / "parallel_emerge"
 
     def __init__(self, sysroot, options):
         """Initialize

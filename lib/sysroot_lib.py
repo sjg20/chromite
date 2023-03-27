@@ -853,10 +853,7 @@ class Sysroot(object):
             #   function here and remove the following call.
             local_binhosts = cros_build_lib.run(
                 [
-                    os.path.join(
-                        constants.CHROMITE_BIN_DIR,
-                        "cros_generate_local_binhosts",
-                    ),
+                    constants.CHROMITE_BIN_DIR / "cros_generate_local_binhosts",
                     "--board=%s" % board,
                 ],
                 print_cmd=False,
@@ -1031,7 +1028,7 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
     def _UpdateToolchainCommand(self, board: str, local_init: bool) -> str:
         """Helper function to build the emerge command for UpdateToolchain."""
         emerge = [
-            os.path.join(constants.CHROMITE_BIN_DIR, "parallel_emerge"),
+            constants.CHROMITE_BIN_DIR / "parallel_emerge",
             "--board=%s" % board,
             "--root-deps=rdeps",
             "--select",

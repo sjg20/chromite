@@ -696,7 +696,7 @@ def Test(board: str, result_directory: str, image_dir: str = None) -> bool:
         image_dir = image_lib.GetLatestImageLink(board, force_chroot=True)
 
     cmd = [
-        Path(constants.CHROMITE_BIN_DIR) / "test_image",
+        constants.CHROMITE_BIN_DIR / "test_image",
         "--board",
         board,
         "--test_results_root",

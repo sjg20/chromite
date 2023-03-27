@@ -168,7 +168,7 @@ def InstallToolchain(sysroot, toolchain=None, force=False, configure=True):
     if not cros_build_lib.IsInsideChroot():
         # Build the command to run inside the chroot instead.
         cmd = [
-            os.path.join(constants.CHROMITE_BIN_DIR, "install_toolchain"),
+            constants.CHROMITE_BIN_DIR / "install_toolchain",
             "--sysroot",
             sysroot.path,
         ]

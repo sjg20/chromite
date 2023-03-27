@@ -234,7 +234,7 @@ def RunCbuildbot(options):
         return 1
 
     # Define the command to run.
-    cbuildbot = os.path.join(constants.CHROMITE_BIN_DIR, "cbuildbot")
+    cbuildbot = constants.CHROMITE_BIN_DIR / "cbuildbot"
     cmd = [cbuildbot] + args + options.build_configs
 
     # Run the tryjob.

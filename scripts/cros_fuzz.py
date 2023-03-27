@@ -859,7 +859,7 @@ class LlvmBinary(object):
     """
 
     # Path to the lddtree chromite script.
-    LDDTREE_SCRIPT_PATH = os.path.join(constants.CHROMITE_BIN_DIR, "lddtree")
+    LDDTREE_SCRIPT_PATH = constants.CHROMITE_BIN_DIR / "lddtree"
 
     def __init__(self, binary):
         self.binary = binary

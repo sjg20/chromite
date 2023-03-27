@@ -52,7 +52,7 @@ def _GetToolchainPackages():
 
 def GetEmergeCommand(sysroot=None):
     """Returns the emerge command to use for |sysroot| (host if None)."""
-    cmd = [os.path.join(constants.CHROMITE_BIN_DIR, "parallel_emerge")]
+    cmd = [constants.CHROMITE_BIN_DIR / "parallel_emerge"]
     if sysroot and sysroot != "/":
         cmd += ["--sysroot=%s" % sysroot]
     return cmd
@@ -125,7 +125,7 @@ def UpdateChroot(board=None, update_host_packages=True):
     cros_sdk_lib.RunChrootVersionHooks()
 
     # Update toolchains.
-    cmd = [os.path.join(constants.CHROMITE_BIN_DIR, "cros_setup_toolchains")]
+    cmd = [constants.CHROMITE_BIN_DIR / "cros_setup_toolchains"]
     if board:
         cmd += ["--targets=boards", "--include-boards=%s" % board]
     cros_build_lib.sudo_run(cmd, debug_level=logging.DEBUG)
@@ -208,7 +208,7 @@ def RunUnittests(
     env["PKGDIR"] = os.path.join(sysroot, constants.UNITTEST_PKG_PATH)
 
     command = [
-        os.path.join(constants.CHROMITE_BIN_DIR, "parallel_emerge"),
+        constants.CHROMITE_BIN_DIR / "parallel_emerge",
         "--sysroot=%s" % sysroot,
     ]
 

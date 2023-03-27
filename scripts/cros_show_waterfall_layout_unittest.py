@@ -19,7 +19,7 @@ class DumpTest(cros_test_lib.OutputTestCase):
 
     def setUp(self):
         bin_name = os.path.basename(__file__).rstrip("_unittest.py")
-        self.bin_path = os.path.join(constants.CHROMITE_BIN_DIR, bin_name)
+        self.bin_path = constants.CHROMITE_BIN_DIR / bin_name
 
     def testTextDump(self):
         """Make sure text dumping is capable of being produced."""

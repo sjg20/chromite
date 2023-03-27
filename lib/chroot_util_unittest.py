@@ -7,6 +7,7 @@
 import itertools
 
 from chromite.lib import chroot_util
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -73,7 +74,7 @@ class ChrootUtilTest(cros_test_lib.RunCommandTempDirTestCase):
             )
             cmd = self.rc.call_args_list[-1][0][-1]
             self.assertEqual(
-                sysroot != "/", any(p.startswith("--sysroot") for p in cmd)
+                sysroot != "/", any(str(p).startswith("--sysroot") for p in cmd)
             )
             self.assertEqual(with_deps, "--deep" in cmd)
             self.assertEqual(not with_deps, "--nodeps" in cmd)
@@ -128,7 +129,7 @@ class ChrootUtilTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         sudo_run_mock.assert_called_once_with(
             [
-                "/mnt/host/source/chromite/bin/parallel_emerge",
+                constants.CHROMITE_BIN_DIR / "parallel_emerge",
                 "--sysroot=/sysroot/",
                 "--keep-going=y",
                 "package1",

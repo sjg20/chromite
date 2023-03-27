@@ -5,7 +5,6 @@
 """Utility script to update the generated config files."""
 
 import logging
-import os
 
 from chromite.config import chromeos_config
 from chromite.format import formatters
@@ -26,7 +25,7 @@ def main(argv):
 
     # Regenerate `waterfall_layout_dump.txt`.
     logging.info("Regenerating waterfall_layout_dump.txt")
-    cmd = os.path.join(constants.CHROMITE_BIN_DIR, "cros_show_waterfall_layout")
+    cmd = constants.CHROMITE_BIN_DIR / "cros_show_waterfall_layout"
     result = cros_build_lib.run(
         [cmd], capture_output=True, encoding="utf-8", debug_level=logging.DEBUG
     )

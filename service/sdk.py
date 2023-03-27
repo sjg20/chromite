@@ -224,7 +224,7 @@ def Create(arguments: CreateArguments) -> Optional[int]:
     """
     cros_build_lib.AssertOutsideChroot()
 
-    cmd = [os.path.join(constants.CHROMITE_BIN_DIR, "cros_sdk")]
+    cmd = [constants.CHROMITE_BIN_DIR / "cros_sdk"]
     cmd.extend(arguments.GetArgList())
 
     cros_build_lib.run(cmd)
@@ -265,7 +265,7 @@ def Delete(
     """
     # Delete the chroot itself.
     logging.info("Removing the SDK.")
-    cmd = [os.path.join(constants.CHROMITE_BIN_DIR, "cros_sdk"), "--delete"]
+    cmd = [constants.CHROMITE_BIN_DIR / "cros_sdk", "--delete"]
     if force:
         cmd.extend(["--force"])
     if chroot:
@@ -488,7 +488,7 @@ def CreateBinhostCLs(
     with tempfile.NamedTemporaryFile() as report_file:
         cros_build_lib.run(
             [
-                os.path.join(constants.CHROMITE_BIN_DIR, "upload_prebuilts"),
+                constants.CHROMITE_BIN_DIR / "upload_prebuilts",
                 "--skip-upload",
                 "--dry-run",
                 "--sync-host",
@@ -541,7 +541,7 @@ def UploadPrebuiltPackages(
     """
     cros_build_lib.run(
         [
-            os.path.join(constants.CHROMITE_BIN_DIR, "upload_prebuilts"),
+            constants.CHROMITE_BIN_DIR / "upload_prebuilts",
             "--sync-host",
             "--build-path",
             constants.SOURCE_ROOT,
