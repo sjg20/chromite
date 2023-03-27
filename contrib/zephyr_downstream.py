@@ -20,25 +20,8 @@ from chromite.lib import gerrit
 MAX_GERRIT_CHANGES = 225
 
 
-def main(args):
+def cmd_downstream(opts):
     """Downstream Zephyr CLs."""
-    # TODO(aaronmassey): Add option to rebase CLs.
-    parser = commandline.ArgumentParser(__doc__)
-    parser.add_argument(
-        "--dry-run", action="store_true", help="Dry run, no updates to Gerrit."
-    )
-    parser.add_argument(
-        "--cq-dry-run",
-        action="store_true",
-        help="Label the patches for dry run (CQ+1) instead of merge (CQ+2, default behavior).",
-    )
-    parser.add_argument(
-        "--limit", type=int, help="How many changes to modify, from the oldest."
-    )
-    parser.add_argument(
-        "--stop-at", type=str, help="Stop at the specified change number."
-    )
-    opts = parser.parse_args(args)
     dry_run = opts.dry_run
 
     site_params = config_lib.GetSiteParams()
@@ -95,3 +78,89 @@ def main(args):
         )
 
     logging.info("All finished! Remember to monitor the CQ!")
+    return 0
+
+
+def cmd_clear_attention(opts):
+    """Remove user from attention set on merged CLs"""
+
+    site_params = config_lib.GetSiteParams()
+    cros = gerrit.GetGerritHelper(site_params.EXTERNAL_REMOTE)
+
+    cls_to_modify = cros.Query(
+        topic="zephyr-downstream", status="merged", attention="me", raw=True
+    )
+    cls_to_modify.sort(key=lambda patch: patch["number"])
+
+    if opts.limit:
+        cls_to_modify = cls_to_modify[: opts.limit]
+
+    counter = 0
+    for cl in cls_to_modify:
+        logging.info(
+            "Updating attention set on CL %s (%d/%d)",
+            cl["number"],
+            counter + 1,
+            len(cls_to_modify),
+        )
+
+        cros.SetAttentionSet(
+            change=cl["number"], remove=("me",), dryrun=opts.dry_run
+        )
+        counter += 1
+
+        if opts.stop_at and opts.stop_at == cl["number"]:
+            break
+
+    logging.info("Total CLs affected: %d", counter)
+    return 0
+
+
+def main(args):
+    """Main entry point for CLI"""
+    # TODO(aaronmassey): Add option to rebase CLs.
+    parser = commandline.ArgumentParser(__doc__)
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Dry run, no updates to Gerrit."
+    )
+    parser.add_argument(
+        "--cq-dry-run",
+        action="store_true",
+        help="Label the patches for dry run (CQ+1) instead of merge (CQ+2, "
+        "default behavior).",
+    )
+    parser.add_argument(
+        "--limit", type=int, help="How many changes to modify, from the oldest."
+    )
+    parser.add_argument(
+        "--stop-at", type=str, help="Stop at the specified change number."
+    )
+
+    #
+    # Subcommands
+    #
+    # Used to extend the functionality of the script. If none is specified,
+    # default to the main downstreaming program (original behavior)
+    #
+
+    # Utility to remove the current user from the attention set on merged CLs,
+    # as this sometimes does not happen automatically and leaves the user's
+    # Gerrit dashboard cluttered.
+    subparser_clear_attention = parser.add_subparsers(
+        title="Subcommands", dest="cmd"
+    )
+    subparser_clear_attention.add_parser(
+        "clear_attention",
+        help="Remove current user from attention set on merged downstreaming "
+        "CLs",
+    )
+
+    opts = parser.parse_args(args)
+
+    if opts.cmd is None:
+        return cmd_downstream(opts)
+    if opts.cmd == "clear_attention":
+        return cmd_clear_attention(opts)
+
+    logging.error("Unknown subcommand %s", opts.cmd)
+    return 1
