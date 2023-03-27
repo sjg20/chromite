@@ -13393,7 +13393,6 @@
     "boards": [
       "hades"
     ],
-    "important": false,
     "models": [
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"hades\",\n  \"name\": \"hades\",\n  \"test_suites\": []\n}"
     ],
