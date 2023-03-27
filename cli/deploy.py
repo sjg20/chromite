@@ -1029,9 +1029,7 @@ def _GetPackagesByCPV(cpvs, strip, sysroot):
         try:
             cros_build_lib.run(
                 [
-                    os.path.join(
-                        constants.CHROMITE_SCRIPTS_DIR, "strip_package"
-                    ),
+                    constants.CHROMITE_SCRIPTS_DIR / "strip_package",
                     "--sysroot",
                     sysroot,
                 ]

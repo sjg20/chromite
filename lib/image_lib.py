@@ -144,9 +144,7 @@ class LoopbackPartitions(object):
             else:
                 result = cros_build_lib.sudo_run(
                     [
-                        os.path.join(
-                            constants.CHROMITE_SCRIPTS_DIR, "cros_losetup"
-                        ),
+                        constants.CHROMITE_SCRIPTS_DIR / "cros_losetup",
                         "attach",
                         self.path,
                     ],
@@ -518,9 +516,7 @@ class LoopbackPartitions(object):
             else:
                 cros_build_lib.sudo_run(
                     [
-                        os.path.join(
-                            constants.CHROMITE_SCRIPTS_DIR, "cros_losetup"
-                        ),
+                        constants.CHROMITE_SCRIPTS_DIR / "cros_losetup",
                         "detach",
                         self.dev,
                     ],

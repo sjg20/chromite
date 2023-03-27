@@ -799,7 +799,7 @@ def create_stripped_packages_tar(
     stripped_pkg_dir = chroot.full_path(build_target.root, "stripped-packages")
     tarball_paths = []
     strip_package_path = chroot.chroot_path(
-        os.path.join(constants.CHROMITE_SCRIPTS_DIR, "strip_package")
+        constants.CHROMITE_SCRIPTS_DIR / "strip_package"
     )
     tarball_cwd = chroot.full_path(build_target.root)
     for pattern in package_globs:

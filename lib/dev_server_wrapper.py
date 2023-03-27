@@ -102,7 +102,7 @@ def GetImagePathWithXbuddy(
     # Since xbuddy often wants to use gsutil from $PATH, make sure our local copy
     # shows up first.
     upath = os.environ["PATH"].split(os.pathsep)
-    upath.insert(0, constants.CHROMITE_SCRIPTS_DIR)
+    upath.insert(0, str(constants.CHROMITE_SCRIPTS_DIR))
     os.environ["PATH"] = os.pathsep.join(upath)
 
     xb = xbuddy.XBuddy(board=board, version=version, static_dir=static_dir)

@@ -466,7 +466,9 @@ class CrOSTest(object):
             # the chroot, we may not have gsutil on PATH. So push chromite's
             # copy of gsutil onto path during the test.
             gsutil_dir = constants.CHROMITE_SCRIPTS_DIR
-            extra_env = {"PATH": os.environ.get("PATH", "") + ":" + gsutil_dir}
+            extra_env = {
+                "PATH": os.environ.get("PATH", "") + ":" + str(gsutil_dir)
+            }
         else:
             extra_env = None
 

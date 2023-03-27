@@ -86,7 +86,7 @@ def Data(
     # ways. See b/235526476 for details.
     result = cros_build_lib.run(
         [
-            Path(constants.CHROMITE_SCRIPTS_DIR) / "isort",
+            constants.CHROMITE_SCRIPTS_DIR / "isort",
             "--settings-file",
             constants.CHROMITE_DIR / ".isort.cfg",
             "-",
@@ -100,7 +100,7 @@ def Data(
     try:
         result = cros_build_lib.run(
             [
-                Path(constants.CHROMITE_SCRIPTS_DIR) / "black",
+                constants.CHROMITE_SCRIPTS_DIR / "black",
                 f"--config={_find_pyproject_toml(path)}",
                 f"--stdin-filename={path}",
                 "-",

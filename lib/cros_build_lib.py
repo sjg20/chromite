@@ -1152,7 +1152,7 @@ def FindCompressor(
         ValueError: If compression is unknown.
     """
     if compression == CompressionType.XZ:
-        return os.path.join(constants.CHROMITE_SCRIPTS_DIR, "xz_auto")
+        return str(constants.CHROMITE_SCRIPTS_DIR / "xz_auto")
     elif compression == CompressionType.GZIP:
         possible_progs = ["pigz", "gzip"]
     elif compression == CompressionType.BZIP2:

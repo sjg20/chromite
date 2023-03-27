@@ -8,7 +8,6 @@ We have a long history of the kernel flaking when working with loopback devices,
 so this helper takes care of setting up & tearing it down reliably.
 """
 
-import os
 from pathlib import Path
 import sys
 from typing import List, Optional
@@ -55,8 +54,7 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
 
     if not osutils.IsRootUser():
         result = cros_build_lib.sudo_run(
-            [os.path.join(constants.CHROMITE_SCRIPTS_DIR, "cros_losetup")]
-            + argv,
+            [constants.CHROMITE_SCRIPTS_DIR / "cros_losetup"] + argv,
             check=False,
         )
         return result.returncode

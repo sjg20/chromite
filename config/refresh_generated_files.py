@@ -35,7 +35,7 @@ def main(argv):
 
     # Regenerate `luci-scheduler.cfg`.
     logging.info("Regenerating luci-scheduler.cfg")
-    cmd = os.path.join(constants.CHROMITE_SCRIPTS_DIR, "gen_luci_scheduler")
+    cmd = constants.CHROMITE_SCRIPTS_DIR / "gen_luci_scheduler"
     luci_result = cros_build_lib.run(
         [cmd], capture_output=True, encoding="utf-8", debug_level=logging.DEBUG
     )

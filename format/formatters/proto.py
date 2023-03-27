@@ -5,7 +5,6 @@
 """Provides utility for formatting proto definitions."""
 
 import os
-from pathlib import Path
 from typing import Optional, Union
 
 from chromite.lib import constants
@@ -29,7 +28,7 @@ def Data(
         path = "format.proto"
     result = cros_build_lib.run(
         [
-            Path(constants.CHROMITE_SCRIPTS_DIR, "clang-format"),
+            constants.CHROMITE_SCRIPTS_DIR / "clang-format",
             "--style=file",
             f"--assume-filename={path}",
         ],

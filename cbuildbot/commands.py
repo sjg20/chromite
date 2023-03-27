@@ -3622,7 +3622,7 @@ def BuildStrippedPackagesTarball(buildroot, board, package_globs, archive_dir):
     stripped_pkg_dir = os.path.join(board_path, "stripped-packages")
     tarball_paths = []
     strip_package_path = path_util.ToChrootPath(
-        os.path.join(constants.CHROMITE_SCRIPTS_DIR, "strip_package")
+        constants.CHROMITE_SCRIPTS_DIR / "strip_package"
     )
     for pattern in package_globs:
         packages = portage_util.FindPackageNameMatches(
