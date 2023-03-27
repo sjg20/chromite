@@ -298,8 +298,8 @@ class Profile(object):
 class Sysroot(object):
     """Class that encapsulate the interaction with sysroots."""
 
-    def __init__(self, path: str):
-        self.path = path
+    def __init__(self, path: Union[Path, str]):
+        self.path = str(path)
 
         # Read config from _MAKE_CONF which also pulls in config from
         # _MAKE_CONF_BOARD_SETUP, but only write any config overrides directly to
