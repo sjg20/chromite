@@ -688,11 +688,7 @@ def Test(board: str, result_directory: str, image_dir: str = None) -> bool:
         image_dir = path_util.ToChrootPath(image_dir)
 
     cmd = [
-        os.path.join(
-            constants.CHROOT_SOURCE_ROOT,
-            constants.CHROMITE_BIN_SUBDIR,
-            "test_image",
-        ),
+        Path(constants.CHROMITE_BIN_DIR) / "test_image",
         "--board",
         board,
         "--test_results_root",
