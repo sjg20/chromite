@@ -353,7 +353,7 @@ def GetLatestVersion() -> str:
 
 
 def UprevSdkAndPrebuilts(
-    chroot: "chroot_lib.Chroot",
+    source_root: Path,
     binhost_gs_bucket: str,
     version: str,
 ) -> List[Path]:

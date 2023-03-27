@@ -5,6 +5,7 @@
 """SDK chroot operations."""
 
 import os
+import pathlib
 from typing import Dict, Union
 
 from chromite.api import controller
@@ -179,14 +180,14 @@ def Update(
 
 
 @faux.all_empty
-@validate.require("chroot")
+@validate.require("source_root")
 @validate.require("binhost_gs_bucket")
 @validate.validation_complete
 def Uprev(input_proto, output_proto, _config):
     """Update the SDK version and prebuilt files to point to the latest SDK."""
     target_version = input_proto.version or sdk.GetLatestVersion()
     modified_files = sdk.UprevSdkAndPrebuilts(
-        controller_util.ParseChroot(input_proto.chroot),
+        pathlib.Path(input_proto.source_root.path),
         binhost_gs_bucket=input_proto.binhost_gs_bucket,
         version=target_version,
     )
