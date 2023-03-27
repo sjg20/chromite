@@ -508,7 +508,9 @@ class ChrootUpdater(object):
             raise InvalidChrootVersionError(
                 "Missing upgrade hook for version %s.\n"
                 "Chroot is too new. Consider running:\n"
-                "    cros_sdk --replace" % self.GetVersion()
+                "    cros_sdk --replace\n"
+                "If the chroot is brand new, retrieve latest hooks with:\n"
+                "    repo sync" % self.GetVersion()
             )
 
         for hook, version in self.GetChrootUpdates():
