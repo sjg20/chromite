@@ -334,8 +334,15 @@ def Update(arguments: UpdateArguments) -> Optional[int]:
     return GetChrootVersion()
 
 
-def GetLatestVersion() -> str:
-    """Return the latest SDK version according to GS://."""
+def _GetRemoteLatestFileValue(key: str) -> str:
+    """Return a value from the remote latest SDK file on GS://, if it exists.
+
+    Returns:
+        The value of the given key in the remote latest file.
+
+    Raises:
+        ValueError: If the given key is not found in the file.
+    """
     uri = gs.GetGsURL(
         constants.SDK_GS_BUCKET,
         for_gsutil=True,
@@ -345,24 +352,59 @@ def GetLatestVersion() -> str:
     contents_dict = key_value_store.LoadData(
         contents, source="remote latest SDK file"
     )
-    if "LATEST_SDK" not in contents_dict:
+    if key not in contents_dict:
         raise ValueError(
-            f"Failed to parse latest SDK file ({uri}) contents:\n{contents}"
+            f"Unable to find key {key} in latest SDK file ({uri}):\n{contents}"
         )
-    return contents_dict["LATEST_SDK"]
+    return contents_dict[key]
+
+
+def GetLatestVersion() -> str:
+    """Return the latest SDK version according to GS://."""
+    return _GetRemoteLatestFileValue("LATEST_SDK")
+
+
+def GetLatestUprevTargetVersion() -> str:
+    """Return the latest-built target version for SDK uprevs form GS://."""
+    return _GetRemoteLatestFileValue("LATEST_SDK_UPREV_TARGET")
+
+
+def _UprevLocalSdkVersionFile(
+    source_root: Path,
+    new_sdk_version: str,
+) -> bool:
+    """Update the local SDK version file (but don't commit the change).
+
+    Args:
+        source_root: The root directory of the ChromiumOS checkout.
+        new_sdk_version: The SDK version to update to.
+
+    Returns:
+        True if changes were made, else False.
+    """
+    sdk_version_filepath = source_root / constants.SDK_VERSION_FILE
+    logging.info("Updating SDK version file (%s)", sdk_version_filepath)
+    return key_value_store.UpdateKeyInLocalFile(
+        sdk_version_filepath, "SDK_LATEST_VERSION", new_sdk_version
+    )
 
 
 def UprevSdkAndPrebuilts(
     source_root: Path,
-    binhost_gs_bucket: str,
+    binhost_gs_bucket: str,  # pylint: disable=unused-argument
     version: str,
 ) -> List[Path]:
     """Uprev the SDK version and prebuilt conf files on the local filesystem.
 
+    TODO(b/259445595): Uprev prebuilt conf files, too.
+
     Returns:
-        List of modified filepaths.
+        List of absolute paths to modified files.
     """
-    raise NotImplementedError()
+    modified_paths = []
+    if _UprevLocalSdkVersionFile(source_root, version):
+        modified_paths.append(source_root / constants.SDK_VERSION_FILE)
+    return modified_paths
 
 
 def BuildPrebuilts(chroot: "chroot_lib.Chroot", board: str = ""):

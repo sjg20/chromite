@@ -500,7 +500,7 @@ class UprevTestCase(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
 
     _source_root = pathlib.Path("/path/to/checkout/")
     _binhost_gs_bucket = "gs://chromiumos-prebuilts/"
-    _latest_version = "2023.02.15.115707"
+    _latest_uprev_target_version = "2023.02.19.112358"
 
     def setUp(self):
         """Set up the test case."""
@@ -510,8 +510,8 @@ class UprevTestCase(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         )
         self.PatchObject(
             sdk_service,
-            "GetLatestVersion",
-            return_value=self._latest_version,
+            "GetLatestUprevTargetVersion",
+            return_value=self._latest_uprev_target_version,
         )
         self._uprev_patch = self.PatchObject(
             sdk_service,
@@ -551,8 +551,9 @@ class UprevTestCase(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         """Test the endpoint with `version` not specified.
 
         In this case, we expect that sdk_controller.Uprev is called with the
-        latest version available on gs://. This is fetched via
-        sdk_controller.GetLatestVersion (mocked here in setUp()).
+        latest uprev target version, based on the remote file in gs://. This is
+        fetched via sdk_controller.GetLatestUprevTargetVersionVersion
+        (mocked here in setUp()).
         """
         request = self.NewRequest()
         response = self.NewResponse()
@@ -560,5 +561,5 @@ class UprevTestCase(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         self._uprev_patch.assert_called_with(
             self._source_root,
             binhost_gs_bucket=self._binhost_gs_bucket,
-            version=self._latest_version,
+            version=self._latest_uprev_target_version,
         )

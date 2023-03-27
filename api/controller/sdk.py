@@ -182,22 +182,30 @@ def Update(
 @faux.all_empty
 @validate.require("source_root")
 @validate.require("binhost_gs_bucket")
+@validate.eq("source_root.location", common_pb2.Path.Location.OUTSIDE)
 @validate.validation_complete
 def Uprev(input_proto, output_proto, _config):
-    """Update the SDK version and prebuilt files to point to the latest SDK."""
-    target_version = input_proto.version or sdk.GetLatestVersion()
+    """Update SDK version file and prebuilt files to point to the latest SDK.
+
+    Files will be changed locally, but not committed.
+    """
+    # If the UprevRequest did not specify a target version,
+    # check the remote SDK version file on Google Cloud Storage for the latest
+    # uprev target.
+    target_version = input_proto.version or sdk.GetLatestUprevTargetVersion()
+
+    # The main uprev logic occurs in service/sdk.py.
     modified_files = sdk.UprevSdkAndPrebuilts(
         pathlib.Path(input_proto.source_root.path),
         binhost_gs_bucket=input_proto.binhost_gs_bucket,
         version=target_version,
     )
+
+    # Populate the UprevResponse object with the modified files.
     for modified_file in modified_files:
-        output_proto.modified_files.add(
-            common_pb2.Path(
-                path=str(modified_file),
-                location=common_pb2.Path.OUTSIDE,
-            )
-        )
+        proto_path = output_proto.modified_files.add()
+        proto_path.path = str(modified_file)
+        proto_path.location = common_pb2.Path.OUTSIDE
     output_proto.version = target_version
 
 
