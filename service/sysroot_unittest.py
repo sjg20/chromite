@@ -152,7 +152,7 @@ class CreateTest(cros_test_lib.RunCommandTempDirTestCase):
         get_args_patch.assert_not_called()
 
         # Test update case.
-        script_loc = os.path.join(constants.CROSUTILS_DIR, "update_chroot")
+        script_loc = constants.CROSUTILS_DIR / "update_chroot"
         config = sysroot.SetupBoardRunConfig(upgrade_chroot=True)
 
         sysroot.Create(target, config, None)

@@ -320,7 +320,7 @@ def Update(arguments: UpdateArguments) -> Optional[int]:
     # TODO: This should be able to be run either in or out of the chroot.
     cros_build_lib.AssertInsideChroot()
 
-    cmd = [os.path.join(constants.CROSUTILS_DIR, "update_chroot")]
+    cmd = [constants.CROSUTILS_DIR / "update_chroot"]
     cmd.extend(arguments.GetArgList())
 
     # The sdk update uses splitdebug instead of separatedebug. Make sure

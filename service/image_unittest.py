@@ -246,7 +246,7 @@ class BuildImageCommandTest(cros_test_lib.MockTestCase):
             image.BuildConfig(), [constants.BASE_IMAGE_BIN], "testBoard"
         )
         expected = {
-            Path(constants.CROSUTILS_DIR) / "build_image.sh",
+            constants.CROSUTILS_DIR / "build_image.sh",
             "--script-is-run-only-by-chromite-and-not-users",
             "--board",
             "testBoard",

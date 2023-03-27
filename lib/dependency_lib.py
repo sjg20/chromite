@@ -242,7 +242,7 @@ def get_source_path_mapping(
             results[package].extend(metadata_directories)
             results[package].extend(scripts_directories)
             # The 'crosutils' repo potentially affects the build of every package.
-            results[package].append(constants.CROSUTILS_DIR)
+            results[package].append(str(constants.CROSUTILS_DIR))
 
         # chromiumos-overlay specifies default settings for every target in
         # chromeos/config  and so can potentially affect every board.

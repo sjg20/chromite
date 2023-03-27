@@ -31,7 +31,7 @@ CHROOT_OUT_ROOT = Path("/mnt/host/out")
 CHROOT_CACHE_ROOT = "/var/cache/chromeos-cache"
 DEPOT_TOOLS_SUBPATH = "src/chromium/depot_tools"
 
-CROSUTILS_DIR = os.path.join(SOURCE_ROOT, "src/scripts")
+CROSUTILS_DIR = Path(SOURCE_ROOT) / "src/scripts"
 CHROMITE_DIR = THIS_FILE.parent.parent
 DEPOT_TOOLS_DIR = os.path.join(SOURCE_ROOT, DEPOT_TOOLS_SUBPATH)
 CHROMITE_BIN_SUBDIR = "chromite/bin"

@@ -4,7 +4,6 @@
 
 """Utilities to create sysroots."""
 
-import glob
 import logging
 import multiprocessing
 import os
@@ -975,10 +974,12 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
             osutils.SafeMakedirs(d, sudo=True)
 
         # Create links for portage hooks.
-        hook_glob = os.path.join(constants.CROSUTILS_DIR, "hooks", "*")
-        for filename in glob.glob(hook_glob):
+        for filename in (constants.CROSUTILS_DIR / "hooks").glob("*"):
             linkpath = self.Path(
-                "etc", "portage", "hooks", os.path.basename(filename)
+                "etc",
+                "portage",
+                "hooks",
+                filename.name,
             )
             osutils.SafeSymlink(filename, linkpath, sudo=True)
 

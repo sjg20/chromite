@@ -230,7 +230,7 @@ class Builder:
 
         vmlinuz = self._install_root / "boot" / "vmlinuz"
         cmd = [
-            os.path.join(constants.CROSUTILS_DIR, "build_kernel_image.sh"),
+            constants.CROSUTILS_DIR / "build_kernel_image.sh",
             f"--board={self._board}",
             f"--arch={arch}",
             f"--to={output}",

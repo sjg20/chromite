@@ -118,7 +118,7 @@ def GetBuildImageCommand(
         List with build_image command with arguments.
     """
     cmd = [
-        Path(constants.CROSUTILS_DIR) / "build_image.sh",
+        constants.CROSUTILS_DIR / "build_image.sh",
         "--script-is-run-only-by-chromite-and-not-users",
         "--board",
         board,
@@ -439,14 +439,11 @@ def BuildRecoveryImage(
     if not board:
         raise InvalidArgumentError("board is required.")
 
-    if cros_build_lib.IsInsideChroot():
-        cmd = [
-            os.path.join(constants.CROSUTILS_DIR, "mod_image_for_recovery.sh")
-        ]
-    else:
-        cmd = ["./mod_image_for_recovery.sh"]
-
-    cmd.extend(["--board", board])
+    cmd = [
+        constants.CROSUTILS_DIR / "mod_image_for_recovery.sh",
+        "--board",
+        board,
+    ]
     if image_path:
         cmd.extend(["--image", str(image_path)])
 

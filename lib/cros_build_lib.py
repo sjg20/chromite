@@ -1868,7 +1868,7 @@ def SetDefaultBoard(board: str):
     Returns:
         bool - True if successfully wrote default, False otherwise.
     """
-    config_path = os.path.join(constants.CROSUTILS_DIR, ".default_board")
+    config_path = constants.CROSUTILS_DIR / ".default_board"
     try:
         osutils.WriteFile(config_path, board)
     except IOError as e:

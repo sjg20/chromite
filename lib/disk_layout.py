@@ -406,7 +406,7 @@ class DiskLayout(object):
                 # Try loading the parent file from the src/scripts/build_library
                 # directory.
                 parent_filename = (
-                    Path(constants.CROSUTILS_DIR) / "build_library" / parent
+                    constants.CROSUTILS_DIR / "build_library" / parent
                 )
             parent_config = self._LoadStackedPartitionConfig(parent_filename)
 
@@ -692,8 +692,7 @@ class DiskLayout(object):
             Disk layout path if exists or the legacy disk layout file path.
         """
         disk_layout = (
-            Path(constants.CROSUTILS_DIR)
-            / "build_library/legacy_disk_layout.json"
+            constants.CROSUTILS_DIR / "build_library/legacy_disk_layout.json"
         )
         for overlay in os.environ.get("BOARD_OVERLAY", "").split():
             layout = Path(overlay) / "scripts/disk_layout.json"

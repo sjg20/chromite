@@ -556,7 +556,7 @@ def Create(
     if run_configs.update_chroot:
         logging.info("Updating chroot.")
         update_chroot = [
-            os.path.join(constants.CROSUTILS_DIR, "update_chroot"),
+            constants.CROSUTILS_DIR / "update_chroot",
             "--toolchain_boards",
             target.name,
         ]

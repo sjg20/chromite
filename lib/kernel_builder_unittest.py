@@ -123,7 +123,7 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
 
         self.assertCommandCalled(
             [
-                os.path.join(constants.CROSUTILS_DIR, "build_kernel_image.sh"),
+                constants.CROSUTILS_DIR / "build_kernel_image.sh",
                 "--board=foo-board",
                 "--arch=foo-arch",
                 "--to=output",
@@ -157,7 +157,7 @@ class BuilderTest(cros_test_lib.RunCommandTestCase):
 
         self.assertCommandCalled(
             [
-                os.path.join(constants.CROSUTILS_DIR, "build_kernel_image.sh"),
+                constants.CROSUTILS_DIR / "build_kernel_image.sh",
                 "--board=foo-board",
                 "--arch=foo-arch",
                 "--to=output",
