@@ -157,7 +157,6 @@
     cherry-release
     cherry64-release
     constitution-release
-    coral-arc-r-release
     coral-release
     corsola-kernelnext-release
     corsola-release
@@ -234,7 +233,6 @@
     pyro-release
     rammus-arc-r-userdebug-release
     rammus-release
-    reef-arc-r-release
     reef-release
     reven-release
     reven-vmtest-release
@@ -515,11 +513,6 @@
   constitution-llvm-toolchain-tryjob
   constitution-payloads-tryjob
   constitution-release-tryjob
-  coral-arc-r-full-tryjob
-  coral-arc-r-llvm-next-toolchain-tryjob
-  coral-arc-r-llvm-toolchain-tryjob
-  coral-arc-r-payloads-tryjob
-  coral-arc-r-release-tryjob
   coral-factory-coral-10122.B-factorybranch-tryjob
   coral-full-tryjob
   coral-llvm-next-toolchain-tryjob
@@ -1050,7 +1043,6 @@
     cherry-release-tryjob
     cherry64-release-tryjob
     constitution-release-tryjob
-    coral-arc-r-release-tryjob
     coral-release-tryjob
     corsola-kernelnext-release-tryjob
     corsola-release-tryjob
@@ -1127,7 +1119,6 @@
     pyro-release-tryjob
     rammus-arc-r-userdebug-release-tryjob
     rammus-release-tryjob
-    reef-arc-r-release-tryjob
     reef-release-tryjob
     reven-release-tryjob
     reven-vmtest-release-tryjob
@@ -1284,11 +1275,6 @@
   rammus-master-factorybranch-tryjob
   rammus-payloads-tryjob
   rammus-release-tryjob
-  reef-arc-r-full-tryjob
-  reef-arc-r-llvm-next-toolchain-tryjob
-  reef-arc-r-llvm-toolchain-tryjob
-  reef-arc-r-payloads-tryjob
-  reef-arc-r-release-tryjob
   reef-factory-reef-8811.B-factorybranch-tryjob
   reef-full-tryjob
   reef-llvm-next-toolchain-tryjob
