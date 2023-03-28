@@ -47,6 +47,14 @@ class LoopbackError(Error):
     """An exception raised when something went wrong setting up a loopback"""
 
 
+def _DumpPartitionInfo() -> None:
+    """Dump loopdevice related info for debug."""
+
+    loop_file_paths = list(Path("/dev").glob("loop*p*"))
+    cros_build_lib.run(["fuser", "-mv"] + loop_file_paths, log_output=True)
+    cros_build_lib.run(["losetup", "-a"], log_output=True)
+
+
 class LoopbackPartitions(object):
     """Loopback mount a file and provide access to its partitions.
 
@@ -197,6 +205,13 @@ class LoopbackPartitions(object):
         """Clear out existing registered partitions."""
         major, minor = cls._CheckNodeIsLoopback(path)
 
+        def _partition_del_retry(e):
+            if isinstance(e, OSError) and e.errno == errno.EBUSY:
+                logging.warning("Deleting partition returned EBUSY.")
+                _DumpPartitionInfo()
+                return True
+            return False
+
         # Check the partitions the kernel knows of.
         logging.debug("%s: Clearing registered partitions", path)
         sysfs_dev = Path(f"/sys/dev/block/{major}:{minor}")
@@ -215,8 +230,18 @@ class LoopbackPartitions(object):
                     continue
                 logging.debug("Removing partition %s", part_id)
                 part_id = int(part_id)
+
                 try:
-                    c_blkpg.delete_partition(fd, part_id)
+                    # There is a possibility we might get EBUSY (b/273697462)
+                    # error when deleting partitions. So retry in that case.
+                    retry_util.GenericRetry(
+                        _partition_del_retry,
+                        3,
+                        c_blkpg.delete_partition,
+                        fd,
+                        part_id,
+                        sleep=1,
+                    )
                     expecting.append(part_id)
                 except OSError as e:
                     logging.warning(
@@ -225,6 +250,8 @@ class LoopbackPartitions(object):
                         part_id,
                         e,
                     )
+                    if e.errno == errno.EBUSY:
+                        _DumpPartitionInfo()
 
         # Wait for the nodes to be cleaned up from /dev.
         for part_id in expecting:
