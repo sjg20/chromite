@@ -528,6 +528,20 @@ class PrebuiltUploader(object):
                 new PUprs can try to test and uprev. If None, then the existing
                 value on GS:// will be retained.
         """
+        # This would be a noop in dryrun mode -- or worse, it would fail to
+        # parse the remote key-value store after pretending to download it.
+        # Instead of side-stepping errors, return early with descriptive logs.
+        if self._dryrun:
+            logging.debug("Not updating remote SDK latest file in dryrun mode.")
+            if latest_sdk is not None:
+                logging.debug("Would have set LATEST_SDK=%s", latest_sdk)
+            if latest_sdk_uprev_target is not None:
+                logging.debug(
+                    "Would have set LATEST_SDK_UPREV_TARGET=%s",
+                    latest_sdk_uprev_target,
+                )
+            return
+
         # Get existing values from the remote file.
         remote_pointerfile = toolchain.GetSdkURL(
             for_gsutil=True, suburl="cros-sdk-latest.conf"
