@@ -698,6 +698,7 @@ def _CopyDirContents(
                         allow_nonempty=allow_nonempty,
                         move=move,
                     )
+                    RmDir(from_path)
                 else:
                     # If it is a file or symbolic link, remove the destination
                     # file and then move the content.

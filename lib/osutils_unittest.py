@@ -1461,6 +1461,25 @@ class MoveDirContentsTestCase(cros_test_lib.TempDirTestCase):
         self.assertTrue((self.to_dir / "b").is_dir())
         self.assertExists(self.to_dir / "b" / "b.txt")
 
+    def testOverlaidDirs(self):
+        """Move files with overlapping directories."""
+        D = cros_test_lib.Directory
+        src_layout = (
+            D("a", ["foo.txt"]),
+            D("b", []),
+        )
+        dest_layout = (D("a", ["bar.txt"]),)
+        cros_test_lib.CreateOnDiskHierarchy(self.from_dir, src_layout)
+        cros_test_lib.CreateOnDiskHierarchy(self.to_dir, dest_layout)
+
+        osutils.MoveDirContents(self.from_dir, self.to_dir, allow_nonempty=True)
+
+        self.assertNotExists(self.from_dir / "a")
+        self.assertNotExists(self.from_dir / "b")
+        self.assertExists(self.to_dir / "a" / "foo.txt")
+        self.assertExists(self.to_dir / "a" / "bar.txt")
+        self.assertExists(self.to_dir / "b")
+
     def testSameDirectory(self):
         """Test source and destination directory are the same."""
         osutils.MoveDirContents(self.from_dir, self.from_dir)
