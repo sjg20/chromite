@@ -771,6 +771,7 @@ def main(argv):
 
     chroot = chroot_lib.Chroot(
         path=options.chroot,
+        out_path=options.out_dir,
         cache_dir=options.cache_dir,
         chrome_root=options.chrome_root,
         goma=goma,
