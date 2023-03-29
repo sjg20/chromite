@@ -144,7 +144,7 @@ class Chroot(object):
         if not self._is_default_path:
             args.extend(["--chroot", self.path])
         if not self._is_default_out_path:
-            args.extend(["--out-dir", str(self.out_path)])
+            args.extend([f"--out{sep}dir", str(self.out_path)])
         if self.cache_dir:
             args.extend([f"--cache{sep}dir", self.cache_dir])
         if self.chrome_root:
