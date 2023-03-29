@@ -44,8 +44,8 @@ To update/image the device with an xbuddy path:
   Common xbuddy version aliases are 'latest' (alias for 'latest-stable')
   latest-{dev, beta, stable, canary}, and latest-official.
 
-  The optional image_type can be one of 'test' (the default), 'dev', 'base',
-  'recovery', or 'signed'.
+  The optional image_type can be one of 'test' (the default), 'base',
+  'recovery', or 'signed'. The 'dev' image_type is supported for local images.
 
 To update/image the device with a local image path:
   cros flash device /path/to/image.bin
