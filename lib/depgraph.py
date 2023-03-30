@@ -70,18 +70,18 @@ class DepGraphGenerator(object):
         self.sysroot = None
         self.unpack_only = False
         self.max_retries = int(os.environ.get("PARALLEL_EMERGE_MAX_RETRIES", 1))
-        # include_bdepend controls whether or not BDEPEND packages are returned as
-        # part of the dependency graph for the build target. This option only
-        # changes behavior when ROOT is not equal to "/", i.e. when the build
-        # target is a board and not the SDK itself.
+        # include_bdepend controls whether BDEPEND packages are returned as part
+        # of the dependency graph for the build target. This option only changes
+        # behavior when ROOT is not equal to "/", i.e. when the build target is
+        # a board and not the SDK itself.
         self.include_bdepend = False
 
     def ParseParallelEmergeArgs(self, argv):
         """Read the parallel emerge arguments from the command-line.
 
-        We need to be compatible with emerge arg format.  We scrape arguments that
-        are specific to parallel_emerge, and pass through the rest directly to
-        emerge.
+        We need to be compatible with emerge arg format.  We scrape arguments
+        that are specific to parallel_emerge, and pass through the rest directly
+        to emerge.
 
         Args:
           argv: arguments list
@@ -91,8 +91,8 @@ class DepGraphGenerator(object):
         """
         emerge_args = []
         for arg in argv:
-            # Specifically match arguments that are specific to parallel_emerge, and
-            # pass through the rest.
+            # Specifically match arguments that are specific to parallel_emerge,
+            # and pass through the rest.
             if arg.startswith("--board="):
                 self.board = arg.replace("--board=", "")
             elif arg.startswith("--sysroot="):
@@ -121,8 +121,8 @@ class DepGraphGenerator(object):
                 # Not one of our options, so pass through to emerge.
                 emerge_args.append(arg)
 
-        # These packages take a really long time to build, so, for expediency, we
-        # are denylisting them from automatic rebuilds because one of their
+        # These packages take a really long time to build, so, for expediency,
+        # we are denylisting them from automatic rebuilds because one of their
         # dependencies needs to be recompiled.
         for pkg in ("chromeos-base/chromeos-chrome",):
             emerge_args.append("--rebuild-exclude=%s" % pkg)
@@ -139,10 +139,10 @@ class DepGraphGenerator(object):
             cros_build_lib.Die("--sysroot and --board are incompatible.")
 
         # Setup various environment variables based on our current board. These
-        # variables are normally setup inside emerge-${BOARD}, but since we don't
-        # call that script, we have to set it up here. These variables serve to
-        # point our tools at /build/BOARD and to setup cross compiles to the
-        # appropriate board as configured in toolchain.conf.
+        # variables are normally setup inside emerge-${BOARD}, but since we
+        # don't call that script, we have to set it up here. These variables
+        # serve to point our tools at /build/BOARD and to setup cross compiles
+        # to the appropriate board as configured in toolchain.conf.
         if self.board:
             self.sysroot = os.environ.get(
                 "SYSROOT", build_target_lib.get_default_sysroot_path(self.board)
@@ -160,11 +160,12 @@ class DepGraphGenerator(object):
         # Parse the emerge options.
         action, opts, cmdline_packages = parse_opts(emerge_args, silent=True)
 
-        # Set environment variables based on options. Portage normally sets these
-        # environment variables in emerge_main, but we can't use that function,
-        # because it also does a bunch of other stuff that we don't want.
-        # TODO(davidjames): Patch portage to move this logic into a function we can
-        # reuse here.
+        # Set environment variables based on options. Portage normally sets
+        # these environment variables in emerge_main, but we can't use that
+        # function, because it also does a bunch of other stuff that we don't
+        # want.
+        # TODO(davidjames): Patch portage to move this logic into a function we
+        #   can reuse here.
         if "--debug" in opts:
             os.environ["PORTAGE_DEBUG"] = "1"
         if "--config-root" in opts:
@@ -177,15 +178,14 @@ class DepGraphGenerator(object):
             os.environ["ACCEPT_PROPERTIES"] = opts["--accept-properties"]
 
         # If we're installing packages to the board, we can disable vardb locks.
-        # This is safe because we only run up to one instance of parallel_emerge in
-        # parallel.
+        # This is safe because we only run up to one instance of parallel_emerge
+        # in parallel.
         # TODO(davidjames): Enable this for the host too.
         if self.sysroot:
             os.environ.setdefault("PORTAGE_LOCKS", "false")
 
-        # Now that we've setup the necessary environment variables, we can load the
-        # emerge config from disk.
-        # pylint: disable=unpacking-non-sequence
+        # Now that we've setup the necessary environment variables, we can load
+        # the emerge config from disk.
         settings, trees, mtimedb = load_emerge_config()
 
         # Add in EMERGE_DEFAULT_OPTS, if specified.
@@ -195,8 +195,9 @@ class DepGraphGenerator(object):
         tmpcmdline.extend(emerge_args)
         action, opts, cmdline_packages = parse_opts(tmpcmdline)
 
-        # If we're installing to the board, we want the --root-deps option so that
-        # portage will install the build dependencies to that location as well.
+        # If we're installing to the board, we want the --root-deps option so
+        # that portage will install the build dependencies to that location as
+        # well.
         if self.sysroot:
             opts.setdefault("--root-deps", True)
 
@@ -206,8 +207,8 @@ class DepGraphGenerator(object):
         # here. Once the updates are finished, we need to commit any changes
         # that the global update made to our mtimedb, and reload the config.
         #
-        # Portage normally handles this logic in emerge_main, but again, we can't
-        # use that function here.
+        # Portage normally handles this logic in emerge_main, but again, we
+        # can't use that function here.
         if _global_updates(trees, mtimedb["updates"]):
             mtimedb.commit()
             # pylint: disable=unpacking-non-sequence
@@ -321,19 +322,19 @@ class DepGraphGenerator(object):
         """Get dependency tree info from emerge.
 
         Args:
-          with_roots: When True, changes the output to have a list of packages for
-            each cpv, and for the deps of each package. This allows more accurately
-            reporting dependencies with the corresponding root information. This
-            format is NOT compatible with other functions in this class, e.g.
-            GenDependencyGraph.
+            with_roots: When True, changes the output to have a list of packages
+                for each cpv, and for the deps of each package. This allows more
+                accurately reporting dependencies with the corresponding root
+                information. This format is NOT compatible with other functions
+                in this class, e.g. GenDependencyGraph.
 
         Returns:
-          A 3-tuple of the dependency tree, the dependency tree info, and the
-          BDEPEND dependency tree.
-          The BDEPEND dependency tree, or "bdeps_tree", consists of the packages
-          that would be installed to the SDK BROOT (at "/") rather than the board
-          root at "/build/$BOARD". If the ROOT is already equal to "/" the contents
-          of deps_tree and bdeps_tree will be identical.
+            A 3-tuple of the dependency tree, the dependency tree info, and the
+            BDEPEND dependency tree.
+            The BDEPEND dependency tree, or "bdeps_tree", consists of the
+            packages that would be installed to the SDK BROOT (at "/") rather
+            than the board root at "/build/$BOARD". If the ROOT is already equal
+            to "/" the contents of deps_tree and bdeps_tree will be identical.
         """
         start = time.time()
 
@@ -364,14 +365,14 @@ class DepGraphGenerator(object):
         digraph = depgraph._dynamic_config.digraph
         root = emerge.settings["ROOT"]
         for node, node_deps in digraph.nodes.items():
-            # Calculate dependency packages that need to be installed first. Each
-            # child on the digraph is a dependency. The "operation" field specifies
-            # what we're doing (e.g. merge, uninstall, etc.). The "priorities" array
-            # contains the type of dependency (e.g. build, runtime, runtime_post,
-            # etc.)
+            # Calculate dependency packages that need to be installed first.
+            # Each child on the digraph is a dependency. The "operation" field
+            # specifies what we're doing (e.g. merge, uninstall, etc.). The
+            # "priorities" array contains the type of dependency (e.g. build,
+            # runtime, runtime_post, etc.)
             #
-            # Portage refers to the identifiers for packages as a CPV. This acronym
-            # stands for Component/Path/Version.
+            # Portage refers to the identifiers for packages as a CPV. This
+            # acronym stands for Component/Path/Version.
             #
             # Here's an example CPV: chromeos-base/power_manager-0.0.1-r1
             # Split up, this CPV would be:
@@ -406,7 +407,8 @@ class DepGraphGenerator(object):
                     else:
                         deps[cpv] = dep
 
-            # We've built our list of deps, so we can add our package to the tree.
+            # We've built our list of deps, so we can add our package to the
+            # tree.
 
             cpv = str(node.cpv)
             pkg_data = {
@@ -416,9 +418,9 @@ class DepGraphGenerator(object):
             }
             # If a package is destined for ROOT, then it is in DEPEND OR RDEPEND
             # and we want to include it in the deps tree. If the package is not
-            # destined for ROOT, then (in the Chrome OS build) we must be building
-            # for a board and the package is a BDEPEND. We only want to add that
-            # package to the deps_tree if include_bdepend is set.
+            # destined for ROOT, then (in the Chrome OS build) we must be
+            # building for a board and the package is a BDEPEND. We only want to
+            # add that package to the deps_tree if include_bdepend is set.
             if node.root == root or self.include_bdepend:
                 if with_roots:
                     deps_tree.setdefault(cpv, []).append(pkg_data)
@@ -431,9 +433,9 @@ class DepGraphGenerator(object):
             # root as every other package and 2. Are functionally the same as
             # DEPEND packages and belong in the deps_tree.
             #
-            # If include_bdepend is passed and we are building for a board target,
-            # BDEPEND packages will intentionally show up in both deps_tree and
-            # bdeps_tree.
+            # If include_bdepend is passed and we are building for a board
+            # target, BDEPEND packages will intentionally show up in both
+            # deps_tree and bdeps_tree.
             if node.root != root:
                 if with_roots:
                     bdeps_tree.setdefault(cpv, []).append(pkg_data)
@@ -482,9 +484,9 @@ class DepGraphGenerator(object):
 
         # deps_map is the actual dependency graph.
         #
-        # Each package specifies a "needs" list and a "provides" list. The "needs"
-        # list indicates which packages we depend on. The "provides" list
-        # indicates the reverse dependencies -- what packages need us.
+        # Each package specifies a "needs" list and a "provides" list. The
+        # "needs" list indicates which packages we depend on. The "provides"
+        # list indicates the reverse dependencies -- what packages need us.
         #
         # We also provide some other information in the dependency graph:
         #  - action: What we're planning on doing with this package. Generally,
@@ -494,31 +496,30 @@ class DepGraphGenerator(object):
         def ReverseTree(packages):
             """Convert tree to digraph.
 
-            Take the tree of package -> requirements and reverse it to a digraph of
-            buildable packages -> packages they unblock.
+            Take the tree of package -> requirements and reverse it to a digraph
+            of buildable packages -> packages they unblock.
 
             Args:
-              packages: Tree(s) of dependencies.
+                packages: Tree(s) of dependencies.
 
             Returns:
-              Unsanitized digraph.
+                Unsanitized digraph.
             """
-            binpkg_phases = set(["setup", "preinst", "postinst"])
-            needed_dep_types = set(
-                [
-                    "blocker",
-                    "buildtime",
-                    "buildtime_slot_op",
-                    "runtime",
-                    "runtime_slot_op",
-                ]
-            )
-            ignored_dep_types = set(["ignored", "runtime_post", "soft"])
+            binpkg_phases = {"setup", "preinst", "postinst"}
+            needed_dep_types = {
+                "blocker",
+                "buildtime",
+                "buildtime_slot_op",
+                "runtime",
+                "runtime_slot_op",
+            }
+            ignored_dep_types = {"ignored", "runtime_post", "soft"}
 
-            # There's a bug in the Portage library where it always returns 'optional'
-            # and never 'buildtime' for the digraph while --usepkg is enabled; even
-            # when the package is being rebuilt. To work around this, we treat
-            # 'optional' as needed when we are using --usepkg. See crbug.com/756240 .
+            # There's a bug in the Portage library where it always returns
+            # 'optional' and never 'buildtime' for the digraph while --usepkg is
+            # enabled; even when the package is being rebuilt. To work around
+            # this, we treat 'optional' as needed when we are using --usepkg.
+            # See crbug.com/756240 .
             if "--usepkg" in self.emerge.opts:
                 needed_dep_types.add("optional")
             else:
@@ -540,9 +541,10 @@ class DepGraphGenerator(object):
                 if pkg in deps_info:
                     this_pkg["idx"] = deps_info[pkg]["idx"]
 
-                # If a package doesn't have any defined phases that might use the
-                # dependent packages (i.e. pkg_setup, pkg_preinst, or pkg_postinst),
-                # we can install this package before its deps are ready.
+                # If a package doesn't have any defined phases that might use
+                # the dependent packages (i.e. pkg_setup, pkg_preinst, or
+                # pkg_postinst), we can install this package before its deps are
+                # ready.
                 emerge_pkg = self.package_db.get(pkg)
                 if emerge_pkg and emerge_pkg.type_name == "binary":
                     this_pkg["binary"] = True
@@ -558,10 +560,10 @@ class DepGraphGenerator(object):
 
                 # Add dependencies to this package.
                 for dep, dep_item in packages[pkg]["deps"].items():
-                    # We only need to enforce strict ordering of dependencies if the
-                    # dependency is a blocker, or is a buildtime or runtime dependency.
-                    # (I.e., ignored, optional, and runtime_post dependencies don't
-                    # depend on ordering.)
+                    # We only need to enforce strict ordering of dependencies if
+                    # the dependency is a blocker, or is a buildtime or runtime
+                    # dependency. (I.e., ignored, optional, and runtime_post
+                    # dependencies don't depend on ordering.)
                     dep_types = dep_item["deptypes"]
                     if needed_dep_types.intersection(dep_types):
                         deps_map[dep]["provides"].add(pkg)
@@ -577,11 +579,12 @@ class DepGraphGenerator(object):
                         )
                         sys.exit(1)
 
-                    # If there's a blocker, Portage may need to move files from one
-                    # package to another, which requires editing the CONTENTS files of
-                    # both packages. To avoid race conditions while editing this file,
-                    # the two packages must not be installed in parallel, so we can't
-                    # safely ignore dependencies. See https://crbug.com/202428.
+                    # If there's a blocker, Portage may need to move files from
+                    # one package to another, which requires editing the
+                    # CONTENTS files of both packages. To avoid race conditions
+                    # while editing this file, the two packages must not be
+                    # installed in parallel, so we can't safely ignore
+                    # dependencies. See https://crbug.com/202428.
                     if "blocker" in dep_types:
                         this_pkg["nodeps"] = False
 
@@ -595,15 +598,18 @@ class DepGraphGenerator(object):
             """
 
             def FindCyclesAtNode(pkg, cycles, unresolved, resolved):
-                """Find cycles in cyclic dependencies starting at specified package.
+                """Find cycles in cyclic dependencies starting at |pkg|.
 
                 Args:
-                  pkg: Package identifier.
-                  cycles: A dict mapping cyclic packages to a dict of the deps that
-                          cause cycles. For each dep that causes cycles, it returns an
-                          example traversal of the graph that shows the cycle.
-                  unresolved: Nodes that have been visited but are not fully processed.
-                  resolved: Nodes that have been visited and are fully processed.
+                    pkg: Package identifier.
+                    cycles: A dict mapping cyclic packages to a dict of the deps
+                        that cause cycles. For each dep that causes cycles, it
+                        returns an example traversal of the graph that shows the
+                        cycle.
+                    unresolved: Nodes that have been visited but are not fully
+                        processed.
+                    resolved: Nodes that have been visited and are fully
+                        processed.
                 """
                 pkg_cycles = cycles.get(pkg)
                 if pkg in resolved and not pkg_cycles:
@@ -636,8 +642,8 @@ class DepGraphGenerator(object):
             # Schedule packages that aren't on the install list for removal
             rm_pkgs = set(deps_map.keys()) - set(deps_info.keys())
 
-            # Remove the packages we don't want, simplifying the graph and making
-            # it easier for us to crack cycles.
+            # Remove the packages we don't want, simplifying the graph and
+            # making it easier for us to crack cycles.
             for pkg in sorted(rm_pkgs):
                 this_pkg = deps_map[pkg]
                 needs = this_pkg["needs"]
@@ -666,8 +672,8 @@ class DepGraphGenerator(object):
 
             # It's OK to swap install order for blockers, as long as the two
             # packages aren't installed in parallel. If there is a cycle, then
-            # we know the packages depend on each other already, so we can drop the
-            # blocker safely without printing a warning.
+            # we know the packages depend on each other already, so we can drop
+            # the blocker safely without printing a warning.
             if depinfo == "blocker":
                 return
 
@@ -686,13 +692,14 @@ class DepGraphGenerator(object):
         def SanitizeTree():
             """Remove circular dependencies.
 
-            We prune all dependencies involved in cycles that go against the emerge
-            ordering. This has a nice property: we're guaranteed to merge
+            We prune all dependencies involved in cycles that go against the
+            emerge ordering. This has a nice property: we're guaranteed to merge
             dependencies in the same order that portage does.
 
-            Because we don't treat any dependencies as "soft" unless they're killed
-            by a cycle, we pay attention to a larger number of dependencies when
-            merging. This hurts performance a bit, but helps reliability.
+            Because we don't treat any dependencies as "soft" unless they're
+            killed by a cycle, we pay attention to a larger number of
+            dependencies when merging. This hurts performance a bit, but helps
+            reliability.
             """
             start = time.time()
             cycles = FindCycles()
@@ -802,20 +809,20 @@ class EmergeData(object):
     ]
 
     def __init__(self):
-        # The action the user requested. If the user is installing packages, this
-        # is None. If the user is doing anything other than installing packages,
-        # this will contain the action name, which will map exactly to the
-        # long-form name of the associated emerge option.
+        # The action the user requested. If the user is installing packages,
+        # this is None. If the user is doing anything other than installing
+        # packages, this will contain the action name, which will map exactly to
+        # the long-form name of the associated emerge option.
         #
-        # Example: If you call parallel_emerge --unmerge package, the action name
-        #          will be "unmerge"
+        # Example: If you call parallel_emerge --unmerge package, the action
+        # name will be "unmerge"
         self.action = None
 
         # The list of packages the user passed on the command-line.
         self.cmdline_packages = None
 
-        # The emerge dependency graph. It'll contain all the packages involved in
-        # this merge, along with their versions.
+        # The emerge dependency graph. It'll contain all the packages involved
+        # in this merge, along with their versions.
         self.depgraph = None
 
         # The list of candidates to add to the world file.
@@ -831,10 +838,10 @@ class EmergeData(object):
         # --usepkg=n is the default, this makes parsing easier, because emerge
         # can just assume that if "--usepkg" is in the dictionary, it's enabled.
         #
-        # These cleanup processes aren't applied to all options. For example, the
-        # --with-bdeps flag is passed in as-is.  For a full list of the cleanups
-        # applied by emerge, see the parse_opts function in the _emerge.main
-        # package.
+        # These cleanup processes aren't applied to all options. For example,
+        # the --with-bdeps flag is passed in as-is.  For a full list of the
+        # cleanups applied by emerge, see the parse_opts function in the
+        # _emerge.main package.
         self.opts = None
 
         # A dictionary used by portage to maintain global state. This state is
@@ -846,23 +853,23 @@ class EmergeData(object):
         # saves what it is currently doing in this database so that it can be
         # resumed when you call it with the --resume option.
         #
-        # parallel_emerge does not save what it is currently doing in the mtimedb,
-        # so we do not support the --resume option.
+        # parallel_emerge does not save what it is currently doing in the
+        # mtimedb, so we do not support the --resume option.
         self.mtimedb = None
 
-        # The portage configuration for our current root. This contains the portage
-        # settings (see below) and the three portage trees for our current root.
-        # (The three portage trees are explained below, in the documentation for
-        #  the "trees" member.)
+        # The portage configuration for our current root. This contains the
+        # portage settings (see below) and the three portage trees for our
+        # current root. (The three portage trees are explained below, in the
+        # documentation for the "trees" member.)
         self.root_config = None
 
         # The scheduler graph is used by emerge to calculate what packages to
-        # install. We don't actually install any deps, so this isn't really used,
-        # but we pass it in to the Scheduler object anyway.
+        # install. We don't actually install any deps, so this isn't really
+        # used, but we pass it in to the Scheduler object anyway.
         self.scheduler_graph = None
 
-        # Portage settings for our current session. Most of these settings are set
-        # in make.conf inside our current install root.
+        # Portage settings for our current session. Most of these settings are
+        # set in make.conf inside our current install root.
         self.settings = None
 
         # The spinner, which spews stuff to stdout to indicate that portage is
@@ -870,13 +877,13 @@ class EmergeData(object):
         # spinner to "silent" mode.
         self.spinner = None
 
-        # The portage trees. There are separate portage trees for each root. To get
-        # the portage tree for the current root, you can look in self.trees[root],
-        # where root = self.settings["ROOT"].
+        # The portage trees. There are separate portage trees for each root. To
+        # get the portage tree for the current root, you can look in
+        # self.trees[root], where root = self.settings["ROOT"].
         #
         # In each root, there are three trees: vartree, porttree, and bintree.
         #  - vartree: A database of the currently-installed packages.
-        #  - porttree: A database of ebuilds, that can be used to build packages.
+        #  - porttree: A database of ebuilds that can be used to build packages.
         #  - bintree: A database of binary packages.
         self.trees = None
 
@@ -912,7 +919,8 @@ def _get_emerge_args(
         "--quiet",
         "--pretend",
         "--emptytree",
-        # Sysroot needs to be set this way so parallel emerge parses it correctly.
+        # Sysroot needs to be set this way so parallel emerge parses it
+        # correctly.
         f"--sysroot={sysroot_path}",
     ]
     if include_bdeps:

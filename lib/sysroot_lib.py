@@ -301,8 +301,8 @@ class Sysroot(object):
         self.path = str(path)
 
         # Read config from _MAKE_CONF which also pulls in config from
-        # _MAKE_CONF_BOARD_SETUP, but only write any config overrides directly to
-        # _MAKE_CONF_BOARD_SETUP.
+        # _MAKE_CONF_BOARD_SETUP, but only write any config overrides directly
+        # to _MAKE_CONF_BOARD_SETUP.
         self._config_file_read = self.Path(_MAKE_CONF)
         self._config_file_write = self.Path(_MAKE_CONF_BOARD_SETUP)
 
@@ -423,12 +423,12 @@ class Sysroot(object):
     def board_overlay(self) -> List[str]:
         """The BOARD_OVERLAY standard field as a list.
 
-        The BOARD_OVERLAY field is set on creation, and stores the list of overlays
-        more directly associated with the build target itself. In an ideal world,
-        this would be the single, top level overlay for the build target (e.g.
-        overlay-eve-private) and everything else could be derived from that. In
-        practice, this is currently every available overlay that is not in
-        src/third_party.
+        The BOARD_OVERLAY field is set on creation, and stores the list of
+        overlays more directly associated with the build target itself. In an
+        ideal world, this would be the single, top level overlay for the build
+        target (e.g. overlay-eve-private) and everything else could be derived
+        from that. In practice, this is currently every available overlay that
+        is not in src/third_party.
         """
         return self.GetStandardField(STANDARD_FIELD_BOARD_OVERLAY).split()
 
@@ -441,9 +441,9 @@ class Sysroot(object):
     @property
     def build_target_overlay(self) -> Optional[Path]:
         """The most specific build target overlay for the sysroot."""
-        # Choose the longest as a proxy for the most specific. This should only ever
-        # be choosing between overlay-x and overlay-x-private, but we'll need better
-        # logic here if we have any cases with more than that.
+        # Choose the longest as a proxy for the most specific. This should only
+        # ever be choosing between overlay-x and overlay-x-private, but we'll
+        # need better logic here if we have any cases with more than that.
         overlays = self._build_target_overlays
         overlay = max(overlays, key=lambda x: len(x.name)) if overlays else None
         return overlay
@@ -457,9 +457,9 @@ class Sysroot(object):
         if not overlays:
             return None
 
-        # Choose the longest as a proxy for the most specific. This should at most
-        # be choosing between chipset-x and chipset-x-private, but we'll need better
-        # logic here if we have any cases with more than that.
+        # Choose the longest as a proxy for the most specific. This should at
+        # most be choosing between chipset-x and chipset-x-private, but we'll
+        # need better logic here if we have any cases with more than that.
         overlay = max(overlays, key=lambda x: len(x.name))
         chipset = overlay.name
 
@@ -501,14 +501,15 @@ class Sysroot(object):
     ) -> List[Path]:
         """Get a list of the overlays available to the sysroot.
 
-        Note: The overlay paths are always inside the SDK. If the outside the SDK
-        paths are needed, we should add an option to transform them here.
+        Note: The overlay paths are always inside the SDK. If the outside the
+        SDK paths are needed, we should add an option to transform them here.
 
         Args:
-          build_target_only: Only fetch the overlays more relevant to the build
-            target. By default, fetch all overlays available to the sysroot.
-          relative: Get the overlay paths relative to the source root rather than
-            as absolute paths.
+            build_target_only: Only fetch the overlays more relevant to the
+               build target. By default, fetch all overlays available to the
+               sysroot.
+            relative: Get the overlay paths relative to the source root rather
+                than as absolute paths.
         """
         overlays = (
             self.board_overlay if build_target_only else self.portdir_overlay
@@ -539,12 +540,12 @@ class Sysroot(object):
     def CreateAllWrappers(self, friendly_name: str = None) -> None:
         """Creates all the wrappers.
 
-        Creates all portage tools wrappers, plus wrappers for gdb, cros_workon and
-        pkg-config.
+        Creates all portage tools wrappers, plus wrappers for gdb, cros_workon
+        and pkg-config.
 
         Args:
-          friendly_name: if not None, create friendly wrappers with |friendly_name|
-            added to the command.
+            friendly_name: if not None, create friendly wrappers with
+                |friendly_name| added to the command.
         """
         chost = self.GetStandardField(STANDARD_FIELD_CHOST)
         for cmd in (
@@ -623,8 +624,8 @@ class Sysroot(object):
             source_root=constants.SOURCE_ROOT,
         )
 
-        # Create a link to the debug symbols in the chroot so that gdb can detect
-        # them.
+        # Create a link to the debug symbols in the chroot so that gdb can
+        # detect them.
         debug_symlink = os.path.join("/usr/lib/debug", self.path.lstrip("/"))
         sysroot_debug = self.Path("usr/lib/debug")
         osutils.SafeMakedirs(os.path.dirname(debug_symlink), sudo=True)
@@ -647,13 +648,13 @@ class Sysroot(object):
         """Make sure the make.conf.board file exists and is up to date.
 
         Args:
-          accepted_licenses: Any additional accepted licenses.
-          local_only: Whether prebuilts can be fetched from remote sources.
-          package_indexes: List of information about available prebuilts, youngest
-            first, or None.
-          expanded_binhost_inheritance: Whether to enable expanded binhost
-            inheritance, which searches for additional binhosts to include to
-            attempt to improve binhost hit rates.
+            accepted_licenses: Any additional accepted licenses.
+            local_only: Whether prebuilts can be fetched from remote sources.
+            package_indexes: List of information about available prebuilts,
+                youngest first, or None.
+            expanded_binhost_inheritance: Whether to enable expanded binhost
+                inheritance, which searches for additional binhosts to include
+                to attempt to improve binhost hit rates.
         """
         board_conf = self.GenerateBoardMakeConf(
             accepted_licenses=accepted_licenses
@@ -785,7 +786,7 @@ class Sysroot(object):
         config = [
             """# AUTO-GENERATED FILE. DO NOT EDIT.
 
-  # Source make.conf from each overlay."""
+# Source make.conf from each overlay."""
         ]
 
         overlay_list = self.GetStandardField(STANDARD_FIELD_BOARD_OVERLAY)
@@ -804,7 +805,8 @@ class Sysroot(object):
         if os.path.isfile(_CHROMEOS_INTERNAL_BOTO_PATH):
             boto_config = _CHROMEOS_INTERNAL_BOTO_PATH
         else:
-            # NB: Do not touch this w/out build consult.  Pretend this doesn't exist.
+            # NB: Do not touch this w/out build consult.  Pretend this doesn't
+            # exist.
             config.append('USE="$USE -ondevice_speech"')
 
         gs_fetch_binpkg = os.path.join(
@@ -834,10 +836,11 @@ class Sysroot(object):
         """Returns the binhost configuration.
 
         Args:
-          local_only: If True, use binary packages from local boards only.
-          package_indexes: List of information about available prebuilts, youngest
-            first, or None.
-          expanded_binhost_inheritance: Look for additional binhosts to inherit.
+            local_only: If True, use binary packages from local boards only.
+            package_indexes: List of information about available prebuilts,
+                youngest first, or None.
+            expanded_binhost_inheritance: Look for additional binhosts to
+                inherit.
 
         Returns:
           The config contents.
@@ -846,8 +849,8 @@ class Sysroot(object):
         if local_only:
             if not board:
                 return ""
-            # TODO(bsimonnet): Refactor cros_generate_local_binhosts into a function
-            # here and remove the following call.
+            # TODO(bsimonnet): Refactor cros_generate_local_binhosts into a
+            #   function here and remove the following call.
             local_binhosts = cros_build_lib.run(
                 [
                     os.path.join(
@@ -866,10 +869,10 @@ class Sysroot(object):
 
         config = []
         if package_indexes:
-            # TODO(crbug/1088059): Drop all use of overlay commits, once the solution
-            # is in place for non-snapshot checkouts.
-            # If present, this defines PORTAGE_BINHOST.  These are independent of the
-            # overlay commits.
+            # TODO(crbug/1088059): Drop all use of overlay commits, once the
+            #   solution is in place for non-snapshot checkouts.
+            # If present, this defines PORTAGE_BINHOST.  These are independent
+            # of the overlay commits.
             config.append("# This is the list of binhosts provided by the API.")
             config.append(
                 'PASSED_BINHOST="%s"'
@@ -931,8 +934,8 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
             if "_" in board:
                 prefixes.append(board.split("_")[0])
             elif expanded_binhost_inheritance:
-                # Search the public parent overlays for the given board, and include
-                # the parents' binhosts; e.g. eve for eve-kvm.
+                # Search the public parent overlays for the given board, and
+                # include the parents' binhosts; e.g. eve for eve-kvm.
                 overlays = portage_util.FindOverlays(
                     constants.PUBLIC_OVERLAYS, board=board
                 )
@@ -948,11 +951,10 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
 
         external = internal = None
         for filename in filenames:
-            # The binhost file must exist and not be empty, both for internal and
-            # external binhosts.
-            # When a builder is deleted and no longer publishes prebuilts, we need
-            # developers to pick up the next set of prebuilts. Clearing the binhost
-            # files triggers this.
+            # The binhost file must exist and not be empty, both for internal
+            # and external binhosts. When a builder is deleted and no longer
+            # publishes prebuilts, we need developers to pick up the next set of
+            # prebuilts. Clearing the binhost files triggers this.
             candidate = os.path.join(_INTERNAL_BINHOST_DIR, filename)
             if not internal and _NotEmpty(candidate):
                 internal = candidate
@@ -986,8 +988,8 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
     def UpdateToolchain(self, board: str, local_init: bool = True) -> None:
         """Updates the toolchain packages.
 
-        This will install both the toolchains and the packages that are implicitly
-        needed (gcc-libs, linux-headers).
+        This will install both the toolchains and the packages that are
+        implicitly needed (gcc-libs, linux-headers).
 
         Args:
           board: The name of the board.
@@ -1050,17 +1052,17 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
     def Delete(self, background: bool = False) -> None:
         """Delete the sysroot.
 
-        Optionally run asynchronously. Async delete moves the sysroot into a temp
-        directory and then deletes the tempdir with a background task.
+        Optionally run asynchronously. Async delete moves the sysroot into a
+        temp directory and then deletes the tempdir with a background task.
 
         Args:
           background: Whether to run the delete as a background operation.
         """
         rm = ["rm", "-rf", "--one-file-system", "--"]
         if background:
-            # Make the temporary directory in the same folder as the sysroot were
-            # deleting to avoid crossing disks, mounts, etc. that'd cause us to
-            # synchronously copy the entire thing before we delete it.
+            # Make the temporary directory in the same folder as the sysroot
+            # were deleting to avoid crossing disks, mounts, etc. that'd cause
+            # us to synchronously copy the entire thing before we delete it.
             cwd = os.path.normpath(self.Path(".."))
             try:
                 result = cros_build_lib.sudo_run(

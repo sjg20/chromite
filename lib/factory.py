@@ -6,7 +6,7 @@
 
 
 class ObjectFactoryIllegalOperation(Exception):
-    """Raised when attemping an illegal ObjectFactory operation."""
+    """Raised when attempting an illegal ObjectFactory operation."""
 
 
 _NO_SINGLETON_INSTANCE = object()
@@ -28,19 +28,17 @@ class ObjectFactory(object):
         """ObjectFactory constructor.
 
         Args:
-          object_name: Human readable name for the type of object that this factory
-                       generates.
-          setup_types: A (set up type name -> generator function) dictionary, which
-                       teaches ObjectFactory how to construct instances after setup
-                       has been called. For set up types where a singleton instance
-                       is specified at setup(...) time, generator function should be
-                       None.
-          allowed_transitions: Optional function, where
-                               allowed_transitions(from_type, to_type) specifies
-                               whether transition from |from_type| to |to_type| is
-                               allowed.
-
-                               If unspecified, no transitions are allowed.
+            object_name: Human readable name for the type of object that this
+                factory generates.
+            setup_types: A (set up type name -> generator function) dictionary,
+                which teaches ObjectFactory how to construct instances after
+                setup has been called. For set up types where a singleton
+                instance is specified at setup(...) time, generator function
+                should be None.
+            allowed_transitions: Optional function, where
+                allowed_transitions(from_type, to_type) specifies whether
+                transition from |from_type| to |to_type| is allowed. If
+                unspecified, no transitions are allowed.
         """
 
         self._object_name = object_name
@@ -67,14 +65,14 @@ class ObjectFactory(object):
                     "%s already set up." % self._object_name
                 )
 
-        # Allow singleton_instance if and only if factory method for this type is
-        # None.
+        # Allow singleton_instance if and only if factory method for this type
+        # is None.
         instance_supplied = singleton_instance != _NO_SINGLETON_INSTANCE
         factory_is_none = self._types[setup_type] is None
         if instance_supplied != factory_is_none:
             raise ObjectFactoryIllegalOperation(
-                "singleton_instance should be supplied if and only if setup_type has "
-                "a factory that is None."
+                "singleton_instance should be supplied if and only if "
+                "setup_type has a factory that is None."
             )
 
         self._setup_type = setup_type
@@ -95,7 +93,7 @@ class ObjectFactory(object):
         """Returns an object instance iff setup has been called.
 
         Raises:
-          ObjectFactoryIllegalOperation: if setup has not yet been called.
+            ObjectFactoryIllegalOperation: if setup has not yet been called.
         """
         if not self.is_setup:
             raise ObjectFactoryIllegalOperation(

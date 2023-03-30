@@ -83,14 +83,16 @@ def CreateOnDiskHierarchy(base_path, dir_struct):
     """Creates on-disk representation of an in-memory directory structure.
 
     Args:
-      base_path: The absolute root of the directory structure.
-      dir_struct: A recursively defined data structure that represents a
-        directory tree.  The basic form is a list.  Elements can be file names or
-        cros_test_lib.Directory objects.  The 'contents' attribute of Directory
-        types is a directory structure representing the contents of the directory.
-        Examples:
-          - ['file1', 'file2']
-          - ['file1', Directory('directory', ['deepfile1', 'deepfile2']), 'file2']
+        base_path: The absolute root of the directory structure.
+        dir_struct: A recursively defined data structure that represents a
+            directory tree.  The basic form is a list.  Elements can be file
+            names or cros_test_lib.Directory objects.  The 'contents' attribute
+            of Directory types is a directory structure representing the
+            contents of the directory.
+            Examples:
+                - ['file1', 'file2']
+                - ['file1', Directory('directory', ['deepfile1', 'deepfile2']),
+                    'file2']
     """
     flattened = _FlattenStructure(base_path, dir_struct)
     for f in flattened:
@@ -204,15 +206,15 @@ class StackedSetup(type):
     Use by including this line in the class signature:
       class ...(..., metaclass=StackedSetup)
 
-    Since cros_test_lib.TestCase uses this metaclass, all derivatives of TestCase
-    also inherit the above behavior (unless they override the metaclass attribute
-    manually).
+    Since cros_test_lib.TestCase uses this metaclass, all derivatives of
+    TestCase also inherit the above behavior (unless they override the metaclass
+    attribute manually).
     """
 
     TEST_CASE_TIMEOUT = 10 * 60
 
     def __new__(cls, clsname, bases, scope):
-        """Generate the new class with pointers to original funcs & our helpers"""
+        """Generate new class with pointers to original funcs & our helpers."""
         if "setUp" in scope:
             scope["__raw_setUp__"] = scope.pop("setUp")
         scope["setUp"] = cls._stacked_setUp
@@ -265,7 +267,7 @@ class StackedSetup(type):
 
     @staticmethod
     def _stacked_tearDown(obj):
-        """Run all the tearDown funcs; if any fail, we move on to the next one"""
+        """Run all tearDown funcs; if any fail, we move on to the next one."""
         exc_info = None
         for target in StackedSetup._walk_mro_stacking(
             obj, "__raw_tearDown__", True
@@ -301,7 +303,7 @@ class TruthTable(object):
     2) Access a particular input line by index, expressed as a tuple of bools.
     3) Access the expected output for a set of inputs.
 
-    For example, say function "Foo" in module "mod" should consists of the
+    For example, say function "Foo" in module "mod" should consist of the
     following code:
 
     def Foo(A, B, C):
@@ -535,9 +537,10 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
     @staticmethod
     def _CheckTestEnv(msg):
         """Sanity check the environment.  https://crbug.com/1015450"""
-        # Note: We use print+sys.exit here instead of logging/Die because it might
-        # cause errors in tests that expect their own setUp to run before their own
-        # tearDown executes.  By failing in the core funcs, we violate that.
+        # Note: We use print+sys.exit here instead of logging/Die because it
+        # might cause errors in tests that expect their own setUp to run before
+        # their own tearDown executes.  By failing in the core funcs, we violate
+        # that.
         st = os.stat("/")
         if st.st_mode & 0o007 != 0o005:
             print(
@@ -564,8 +567,8 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
         self.__saved_umask__ = os.umask(0o22)
         for x in self.ENVIRON_VARIABLE_SUPPRESSIONS:
             os.environ.pop(x, None)
-        # Force all log lines in tests to include ANSI color prefixes, since it can
-        # be configured per-user.
+        # Force all log lines in tests to include ANSI color prefixes, since it
+        # can be configured per-user.
         os.environ["NOCOLOR"] = "no"
 
         self.__global_config_patchers__ = [
@@ -664,7 +667,8 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
             while path != "/":
                 path = os.path.dirname(path)
                 if not path:
-                    # If we're given something like "foo", abort once we get to "".
+                    # If we're given something like "foo", abort once we get to
+                    # "".
                     break
                 result = os.path.exists(path)
                 msg.append("\tos.path.exists(%s): %s" % (path, result))
@@ -688,8 +692,8 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
     def assertStartsWith(self, s, prefix, msg=None):
         """Asserts that |s| starts with |prefix|.
 
-        This function should be preferred over assertTrue(s.startswith(prefix)) for
-        it produces better error failure message than the other.
+        This function should be preferred over assertTrue(s.startswith(prefix))
+        for it produces better error failure message than the other.
         """
         if s.startswith(prefix):
             return
@@ -702,8 +706,8 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
     def assertEndsWith(self, s, suffix, msg=None):
         """Asserts that |s| ends with |suffix|.
 
-        This function should be preferred over assertTrue(s.endswith(suffix)) for
-        it produces better error failure message than the other.
+        This function should be preferred over assertTrue(s.endswith(suffix))
+        for it produces better error failure message than the other.
         """
         if s.endswith(suffix):
             return
@@ -829,7 +833,7 @@ class OutputTestCase(TestCase):
         )
 
     def _GenCheckMsgFunc(self, prefix_re, line_re):
-        """Return boolean func to check a line given |prefix_re| and |line_re|."""
+        """Return bool func to check a line given |prefix_re| and |line_re|."""
 
         def _method(line):
             if prefix_re:
@@ -848,8 +852,8 @@ class OutputTestCase(TestCase):
         if isinstance(line_re, str):
             line_re = re.compile(line_re)
 
-        # Provide a description of what this function looks for in a line.  Error
-        # messages can make use of this.
+        # Provide a description of what this function looks for in a line.
+        # Error messages can make use of this.
         _method.description = None
         if prefix_re and line_re:
             _method.description = (
@@ -1102,9 +1106,9 @@ class TempDirTestCase(TestCase):
         """Leave behind tempdirs created by instances of this class.
 
         Calling this function ensures that all future instances will leak their
-        temporary directories. Additionally, all future temporary directories will
-        be created inside one top level temporary directory, so that you can easily
-        blow them away when you're done.
+        temporary directories. Additionally, all future temporary directories
+        will be created inside one top level temporary directory, so that you
+        can easily blow them away when you're done.
         Currently, this function is pretty stupid. You should call it *before*
         creating any instances.
 
@@ -1130,9 +1134,10 @@ class TempDirTestCase(TestCase):
             prefix="chromite.test", set_global=True, delete=self.DELETE
         )
         self.tempdir = Path(self._tempdir_obj.tempdir)
-        # We must use addCleanup here so that inheriting TestCase classes can use
-        # addCleanup with the guarantee that the tempdir will be cleand up _after_
-        # their addCleanup has run. TearDown runs before cleanup functions.
+        # We must use addCleanup here so that inheriting TestCase classes can
+        # use addCleanup with the guarantee that the tempdir will be cleaned up
+        # _after_ their addCleanup has run. TearDown runs before cleanup
+        # functions.
         self.addCleanup(self._CleanTempDir)
 
     def _CleanTempDir(self):
@@ -1153,7 +1158,7 @@ class TempDirTestCase(TestCase):
         self.assertEqual(read_content, content)
 
     def assertTempFileContents(self, file_path, content):
-        """Assert that a file in the temp directory contains the given content."""
+        """Assert a file in the temp directory contains the given content."""
         self.assertFileContents(os.path.join(self.tempdir, file_path), content)
 
     def ReadTempFile(self, path):
@@ -1189,8 +1194,8 @@ class FakeSDKCache(object):
         # Sets the SDK Version.
         self.sdk_version = sdk_version
         os.environ["%SDK_VERSION"] = sdk_version
-        # Defines the path for the fake SDK Symlink Cache. (No backing tarball cache
-        # is needed.)
+        # Defines the path for the fake SDK Symlink Cache. (No backing tarball
+        # cache is needed.)
         self.symlink_cache_path = os.path.join(
             self.cache_dir, "chrome-sdk", "symlinks"
         )
@@ -1286,7 +1291,8 @@ class ProgressBarTestCase(MockOutputTestCase):
             except AssertionError:
                 skipped += 1
 
-        # crbug.com/560953 It's normal to skip a few events under heavy CPU load.
+        # crbug.com/560953 It's normal to skip a few events under heavy CPU
+        # load.
         self.assertLessEqual(
             skipped,
             num_events // 2,
@@ -1339,7 +1345,8 @@ class ListTestSuite(unittest.BaseTestSuite):
 
         if top:
             if tests:
-                # Now that we have all the tests, print them in lined up columns.
+                # Now that we have all the tests, print them in lined up
+                # columns.
                 maxlen = max(len(x[0]) for x in tests)
                 for test, desc in tests:
                     print("%-*s  %s" % (maxlen, test, desc))
@@ -1408,8 +1415,8 @@ class ProfileTestRunner(unittest.TextTestRunner):
 class TestProgram(unittest.TestProgram):
     """Helper wrapper around unittest.TestProgram
 
-    Any passed in kwargs are passed directly down to unittest.main; via this, you
-    can inject custom argv for example (to limit what tests run).
+    Any passed in kwargs are passed directly down to unittest.main; via this,
+    you can inject custom argv for example (to limit what tests run).
     """
 
     def __init__(self, **kwargs):
@@ -1574,8 +1581,9 @@ class TestProgram(unittest.TestProgram):
         elif opts.trace:
             self.testRunner = TraceTestRunner
 
-            # Create the automatic ignore list based on sys.path.  We need to filter
-            # out chromite paths though as we might have automatic local paths in it.
+            # Create the automatic ignore list based on sys.path.  We need to
+            # filter out chromite paths though as we might have automatic local
+            # paths in it.
             auto_ignore = set()
             if opts.ignore_system:
                 auto_ignore.add(
@@ -1618,8 +1626,8 @@ class TestProgram(unittest.TestProgram):
             self.testNames = (self.defaultTest,)
 
         if not opts.wipe:
-            # Instruct the TempDirTestCase to skip cleanup before actually creating
-            # any tempdirs.
+            # Instruct the TempDirTestCase to skip cleanup before actually
+            # creating any tempdirs.
             self._leaked_tempdir = TempDirTestCase.SkipCleanup()
 
         self.createTests()
@@ -1628,9 +1636,10 @@ class TestProgram(unittest.TestProgram):
         # If cidb has been imported, stub it out.  We do this dynamically so we
         # don't have to import cidb in every single test module.
         if "chromite.lib.cidb" in sys.modules:
-            # Unit tests should never connect to the live prod or debug instances
-            # of the cidb. This call ensures that they will not accidentally
-            # do so through the normal cidb SetUp / GetConnectionForBuilder factory.
+            # Unit tests should never connect to the live prod or debug
+            # instances of the cidb. This call ensures that they will not
+            # accidentally do so through the normal cidb SetUp /
+            # GetConnectionForBuilder factory.
             sys.modules[
                 "chromite.lib.cidb"
             ].CIDBConnectionFactory.SetupMockCidb()
@@ -1670,13 +1679,14 @@ class PopenMock(partial_mock.PartialCmdMock):
         stdout = os.path.join(self.tempdir, "output")
         stderr = os.path.join(self.tempdir, "error")
 
-        # This encoding handling might appear a bit wonky, but it's OK, I promise.
-        # The purpose of this mock is to stuff data into files so that we can run a
-        # fake script in place of the real command.  So any cros_build_lib.run()
-        # settings will still be fully checked including encoding.  This code just
-        # takes care of writing the data from AddCmdResult objects.  Those might be
-        # specified in strings or in bytes, but there's no value in forcing all code
-        # to use the same encoding with the mocks.
+        # This encoding handling might appear a bit wonky, but it's OK, I
+        # promise. The purpose of this mock is to stuff data into files so that
+        # we can run a fake script in place of the real command.  So any
+        # cros_build_lib.run() settings will still be fully checked including
+        # encoding.  This code just takes care of writing the data from
+        # AddCmdResult objects.  Those might be specified in strings or in
+        # bytes, but there's no value in forcing all code to use the same
+        # encoding with the mocks.
         def _MaybeEncode(src):
             return src.encode("utf-8") if isinstance(src, str) else src
 

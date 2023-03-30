@@ -153,19 +153,20 @@ def WriteFile(
     """Write the given content to disk.
 
     Args:
-      path: Pathway to write the content to.
-      content: Content to write.  May be either an iterable, or a string.
-      mode: The mode to use when opening the file.  'w' is for text files (see the
-        following settings) and 'wb' is for binary files.  If appending, pass
-        'w+', etc...
-      encoding: The encoding of the file content.  Text files default to 'utf-8'.
-      errors: How to handle encoding errors.  Text files default to 'strict'.
-      atomic: If the updating of the file should be done atomically.  Note this
-              option is incompatible w/ append mode.
-      makedirs: If True, create missing leading directories in the path.
-      sudo: If True, write the file as root.
-      chmod: Permissions to make sure the file uses.  By default, permissions will
-          be maintained if |path| exists, or default to 0644.
+        path: Pathway to write the content to.
+        content: Content to write.  May be either an iterable, or a string.
+        mode: The mode to use when opening the file.  'w' is for text files (see
+            the following settings) and 'wb' is for binary files.  If appending,
+            pass 'w+', etc...
+        encoding: The encoding of the file content.  Text files default to
+            'utf-8'.
+        errors: How to handle encoding errors.  Text files default to 'strict'.
+        atomic: If the updating of the file should be done atomically.  Note
+            this option is incompatible w/ append mode.
+        makedirs: If True, create missing leading directories in the path.
+        sudo: If True, write the file as root.
+        chmod: Permissions to make sure the file uses.  By default, permissions
+            will be maintained if |path| exists, or default to 0644.
     """
     if mode not in _VALID_WRITE_MODES:
         raise ValueError(
@@ -219,12 +220,12 @@ def WriteFile(
             else:
                 return 0o644
 
-    # If the file needs to be written as root and we are not root, write to a temp
-    # file, move it and change the permission.
+    # If the file needs to be written as root and we are not root, write to a
+    # temp file, move it and change the permission.
     if sudo and IsNonRootUser():
         if "a" in mode or mode.startswith("r+"):
-            # Use dd to run through sudo & append the output, and write the new data
-            # to it through stdin.
+            # Use dd to run through sudo & append the output, and write the new
+            # data to it through stdin.
             cmd = ["dd", "conv=notrunc", "status=none", f"of={path}"]
             if "a" in mode:
                 cmd += ["oflag=append"]
@@ -388,18 +389,19 @@ def ReadFile(
     The defaults are geared towards reading UTF-8 encoded text.
 
     Args:
-      path: The file to read.
-      mode: The mode to use when opening the file.  'r' is for text files (see the
-        following settings) and 'rb' is for binary files.
-      encoding: The encoding of the file content.  Text files default to 'utf-8'.
-      errors: How to handle encoding errors.  Text files default to 'strict'.
-      size: How many bytes to return.  Defaults to the entire file.  If this is
-        larger than the number of available bytes, an error is not thrown, you'll
-        just get back a short read.
-      seek: How many bytes to skip from the beginning.  By default, none.  If this
-        is larger than the file itself, an error is not thrown, you'll just get
-        back a short read.
-      sudo: If True, read the file as root.
+        path: The file to read.
+        mode: The mode to use when opening the file.  'r' is for text files (see
+            the following settings) and 'rb' is for binary files.
+        encoding: The encoding of the file content.  Text files default to
+            'utf-8'.
+        errors: How to handle encoding errors.  Text files default to 'strict'.
+        size: How many bytes to return.  Defaults to the entire file.  If this
+            is larger than the number of available bytes, an error is not
+            thrown, you'll just get back a short read.
+        seek: How many bytes to skip from the beginning.  By default, none.  If
+            this is larger than the file itself, an error is not thrown, you'll
+            just get back a short read.
+        sudo: If True, read the file as root.
 
     Returns:
       The content of the file, either as bytes or a string (with the specified
@@ -424,8 +426,8 @@ def ReadFile(
         if not sudo:
             raise
 
-    # If in sudo mode, use dd to extract.  We'll read in chunks of 1MiB for better
-    # perf than the default of 512 bytes.
+    # If in sudo mode, use dd to extract.  We'll read in chunks of 1MiB for
+    # better perf than the default of 512 bytes.
     cmd = [
         "dd",
         "status=none",
@@ -592,15 +594,15 @@ def SafeMakedirsNonRoot(path, mode=0o775, user=None):
     try:
         created = SafeMakedirs(path, mode=mode, user=user)
         if not created:
-            # Sometimes, the directory exists, but is owned by root. As a HACK, we
-            # will chown it to the requested user.
+            # Sometimes, the directory exists, but is owned by root. As a HACK,
+            # we will chown it to the requested user.
             stat_info = os.stat(path)
             should_chown = stat_info.st_uid == 0
     except OSError as e:
         if e.errno == errno.EACCES:
-            # Sometimes, (a prefix of the) path we're making the directory in may be
-            # owned by root, and so we fail. As a HACK, use da power to create
-            # directory and then chown it.
+            # Sometimes, (a prefix of the) path we're making the directory in
+            # may be owned by root, and so we fail. As a HACK, use da power to
+            # create directory and then chown it.
             created = should_chown = SafeMakedirs(path, mode=mode, sudo=True)
 
     if should_chown:
@@ -629,8 +631,8 @@ def _CopyDirContents(
     an existing directory. For example, for the given paths:
 
     from/
-      inside/x.py
-      y.py
+        inside/x.py
+        y.py
     to/
 
     shutil.copytree('from', 'to')
@@ -638,27 +640,28 @@ def _CopyDirContents(
 
     shutil.copytree('from', 'to/non_existent_dir')
     to/non_existent_dir/
-      inside/x.py
-      y.py
+        inside/x.py
+        y.py
 
     CopyDirContents('from', 'to')
     to/
-      inside/x.py
-      y.py
+        inside/x.py
+        y.py
 
     Args:
-      from_dir: The directory whose contents should be copied. Must exist.
-      to_dir: The directory to which contents should be copied. Must exist.
-      symlinks: Whether symlinks should be copied or dereferenced. When True, all
-        symlinks will be copied as symlinks into the destination. When False, the
-        symlinks will be dereferenced and the contents copied over.
-      allow_nonempty: If True, do not die when to_dir is nonempty.
-      move: Move the contents instead of copying them.
+        from_dir: The directory whose contents should be copied. Must exist.
+        to_dir: The directory to which contents should be copied. Must exist.
+        symlinks: Whether symlinks should be copied or dereferenced. When True,
+            all symlinks will be copied as symlinks into the destination. When
+            False, the symlinks will be dereferenced and the contents copied
+            over.
+        allow_nonempty: If True, do not die when to_dir is nonempty.
+        move: Move the contents instead of copying them.
 
     Raises:
-      BadPathsException: if the source / target directories don't exist, or if
-          target directory is non-empty when allow_nonempty=False.
-      OSError: on esoteric permission errors.
+        BadPathsException: if the source / target directories don't exist, or if
+            target directory is non-empty when allow_nonempty=False.
+        OSError: on esoteric permission errors.
     """
     from_dir = Path(from_dir).resolve()
     to_dir = Path(to_dir).resolve()
@@ -684,9 +687,10 @@ def _CopyDirContents(
         elif from_path.is_dir():
             if move:
                 if to_path.is_dir():
-                    # if a destination directory already exists, recursively check for the
-                    # individual files and directories in from path to be moved, so that
-                    # we overwrite or copy the files to destination directory.
+                    # if a destination directory already exists, recursively
+                    # check for the individual files and directories in from
+                    # path to be moved, so that we overwrite or copy the files
+                    # to destination directory.
                     _CopyDirContents(
                         from_path,
                         to_path,
@@ -695,13 +699,13 @@ def _CopyDirContents(
                         move=move,
                     )
                 else:
-                    # If it is a file or symbolic link, remove the destination file and
-                    # then move the content.
+                    # If it is a file or symbolic link, remove the destination
+                    # file and then move the content.
                     if to_path.is_file():
                         SafeUnlink(to_path)
-                    # TODO(rchandrasekar): In python 3.9, shutil.move() accepts Path
-                    # object. Remove the typecast to string, once python version moves
-                    # to 3.9.
+                    # TODO(python3.9): In python 3.9, shutil.move() accepts
+                    #   Path object. Remove the typecast to string, once python
+                    #   version moves to 3.9.
                     shutil.move(
                         str(from_path),
                         str(to_path),
@@ -727,17 +731,18 @@ def CopyDirContents(
     Both should exist.
 
     Args:
-      from_dir: The directory whose contents should be copied. Must exist.
-      to_dir: The directory to which contents should be copied. Must exist.
-      symlinks: Whether symlinks should be copied or dereferenced. When True, all
-        symlinks will be copied as symlinks into the destination. When False, the
-        symlinks will be dereferenced and the contents copied over.
-      allow_nonempty: If True, do not die when to_dir is nonempty.
+        from_dir: The directory whose contents should be copied. Must exist.
+        to_dir: The directory to which contents should be copied. Must exist.
+        symlinks: Whether symlinks should be copied or dereferenced. When True,
+            all symlinks will be copied as symlinks into the destination. When
+            False, the symlinks will be dereferenced and the contents copied
+            over.
+        allow_nonempty: If True, do not die when to_dir is nonempty.
 
     Raises:
-      BadPathsException: if the source / target directories don't exist, or if
-          target directory is non-empty when allow_nonempty=False.
-      OSError: on esoteric permission errors.
+        BadPathsException: if the source / target directories don't exist, or if
+            target directory is non-empty when allow_nonempty=False.
+        OSError: on esoteric permission errors.
     """
     _CopyDirContents(
         from_dir, to_dir, symlinks=symlinks, allow_nonempty=allow_nonempty
@@ -781,7 +786,8 @@ def RmDir(path, ignore_missing=False, sudo=False):
       ignore_missing: Do not error when path does not exist.
       sudo: Remove directories as root.
     """
-    # Using `sudo` is a bit expensive, so try to delete everything natively first.
+    # Using `sudo` is a bit expensive, so try to delete everything natively
+    # first.
     try:
         shutil.rmtree(path)
         return
@@ -808,7 +814,7 @@ def RmDir(path, ignore_missing=False, sudo=False):
 
 
 class EmptyDirNonExistentException(BadPathsException):
-    """EmptyDir was called on a non-existent directory without ignore_missing."""
+    """EmptyDir called on a non-existent directory without ignore_missing."""
 
 
 def EmptyDir(path, ignore_missing=False, sudo=False, exclude=()):
@@ -871,8 +877,8 @@ def Which(
 
     for p in path.split(os.pathsep):
         if root and p.startswith("/"):
-            # Don't prefix relative paths.  We might want to support this at some
-            # point, but it's not worth the coding hassle currently.
+            # Don't prefix relative paths.  We might want to support this at
+            # some point, but it's not worth the coding hassle currently.
             p = os.path.join(root, p.lstrip("/"))
         p = os.path.join(p, binary)
         if os.path.isfile(p) and os.access(p, mode):
@@ -923,11 +929,12 @@ def IteratePathParents(start_path: Union[str, os.PathLike]) -> Iterator[Path]:
     """Generator that iterates through a directory's parents.
 
     Args:
-      start_path: The path to start from.
+        start_path: The path to start from.
 
     Yields:
-      The passed-in path, along with its parents.  i.e.,
-      IteratePathParents('/usr/local') would yield '/usr/local', '/usr', and '/'.
+        The passed-in path, along with its parents.  i.e.,
+            IteratePathParents('/usr/local')
+        would yield '/usr/local', '/usr', and '/'.
     """
     path = Path(start_path).resolve()
     yield path
@@ -1090,13 +1097,13 @@ class TempDir(object):
         """Constructor. Creates the temporary directory.
 
         Args:
-          prefix: See tempfile.mkdtemp documentation.
-          base_dir: The directory to place the temporary directory.
-          set_global: Set this directory as the global temporary directory.
-          delete: Whether the temporary dir should be deleted as part of cleanup.
-              (default: True)
-          sudo_rm: Whether the temporary dir will need root privileges to remove.
-              (default: False)
+            prefix: See tempfile.mkdtemp documentation.
+            base_dir: The directory to place the temporary directory.
+            set_global: Set this directory as the global temporary directory.
+            delete: Whether the temporary dir should be deleted as part of
+                cleanup. (default: True)
+            sudo_rm: Whether the temporary dir will need root privileges to
+                remove. (default: False)
         """
         self.kwargs = kwargs.copy()
         self.delete = kwargs.pop("delete", True)
@@ -1125,8 +1132,9 @@ class TempDir(object):
             self.Cleanup()
         except Exception:
             if exc_type:
-                # If an exception from inside the context was already in progress,
-                # log our cleanup exception, then allow the original to resume.
+                # If an exception from inside the context was already in
+                # progress, log our cleanup exception, then allow the original
+                # to resume.
                 logging.error("While exiting %s:", self, exc_info=True)
 
                 if self.tempdir:
@@ -1138,8 +1146,8 @@ class TempDir(object):
                     except OSError:
                         logging.error("  Directory did not exist.")
 
-                    # Log all mounts at the time of the failure, since that's the most
-                    # common cause.
+                    # Log all mounts at the time of the failure, since that's
+                    # the most common cause.
                     mount_results = cros_build_lib.run(
                         ["mount"],
                         stdout=True,
@@ -1366,19 +1374,21 @@ def UmountDir(path, lazy=True, sudo=True, cleanup=True):
 
     if cleanup:
         # We will randomly get EBUSY here even when the umount worked.  Suspect
-        # this is due to the host distro doing stupid crap on us like autoscanning
-        # directories when they get mounted.
+        # this is due to the host distro doing stupid crap on us like
+        # autoscanning directories when they get mounted.
         def _retry(e):
-            # When we're using `rm` (which is required for sudo), we can't cleanly
-            # detect the aforementioned failure.  This is because `rm` will see the
-            # errno, handle itself, and then do exit(1).  Which means all we see is
-            # that rm failed.  Assume it's this issue as -rf will ignore most things.
+            # When we're using `rm` (which is required for sudo), we can't
+            # cleanly detect the aforementioned failure.  This is because `rm`
+            # will see the errno, handle itself, and then do exit(1).  Which
+            # means all we see is that rm failed.  Assume it's this issue as -rf
+            # will ignore most things.
             if isinstance(e, cros_build_lib.RunCommandError):
                 return True
             elif isinstance(e, OSError):
-                # When we aren't using sudo, we do the unlink ourselves, so the exact
-                # errno is bubbled up to us and we can detect it specifically without
-                # potentially ignoring all other possible failures.
+                # When we aren't using sudo, we do the unlink ourselves, so the
+                # exact errno is bubbled up to us and we can detect it
+                # specifically without potentially ignoring all other possible
+                # failures.
                 return e.errno == errno.EBUSY
             else:
                 # Something else, we don't know so do not retry.
@@ -1445,12 +1455,12 @@ def SourceEnvironment(script, allowlist, ifs=",", env=None, multiline=False):
     """
     dump_script = ['source "%s" >/dev/null' % script, 'IFS="%s"' % ifs]
     for var in allowlist:
-        # Note: If we want to get more exact results out of bash, we should switch
-        # to using `declare -p "${var}"`.  It would require writing a custom parser
-        # here, but it would be more robust.
+        # Note: If we want to get more exact results out of bash, we should
+        # switch to using `declare -p "${var}"`.  It would require writing a
+        # custom parser here, but it would be more robust.
         dump_script.append(
-            '[[ "${%(var)s+set}" == "set" ]] && echo "%(var)s=\\"${%(var)s[*]}\\""'
-            % {"var": var}
+            '[[ "${%(var)s+set}" == "set" ]] && '
+            'echo "%(var)s=\\"${%(var)s[*]}\\""' % {"var": var}
         )
     dump_script.append("exit 0")
 
@@ -1673,7 +1683,8 @@ def ChrootContext(target_dir: Union[Path, str]) -> int:
                 os.fchdir(fd)
                 # chroot to the saved / (via the cwd . symlink).
                 os.chroot(".")
-        # Context manager will chdir back to the original cwd via its saved handle.
+        # Context manager will chdir back to the original cwd via its saved
+        # handle.
 
 
 def _SameFileSystem(path1, path2):
@@ -1700,13 +1711,13 @@ class MountOverlayContext(object):
         """Initialize.
 
         Args:
-          lower_dir: The lower directory (read-only).
-          upper_dir: The upper directory (read-write).
-          mount_dir: The mount point for the merged overlay.
-          cleanup: Whether to remove the mount point after unmounting. This uses an
-              internal retry logic for cases where unmount is successful but the
-              directory still appears busy, and is generally more resilient than
-              removing it independently.
+            lower_dir: The lower directory (read-only).
+            upper_dir: The upper directory (read-write).
+            mount_dir: The mount point for the merged overlay.
+            cleanup: Whether to remove the mount point after unmounting. This
+                uses an internal retry logic for cases where unmount is
+                successful but the directory still appears busy, and is
+                generally more resilient than removing it independently.
         """
         self._lower_dir = lower_dir
         self._upper_dir = upper_dir
@@ -1715,8 +1726,8 @@ class MountOverlayContext(object):
         self.tempdir = None
 
     def __enter__(self):
-        # Upstream Kernel 3.18 and the ubuntu backport of overlayfs have different
-        # APIs. We must support both.
+        # Upstream Kernel 3.18 and the ubuntu backport of overlayfs have
+        # different APIs. We must support both.
         try_legacy = False
         stashed_e_overlay_str = None
 
@@ -1920,7 +1931,8 @@ def IsRootUser() -> bool:
     and the access to resources are determined based on the effective user ID.
     For example, a regular user with uid 12345, may not have access to certain
     resources. Running with sudo privileges will make the euid to be 0 (Root)
-    (while the uid remains the same 12345) and will gain certain resource access.
+    (while the uid remains the same 12345) and will gain certain resource
+    access.
 
     Hence to check if a user has root privileges, it is best to check the euid
     of the process.

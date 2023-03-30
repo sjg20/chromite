@@ -605,19 +605,19 @@ class EBuild(object):
         self.cros_workon_vars = old_vars
         if new_vars is not None and old_vars is not None:
             merged_vars = new_vars._replace(commit=old_vars.commit)
-            # If the project settings have changed, throw away existing vars (use
-            # new_vars).
+            # If the project settings have changed, throw away existing vars
+            # (use new_vars).
             if merged_vars != old_vars:
                 self.cros_workon_vars = new_vars
 
     @staticmethod
     def Classify(ebuild_path):
-        """Return whether this ebuild is workon, stable, and/or manually uprevved
+        """Return the workon, stable, and manually uprev status for the ebuild.
 
         workon is determined by whether the ebuild inherits from the
         'cros-workon' eclass. stable is determined by whether there's a '~'
-        in the KEYWORDS setting in the ebuild. An ebuild is only manually uprevved
-        if a line in it starts with 'CROS_WORKON_MANUAL_UPREV='.
+        in the KEYWORDS setting in the ebuild. An ebuild is only manually
+        uprevved if a line in it starts with 'CROS_WORKON_MANUAL_UPREV='.
         """
         is_workon = False
         is_stable = False
@@ -626,8 +626,9 @@ class EBuild(object):
         restrict_tests = False
         with open(ebuild_path, mode="rb") as fp:
             for i, line in enumerate(fp):
-                # If the file has bad encodings, produce a helpful diagnostic for the
-                # user.  The default encoding exception lacks direct file context.
+                # If the file has bad encodings, produce a helpful diagnostic
+                # for the user.  The default encoding exception lacks direct
+                # file context.
                 try:
                     line = line.decode("utf-8")
                 except UnicodeDecodeError:
@@ -643,8 +644,8 @@ class EBuild(object):
                     if EBuild._ECLASS_IMPLIES_TEST & eclasses:
                         has_test = True
                 elif line.startswith("KEYWORDS="):
-                    # Strip off the comments, then extract the value of the variable, then
-                    # strip off any quotes.
+                    # Strip off the comments, then extract the value of the
+                    # variable, then strip off any quotes.
                     line = line.split("#", 1)[0].split("=", 1)[1].strip("\"'")
                     for keyword in line.split():
                         if not keyword.startswith("~") and keyword != "-*":
@@ -667,7 +668,7 @@ class EBuild(object):
         )
 
     def _ReadEBuild(self, path):
-        """Determine the settings of is_workon, is_stable and is_manually_uprevved
+        """Determine is_workon, is_stable and is_manually_uprevved settings.
 
         These are determined using the static Classify function.
         """
@@ -706,12 +707,12 @@ class EBuild(object):
         autotest eclass.
 
         Args:
-          ebuild_path: Path to the ebuild file (e.g
-                       autotest-tests-graphics-9999.ebuild).
-          srcdir: The path of the source for the test
+            ebuild_path: Path to the ebuild file (e.g
+                autotest-tests-graphics-9999.ebuild).
+            srcdir: The path of the source for the test.
 
         Returns:
-          A list of strings mentioning directory paths.
+            A list of strings mentioning directory paths.
         """
         results = []
         test_vars = ("IUSE_TESTS",)
@@ -733,8 +734,8 @@ class EBuild(object):
 
         # Check the existence of every directory combination of location and
         # test_type for each test.
-        # This is a re-implementation of the same logic in autotest_src_prepare in
-        # the chromiumos-overlay/eclass/autotest.eclass .
+        # This is a re-implementation of the same logic in autotest_src_prepare
+        # in the chromiumos-overlay/eclass/autotest.eclass.
         for cur_test in test_list:
             for x, y in list(itertools.product(location, test_type)):
                 a = os.path.join(srcdir, x, y, cur_test)
@@ -785,11 +786,12 @@ class EBuild(object):
         settings = osutils.SourceEnvironment(ebuild_path, workon_vars, env=env)
         # Try to detect problems extracting the variables by checking whether
         # either CROS_WORKON_PROJECT or CROS_WORK_SRCPATH is set. If it isn't,
-        # something went wrong, possibly because we're simplistically sourcing the
-        # ebuild without most of portage being available. That still breaks this
-        # script and needs to be flagged as an error. We won't catch problems
-        # setting CROS_WORKON_LOCALNAME or if CROS_WORKON_{PROJECT,SRCPATH} is set
-        # to the wrong thing, but at least this covers some types of failures.
+        # something went wrong, possibly because we're simplistically sourcing
+        # the ebuild without most of portage being available. That still breaks
+        # this script and needs to be flagged as an error. We won't catch
+        # problems setting CROS_WORKON_LOCALNAME or if
+        # CROS_WORKON_{PROJECT,SRCPATH} is set to the wrong thing, but at least
+        # this covers some types of failures.
         projects = []
         srcpaths = []
         subdirs = []
@@ -819,8 +821,8 @@ class EBuild(object):
         if (len(projects) > 1 or len(srcpaths) > 1) and rev_subdirs:
             raise EbuildFormatIncorrectError(
                 ebuild_path,
-                "Must not define CROS_WORKON_SUBDIRS_TO_REV if defining multiple "
-                "cros_workon projects or source paths.",
+                "Must not define CROS_WORKON_SUBDIRS_TO_REV if defining "
+                "multiple cros_workon projects or source paths.",
             )
 
         return CrosWorkonVars(
@@ -865,8 +867,8 @@ class EBuild(object):
                 "Number of _PROJECT and _LOCALNAME items don't match.",
             )
 
-        # If both SRCPATH and PROJECT are defined, they must have the same number
-        # of items.
+        # If both SRCPATH and PROJECT are defined, they must have the same
+        # number of items.
         if len(srcpaths) > num_projects:
             if num_projects > 0:
                 raise EbuildFormatIncorrectError(
@@ -904,8 +906,8 @@ class EBuild(object):
                 raise EbuildFormatIncorrectError(
                     ebuild_path, "Incorrect number of _SUBTREE items."
                 )
-            # Multiply by num_projects. Note that subtrees is a list of tuples, and
-            # there should be at least one element.
+            # Multiply by num_projects. Note that subtrees is a list of tuples,
+            # and there should be at least one element.
             subtrees *= num_projects
 
         return cros_workon_vars._replace(
@@ -920,17 +922,18 @@ class EBuild(object):
         """Get source information for this ebuild.
 
         Args:
-          srcroot: Full path to the "src" subdirectory in the source repository.
-          manifest: git.ManifestCheckout object.
-          reject_self_repo: Whether to abort if the ebuild lives in the same git
-              repo as it is tracking for uprevs.
+            srcroot: Full path to the "src" subdirectory in the source
+                repository.
+            manifest: git.ManifestCheckout object.
+            reject_self_repo: Whether to abort if the ebuild lives in the same
+                git repo as it is tracking for uprevs.
 
         Returns:
           EBuild.SourceInfo namedtuple.
 
         Raises:
-          raise Error if there are errors with extracting/validating data required
-            for constructing SourceInfo.
+            raise Error if there are errors with extracting/validating data
+            required for constructing SourceInfo.
         """
         localnames = self.cros_workon_vars.localname
         projects = self.cros_workon_vars.project
@@ -961,8 +964,8 @@ class EBuild(object):
 
         # See what git repo the ebuild lives in to make sure the ebuild isn't
         # tracking the same repo.  https://crbug.com/1050663
-        # We set strict=False if we're running under pytest because it's valid for
-        # ebuilds created in tests to not live in a git tree.
+        # We set strict=False if we're running under pytest because it's valid
+        # for ebuilds created in tests to not live in a git tree.
         under_test = os.environ.get("CHROMITE_INSIDE_PYTEST") == "1"
         ebuild_git_tree = manifest.FindCheckoutFromPath(
             self.ebuild_path, strict=not under_test
@@ -998,7 +1001,8 @@ class EBuild(object):
                 if self.subdir_support and subdir:
                     subdir_path = os.path.join(subdir_path, subdir)
 
-                # Verify that we're grabbing the commit id from the right project name.
+                # Verify that we're grabbing the commit id from the right
+                # project name.
                 real_project = manifest.FindCheckoutFromPath(subdir_path)[
                     "name"
                 ]
@@ -1057,8 +1061,8 @@ class EBuild(object):
         Unlike the commit hash, the SHA1 of the source tree is unaffected by the
         history of the repository, or by commit messages.
 
-        Given path can point a regular file, not a directory. If it does not exist,
-        None is returned.
+        Given path can point a regular file, not a directory. If it does not
+        exist, None is returned.
 
         Raises:
           raise Error if git fails to determine the HEAD tree hash.
@@ -1098,7 +1102,8 @@ class EBuild(object):
         if not self.is_workon:
             raise EbuildFormatIncorrectError(
                 self._ebuild_path_no_version,
-                "Package has a chromeos-version.sh script but is not workon-able.",
+                "Package has a chromeos-version.sh script but is not "
+                "workon-able.",
             )
 
         srcdirs = self.GetSourceInfo(srcroot, manifest).srcdirs
@@ -1125,8 +1130,8 @@ class EBuild(object):
                 )
             )
 
-        # Sanity check: disallow versions that will be larger than the 9999 ebuild
-        # used by cros-workon.
+        # Sanity check: disallow versions that will be larger than the 9999
+        # ebuild used by cros-workon.
         main_pv = output.split(".", 1)[0]
         try:
             main_pv = int(main_pv)
@@ -1140,8 +1145,8 @@ class EBuild(object):
                 % (vers_script, WORKON_EBUILD_VERSION, output)
             )
 
-        # Sanity check: We should be able to parse a CPV string with the produced
-        # version number.
+        # Sanity check: We should be able to parse a CPV string with the
+        # produced version number.
         verify_pkg_str = f"foo/bar-{output}"
         verify_pkg = package_info.parse(verify_pkg_str)
         if verify_pkg.cpvr != verify_pkg_str:
@@ -1175,26 +1180,27 @@ class EBuild(object):
     ):
         """Revs a workon ebuild given the git commit hash.
 
-        By default this class overwrites a new ebuild given the normal
+        By default, this class overwrites a new ebuild given the normal
         ebuild rev'ing logic.
 
         Args:
-          srcroot: full path to the 'src' subdirectory in the source
-            repository.
-          manifest: git.ManifestCheckout object.
-          reject_self_repo: Whether to abort if the ebuild lives in the same git
-              repo as it is tracking for uprevs.
-          new_version: The new version number for this ebuild. No revision number.
+            srcroot: full path to the 'src' subdirectory in the source
+                repository.
+            manifest: git.ManifestCheckout object.
+            reject_self_repo: Whether to abort if the ebuild lives in the same
+                git repo as it is tracking for uprevs.
+            new_version: The new version number for this ebuild. No revision
+                number.
 
         Returns:
-          If the revved package is different than the old ebuild, return a tuple
-          of (full revved package name (including the version number), new stable
-          ebuild path to add to git, old ebuild path to remove from git (if any)).
-          Otherwise, return None.
+            If the revved package is different than the old ebuild, return a
+            tuple of (full revved package name (including the version number),
+            new stable ebuild path to add to git, old ebuild path to remove from
+            git (if any)). Otherwise, return None.
 
         Raises:
-          OSError: Error occurred while creating a new ebuild.
-          IOError: Error occurred while writing to the new revved ebuild file.
+            OSError: Error occurred while creating a new ebuild.
+            IOError: Error occurred while writing to the new revved ebuild file.
         """
         if new_version is not None:
             if not pms.version_valid(new_version):
@@ -1255,8 +1261,8 @@ class EBuild(object):
             CROS_WORKON_TREE=self.FormatBashArray(tree_ids),
         )
 
-        # We use |self._unstable_ebuild_path| because that will contain the newest
-        # changes to the ebuild (and potentially changes to test subdirs
+        # We use |self._unstable_ebuild_path| because that will contain the
+        # newest changes to the ebuild (and potentially changes to test subdirs
         # themselves).
         subdirs_to_rev = self.GetAutotestSubdirsToRev(
             self._unstable_ebuild_path, srcdirs[0]
@@ -1273,9 +1279,9 @@ class EBuild(object):
             test_dirs_changed = True
 
         def _CheckForChanges():
-            # It is possible for chromeos-version.sh to have changed leading to a
-            # non-existent old_stable_ebuild_path. If this is the case, a change
-            # happened so perform the uprev.
+            # It is possible for chromeos-version.sh to have changed leading to
+            # a non-existent old_stable_ebuild_path. If this is the case, a
+            # change happened so perform the uprev.
             if not os.path.exists(old_stable_ebuild_path):
                 return True
 
@@ -1383,9 +1389,9 @@ class EBuild(object):
         dirs.extend(self.cros_workon_vars.rev_subdirs)
         dirs.extend(subdirs_to_rev)
         if dirs:
-            # Any change to the unstable ebuild must generate an uprev. If there are
-            # no dirs then this happens automatically (since the git log has no file
-            # list). Otherwise we must ensure that it works here.
+            # Any change to the unstable ebuild must generate an uprev. If there
+            # are no dirs then this happens automatically (since the git log has
+            # no file list). Otherwise, we must ensure that it works here.
             dirs.append("*9999.ebuild")
         git_args = ["log", "--oneline", logrange, "--"] + dirs
 
@@ -1422,7 +1428,7 @@ class EBuild(object):
 
     @classmethod
     def _AlmostSameEBuilds(cls, ebuild_path1, ebuild_path2):
-        """Checks if two ebuilds are the same except for CROS_WORKON_COMMIT line.
+        """Checks if two ebuilds are the same except CROS_WORKON_COMMIT line.
 
         Even if CROS_WORKON_COMMIT is different, as long as CROS_WORKON_TREE is
         the same, we can guarantee the source tree is identical.
@@ -1469,12 +1475,12 @@ class PortageDB(object):
         """Initialize the internal structure for the database in the given root.
 
         Args:
-          root: The path to the root to inspect, for example "/build/foo".
-          vdb: Known path to package database in the partition. Defaults to
-            VDB_PATH.
-          package_install_path: The subdirectory path from the root where installed
-            files are stored. e.g. for stateful partitions on test images,
-            'dev_image'.
+            root: The path to the root to inspect, for example "/build/foo".
+            vdb: Known path to package database in the partition. Defaults to
+                VDB_PATH.
+            package_install_path: The subdirectory path from the root where
+                installed files are stored. e.g. for stateful partitions on test
+                images, 'dev_image'.
         """
         self.root = root
         self.package_install_path = os.path.join(
@@ -1487,13 +1493,13 @@ class PortageDB(object):
         """Get the InstalledPackage instance for the passed package.
 
         Args:
-          category: The category of the package. For example "chromeos-base".
-          pv: The package name with the version (and revision) of the
-              installed package. For example "libchrome-271506-r5".
+            category: The category of the package. For example "chromeos-base".
+            pv: The package name with the version (and revision) of the
+                installed package. For example "libchrome-271506-r5".
 
         Returns:
-          An InstalledPackage instance for the requested package or None if the
-          requested package is not found.
+            An InstalledPackage instance for the requested package or None if
+            the requested package is not found.
         """
         pkg_key = "%s/%s" % (category, pv)
         if pkg_key in self._ebuilds:
@@ -1512,7 +1518,8 @@ class PortageDB(object):
         """Lists all portage packages in the database.
 
         Returns:
-          A list of InstalledPackage instances for each package in the database.
+            A list of InstalledPackage instances for each package in the
+            database.
         """
         ebuild_pattern = os.path.join(self.db_path, "*/*/*.ebuild")
         packages = []
@@ -1549,18 +1556,19 @@ class InstalledPackage(object):
         """Initialize the installed ebuild wrapper.
 
         Args:
-          portage_db: The PortageDB instance where the ebuild is installed. This
-              is used to query the database about other installed ebuilds, for
-              example, the ones listed in DEPEND, but otherwise it isn't used.
-          pkgdir: The directory where the installed package resides. This could be
-              for example a directory like "var/db/pkg/category/pf" or the
-              "build-info" directory in the portage temporary directory where
-              the package is being built.
-          category: The category of the package. If omitted, it will be loaded from
-              the package contents.
-          pf: The package and version of the package. If omitted, it will be loaded
-              from the package contents. This avoids unnecessary lookup when this
-              value is known.
+            portage_db: The PortageDB instance where the ebuild is installed.
+                This is used to query the database about other installed
+                ebuilds, for example, the ones listed in DEPEND, but otherwise
+                it isn't used.
+            pkgdir: The directory where the installed package resides. This
+                could be for example a directory like "var/db/pkg/category/pf"
+                or the "build-info" directory in the portage temporary directory
+                where the package is being built.
+            category: The category of the package. If omitted, it will be loaded
+                from the package contents.
+            pf: The package and version of the package. If omitted, it will be
+                loaded from the package contents. This avoids unnecessary lookup
+                when this value is known.
 
         Raises:
           PortageDBError if the pkgdir doesn't contain a valid package.
@@ -1583,7 +1591,8 @@ class InstalledPackage(object):
         ebuild_path = os.path.join(self.pkgdir, "%s.ebuild" % self.pf)
         if not os.path.exists(ebuild_path):
             raise PortageDBError(
-                f"Package doesn't contain an ebuild file; expected {ebuild_path}."
+                "Package doesn't contain an ebuild file; expected "
+                f"{ebuild_path}."
             )
 
         split_pv = package_info.parse(self.pf)
@@ -1654,11 +1663,11 @@ class InstalledPackage(object):
         """List of files and directories installed by this package.
 
         Returns:
-          A list of tuples (file_type, path) where the file_type is a string
-          determining the type of the installed file: InstalledPackage.OBJ (regular
-          files), InstalledPackage.SYM (symlinks) or InstalledPackage.DIR
-          (directory), and path is the relative path of the file to the root like
-          'usr/bin/ls'.
+            A list of tuples (file_type, path) where the file_type is a string
+            determining the type of the installed file: InstalledPackage.OBJ
+            (regular files), InstalledPackage.SYM (symlinks) or
+            InstalledPackage.DIR (directory), and path is the relative path of
+            the file to the root like 'usr/bin/ls'.
         """
         path = os.path.join(self.pkgdir, "CONTENTS")
         if not os.path.exists(path):
@@ -1794,7 +1803,7 @@ def GetOverlayEBuilds(
         of whether they are in our set of packages.
       packages: A set of the packages we want to gather.  If use_all is
         True, this argument is ignored, and should be None.
-      allow_manual_uprev: Whether or not to consider manually uprevved ebuilds.
+      allow_manual_uprev: Whether to consider manually uprevved ebuilds.
       subdir_support: Support obsolete CROS_WORKON_SUBDIR.
                       Intended for branchs older than 10363.0.0.
 
@@ -1938,8 +1947,8 @@ def RegenDependencyCache(
 ) -> None:
     """Regenerate the dependency cache in parallel.
 
-    Use emerge --regen instead of egencache to regenerate metadata caches for all
-    overlays (egencache only updates the cache for specific overlays).
+    Use emerge --regen instead of egencache to regenerate metadata caches for
+    all overlays (egencache only updates the cache for specific overlays).
 
     Args:
       board: The board to inspect.
@@ -2023,8 +2032,8 @@ def GetWorkonProjectMap(overlay, subdirectories):
       subdirectories: List of subdirectories to look in on the overlay.
 
     Yields:
-      Tuples containing (filename, projects, srcpaths) for cros-workon ebuilds in
-      the given overlay under the given subdirectories.
+        Tuples containing (filename, projects, srcpaths) for cros-workon ebuilds
+        in the given overlay under the given subdirectories.
     """
     # Search ebuilds for project names, ignoring non-existent directories.
     # Also filter out ebuilds which are not cros_workon.
@@ -2133,19 +2142,19 @@ def _Equery(
     """Executes equery commands.
 
     Args:
-      module: The equery module to run.
-      *args: Arguments to the equery module.
-      board: The board to inspect.
-      sysroot: The root directory being inspected.
-      buildroot: Source root to run commands against.
-      quiet: Whether to run the module in quiet mode.  This is module specific, so
-          consult the documentation for behavior.
-      print_cmd: Whether to print the command before running it.
-      extra_env: Extra environment settings to pass down.
-      check: Whether to throw an exception if the command fails.
+        module: The equery module to run.
+        *args: Arguments to the equery module.
+        board: The board to inspect.
+        sysroot: The root directory being inspected.
+        buildroot: Source root to run commands against.
+        quiet: Whether to run the module in quiet mode.  This is module
+            specific, so consult the documentation for behavior.
+        print_cmd: Whether to print the command before running it.
+        extra_env: Extra environment settings to pass down.
+        check: Whether to throw an exception if the command fails.
 
     Returns:
-      A cros_build_lib.CompletedProcess object.
+        A cros_build_lib.CompletedProcess object.
     """
     # There is no situation where we want color or pipe detection.
     cmd = [_GetSysrootTool("equery", board, sysroot), "--no-color", "--no-pipe"]
@@ -2440,7 +2449,8 @@ def GetReverseDependencies(
         on the specified packages.
 
     Returns:
-      List[package_info.PackageInfo]: Packages that depend on the given packages.
+        List[package_info.PackageInfo]: Packages that depend on the given
+        packages.
 
     Raises:
       ValueError when no packages are provided.
@@ -3063,17 +3073,17 @@ def CalculatePackageSize(
 ) -> PackageSizes:
     """Given a fileset for a Portage package, calculate the package size.
 
-    This function provides the size of the given package on disk in both apparent
-    size and disk utilization. It is provided in bytes (not blocks).
+    This function provides the size of the given package on disk in both
+    apparent size and disk utilization. It is provided in bytes (not blocks).
 
-    By implication, these two figures may be different when files are very small,
-    or when the apparent size is much larger than allocated blocks on disk (as is
-    the case with sparse files).
+    By implication, these two figures may be different when files are very
+    small, or when the apparent size is much larger than allocated blocks on
+    disk (as is the case with sparse files).
 
-    This function also only calculates the size of package files which are actual
-    OBJ-type files listed in the CONTENTS file for the package in the package db.
-    As such, the storage needs for any existing symlinks or relevant inodes is
-    not accounted for in this function.
+    This function also only calculates the size of package files which are
+    actual OBJ-type files listed in the CONTENTS file for the package in the
+    package db. As such, the storage needs for any existing symlinks or relevant
+    inodes is not accounted for in this function.
 
     Args:
       files_in_package: A list of file information for all files installed by a

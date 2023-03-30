@@ -289,7 +289,7 @@ class PatchIsEmpty(ApplyPatchException):
 
 
 class DependencyError(PatchException):
-    """Thrown when a change cannot be applied due to a failure in a dependency."""
+    """When a change cannot be applied due to a failure in a dependency."""
 
     def __init__(self, patch, error):
         """Initialize the error object.
@@ -312,19 +312,19 @@ class DependencyError(PatchException):
         """Get the root error of nested dependency errors.
 
         DependencyError can be nested dependency errors on a root error, this
-        method returns the exception of the root change. For example, for the error
-        'CL:A depends on CL:B, which depends on CL:C, which was not eligible
-        (wrong manifest branch, wrong labels, or otherwise filtered from eligible
-        set).', this method will return the not_eligible_error of CL:C.
-        DependencyErrors won't be formed by circular dependency errors, add the
-        depth check just in case dependency errors are malformed.
+        method returns the exception of the root change. For example, for the
+        error 'CL:A depends on CL:B, which depends on CL:C, which was not
+        eligible (wrong manifest branch, wrong labels, or otherwise filtered
+        from eligible set).', this method will return the not_eligible_error of
+        CL:C. DependencyErrors won't be formed by circular dependency errors,
+        add the depth check just in case dependency errors are malformed.
 
         Args:
-          limit: The limit (int) of depth to get the root error.
+            limit: The limit (int) of depth to get the root error.
 
         Returns:
-          The root error of the nested dependency errors; None if the depth exceeds
-          the given limit.
+            The root error of the nested dependency errors; None if the depth
+            exceeds the given limit.
         """
         depth = 1
         key_error = self.error
@@ -411,7 +411,7 @@ class PatchCache(object):
             self.InjectCustomKeys(change.LookupAliases(), change)
 
     def InjectCustomKeys(self, keys, change):
-        """Inject a change w/ a list of keys.  Generally you want Inject instead.
+        """Inject a change w/ a list of keys. Generally you want Inject instead.
 
         Args:
           keys: A list of keys to update.
@@ -654,7 +654,7 @@ class PatchQuery(object):
     our internal PatchCache. It is mostly used to describe a patch
     dependency.
 
-    It is is intended to match a single patch. If a user specified a
+    It is intended to match a single patch. If a user specified a
     non-full change id then it might match multiple patches. If a user
     specified an invalid change id then it might not match any patches.
     """
@@ -671,12 +671,14 @@ class PatchQuery(object):
         """Initializes a PatchQuery instance.
 
         Args:
-          remote: The remote git instance path, defined in constants.CROS_REMOTES.
-          project: The name of the project that the patch applies to.
-          tracking_branch: The remote branch of the project the patch applies to.
-          change_id: The Gerrit Change-ID representing this patch.
-          sha1: The sha1 of the commit. This *must* be accurate
-          gerrit_number: The Gerrit number of the patch.
+            remote: The remote git instance path, defined in
+                constants.CROS_REMOTES.
+            project: The name of the project that the patch applies to.
+            tracking_branch: The remote branch of the project the patch applies
+                to.
+            change_id: The Gerrit Change-ID representing this patch.
+            sha1: The sha1 of the commit. This *must* be accurate
+            gerrit_number: The Gerrit number of the patch.
         """
         self.remote = remote
         self.tracking_branch = None
@@ -692,7 +694,7 @@ class PatchQuery(object):
         self.id = self.full_change_id = None
         self._SetFullChangeID()
         # self.id is the only attribute with the internal prefix (*) if
-        # applicable. All other atttributes are strictly external format.
+        # applicable. All other attributes are strictly external format.
         self._SetID()
 
     def _SetFullChangeID(self):
@@ -721,8 +723,8 @@ class PatchQuery(object):
             self.id = AddPrefix(self, self.full_change_id)
 
         elif self.sha1:
-            # We assume sha1 is unique, but in rare cases (e.g. two branches with
-            # the same history) it is not. We don't handle that.
+            # We assume sha1 is unique, but in rare cases (e.g. two branches
+            # with the same history) it is not. We don't handle that.
             self.id = "%s%s" % (
                 config_lib.GetSiteParams().CHANGE_PREFIX[self.remote],
                 self.sha1,
@@ -779,8 +781,8 @@ class PatchQuery(object):
             # above, but also is not used for query.
             raise ValueError(
                 "We do not have enough information to generate a Gerrit query. "
-                "At least one of the following fields needs to be set: Change-Id, "
-                "Gerrit number, or sha1"
+                "At least one of the following fields needs to be set: "
+                "Change-Id, Gerrit number, or sha1"
             )
 
     def __hash__(self):
@@ -826,7 +828,7 @@ class PatchQuery(object):
 
 
 class GitRepoPatch(PatchQuery):
-    """Representing a patch from a branch of a local or remote git repository."""
+    """Represent a patch from a branch of a local or remote git repository."""
 
     # Note the selective case insensitivity; gerrit allows only this.
     # TOOD(ferringb): back VALID_CHANGE_ID_RE down to {8,40}, requires
@@ -858,15 +860,16 @@ class GitRepoPatch(PatchQuery):
         """Initialization of abstract Patch class.
 
         Args:
-          project_url: The url of the git repo (can be local or remote) to pull the
-                       patch from.
-          project: See PatchQuery for documentation.
-          ref: The refspec to pull from the git repo.
-          tracking_branch: See PatchQuery for documentation.
-          remote: See PatchQuery for documentation.
-          sha1: The sha1 of the commit, if known. This *must* be accurate.  Can
-            be None if not yet known- in which case Fetch will update it.
-          change_id: See PatchQuery for documentation.
+            project_url: The url of the git repo (can be local or remote) to
+                pull the patch from.
+            project: See PatchQuery for documentation.
+            ref: The refspec to pull from the git repo.
+            tracking_branch: See PatchQuery for documentation.
+            remote: See PatchQuery for documentation.
+            sha1: The sha1 of the commit, if known. This *must* be accurate.
+                Can be None if not yet known- in which case Fetch will update
+                it.
+            change_id: See PatchQuery for documentation.
         """
         super().__init__(
             remote,
@@ -985,17 +988,17 @@ class GitRepoPatch(PatchQuery):
         return [x.strip() for x in output]
 
     def UpdateMetadataFromRepo(self, git_repo, sha1):
-        """Update this this object's metadata given a sha1.
+        """Update this object's metadata given a sha1.
 
-        This updates various internal fields such as the committer name and email,
-        the commit message, tree hash, etc.
+        This updates various internal fields such as the committer name and
+        email, the commit message, tree hash, etc.
 
         Raises a PatchException if the found sha1 differs from self.sha1.
 
         Args:
-          git_repo: The path to the git repository that this commit exists in.
-          sha1: The sha1 of the commit.  If None, assumes it was just fetched and
-            uses "FETCH_HEAD".
+            git_repo: The path to the git repository that this commit exists in.
+            sha1: The sha1 of the commit.  If None, assumes it was just fetched
+                and uses "FETCH_HEAD".
 
         Returns:
           The sha1 of the commit.
@@ -1107,9 +1110,9 @@ class GitRepoPatch(PatchQuery):
                 ],
             )
         except cros_build_lib.RunCommandError as e:
-            # If we get a 128, that means git couldn't find the the parent of our
-            # sha1- meaning we're the first commit in the repository (there is no
-            # parent).
+            # If we get a 128, that means git couldn't find the parent of our
+            # sha1- meaning we're the first commit in the repository (there is
+            # no parent).
             if e.returncode != 128:
                 raise
             return {}
@@ -1127,9 +1130,9 @@ class GitRepoPatch(PatchQuery):
     def Merge(self, git_repo, trivial=False, inflight=False, leave_dirty=False):
         """Attempts to merge the given rev into branch.
 
-        Note: This method is intended to present the same interface as CherryPick.
-        However, it's behavior is simpler and not all of the arguments actually
-        do anything.
+        Note: This method is intended to present the same interface as
+        CherryPick. However, it's behavior is simpler and not all the arguments
+        actually do anything.
 
         Args:
           git_repo: The git repository to operate upon.
@@ -1142,8 +1145,8 @@ class GitRepoPatch(PatchQuery):
         """
         cmd = ["merge", self.sha1]
 
-        # TODO(akeshet): Amend the original merge's commit message before merging
-        # it.
+        # TODO(akeshet): Amend the original merge's commit message before
+        #   merging it.
 
         reset_target = "HEAD"
         try:
@@ -1152,8 +1155,8 @@ class GitRepoPatch(PatchQuery):
             return
         except cros_build_lib.RunCommandError:
             # TODO(akeshet): Add more specialized or grandular error handling.
-            # TODO(akeshet): Use an exception class other than ApplyPatchException,
-            # for merge commits.
+            # TODO(akeshet): Use an exception class other than
+            #   ApplyPatchException, for merge commits.
             raise ApplyPatchException(self, "Unable to merge this CL.")
         finally:
             if reset_target:
@@ -1165,10 +1168,11 @@ class GitRepoPatch(PatchQuery):
         """Attempts to cherry-pick the given rev into branch.
 
         Args:
-          git_repo: The git repository to operate upon.
-          trivial: Only allow trivial merges when applying change.
-          inflight: If true, changes are already applied in this branch.
-          leave_dirty: If True, if a CherryPick fails leaves partial commit behind.
+            git_repo: The git repository to operate upon.
+            trivial: Only allow trivial merges when applying change.
+            inflight: If true, changes are already applied in this branch.
+            leave_dirty: If True, if a CherryPick fails leaves partial commit
+                behind.
 
         Raises:
           A ApplyPatchException if the request couldn't be handled.
@@ -1201,9 +1205,9 @@ class GitRepoPatch(PatchQuery):
                     ),
                 )
             elif ret == 1:
-                # This means merge resolution was fine, but there was content conflicts.
-                # If there are no conflicts, then this is caused by the change already
-                # being merged.
+                # This means merge resolution was fine, but there were content
+                # conflicts. If there are no conflicts, then this is caused by
+                # the change already being merged.
                 result = git.RunGit(
                     git_repo, ["diff", "--name-only", "--diff-filter=U"]
                 )
@@ -1215,15 +1219,15 @@ class GitRepoPatch(PatchQuery):
                     reset_target = None
                     raise PatchIsEmpty(self, inflight=inflight)
 
-                # Making it here means that it wasn't trivial, nor was it already
-                # applied.
+                # Making it here means that it wasn't trivial, nor was it
+                # already applied.
                 assert not trivial
                 raise ApplyPatchException(
                     self, inflight=inflight, files=conflicts
                 )
 
-            # ret=2 handling, this deals w/ trivial conflicts; including figuring
-            # out if it was trivial induced or not.
+            # ret=2 handling, this deals w/ trivial conflicts; including
+            # figuring out if it was trivial induced or not.
             if not trivial:
                 logging.error("The git tree may be corrupted.")
                 logging.error(
@@ -1233,11 +1237,11 @@ class GitRepoPatch(PatchQuery):
                 raise
 
             # Here's the kicker; trivial conflicts can mask content conflicts.
-            # We would rather state if it's a content conflict since in solving the
-            # content conflict, the trivial conflict is solved.  Thus this
+            # We would rather state if it's a content conflict since in solving
+            # the content conflict, the trivial conflict is solved.  Thus this
             # second run, where we let the exception fly through if one occurs.
-            # Note that a trivial conflict means the tree is unmodified; thus
-            # no need for cleanup prior to this invocation.
+            # Note that a trivial conflict means the tree is unmodified; thus no
+            # need for cleanup prior to this invocation.
             reset_target = None
             self.CherryPick(git_repo, trivial=False, inflight=inflight)
             # Since it succeeded, we need to rewind.
@@ -1266,7 +1270,8 @@ class GitRepoPatch(PatchQuery):
 
         logging.info("Attempting to apply change %s", self)
 
-        # If the patch branch exists use it, otherwise create it and switch to it.
+        # If the patch branch exists use it, otherwise create it and switch to
+        # it.
         if git.DoesCommitExistInRepo(git_repo, constants.PATCH_BRANCH):
             git.RunGit(git_repo, ["checkout", "-f", constants.PATCH_BRANCH])
         else:
@@ -1277,9 +1282,9 @@ class GitRepoPatch(PatchQuery):
             if revision:
                 git.RunGit(git_repo, ["reset", "--hard", revision])
 
-        # Figure out if we're inflight.  At this point, we assume that the branch
-        # is checked out and rebased onto upstream.  If HEAD differs from upstream,
-        # then there are already other patches that have been applied.
+        # Figure out if we're inflight.  At this point, we assume that the
+        # branch is checked out and rebased onto upstream.  If HEAD differs from
+        # upstream, then there are already other patches that have been applied.
         upstream, head = [
             git.RunGit(git_repo, ["rev-list", "-n1", x]).stdout.strip()
             for x in (upstream, "HEAD")
@@ -1320,7 +1325,8 @@ class GitRepoPatch(PatchQuery):
             git.RunGit(git_repo, ["checkout", "-f", "--detach", upstream])
 
             do_apply(git_repo, trivial=trivial, inflight=False)
-            # Making it here means that it was an inflight issue; throw the original.
+            # Making it here means that it was an inflight issue; throw the
+            # original.
             raise
         finally:
             # Ensure we're on the correct branch on the way out.
@@ -1354,8 +1360,8 @@ class GitRepoPatch(PatchQuery):
         # |/
         # *   A [common ancestor on mainline]
         #
-        # because of potential complications if C is cherry-picked into mainline in
-        # the same CQ run as we are attempting to merge E.
+        # because of potential complications if C is cherry-picked into mainline
+        # in the same CQ run as we are attempting to merge E.
         #
         # We prevent this by limiting ourselves to handle E only if at least 1
         # parent is already in the history of CURRENT_UPSTREAM.
@@ -1371,17 +1377,17 @@ class GitRepoPatch(PatchQuery):
         if not parent_is_ancestor:
             raise NonMainlineMerge(self)
 
-        # TODO(akeshet): We should also validate that the "branchline" commits are
-        # not in the current validation pool, otherwise we could end up with CLs.
-        # being duplicated if the CQ both cherry-picks them and brings them in via
-        # merge.
+        # TODO(akeshet): We should also validate that the "branchline" commits
+        #   are not in the current validation pool, otherwise we could end up
+        #   with CLs. being duplicated if the CQ both cherry-picks them and
+        #   brings them in via merge.
         #
         # The user instructions for the merge feature will make it clear that
-        # "branchline" CLs should not be reviewed or CQ'd in the same way, but it
-        # shouldn't be too hard to add a check here.
+        # "branchline" CLs should not be reviewed or CQ'd in the same way, but
+        # it shouldn't be too hard to add a check here.
 
     def _FromSha1(self, sha1):
-        """Return a new GitRepoPatch instance with same upstream, for other sha1.
+        """Return a new GitRepoPatch instance with same upstream, for |sha1|.
 
         This is a useful helper method to convert sha1 values into GitRepoPatch
         objects if needed, to make use of the GitRepoPatch methods.
@@ -1398,18 +1404,20 @@ class GitRepoPatch(PatchQuery):
     def ApplyAgainstManifest(self, manifest, trivial=False):
         """Applies the patch against the specified manifest.
 
-          manifest: A ManifestCheckout object which is used to discern which
-            git repo to patch, what the upstream branch should be, etc.
-          trivial:  Only allow trivial merges when applying change.
+        Args:
+            manifest: A ManifestCheckout object which is used to discern which
+                git repo to patch, what the upstream branch should be, etc.
+            trivial: Only allow trivial merges when applying change.
 
         Raises:
           ApplyPatchException: If the patch failed to apply.
         """
         for checkout in self.GetCheckouts(manifest):
             revision = checkout.get("revision")
-            # revision might be a branch which is written as it would appear on the
-            # remote. If so, rewrite it as a local reference to the remote branch.
-            # For example, refs/heads/main might become refs/remotes/cros/main.
+            # revision might be a branch which is written as it would appear on
+            # the remote. If so, rewrite it as a local reference to the remote
+            # branch. For example, refs/heads/main might become
+            # refs/remotes/cros/main.
             if revision and not git.IsSHA1(revision):
                 revision = "refs/remotes/%s/%s" % (
                     checkout["remote"],
@@ -1437,7 +1445,7 @@ class GitRepoPatch(PatchQuery):
         This will parse the Change-Id out of the given commit message;
         if it cannot find one, it logs a warning and creates a fake ID.
 
-        By its nature, that fake ID is useless- it's created to simplify
+        By its nature, that fake ID is useless - it's created to simplify
         API usage for patch consumers. If CQ were to see and try operating
         on one of these, it would fail for example.
         """
@@ -1486,16 +1494,17 @@ class GitRepoPatch(PatchQuery):
     def _FindEbuildConflicts(self, git_repo, upstream, inflight=False):
         """Verify that there are no ebuild conflicts in the given |git_repo|.
 
-        When an ebuild is uprevved, git treats the uprev as a "delete" and an "add".
-        If a developer writes a CL to delete an ebuild, and the CQ uprevs the ebuild
-        in the mean time, the ebuild deletion is silently lost, because git does
-        not flag the double-delete as a conflict. Instead the CQ attempts to test
-        the CL and it ends up breaking the CQ.
+        When an ebuild is uprevved, git treats the uprev as a "delete" and an
+        "add". If a developer writes a CL to delete an ebuild, and the CQ uprevs
+        the ebuild in the meantime, the ebuild deletion is silently lost,
+        because git does not flag the double-delete as a conflict. Instead, the
+        CQ attempts to test the CL, and it ends up breaking the CQ.
 
         Args:
-          git_repo: The directory to examine.
-          upstream: The upstream git revision.
-          inflight: Whether we currently have patches applied to this repository.
+            git_repo: The directory to examine.
+            upstream: The upstream git revision.
+            inflight: Whether we currently have patches applied to this
+                repository.
         """
         ebuilds = [
             path
@@ -1603,12 +1612,12 @@ class GitRepoPatch(PatchQuery):
         """Get the local SHA1 for this patch in the given |manifest|.
 
         Args:
-          git_repo: The path to the repo.
-          revision: The tracking branch.
+            git_repo: The path to the repo.
+            revision: The tracking branch.
 
         Returns:
-          The local SHA1 for this patch, if it is present in the given |manifest|.
-          If this patch is not present, returns None.
+            The local SHA1 for this patch, if it is present in the given
+            |manifest|. If this patch is not present, returns None.
         """
         query = "Change-Id: %s" % self.change_id
         cmd = [
@@ -1630,12 +1639,13 @@ class GitRepoPatch(PatchQuery):
         """Get the parent sha1s of this patch.
 
         Args:
-          git_repo: The path to the repo.
+            git_repo: The path to the repo.
 
         Returns:
-          A list of sha1s. For normal commits, this will be a length=1 list. For
-          merge commits, this will be a length=2 list. For commits with no parent
-          (i.e. the initial commit of a repo) this will be an empty list.
+            A list of sha1s. For normal commits, this will be a length=1 list.
+            For merge commits, this will be a length=2 list. For commits with no
+            parent (i.e. the initial commit of a repo) this will be an empty
+            list.
         """
         self.Fetch(git_repo)
 
@@ -1647,10 +1657,10 @@ class GitRepoPatch(PatchQuery):
         """Determine if this patch is a merge commit.
 
         Args:
-          git_repo: The path to the repo.
+            git_repo: The path to the repo.
 
         Returns:
-          True if this is a merge commit, false otherwise.
+            True if this is a merge commit, false otherwise.
         """
         return len(self._GetParents(git_repo)) == 2
 
@@ -1658,11 +1668,11 @@ class GitRepoPatch(PatchQuery):
         """Determine whether this patch is ancestor of |other_patch|.
 
         Args:
-          git_repo: The git repository to fetch into.
-          other_patch: A GitRepoPatch representing the other patch.
+            git_repo: The git repository to fetch into.
+            other_patch: A GitRepoPatch representing the other patch.
 
         Returns:
-          True if this patch is ancestor of |other_patch|. False otherwise.
+            True if this patch is ancestor of |other_patch|. False otherwise.
         """
         self.Fetch(git_repo)
         other_patch.Fetch(git_repo)
@@ -1696,10 +1706,10 @@ class LocalPatch(GitRepoPatch):
     def _GetCarbonCopy(self):
         """Returns a copy of this commit object, with a different sha1.
 
-        This is used to work around a Gerrit bug, where a commit object cannot be
-        uploaded for review if an existing branch (in refs/tryjobs/*) points to
-        that same sha1.  So instead we create a copy of the commit object and upload
-        that to refs/tryjobs/*.
+        This is used to work around a Gerrit bug, where a commit object cannot
+        be uploaded for review if an existing branch (in refs/tryjobs/*) points
+        to that same sha1.  So instead we create a copy of the commit object and
+        upload that to refs/tryjobs/*.
 
         Returns:
           The sha1 of the new commit object.
@@ -1736,10 +1746,10 @@ class LocalPatch(GitRepoPatch):
             [(field, field_value[field]) for field, _ in transfer_fields]
         )
 
-        # Reset the commit date to a value that can't conflict; if we
-        # leave this to git, it's possible for a fast moving set of commit/uploads
-        # to all occur within the same second (thus the same commit date),
-        # resulting in the same sha1.
+        # Reset the commit date to a value that can't conflict; if we leave this
+        # to git, it's possible for a fast moving set of commit/uploads to all
+        # occur within the same second (thus the same commit date), resulting in
+        # the same sha1.
         extra_env["GIT_COMMITTER_DATE"] = str(
             int(extra_env["GIT_COMMITER_DATE"]) - 1
         )
@@ -1822,7 +1832,7 @@ class LocalPatch(GitRepoPatch):
         for num, line in enumerate(lines):
             # Look for output like:
             # remote: New Changes:
-            # remote:   https://chromium-review.googlesource.com/36756 Enforce a ...
+            # remote:  https://chromium-review.googlesource.com/36756 Enforce...
             if "New Changes:" in line:
                 urls = []
                 # We're exiting the loop after this point.
@@ -1947,8 +1957,8 @@ class GerritFetchOnlyPatch(GitRepoPatch):
         self.fail_count = fail_count
         self.pass_count = pass_count
         self.total_fail_count = total_fail_count
-        # commit_message is herited from GitRepoPatch, only override it when passed
-        # in value is not None.
+        # commit_message is inherited from GitRepoPatch, only override it when
+        # passed in value is not None.
         if commit_message:
             self.commit_message = commit_message
 
@@ -1994,20 +2004,21 @@ class GerritFetchOnlyPatch(GitRepoPatch):
             parsed_id = self._ParseChangeId(commit_message)
             if parsed_id != self.change_id:
                 raise AssertionError(
-                    "For Change-Id %s, sha %s, our parsing of the Change-Id did not "
-                    "match what gerrit told us.  This is an internal bug: either our "
-                    "parsing no longer matches gerrit's, or somehow this instance's "
-                    "stored change_id was invalidly modified.  Our parsing of the "
-                    "Change-Id yielded: %s"
+                    "For Change-Id %s, sha %s, our parsing of the Change-Id "
+                    "did not match what gerrit told us. This is an internal "
+                    "bug: either our parsing no longer matches gerrit's, or "
+                    "somehow this instance's stored change_id was invalidly "
+                    "modified.  Our parsing of the Change-Id yielded: %s"
                     % (self.change_id, self.sha1, parsed_id)
                 )
 
         except BrokenChangeID:
             logging.warning(
-                "Change %s, Change-Id %s, sha1 %s lacks a change-id in its commit "
-                "message.  This can break the ability for any children to depend on "
-                "this Change as a parent.  Please add the appropriate "
-                "Change-Id into the commit message to resolve this.",
+                "Change %s, Change-Id %s, sha1 %s lacks a change-id in its "
+                "commit message. This can break the ability for any children "
+                "to depend on this Change as a parent. Please add the "
+                "appropriate Change-Id into the commit message to resolve "
+                "this.",
                 self,
                 self.change_id,
                 self.sha1,
@@ -2049,10 +2060,11 @@ class GerritPatch(GerritFetchOnlyPatch):
         https://gerrit-review.googlesource.com/Documentation/json.html
 
         Args:
-          patch_dict: A dictionary containing the parsed JSON gerrit query results.
-          remote: The manifest remote the patched project uses.
-          url_prefix: The project name will be appended to this to get the full
-                      repository URL.
+            patch_dict: A dictionary containing the parsed JSON gerrit query
+                results.
+            remote: The manifest remote the patched project uses.
+            url_prefix: The project name will be appended to this to get the
+                full repository URL.
         """
         self.patch_dict = patch_dict
         self.url_prefix = url_prefix
@@ -2101,15 +2113,15 @@ class GerritPatch(GerritFetchOnlyPatch):
     def ConvertQueryResults(change, host):
         """Converts HTTP query results to the old SQL format.
 
-        The HTTP interface to gerrit uses a different json schema from the old SQL
-        interface.  This method converts data from the new schema to the old one,
-        typically before passing it to the GerritPatch constructor.
+        The HTTP interface to gerrit uses a different json schema from the old
+        SQL interface.  This method converts data from the new schema to the old
+        one, typically before passing it to the GerritPatch constructor.
 
         Old interface:
-          https://gerrit-review.googlesource.com/Documentation/json.html
+            https://gerrit-review.googlesource.com/Documentation/json.html
 
         New interface:
-          https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#json-entities
+            https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#json-entities
         """
         try:
             _convert_tm = lambda tm: calendar.timegm(
@@ -2212,8 +2224,9 @@ class GerritPatch(GerritFetchOnlyPatch):
 
             if not gerrit_number and not change_id and not sha1:
                 raise AssertionError(
-                    'While processing the dependencies of change %s, no "number", "id",'
-                    ' or "revision" key found in: %r' % (self.gerrit_number, d)
+                    "While processing the dependencies of change %s, no "
+                    '"number", "id", or "revision" key found in: %r'
+                    % (self.gerrit_number, d)
                 )
 
             results.append(
@@ -2247,7 +2260,7 @@ class GerritPatch(GerritFetchOnlyPatch):
             gerrit_host, self.gerrit_number, revision=revision
         )
         if result is None or "mergeable" not in result:
-            # Maybe the request was invalid (eg. revision doesn't exist).
+            # Maybe the request was invalid (e.g. revision doesn't exist).
             return None
         return result["mergeable"]
 
@@ -2333,13 +2346,13 @@ class GerritPatch(GerritFetchOnlyPatch):
         """Return whether the current patchset has the specified approval.
 
         Args:
-          field: Which field to check.
-            'VRIF': Whether patch was verified.
-            'CRVW': Whether patch was approved.
-            'COMR': Whether patch was marked commit ready.
-            'TRY':  Whether patch was marked ready for trybot.
-          value: The expected value of the specified field (as string, or as list
-                 of accepted strings).
+            field: Which field to check.
+                'VRIF': Whether patch was verified.
+                'CRVW': Whether patch was approved.
+                'COMR': Whether patch was marked commit ready.
+                'TRY':  Whether patch was marked ready for trybot.
+            value: The expected value of the specified field (as string, or as
+                list of accepted strings).
         """
         # All approvals default to '0', so use that if there's no matches.
         type_approvals = [
@@ -2393,10 +2406,10 @@ class GerritPatch(GerritFetchOnlyPatch):
         """Return most recent value of specific field on the current patchset.
 
         Args:
-          field: Which field to check ('VRIF', 'CRVW', ...).
+            field: Which field to check ('VRIF', 'CRVW', ...).
 
         Returns:
-          Most recent field value (as str) or '0' if no such field.
+            Most recent field value (as str) or '0' if no such field.
         """
         # All approvals default to '0', so use that if there's no matches.
         type_approvals = [
@@ -2412,10 +2425,10 @@ class GerritPatch(GerritFetchOnlyPatch):
         """Ensure that commit messages have necessary Gerrit footers on the end.
 
         Args:
-          msg: The commit message.
+            msg: The commit message.
 
         Returns:
-          The modified commit message with necessary Gerrit footers.
+            The modified commit message with necessary Gerrit footers.
         """
         msg = super()._AddFooters(msg)
 
@@ -2563,9 +2576,10 @@ def _CheckLocalPatches(manifest, local_patches):
             cros_build_lib.Die("Project %s does not exist.", project)
         if len(checkouts) > 1:
             cros_build_lib.Die(
-                "We do not yet support local patching for projects that are checked "
-                "out to multiple directories. Try uploading your patch to gerrit "
-                "and referencing it via the -g option instead."
+                "We do not yet support local patching for projects that are "
+                "checked out to multiple directories. Try uploading your "
+                "patch to gerrit and referencing it via the -g option "
+                "instead."
             )
         checkout = checkouts[0]
 
@@ -2627,18 +2641,18 @@ def PrepareRemotePatches(patches):
     """Generate patch objects from list of --remote-patch parameters.
 
     Args:
-      patches: A list of --remote-patches strings that the user specified on
-               the commandline.  Patch strings are colon-delimited.  Patches come
-               in the format
+        patches: A list of --remote-patches strings that the user specified on
+            the commandline.  Patch strings are colon-delimited. Patches come in
+            the format:
                <project>:<original_branch>:<ref>:<tracking_branch>:<tag>.
-               A description of each element:
-               project: The manifest project name that the patch is for.
-               original_branch: The name of the development branch that the local
-                                patch came from.
-               ref: The remote ref that points to the patch.
-               tracking_branch: The upstream branch that the original_branch was
-                                tracking.  Should be a manifest branch.
-               tag: Denotes whether the project is an internal or external
+            A description of each element:
+                project: The manifest project name that the patch is for.
+                original_branch: The name of the development branch that the
+                    local patch came from.
+                ref: The remote ref that points to the patch.
+                tracking_branch: The upstream branch that the original_branch
+                    was tracking.  Should be a manifest branch.
+                tag: Denotes whether the project is an internal or external
                     project.
     """
     site_params = config_lib.GetSiteParams()
