@@ -318,6 +318,9 @@ def InstallPackages(input_proto, output_proto, _config):
     # anything.
     dryrun = input_proto.flags.dryrun
 
+    # Allow cros workon packages to build from the unstable ebuilds.
+    workon = input_proto.flags.workon
+
     if not target_sysroot.IsToolchainInstalled():
         cros_build_lib.Die("Toolchain must first be installed.")
 
@@ -336,6 +339,7 @@ def InstallPackages(input_proto, output_proto, _config):
         incremental_build=False,
         dryrun=dryrun,
         backtrack=DEFAULT_BACKTRACK,
+        workon=workon,
     )
 
     try:

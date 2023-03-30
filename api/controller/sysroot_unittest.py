@@ -852,6 +852,7 @@ class InstallPackagesTest(
             incremental_build=False,
             dryrun=False,
             backtrack=sysroot_controller.DEFAULT_BACKTRACK,
+            workon=False,
         )
 
     def testSuccessWithGomaLogs(self):
