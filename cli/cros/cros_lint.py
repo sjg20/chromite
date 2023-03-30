@@ -295,10 +295,6 @@ def _ShellLintFile(
     Returns:
         A CompletedProcess object.
     """
-    # TODO: Try using `checkbashisms`.
-    syntax_check = _ToolRunCommand(["bash", "-n", path], debug)
-    if syntax_check.returncode != 0:
-        return syntax_check
 
     # Try using shellcheck if it exists, with a preference towards finding it
     # inside the chroot. This is OK as it is statically linked.
