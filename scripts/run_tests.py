@@ -33,6 +33,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
 from chromite.lib import namespaces
+from chromite.lint import linters
 from chromite.scripts import clang_format
 
 
@@ -119,6 +120,7 @@ def precache():
     formatters.gn._find_gn()
     formatters.star._find_buildifier()
     formatters.textproto._find_txtpbfmt()
+    linters.shell._find_shellcheck()
     with clang_format.ClangFormat():
         pass
 

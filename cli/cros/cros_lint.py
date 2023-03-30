@@ -295,19 +295,6 @@ def _ShellLintFile(
     Returns:
         A CompletedProcess object.
     """
-
-    # Try using shellcheck if it exists, with a preference towards finding it
-    # inside the chroot. This is OK as it is statically linked.
-    shellcheck = osutils.Which(
-        "shellcheck",
-        path="/usr/bin",
-        root=os.path.join(constants.SOURCE_ROOT, "chroot"),
-    ) or osutils.Which("shellcheck")
-
-    if not shellcheck:
-        logging.notice("Install shellcheck for additional shell linting.")
-        return syntax_check
-
     # Instruct shellcheck to run itself from the shell script's dir. Note that
     # 'SCRIPTDIR' is a special string that shellcheck rewrites to the dirname of
     # the given path.
@@ -320,7 +307,8 @@ def _ShellLintFile(
         extra_checks.append("quote-safe-variables")  # SC2248
 
     cmd = [
-        shellcheck,
+        # pylint: disable=protected-access
+        linters.shell._find_shellcheck(),
         "--source-path=SCRIPTDIR",
         "--enable=%s" % ",".join(extra_checks),
     ]
