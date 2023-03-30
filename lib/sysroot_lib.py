@@ -122,13 +122,12 @@ _CHROMIUMOS_OVERLAY = os.path.join(
 _CHROMIUMOS_CONFIG = os.path.join(_CHROMIUMOS_OVERLAY, "chromeos", "config")
 
 _INTERNAL_BINHOST_DIR = os.path.join(
-    constants.SOURCE_ROOT,
-    "src/private-overlays/chromeos-partner-overlay/" "chromeos/binhost/target",
+    constants.PRIVATE_BINHOST_CONF_DIR,
+    "target",
 )
 _EXTERNAL_BINHOST_DIR = os.path.join(
-    constants.SOURCE_ROOT,
-    constants.CHROMIUMOS_OVERLAY_DIR,
-    "chromeos/binhost/target",
+    constants.PUBLIC_BINHOST_CONF_DIR,
+    "target",
 )
 
 _CHROMEOS_INTERNAL_BOTO_PATH = os.path.join(
@@ -832,6 +831,7 @@ class Sysroot(object):
         local_only: bool = False,
         package_indexes: List["PackageIndexInfo"] = None,
         expanded_binhost_inheritance: bool = False,
+        source_root: str = constants.SOURCE_ROOT,
     ) -> str:
         """Returns the binhost configuration.
 
@@ -841,6 +841,7 @@ class Sysroot(object):
                 youngest first, or None.
             expanded_binhost_inheritance: Look for additional binhosts to
                 inherit.
+            source_root: Root directory for the source files.
 
         Returns:
           The config contents.
@@ -878,58 +879,79 @@ class Sysroot(object):
             config.append('PORTAGE_BINHOST="$PASSED_BINHOST"')
             return "\n".join(config)
 
-        (
-            postsubmit_binhost,
-            postsubmit_binhost_internal,
-        ) = self._PostsubmitBinhosts(board, expanded_binhost_inheritance)
-
         config.append(
             """
 # FULL_BINHOST is populated by the full builders. It is listed first because it
 # is the lowest priority binhost. It is better to download packages from the
-# postsubmit binhost because they are fresher packages.
+# postsubmit/cq binhost because they are fresher packages.
 PORTAGE_BINHOST="$FULL_BINHOST"
 """
         )
 
-        if postsubmit_binhost:
-            config.append(
-                """
-# POSTSUBMIT_BINHOST is populated by the postsubmit builders. If the same
-# package is provided by both the postsubmit and full binhosts, the package is
-# downloaded from the postsubmit binhost.
-source %s
-PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
-"""
-                % postsubmit_binhost
+        config.extend(
+            self._ContinuousBinhostConfigs(
+                "POSTSUBMIT", board, expanded_binhost_inheritance, source_root
             )
-
-        if postsubmit_binhost_internal:
-            config.append(
-                """
-# The internal POSTSUBMIT_BINHOST is populated by the internal postsubmit
-# builders. It takes priority over the public postsubmit binhost.
-source %s
-PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
-"""
-                % postsubmit_binhost_internal
+        )
+        config.extend(
+            self._ContinuousBinhostConfigs(
+                "CQ", board, expanded_binhost_inheritance, source_root
             )
+        )
 
         return "\n".join(config)
 
-    def _PostsubmitBinhosts(
-        self, board: Union[str, None], expanded_binhost_inheritance: bool
+    def _ContinuousBinhostConfigs(
+        self,
+        builder_type: str,
+        board: Union[str, None],
+        expanded_binhost_inheritance: bool,
+        source_root: str,
+    ) -> List[str]:
+        config = []
+        (binhost_public, binhost_internal) = self._ContinuousBinhosts(
+            builder_type, board, expanded_binhost_inheritance, source_root
+        )
+        if binhost_public:
+            config.append(
+                f"""
+# {builder_type}_BINHOST is populated by the public {builder_type} builders.
+# The packages here takes higher priority than the packages provided by the
+# above binhosts.
+source {binhost_public}
+PORTAGE_BINHOST="$PORTAGE_BINHOST ${builder_type}_BINHOST"
+"""
+            )
+        if binhost_internal:
+            config.append(
+                f"""
+# {builder_type}_BINHOST is populated by the internal {builder_type} builders.
+# The packages here takes higher priority than the packages provided by the
+# above binhosts.
+source {binhost_internal}
+PORTAGE_BINHOST="$PORTAGE_BINHOST ${builder_type}_BINHOST"
+"""
+            )
+
+        return config
+
+    def _ContinuousBinhosts(
+        self,
+        builder_type: str,
+        board: Union[str, None],
+        expanded_binhost_inheritance: bool,
+        source_root: str,
     ) -> Tuple[Optional[str], Optional[str]]:
-        """Returns the postsubmit binhost to use."""
-        prefixes = []
+        """Returns the postsubmit or CQ binhost to use."""
+        boards = []
         # The preference of picking the binhost file for a board is in the same
-        # order of prefixes, so it's critical to make sure
-        # <board>-POSTSUBMIT_BINHOST.conf is at the top of |prefixes| list.
+        # order of boards, so it's critical to make sure
+        # <board>-<builder_type>_BINHOST.conf is at the top of |boards| list.
         if board:
-            prefixes = [board]
+            boards = [board]
             # Add reference board if applicable.
             if "_" in board:
-                prefixes.append(board.split("_")[0])
+                boards.append(board.split("_")[0])
             elif expanded_binhost_inheritance:
                 # Search the public parent overlays for the given board, and
                 # include the parents' binhosts; e.g. eve for eve-kvm.
@@ -937,14 +959,14 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
                     constants.PUBLIC_OVERLAYS, board=board
                 )
                 names = [portage_util.GetOverlayName(x) for x in overlays]
-                prefixes.extend(x for x in names if x != board)
+                boards.extend(x for x in names if x != board)
 
         # Add base architecture board.
         arch = self.GetStandardField(STANDARD_FIELD_ARCH)
         if arch in _ARCH_MAPPING:
-            prefixes.append(_ARCH_MAPPING[arch])
+            boards.append(_ARCH_MAPPING[arch])
 
-        filenames = ["%s-POSTSUBMIT_BINHOST.conf" % p for p in prefixes]
+        filenames = [f"{p}-{builder_type}_BINHOST.conf" for p in boards]
 
         external = internal = None
         for filename in filenames:
@@ -952,11 +974,15 @@ PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"
             # and external binhosts. When a builder is deleted and no longer
             # publishes prebuilts, we need developers to pick up the next set of
             # prebuilts. Clearing the binhost files triggers this.
-            candidate = os.path.join(_INTERNAL_BINHOST_DIR, filename)
+            candidate = os.path.join(
+                source_root, _INTERNAL_BINHOST_DIR, filename
+            )
             if not internal and _NotEmpty(candidate):
                 internal = candidate
 
-            candidate = os.path.join(_EXTERNAL_BINHOST_DIR, filename)
+            candidate = os.path.join(
+                source_root, _EXTERNAL_BINHOST_DIR, filename
+            )
             if not external and _NotEmpty(candidate):
                 external = candidate
 

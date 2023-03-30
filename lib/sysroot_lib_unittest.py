@@ -19,7 +19,7 @@ from chromite.lib.parser import package_info
 
 
 class SysrootLibTest(cros_test_lib.MockTempDirTestCase):
-    """Unittest for sysroot_lib.py"""
+    """Unittests for sysroot_lib.py"""
 
     def setUp(self):
         """Setup the test environment."""
@@ -266,7 +266,7 @@ class ProfileTest(cros_test_lib.TestCase):
 
 
 class SysrootLibInstallConfigTest(cros_test_lib.MockTempDirTestCase):
-    """Unittest for sysroot_lib.py"""
+    """Unittests for sysroot_lib.py"""
 
     # pylint: disable=protected-access
 
@@ -346,6 +346,142 @@ class SysrootLibInstallConfigTest(cros_test_lib.MockTempDirTestCase):
 
         filepath = os.path.join(self.tempdir, sysroot_lib._MAKE_CONF_USER)
         self.assertExists(filepath)
+
+
+class SysrootGenerateBinhostConfTest(cros_test_lib.MockTempDirTestCase):
+    """Unittests for GenerateBinhostConf method in sysroot_lib.py"""
+
+    def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
+        self.PatchObject(osutils, "IsRootUser", return_value=True)
+
+        sysroot_path = os.path.join(self.tempdir, "sysroot")
+        osutils.SafeMakedirs(sysroot_path)
+        self.sysroot = sysroot_lib.Sysroot(sysroot_path)
+        self.sysroot.WriteConfig('BOARD_USE="foofoo"')
+
+        unittest_lib.create_stub_make_conf(sysroot_path)
+
+        self.external_binhost_dir = os.path.join(
+            self.tempdir,
+            constants.PUBLIC_BINHOST_CONF_DIR,
+            "target",
+        )
+
+        self.internal_binhost_file_path = os.path.join(
+            self.tempdir,
+            constants.PRIVATE_BINHOST_CONF_DIR,
+            "target",
+        )
+
+        self.external_cq_binhost_file_path = os.path.join(
+            self.external_binhost_dir, "foofoo-CQ_BINHOST.conf"
+        )
+
+        self.external_postsubmit_binhost_file_path = os.path.join(
+            self.external_binhost_dir, "foofoo-POSTSUBMIT_BINHOST.conf"
+        )
+
+        self.internal_cq_binhost_file_path = os.path.join(
+            self.internal_binhost_file_path, "foofoo-CQ_BINHOST.conf"
+        )
+
+        self.internal_postsubmit_binhost_file_path = os.path.join(
+            self.internal_binhost_file_path, "foofoo-POSTSUBMIT_BINHOST.conf"
+        )
+
+    def _removeCommentAndEmptyLines(self, lines):
+        # Remove comment and empty lines.
+        return [
+            line for line in lines if line != "" and not line.startswith("#")
+        ]
+
+    def testFullBinhost(self):
+        config = self.sysroot.GenerateBinhostConf(source_root=self.tempdir)
+
+        lines = self._removeCommentAndEmptyLines(config.splitlines())
+        self.assertEqual(len(lines), 1)
+        self.assertTrue('PORTAGE_BINHOST="$FULL_BINHOST"' in lines)
+
+    def testCqBinhost(self):
+        content = 'CQ_BINHOST="gs://bar/bar"'
+        osutils.WriteFile(
+            self.external_cq_binhost_file_path, content, makedirs=True
+        )
+
+        config = self.sysroot.GenerateBinhostConf(source_root=self.tempdir)
+        lines = self._removeCommentAndEmptyLines(config.splitlines())
+        self.assertEqual(len(lines), 3)
+        self.assertEqual(lines[0], 'PORTAGE_BINHOST="$FULL_BINHOST"')
+        self.assertEqual(
+            lines[1], f"source {self.external_cq_binhost_file_path}"
+        )
+        self.assertEqual(
+            lines[2], 'PORTAGE_BINHOST="$PORTAGE_BINHOST $CQ_BINHOST"'
+        )
+
+    def testPostsubmitBinhost(self):
+        content = 'POSTSUBMIT_BINHOST="gs://bar/bar"'
+        osutils.WriteFile(
+            self.internal_postsubmit_binhost_file_path, content, makedirs=True
+        )
+
+        config = self.sysroot.GenerateBinhostConf(source_root=self.tempdir)
+        lines = self._removeCommentAndEmptyLines(config.splitlines())
+        self.assertEqual(len(lines), 3)
+        self.assertEqual(lines[0], 'PORTAGE_BINHOST="$FULL_BINHOST"')
+        self.assertEqual(
+            lines[1], f"source {self.internal_postsubmit_binhost_file_path}"
+        )
+        self.assertEqual(
+            lines[2], 'PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"'
+        )
+
+    def testAllBinhost(self):
+        content = 'CQ_BINHOST="gs://bar/bar"'
+        osutils.WriteFile(
+            self.external_cq_binhost_file_path, content, makedirs=True
+        )
+        osutils.WriteFile(
+            self.internal_cq_binhost_file_path, content, makedirs=True
+        )
+        content = 'POSTSUBMIT_BINHOST="gs://bar/bar"'
+        osutils.WriteFile(
+            self.external_postsubmit_binhost_file_path, content, makedirs=True
+        )
+        osutils.WriteFile(
+            self.internal_postsubmit_binhost_file_path, content, makedirs=True
+        )
+
+        config = self.sysroot.GenerateBinhostConf(source_root=self.tempdir)
+        lines = self._removeCommentAndEmptyLines(config.splitlines())
+        self.assertEqual(len(lines), 9)
+        self.assertEqual(lines[0], 'PORTAGE_BINHOST="$FULL_BINHOST"')
+        self.assertEqual(
+            lines[1], f"source {self.external_postsubmit_binhost_file_path}"
+        )
+        self.assertEqual(
+            lines[2], 'PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"'
+        )
+        self.assertEqual(
+            lines[3], f"source {self.internal_postsubmit_binhost_file_path}"
+        )
+        self.assertEqual(
+            lines[4], 'PORTAGE_BINHOST="$PORTAGE_BINHOST $POSTSUBMIT_BINHOST"'
+        )
+        self.assertEqual(
+            lines[5], f"source {self.external_cq_binhost_file_path}"
+        )
+        self.assertEqual(
+            lines[6], 'PORTAGE_BINHOST="$PORTAGE_BINHOST $CQ_BINHOST"'
+        )
+        self.assertEqual(
+            lines[7], f"source {self.internal_cq_binhost_file_path}"
+        )
+        self.assertEqual(
+            lines[8], 'PORTAGE_BINHOST="$PORTAGE_BINHOST $CQ_BINHOST"'
+        )
 
 
 class SysrootLibToolchainUpdateTest(cros_test_lib.RunCommandTempDirTestCase):
