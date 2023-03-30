@@ -16,8 +16,10 @@ import resource
 import shutil
 from typing import List, Optional, Union
 
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
+from chromite.lib import locking
 from chromite.lib import metrics_lib
 from chromite.lib import osutils
 from chromite.lib import path_util
@@ -33,6 +35,13 @@ _CHROOT_VERSION_HOOKS_DIR = constants.CROSUTILS_DIR / "chroot_version_hooks.d"
 _BASH_COMPLETION_DIR = (
     f"{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/etc/bash_completion.d"
 )
+
+# Pairs of "old chroot location" and "new chroot location." Older SDKs mixed
+# chroot state throughout the chroot tree; we'll migrate contents from the old
+# path (prefixed at the "chroot" base) to the new path (prefixed at the "output
+# directory" base).
+# TODO(b/265885353): add paths as we migrate state.
+_CHROOT_STATE_MIGRATIONS = ()
 
 
 class Error(Exception):
@@ -394,6 +403,55 @@ def CleanupChrootMount(chroot=None, buildroot=None, delete=False):
 
     if delete:
         osutils.RmDir(chroot, ignore_missing=True, sudo=True)
+
+
+def MigrateStatePaths(chroot: chroot_lib.Chroot, lock: locking.FileLock):
+    """Migrate chroot state paths.
+
+    Moves directory contents from old stateful-chroot locations to new "output
+    directory" structure, where stateful directories are all collected in
+    out_path.
+    """
+    for src_suffix, dst_suffix in _CHROOT_STATE_MIGRATIONS:
+        # If the |src| directory is non-empty (or, includes only a README),
+        # migrate its contents to |dst|.
+        src = Path(chroot.path) / src_suffix
+        dst = chroot.out_path / dst_suffix
+
+        try:
+            src_list = [i for i in src.iterdir()]
+        except FileNotFoundError:
+            continue
+        except NotADirectoryError:
+            continue
+        if len(src_list) == 0:
+            continue
+        if len(src_list) == 1 and src_list[0] == src / "README":
+            continue
+
+        logging.info(
+            "Migrating state path %s to %s; this may take a few moments",
+            src,
+            dst,
+        )
+        lock.write_lock(
+            "upgrade to %s needed but chroot is locked; please "
+            "exit all instances so this upgrade can finish." % src
+        )
+
+        osutils.SafeMakedirsNonRoot(dst)
+        osutils.MoveDirContents(src, dst, allow_nonempty=True)
+        osutils.WriteFile(
+            src / "README",
+            """\
+This is not the directory you're looking for. The CrOS SDK has been refactored,
+and this directory's contents contents can now be found within the SDK
+state/output directory at %s.
+
+Do not remove this directory.
+"""
+            % dst,
+        )
 
 
 def RunChrootVersionHooks(version_file=None, hooks_dir=None):

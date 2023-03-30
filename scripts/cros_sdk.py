@@ -862,6 +862,8 @@ def main(argv):
                 # Wipe and continue.
                 osutils.RmDir(src)
 
+        cros_sdk_lib.MigrateStatePaths(chroot, lock)
+
         mounted = False
         if options.create:
             lock.write_lock()

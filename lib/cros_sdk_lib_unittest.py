@@ -5,11 +5,13 @@
 """Test the cros_sdk_lib module."""
 
 import os
+from pathlib import Path
 
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import locking
 from chromite.lib import osutils
 
 
@@ -83,6 +85,59 @@ class TestGetFileSystemDebug(cros_test_lib.RunCommandTestCase):
         self.assertEqual(file_system_debug_tuple.fuser, "fuser_output")
         self.assertEqual(file_system_debug_tuple.lsof, "lsof_output")
         self.assertEqual(file_system_debug_tuple.ps, "ps_output")
+
+
+class TestMigrateStatePaths(cros_test_lib.MockTempDirTestCase):
+    """Tests MigrateStatePaths functionality."""
+
+    def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
+        chroot_path = self.tempdir / "chroot"
+        out_path = self.tempdir / "out"
+        self.chroot = chroot_lib.Chroot(path=chroot_path, out_path=out_path)
+        osutils.SafeMakedirsNonRoot(self.chroot.path)
+        osutils.SafeMakedirsNonRoot(self.chroot.out_path)
+        self.lock = locking.FileLock(
+            chroot_path / ".chroot_lock", "chroot lock"
+        )
+
+        # TODO(b/265885353): fill map as we migrate state paths.
+        self.state_path_map = ()
+
+    def testOldPathsExist(self):
+        for src, dst in self.state_path_map:
+            osutils.SafeMakedirsNonRoot(src / "foo")
+
+            cros_sdk_lib.MigrateStatePaths(self.chroot, self.lock)
+
+            self.assertNotExists(src / "foo")
+            self.assertExists(src / "README")
+            self.assertExists(dst / "foo")
+
+    def testOnlyReadmeExists(self):
+        for src, dst in self.state_path_map:
+            osutils.SafeMakedirsNonRoot(src)
+            osutils.Touch(src / "README")
+
+            cros_sdk_lib.MigrateStatePaths(self.chroot, self.lock)
+
+            self.assertExists(src / "README")
+            self.assertNotExists(dst / "README")
+
+    def testBothPathsExist(self):
+        for src, dst in self.state_path_map:
+            osutils.SafeMakedirsNonRoot(src / "foo")
+            osutils.Touch(src / "foo" / "bar")
+            osutils.SafeMakedirsNonRoot(dst / "foo")
+            osutils.Touch(dst / "foo" / "baz")
+
+            cros_sdk_lib.MigrateStatePaths(self.chroot, self.lock)
+
+            self.assertNotExists(src / "foo")
+            self.assertExists(dst / "foo")
+            self.assertExists(dst / "foo" / "bar")
+            self.assertExists(dst / "foo" / "baz")
 
 
 class TestGetChrootVersion(cros_test_lib.MockTestCase):
