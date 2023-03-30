@@ -53,7 +53,7 @@ class TestConsumeMessages(cros_test_lib.MockTestCase):
         )
 
     def testNoneEndsProcess(self):
-        """Putting None on the Queue should immediately end the consumption loop."""
+        """None on the Queue should immediately end the consumption loop."""
         q = Queue.Queue()
         q.put(None)
 
@@ -229,7 +229,7 @@ class TestConsumeMessages(cros_test_lib.MockTestCase):
         self.assertEqual(0, ts_mon_config.logging.exception.call_count)
 
     def testSetOnceMetricKeepsEmitting(self):
-        """Tests that a metric which is set once emits many times if left alone."""
+        """Verify a metric which is set once emits many times if left alone."""
         self.PatchObject(ts_mon_config, "FLUSH_INTERVAL", 0)
         self.time_mock.time.side_effect = [1, 2, 3, 4, 5]
         q = Queue.Queue()

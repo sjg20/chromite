@@ -112,13 +112,13 @@ def get_version_from_refs(refs: List[GitRef]) -> str:
     Version strings are of format "78.0.3876.1".
 
     Args:
-      refs: The tags to parse for the best version.
+        refs: The tags to parse for the best version.
 
     Returns:
-      str: The version to use.
+        str: The version to use.
 
     Raises:
-      Exception: if no unstable ebuild exists for Chrome.
+        Exception: if no unstable ebuild exists for Chrome.
     """
     if not refs:
         raise NoRefsError("|refs| must not be empty.")
@@ -199,13 +199,13 @@ def find_chrome_ebuilds(
     """Return a tuple of chrome's unstable ebuild and stable ebuilds.
 
     Args:
-      package_dir: The path to where the package ebuild is stored.
+        package_dir: The path to where the package ebuild is stored.
 
     Returns:
-      Tuple [unstable_ebuild, stable_ebuilds].
+        Tuple [unstable_ebuild, stable_ebuilds].
 
     Raises:
-      Exception: if no unstable ebuild exists for Chrome.
+        Exception: if no unstable ebuild exists for Chrome.
     """
     stable_ebuilds = []
     unstable_ebuilds = []
@@ -235,19 +235,20 @@ class Outcome(enum.Enum):
     """An enum representing the possible outcomes of a package uprev attempt.
 
     Variants:
-      NEWER_VERSION_EXISTS: An ebuild with a higher version than the requested
-          version already exists, so no change occurred.
-      SAME_VERSION_EXISTS: An ebuild with the same version as the requested
-          version already exists and the stable & unstable ebuilds are identical,
-          so no change occurred.
-      REVISION_BUMP: An ebuild with the same version as the requested version
-          already exists but the contents of the stable & unstable ebuilds differ,
-          so the stable ebuild was updated and the revision number was increased.
-      VERSION_BUMP: The requested uprev version was greater than that of any
-          stable ebuild that exists, so a new stable ebuild was created at the
-          requested version.
-      NEW_EBUILD_CREATED: No stable ebuild for this package existed yet, so a new
-          stable ebuild was created at the requested version.
+        NEWER_VERSION_EXISTS: An ebuild with a higher version than the requested
+            version already exists, so no change occurred.
+        SAME_VERSION_EXISTS: An ebuild with the same version as the requested
+            version already exists and the stable & unstable ebuilds are
+            identical, so no change occurred.
+        REVISION_BUMP: An ebuild with the same version as the requested version
+            already exists but the contents of the stable & unstable ebuilds
+            differ, so the stable ebuild was updated and the revision number was
+            increased.
+        VERSION_BUMP: The requested uprev version was greater than that of any
+            stable ebuild that exists, so a new stable ebuild was created at the
+            requested version.
+        NEW_EBUILD_CREATED: No stable ebuild for this package existed yet, so a
+            new stable ebuild was created at the requested version.
     """
 
     NEWER_VERSION_EXISTS = enum.auto()
@@ -264,9 +265,9 @@ class UprevResult(object):
     files were changed.
 
     Attributes:
-      outcome: An instance of Outcome documenting what change took place.
-      changed_files: A list of the paths of the files that were altered by this
-          uprev attempt.
+        outcome: An instance of Outcome documenting what change took place.
+        changed_files: A list of the paths of the files that were altered by
+            this uprev attempt.
     """
 
     outcome: Outcome
@@ -297,7 +298,7 @@ class UprevResult(object):
 
     @property
     def newer_version_exists(self) -> bool:
-        """True when the existing stable version is newer than the given version."""
+        """True when existing stable version is newer than the given version."""
         return self.outcome is Outcome.NEWER_VERSION_EXISTS
 
     @property
@@ -351,7 +352,8 @@ class UprevChromeManager(object):
 
         # Find the unstable (9999) ebuild and any existing stable ebuilds.
         unstable_ebuild, stable_ebuilds = find_chrome_ebuilds(package_dir)
-        # Find the best stable candidate to uprev -- the one that will be replaced.
+        # Find the best stable candidate to uprev -- the one that will be
+        # replaced.
         should_uprev, candidate = self._find_chrome_uprev_candidate(
             stable_ebuilds
         )
@@ -384,14 +386,14 @@ class UprevChromeManager(object):
         """Find the ebuild to replace.
 
         Args:
-          stable_ebuilds: All stable ebuilds that were found.
+            stable_ebuilds: All stable ebuilds that were found.
 
         Returns:
-          A (okay_to_uprev, best_stable_candidate) tuple.
-          okay_to_uprev: A bool indicating that an uprev should proceed. False if
-              a newer stable ebuild than the requested version exists.
-          best_stable_candidate: The highest version stable ebuild that exists, or
-              None if no stable ebuilds exist.
+            A (okay_to_uprev, best_stable_candidate) tuple.
+            okay_to_uprev: A bool indicating that an uprev should proceed. False
+                if a newer stable ebuild than the requested version exists.
+            best_stable_candidate: The highest version stable ebuild that
+                exists, or None if no stable ebuilds exist.
         """
         candidate = _get_best_stable_chrome_ebuild_from_ebuilds(stable_ebuilds)
         if not candidate:
@@ -425,19 +427,20 @@ class UprevChromeManager(object):
     ) -> UprevResult:
         """Uprevs the chrome ebuild specified by chrome_rev.
 
-        This is the main function that uprevs the chrome_rev from a stable candidate
-        to its new version.
+        This is the main function that uprevs the chrome_rev from a stable
+        candidate to its new version.
 
         Args:
-          stable_candidate: ebuild that corresponds to the stable ebuild we are
-            revving from.  If None, builds a new ebuild given the version
-            and logic for chrome_rev type with revision set to 1.
-          unstable_ebuild: ebuild corresponding to the unstable ebuild for chrome.
-          package_name: package name.
-          package_dir: Path to the chromeos-chrome package dir.
+            stable_candidate: ebuild that corresponds to the stable ebuild we
+                are revving from.  If None, builds a new ebuild given the
+                version and logic for chrome_rev type with revision set to 1.
+            unstable_ebuild: ebuild corresponding to the unstable ebuild for
+                chrome.
+            package_name: package name.
+            package_dir: Path to the chromeos-chrome package dir.
 
         Returns:
-          Full portage version atom (including rc's, etc) that was revved.
+            Full portage version atom (including rc's, etc) that was revved.
         """
 
         def _is_new_ebuild_redundant(
@@ -445,8 +448,8 @@ class UprevChromeManager(object):
         ) -> bool:
             """Returns True if the new ebuild is redundant.
 
-            This is True if there if the current stable ebuild is the exact same copy
-            of the new one.
+            This is True if the current stable ebuild is the exact same copy of
+            the new one.
             """
             if (
                 stable_ebuild
@@ -461,7 +464,8 @@ class UprevChromeManager(object):
             else:
                 return False
 
-        # Case where we have the last stable candidate with same version just rev.
+        # Case where we have the last stable candidate with same version just
+        # rev.
         if (
             stable_candidate
             and stable_candidate.chrome_version == self._version
@@ -483,7 +487,10 @@ class UprevChromeManager(object):
 
         # Determine whether this is ebuild is redundant.
         if _is_new_ebuild_redundant(new_ebuild, stable_candidate):
-            msg = "Previous ebuild with same version found and ebuild is redundant."
+            msg = (
+                "Previous ebuild with same version found and ebuild is "
+                "redundant."
+            )
             logging.info(msg)
             os.unlink(new_ebuild_path)
             return UprevResult(Outcome.SAME_VERSION_EXISTS)
@@ -491,12 +498,12 @@ class UprevChromeManager(object):
         if rev_bump:
             return UprevResult(Outcome.REVISION_BUMP, [new_ebuild.ebuild_path])
         elif stable_candidate:
-            # If a stable ebuild already existed and rev_bump is False, then a stable
-            # ebuild with a new major version has been generated.
+            # If a stable ebuild already existed and rev_bump is False, then a
+            # stable ebuild with a new major version has been generated.
             return UprevResult(Outcome.VERSION_BUMP, [new_ebuild.ebuild_path])
         else:
-            # If no stable ebuild existed, then we've created the first stable ebuild
-            # for this package.
+            # If no stable ebuild existed, then we've created the first stable
+            # ebuild for this package.
             return UprevResult(
                 Outcome.NEW_EBUILD_CREATED, [new_ebuild.ebuild_path]
             )
@@ -515,8 +522,8 @@ class UprevOverlayManager(object):
     this class, e.g. chrome and android.
 
     TODO (saklein): The manifest object for this class is used deep in the
-      portage_util uprev process. Look into whether it's possible to redo it so
-      the manifest isn't required.
+        portage_util uprev process. Look into whether it's possible to redo it
+        so the manifest isn't required.
     """
 
     def __init__(
@@ -530,13 +537,12 @@ class UprevOverlayManager(object):
         """Init function.
 
         Args:
-          overlays: The overlays to search for ebuilds.
-          manifest: The manifest object.
-          build_targets: The build
-            targets to clean in |chroot|, if desired. No effect unless |chroot| is
-            provided.
-          chroot: The chroot to clean, if desired.
-          output_dir: The path to optionally dump result files.
+            overlays: The overlays to search for ebuilds.
+            manifest: The manifest object.
+            build_targets: The build targets to clean in |chroot|, if desired.
+                No effect unless |chroot| is provided.
+            chroot: The chroot to clean, if desired.
+            output_dir: The path to optionally dump result files.
         """
         self.overlays = overlays
         self.manifest = manifest
@@ -550,8 +556,9 @@ class UprevOverlayManager(object):
         self._removed_ebuild_files = None
         self._overlay_ebuilds = None
 
-        # We cleaned up self-referential ebuilds by this version, but don't enforce
-        # the check on older ones to avoid breaking factory/firmware branches.
+        # We cleaned up self-referential ebuilds by this version, but don't
+        # enforce the check on older ones to avoid breaking factory/firmware
+        # branches.
         root_version = chromeos_version.VersionInfo.from_repo(
             constants.SOURCE_ROOT
         )
@@ -580,8 +587,8 @@ class UprevOverlayManager(object):
         specified, uprevs all ebuilds for overlays in self.overlays.
 
         Args:
-          package_list: A list of packages to uprev.
-          force: Boolean indicating whether to consider deny-listed ebuilds.
+            package_list: A list of packages to uprev.
+            force: Boolean indicating whether to consider deny-listed ebuilds.
         """
         # Use all found packages if an explicit package_list is not given.
         use_all = not bool(package_list)
@@ -610,8 +617,8 @@ class UprevOverlayManager(object):
         self._clean_stale_packages()
 
         if self.output_dir and os.path.exists(self.output_dir):
-            # Write out dumps of the results. This is largely meant for validating
-            # results.
+            # Write out dumps of the results. This is largely meant for
+            # validating results.
             osutils.WriteFile(
                 os.path.join(self.output_dir, "revved_packages"),
                 "\n".join(self._revved_packages),
@@ -633,7 +640,7 @@ class UprevOverlayManager(object):
         """Execute uprevs for an overlay.
 
         Args:
-          overlay: The overlay to uprev.
+            overlay: The overlay to uprev.
         """
         if not os.path.isdir(overlay):
             logging.warning("Skipping %s, which is not a directory.", overlay)
@@ -650,8 +657,8 @@ class UprevOverlayManager(object):
         """Work on a single ebuild.
 
         Args:
-          overlay: The overlay the ebuild belongs to.
-          ebuild: The ebuild to work on.
+            overlay: The overlay the ebuild belongs to.
+            ebuild: The ebuild to work on.
         """
         logging.debug(
             "Working on %s, info %s", ebuild.package, ebuild.cros_workon_vars
@@ -704,12 +711,13 @@ class UprevOverlayManager(object):
         otherwise specified by package_list.
 
         Args:
-          use_all: Whether to include all ebuilds in the specified directories.
-            If true, then we gather all packages in the directories regardless
-            of whether they are in our set of packages.
-          package_list: A set of the packages we want to gather. If
-          use_all is True, this argument is ignored, and should be None.
-          force: Boolean indicating whether to consider deny-listed ebuilds.
+            use_all: Whether to include all ebuilds in the specified
+                directories. If true, then we gather all packages in the
+                directories regardless of whether they are in our set of
+                packages.
+            package_list: A set of the packages we want to gather. If
+                use_all is True, this argument is ignored, and should be None.
+            force: Boolean indicating whether to consider deny-listed ebuilds.
         """
         # See crrev.com/c/1257944 for origins of this.
         root_version = chromeos_version.VersionInfo.from_repo(
@@ -820,8 +828,8 @@ class UprevVersionedPackageResult(object):
         """Adds version/ebuilds tuple to result.
 
         Args:
-          new_version: New version number of package.
-          modified_files: List of files modified for the given version.
+            new_version: New version number of package.
+            modified_files: List of files modified for the given version.
         """
         result = UprevVersionedPackageModifications(new_version, modified_files)
         self.modified.append(result)
@@ -857,15 +865,18 @@ def _get_ebuilds(
     """Get stable and unstable ebuilds for a given package path.
 
     Args:
-      package_path: The path of the package relative to the src root. This path
-        should contain an unstable 9999 ebuild and optionally a stable ebuild.
+        package_path: The path of the package relative to the src root. This
+            path should contain an unstable 9999 ebuild and optionally a stable
+            ebuild.
 
     Returns:
-      The stable and unstable ebuilds.
+        The stable and unstable ebuilds.
 
     Raises:
-      NoUnstableEbuildError: if the package path doesn't contain an unstable ebuild.
-      TooManyStableEbuildsError: if the package path contains more than 1 stable ebuild.
+        NoUnstableEbuildError: if the package path doesn't contain an unstable
+            ebuild.
+        TooManyStableEbuildsError: if the package path contains more than 1
+            stable ebuild.
     """
     package_path = str(package_path)
     package = os.path.basename(package_path)
@@ -898,8 +909,8 @@ def get_stable_ebuild_version(
     """Get the version number (without revision) of a stable ebuild.
 
     Args:
-      package_path: The path of the package relative to the src root. This path
-        should contain a stable ebuild.
+        package_path: The path of the package relative to the src root. This
+            path should contain a stable ebuild.
     """
     stable_ebuild, _ = _get_ebuilds(str(package_path))
 
@@ -914,15 +925,15 @@ def uprev_ebuild_from_pin(
     """Changes the package ebuild's version to match the version pin file.
 
     Args:
-      package_path: The path of the package relative to the src root. This path
-        should contain a stable and an unstable ebuild with the same name
-        as the package.
-      version_no_rev: The version string to uprev to (excluding revision). The
-        ebuild's version will be directly set to this number.
-      chroot: specify a chroot to enter.
+        package_path: The path of the package relative to the src root. This
+            path should contain a stable and an unstable ebuild with the same
+            name as the package.
+        version_no_rev: The version string to uprev to (excluding revision). The
+            ebuild's version will be directly set to this number.
+        chroot: specify a chroot to enter.
 
     Returns:
-      The uprev result.
+        The uprev result.
     """
     package = os.path.basename(package_path)
     package_src_path = os.path.join(constants.SOURCE_ROOT, package_path)
@@ -937,8 +948,8 @@ def uprev_ebuild_from_pin(
     if stable_ebuild is None:
         raise EbuildUprevError("No stable ebuild found for %s" % package)
 
-    # If the new version is the same as the old version, bump the revision number,
-    # otherwise reset it to 1
+    # If the new version is the same as the old version, bump the revision
+    # number, otherwise reset it to 1
     if version_no_rev == stable_ebuild.version_no_rev:
         version = "%s-r%d" % (
             version_no_rev,
@@ -990,16 +1001,18 @@ def uprev_workon_ebuild_to_version(
     """Uprev a cros-workon ebuild to a specified version.
 
     Args:
-      package_path: The path of the package relative to the src root. This path
-        should contain an unstable 9999 ebuild that inherits from cros-workon.
-      target_version: The version to use for the stable ebuild to be generated.
-        Should not contain a revision number.
-      chroot: The path to the chroot to enter, if not the default.
-      allow_downrev: Whether the downrev should be proceed. If not and the target
-        version is older than the existing version, abort this downrev.
-      ref: The target version's ref tag in the git repository to be used.
-      chroot_src_root: Path to the root of the source checkout when inside the
-        chroot. Only override for testing.
+        package_path: The path of the package relative to the src root. This
+            path should contain an unstable 9999 ebuild that inherits from
+            cros-workon.
+        target_version: The version to use for the stable ebuild to be
+            generated. Should not contain a revision number.
+        chroot: The path to the chroot to enter, if not the default.
+        allow_downrev: Whether the downrev should be proceed. If not and the
+            target version is older than the existing version, abort this
+            downrev.
+        ref: The target version's ref tag in the git repository to be used.
+        chroot_src_root: Path to the root of the source checkout when inside the
+            chroot. Only override for testing.
     """
     package_path = str(package_path)
     package = os.path.basename(package_path)
@@ -1032,8 +1045,8 @@ def uprev_workon_ebuild_to_version(
     ):
         return UprevResult(outcome=Outcome.NEWER_VERSION_EXISTS)
 
-    # If the new version is the same as the old version, bump the revision number,
-    # otherwise reset it to 1
+    # If the new version is the same as the old version, bump the revision
+    # number, otherwise reset it to 1.
     if stable_ebuild and target_version == stable_ebuild.version_no_rev:
         output_version = (
             f"{target_version}-r{stable_ebuild.current_revision + 1}"
@@ -1049,9 +1062,9 @@ def uprev_workon_ebuild_to_version(
     new_ebuild_src_path = os.path.join(SRC_ROOT, new_ebuild_path)
     manifest_src_path = os.path.join(package_src_path, "Manifest")
 
-    # Go through the normal uprev process for a cros-workon ebuild, by calculating
-    # and writing out the commit & tree IDs for the projects and subtrees
-    # specified in the unstable ebuild.
+    # Go through the normal uprev process for a cros-workon ebuild, by
+    # calculating and writing out the commit & tree IDs for the projects and
+    # subtrees specified in the unstable ebuild.
     manifest = git.ManifestCheckout.Cached(constants.SOURCE_ROOT)
     info = unstable_ebuild.GetSourceInfo(
         os.path.join(constants.SOURCE_ROOT, "src"), manifest

@@ -144,12 +144,12 @@ class SetFailureTypeTest(cros_test_lib.TestCase):
         """Returns a function to test.
 
         Args:
-          set_type: The exception type that the function is decorated with.
-          raise_type: The exception type that the function raises.
-          *args: args to pass to the instance of |raise_type|.
+            set_type: The exception type that the function is decorated with.
+            raise_type: The exception type that the function raises.
+            *args: args to pass to the instance of |raise_type|.
 
         Returns:
-          The function to test.
+            The function to test.
         """
 
         @failures_lib.SetFailureType(set_type)
@@ -260,7 +260,7 @@ class FailureTypeListTests(cros_test_lib.TestCase):
     """Tests for failure type lists."""
 
     def testFailureTypeList(self):
-        """Test the current failure names are already added to the type lists."""
+        """Verify current failure names are already added to the type lists."""
         self.assertTrue(
             failures_lib.BuildScriptFailure.__name__
             in failure_message_lib.BUILD_SCRIPT_FAILURE_TYPES

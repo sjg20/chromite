@@ -32,7 +32,7 @@ class TestNormalizePort(cros_test_lib.TestCase):
         )
 
     def testNormalizePortOutOfRange(self):
-        """Tests that error is rasied when port is out of range."""
+        """Tests that error is raised when port is out of range."""
         self.assertRaises(ValueError, remote_access.NormalizePort, "-1")
         self.assertRaises(ValueError, remote_access.NormalizePort, 99999)
 
@@ -47,11 +47,11 @@ class TestRemoveKnownHost(cros_test_lib.MockTempDirTestCase):
     _HOST_KEY = (
         _HOST
         + " ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCjysPTaDAtRaxRaW1JjqzCHp2"
-        "88gvlUgtJxd2Jt/v63fkqZ5zzLLoeoAMwv0oYSRU82qhLimXpHxXRkrMC5nrpz5zJch+ktql"
-        "0rSRgo+dqc1GzmyOOAq5NkQsgBb3hefxMxCZRV8Dv0n7qaindZRxE8MnRJmVUoj8Wq8wryab"
-        "p+fUBkesBwaJhPXa4WBJeI5d+rO5tEBSNkvIp0USU6Ku3Ct0q2sZbOkY5g1VFAUYm4wyshCf"
-        "oWvU8ivMFp0pCezMISGstKpkIQApq2dLUb6EmeIgnhHzZXOn7doxIGD33JUfFmwNi0qfk3vV"
-        "6vKRVDEZD68+ix6gjKpicY5upA/9P\n"
+        "88gvlUgtJxd2Jt/v63fkqZ5zzLLoeoAMwv0oYSRU82qhLimXpHxXRkrMC5nrpz5zJch+"
+        "ktql0rSRgo+dqc1GzmyOOAq5NkQsgBb3hefxMxCZRV8Dv0n7qaindZRxE8MnRJmVUoj8W"
+        "q8wryabp+fUBkesBwaJhPXa4WBJeI5d+rO5tEBSNkvIp0USU6Ku3Ct0q2sZbOkY5g1VF"
+        "AUYm4wyshCfoWvU8ivMFp0pCezMISGstKpkIQApq2dLUb6EmeIgnhHzZXOn7doxIGD33J"
+        "UfFmwNi0qfk3vV6vKRVDEZD68+ix6gjKpicY5upA/9P\n"
     )
 
     def testRemoveKnownHostDefaultFile(self):
@@ -91,7 +91,7 @@ class TestCompileSSHConnectSettings(cros_test_lib.TestCase):
         )
 
     def testNoneSettingOmitted(self):
-        """Tests that a None value will omit a default setting from the output."""
+        """Verify a None value will omit a default setting from the output."""
         self.assertIn("-oProtocol=2", remote_access.CompileSSHConnectSettings())
         self.assertNotIn(
             "-oProtocol=2",
@@ -123,8 +123,8 @@ class RemoteShMock(partial_mock.PartialCmdMock):
         """Simulates a RemoteSh invocation.
 
         Returns:
-          A CompletedProcess object with an additional member |rc_mock| to
-          enable examination of the underlying run() function call.
+            A CompletedProcess object with an additional member |rc_mock| to
+            enable examination of the underlying run() function call.
         """
         result = self._results["RemoteSh"].LookupResult(
             (cmd,),
@@ -162,7 +162,7 @@ class RemoteDeviceMock(partial_mock.PartialMock):
 
 
 class CreateTunnelTest(cros_test_lib.MockTempDirTestCase):
-    """Base class with popen mocked out for RemoteAccess.CreateTunnel() tests."""
+    """Base class with popen mocked for RemoteAccess.CreateTunnel() tests."""
 
     def setUp(self):
         self.popen_mock = self.StartPatcher(CreateTunnelPopenMock())
@@ -422,8 +422,8 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
             m = self.PatchObject(remote_access.RemoteDevice, "CopyToWorkDir")
             self.rsh_mock.AddCmdResult(partial_mock.In("runit"))
             device.run(["runit"], extra_env={"VAR": "v" * 1024 * 1024})
-            # We'll assume that the test passed when it tries to copy a file to the
-            # remote side (the shell script to run indirectly).
+            # We'll assume that the test passed when it tries to copy a file to
+            # the remote side (the shell script to run indirectly).
             self.assertEqual(m.call_count, 1)
 
     def testRunPathlib(self):
@@ -499,7 +499,7 @@ class RemoteDeviceTest(cros_test_lib.MockTestCase):
             self.assertEqual(device.IsSELinuxEnforced(), False)
 
     def testSELinuxUnavailable(self):
-        """Test IsSELinuxAvailable() and IsSELinuxEnforced() when unavailable."""
+        """Test IsSELinux{Available|Enforced}() when unavailable."""
         self.rsh_mock.AddCmdResult(
             partial_mock.ListRegex("which restorecon"), returncode=0
         )
@@ -573,8 +573,8 @@ class ChromiumOSDeviceTest(cros_test_lib.MockTestCase):
             )
             self.assertEqual("foo", device.run("echo foo", shell=True).stdout)
 
-            # Run the same commands, but make sure PATH isn't modified when fix_path
-            # is False.
+            # Run the same commands, but make sure PATH isn't modified when
+            # fix_path is False.
             device._include_dev_paths = False
             self.rsh_mock.AddCmdResult(["echo", "foo"], stdout="foo")
             self.assertEqual("foo", device.run(["echo", "foo"]).stdout)

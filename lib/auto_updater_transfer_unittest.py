@@ -2,11 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Unit tests for the auto_updater_tranfer module.
+"""Unit tests for the auto_updater_transfer module.
 
 The main parts of unittest include:
-  1. test transfer methods in LocalTransfer.
-  5. test retrials in LocalTransfer.
+    1. test transfer methods in LocalTransfer.
+    5. test retrials in LocalTransfer.
 """
 
 from __future__ import absolute_import
@@ -36,7 +36,7 @@ _DEFAULT_ARGS = {
 
 
 class CrOSLocalTransferPrivateMock(partial_mock.PartialCmdMock):
-    """Mock out all transfer functions in auto_updater_transfer.LocalTransfer."""
+    """Mock all transfer functions in auto_updater_transfer.LocalTransfer."""
 
     TARGET = "chromite.lib.auto_updater_transfer.LocalTransfer"
     ATTRS = (
@@ -50,20 +50,20 @@ class CrOSLocalTransferPrivateMock(partial_mock.PartialCmdMock):
         partial_mock.PartialCmdMock.__init__(self)
 
     def _TransferStatefulUpdate(self, _inst, *_args, **_kwargs):
-        """Mock auto_updater_transfer.LocalTransfer._TransferStatefulUpdate."""
+        """Mock LocalTransfer._TransferStatefulUpdate."""
 
     def _TransferRootfsUpdate(self, _inst, *_args, **_kwargs):
-        """Mock auto_updater_transfer.LocalTransfer._TransferRootfsUpdate."""
+        """Mock LocalTransfer._TransferRootfsUpdate."""
 
     def _TransferUpdateUtilsPackage(self, _inst, *_args, **_kwargs):
-        """Mock auto_updater_transfer.LocalTransfer._TransferUpdateUtilsPackage."""
+        """Mock LocalTransfer._TransferUpdateUtilsPackage."""
 
     def _EnsureDeviceDirectory(self, _inst, *_args, **_kwargs):
-        """Mock auto_updater_transfer.LocalTransfer._EnsureDeviceDirectory."""
+        """Mock LocalTransfer._EnsureDeviceDirectory."""
 
 
 class CrosTransferBaseClassTest(cros_test_lib.MockTestCase):
-    """Test whether Transfer's public transfer functions are retried correctly."""
+    """Verify Transfer's public transfer functions are retried correctly."""
 
     def CreateInstance(self, device, **kwargs):
         """Create auto_updater_transfer.LocalTransfer instance.
@@ -202,8 +202,8 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
     def testCheckPayloadsError(self):
         """Test CheckPayloads() with raising exception.
 
-        auto_updater_transfer.ChromiumOSTransferError is raised if it does not find
-        payloads in its path.
+        auto_updater_transfer.ChromiumOSTransferError is raised if it does not
+        find payloads in its path.
         """
         self.PatchObject(os.path, "exists", return_value=False)
         with remote_access.ChromiumOSDeviceHandler(
@@ -259,7 +259,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def setUp(self):
-        """Mock remote_access.RemoteDevice/ChromiumOSDevice functions for update."""
+        """Mock remote_access.RemoteDevice/ChromiumOSDevice functions."""
         self.PatchObject(
             remote_access.RemoteDevice, "work_dir", "/test/work/dir"
         )
@@ -283,14 +283,14 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
             ]
 
             self.PatchObject(self._transfer_class, "_EnsureDeviceDirectory")
-            self.PatchObject(
+            curl_patch = self.PatchObject(
                 self._transfer_class, "_GetCurlCmdForPayloadDownload"
             )
             self.PatchObject(remote_access.ChromiumOSDevice, "run")
 
             transfer._TransferUpdateUtilsPackage()
             self.assertListEqual(
-                self._transfer_class._GetCurlCmdForPayloadDownload.call_args_list,
+                curl_patch.call_args_list,
                 [mock.call(**x) for x in expected],
             )
 
@@ -399,7 +399,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
             )
 
             self.PatchObject(self._transfer_class, "_EnsureDeviceDirectory")
-            self.PatchObject(
+            curl_patch = self.PatchObject(
                 self._transfer_class, "_GetCurlCmdForPayloadDownload"
             )
             self.PatchObject(remote_access.ChromiumOSDevice, "run")
@@ -413,7 +413,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
 
             transfer._TransferStatefulUpdate()
             self.assertListEqual(
-                self._transfer_class._GetCurlCmdForPayloadDownload.call_args_list,
+                curl_patch.call_args_list,
                 [mock.call(**x) for x in expected],
             )
 
@@ -519,7 +519,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
             ]
 
             self.PatchObject(self._transfer_class, "_EnsureDeviceDirectory")
-            self.PatchObject(
+            curl_patch = self.PatchObject(
                 self._transfer_class, "_GetCurlCmdForPayloadDownload"
             )
             self.PatchObject(remote_access.ChromiumOSDevice, "run")
@@ -528,7 +528,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
             transfer._TransferRootfsUpdate()
 
             self.assertListEqual(
-                self._transfer_class._GetCurlCmdForPayloadDownload.call_args_list,
+                curl_patch.call_args_list,
                 [mock.call(**x) for x in expected],
             )
 
@@ -670,8 +670,8 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
         """Test CheckPayloads().
 
         Test the exception thrown by CheckPayloads() method when
-        transfer_rootfs_update and transfer_stateful_update are both set to True and
-        _RemoteDevserver() throws an error.
+        transfer_rootfs_update and transfer_stateful_update are both set to True
+        and _RemoteDevserver() throws an error.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
@@ -802,8 +802,8 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
         """Test CheckPayloads().
 
         Test exception thrown by CheckPayloads() method when
-        transfer_rootfs_update is False and transfer_stateful_update is set to True
-        and _RemoteDevserver() throws an error.
+        transfer_rootfs_update is False and transfer_stateful_update is set to
+        True and _RemoteDevserver() throws an error.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
@@ -830,8 +830,8 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
     def testCheckPayloadsNoPayloadError(self):
         """Test auto_updater_transfer.CheckPayloads.
 
-        Test CheckPayloads() for exceptions raised when payloads are not available
-        on the staging server.
+        Test CheckPayloads() for exceptions raised when payloads are not
+        available on the staging server.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP

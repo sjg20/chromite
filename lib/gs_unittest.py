@@ -79,7 +79,8 @@ PreconditionException: 412 Precondition Failed"""
     def PreStart(self):
         os.environ.pop("BOTO_CONFIG", None)
         # Set it here for now, instead of mocking out Cached() directly because
-        # python-mock has a bug with mocking out class methods with autospec=True.
+        # python-mock has a bug with mocking out class methods with
+        # autospec=True.
         # TODO(rcui): Change this when this is fixed in PartialMock.
         self._SetGSUtilUrl()
 
@@ -563,7 +564,8 @@ class CopyTest(AbstractGSContextTest, cros_test_lib.TempDirTestCase):
         """Test generation return value."""
         exp_gen = 1413571271901000
         stderr = (
-            "Copying file:///dev/null [Content-Type=application/octet-stream]...\n"
+            "Copying file:///dev/null [Content-Type=application/octet-stream]"
+            "...\n"
             "Uploading   %(uri)s:               0 B    \r"
             "Uploading   %(uri)s:               0 B    \r"
             "Created: %(uri)s#%(gen)s\n"
@@ -577,21 +579,23 @@ class CopyTest(AbstractGSContextTest, cros_test_lib.TempDirTestCase):
     def testGeneration404(self):
         """Test behavior when we get weird output."""
         stderr = (
-            # This is a bit verbose, but it's from real output, so should be fine.
-            "Copying file:///tmp/tmpyUUPg1 [Content-Type=application/octet-stream]"
-            "...\n"
+            # This is a bit verbose, but it's from real output, so should be
+            # fine.
+            "Copying file:///tmp/tmpyUUPg1 [Content-Type=application/"
+            "octet-stream]...\n"
             "Uploading   ...recovery-R38-6158.66.0-mccloud.instructions.lock:"
             " 0 B/38 B    \r"
             "Uploading   ...recovery-R38-6158.66.0-mccloud.instructions.lock:"
             " 38 B/38 B    \r"
-            'NotFoundException: 404 Attempt to get key for "gs://chromeos-releases'
-            "/tobesigned/50,beta-\n"
+            'NotFoundException: 404 Attempt to get key for "'
+            "gs://chromeos-releases/tobesigned/50,beta-\n"
             "channel,mccloud,6158.66.0,ChromeOS-\n"
-            'recovery-R38-6158.66.0-mccloud.instructions.lock" failed. This can '
-            "happen if the\n"
-            "URI refers to a non-existent object or if you meant to operate on a "
-            "directory\n"
-            "(e.g., leaving off -R option on gsutil cp, mv, or ls of a bucket)\n"
+            'recovery-R38-6158.66.0-mccloud.instructions.lock" failed. '
+            "This can happen if the\n"
+            "URI refers to a non-existent object or if you meant to operate on "
+            "a directory\n"
+            "(e.g., leaving off -R option on gsutil cp, mv, or ls of a "
+            "bucket)\n"
         )
         self.gs_mock.AddCmdResult(
             partial_mock.In("cp"), returncode=1, stderr=stderr
@@ -618,8 +622,8 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
             # Upload the file.
             gen = ctx.Copy(local_src_file, tempuri)
 
-            # Verify the generation is valid.  All we can assume is that it's a valid
-            # whole number greater than 0.
+            # Verify the generation is valid.  All we can assume is that it's a
+            # valid whole number greater than 0.
             self.assertNotEqual(gen, None)
             self.assertIsInstance(gen, numbers.Integral)
             self.assertGreater(gen, 0)
@@ -654,8 +658,8 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
             # Upload & compress the file.
             gen = ctx.Copy(local_src_file, tempuri, auto_compress=True)
 
-            # Verify the generation is valid.  All we can assume is that it's a valid
-            # whole number greater than 0.
+            # Verify the generation is valid.  All we can assume is that it's a
+            # valid whole number greater than 0.
             self.assertNotEqual(gen, None)
             self.assertGreater(gen, 0)
 
@@ -664,7 +668,8 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
                 ctx.GetSize(tempuri), os.path.getsize(local_src_file)
             )
 
-            # Copy it back down and verify the content is decompressed & unchanged.
+            # Copy it back down and verify the content is decompressed &
+            # unchanged.
             ctx.Copy(tempuri, local_dst_file)
             new_content = osutils.ReadFile(local_dst_file)
             self.assertEqual(content, new_content)
@@ -681,8 +686,8 @@ class UnmockedCopyTest(cros_test_lib.TempDirTestCase):
             osutils.WriteFile(local_src_file, "gen0")
             gen = ctx.Copy(local_src_file, tempuri, version=0)
 
-            # Verify the generation is valid.  All we can assume is that it's a valid
-            # whole number greater than 0.
+            # Verify the generation is valid.  All we can assume is that it's a
+            # valid whole number greater than 0.
             self.assertNotEqual(gen, None)
             self.assertGreater(gen, 0)
 
@@ -875,7 +880,8 @@ class GSContextInitTest(cros_test_lib.MockTempDirTestCase):
 
     def testInitBotoFileEnv(self):
         """Test boto file environment is set correctly."""
-        # We use gsutil_bin as a file that already exists and is not the default.
+        # We use gsutil_bin as a file that already exists and is not the
+        # default.
         os.environ["BOTO_CONFIG"] = self.gsutil_bin
         self.assertTrue(gs.GSContext().boto_file, self.gsutil_bin)
         self.assertEqual(
@@ -1057,7 +1063,10 @@ class GSRetryFilterTest(cros_test_lib.TestCase):
         "-rc2/packages/chromeos-base/autotest-tests-0.0.1-r4679.tbz2"
     )
     GSUTIL_TRACKER_DIR = "/foo"
-    UPLOAD_TRACKER_FILE = "upload_TRACKER_9263880a80e4a582aec54eaa697bfcdd9c5621ea.9.tbz2__JSON.url"
+    UPLOAD_TRACKER_FILE = (
+        "upload_TRACKER_9263880a80e4a582aec54eaa697bfcdd9c5621ea.9.tbz2__JSON."
+        "url"
+    )
     DOWNLOAD_TRACKER_FILE = (
         "download_TRACKER_5a695131f3ef6e4c903f594783412bb996a7f375._file__JSON."
         "etag"
@@ -1147,7 +1156,7 @@ class GSRetryFilterTest(cros_test_lib.TestCase):
             self.assertFalse(self.ctx.GetTrackerFilenames.called)
 
     def testNoRemoveTrackerFileOnOtherErrors(self):
-        """Test that we do not attempt to delete tracker files for other errors."""
+        """Verify we do not attempt to delete tracker files for other errors."""
         cmd = ["gsutil", "cp", self.REMOTE_PATH, self.LOCAL_PATH]
         e = self._getException(cmd, "One or more URLs matched no objects")
 
@@ -1167,7 +1176,7 @@ class GSRetryFilterTest(cros_test_lib.TestCase):
         self.assertEqual(self.ctx._RetryFilter(e), True)
 
     def testRetrySSLEOF(self):
-        """Verify retry behavior when EOF occurs in violation of SSL protocol."""
+        """Verify retry behavior on EOF in violation of SSL protocol."""
         error = (
             "ssl.SSLError: [Errno 8] _ssl.c:510: EOF occurred in violation of"
             " protocol"
@@ -1194,7 +1203,7 @@ class GSRetryFilterTest(cros_test_lib.TestCase):
         self.assertEqual(self.ctx._RetryFilter(e), True)
 
     def testRetryAccessDeniedException(self):
-        """Verify retry behavior when transient AccessDeniedException happens."""
+        """Verify retry behavior on transient AccessDeniedException."""
         error = (
             "AccessDeniedException: 403 XXX@gmail.com does not have "
             "storage.objects.delete access to XXX"
@@ -1377,7 +1386,7 @@ class GSContextTest(AbstractGSContextTest):
         gs.GSContext(cache_dir=self.tempdir)
 
     def testUnknownError(self):
-        """Test that when gsutil fails in an unknown way, we do the right thing."""
+        """Verify when gsutil fails in an unknown way, we do the right thing."""
         self.gs_mock.AddCmdResult(["cat", "/asdf"], returncode=1)
 
         ctx = gs.GSContext()
@@ -1447,14 +1456,15 @@ class GSContextTest(AbstractGSContextTest):
         self.assertEqual([self.FILE_NAME], result)
 
     def testGetGsNamesWithWaitWithDirectStat(self):
-        """We should directly stat an artifact whose name is fully spelled out."""
+        """Verify direct stat an artifact whose name is fully spelled out."""
         pattern = self.FILE_NAME
 
         ctx = gs.GSContext()
 
         exists = {"%s/%s" % (self.URL, self.FILE_NAME): True}
         with mock.patch.object(ctx, "Exists", side_effect=lambda p: exists[p]):
-            # Timeout explicitly set to 0 to test that we always run at least once.
+            # Timeout explicitly set to 0 to test that we always run at least
+            # once.
             result = ctx.GetGsNamesWithWait(
                 pattern, self.URL, period=1, timeout=0
             )
@@ -1469,7 +1479,8 @@ class GSContextTest(AbstractGSContextTest):
         # GSUtil ls gs://archive_url_prefix/.
         exists = [[], self.LIST_RESULT]
         with mock.patch.object(ctx, "List", side_effect=exists):
-            # Timeout explicitly set to 0 to test that we always run at least once.
+            # Timeout explicitly set to 0 to test that we always run at least
+            # once.
             result = ctx.GetGsNamesWithWait(
                 pattern, self.URL, period=1, timeout=4
             )
@@ -1534,7 +1545,8 @@ class UnmockedGSContextTest(cros_test_lib.TempDirTestCase):
                 [file_name],
             )
 
-            # Remove the matched file, verify that GetGsNamesWithWait returns None.
+            # Remove the matched file, verify that GetGsNamesWithWait returns
+            # None.
             ctx.Remove(os.path.join(url, file_name), ignore_missing=True)
 
             self.assertEqual(

@@ -11,7 +11,7 @@ from chromite.lib import osutils
 class Subgraph(object):
     """A subgraph in dot. Contains nodes, arcs, and other subgraphs."""
 
-    _valid_ranks = set(["source", "sink", "same", "min", "max", None])
+    _valid_ranks = {"source", "sink", "same", "min", "max", None}
 
     def __init__(self, rank=None):
         self._rank = rank
@@ -55,7 +55,7 @@ class Subgraph(object):
         return lines
 
     def _GenSubgraphs(self):
-        """Generates the code for all the subgraphs contained in this subgraph."""
+        """Generates the code for all subgraphs contained in this subgraph."""
         lines = []
         for subgraph in self._subgraphs:
             lines += subgraph.Gen()

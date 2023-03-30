@@ -23,12 +23,12 @@ class Remoteexec(object):
         """Initializes a Remoteexec instance.
 
         Args:
-          reclient_dir: Path to the re-client directory that contains the reproxy,
-            bootstrap, rewrapper binaries.
-          reproxy_cfg_file: Path to the config file for starting reproxy.
+            reclient_dir: Path to the re-client directory that contains the
+                reproxy, bootstrap, rewrapper binaries.
+            reproxy_cfg_file: Path to the config file for starting reproxy.
 
         Raises:
-          ValueError
+            ValueError
         """
 
         reclient_dir = Path(reclient_dir)
@@ -85,10 +85,10 @@ class Remoteexec(object):
         Run the start or shutdown command for the remoteexec.
 
         Args:
-          shutdown: If true, add shutdown command.
+            shutdown: If true, add shutdown command.
 
         Raises:
-          cros_build_lib.RunCommandError
+            cros_build_lib.RunCommandError
         """
         bootstrap_path = self.reclient_dir / "bootstrap"
         reproxy_path = self.reclient_dir / "reproxy"
@@ -109,7 +109,7 @@ class Remoteexec(object):
         Run the command to start the remoteexec.
 
         Raises:
-          cros_build_lib.RunCommandError
+            cros_build_lib.RunCommandError
         """
         self._RunRemoteExec()
 
@@ -119,6 +119,6 @@ class Remoteexec(object):
         Run the command to shutdown the remoteexec.
 
         Raises:
-          cros_build_lib.RunCommandError
+            cros_build_lib.RunCommandError
         """
         self._RunRemoteExec(shutdown=True)

@@ -64,7 +64,7 @@ class StatefulUpdaterTest(cros_test_lib.MockTempDirTestCase):
         self.assertExists(self._payload)
 
     def testTargetStatefulUpdateFileDoNotExist(self):
-        """Tests that we raise error if the target stateful file doesn't exist."""
+        """Verify we raise error if the target stateful file doesn't exist."""
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
         ) as device:

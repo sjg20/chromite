@@ -55,7 +55,7 @@ class ChromiumOSBaseUpdaterMock(partial_mock.PartialCmdMock):
 
 
 class TransferMock(partial_mock.PartialCmdMock):
-    """Mock out all transfer functions in auto_updater_transfer.LocalTransfer."""
+    """Mock all transfer functions in auto_updater_transfer.LocalTransfer."""
 
     TARGET = "chromite.lib.auto_updater_transfer.LocalTransfer"
     ATTRS = (
@@ -72,13 +72,13 @@ class TransferMock(partial_mock.PartialCmdMock):
         """Mock auto_updater_transfer.Transfer.CheckPayloads."""
 
     def TransferUpdateUtilsPackage(self, _inst, *_args, **_kwargs):
-        """Mock auto_updater_transfer.LocalTransfer.TransferUpdateUtilsPackage."""
+        """Mock LocalTransfer.TransferUpdateUtilsPackage."""
 
     def TransferRootfsUpdate(self, _inst, *_args, **_kwargs):
-        """Mock auto_updater_transfer.LocalTransfer.TransferRootfsUpdate."""
+        """Mock LocalTransfer.TransferRootfsUpdate."""
 
     def TransferStatefulUpdate(self, _inst, *_args, **_kwargs):
-        """Mock auto_updater_transfer.LocalTransfer.TransferStatefulUpdate."""
+        """Mock LocalTransfer.TransferStatefulUpdate."""
 
 
 class ChromiumOSPreCheckMock(partial_mock.PartialCmdMock):
@@ -132,8 +132,8 @@ class TransferTest(ChromiumOSUpdaterBaseTest):
     def testTransferForRootfs(self):
         """Test transfer functions for rootfs update.
 
-        When rootfs update is enabled, update-utils and rootfs update payload are
-        transferred. Stateful update payload is not.
+        When rootfs update is enabled, update-utils and rootfs update payload
+        are transferred. Stateful update payload is not.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
@@ -179,7 +179,7 @@ class ChromiumOSUpdatePreCheckTest(ChromiumOSUpdaterBaseTest):
             )
 
     def testCheckRestoreStatefulError(self):
-        """Test CheckRestoreStateful fails with raising ChromiumOSUpdateError."""
+        """Test CheckRestoreStateful fails, raising ChromiumOSUpdateError."""
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
         ) as device:
@@ -297,7 +297,7 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
             )
 
     def testUpdateStatefulNoCopyStateful(self):
-        """Tests stateful update when stateful payload is not copied to device."""
+        """Tests stateful update when stateful payload not copied to device."""
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
         ) as device:
@@ -367,9 +367,9 @@ class ChromiumOSUpdaterRunTest(ChromiumOSUpdaterBaseTest):
     def testCreateTransferObjectError(self):
         """Test ChromiumOSUpdater.CreateTransferObject method.
 
-        Tests if the method throws ChromiumOSUpdater error when a class that is not
-        a subclass of auto_updater_transfer.Transfer is passed as value for the
-        transfer_class argument.
+        Tests if the method throws ChromiumOSUpdater error when a class that is
+        not a subclass of auto_updater_transfer.Transfer is passed as value for
+        the transfer_class argument.
         """
 
         class NotATransferSubclass(object):
@@ -512,7 +512,8 @@ class ChromiumOSUpdaterRunErrorTest(ChromiumOSErrorTest):
     def testSetupRootfsUpdateError(self):
         """Test ChromiumOSUpdater.SetupRootfsUpdate with raising exception.
 
-        RootfsUpdateError is raised if it cannot get status from GetUpdateStatus.
+        RootfsUpdateError is raised if it cannot get status from
+        GetUpdateStatus.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
@@ -662,7 +663,8 @@ class ChromiumOSUpdaterRunErrorTest(ChromiumOSErrorTest):
     def testStatefulUpdateCmdError(self):
         """Test ChromiumOSUpdater.UpdateStateful with raising exception.
 
-        StatefulUpdateError is raised if device fails to update stateful partition.
+        StatefulUpdateError is raised if device fails to update stateful
+        partition.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
@@ -744,10 +746,10 @@ class ChromiumOSUpdaterRunErrorTest(ChromiumOSErrorTest):
             )
 
     def testNoVerifyError(self):
-        """Test RebootAndVerify won't raise any error when unable do_rootfs_update.
+        """Test RebootAndVerify won't raise errors when unable do_rootfs_update.
 
-        If do_rootfs_update is unabled, verify logic won't be touched, which means
-        no AutoUpdateVerifyError will be thrown.
+        If do_rootfs_update is disabled, verify logic won't be touched, which
+        means no AutoUpdateVerifyError will be thrown.
         """
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
@@ -775,7 +777,7 @@ class RetryCommand(cros_test_lib.RunCommandTestCase):
     """Base class for _RetryCommand tests."""
 
     def testRetryCommand(self):
-        """Ensures that _RetryCommand can take both string and list args for cmd."""
+        """Verify _RetryCommand can take both string and list args for cmd."""
         with remote_access.ChromiumOSDeviceHandler(
             remote_access.TEST_IP
         ) as device:

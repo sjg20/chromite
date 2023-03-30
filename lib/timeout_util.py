@@ -41,8 +41,8 @@ def _ScheduleTimer(seconds, interval=0):
     immediately, so that handler can be called even in this stack.
 
     Args:
-      seconds: How long to wait before sending SIGALRM, in seconds.
-      interval: (Optional) interval schedule for the timer.
+        seconds: How long to wait before sending SIGALRM, in seconds.
+        interval: (Optional) interval schedule for the timer.
     """
     # Min resolution of itimer. See man setitimer(2) for details.
     MIN_SECONDS = 0.000001
@@ -53,7 +53,7 @@ def _CancelTimer():
     """Cancels the currently scheduled SIGALRM timer.
 
     Returns:
-      Previous timer, which is a pair of scheduled timeout and interval.
+        Previous timer, which is a pair of scheduled timeout and interval.
     """
     return signal.setitimer(signal.ITIMER_REAL, 0)
 
@@ -70,14 +70,14 @@ def Timeout(
     is reached. Timeout can also nest underneath FatalTimeout.
 
     Args:
-      max_run_time: How long to wait before sending SIGALRM.  May be a number
-        (in seconds, can be fractional) or a datetime.timedelta object.
-      error_message: Optional string to wrap in the TimeoutError exception on
-        timeout. If not provided, default template will be used.
-      reason_message: Optional string to be appended to the TimeoutError
-        error_message string. Provide a custom message here if you want to have
-        a purpose-specific message without overriding the default template in
-        |error_message|.
+        max_run_time: How long to wait before sending SIGALRM.  May be a number
+            (in seconds, can be fractional) or a datetime.timedelta object.
+        error_message: Optional string to wrap in the TimeoutError exception on
+            timeout. If not provided, default template will be used.
+        reason_message: Optional string to be appended to the TimeoutError
+            error_message string. Provide a custom message here if you want to
+            have a purpose-specific message without overriding the default
+            template in |error_message|.
     """
     max_run_time = Timedelta(max_run_time).total_seconds()
     if reason_message:
@@ -92,9 +92,9 @@ def Timeout(
     original_handler = signal.signal(signal.SIGALRM, kill_us)
 
     try:
-        # Signal the min in case the leftover time was smaller than this timeout.
-        # This needs to be called in try block, otherwise, finally may not be
-        # called in case that the timeout duration is too short.
+        # Signal the min in case the leftover time was smaller than this
+        # timeout. This needs to be called in try block, otherwise, finally may
+        # not be called in case that the timeout duration is too short.
         _ScheduleTimer(min(previous_timeout or float("inf"), max_run_time))
         yield
     finally:
@@ -105,8 +105,8 @@ def Timeout(
         # Ensure the previous handler will fire if it was meant to.
         if previous_timeout:
             remaining_timeout = previous_timeout - (time.time() - previous_time)
-            # It is ok to pass negative remaining_timeout. Please see also comments
-            # of _ScheduleTimer for more details.
+            # It is ok to pass negative remaining_timeout. Please see also
+            # comments of _ScheduleTimer for more details.
             _ScheduleTimer(remaining_timeout, previous_interval)
 
 
@@ -124,10 +124,10 @@ def FatalTimeout(max_run_time, display_message=None):
     manager.
 
     Args:
-      max_run_time: How long to wait.  May be a number (in seconds, can be
-        fractional) or a datetime.timedelta object.
-      display_message: Optional string message to be included in timeout
-        error message, if the timeout occurs.
+        max_run_time: How long to wait.  May be a number (in seconds, can be
+            fractional) or a datetime.timedelta object.
+        display_message: Optional string message to be included in timeout
+            error message, if the timeout occurs.
     """
     max_run_time = Timedelta(max_run_time).total_seconds()
 
@@ -142,8 +142,8 @@ def FatalTimeout(max_run_time, display_message=None):
         # fairly high.
         _ScheduleTimer(60)
 
-        # The cbuildbot stage that gets aborted by this timeout should be treated as
-        # failed by buildbot.
+        # The cbuildbot stage that gets aborted by this timeout should be
+        # treated as failed by buildbot.
         error_message = (
             "Timeout occurred- waited %i seconds, failing." % max_run_time
         )
@@ -170,7 +170,7 @@ def FatalTimeout(max_run_time, display_message=None):
 
 
 def TimeoutDecorator(max_time):
-    """Decorator used to ensure a func is interrupted if it's running too long."""
+    """Decorator used to ensure a func is interrupted if it runs too long."""
 
     # Save off the built-in versions of time.time, signal.signal, and
     # signal.alarm, in case they get mocked out later. We want to ensure that
@@ -223,10 +223,10 @@ def WaitForReturnTrue(*args, **kwargs):
     Continues to run until the function returns True.
 
     Args:
-      See WaitForReturnValue([True], ...)
+        See WaitForReturnValue([True], ...)
 
     Raises:
-      TimeoutError when the timeout is exceeded.
+        TimeoutError when the timeout is exceeded.
     """
     WaitForReturnValue([True], *args, **kwargs)
 
@@ -238,14 +238,14 @@ def WaitForReturnValue(values, *args, **kwargs):
     of accepted |values|.  See WaitForSuccess for more details.
 
     Args:
-      values: A list or set of acceptable return values.
-      *args, **kwargs: See WaitForSuccess for remaining arguments.
+        values: A list or set of acceptable return values.
+        *args, **kwargs: See WaitForSuccess for remaining arguments.
 
     Returns:
-      The value most recently returned by |func|.
+        The value most recently returned by |func|.
 
     Raises:
-      TimeoutError when the timeout is exceeded.
+        TimeoutError when the timeout is exceeded.
     """
 
     def _Retry(return_value):
@@ -266,35 +266,36 @@ def WaitForSuccess(
 ):
     """Periodically run a function, waiting in between runs.
 
-    Continues to run given function until return value is accepted by retry check.
+    Continues to run given function until return value is accepted by retry
+    check.
 
     To retry based on raised exceptions see GenericRetry in retry_util.
 
     Args:
-      retry_check: A functor that will be passed the return value of |func| as
-        the only argument.  If |func| should be retried |retry_check| should
-        return True.
-      func: The function to run to test for a value.
-      timeout: The maximum amount of time to wait.  May be a number (in seconds)
-        or a datetime.timedelta object.
-      period: How long between calls to |func|.  May be a number (in seconds) or
-        a datetime.timedelta object.
-      side_effect_func: Optional function to be called between polls of func,
-        typically to output logging messages. The remaining time will be passed
-        as a datetime.timedelta object.
-      func_args: Optional list of positional arguments to be passed to |func|.
-      func_kwargs: Optional dictionary of keyword arguments to be passed to
-                   |func|.
-      fallback_timeout: We set a secondary timeout based on sigalarm this many
-                        seconds after the initial timeout. This should NOT be
-                        considered robust, but can allow timeouts inside blocking
-                        methods.
+        retry_check: A functor that will be passed the return value of |func| as
+            the only argument.  If |func| should be retried |retry_check| should
+            return True.
+        func: The function to run to test for a value.
+        timeout: The maximum amount of time to wait.  May be a number (in
+            seconds) or a datetime.timedelta object.
+        period: How long between calls to |func|.  May be a number (in seconds)
+            or a datetime.timedelta object.
+        side_effect_func: Optional function to be called between polls of func,
+            typically to output logging messages. The remaining time will be
+            passed as a datetime.timedelta object.
+        func_args: Optional list of positional arguments to be passed to |func|.
+        func_kwargs: Optional dictionary of keyword arguments to be passed to
+            |func|.
+        fallback_timeout: We set a secondary timeout based on sigalarm this many
+            seconds after the initial timeout. This should NOT be considered
+            robust, but can allow timeouts inside blocking methods.
 
     Returns:
-      The value most recently returned by |func| that was not flagged for retry.
+        The value most recently returned by |func| that was not flagged for
+        retry.
 
     Raises:
-      TimeoutError when the timeout is exceeded.
+        TimeoutError when the timeout is exceeded.
     """
     timeout = Timedelta(timeout, zero_ok=True)
     period = Timedelta(period, zero_ok=True)

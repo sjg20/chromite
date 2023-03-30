@@ -4,7 +4,7 @@
 
 """Manage Google Low Overhead Authentication Service (LOAS) tasks.
 
-This is used by scripts that run outside of the chroot and require access to
+This is used by scripts that run outside the chroot and require access to
 Google production resources.
 
 If you don't know what any of this means, then you don't need this module :).
@@ -30,9 +30,9 @@ class Loas(object):
         """Initialize.
 
         Args:
-          user: The LOAS account to check.
-          email_notify: The people to notify when the cert is going to expire.
-          email_server: The e-mail server to use when notifying.
+            user: The LOAS account to check.
+            email_notify: The people to notify when the cert is going to expire.
+            email_server: The e-mail server to use when notifying.
         """
         self.user = user
         self.email_notify = email_notify

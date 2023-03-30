@@ -12,7 +12,10 @@ def _get_trees():
     """Get the hand-built deps trees for tests.
 
     Returns:
-      tuple: (deps tree with bdeps, deps tree without bdeps, bdeps tree, sdk tree)
+        tuple: (deps tree with bdeps,
+            deps tree without bdeps,
+            bdeps tree,
+            sdk tree)
     """
     sysroot = "/build/target/"
     # Quick access to complete deps entries for each package.
@@ -209,13 +212,13 @@ def _get_raw_sdk_depgraph(*_args, **_kwargs):
 
 
 def _get_raw_sysroot_depgraph(*_args, **_kwargs):
-    """Build a DepgraphResult instance corresponding to the test sysroot data."""
+    """Get a DepgraphResult instance corresponding to the test sysroot data."""
     _, deps_tree, bdeps_tree, _ = _get_trees()
     return depgraph.DepgraphResult(deps_tree, bdeps_tree, ["virtual/sysroot-1"])
 
 
 def _get_raw_build_target_depgraph(*_args, **_kwargs):
-    """Build a DepgraphResult instance corresponding to the full depgraph data."""
+    """Get a DepgraphResult instance corresponding to the full depgraph data."""
     deps_tree, _, bdeps_tree, _ = _get_trees()
     return depgraph.DepgraphResult(deps_tree, bdeps_tree, ["virtual/sysroot-1"])
 
