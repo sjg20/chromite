@@ -1,0 +1,2 @@
+# Zephyr downstreaming utility script and its wrapper
+per-file zephyr-downstream* = aaronmassey@google.com
