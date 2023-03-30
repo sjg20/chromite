@@ -668,6 +668,9 @@ class PartialCmdMock(PartialMock):
         result = cros_build_lib.CompletedProcess(
             returncode=returncode, stdout=stdout, stderr=stderr
         )
+        # NB: Keep in sync with RunCommandMock.run.
+        if isinstance(cmd, (tuple, list)):
+            cmd = [str(x) if isinstance(x, os.PathLike) else x for x in cmd]
         self._results[mock_attr].AddResultForParams(
             (cmd,),
             result,

@@ -126,6 +126,9 @@ class RemoteShMock(partial_mock.PartialCmdMock):
             A CompletedProcess object with an additional member |rc_mock| to
             enable examination of the underlying run() function call.
         """
+        # NB: Keep in sync with RunCommandMock.run.
+        if isinstance(cmd, (tuple, list)):
+            cmd = [str(x) if isinstance(x, os.PathLike) else x for x in cmd]
         result = self._results["RemoteSh"].LookupResult(
             (cmd,),
             hook_args=(

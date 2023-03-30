@@ -1723,8 +1723,9 @@ class RunCommandMock(partial_mock.PartialCmdMock):
         return self._called
 
     def run(self, cmd, *args, **kwargs):
+        # NB: Keep in sync with PartialCmdMock.AddCmdResult.
         if isinstance(cmd, (tuple, list)):
-            cmd = list(str(x) if isinstance(x, os.PathLike) else x for x in cmd)
+            cmd = [str(x) if isinstance(x, os.PathLike) else x for x in cmd]
         self._called = True
         result = self._results["run"].LookupResult(
             (cmd,), kwargs=kwargs, hook_args=(cmd,) + args, hook_kwargs=kwargs
