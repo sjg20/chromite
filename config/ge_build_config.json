@@ -3744,6 +3744,15 @@
         },
         {
           "board_name": "brya-pvs",
+          "name": "omnigul",
+          "cq_test_enabled": false,
+          "release_builder_test_pool": "bvt",
+          "board_id": 7263,
+          "is_active": true,
+          "is_experimental": false
+        },
+        {
+          "board_name": "brya-pvs",
           "name": "osiris",
           "cq_test_enabled": false,
           "release_builder_test_pool": "bvt",
