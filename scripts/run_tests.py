@@ -58,7 +58,8 @@ def main(argv):
     if opts.network:
         pytest_args += ["-m", "not network_test or network_test"]
 
-    precache()
+    if opts.precache:
+        precache()
 
     if opts.quick:
         logging.info("Skipping test namespacing due to --quickstart.")
@@ -67,7 +68,7 @@ def main(argv):
         # interfere with parts of the running system if not isolated in a namespace.
         # Disabling namespaces is not recommended for general use.
         namespaces.ReExecuteWithNamespace(
-            [sys.argv[0]] + argv, network=opts.network
+            [sys.argv[0], "--no-precache"] + argv, network=opts.network
         )
 
     jobs = opts.jobs
@@ -174,6 +175,12 @@ def get_parser():
         "--network",
         action="store_true",
         help="Include network tests.",
+    )
+    parser.add_argument(
+        "--no-precache",
+        dest="precache",
+        action="store_false",
+        help="Skip precaching packages from the network.",
     )
     parser.add_argument(
         "--no-chroot",
