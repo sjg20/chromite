@@ -73,7 +73,8 @@ def _IsWorkonEbuild(include_chrome, ebuild_path, ebuild_contents=None):
 def _GetLinesFromFile(path, line_prefix, line_suffix):
     """Get a unique set of lines from a file, stripping off a prefix and suffix.
 
-    Rejects lines that do not start with |line_prefix| or end with |line_suffix|.
+    Rejects lines that do not start with |line_prefix| or end with
+    |line_suffix|.
     Returns an empty set if the file at |path| does not exist.
     Discards duplicate lines.
 
@@ -209,15 +210,15 @@ class WorkonHelper(object):
         """Construct an instance.
 
         Args:
-          sysroot: path to sysroot to work on packages within.
-          friendly_name: friendly name of the system
-              (e.g. 'host', <board name>, or a brick friendly name).
-              Defaults to 'host' if sysroot is '/' or the last component of the
-              sysroot path.
-          verbose: boolean True iff we should print a lot more command output.
-              This is intended for debugging, and you should never cause a script
-              to depend on behavior enabled by this flag.
-          src_root: path to source root inside chroot.
+            sysroot: path to sysroot to work on packages within.
+            friendly_name: friendly name of the system
+                (e.g. 'host', <board name>, or a brick friendly name).
+                Defaults to 'host' if sysroot is '/' or the last component of
+                the sysroot path.
+            verbose: boolean True iff we should print a lot more command output.
+                This is intended for debugging, and you should never cause a
+                script to depend on behavior enabled by this flag.
+            src_root: path to source root inside chroot.
         """
         self._sysroot = sysroot
         if friendly_name:
@@ -246,10 +247,10 @@ class WorkonHelper(object):
         )
 
         # Clobber and re-create the WORKON_FILE symlinks every time. This is a
-        # trivial operation and eliminates all kinds of corner cases as well as any
-        # possible future renames of WORKON_FILE.
-        # In particular, we build the chroot as a board (amd64-host), bundle it and
-        # unpack it on /. After unpacking, the symlinks will point to
+        # trivial operation and eliminates all kinds of corner cases as well as
+        # any possible future renames of WORKON_FILE.
+        # In particular, we build the chroot as a board (amd64-host), bundle it
+        # and unpack it on /. After unpacking, the symlinks will point to
         # .config/cros_workon/amd64-host instead of .config/cros_workon/host.
         # Regenerating the symlinks here corrects it. crbug.com/23096.
         # Note: This is currently also relied upon as an indirect fix for
@@ -286,8 +287,9 @@ class WorkonHelper(object):
                     x.strip() for x in portdir_overlay.splitlines()
                 ]
             else:
-                # This command is exceptionally slow, and we don't expect the list of
-                # overlays to change during the lifetime of WorkonHelper.
+                # This command is exceptionally slow, and we don't expect the
+                # list of overlays to change during the lifetime of
+                # WorkonHelper.
                 self._cached_overlays = portage_util.FindSysrootOverlays(
                     self._sysroot
                 )
@@ -297,8 +299,8 @@ class WorkonHelper(object):
     def _SetWorkedOnAtoms(self, atoms):
         """Sets the unmasked atoms.
 
-        This will generate both the unmasked atom list and the masked atoms list as
-        the two files mention the same atom list.
+        This will generate both the unmasked atom list and the masked atoms list
+        as the two files mention the same atom list.
 
         Args:
           atoms: Atoms to unmask.
@@ -332,7 +334,7 @@ class WorkonHelper(object):
                 )
 
     def _AtomsToEbuilds(self, atoms):
-        """Maps from a list of CP atoms to a list of corresponding -9999 ebuilds.
+        """Maps a list of CP atoms to a list of corresponding -9999 ebuilds.
 
         Args:
           atoms: iterable of portage atoms (e.g. ['sys-apps/dbus']).
@@ -360,7 +362,7 @@ class WorkonHelper(object):
         return ebuilds
 
     def _GetCanonicalAtom(self, package_fragment: str, find_stale=False):
-        """Transform a package source path or name fragment to the canonical atom.
+        """Transform a pkg source path or name fragment to the canonical atom.
 
         If there are multiple atoms that a package fragment could map to,
         picks an arbitrary one and prints a warning.
@@ -415,10 +417,12 @@ class WorkonHelper(object):
                         logging.warning("  %s", p)
                     logging.warning("Using %s", path_atoms[0])
                     logging.notice(
-                        "cros workon start command for the rest of the packages:"
+                        "cros workon start command for the rest of the "
+                        "packages:"
                     )
                     logging.notice(
-                        f'cros workon -b {self._system} start {" ".join(path_atoms[1:])}'
+                        f"cros workon -b {self._system} start "
+                        f'{" ".join(path_atoms[1:])}'
                     )
 
                 logging.notice(
@@ -450,8 +454,8 @@ class WorkonHelper(object):
 
         if not _IsWorkonEbuild(True, ebuild_path):
             msg = (
-                "In order to cros_workon a package, it must have a -9999 ebuild "
-                "that inherits from cros-workon.\n"
+                "In order to cros_workon a package, it must have a -9999 "
+                "ebuild that inherits from cros-workon.\n"
             )
             if "-9999" in ebuild_path:
                 msg += (
@@ -518,8 +522,9 @@ class WorkonHelper(object):
         # Make sure we're in a source path.
         path = Path(raw_path).resolve()
         if not path.exists():
-            # The path doesn't exist. To avoid the long lookup when the dev misspells
-            # a package name, lets just assume it's that and return no packages.
+            # The path doesn't exist. To avoid the long lookup when the dev
+            # misspells a package name, lets just assume it's that and return no
+            # packages.
             logging.warning(
                 "%s (%s) does not exist. Is it a misspelled package?",
                 path,
@@ -580,16 +585,18 @@ class WorkonHelper(object):
         """Get a list of all cros-workon ebuilds in the current system.
 
         Args:
-          filter_workon: True iff we should filter the list of ebuilds to those
-              packages which define only a workon ebuild (i.e. no stable version).
-          filter_on_arch: True iff we should only return ebuilds which are marked
-              as unstable for the architecture of the system we're interested in.
-          include_chrome: True iff we should also include chromeos-chrome and
-              related ebuilds.  These ebuilds can be worked on, but don't work
-              like normal cros-workon ebuilds.
+            filter_workon: True iff we should filter the list of ebuilds to
+                those packages which define only a workon ebuild (i.e. no stable
+                version).
+            filter_on_arch: True iff we should only return ebuilds which are
+                marked as unstable for the architecture of the system we're
+                interested in.
+            include_chrome: True iff we should also include chromeos-chrome and
+                related ebuilds.  These ebuilds can be worked on, but don't work
+                like normal cros-workon ebuilds.
 
         Returns:
-          list of paths to ebuilds meeting the above criteria.
+            list of paths to ebuilds meeting the above criteria.
         """
         result = []
         if filter_on_arch:
@@ -716,17 +723,19 @@ class WorkonHelper(object):
         """Mark a list of packages as being worked on locally.
 
         Args:
-          packages: list of package name fragments. While each fragment could be a
-              complete portage atom, this helper will attempt to infer intent by
-              looking for fragments in a list of all possible atoms for the system
-              in question.
-          use_all: True iff we should ignore the package list, and instead consider
-              all possible atoms that we could mark as worked on locally.
-          use_workon_only: True iff we should ignore the package list, and instead
-              consider all possible atoms for the system in question that define
-              only the -9999 ebuild.
-          quiet: Does not log the started atoms when True. Used to avoid confusion
-              in cases where the list must be toggled to compute the new packages.
+            packages: list of package name fragments. While each fragment could
+                be a complete portage atom, this helper will attempt to infer
+                intent by looking for fragments in a list of all possible atoms
+                for the system in question.
+            use_all: True iff we should ignore the package list, and instead
+                consider all possible atoms that we could mark as worked on
+                locally.
+            use_workon_only: True iff we should ignore the package list, and
+                instead consider all possible atoms for the system in question
+                that define only the -9999 ebuild.
+            quiet: Does not log the started atoms when True. Used to avoid
+                confusion in cases where the list must be toggled to compute the
+                new packages.
         """
         if not os.path.exists(self._sysroot):
             raise WorkonError("Sysroot %s is not setup." % self._sysroot)
@@ -758,8 +767,8 @@ class WorkonHelper(object):
         self._AddProjectsToPartialManifests(new_atoms)
 
         if not quiet:
-            # Legacy scripts used single quotes in their output, and we carry on this
-            # honorable tradition.
+            # Legacy scripts used single quotes in their output, and we carry on
+            # this honorable tradition.
             logging.notice(
                 "Started working on '%s' for '%s'",
                 " ".join(new_atoms),
@@ -773,20 +782,21 @@ class WorkonHelper(object):
         use_workon_only: bool = False,
         quiet: bool = False,
     ):
-        """Stop working on a list of packages currently marked as locally worked on.
+        """Stop working on a list of pkgs currently marked as locally worked on.
 
         Args:
-          packages: list of package name fragments.  These will be mapped to
-              canonical portage atoms via the same process as
-              StartWorkingOnPackages().
-          use_all: True iff instead of the provided package list, we should just
-              stop working on all currently worked on atoms for the system in
-              question.
-          use_workon_only: True iff instead of the provided package list, we should
-              stop working on all currently worked on atoms that define only a
-              -9999 ebuild.
-          quiet: Does not log the started atoms when True. Used to avoid confusion
-              in cases where the list must be toggled to compute the new packages.
+            packages: list of package name fragments.  These will be mapped to
+                canonical portage atoms via the same process as
+                StartWorkingOnPackages().
+            use_all: True iff instead of the provided package list, we should
+                just stop working on all currently worked on atoms for the
+                system in question.
+            use_workon_only: True iff instead of the provided package list, we
+                should stop working on all currently worked on atoms that define
+                only a -9999 ebuild.
+            quiet: Does not log the started atoms when True. Used to avoid
+                confusion in cases where the list must be toggled to compute the
+                new packages.
         """
         if use_all or use_workon_only:
             atoms = self._GetLiveAtoms(filter_workon=use_workon_only)
@@ -806,8 +816,8 @@ class WorkonHelper(object):
         self._SetWorkedOnAtoms(current_atoms)
 
         if stopped_atoms and not quiet:
-            # Legacy scripts used single quotes in their output, and we carry on this
-            # honorable tradition.
+            # Legacy scripts used single quotes in their output, and we carry on
+            # this honorable tradition.
             logging.notice(
                 "Stopped working on '%s' for '%s'",
                 " ".join(stopped_atoms),
@@ -818,17 +828,17 @@ class WorkonHelper(object):
         """Get information about packages.
 
         Args:
-          packages: list of package name fragments.  These will be mapped to
-              canonical portage atoms via the same process as
-              StartWorkingOnPackages().
-          use_all: True iff we should ignore the package list, and instead consider
-              all possible workon-able atoms.
-          use_workon_only: True iff we should ignore the package list, and instead
-              consider all possible atoms for the system in question that define
-              only the -9999 ebuild.
+            packages: list of package name fragments.  These will be mapped to
+                canonical portage atoms via the same process as
+                StartWorkingOnPackages().
+            use_all: True iff we should ignore the package list, and instead
+                consider all possible workon-able atoms.
+            use_workon_only: True iff we should ignore the package list, and
+                instead consider all possible atoms for the system in question
+                that define only the -9999 ebuild.
 
         Returns:
-          Returns a list of PackageInfo tuples.
+            Returns a list of PackageInfo tuples.
         """
         if use_all or use_workon_only:
             # You can't use info to find the source code from Chrome, since that
@@ -855,8 +865,8 @@ class WorkonHelper(object):
             ebuild_to_repos[ebuild] = projects
             ebuild_obj = portage_util.EBuild(ebuild)
             if ebuild_obj.is_manually_uprevved:
-                # Manually uprevved ebuild is pinned to a specific git sha1, so change
-                # in that repo matter to the ebuild.
+                # Manually uprevved ebuild is pinned to a specific git sha1, so
+                # change in that repo matter to the ebuild.
                 continue
             src_paths = ebuild_obj.GetSourceInfo(src_root, manifest).srcdirs
             src_paths = [
@@ -878,8 +888,10 @@ class WorkonHelper(object):
         """Run a command in the source directory of an atom.
 
         Args:
-          atom: string atom to run the command in (e.g. 'chromeos-base/shill').
-          command: string shell command to run in the source directory of |atom|.
+            atom: string atom to run the command in (e.g.
+                'chromeos-base/shill').
+            command: string shell command to run in the source directory of
+                |atom|.
         """
         logging.info('Running "%s" on %s', command, atom)
         ebuild_path = self._FindEbuildForPackage(atom)
@@ -899,13 +911,14 @@ class WorkonHelper(object):
         """Run a command in the source directory of a list of packages.
 
         Args:
-          packages: list of package name fragments.
-          command: string shell command to run in the source directory of |atom|.
-          use_all: True iff we should ignore the package list, and instead consider
-              all possible workon-able atoms.
-          use_workon_only: True iff we should ignore the package list, and instead
-              consider all possible atoms for the system in question that define
-              only the -9999 ebuild.
+            packages: list of package name fragments.
+            command: string shell command to run in the source directory of
+                |atom|.
+            use_all: True iff we should ignore the package list, and instead
+                consider all possible workon-able atoms.
+            use_workon_only: True iff we should ignore the package list, and
+                instead consider all possible atoms for the system in question
+                that define only the -9999 ebuild.
         """
         if use_all or use_workon_only:
             atoms = self._GetLiveAtoms(filter_workon=use_workon_only)
@@ -954,8 +967,8 @@ class WorkonScope:
         self.start(self.pkgs)
         after_workon = self.helper.ListAtoms()
 
-        # Stop = the set we actually started. Preserves workon started status for
-        # any in the packages that were already worked on.
+        # Stop = the set we actually started. Preserves workon started status
+        # for any in the packages that were already worked on.
         self.stop_packages = sorted(set(after_workon) - set(self.before_workon))
         return self
 
@@ -1016,14 +1029,14 @@ class WorkonScope:
         self.helper.StopWorkingOnPackages(pkgs)
 
     def start(self, pkgs: Iterable[str]):
-        """Helper method to allow the context manager to explicitly start packages.
+        """Helper to allow the context manager to explicitly start packages.
 
-        Invocations of this method will track started packages and stop them when
-        __exit__ is invoked, even when explicitly called by a client in a runtime
-        context.
+        Invocations of this method will track started packages and stop them
+        when __exit__ is invoked, even when explicitly called by a client in a
+        runtime context.
 
         Args:
-          pkgs: A list of package name fragments.
+            pkgs: A list of package name fragments.
         """
         if pkgs:
             logging.debug(
@@ -1036,13 +1049,13 @@ class WorkonScope:
             )
 
     def stop(self, pkgs: Iterable[str]):
-        """Helper method to allow the context manager to explicitly stop packages.
+        """Helper to allow the context manager to explicitly stop packages.
 
         If a package is stopped that was marked as workon before entering the
         runtime context, that package will be restarted on exit.
 
         Args:
-          pkgs: A list of package name fragments.
+            pkgs: A list of package name fragments.
         """
         if pkgs:
             logging.debug(

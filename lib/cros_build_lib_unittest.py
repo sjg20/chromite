@@ -61,7 +61,7 @@ class CmdToStrTest(cros_test_lib.TestCase):
         self.differ = difflib.Differ()
 
     def _assertEqual(self, func, test_input, test_output, result):
-        """Like assertEqual but with built in diff support."""
+        """Like assertEqual but with built-in diff support."""
         msg = "Expected %s to translate %r to %r, but got %r" % (
             func,
             test_input,
@@ -77,8 +77,8 @@ class CmdToStrTest(cros_test_lib.TestCase):
             self._assertEqual(functor.__name__, test_input, test_output, result)
 
             if check_type:
-                # Also make sure the result is a string, otherwise the %r output will
-                # include a "u" prefix and that is not good for logging.
+                # Also make sure the result is a string, otherwise the %r output
+                # will include a "u" prefix and that is not good for logging.
                 self.assertEqual(type(test_output), str)
 
     def testShellQuote(self):
@@ -301,7 +301,7 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
             )
 
     def testEncodingReplaceInvalidUtf8Output(self):
-        """Verify encoding='utf-8' errors='replace' output with invalid content."""
+        """Verify invalid content's encoding='utf-8' errors='replace' output."""
         result = cros_build_lib.run(
             ["echo", b"S\xffE"],
             capture_output=True,
@@ -659,8 +659,8 @@ class TestRunCommand(cros_test_lib.MockTestCase):
         self.proc_mock.returncode = 0
         cmd_list = ["foo", "bar", "roger"]
 
-        # Run.  We expect the env= to be passed through from sp (subprocess.Popen)
-        # to rc (run).
+        # Run.  We expect the env= to be passed through from sp
+        # (subprocess.Popen) to rc (run).
         self._TestCmd(
             cmd_list, cmd_list, sp_kv=dict(env=sp_env), rc_kv=dict(env=rc_env)
         )
@@ -670,8 +670,8 @@ class TestRunCommand(cros_test_lib.MockTestCase):
         # We'll put this bogus environment together, just to make sure
         # subprocess.Popen gets passed it.
         extra_env = {"Pinky": "Brain"}
-        ## This is a little bit circular, since the same logic is used to compute
-        ## the value inside, but at least it checks that this happens.
+        ## This is a little bit circular, since the same logic is used to
+        ## compute the value inside, but at least it checks that this happens.
         total_env = os.environ.copy()
         # The core run code forces this too.
         total_env["LC_MESSAGES"] = "C"
@@ -681,8 +681,8 @@ class TestRunCommand(cros_test_lib.MockTestCase):
         self.proc_mock.returncode = 0
         cmd_list = ["foo", "bar", "roger"]
 
-        # Run.  We expect the env= to be passed through from sp (subprocess.Popen)
-        # to rc (run).
+        # Run.  We expect the env= to be passed through from sp
+        # (subprocess.Popen) to rc (run).
         self._TestCmd(
             cmd_list,
             cmd_list,
@@ -707,8 +707,8 @@ class TestRunCommand(cros_test_lib.MockTestCase):
         self.proc_mock.returncode = 0
         cmd_list = ["foo", "bar", "roger"]
 
-        # Run.  We expect the env= to be passed through from sp (subprocess.Popen)
-        # to rc (run).
+        # Run.  We expect the env= to be passed through from sp
+        # (subprocess.Popen) to rc (run).
         self._TestCmd(
             cmd_list,
             cmd_list,
@@ -736,8 +736,8 @@ class TestRunCommand(cros_test_lib.MockTestCase):
         self.proc_mock.returncode = 0
         cmd_list = ["foo", "bar", "roger"]
 
-        # Run.  We expect the env= to be passed through from sp (subprocess.Popen)
-        # to rc (run).
+        # Run.  We expect the env= to be passed through from sp
+        # (subprocess.Popen) to rc (run).
         self._TestCmd(
             cmd_list,
             ["cros_sdk", "Pinky=Brain", "--"] + cmd_list,
@@ -834,7 +834,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
         self.assertEqual(self.stdin, unicode_input.encode("utf-8"))
 
     def testInputStringNoEncoding(self):
-        """Verify we encode UTF-8 strings passed on input w/out passing encoding."""
+        """Verify we encode UTF-8 input strings w/out passing encoding."""
         cmd_list = ["foo", "bar", "roger"]
         unicode_input = "💩"
         self.proc_mock.returncode = 0
@@ -1478,7 +1478,7 @@ class FailedCreateTarballTests(cros_test_lib.MockTestCase):
         self.tarResults = []
 
         def Result(*_args, **_kwargs):
-            """Creates CompletedProcess objects for each tarResults value in turn."""
+            """Creates CompletedProcess objects for each tarResults value."""
             return cros_build_lib.CompletedProcess(
                 returncode=self.tarResults.pop(0)
             )

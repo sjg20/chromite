@@ -98,7 +98,8 @@ class BuilderStatus(object):
                 BUILDER_STATUS_MISSING).
             message: A build_failure_message.BuildFailureMessage object with
                 details of builder failure. Or, None.
-            dashboard_url: Optional url linking to builder dashboard for this build.
+            dashboard_url: Optional url linking to builder dashboard for this
+                build.
         """
         self.status = status
         self.message = message
@@ -158,7 +159,7 @@ class BuilderStatus(object):
         return flat_dict
 
     def AsPickledDict(self):
-        """Returns a pickled dictionary representation of this builder status."""
+        """Returns a pickled dict representation of this builder status."""
         return pickle.dumps(
             dict(
                 status=self.status,
@@ -240,7 +241,8 @@ class BuilderStatusManager(object):
             or master_build_identifier.cidb_id is None
             or master_build_identifier.buildbucket_id is None
         ):
-            # Builds without master_build_id can't be aborted by self-destruction.
+            # Builds without master_build_id can't be aborted by
+            # self-destruction.
             return False
 
         buildbucket_ids = buildstore.GetKilledChildBuilds(
@@ -371,7 +373,7 @@ class SlaveBuilderStatus(object):
         )
 
     def _InitSlaveInfo(self):
-        """Init slave info including buildbucket info, cidb info and failures."""
+        """Init slave info incl. buildbucket info, cidb info and failures."""
         scheduled_buildbucket_info_dict = buildbucket_v2.GetBuildInfoDict(
             self.metadata, exclude_experimental=self.exclude_experimental
         )
@@ -551,8 +553,8 @@ class SlaveBuilderStatus(object):
                 status = common_pb2.Status.Name(build.status)
                 url = f"{constants.CHROMEOS_MILO_HOST}{build.id}"
             except buildbucket_v2.BuildbucketResponseException as e:
-                # If we have a temporary issue accessing the build status from the
-                # Buildbucket, log the error and continue with other builds.
+                # If we have a temporary issue accessing the build status from
+                # the Buildbucket, log the error and continue with other builds.
                 # SlaveStatus will handle the missing builds in ShouldWait().
                 logging.error(
                     "Failed to get status for build %s id %s: %s",
@@ -588,7 +590,8 @@ class SlaveBuilderStatus(object):
             returned map only contains slave builds which are associated with
             buildbucket_ids recorded in all_buildbucket_info_dict.
         """
-        # TODO(buildstore): Make sure buildstore is BuildStore, not CIDBConnection.
+        # TODO(buildstore): Make sure buildstore is BuildStore, not
+        #   CIDBConnection.
         all_cidb_status_dict = {}
         if buildstore is not None:
             buildbucket_ids = (

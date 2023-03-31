@@ -153,17 +153,18 @@ class UserDB(object):
         """Returns a user's database entry.
 
         Args:
-          username: name of user to get the entry for.
-          skip_lock: True iff we should skip getting a lock before reading the
-            database.
+            username: name of user to get the entry for.
+            skip_lock: True iff we should skip getting a lock before reading the
+                database.
 
         Returns:
-          database entry as a string.
+            database entry as a string.
         """
         if skip_lock:
             return UserToEntry(self._users[username])
 
-        # Clear the user cache to force ourselves to reparse while holding a lock.
+        # Clear the user cache to force ourselves to reparse while holding a
+        # lock.
         self._user_cache = None
 
         with locking.PortableLinkLock(
@@ -175,17 +176,18 @@ class UserDB(object):
         """Returns a group's database entry.
 
         Args:
-          groupname: name of group to get the entry for.
-          skip_lock: True iff we should skip getting a lock before reading the
-            database.
+            groupname: name of group to get the entry for.
+            skip_lock: True iff we should skip getting a lock before reading the
+                database.
 
         Returns:
-          database entry as a string.
+            database entry as a string.
         """
         if skip_lock:
             return GroupToEntry(self._groups[groupname])
 
-        # Clear the group cache to force ourselves to reparse while holding a lock.
+        # Clear the group cache to force ourselves to reparse while holding a
+        # lock.
         self._group_cache = None
 
         with locking.PortableLinkLock(
@@ -197,10 +199,10 @@ class UserDB(object):
         """Returns True iff a user called |username| exists in the database.
 
         Args:
-          username: name of a user (e.g. 'root')
+            username: name of a user (e.g. 'root')
 
         Returns:
-          True iff the given |username| has an entry in /etc/passwd.
+            True iff the given |username| has an entry in /etc/passwd.
         """
         return username in self._users
 
@@ -208,10 +210,10 @@ class UserDB(object):
         """Returns True iff a group called |groupname| exists in the database.
 
         Args:
-          groupname: name of a group (e.g. 'root')
+            groupname: name of a group (e.g. 'root')
 
         Returns:
-          True iff the given |groupname| has an entry in /etc/group.
+            True iff the given |groupname| has an entry in /etc/group.
         """
         return groupname in self._groups
 
@@ -219,10 +221,10 @@ class UserDB(object):
         """Resolves a username to a uid.
 
         Args:
-          username: name of a user (e.g. 'root')
+            username: name of a user (e.g. 'root')
 
         Returns:
-          The uid of the given username.  Raises ValueError on failure.
+            The uid of the given username.  Raises ValueError on failure.
         """
         user = self._users.get(username)
         if user:
@@ -236,10 +238,10 @@ class UserDB(object):
         """Resolves a groupname to a gid.
 
         Args:
-          groupname: name of a group (e.g. 'wheel')
+            groupname: name of a group (e.g. 'wheel')
 
         Returns:
-          The gid of the given groupname.  Raises ValueError on failure.
+            The gid of the given groupname.  Raises ValueError on failure.
         """
         group = self._groups.get(groupname)
         if group:
@@ -252,10 +254,11 @@ class UserDB(object):
     def AddUser(self, user):
         """Atomically add a user to the database.
 
-        If a user named |user.user| already exists, this method will simply return.
+        If a user named |user.user| already exists, this method will simply
+        return.
 
         Args:
-          user: user_db.User object to add to database.
+            user: user_db.User object to add to database.
         """
         # Try to avoid grabbing the lock in the common case that a user already
         # exists.
@@ -272,8 +275,8 @@ class UserDB(object):
         with locking.PortableLinkLock(
             self._user_db_file + ".lock", max_retry=self._DB_LOCK_RETRIES
         ):
-            # Check that |user| exists under the lock in case we're racing to create
-            # this user.
+            # Check that |user| exists under the lock in case we're racing to
+            # create this user.
             if self.UserExists(user.user):
                 logging.info(
                     'Not installing user "%s" because it already existed.',
@@ -302,7 +305,7 @@ class UserDB(object):
         return.
 
         Args:
-          group: user_db.Group object to add to database.
+            group: user_db.Group object to add to database.
         """
         # Try to avoid grabbing the lock in the common case that a group already
         # exists.
@@ -319,8 +322,8 @@ class UserDB(object):
         with locking.PortableLinkLock(
             self._group_db_file + ".lock", max_retry=self._DB_LOCK_RETRIES
         ):
-            # Check that |group| exists under the lock in case we're racing to create
-            # this group.
+            # Check that |group| exists under the lock in case we're racing to
+            # create this group.
             if self.GroupExists(group.group):
                 logging.info(
                     'Not installing group "%s" because it already existed.',

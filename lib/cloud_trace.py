@@ -48,7 +48,8 @@ def LogSpan(span):
     except OSError as error:
         if error.errno == errno.EPERM:
             logging.warning(
-                "Received permissions error while trying to open the span log file."
+                "Received permissions error while trying to open the span "
+                "log file."
             )
             return None
         elif error.errno == errno.ENOENT:

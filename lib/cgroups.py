@@ -50,7 +50,7 @@ class _GroupWasRemoved(Exception):
     """Exception representing when a group was unexpectedly removed.
 
     Via design, this should only be possible when instantiating a new
-    pool, but the parent pool has been removed- this means effectively that
+    pool, but the parent pool has been removed - this means effectively that
     we're supposed to shutdown (either we've been sigterm'd and ignored it,
     or it's imminent).
     """
@@ -63,7 +63,7 @@ def _FileContains(filename, strings):
 
 
 def EnsureInitialized(functor):
-    """Decorator for Cgroup methods to ensure the method is ran only if inited"""
+    """Decorator for Cgroup methods to ensure |functor| runs only if inited."""
 
     def f(self, *args, **kwargs):
         # pylint: disable=protected-access
@@ -124,9 +124,9 @@ class Cgroup(object):
                 if mtab.destination == mnt:
                     return True
 
-            # Grab a lock so in the off chance we have multiple programs (like two
-            # cros_sdk launched in parallel) running this init logic, we don't end
-            # up mounting multiple times.
+            # Grab a lock so in the off chance we have multiple programs (like
+            # two cros_sdk launched in parallel) running this init logic, we
+            # don't end up mounting multiple times.
             lock_path = "/tmp/.chromite.cgroups.lock"
             with locking.FileLock(lock_path, "cgroup lock") as lock:
                 lock.write_lock()
@@ -198,11 +198,12 @@ class Cgroup(object):
         """Initalize a cgroup instance.
 
         Args:
-            namespace: What cgroup namespace is this in?  cbuildbot/1823 for example.
+            namespace: What cgroup namespace is this in? e.g. cbuildbot/1823
             autoclean: Should this cgroup be removed once unused?
             lazy_init: Should we create the cgroup immediately, or when needed?
-            parent: A Cgroup instance; if the namespace is cbuildbot/1823, then the
-            parent *must* be the cgroup instance for namespace cbuildbot.
+            parent: A Cgroup instance; if the namespace is cbuildbot/1823, then
+                the parent *must* be the cgroup instance for namespace
+                cbuildbot.
             _is_root:  Internal option, shouldn't be used by consuming code.
             _overwrite: Internal option, shouldn't be used by consuming code.
         """
@@ -233,14 +234,15 @@ class Cgroup(object):
     def _LimitName(self, name, for_path=False, multilevel=False):
         """Translation function doing confidence checks on derivative namespaces
 
-        If you're extending this class, you should be using this for any namespace
-        operations that pass through a nested group.
+        If you're extending this class, you should be using this for any
+        namespace operations that pass through a nested group.
         """
-        # We use a fake pathway here, and this code must do so.  To calculate the
-        # real pathway requires knowing CGROUP_ROOT, which requires sudo
-        # potentially.  Since this code may be invoked just by loading the module,
-        # no execution/sudo should occur.  However, if for_path is set, we *do*
-        # require CGROUP_ROOT- which is fine, since we sort that on the way out.
+        # We use a fake pathway here, and this code must do so.  To calculate
+        # the real pathway requires knowing CGROUP_ROOT, which requires sudo
+        # potentially.  Since this code may be invoked just by loading the
+        # module, no execution/sudo should occur.  However, if for_path is set,
+        # we *do* require CGROUP_ROOT- which is fine, since we sort that on the
+        # way out.
         fake_path = os.path.normpath(os.path.join("/fake-path", self.namespace))
         path = os.path.normpath(os.path.join(fake_path, name))
 
@@ -401,9 +403,9 @@ class Cgroup(object):
 
         if force_inheritance:
             if self._SUPPORTS_AUTOINHERIT:
-                # If the cgroup version supports it, flip the auto-inheritance setting
-                # on so that cgroups nested here don't have to manually transfer
-                # settings
+                # If the cgroup version supports it, flip the auto-inheritance
+                # setting on so that cgroups nested here don't have to manually
+                # transfer settings
                 self._SudoSet("cgroup.clone_children", "1")
 
             # Deal with noprefix mount option.  Because Android.
@@ -419,9 +421,9 @@ class Cgroup(object):
                 for name in ("cpus", "mems"):
                     name = name_prefix + name
                     if not self._overwrite:
-                        # Top level nodes like cros/cbuildbot we don't want to overwrite-
-                        # users/system may've leveled configuration.  If it's empty,
-                        # overwrite it in those cases.
+                        # Top level nodes like cros/cbuildbot we don't want to
+                        # overwrite- users/system may've leveled configuration.
+                        # If it's empty, overwrite it in those cases.
                         val = self.GetValue(name, "").strip()
                         if val:
                             continue
@@ -610,12 +612,14 @@ class Cgroup(object):
                 new_pids = pids.difference(previous_pids)
                 if new_pids:
                     _SignalPids(new_pids, signal.SIGTERM)
-                    # As long as new pids keep popping up, skip sleeping and just keep
-                    # stomping them as quickly as possible (whack-a-mole is a good visual
-                    # analogy of this).  We do this to ensure that fast moving spawns
-                    # are dealt with as quickly as possible.  When considering this code,
-                    # it's best to think about forkbomb scenarios- shouldn't occur, but
-                    # synthetic fork-bombs can occur, thus this code being aggressive.
+                    # As long as new pids keep popping up, skip sleeping and
+                    # just keep stomping them as quickly as possible
+                    # (whack-a-mole is a good visual analogy of this).  We do
+                    # this to ensure that fast moving spawns are dealt with as
+                    # quickly as possible.  When considering this code, it's
+                    # best to think about forkbomb scenarios - shouldn't occur,
+                    # but synthetic fork-bombs can occur, thus this code being
+                    # aggressive.
                     continue
 
             time.sleep(poll_interval)
@@ -645,18 +649,19 @@ class Cgroup(object):
             time.sleep(poll_interval)
 
             # Note this is done after the sleep; try to give the kernel time to
-            # shutdown the processes.  They may still be transitioning to defunct
-            # kernel side by when we hit this scan, but that's fine- the next will
-            # get it.
+            # shutdown the processes.  They may still be transitioning to
+            # defunct kernel side by when we hit this scan, but that's fine -
+            # the next will get it.
             # This needs to be nonstrict; it's possible the kernel is currently
-            # killing the pids we've just sigkill'd, thus the group isn't removable
-            # yet.  Additionally, it's possible a child got forked we didn't see.
-            # Ultimately via our killing/removal attempts, it will be removed,
-            # just not necessarily on the first run.
+            # killing the pids we've just sigkill'd, thus the group isn't
+            # removable yet.  Additionally, it's possible a child got forked we
+            # didn't see. Ultimately via our killing/removal attempts, it will
+            # be removed, just not necessarily on the first run.
             if remove:
                 if self.RemoveThisGroup(strict=False):
-                    # If we successfully removed this group, then there can be no pids,
-                    # sub groups, etc, within it.  No need to scan further.
+                    # If we successfully removed this group, then there can be
+                    # no pids, sub groups, etc, within it.  No need to scan
+                    # further.
                     return True
                 groups_existed = True
             else:
@@ -681,16 +686,17 @@ class Cgroup(object):
 
         cpuset = None
         try:
-            # See the kernels Documentation/filesystems/proc.txt if you're unfamiliar
-            # w/ procfs, and keep in mind that we have to work across multiple kernel
-            # versions.
+            # See the kernels Documentation/filesystems/proc.txt if you're
+            # unfamiliar w/ procfs, and keep in mind that we have to work across
+            # multiple kernel versions.
             cpuset = osutils.ReadFile("/proc/%s/cpuset" % (pid,)).rstrip("\n")
         except EnvironmentError as e:
             if e.errno != errno.ENOENT:
                 raise
             with open(f"/proc/{pid}/cgroup", encoding="utf-8") as f:
                 for line in f:
-                    # First digit is the hierachy index, 2nd is subsytem, 3rd is space.
+                    # First digit is the hierachy index, 2nd is subsytem, 3rd
+                    # is space.
                     # 2:cpuset:/
                     # 2:cpuset:/cros/cbuildbot/1234
 
@@ -708,7 +714,7 @@ class Cgroup(object):
 
     @classmethod
     def FindStartingGroup(cls, process_name, nesting=True):
-        """Create and return the starting cgroup for ourselves nesting if allowed.
+        """Create & return the starting cgroup for ourselves nesting if allowed.
 
         Note that the node returned is either a generic process pool (e.g.
         cros/cbuildbot), or the parent pool we're nested within; processes

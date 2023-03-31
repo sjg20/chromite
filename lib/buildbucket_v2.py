@@ -681,7 +681,8 @@ class BuildbucketV2(object):
             properties: properties key in parameters_json
             gerrit_changes: Repeated GerritChange message type.
             tags: repeated StringPair of Build.tags to associate with build.
-            dimensions: RequestedDimension Swarming dimension to override in config.
+            dimensions: RequestedDimension Swarming dimension to override in
+                config.
             fields: fields to include in the response.
             critical: bool for build.critical.
 
@@ -736,14 +737,14 @@ class BuildbucketV2(object):
         )
 
     def GetKilledChildBuilds(self, buildbucket_id):
-        """Get IDs of all the builds killed by self-destructed orchestrator build.
+        """Get IDs of all builds killed by self-destructed orchestrator build.
 
         Args:
             buildbucket_id: Buildbucket ID of the orchestrator build.
 
         Returns:
-            A list of Buildbucket IDs of the child builds that were killed by the
-            orchestrator build or None if the query was unsuccessful.
+            A list of Buildbucket IDs of the child builds that were killed by
+            the orchestrator build or None if the query was unsuccessful.
         """
         properties = "output.properties"
         try:
@@ -791,13 +792,14 @@ class BuildbucketV2(object):
             buildbucket_id: Buildbucket ID of the build to be queried for.
 
         Returns:
-            A Dictionary with keys (build_config, start_time, finish_time, status,
-            platform_version, full_version, milestone_version, critical,
-            buildbucket_id, summary, master_build_id, bot_hostname,
-            deadline, build_type, metadata_url, toolchain_url, branch).
+            A Dictionary with keys (build_config, start_time, finish_time,
+            status, platform_version, full_version, milestone_version, critical,
+            buildbucket_id, summary, master_build_id, bot_hostname, deadline,
+            build_type, metadata_url, toolchain_url, branch).
         """
         CIDB_TO_BB_PROPERTIES_MAP = {
-            # A mapping of CIDB property names to their Buildbucket v2 equivalents.
+            # A mapping of CIDB property names to their Buildbucket v2
+            # equivalents.
             "bot_id": "bot_hostname",
             "cidb_id": "id",
             "cbb_branch": "branch",
@@ -872,7 +874,8 @@ class BuildbucketV2(object):
                 build_status[status_name] = None
             return build_status
 
-        # Including the now-defunct columns of CIDB Table so as to not break logic.
+        # Including the now-defunct columns of CIDB Table so as to not break
+        # logic.
         # TODO(dhanyaganesh): remove these one at a time.
         build_status["builder_name"] = None
         build_status["build_number"] = None
@@ -938,8 +941,8 @@ class BuildbucketV2(object):
     ):
         """Returns basic information about most recent builds for build config.
 
-        By default this function returns the most recent builds. Some arguments can
-        restrict the result to older builds.
+        By default, this function returns the most recent builds. Some arguments
+        can restrict the result to older builds.
 
         Args:
             build_config: config name of the build to get history.
@@ -985,8 +988,8 @@ class BuildbucketV2(object):
             if ignore_build_id in build_ids:
                 build_ids = [x for x in build_ids if ignore_build_id != x]
             else:
-                # If we do not find ignore_build_id, we ignore the last (i.e. oldest)
-                # build in order to return num_results elements.
+                # If we do not find ignore_build_id, we ignore the last (i.e.
+                # oldest) build in order to return num_results elements.
                 build_ids = build_ids[:-1]
 
         return [self.GetBuildStatus(x) for x in build_ids]
@@ -1057,7 +1060,8 @@ class BuildbucketV2(object):
         The client accepts the following arguments to its requests:
         timeout: int
         metadata: Dict[str, Any]
-        credentials: Callable[[luci.prpc.client.Request], luci.prpc.client.Request]
+        credentials: Callable[[luci.prpc.client.Request],
+            luci.prpc.client.Request]
         """
         kwargs = {}
         if self._access_token_retriever is not None:

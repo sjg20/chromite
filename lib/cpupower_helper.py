@@ -29,7 +29,7 @@ def _FetchActiveCpuGovernor() -> Optional[str]:
     """Scans and returns the active governor if all cpus use it.
 
     Returns:
-      The active governor or None if there is no single active governor.
+        The active governor or None if there is no single active governor.
     """
     cpufreq = _CPU_PATH / "cpufreq"
 
@@ -55,11 +55,11 @@ def _FetchActiveCpuGovernor() -> Optional[str]:
 
 
 def _AutoSetGovStickyConfigUpdate(perf_governor: bool, sticky: bool) -> None:
-    """Create or remove config file based on performance governor sticky request.
+    """Create/remove config file based on performance governor sticky request.
 
     Args:
-      perf_governor: If true, switch the CPU governors to performance.
-      sticky: If true, cache the switch request for subsequent runs.
+        perf_governor: If true, switch the CPU governors to performance.
+        sticky: If true, cache the switch request for subsequent runs.
     """
     if not sticky:
         return
@@ -83,15 +83,15 @@ def ModifyCpuGovernor(perf_governor: bool, sticky: bool) -> Iterator[None]:
     governor and will revert the policy to the default governor when it exits.
     When the sticky option is selected, the governor will be automatically
     switched to performance for the subsequent runs. To clear this automatic
-    switching, user must pass the perf_governor arg as false with sticky argument
-    set to true.
+    switching, user must pass the perf_governor arg as false with sticky
+    argument set to true.
 
     Args:
-      perf_governor: If true, switch the CPU governors to performance.
-      sticky: If true, cache the switch request for subsequent runs.
+        perf_governor: If true, switch the CPU governors to performance.
+        sticky: If true, cache the switch request for subsequent runs.
 
     Yields:
-      Iterator.
+        Iterator.
     """
 
     _AutoSetGovStickyConfigUpdate(perf_governor, sticky)
@@ -117,8 +117,8 @@ def ModifyCpuGovernor(perf_governor: bool, sticky: bool) -> Iterator[None]:
         if "performance" in governors:
             old_governor = _FetchActiveCpuGovernor()
 
-            # Switch the CPU governors to performance if they have the same active
-            # governor and if the active governor is not performance.
+            # Switch the CPU governors to performance if they have the same
+            # active governor and if the active governor is not performance.
             if new_governor and old_governor and new_governor != old_governor:
                 logging.info(
                     "Temporarily setting CPU governors to %s", new_governor

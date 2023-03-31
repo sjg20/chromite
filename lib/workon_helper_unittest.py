@@ -136,8 +136,8 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
             ],
         )
         # Turn off behavior related to adding repositories to minilayouts.
-        # TODO(b/208444115): Add tests for the full workflow. Ideally will be able
-        #  to create a manifest and ebuilds usable with `ebuild info`.
+        # TODO(b/208444115): Add tests for the full workflow. Ideally will be
+        #  able to create a manifest and ebuilds usable with `ebuild info`.
         self.PatchObject(
             workon_helper.WorkonHelper, "_AddProjectsToPartialManifests"
         )
@@ -165,8 +165,8 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
         self.PatchObject(
             depgraph, "get_build_target_dependency_graph", return_value=graph
         )
-        # We do a lot of work as root. Pretend to be root so that we never have to
-        # call sudo.
+        # We do a lot of work as root. Pretend to be root so that we never have
+        # to call sudo.
         self.PatchObject(osutils, "IsRootUser", return_value=True)
 
     def CreateHelper(self, host=False):
@@ -380,7 +380,7 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
         self.assertExists(file_path)
 
     def testInstalledWorkonAtoms(self):
-        """Test that we can list all the cros workon atoms that are installed."""
+        """Verify we can list all the cros workon atoms that are installed."""
         helper = self.CreateHelper()
         self.assertEqual(
             set([VERSIONED_WORKON_ATOM]), helper.InstalledWorkonAtoms()
@@ -420,26 +420,26 @@ class WorkonScopeTest(cros_test_lib.MockTestCase):
         )
 
     def testCMStartsAndStopsWithNoInitialPackages(self):
-        """Verify that the context manager works with no supplied package list."""
+        """Verify the context manager works with no supplied package list."""
         with workon_helper.WorkonScope(self.bt):
             self.start_patch.assert_not_called()
         self.stop_patch.assert_not_called()
 
     def testCMStartsAndStopsPackages(self):
-        """Verify that the context manager usage starts and stops workon state."""
+        """Verify the context manager usage starts and stops workon state."""
         with workon_helper.WorkonScope(self.bt, [WORKON_ONLY_ATOM]):
             self.start_patch.assert_called_once_with([WORKON_ONLY_ATOM])
         self.stop_patch.assert_called_once_with([WORKON_ONLY_ATOM])
 
     def testRetainsExistingWorkons(self):
-        """Verify that the context manager does not stop previously started pkgs."""
+        """Verify the context manager does not stop previously started pkgs."""
         self.workon = [WORKON_ONLY_ATOM]
         with workon_helper.WorkonScope(self.bt, [WORKON_ONLY_ATOM]):
             self.start_patch.assert_called_once_with([WORKON_ONLY_ATOM])
         self.stop_patch.assert_not_called()
 
     def testStartsStandaloneAtom(self):
-        """Verify that the helper .start() method (non-CM usage) starts workon."""
+        """Verify the helper .start() method (non-CM usage) starts workon."""
         helper = workon_helper.WorkonScope(self.bt)
         self.start_patch.assert_not_called()
         helper.start([WORKON_ONLY_ATOM])
@@ -447,7 +447,7 @@ class WorkonScopeTest(cros_test_lib.MockTestCase):
         self.stop_patch.assert_not_called()
 
     def testStopsStandaloneAtom(self):
-        """Verify that the helper .stop() method (non-CM usage) stops workon."""
+        """Verify the helper .stop() method (non-CM usage) stops workon."""
         helper = workon_helper.WorkonScope(self.bt)
         self.stop_patch.assert_not_called()
         helper.stop([WORKON_ONLY_ATOM])
@@ -455,7 +455,7 @@ class WorkonScopeTest(cros_test_lib.MockTestCase):
         self.start_patch.assert_not_called()
 
     def testRaisesExceptionForNonexistentBoard(self):
-        """CM usage should perform start & stop in addition to raising exception."""
+        """CM usage should perform start & stop, plus raise exception."""
         se = workon_helper.WorkonError()
         self.start_patch = self.PatchObject(
             workon_helper.WorkonHelper, "StartWorkingOnPackages", side_effect=se

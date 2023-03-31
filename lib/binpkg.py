@@ -89,26 +89,26 @@ class PackageIndex(object):
                 )
 
     def _ReadPkgIndex(self, pkgfile):
-        """Read a list of key/value pairs from the Packages file into a dictionary.
+        """Read a list of key/value pairs from the Packages file into a dict.
 
         Both header entries and package entries are lists of key/value pairs, so
-        they can both be read by this function. Entries can be terminated by empty
-        lines or by the end of the file.
+        they can both be read by this function. Entries can be terminated by
+        empty lines or by the end of the file.
 
-        This function will read lines from the specified file until it encounters
-        the a blank line or the end of the file.
+        This function will read lines from the specified file until it
+        encounters a blank line or the end of the file.
 
-        Keys and values in the Packages file are separated by a colon and a space.
-        Keys may contain capital letters, numbers, and underscores, but may not
-        contain colons. Values may contain any character except a newline. In
-        particular, it is normal for values to contain colons.
+        Keys and values in the Packages file are separated by a colon and a
+        space. Keys may contain capital letters, numbers, and underscores, but
+        may not contain colons. Values may contain any character except a
+        newline. In particular, it is normal for values to contain colons.
 
         Lines that have content, and do not contain a valid key/value pair, are
         ignored. This is for compatibility with the Portage package parser, and
         to allow for future extensions to the Packages file format.
 
         All entries must contain at least one key/value pair. If the end of the
-        fils is reached, an empty dictionary is returned.
+        file is reached, an empty dictionary is returned.
 
         Args:
             pkgfile: A python file object.
@@ -138,8 +138,8 @@ class PackageIndex(object):
         """
         lines = ["%s: %s" % (k, v) for k, v in sorted(entry.items()) if v]
         if lines:
-            # Temporary means of simplifying formatting and ensuring a blank line
-            # after each entry. This whole system needs to be cleaned up.
+            # Temporary means of simplifying formatting and ensuring a blank
+            # line after each entry. This whole system needs to be cleaned up.
             lines.extend([""])
 
         return lines
@@ -221,10 +221,10 @@ class PackageIndex(object):
     def ResolveDuplicateUploads(self, pkgindexes):
         """Point packages at files that have already been uploaded.
 
-        For each package in our index, check if there is an existing package that
-        has already been uploaded to the same base URI, and that is no older than
-        two weeks. If so, point that package at the existing file, so that we don't
-        have to upload the file.
+        For each package in our index, check if there is an existing package
+        that has already been uploaded to the same base URI, and that is no
+        older than two weeks. If so, point that package at the existing file, so
+        that we don't have to upload the file.
 
         Args:
             pkgindexes: A list of PackageIndex objects containing info about
@@ -248,10 +248,10 @@ class PackageIndex(object):
             sha1 = pkg.get("SHA1")
             dup = db.get(sha1)
 
-            # If the debug symbols are available locally but are not available in the
-            # remote binhost, re-upload them.
-            # Note: this should never happen as we would have pulled the debug symbols
-            # from said binhost.
+            # If the debug symbols are available locally but are not available
+            # in the remote binhost, re-upload them.
+            # Note: this should never happen as we would have pulled the debug
+            # symbols from said binhost.
             if (
                 sha1
                 and dup
@@ -287,8 +287,8 @@ class PackageIndex(object):
     def Write(self, pkgfile):
         """Write a packages file to disk.
 
-        If 'modified' flag is set, the TIMESTAMP and PACKAGES fields in the header
-        will be updated before writing to disk.
+        If 'modified' flag is set, the TIMESTAMP and PACKAGES fields in the
+        header will be updated before writing to disk.
 
         Args:
             pkgfile: A python file object.
@@ -305,8 +305,8 @@ class PackageIndex(object):
             A temporary file containing the packages from pkgindex.
         """
         # pylint: disable=R1732
-        # This method returns an open file, so we cannot use a 'with' here (without
-        # changing the behavior and breaking the unittest).
+        # This method returns an open file, so we cannot use a 'with' here
+        # (without changing the behavior and breaking the unittest).
         f = tempfile.NamedTemporaryFile(
             prefix="chromite.binpkg.pkgidx.", mode="w+"
         )
@@ -322,9 +322,9 @@ class PackageIndex(object):
         for metadata in sorted(self.packages, key=operator.itemgetter("CPV")):
             lines.extend(self._FormatPkgIndex(metadata))
 
-        # Adding trailing \n to force this method to produce the same output as the
-        # other write method. This is unnecessary and can be removed when this is
-        # refactored and simplified.
+        # Adding trailing \n to force this method to produce the same output as
+        # the other write method. This is unnecessary and can be removed when
+        # this is refactored and simplified.
         osutils.WriteFile(file_path, "%s\n" % "\n".join(lines), sudo=sudo)
 
     def _ModifiedHeaderUpdate(self):

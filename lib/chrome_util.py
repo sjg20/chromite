@@ -94,11 +94,11 @@ class Conditions(object):
 
 
 class MultipleMatchError(failures_lib.StepFailure):
-    """A glob pattern matches multiple files but a non-dir dest was specified."""
+    """Glob pattern matches multiple files but a non-dir dest was specified."""
 
 
 class MissingPathError(failures_lib.StepFailure):
-    """An expected path is non-existant."""
+    """An expected path is non-existent."""
 
 
 class MustNotBeDirError(failures_lib.StepFailure):
@@ -219,9 +219,9 @@ class Copier(object):
             else:
                 msg = (
                     "%s does not exist and is required.\n"
-                    "You might build Chrome with the wrong configuration. Have you "
-                    "configured your args.gn correctly? You may need to edit "
-                    "your .gclient file and run `$ gclient runhooks`.\n"
+                    "You might build Chrome with the wrong configuration. Have "
+                    "you configured your args.gn correctly? You may need to "
+                    "edit your .gclient file and run `$ gclient runhooks`.\n"
                     "You can bypass this error with --sloppy.\n"
                     "Aborting copy..." % src
                 )
@@ -527,8 +527,8 @@ def _GetGnLabel(build_dir, build_target):
     """
     src_dir = os.path.dirname(os.path.dirname(build_dir))
     # Look up gn label from testing/buildbot/gn_isolate_map.pyl, which contains
-    # a mapping of build targets to GN labels. This is faster than extracting the
-    # gn label from "gn ls" output.
+    # a mapping of build targets to GN labels. This is faster than extracting
+    # the gn label from "gn ls" output.
     isolate_map_file = os.path.join(
         src_dir, "testing", "buildbot", "gn_isolate_map.pyl"
     )
@@ -599,7 +599,8 @@ def GetChromeRuntimeDeps(build_dir, build_target):
 
         runtime_deps = result.stdout.splitlines()
 
-    # |runtime_deps| is relative to |build_dir|. Make them relative to |src_dir|.
+    # |runtime_deps| is relative to |build_dir|. Make them relative to
+    # |src_dir|.
     src_dir = os.path.dirname(os.path.dirname(build_dir))
     rebased_runtime_deps = []
     for f in runtime_deps:
@@ -674,7 +675,7 @@ def StageChromeFromBuildDir(
         build_dir: Path to location of Chrome build artifacts.
         strip_bin: Path to executable used for stripping binaries.
         sloppy: Ignore when mandatory artifacts are missing.
-        gn_args: A dictionary of args.gn valuses that Chrome was built with.
+        gn_args: A dictionary of args.gn values that Chrome was built with.
         staging_flags: A list of extra staging flags. Valid flags are specified
             in STAGING_FLAGS.
         strip_flags: A list of flags to pass to the tool used to strip binaries.

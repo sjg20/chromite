@@ -80,7 +80,8 @@ class Disk(object):
                 # Skip anything not a partition.
                 continue
 
-            # The expected output for a partition is 4 lines in the following format.
+            # The expected output for a partition is 4 lines in the following
+            # format.
             #  <start>  <size>  <part_num> Label: "<label>"
             #  Type: <part_type>
             #  UUID: <uuid>
