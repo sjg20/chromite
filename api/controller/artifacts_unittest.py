@@ -49,7 +49,12 @@ class BundleRequestMixin(object):
         return request
 
     def SysrootRequest(
-        self, sysroot=None, build_target=None, output_dir=None, chroot=None
+        self,
+        sysroot=None,
+        build_target=None,
+        output_dir=None,
+        chroot=None,
+        chroot_out=None,
     ):
         """Get a sysroot format request instance."""
         request = self.EmptyRequest()
@@ -60,7 +65,9 @@ class BundleRequestMixin(object):
         if output_dir:
             request.output_dir = output_dir
         if chroot:
-            request.chroot.path = chroot
+            request.chroot.path = str(chroot)
+        if chroot_out:
+            request.chroot.out_path = str(chroot_out)
 
         return request
 
@@ -78,7 +85,8 @@ class BundleTestCase(
         osutils.SafeMakedirs(self.output_dir)
         self.sysroot_path = "/build/target"
         self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
-        self.chroot_path = os.path.join(self.tempdir, "chroot")
+        self.chroot_path = self.tempdir / "chroot"
+        self.chroot_out_path = self.tempdir / "out"
         full_sysroot_path = os.path.join(
             self.chroot_path, self.sysroot_path.lstrip(os.sep)
         )
@@ -91,7 +99,7 @@ class BundleTestCase(
         self.target_request = self.BuildTargetRequest(
             build_target="target",
             output_dir=self.output_dir,
-            chroot=self.chroot_path,
+            chroot=str(self.chroot_path),
         )
 
         # Sysroot request.
@@ -100,6 +108,7 @@ class BundleTestCase(
             build_target="target",
             output_dir=self.output_dir,
             chroot=self.chroot_path,
+            chroot_out=self.chroot_out_path,
         )
 
         self.source_root = self.tempdir
@@ -347,7 +356,9 @@ class BundleTastFilesTest(BundleTestCase):
 
     def testBundleTastFiles(self):
         """BundleTastFiles calls service correctly."""
-        chroot = chroot_lib.Chroot(self.chroot_path)
+        chroot = chroot_lib.Chroot(
+            self.chroot_path, out_path=self.chroot_out_path
+        )
 
         expected_archive = os.path.join(
             self.output_dir, artifacts_svc.TAST_BUNDLE_NAME
