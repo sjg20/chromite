@@ -1428,6 +1428,19 @@ class MoveDirContentsTestCase(cros_test_lib.TempDirTestCase):
             os.readlink(self.to_dir / "sym.txt"), str(self.tempdir / "a.txt")
         )
 
+    def testSymlinkTargetDoesntExist(self):
+        """Move symlink from source to destination when target doesn't exist."""
+        (self.from_dir / "sym.txt").symlink_to(self.tempdir / "a.txt")
+        self.assertNotExists(self.tempdir / "a.txt")
+
+        osutils.MoveDirContents(self.from_dir, self.to_dir)
+
+        self.assertTrue((self.to_dir / "sym.txt").is_symlink())
+        self.assertNotExists(self.tempdir / "a.txt")
+        self.assertEqual(
+            os.readlink(self.to_dir / "sym.txt"), str(self.tempdir / "a.txt")
+        )
+
     def testOverWriteFiles(self):
         """Move files with same name from source to destination."""
         # test dotfiles in top and multiple level directories.

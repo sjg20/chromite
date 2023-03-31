@@ -682,8 +682,13 @@ def _CopyDirContents(
         # Copy/Move the contents.
         to_path = to_dir / from_path.name
 
-        if symlinks and from_path.is_symlink():
-            to_path.symlink_to(os.readlink(from_path))
+        if from_path.is_symlink():
+            if move:
+                shutil.move(from_path, to_path)
+            elif symlinks:
+                to_path.symlink_to(os.readlink(from_path))
+            else:
+                shutil.copy2(from_path, to_path)
         elif from_path.is_dir():
             if move:
                 if to_path.is_dir():
