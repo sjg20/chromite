@@ -520,6 +520,8 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
 
     def testTestFailsInvalidArguments(self):
         """Test invalid arguments are correctly failed."""
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
         with self.assertRaises(image.InvalidArgumentError):
             image.Test(None, None)
         with self.assertRaises(image.InvalidArgumentError):
@@ -528,6 +530,8 @@ class ImageTestTest(cros_test_lib.RunCommandTempDirTestCase):
             image.Test(None, self.outside_result_dir)
         with self.assertRaises(image.InvalidArgumentError):
             image.Test(self.board, None)
+        with self.assertRaises(image.ChrootError):
+            image.Test(self.board, self.outside_result_dir)
 
     def testTestInsideChrootAllProvided(self):
         """Test behavior when inside the chroot and all paths provided."""

@@ -606,6 +606,7 @@ def WriteLsbRelease(sysroot, fields):
     )
 
 
+# TODO(b/265885353): update to use path_util or chroot_lib.
 def GetLatestImageLink(
     board: str, force_chroot: bool = False, pointer: Optional[str] = None
 ):

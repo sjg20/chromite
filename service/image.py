@@ -41,6 +41,10 @@ class Error(Exception):
     """Base module error."""
 
 
+class ChrootError(Error, Exception):
+    """Unexpectedly run outside the chroot."""
+
+
 class InvalidArgumentError(Error, ValueError):
     """Invalid argument values."""
 
@@ -679,13 +683,14 @@ def Test(board: str, result_directory: str, image_dir: str = None) -> bool:
         raise InvalidArgumentError("Board is required.")
     if not result_directory:
         raise InvalidArgumentError("Result directory required.")
+    # We don't handle inside/outside chroot path translation. We only need to
+    # work inside the chroot, so that's OK. Enforce that assumption.
+    if cros_build_lib.IsOutsideChroot():
+        raise ChrootError("Image Test service only available inside chroot.")
 
     if not image_dir:
         # We can build the path to the latest image directory.
         image_dir = image_lib.GetLatestImageLink(board, force_chroot=True)
-    elif not cros_build_lib.IsInsideChroot() and os.path.exists(image_dir):
-        # Outside chroot with outside chroot path--we need to convert it.
-        image_dir = path_util.ToChrootPath(image_dir)
 
     cmd = [
         Path(constants.CHROMITE_BIN_DIR) / "test_image",
