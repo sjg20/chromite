@@ -6,6 +6,7 @@
 
 import json
 import os
+from pathlib import Path
 
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import commands
@@ -17,6 +18,7 @@ from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
+from chromite.lib import path_util
 from chromite.lib import perf_uploader
 from chromite.lib import portage_util
 from chromite.lib.buildstore import FakeBuildStore
@@ -266,8 +268,8 @@ class SDKUprevStageTest(generic_stages_unittest.AbstractStageTestCase):
             lambda *args, **kwargs: recorded_args.append(args),
         )
 
-        out_dir = os.path.join(
-            self.build_root, "chroot", "tmp", "toolchain-pkgs"
+        out_dir = path_util.ToChrootPath(
+            Path("/") / "tmp" / "toolchain-pkgs", source_path=self.build_root
         )
         osutils.SafeMakedirs(out_dir)
         osutils.Touch(os.path.join(out_dir, "fake_sdk.tar.xz"))

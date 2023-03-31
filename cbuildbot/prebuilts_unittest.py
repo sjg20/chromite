@@ -10,7 +10,9 @@ from unittest import mock
 from chromite.cbuildbot import cbuildbot_unittest
 from chromite.cbuildbot import prebuilts
 from chromite.cbuildbot.stages import generic_stages_unittest
+from chromite.lib import chroot_lib
 from chromite.lib import constants
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 
@@ -23,6 +25,8 @@ class PrebuiltTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test general cbuildbot command methods."""
 
     def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
         self._board = "test-board"
         self._buildroot = self.tempdir
         self._overlays = [
@@ -36,12 +40,13 @@ class PrebuiltTest(cros_test_lib.RunCommandTempDirTestCase):
         # A magical date for a magical time.
         version = "1994.04.02.000000"
 
-        # Fake out toolchains overlay tarballs.
-        tarball_dir = os.path.join(
-            self._buildroot,
-            constants.DEFAULT_CHROOT_DIR,
-            constants.SDK_OVERLAYS_OUTPUT,
+        chroot = chroot_lib.Chroot(
+            path=self._buildroot / constants.DEFAULT_CHROOT_DIR,
+            out_path=self._buildroot / constants.DEFAULT_OUT_DIR,
         )
+
+        # Fake out toolchains overlay tarballs.
+        tarball_dir = chroot.full_path(constants.SDK_OVERLAYS_OUTPUT)
         osutils.SafeMakedirs(tarball_dir)
 
         toolchain_overlay_tarball_args = []
@@ -62,11 +67,7 @@ class PrebuiltTest(cros_test_lib.RunCommandTempDirTestCase):
             )
 
         # Fake out toolchain tarballs.
-        tarball_dir = os.path.join(
-            self._buildroot,
-            constants.DEFAULT_CHROOT_DIR,
-            constants.SDK_TOOLCHAINS_OUTPUT,
-        )
+        tarball_dir = chroot.full_path(constants.SDK_TOOLCHAINS_OUTPUT)
         osutils.SafeMakedirs(tarball_dir)
 
         toolchain_tarball_args = []

@@ -7,9 +7,11 @@
 import glob
 import logging
 import os
+from pathlib import Path
 
 from chromite.cbuildbot import commands
 from chromite.lib import constants
+from chromite.lib import path_util
 from chromite.lib.parser import package_info
 
 
@@ -77,7 +79,12 @@ def GetToolchainSdkPaths(build_root, is_overlay=False):
         out_dir = constants.SDK_TOOLCHAINS_OUTPUT
 
     glob_pattern = os.path.join(
-        build_root, constants.DEFAULT_CHROOT_DIR, out_dir, prefix + "*.tar.*"
+        path_util.FromChrootPath(
+            Path("/") / out_dir,
+            chroot_path=build_root / Path(constants.DEFAULT_CHROOT_DIR),
+            out_path=build_root / constants.DEFAULT_OUT_DIR,
+        ),
+        prefix + "*.tar.*",
     )
     result = []
     for tarball in sorted(glob.glob(glob_pattern)):
