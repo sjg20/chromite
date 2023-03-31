@@ -105,7 +105,10 @@ def cmd_clear_attention(opts):
         )
 
         cros.SetAttentionSet(
-            change=cl["number"], remove=("me",), dryrun=opts.dry_run
+            change=cl["number"],
+            remove=("me",),
+            dryrun=opts.dry_run,
+            notify="NONE",
         )
         counter += 1
 
