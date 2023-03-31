@@ -42,6 +42,7 @@ SYSTEM_PACKAGES = {
     "sys-devel/",
     "sys-libs/",
     "sys-process/",
+    "chromeos-base/chromite-sdk",
 }
 
 CHROME_PACKAGES = [
