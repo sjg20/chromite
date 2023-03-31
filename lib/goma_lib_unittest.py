@@ -11,31 +11,36 @@ import json
 import os
 from pathlib import Path
 import time
-from unittest import mock
 
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import goma_lib
 from chromite.lib import osutils
+from chromite.lib import path_util
 
 
 class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
     """Tests for the Goma object."""
 
     def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
         self.goma_dir = self.tempdir / "goma"
         self.chroot_dir = self.tempdir / "chroot"
         self.out_dir = self.tempdir / "out"
-        self.chroot_tmp = self.chroot_dir / "tmp"
+        self.chroot_tmp = Path(
+            path_util.FromChrootPath(
+                "/tmp",
+                chroot_path=Path(self.chroot_dir),
+                out_path=Path(self.out_dir),
+            )
+        )
         self.log_dir = self.chroot_tmp / "log_dir"
 
         osutils.SafeMakedirs(self.goma_dir)
         osutils.SafeMakedirs(self.chroot_tmp)
 
-    @mock.patch(
-        "chromite.lib.cros_build_lib.IsInsideChroot", return_value=False
-    )
-    def testExtraEnvCustomChroot(self, _):
+    def testExtraEnvCustomChroot(self):
         """Test the chroot env building with a custom chroot location."""
         stats_filename = "stats_filename"
         counterz_filename = "counterz_filename"
@@ -112,7 +117,12 @@ class GomaTest(cros_test_lib.TempDirTestCase, cros_test_lib.RunCommandTestCase):
         """Test Goma instance command interface."""
         goma_ctl = self.goma_dir / "goma_ctl.py"
 
-        goma = goma_lib.Goma(self.goma_dir, None)
+        goma = goma_lib.Goma(
+            self.goma_dir,
+            goma_tmp_dir=None,
+            chroot_dir=self.chroot_dir,
+            out_dir=self.out_dir,
+        )
         goma.Start()
         self.assertCommandContains([goma_ctl, "start"])
         goma.Restart()
