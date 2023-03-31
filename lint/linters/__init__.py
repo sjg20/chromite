@@ -12,6 +12,7 @@ from chromite.utils import lazy_loader
 locals().update(
     (x, lazy_loader.ForFunctions(f"chromite.lint.linters.{x}"))
     for x in (
+        "gnlint",
         "owners",
         "shell",
         "upstart",

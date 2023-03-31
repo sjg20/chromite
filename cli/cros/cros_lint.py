@@ -220,13 +220,15 @@ def _PylintFile(path, output_format, debug, _relaxed: bool, _commit: str):
     return _ToolRunCommand(cmd, debug, extra_env=extra_env)
 
 
-def _GnlintFile(path, _, debug, _relaxed: bool, _commit: str):
+def _GnlintFile(path, _, _debug, _relaxed: bool, commit: str):
     """Returns result of running gnlint on |path|."""
-    gnlint = os.path.join(
-        constants.SOURCE_ROOT, "src", "platform2", "common-mk", "gnlint.py"
-    )
-    cmd = [gnlint, path]
-    return _ToolRunCommand(cmd, debug)
+    result = cros_build_lib.CompletedProcess(f'gnlint "{path}"', returncode=0)
+
+    data = _get_file_data(path, commit)
+    if linters.gnlint.Data(data, path):
+        result.returncode = 1
+
+    return result
 
 
 def _GolintFile(path, _, debug, _relaxed: bool, _commit: str):
