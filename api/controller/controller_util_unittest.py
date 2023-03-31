@@ -4,6 +4,8 @@
 
 """controller_util unittests."""
 
+from pathlib import Path
+
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
@@ -254,3 +256,63 @@ def test_package_index_info():
     )
 
     assert obj == controller_util.deserialize_package_index_info(msg)
+
+
+class Pb2PathToPathlibPathTest(cros_test_lib.TestCase):
+    """Verify functionality for pb2_path_to_pathlib_path()."""
+
+    chroot = common_pb2.Chroot(path="/path/to/chroot")
+
+    @staticmethod
+    def create_pb2_path(path: str, inside: bool) -> common_pb2.Path:
+        """Helper function to create a common_pb2.Path."""
+        location = (
+            common_pb2.Path.Location.INSIDE
+            if inside
+            else common_pb2.Path.Location.OUTSIDE
+        )
+        return common_pb2.Path(path=path, location=location)
+
+    def test_relative_inside(self):
+        """Verify that passing in a relative path inside the chroot fails"""
+        pb2_path = self.create_pb2_path(path="usr/bin", inside=True)
+        with self.assertRaises(ValueError):
+            controller_util.pb2_path_to_pathlib_path(
+                pb2_path, chroot=self.chroot
+            )
+
+    def test_relative_outside(self):
+        """Verify that passing in a relative path outside the chroot fails"""
+        pb2_path = self.create_pb2_path(path="usr/bin", inside=False)
+        with self.assertRaises(ValueError):
+            controller_util.pb2_path_to_pathlib_path(
+                pb2_path, chroot=self.chroot
+            )
+
+    def test_inside_with_chroot(self):
+        """Verify that we can convert an inside path with a chroot."""
+        pb2_path = self.create_pb2_path(path="/usr/bin", inside=True)
+        pathlib_path = controller_util.pb2_path_to_pathlib_path(
+            pb2_path, chroot=self.chroot
+        )
+        self.assertEqual(pathlib_path, Path("/path/to/chroot/usr/bin"))
+
+    def test_outside_with_chroot(self):
+        """Verify that we can convert an outside path with a chroot."""
+        pb2_path = self.create_pb2_path(path="/usr/bin", inside=False)
+        pathlib_path = controller_util.pb2_path_to_pathlib_path(
+            pb2_path, chroot=self.chroot
+        )
+        self.assertEqual(pathlib_path, Path("/usr/bin"))
+
+    def test_inside_without_chroot(self):
+        """Verify that we cannot convert an inside path without a chroot."""
+        pb2_path = self.create_pb2_path(path="/usr/bin", inside=True)
+        with self.assertRaises(ValueError):
+            controller_util.pb2_path_to_pathlib_path(pb2_path)
+
+    def test_outside_without_chroot(self):
+        """Verify that we can convert an outside path without a chroot."""
+        pb2_path = self.create_pb2_path(path="/usr/bin", inside=False)
+        pathlib_path = controller_util.pb2_path_to_pathlib_path(pb2_path)
+        self.assertEqual(pathlib_path, Path("/usr/bin"))

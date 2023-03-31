@@ -14,7 +14,6 @@ from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import cros_build_lib
-from chromite.lib import path_util
 from chromite.service import sdk
 
 
@@ -77,10 +76,10 @@ def CreateManifestFromSdk(
     _assert_path_is_absolute(input_proto.sdk_path.path, "SDK path")
     _assert_path_is_absolute(input_proto.dest_dir.path, "destination directory")
 
-    sdk_path = path_util.ProtoPathToPathlibPath(
+    sdk_path = controller_util.pb2_path_to_pathlib_path(
         input_proto.sdk_path, input_proto.chroot
     )
-    dest_dir = path_util.ProtoPathToPathlibPath(
+    dest_dir = controller_util.pb2_path_to_pathlib_path(
         input_proto.dest_dir, input_proto.chroot
     )
 

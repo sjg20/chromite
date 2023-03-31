@@ -296,3 +296,32 @@ def PackageInfoToString(package_info_msg):
     p = package_info_msg.package_name
     v = ("-%s" % package_info_msg.version) if package_info_msg.version else ""
     return "%s%s%s" % (c, p, v)
+
+
+def pb2_path_to_pathlib_path(
+    pb2_path: "common_pb2.Path",
+    chroot: Optional["common_pb2.Chroot"] = None,
+) -> Path:
+    """Convert an absolute pb2 path to a pathlib.Path outside the chroot.
+
+    Args:
+        pb2_path: An absolute path, which might be inside or outside chroot.
+        chroot: The chroot that the path might be inside of.
+
+    Returns:
+        A Path pointing to the same location as pb2_path, originating
+        outside the chroot.
+
+    Raises:
+        ValueError: If the given path is relative instead of absolute.
+        ValueError: If the given path is inside the chroot, but a chroot is not
+            provided.
+    """
+    if pb2_path.path[0] != "/":
+        raise ValueError(f"Cannot convert relative path: {pb2_path.path}")
+    if pb2_path.location is common_pb2.Path.Location.OUTSIDE:
+        return Path(pb2_path.path)
+    if chroot is None:
+        raise ValueError("Cannot convert inside path without a chroot.")
+    path_relative_to_root = pb2_path.path[1:]
+    return Path(chroot.path, path_relative_to_root)
