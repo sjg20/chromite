@@ -89,7 +89,7 @@ _FILENAME_PATTERNS_TOOL_MAP = {
             "use.mask",
         }
     ): (formatters.whitespace.Data,),
-    frozenset({"DIR_METADATA"}): (formatters.textproto.Data,),
+    frozenset({"DIR_METADATA", "METADATA"}): (formatters.textproto.Data,),
     # TODO(build): Add a formatter for this.
     frozenset({"OWNERS*"}): (formatters.whitespace.Data,),
 }
