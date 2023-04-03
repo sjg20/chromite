@@ -51,8 +51,10 @@ def _DumpPartitionInfo() -> None:
     """Dump loopdevice related info for debug."""
 
     loop_file_paths = list(Path("/dev").glob("loop*p*"))
-    cros_build_lib.run(["fuser", "-mv"] + loop_file_paths, log_output=True)
-    cros_build_lib.run(["losetup", "-a"], log_output=True)
+    cros_build_lib.run(
+        ["fuser", "-mv"] + loop_file_paths, check=False, log_output=True
+    )
+    cros_build_lib.run(["losetup", "-a"], check=False, log_output=True)
 
 
 class LoopbackPartitions(object):
