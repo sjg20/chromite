@@ -5,6 +5,7 @@
 """Test the cros_sdk_lib module."""
 
 import os
+from pathlib import Path
 
 from chromite.lib import chroot_lib
 from chromite.lib import cros_build_lib
@@ -102,7 +103,9 @@ class TestMigrateStatePaths(cros_test_lib.MockTempDirTestCase):
         )
 
         # TODO(b/265885353): fill map as we migrate state paths.
-        self.state_path_map = ()
+        self.state_path_map = (
+            (Path(self.chroot.path) / "tmp", self.chroot.out_path / "tmp"),
+        )
 
     def testOldPathsExist(self):
         for src, dst in self.state_path_map:
