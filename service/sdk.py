@@ -586,7 +586,7 @@ def BuildSdkToolchain(
             chroot_args=chroot.get_enter_args(),
         )
 
-    _SetupToolchains(["--nousepkg"], True)
+    _SetupToolchains(["--nousepkg", "--debug"], True)
     osutils.RmDir(
         chroot.full_path(constants.SDK_TOOLCHAINS_OUTPUT),
         ignore_missing=True,

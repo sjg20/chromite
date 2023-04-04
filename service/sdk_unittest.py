@@ -377,7 +377,7 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
 
         # Assert
         self.assertCommandCalled(
-            ["sudo", "--", "cros_setup_toolchains", "--nousepkg"],
+            ["sudo", "--", "cros_setup_toolchains", "--nousepkg", "--debug"],
             enter_chroot=True,
             chroot_args=[
                 "--chroot",
@@ -434,6 +434,7 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
                 "--",
                 "cros_setup_toolchains",
                 "--nousepkg",
+                "--debug",
             ],
             enter_chroot=True,
             chroot_args=[
