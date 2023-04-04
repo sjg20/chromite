@@ -424,7 +424,8 @@ class ProjectAndPathTest(cros_test_lib.MockTempDirTestCase):
         if not fake_projects:
             fake_projects = [""] * len(fake_srcpaths)
 
-        # We need 'chromeos-base' here because it controls default _SUBDIR values.
+        # We need 'chromeos-base' here because it controls default _SUBDIR
+        # values.
         ebuild_path = os.path.join(
             self.tempdir,
             "packages",
@@ -690,10 +691,11 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
                     return "someebuild-9999.ebuild"
 
                 file_list = cmd[cmd.index("--") + 1 :]
-                # Just get the last path component so we can specify the file_list
-                # without concerning outselves with tempdir
+                # Just get the last path component, so we can specify the
+                # file_list without concerning ourselves with tempdir
                 file_list = [os.path.split(f)[1] for f in file_list]
-                # Return a stub file if we have changes in any of the listed files.
+                # Return a stub file if we have changes in any of the listed
+                # files.
                 if set(self.git_files_changed).intersection(file_list):
                     return "somefile"
                 return ""
@@ -744,7 +746,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testRevUnchangedEBuildSubdirsNoChange(self):
-        """Test Uprev of a single-project ebuild with CROS_WORKON_SUBDIRS_TO_REV.
+        """Uprev of a single-project ebuild with CROS_WORKON_SUBDIRS_TO_REV.
 
         No files changed in git, so this should not uprev.
         """
@@ -757,10 +759,10 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         self.assertNotExists(self.revved_ebuild_path)
 
     def testRevUnchangedEBuildSubdirsChange(self):
-        """Test Uprev of a single-project ebuild with CROS_WORKON_SUBDIRS_TO_REV.
+        """Uprev of a single-project ebuild with CROS_WORKON_SUBDIRS_TO_REV.
 
-        The 'foo' directory is changed in git, and this directory is mentioned in
-        CROS_WORKON_SUBDIRS_TO_REV, so this should uprev.
+        The 'foo' directory is changed in git, and this directory is mentioned
+        in CROS_WORKON_SUBDIRS_TO_REV, so this should uprev.
         """
         self.git_files_changed = ["foo"]
         self.createRevWorkOnMocks(self._mock_ebuild_subdir, rev=True)
@@ -776,10 +778,11 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testRevChangedEBuildFilesChanged(self):
-        """Test Uprev of a single-project ebuild whose files/ content has changed.
+        """Test Uprev of a single-project ebuild with files/ content change.
 
         The 'files' directory is changed in git and some other directory is
-        mentioned in CROS_WORKON_SUBDIRS_TO_REV. files/ should always force uprev.
+        mentioned in CROS_WORKON_SUBDIRS_TO_REV. files/ should always force
+        uprev.
         """
         self.git_files_changed = ["files"]
         self.createRevWorkOnMocks(self._mock_ebuild_subdir, rev=True)
@@ -795,10 +798,11 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testRevUnchangedEBuildFilesChanged(self):
-        """Test Uprev of a single-project ebuild whose files/ content has changed.
+        """Test Uprev of a single-project ebuild with files/ content change.
 
         The 'files' directory is changed in git and some other directory is
-        mentioned in CROS_WORKON_SUBDIRS_TO_REV. files/ should always force uprev.
+        mentioned in CROS_WORKON_SUBDIRS_TO_REV. files/ should always force
+        uprev.
         """
         self.git_files_changed = ["files"]
         self.createRevWorkOnMocks(self._mock_ebuild_subdir, rev=False)
@@ -850,8 +854,8 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         """Uprev a changed ebuild with CROS_WORKON_SUBDIRS_TO_REV.
 
         Any change to the 9999 ebuild should cause an uprev, even if
-        CROS_WORKON_SUBDIRS_TO_REV is set and no files in that list are changed in
-        git.
+        CROS_WORKON_SUBDIRS_TO_REV is set and no files in that list are changed
+        in git.
         """
         self.unstable_ebuild_changed = True
         self.createRevWorkOnMocks(self._mock_ebuild_subdir, rev=True)
@@ -1108,7 +1112,7 @@ class EBuildRevWorkonTest(cros_test_lib.MockTempDirTestCase):
         self.assertEqual(exists.call_count, 1)
 
     def testUpdateEBuildRecovery(self):
-        """Make sure UpdateEBuild can be called more than once even w/failures."""
+        """Verify UpdateEBuild can be called more than once even w/failures."""
         ebuild = os.path.join(self.tempdir, "test.ebuild")
         content = "# Some data\nVAR=val\n"
         osutils.WriteFile(ebuild, content)
@@ -1453,8 +1457,8 @@ class UtilFuncsTest(cros_test_lib.TempDirTestCase):
         def _runTestGetRepositoryFromEbuildInfo(fake_projects, fake_srcdirs):
             """Generate the output from ebuild info"""
 
-            # ebuild info always put () around the result, even for single element
-            # array.
+            # ebuild info always put () around the result, even for single
+            # element array.
             fake_ebuild_contents = """
 CROS_WORKON_PROJECT=("%s")
 CROS_WORKON_SRCDIR=("%s")
@@ -1496,9 +1500,9 @@ class GetOverlayEBuildsTest(cros_test_lib.MockTempDirTestCase):
     def _FindUprevCandidateMock(files, allow_manual_uprev, _subdir_support):
         """Mock for the FindUprevCandidateMock function.
 
-        Simplified implementation of FindUprevCandidate: consider an ebuild worthy
-        of uprev if |allow_manual_uprev| is set or the ebuild is not manually
-        uprevved.
+        Simplified implementation of FindUprevCandidate: consider an ebuild
+        worthy of uprev if |allow_manual_uprev| is set or the ebuild is not
+        manually uprevved.
         """
         for f in files:
             if f.endswith(".ebuild") and (
@@ -1657,7 +1661,8 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
                     continue
                 os.makedirs(pkgpath)
                 if pkg.endswith("-invalid"):
-                    # Invalid package does not meet existence of "%s/%s.ebuild" file.
+                    # Invalid package does not meet existence of "%s/%s.ebuild"
+                    # file.
                     osutils.Touch(os.path.join(pkgpath, "whatever"))
                     continue
                 # Create the package.
@@ -1678,7 +1683,8 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
     def testListInstalledPackages(self):
         """Test if listing packages installed into a root works."""
         packages = portage_util.ListInstalledPackages(self.fake_chroot)
-        # Sort the lists, because the filesystem might reorder the entries for us.
+        # Sort the lists, because the filesystem might reorder the entries for
+        # us.
         packages.sort()
         self.fake_packages.sort()
         self.assertEqual(self.fake_packages, packages)
@@ -1772,7 +1778,8 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
         self.assertTrue(pkg)
         lst = pkg.ListContents()
 
-        # Check ListContents filters out the garbage we added to the list of files.
+        # Check ListContents filters out the garbage we added to the list of
+        # files.
         fake_files = [
             f for f in self.fake_files if f[0] in ("sym", "obj", "dir")
         ]
@@ -1781,8 +1788,8 @@ class PortageDBTest(cros_test_lib.TempDirTestCase):
         # Check the paths are all relative.
         self.assertTrue(all(not f[1].startswith("/") for f in lst))
 
-        # Check all the files are present. We only consider file type and path, and
-        # convert the path to a relative path.
+        # Check all the files are present. We only consider file type and path,
+        # and convert the path to a relative path.
         fake_files = [(f[0], f[1].lstrip("/")) for f in fake_files]
         self.assertEqual(fake_files, lst)
 
@@ -1811,7 +1818,7 @@ class InstalledPackageTest(cros_test_lib.TempDirTestCase):
             osutils.WriteFile(os.path.join(self.tempdir, path), data)
 
     def testOutOfDBPackage(self):
-        """Tests an InstalledPackage instance can be created without a PortageDB."""
+        """Verify InstalledPackage instance can be created w/o a PortageDB."""
         pkg = portage_util.InstalledPackage(None, self.tempdir)
         self.assertEqual("category-1", pkg.category)
         self.assertEqual("http://example.com", pkg.homepage)
@@ -1821,7 +1828,7 @@ class InstalledPackageTest(cros_test_lib.TempDirTestCase):
         self.assertEqual("123", pkg.size)
 
     def testIncompletePackage(self):
-        """Tests an incomplete or otherwise invalid package raises an exception."""
+        """Tests an incomplete or invalid package raises an exception."""
         # No package name is provided.
         os.unlink(os.path.join(self.tempdir, "PF"))
         self.assertRaises(
@@ -1898,7 +1905,8 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
 
     def testUndefinedEnvvars(self):
         """Test undefined variable handling."""
-        # The variable exists in the command output even when not actually defined.
+        # The variable exists in the command output even when not actually
+        # defined.
         result = cros_build_lib.CompletedProcess(
             stdout="DOES_NOT_EXIST=\n", returncode=1
         )
@@ -1944,8 +1952,9 @@ class PortageqEnvvarTest(cros_test_lib.MockTestCase):
         with self.assertRaises(TypeError):
             portage_util.PortageqEnvvars("")
 
-        # Raised when extending the command list. This is currently expected, and
-        # ints should not be accepted, but more formal handling can be added.
+        # Raised when extending the command list. This is currently expected,
+        # and ints should not be accepted, but more formal handling can be
+        # added.
         with self.assertRaises(TypeError):
             portage_util.PortageqEnvvars(1)
 
@@ -1978,9 +1987,9 @@ class PortageqMatchTest(cros_test_lib.MockTestCase):
     def testMultiError(self):
         """Test unspecific query results in error.
 
-        The method currently isn't setup to support multiple values in the output.
-        It is instead interpreted as a cpv format error by SplitCPV. This isn't
-        a hard requirement, just the current expected behavior.
+        The method currently isn't setup to support multiple values in the
+        output. It is instead interpreted as a cpv format error by SplitCPV.
+        This isn't a hard requirement, just the current expected behavior.
         """
         output_str = "cat-1/pkg-one-1.0\ncat-2/pkg-two-2.1.3-r45\n"
         result = cros_build_lib.CompletedProcess(

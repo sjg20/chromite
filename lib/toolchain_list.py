@@ -31,7 +31,7 @@ class ToolchainList(object):
         """Construct an instance.
 
         Args:
-          overlays: list of overlay directories to add toolchains from.
+            overlays: list of overlay directories to add toolchains from.
         """
         if overlays is None:
             raise ValueError("Must specify overlays.")
@@ -47,7 +47,7 @@ class ToolchainList(object):
         Does not include overlays that this overlay depends on.
 
         Args:
-          overlay_dir: absolute path to an overlay directory.
+            overlay_dir: absolute path to an overlay directory.
         """
         config_path = os.path.join(overlay_dir, "toolchain.conf")
         if not os.path.exists(config_path):
@@ -83,8 +83,9 @@ class ToolchainList(object):
         """Add a toolchain to |self|.
 
         Args:
-          target: string target (e.g. 'x86_64-cros-linux-gnu').
-          setting_overrides: dictionary of setting overrides for this toolchain.
+            target: string target (e.g. 'x86_64-cros-linux-gnu').
+            setting_overrides: dictionary of setting overrides for this
+                toolchain.
         """
         if setting_overrides is None:
             setting_overrides = dict()
@@ -110,8 +111,8 @@ class ToolchainList(object):
             )
             toolchains.insert(0, default_toolchain)
 
-        # We might get toolchain setting overrides from a couple different overlays.
-        # Merge all these overrides together, disallowing conflicts.
+        # We might get toolchain setting overrides from a couple different
+        # overlays. Merge all these overrides together, disallowing conflicts.
         for toolchain in toolchains:
             targets.setdefault(toolchain.target, dict())
             existing_overrides = targets[toolchain.target]
@@ -121,7 +122,8 @@ class ToolchainList(object):
                     and existing_overrides[key] != value
                 ):
                     raise MismatchedToolchainConfigsError(
-                        "For toolchain %s, found %s to be set to both %r and %r."
+                        "For toolchain %s, found %s to be set to both %r and "
+                        "%r."
                         % (
                             toolchain.target,
                             key,
@@ -131,7 +133,8 @@ class ToolchainList(object):
                     )
                 existing_overrides[key] = value
 
-        # Now that we've merged all the setting overrides, apply them to defaults.
+        # Now that we've merged all the setting overrides, apply them to
+        # defaults.
         for target in targets.keys():
             settings = {
                 "sdk": True,

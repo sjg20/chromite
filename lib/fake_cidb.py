@@ -28,7 +28,7 @@ class FakeCIDBConnection(object):
         self.buildMessageTable = {}
 
     def _TrimStatus(self, status):
-        """Trims a build row to keys that should be returned by GetBuildStatus"""
+        """Trim a build row to keys that should be returned by GetBuildStatus"""
         return {
             k: v
             for (k, v) in status.items()
@@ -66,8 +66,8 @@ class FakeCIDBConnection(object):
     ):
         """Insert a build row.
 
-        Note this API slightly differs from cidb as we pass status to avoid having
-        to have a later FinishBuild call in testing.
+        Note this API slightly differs from cidb as we pass status to avoid
+        having to have a later FinishBuild call in testing.
         """
         if start_time is None:
             start_time = datetime.datetime.now()
@@ -218,14 +218,14 @@ class FakeCIDBConnection(object):
         """Get the build messages of the given build id.
 
         Args:
-          build_id: build id (string) of the build to get messages.
-          message_type: Get messages with the specific message_type (string) if
-            message_type is not None.
-          message_subtype: Get messages with the specific message_subtype (stirng)
-            if message_subtype is not None.
+            build_id: build id (string) of the build to get messages.
+            message_type: Get messages with the specific message_type (string)
+                if message_type is not None.
+            message_subtype: Get messages with the specific message_subtype
+                (string) if message_subtype is not None.
 
         Returns:
-          A list of build messages (in the format of dict).
+            A list of build messages (in the format of dict).
         """
         messages = []
         for v in self.buildMessageTable.values():
@@ -441,11 +441,13 @@ class FakeCIDBConnection(object):
             for f_dict in self.failureTable.values():
                 if f_dict["build_stage_id"] in bs_table:
                     bs_dict = bs_table[f_dict["build_stage_id"]]
+                    # pylint: disable=line-too-long
                     stage_failures.append(
                         failure_message_lib.StageFailure.GetStageFailureFromDicts(
                             f_dict, bs_dict, b_dict
                         )
                     )
+                    # pylint: enable=line-too-long
 
         return stage_failures
 

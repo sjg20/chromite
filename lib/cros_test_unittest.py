@@ -443,8 +443,8 @@ class CrOSTesterMiscTests(CrOSTesterBase):
     def testRunDeviceCmdWithoutSrcFiles(self):
         """Verify running a remote command when src files are not specified.
 
-        The remote command should not change the working directory or create a temp
-        directory on the target.
+        The remote command should not change the working directory or create a
+        temp directory on the target.
         """
         self._tester.remote_cmd = True
         self._tester.args = ["/usr/local/autotest/bin/vm_sanity.py"]
@@ -554,7 +554,8 @@ class CrOSTesterAutotest(CrOSTesterBase):
     def testInsideChrootAutotest(self, _check_inside_chroot_mock):
         """Tests running an autotest from within the chroot."""
         # Checks that mock version has been called.
-        # TODO(crbug/1065172): Invalid assertion that had previously been mocked.
+        # TODO(crbug/1065172): Invalid assertion that had previously been
+        #  mocked.
         # check_inside_chroot_mock.assert_called()
 
         self._tester.autotest = ["accessibility_Sanity"]
@@ -578,7 +579,8 @@ class CrOSTesterAutotest(CrOSTesterBase):
     def testOutsideChrootAutotest(self, _check_inside_chroot_mock):
         """Tests running an autotest from outside the chroot."""
         # Checks that mock version has been called.
-        # TODO(crbug/1065172): Invalid assertion that had previously been mocked.
+        # TODO(crbug/1065172): Invalid assertion that had previously been
+        #  mocked.
         # check_inside_chroot_mock.assert_called()
 
         self._tester.autotest = ["accessibility_Sanity"]
@@ -867,7 +869,7 @@ class CrOSTesterChromeTest(CrOSTesterBase):
         rsync_mock.assert_called()
 
     def testChromeTestExeArg(self):
-        """Verify build/deploy and chrome test commands when a test arg is given."""
+        """Verify build/deploy and chrome test commands with a test arg."""
         test_exe = "crypto_unittests"
         test_label = "//crypto:" + test_exe
         test_args = ["--test-launcher-print-test-stdio=auto"]
@@ -899,7 +901,7 @@ class CrOSTesterParser(CrOSTesterBase):
         self.assertIn(error_msg, output.GetStderr())
 
     def testParserErrorChromeTest(self):
-        """Verify we get a parser error for --chrome-test when no args are given."""
+        """Verify we get a parser error for --chrome-test with no args."""
         self.CheckParserError("--chrome-test", "--chrome-test")
 
     def testParserSetsBuildDir(self):

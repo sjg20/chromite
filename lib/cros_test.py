@@ -374,7 +374,8 @@ class CrOSTest(object):
         return self._device.run(
             [
                 "python",
-                "/usr/local/telemetry/src/third_party/catapult/telemetry/bin/run_tests",
+                "/usr/local/telemetry/src/third_party/catapult/telemetry/bin/"
+                "run_tests",
                 "--browser=%s" % browser,
             ]
             + self.catapult_tests,
@@ -441,7 +442,8 @@ class CrOSTest(object):
             "-build=false",
             "-waituntilready",
             # Skip tests depending on private runtime variables.
-            # 'gs://chromeos-prebuilt/board/amd64-host/.../chromeos-base/tast-vars*'
+            # 'gs://chromeos-prebuilt/board/amd64-host/.../
+            # chromeos-base/tast-vars*'
             # doesn't contain runtime variable files in the tast-tests-private
             # repository.
             r"-maybemissingvars=.+\..+",

@@ -43,29 +43,29 @@ class RetryOnServerErrorHttpRequest(HttpRequest):
         |num_retries| will cause failed requests to be retried.
 
         Args:
-          http: The httplib2.http to send this request through.
-          num_retries: Number of retries. Class default value will be used if
-              omitted.
+            http: The httplib2.http to send this request through.
+            num_retries: Number of retries. Class default value will be used if
+                omitted.
 
         Returns:
-          A deserialized object model of the response body as determined
-              by the postproc. See HttpRequest.execute().
+            A deserialized object model of the response body as determined
+            by the postproc. See HttpRequest.execute().
         """
         return super().execute(
             http=http, num_retries=num_retries or self.num_retries
         )
 
 
-def _GetMetdataValue(metadata, key):
+def _GetMetadataValue(metadata, key):
     """Finds a value corresponding to a given metadata key.
 
     Args:
-      metadata: metadata object, i.e. a dict containing containing 'items'
-        - a list of key-value pairs.
-      key: name of the key.
+        metadata: metadata object, i.e. a dict containing 'items'
+            - a list of key-value pairs.
+        key: name of the key.
 
     Returns:
-      Corresponding value or None if it was not found.
+        Corresponding value or None if it was not found.
     """
     for item in metadata["items"]:
         if item["key"] == key:
@@ -77,10 +77,10 @@ def _UpdateMetadataValue(metadata, key, value):
     """Updates a single key-value pair in a metadata object.
 
     Args:
-      metadata: metadata object, i.e. a dict containing containing 'items'
-        - a list of key-value pairs.
-      key: name of the key.
-      value: new value for the key, or None if it should be removed.
+        metadata: metadata object, i.e. a dict containing 'items'
+            - a list of key-value pairs.
+        key: name of the key.
+        value: new value for the key, or None if it should be removed.
     """
     items = metadata.setdefault("items", [])
     for item in items:
@@ -101,7 +101,7 @@ def _UpdateMetadataValue(metadata, key, value):
 
 
 class GceContext(object):
-    """A convinient wrapper around the GCE Python API."""
+    """A convenient wrapper around the GCE Python API."""
 
     # These constants are made public so that users can customize as they need.
     DEFAULT_TIMEOUT_SEC = 5 * 60
@@ -109,8 +109,10 @@ class GceContext(object):
     IMAGE_OPERATIONS_TIMEOUT_SEC = 10 * 60
 
     _GCE_SCOPES = (
-        "https://www.googleapis.com/auth/compute",  # CreateInstance, CreateImage
-        "https://www.googleapis.com/auth/devstorage.full_control",  # CreateImage
+        # CreateInstance, CreateImage
+        "https://www.googleapis.com/auth/compute",
+        # CreateImage
+        "https://www.googleapis.com/auth/devstorage.full_control",
     )
     _DEFAULT_NETWORK = "default"
     _DEFAULT_MACHINE_TYPE = "n1-standard-8"
@@ -132,10 +134,10 @@ class GceContext(object):
         """Initializes GceContext.
 
         Args:
-          project: The GCP project to create instances in.
-          zone: The default zone to create instances in.
-          credentials: The credentials used to call the GCE API.
-          thread_safe: Whether the client is expected to be thread safe.
+            project: The GCP project to create instances in.
+            zone: The default zone to create instances in.
+            credentials: The credentials used to call the GCE API.
+            thread_safe: Whether the client is expected to be thread safe.
         """
         self.project = project
         self.zone = zone
@@ -163,12 +165,12 @@ class GceContext(object):
         https://developers.google.com/api-client-library/python/auth/service-accounts
 
         Args:
-          project: The GCP project to create images and instances in.
-          zone: The default zone to create instances in.
-          json_key_file: Path to the service account JSON key.
+            project: The GCP project to create images and instances in.
+            zone: The default zone to create instances in.
+            json_key_file: Path to the service account JSON key.
 
         Returns:
-          GceContext.
+            GceContext.
         """
         credentials = GoogleCredentials.from_stream(
             json_key_file
@@ -183,12 +185,12 @@ class GceContext(object):
         https://developers.google.com/api-client-library/python/auth/service-accounts
 
         Args:
-          project: The GCP project to create images and instances in.
-          zone: The default zone to create instances in.
-          json_key_file: Path to the service account JSON key.
+            project: The GCP project to create images and instances in.
+            zone: The default zone to create instances in.
+            json_key_file: Path to the service account JSON key.
 
         Returns:
-          GceContext.
+            GceContext.
         """
         credentials = GoogleCredentials.from_stream(
             json_key_file
@@ -199,11 +201,11 @@ class GceContext(object):
         """Reserves an external IP address.
 
         Args:
-          name: The name to assign to the address.
-          region: Region to reserved the address in.
+            name: The name to assign to the address.
+            region: Region to reserve the address in.
 
         Returns:
-          The reserved address as a string.
+            The reserved address as a string.
         """
         body = {
             "name": name,
@@ -235,8 +237,8 @@ class GceContext(object):
         """Frees up an external IP address.
 
         Args:
-          name: The name of the address.
-          region: Region of the address.
+            name: The name of the address.
+            region: Region of the address.
         """
         operation = (
             self.gce_client.addresses()
@@ -255,10 +257,10 @@ class GceContext(object):
         """Resolves name of the region that a zone belongs to.
 
         Args:
-          zone: The zone to resolve.
+            zone: The zone to resolve.
 
         Returns:
-          Name of the region corresponding to the zone.
+            Name of the region corresponding to the zone.
         """
         zone_resource = (
             self.gce_client.zones()
@@ -282,31 +284,32 @@ class GceContext(object):
         """Creates an instance with the given image and waits until it's ready.
 
         Args:
-          name: Instance name.
-          image: Fully spelled URL of the image, e.g., for private images,
-              'global/images/my-private-image', or for images from a
-              publicly-available project,
-              'projects/debian-cloud/global/images/debian-7-wheezy-vYYYYMMDD'.
-              Details:
-              https://cloud.google.com/compute/docs/reference/latest/instances/insert
-          zone: The zone to create the instance in. Default zone will be used if
-              omitted.
-          network: An existing network to create the instance in. Default network
-              will be used if omitted.
-          subnet: The subnet to create the instance in.
-          machine_type: The machine type to use. Default machine type will be used
-              if omitted.
-          default_scopes: If true, the default scopes are added to the instances.
-          static_address: External IP address to assign to the instance as a string.
-              If None an emphemeral address will be used.
-          kwargs: Other possible Instance Resource properties.
-              https://cloud.google.com/compute/docs/reference/latest/instances#resource
-              Note that values from kwargs will overrule properties constructed from
-              positinal arguments, i.e., name, image, zone, network and
-              machine_type.
+            name: Instance name.
+            image: Fully spelled URL of the image, e.g., for private images,
+                'global/images/my-private-image', or for images from a
+                publicly-available project,
+                'projects/debian-cloud/global/images/debian-7-wheezy-vYYYYMMDD'.
+                Details:
+                https://cloud.google.com/compute/docs/reference/latest/instances/insert
+            zone: The zone to create the instance in. Default zone will be used
+                if omitted.
+            network: An existing network to create the instance in. Default
+                network will be used if omitted.
+            subnet: The subnet to create the instance in.
+            machine_type: The machine type to use. Default machine type will be
+                used if omitted.
+            default_scopes: If true, the default scopes are added to the
+                instances.
+            static_address: External IP address to assign to the instance as a
+                string. If None an ephemeral address will be used.
+            kwargs: Other possible Instance Resource properties.
+                https://cloud.google.com/compute/docs/reference/latest/instances#resource
+                Note that values from kwargs will overrule properties
+                constructed from positional arguments, i.e., name, image, zone,
+                network and machine_type.
 
         Returns:
-          URL to the created instance.
+            URL to the created instance.
         """
         logging.info('Creating instance "%s" with image "%s" ...', name, image)
         network = "global/networks/%s" % network or self._DEFAULT_NETWORK
@@ -376,8 +379,9 @@ class GceContext(object):
         """Deletes an instance with the name and waits until it's done.
 
         Args:
-          name: Name of the instance to delete.
-          zone: Zone where the instance is in. Default zone will be used if omitted.
+            name: Name of the instance to delete.
+            zone: Zone where the instance is in. Default zone will be used if
+                omitted.
         """
         logging.info('Deleting instance "%s" ...', name)
         operation = (
@@ -393,8 +397,9 @@ class GceContext(object):
         """Starts an instance with the name and waits until it's done.
 
         Args:
-          name: Name of the instance to start.
-          zone: Zone where the instance is in. Default zone will be used if omitted.
+            name: Name of the instance to start.
+            zone: Zone where the instance is in. Default zone will be used if
+                omitted.
         """
         logging.info('Starting instance "%s" ...', name)
         operation = (
@@ -410,8 +415,9 @@ class GceContext(object):
         """Stops an instance with the name and waits until it's done.
 
         Args:
-          name: Name of the instance to stop.
-          zone: Zone where the instance is in. Default zone will be used if omitted.
+            name: Name of the instance to stop.
+            zone: Zone where the instance is in. Default zone will be used if
+                omitted.
         """
         logging.info('Stopping instance "%s" ...', name)
         operation = (
@@ -427,13 +433,12 @@ class GceContext(object):
         """Creates an image with the given |source|.
 
         Args:
-          name: Name of the image to be created.
-          source:
-            Google Cloud Storage object of the source disk, e.g.,
-            'https://storage.googleapis.com/my-gcs-bucket/test_image.tar.gz'.
+            name: Name of the image to be created.
+            source: Google Cloud Storage object of the source disk. e.g.:
+                https://storage.googleapis.com/my-gcs-bucket/test_image.tar.gz
 
         Returns:
-          URL to the created image.
+            URL to the created image.
         """
         logging.info('Creating image "%s" with "source" %s ...', name, source)
         config = {
@@ -458,7 +463,7 @@ class GceContext(object):
         """Deletes an image and waits until it's deleted.
 
         Args:
-          name: Name of the image to delete.
+            name: Name of the image to delete.
         """
         logging.info('Deleting image "%s" ...', name)
         operation = (
@@ -474,11 +479,11 @@ class GceContext(object):
         """Lists all instances.
 
         Args:
-          zone: Zone where the instances are in. Default zone will be used if
+            zone: Zone where the instances are in. Default zone will be used if
                 omitted.
 
         Returns:
-          A list of Instance Resources if found, or an empty list otherwise.
+            A list of Instance Resources if found, or an empty list otherwise.
         """
         result = (
             self.gce_client.instances()
@@ -491,7 +496,7 @@ class GceContext(object):
         """Lists all images.
 
         Returns:
-          A list of Image Resources if found, or an empty list otherwise.
+            A list of Image Resources if found, or an empty list otherwise.
         """
         result = self.gce_client.images().list(project=self.project).execute()
         return result.get("items", [])
@@ -500,15 +505,16 @@ class GceContext(object):
         """Gets an Instance Resource by name and zone.
 
         Args:
-          instance: Name of the instance.
-          zone: Zone where the instance is in. Default zone will be used if omitted.
+            instance: Name of the instance.
+            zone: Zone where the instance is in. Default zone will be used if
+                omitted.
 
         Returns:
-          An Instance Resource.
+            An Instance Resource.
 
         Raises:
-          ResourceNotFoundError if instance was not found, or HttpError on other
-          HTTP failures.
+            ResourceNotFoundError: if instance was not found.
+            HttpError: other HTTP failures.
         """
         try:
             return (
@@ -533,14 +539,15 @@ class GceContext(object):
         """Gets the external IP of an instance.
 
         Args:
-          instance: Name of the instance to get IP for.
-          zone: Zone where the instance is in. Default zone will be used if omitted.
+            instance: Name of the instance to get IP for.
+            zone: Zone where the instance is in. Default zone will be used if
+                omitted.
 
         Returns:
-          External IP address of the instance.
+            External IP address of the instance.
 
         Raises:
-          Error: Something went wrong when trying to get IP for the instance.
+            Error: Something went wrong when trying to get IP for the instance.
         """
         result = self.GetInstance(instance, zone)
         try:
@@ -560,13 +567,13 @@ class GceContext(object):
         """Gets an Image Resource by name.
 
         Args:
-          image: Name of the image to look for.
+            image: Name of the image to look for.
 
         Returns:
-          An Image Resource.
+            An Image Resource.
 
         Raises:
-          ResourceNotFoundError: The requested image was not found.
+            ResourceNotFoundError: The requested image was not found.
         """
         try:
             return (
@@ -587,11 +594,12 @@ class GceContext(object):
         """Checks if an instance exists in the current project.
 
         Args:
-          instance: Name of the instance to check existence of.
-          zone: Zone where the instance is in. Default zone will be used if omitted.
+            instance: Name of the instance to check existence of.
+            zone: Zone where the instance is in. Default zone will be used if
+                omitted.
 
         Returns:
-          True if the instance exists or False otherwise.
+            True if the instance exists or False otherwise.
         """
         try:
             return self.GetInstance(instance, zone) is not None
@@ -602,10 +610,10 @@ class GceContext(object):
         """Checks if an image exists in the current project.
 
         Args:
-          image: Name of the image to check existence of.
+            image: Name of the image to check existence of.
 
         Returns:
-          True if the instance exists or False otherwise.
+            True if the instance exists or False otherwise.
         """
         try:
             return self.GetImage(image) is not None
@@ -616,23 +624,24 @@ class GceContext(object):
         """Looks up a single project metadata value.
 
         Args:
-          key: Metadata key name.
+            key: Metadata key name.
 
         Returns:
-          Metadata value corresponding to the key, or None if it was not found.
+            Metadata value corresponding to the key, or None if it was not
+            found.
         """
         projects_data = (
             self.gce_client.projects().get(project=self.project).execute()
         )
         metadata = projects_data["commonInstanceMetadata"]
-        return _GetMetdataValue(metadata, key)
+        return _GetMetadataValue(metadata, key)
 
     def SetCommonInstanceMetadata(self, key, value):
         """Sets a single project metadata value.
 
         Args:
-          key: Metadata key to be set.
-          value: New value, or None if the given key should be removed.
+            key: Metadata key to be set.
+            value: New value, or None if the given key should be removed.
         """
         projects_data = (
             self.gce_client.projects().get(project=self.project).execute()
@@ -650,23 +659,24 @@ class GceContext(object):
         """Looks up instance's metadata value.
 
         Args:
-          instance: Name of the instance.
-          key: Metadata key name.
+            instance: Name of the instance.
+            key: Metadata key name.
 
         Returns:
-          Metadata value corresponding to the key, or None if it was not found.
+            Metadata value corresponding to the key, or None if it was not
+            found.
         """
         instance_data = self.GetInstance(instance)
         metadata = instance_data["metadata"]
-        return self._GetMetdataValue(metadata, key)
+        return _GetMetadataValue(metadata, key)
 
     def SetInstanceMetadata(self, instance, key, value):
         """Sets a single instance metadata value.
 
         Args:
-          instance: Name of the instance.
-          key: Metadata key to be set.
-          value: New value, or None if the given key should be removed.
+            instance: Name of the instance.
+            key: Metadata key to be set.
+            value: New value, or None if the given key should be removed.
         """
         instance_data = self.GetInstance(instance)
         metadata = instance_data["metadata"]
@@ -689,13 +699,13 @@ class GceContext(object):
         """Waits until a GCE ZoneOperation is finished or timed out.
 
         Args:
-          operation: The GCE operation to wait for.
-          zone: The zone that |operation| belongs to.
-          timeout_sec: The maximum number of seconds to wait for.
-          timeout_handler: A callable to be executed when timeout happens.
+            operation: The GCE operation to wait for.
+            zone: The zone that |operation| belongs to.
+            timeout_sec: The maximum number of seconds to wait for.
+            timeout_handler: A callable to be executed when timeout happens.
 
         Raises:
-          Error when timeout happens or the operation fails.
+            Error when timeout happens or the operation fails.
         """
         get_request = self.gce_client.zoneOperations().get(
             project=self.project, zone=zone or self.zone, operation=operation
@@ -710,13 +720,13 @@ class GceContext(object):
         """Waits until a GCE RegionOperation is finished or timed out.
 
         Args:
-          operation: The GCE operation to wait for.
-          region: The region that |operation| belongs to.
-          timeout_sec: The maximum number of seconds to wait for.
-          timeout_handler: A callable to be executed when timeout happens.
+            operation: The GCE operation to wait for.
+            region: The region that |operation| belongs to.
+            timeout_sec: The maximum number of seconds to wait for.
+            timeout_handler: A callable to be executed when timeout happens.
 
         Raises:
-          Error when timeout happens or the operation fails.
+            Error when timeout happens or the operation fails.
         """
         get_request = self.gce_client.regionOperations().get(
             project=self.project,
@@ -733,12 +743,12 @@ class GceContext(object):
         """Waits until a GCE GlobalOperation is finished or timed out.
 
         Args:
-          operation: The GCE operation to wait for.
-          timeout_sec: The maximum number of seconds to wait for.
-          timeout_handler: A callable to be executed when timeout happens.
+            operation: The GCE operation to wait for.
+            timeout_sec: The maximum number of seconds to wait for.
+            timeout_handler: A callable to be executed when timeout happens.
 
         Raises:
-          Error when timeout happens or the operation fails.
+            Error when timeout happens or the operation fails.
         """
         get_request = self.gce_client.globalOperations().get(
             project=self.project, operation=operation
@@ -757,19 +767,18 @@ class GceContext(object):
         timeout_sec=None,
         timeout_handler=None,
     ):
-        """Waits until timeout or the request gets a response with a 'DONE' status.
+        """Waits until timeout, or it receives a response with a 'DONE' status.
 
         Args:
-          operation: The GCE operation to wait for.
-          get_operation_request:
-            The HTTP request to get the operation's status.
-            This request will be executed periodically until it returns a status
-            'DONE'.
-          timeout_sec: The maximum number of seconds to wait for.
-          timeout_handler: A callable to be executed when times out.
+            operation: The GCE operation to wait for.
+            get_operation_request: The HTTP request to get the operation's
+                status. This request will be executed periodically until it
+                returns a status 'DONE'.
+            timeout_sec: The maximum number of seconds to wait for.
+            timeout_handler: A callable to be executed when times out.
 
         Raises:
-          Error when timeout happens or the operation fails.
+            Error when timeout happens or the operation fails.
         """
 
         def _IsDone():
@@ -792,7 +801,7 @@ class GceContext(object):
             if timeout_handler:
                 timeout_handler()
             raise Error(
-                "Timeout wating for operation [%s] to complete" % operation
+                "Timeout waiting for operation [%s] to complete" % operation
             )
 
     def _BuildRetriableRequest(
@@ -807,16 +816,17 @@ class GceContext(object):
         """Builds a request that will be automatically retried on server errors.
 
         Args:
-          num_retries: The maximum number of times to retry until give up.
-          http: An httplib2.Http object that this request will be executed through.
-          thread_safe: Whether or not the request needs to be thread-safe.
-          credentials: Credentials to apply to the request.
-          *args: Optional positional arguments.
-          **kwargs: Optional keyword arguments.
+            num_retries: The maximum number of times to retry until give up.
+            http: An httplib2.Http object that this request will be executed
+                through.
+            thread_safe: Whether the request needs to be thread-safe.
+            credentials: Credentials to apply to the request.
+            *args: Optional positional arguments.
+            **kwargs: Optional keyword arguments.
 
         Returns:
-          RetryOnServerErrorHttpRequest: A request that will automatically retried
-              on server errors.
+            RetryOnServerErrorHttpRequest: A request that will automatically
+                retry on server errors.
         """
         if thread_safe:
             # Create a new http object for every request.

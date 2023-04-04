@@ -50,16 +50,16 @@ def GetXbuddyPath(path):
     """A helper function to parse an xbuddy path.
 
     Args:
-      path: Either an xbuddy path, gs path, or a path with no scheme.
+        path: Either an xbuddy path, gs path, or a path with no scheme.
 
     Returns:
-      path/for/xbuddy if |path| is xbuddy://path/for/xbuddy;
-      path/for/gs if |path| is gs://chromeos-image-archive/path/for/gs/;
-      otherwise, |path|.
+        path/for/xbuddy if |path| is xbuddy://path/for/xbuddy;
+        path/for/gs if |path| is gs://chromeos-image-archive/path/for/gs/;
+        otherwise, |path|.
 
     Raises:
-      ValueError if |path| is an unrecognized scheme, or is a gs path with
-      an unrecognized bucket.
+        ValueError: if |path| is an unrecognized scheme, or is a gs path with
+            an unrecognized bucket.
     """
     parsed = urllib.parse.urlparse(path)
 
@@ -86,21 +86,21 @@ def GetImagePathWithXbuddy(
 
     Ask xbuddy to translate |path|, and if necessary, download and stage the
     image, then return a translated path to the image. Also returns the resolved
-    XBuddy path, which may be useful for subsequent calls in case the argument is
-    an alias.
+    XBuddy path, which may be useful for subsequent calls in case the argument
+    is an alias.
 
     Args:
-      path: The xbuddy path.
-      board: The default board to use if board is not specified in |path|.
-      version: The default version to use if one is not specified in |path|.
-      static_dir: Static directory to stage the image in.
-      silent: Suppress error messages.
+        path: The xbuddy path.
+        board: The default board to use if board is not specified in |path|.
+        version: The default version to use if one is not specified in |path|.
+        static_dir: Static directory to stage the image in.
+        silent: Suppress error messages.
 
     Returns:
-      A tuple consisting of the build id and full path to the image.
+        A tuple consisting of the build id and full path to the image.
     """
-    # Since xbuddy often wants to use gsutil from $PATH, make sure our local copy
-    # shows up first.
+    # Since xbuddy often wants to use gsutil from $PATH, make sure our local
+    # copy shows up first.
     upath = os.environ["PATH"].split(os.pathsep)
     upath.insert(0, str(constants.CHROMITE_SCRIPTS_DIR))
     os.environ["PATH"] = os.pathsep.join(upath)
@@ -132,8 +132,8 @@ def GetIPv4Address(dev=None, global_ip=True):
     either via a VM or remote machine on the same network.
 
     Args:
-      dev: Get the IP address of the device (e.g. 'eth0').
-      global_ip: If set True, returns a globally valid IP address. Otherwise,
+        dev: Get the IP address of the device (e.g. 'eth0').
+        global_ip: If set True, returns a globally valid IP address. Otherwise,
         returns a local IP address (default: True).
     """
     cmd = ["ip", "addr", "show"]
@@ -189,12 +189,12 @@ class DevServerWrapper(multiprocessing.Process):
         """Initialize a DevServerWrapper instance.
 
         Args:
-          static_dir: The static directory to be used by the devserver.
-          port: The port to used by the devserver.
-          log_dir: Directory to store the log files.
-          src_image: The path to the image to be used as the base to
+            static_dir: The static directory to be used by the devserver.
+            port: The port to used by the devserver.
+            log_dir: Directory to store the log files.
+            src_image: The path to the image to be used as the base to
             generate delta payloads.
-          board: Override board to pass to the devserver for xbuddy pathing.
+            board: Override board to pass to the devserver for xbuddy pathing.
         """
         super().__init__()
         self.devserver_bin = "start_devserver"
@@ -236,10 +236,10 @@ class DevServerWrapper(multiprocessing.Process):
         """Returns the dev server url.
 
         Args:
-          ip: IP address of the devserver. If not set, use the IP
+            ip: IP address of the devserver. If not set, use the IP
             address of this machine.
-          port: Port number of devserver.
-          sub_dir: The subdirectory of the devserver url.
+            port: Port number of devserver.
+            sub_dir: The subdirectory of the devserver url.
         """
         ip = GetIPv4Address() if not ip else ip
         # If port number is not given, assume 8080 for backward
@@ -271,7 +271,7 @@ class DevServerWrapper(multiprocessing.Process):
         """Creates |static_dir|.
 
         Args:
-          static_dir: path to the static directory of the devserver instance.
+            static_dir: path to the static directory of the devserver instance.
         """
         osutils.SafeMakedirsNonRoot(static_dir)
 
@@ -280,7 +280,7 @@ class DevServerWrapper(multiprocessing.Process):
         """Cleans up |static_dir|.
 
         Args:
-          static_dir: path to the static directory of the devserver instance.
+            static_dir: path to the static directory of the devserver instance.
         """
         logging.info("Clearing cache directory %s", static_dir)
         osutils.RmDir(static_dir, ignore_missing=True, sudo=True)
@@ -349,7 +349,7 @@ class DevServerWrapper(multiprocessing.Process):
             raise DevServerStartupError("Devserver did not start")
 
     def run(self):
-        """Kicks off devserver in a separate process and waits for it to finish."""
+        """Start devserver in a separate process and waits for it to finish."""
         # Truncate the log file if it already exists.
         if os.path.exists(self.log_file):
             osutils.SafeUnlink(self.log_file, sudo=True)
@@ -411,15 +411,18 @@ class DevServerWrapper(multiprocessing.Process):
     def Start(self):
         """Starts a background devserver and waits for it to start.
 
-        Starts a background devserver and waits for it to start. Will only return
-        once devserver has started and running pid has been read.
+        Starts a background devserver and waits for it to start. Will only
+        return once devserver has started and running pid has been read.
         """
         self.start()
         self._WaitUntilStarted()
         self._pid = self._GetPID()
 
     def Stop(self):
-        """Kills the devserver instance with SIGTERM and SIGKILL if SIGTERM fails"""
+        """Kill the devserver instance.
+
+        Uses SIGTERM, and then SIGKILL if SIGTERM fails.
+        """
         if not self._pid:
             logging.debug("No devserver running.")
             return
@@ -444,7 +447,7 @@ class DevServerWrapper(multiprocessing.Process):
         print(self.TailLog(num_lines="+1"))
 
     def TailLog(self, num_lines=50):
-        """Returns the most recent |num_lines| lines of the devserver log file."""
+        """Returns most recent |num_lines| lines of the devserver log file."""
         fname = self.log_file
         # We use self._RunCommand here to check the existence of the log file.
         if self._RunCommand(["test", "-f", fname], check=False).returncode == 0:

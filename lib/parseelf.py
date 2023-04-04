@@ -28,10 +28,10 @@ def ParseELFSymbols(elf):
     """Parses list of symbols in an ELF file.
 
     Args:
-      elf: An elffile.ELFFile instance.
+        elf: An elffile.ELFFile instance.
 
     Returns:
-      A 2-tuple of (imported, exported) symbols, each of which is a set.
+        A 2-tuple of (imported, exported) symbols, each of which is a set.
     """
     imp = set()
     exp = set()
@@ -56,17 +56,17 @@ def ParseELFSymbols(elf):
                 dthash_ptr = tag.entry.d_ptr
 
         stringtable = (
-            segment._get_stringtable()
-        )  # pylint: disable=protected-access
+            segment._get_stringtable()  # pylint: disable=protected-access
+        )
 
         symtab_offset = next(elf.address_offsets(symtab_ptr))
 
         if dthash_ptr:
             # DT_SYMTAB provides no information on the number of symbols table
-            # entries. Instead, we use DT_HASH's nchain value, which according to the
-            # spec, "should equal the number of symbol table entries".
-            # nchain is the second 32-bit integer at the address pointed by DT_HASH,
-            # both for ELF and ELF64 formats.
+            # entries. Instead, we use DT_HASH's nchain value, which according
+            # to the spec, "should equal the number of symbol table entries".
+            # nchain is the second 32-bit integer at the address pointed by
+            # DT_HASH, both for ELF and ELF64 formats.
             fmt = "<I" if elf.little_endian else ">I"
             nchain_offset = next(elf.address_offsets(dthash_ptr + 4))
             elf.stream.seek(nchain_offset)
@@ -106,17 +106,17 @@ def ParseELF(
     Loads and parses the passed elf file.
 
     Args:
-      root: Path to the directory where the rootfs is mounted.
-      rel_path: The path to the parsing file relative to root.
-      ldpaths: The dict() with the ld path information. See lddtree.LoadLdpaths()
-          for details.
-      parse_symbols: Whether the result includes the dynamic symbols 'imp_sym' and
-          'exp_sym' sections. Disabling it reduces the time for large files with
-          many symbols.
+        root: Path to the directory where the rootfs is mounted.
+        rel_path: The path to the parsing file relative to root.
+        ldpaths: The dict() with the ld path information. See
+            lddtree.LoadLdpaths() for details.
+        parse_symbols: Whether the result includes the dynamic symbols 'imp_sym'
+            and 'exp_sym' sections. Disabling it reduces the time for large
+            files with many symbols.
 
     Returns:
-      If the passed file isn't a supported ELF file, returns None. Otherwise,
-      returns a dict() with information about the parsed ELF.
+        None: If the passed file isn't a supported ELF file.
+        dict: Otherwise, contains information about the parsed ELF.
     """
     # TODO(vapier): Convert to Path instead.
     root = str(root)

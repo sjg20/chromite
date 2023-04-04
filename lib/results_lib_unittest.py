@@ -357,7 +357,7 @@ class BuildStagesResultsTest(cros_test_lib.TestCase):
         self.assertEqual(SetAttrStage.VALUE, value)
 
     def testParallelStageCommunicationTimeout(self):
-        """Test run attr communication between parallel stages that times out."""
+        """Test attr communication between parallel stages that times out."""
 
         def assert_test(value):
             self.assertEqual(

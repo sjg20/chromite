@@ -41,7 +41,7 @@ class DeviceTester(cros_test_lib.RunCommandTestCase):
 
     def testWaitForBoot(self):
         self._device.WaitForBoot()
-        # Verify that ssh command is called with all of the right configurations.
+        # Verify that ssh command is called with all the right configurations.
         self.assertCommandContains(["ssh", "root@190.0.2.130", "--", "true"])
 
     @mock.patch(
@@ -49,7 +49,7 @@ class DeviceTester(cros_test_lib.RunCommandTestCase):
         side_effect=remote_access.SSHConnectionError(),
     )
     def testWaitForBootTimeOut(self, boot_mock):
-        """Verify an exception is raised when the device takes to long to boot."""
+        """Verify exception is raised when the device takes to0 long to boot."""
         self.assertRaises(device.DeviceError, self._device.WaitForBoot, sleep=0)
         boot_mock.assert_called()
 

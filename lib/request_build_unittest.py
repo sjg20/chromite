@@ -74,9 +74,10 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
     """Perform real buildbucket requests against a fake instance."""
 
     def setUp(self):
-        # This mocks out the class, then creates a return_value for a function on
-        # instances of it. We do this instead of just mocking out the function to
-        # ensure not real network requests are made in other parts of the class.
+        # This mocks out the class, then creates a return_value for a function
+        # on instances of it. We do this instead of just mocking out the
+        # function to ensure not real network requests are made in other parts
+        # of the class.
         client_mock = self.PatchObject(buildbucket_v2, "BuildbucketV2")
         client_mock().ScheduleBuilder.return_value = build_pb2.Build(
             id=12345,
@@ -245,9 +246,9 @@ class RequestBuildHelperTestsMock(RequestBuildHelperTestsBase):
             "with [config:build_config] [buildbucket_id:buildbucket_id]."
         )
 
-        # This test both validates that we can generate the log message, and that
-        # it's format hasn't changed. Since there are scripts that parse it via
-        # regex, the later is important.
+        # This test both validates that we can generate the log message, and
+        # that it's format hasn't changed. Since there are scripts that parse it
+        # via regex, the latter is important.
         self.assertEqual(msg, expected)
 
 

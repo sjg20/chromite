@@ -73,18 +73,18 @@ def _get_eclasses_for_ebuild(ebuild_path, path_cache, overlay_dirs):
             except NoMatchingFileForDigest:
                 logging.warning(
                     (
-                        "Package %s has a reference to eclass %s with digest %s but no "
-                        "matching file could be found."
+                        "Package %s has a reference to eclass %s with digest "
+                        "%s but no matching file could be found."
                     ),
                     package_name,
                     eclass,
                     digest,
                 )
-                # If we can't find a matching eclass file then we don't know exactly
-                # which overlay the eclass file is coming from, but we do know that it
-                # has to be in one of the overlay_dirs. So as a fallback we will pretend
-                # the eclass could be in any of them and add all of the paths that it
-                # could possibly have.
+                # If we can't find a matching eclass file then we don't know
+                # exactly which overlay the eclass file is coming from, but we
+                # do know that it has to be in one of the overlay_dirs. So as a
+                # fallback we will pretend the eclass could be in any of them
+                # and add all the paths that it could possibly have.
                 relevant_eclass_paths.extend(
                     [
                         os.path.join(overlay, "eclass", eclass) + ".eclass"
@@ -114,8 +114,8 @@ def _parse_ebuild_cache_entry(cache_file_path):
         # The edb cache files contain the overlay path, the md5 cache file does
         # not, so optionally parse the path.
         r"((?P<overlay_path>[^\s]+)\s+)?"
-        # The eclass digest followed by a word boundary -- \b prevents parsing md5
-        # digests as paths when the next class begins with a-f.
+        # The eclass digest followed by a word boundary -- \b prevents parsing
+        # md5 digests as paths when the next class begins with a-f.
         r"(?P<digest>[\da-fA-F]+)\b(\s+|$)"
     )
 
@@ -138,36 +138,37 @@ def get_source_path_mapping(
 ) -> Mapping[str, List[str]]:
     """Returns a map from each package to the source paths it depends on.
 
-    A source path is considered dependency of a package if modifying files in that
-    path might change the content of the resulting package.
+    A source path is considered dependency of a package if modifying files in
+    that path might change the content of the resulting package.
 
     Notes:
-      1) This method errs on the side of returning unneeded dependent paths by
-         default.
-         i.e: for a given package X, some of its dependency source paths may
-         contain files which doesn't affect the content of X. By contrast, any
-         missing dependency source paths for package X is considered a bug.
-      2) This only outputs the direct dependency source paths for a given package
-         and does not takes include the dependency source paths of dependency
-         packages.
-         e.g: if package A depends on B (DEPEND=B), then results of computing
-         dependency source paths of A doesn't include dependency source paths
-         of B.
+        1) This method errs on the side of returning unneeded dependent paths by
+            default.
+            i.e: for a given package X, some of its dependency source paths may
+            contain files which doesn't affect the content of X. By contrast,
+            any missing dependency source paths for package X is considered a
+            bug.
+        2) This only outputs the direct dependency source paths for a given
+            package and does not include the dependency source paths of
+            dependency packages.
+            e.g: if package A depends on B (DEPEND=B), then results of computing
+            dependency source paths of A doesn't include dependency source paths
+            of B.
 
     Args:
-      packages: The list of packages CPV names (str)
-      sysroot_path: The path to the sysroot.  If the packages are board
-        agnostic, then this should be '/'.
-      board: The name of the board if packages are dependency of board. If
-        the packages are board agnostic, then this should be None.
-      include_eclass: Whether to include eclass paths.
-      include_overlay: Whether to include overlay paths.
+        packages: The list of packages CPV names (str)
+        sysroot_path: The path to the sysroot.  If the packages are board
+            agnostic, then this should be '/'.
+        board: The name of the board if packages are dependency of board. If
+            the packages are board agnostic, then this should be None.
+        include_eclass: Whether to include eclass paths.
+        include_overlay: Whether to include overlay paths.
 
     Returns:
-      Map from each package to the source path (relative to the repo checkout
-        root, i.e: ~/chromiumos/ in your cros_sdk) it depends on.
-      For each source path which is a directory, the string is ended with a
-        trailing '/'.
+        Map from each package to the source path (relative to the repo checkout
+            root, i.e: ~/chromiumos/ in your cros_sdk) it depends on.
+        For each source path which is a directory, the string is ended with a
+            trailing '/'.
     """
     results = {}
 
@@ -187,8 +188,9 @@ def get_source_path_mapping(
     for package, ebuild_path in packages_to_ebuild_paths.items():
         ebuild = portage_util.EBuild(ebuild_path)
         if not ebuild.is_workon or ebuild.is_manually_uprevved:
-            # Can only fetch workon source paths from workon ebuilds, and manually
-            # uprevved packages are pinned so changes to the source repo don't matter.
+            # Can only fetch workon source paths from workon ebuilds, and
+            # manually uprevved packages are pinned so changes to the source
+            # repo don't matter.
             continue
 
         workon_subtrees = ebuild.GetSourceInfo(buildroot, manifest).subtrees
@@ -199,8 +201,8 @@ def get_source_path_mapping(
             overlay_type="both", board=board
         )
     else:
-        # If a board is not specified we assume the package is intended for the SDK
-        # and so we use the overlays for the SDK builder.
+        # If a board is not specified we assume the package is intended for the
+        # SDK, and so we use the overlays for the SDK builder.
         overlay_directories = portage_util.FindOverlays(
             overlay_type="both", board=constants.CHROOT_BUILDER_BOARD
         )
@@ -217,9 +219,9 @@ def get_source_path_mapping(
     # Source paths which are the overlay directories for the given board
     # (packages are board specific).
     if include_overlay:
-        # The only parts of the overlay that affect every package are the current
-        # profile (which lives somewhere in the profiles/ subdir) and a top-level
-        # make.conf (if it exists).
+        # The only parts of the overlay that affect every package are the
+        # current profile (which lives somewhere in the profiles/ subdir) and a
+        # top-level make.conf (if it exists).
         profile_directories = [
             os.path.join(x, "profiles") for x in overlay_directories
         ]
@@ -227,8 +229,8 @@ def get_source_path_mapping(
             os.path.join(x, "make.conf") for x in overlay_directories
         ]
 
-        # These directories *might* affect a build, so we include them for now to
-        # be safe.
+        # These directories *might* affect a build, so we include them for now
+        # to be safe.
         metadata_directories = [
             os.path.join(x, "metadata") for x in overlay_directories
         ]
@@ -241,7 +243,8 @@ def get_source_path_mapping(
             results[package].extend(make_conf_paths)
             results[package].extend(metadata_directories)
             results[package].extend(scripts_directories)
-            # The 'crosutils' repo potentially affects the build of every package.
+            # The 'crosutils' repo potentially affects the build of every
+            # package.
             results[package].append(str(constants.CROSUTILS_DIR))
 
         # chromiumos-overlay specifies default settings for every target in

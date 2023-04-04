@@ -376,12 +376,12 @@ class TestPathResolver(cros_test_lib.MockTestCase):
 
         self.SetChrootPath(constants.SOURCE_ROOT)
         resolver = path_util.ChrootPathResolver()
-        # These two patches are only necessary or have any affect on the test when
-        # the test is run inside of a symlinked chroot. The _ReadChrootLink patch
-        # ensures it runs as if it is not in a symlinked chroot. The realpath
-        # patch is necessary to make it actually behave as if that's the case.
-        # In both instances the effective return value are as if it was not in a
-        # symlinked chroot.
+        # These two patches are only necessary or have any affect on the test
+        # when the test is run inside of a symlinked chroot. The _ReadChrootLink
+        # patch ensures it runs as if it is not in a symlinked chroot. The
+        # realpath patch is necessary to make it actually behave as if that's
+        # the case. In both instances the effective return value are as if it
+        # was not in a symlinked chroot.
         # TODO(saklein) Rewrite these tests so this isn't necessary.
         self.PatchObject(resolver, "_ReadChrootLink", return_value=None)
         self.PatchObject(os.path, "realpath", side_effect=lambda x: x)
@@ -446,12 +446,12 @@ class TestPathResolver(cros_test_lib.MockTestCase):
         resolver = path_util.ChrootPathResolver(
             chroot_path=CUSTOM_CHROOT_PATH, out_path=CUSTOM_OUT_PATH
         )
-        # These two patches are only necessary or have any affect on the test when
-        # the test is run inside of a symlinked chroot. The _ReadChrootLink patch
-        # ensures it runs as if it is not in a symlinked chroot. The realpath
-        # patch is necessary to make it actually behave as if that's the case.
-        # In both instances the effective return value are as if it was not in a
-        # symlinked chroot.
+        # These two patches are only necessary or have any affect on the test
+        # when the test is run inside a symlinked chroot. The _ReadChrootLink
+        # patch ensures it runs as if it is not in a symlinked chroot. The
+        # realpath patch is necessary to make it actually behave as if that's
+        # the case. In both instances the effective return value are as if it
+        # was not in a symlinked chroot.
         # TODO(saklein) Rewrite these tests so this isn't necessary.
         self.PatchObject(resolver, "_ReadChrootLink", return_value=None)
         self.PatchObject(os.path, "realpath", side_effect=lambda x: x)
@@ -518,7 +518,8 @@ class TestPathResolver(cros_test_lib.MockTestCase):
             resolver.FromChroot("/some/path"),
         )
 
-        # Should be able to handle translating the linked location to a chroot path.
+        # Should be able to handle translating the linked location to a chroot
+        # path.
         self.assertEqual(
             "/some/path", resolver.ToChroot("/another/path/some/path")
         )

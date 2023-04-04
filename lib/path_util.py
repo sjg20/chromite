@@ -33,12 +33,13 @@ class ChrootPathResolver(object):
     """Perform path resolution to/from the chroot.
 
     Attributes:
-      source_path: Value to override default source root inference.
-      source_from_path_repo: Whether to infer the source root from the converted
-        path's repo parent during inbound translation; overrides |source_path|.
-      chroot_path: Full path of the chroot to use. If chroot_path is specified,
-        source_path cannot be specified.
-      out_path: Full path of the output directory to use.
+        source_path: Value to override default source root inference.
+        source_from_path_repo: Whether to infer the source root from the
+            converted path's repo parent during inbound translation; overrides
+            |source_path|.
+        chroot_path: Full path of the chroot to use. If chroot_path is
+            specified, source_path cannot be specified.
+        out_path: Full path of the output directory to use.
     """
 
     # When chroot_path is specified, it is assumed that any reference to
@@ -95,11 +96,12 @@ class ChrootPathResolver(object):
             self._out_path = (
                 constants.DEFAULT_OUT_PATH if out_path is None else out_path
             )
-            # The chroot link allows us to resolve paths when the chroot is symlinked
-            # to the default location. This is generally not used, but it is useful
-            # for CI for optimization purposes. We will trust them not to do something
-            # dumb, like symlink to /, but this doesn't enable that kind of behavior
-            # anyway, just allows resolving paths correctly from outside the chroot.
+            # The chroot link allows us to resolve paths when the chroot is
+            # symlinked to the default location. This is generally not used, but
+            # it is useful for CI for optimization purposes. We will trust them
+            # not to do something dumb, like symlink to /, but this doesn't
+            # enable that kind of behavior anyway, just allows resolving paths
+            # correctly from outside the chroot.
             self._chroot_link = self._ReadChrootLink(self._chroot_path)
 
             # Initialize mapping of known root bind mounts.
@@ -133,22 +135,23 @@ class ChrootPathResolver(object):
         recommended for non-chroot paths.
 
         Args:
-          path: The path to resolve.
+            path: The path to resolve.
 
         Returns:
-          The resolved path if the provided path is a symlink, None otherwise.
+            The resolved path if the provided path is a symlink, None otherwise.
         """
-        # Mainly for the "if self._source_from_path_repo:" branch in _GetChrootPath.
-        # _GetSourcePathChroot can return None, so double check it here.
+        # Mainly for the "if self._source_from_path_repo:" branch in
+        # _GetChrootPath. _GetSourcePathChroot can return None, so double check
+        # it here.
         if not path:
             return None
 
         abs_path = os.path.abspath(path)
         link = osutils.ResolveSymlink(abs_path)
 
-        # ResolveSymlink returns the passed path when the path isn't a symlink. We
-        # can skip some redundant work when its falling back on the link when the
-        # chroot is not a symlink.
+        # ResolveSymlink returns the passed path when the path isn't a symlink.
+        # We can skip some redundant work when its falling back on the link when
+        # the chroot is not a symlink.
         if link == abs_path:
             return None
 
@@ -166,17 +169,19 @@ class ChrootPathResolver(object):
         """If |path| starts with |src_root|, replace it using |dst_root_input|.
 
         Args:
-          path: An absolute path we want to convert to a destination equivalent.
-          src_root: The root that path needs to be contained in.
-          dst_root_input: The root we want to relocate the relative path into, or a
-            function returning this value.
+            path: An absolute path we want to convert to a destination
+                equivalent.
+            src_root: The root that path needs to be contained in.
+            dst_root_input: The root we want to relocate the relative path into,
+                or a function returning this value.
 
         Returns:
-          A translated path, or None if |src_root| is not a prefix of |path|.
+            A translated path, or None if |src_root| is not a prefix of |path|.
 
         Raises:
-          ValueError: If |src_root| is a prefix but |dst_root_input| yields None,
-            which means we don't have sufficient information to do the translation.
+            ValueError: If |src_root| is a prefix but |dst_root_input| yields
+                None, which means we don't have sufficient information to do the
+                translation.
         """
         if src_root and not osutils.IsSubPath(path, src_root):
             return None
@@ -192,22 +197,22 @@ class ChrootPathResolver(object):
     def _GetChrootPath(self, path) -> str:
         """Translates a fully-expanded host |path| into a chroot equivalent.
 
-        This checks path prefixes in order from the most to least "contained": the
-        chroot itself, then the cache directory, and finally the source tree. The
-        idea is to return the shortest possible chroot equivalent.
+        This checks path prefixes in order from the most to least "contained":
+        the chroot itself, then the cache directory, and finally the source
+        tree. The idea is to return the shortest possible chroot equivalent.
 
         Args:
-          path: A host path to translate.
+            path: A host path to translate.
 
         Returns:
-          An equivalent chroot path.
+            An equivalent chroot path.
 
         Raises:
-          ValueError: If |path| is not reachable from the chroot.
+            ValueError: If |path| is not reachable from the chroot.
         """
-        # Preliminary: compute the actual source and chroot paths to use. These are
-        # generally the precomputed values, unless we're inferring the source root
-        # from the path itself.
+        # Preliminary: compute the actual source and chroot paths to use. These
+        # are generally the precomputed values, unless we're inferring the
+        # source root from the path itself.
         source_path = self._source_path
         chroot_path = self._chroot_path
         chroot_link = self._chroot_link
@@ -245,19 +250,20 @@ class ChrootPathResolver(object):
     def _GetHostPath(self, path) -> str:
         """Translates a fully-expanded chroot |path| into a host equivalent.
 
-        We first attempt translation of known roots (source). If any is successful,
-        we check whether the result happens to point back to the chroot, in which
-        case we trim the chroot path prefix and recurse. If neither was successful,
-        just prepend the chroot path.
+        We first attempt translation of known roots (source). If any is
+        successful, we check whether the result happens to point back to the
+        chroot, in which case we trim the chroot path prefix and recurse. If
+        neither was successful, just prepend the chroot path.
 
         Args:
-          path: A chroot path to translate.
+            path: A chroot path to translate.
 
         Returns:
-          An equivalent host path.
+            An equivalent host path.
 
         Raises:
-          ValueError: If |path| could not be mapped to a proper host destination.
+            ValueError: If |path| could not be mapped to a proper host
+                destination.
         """
         new_path = None
 
@@ -271,8 +277,9 @@ class ChrootPathResolver(object):
             # If no known root was identified, just prepend the chroot path.
             new_path = self._TranslatePath(path, "", self._chroot_path)
         else:
-            # Check whether the resolved path happens to point back at the chroot, in
-            # which case trim the chroot path or link prefix and continue recursively.
+            # Check whether the resolved path happens to point back at the
+            # chroot, in which case trim the chroot path or link prefix and
+            # continue recursively.
             path = self._TranslatePath(new_path, self._chroot_path, "/")
             if path is None and self._chroot_link:
                 path = self._TranslatePath(new_path, self._chroot_link, "/")
@@ -286,21 +293,21 @@ class ChrootPathResolver(object):
         """Expands |path|; if outside the chroot, applies |get_converted_path|.
 
         Args:
-          path: A path to be converted.
-          get_converted_path: A conversion function.
+            path: A path to be converted.
+            get_converted_path: A conversion function.
 
         Returns:
-          An expanded and (if needed) converted path.
+            An expanded and (if needed) converted path.
 
         Raises:
-          ValueError: If path conversion failed.
+            ValueError: If path conversion failed.
         """
         # NOTE: We do not want to expand wrapper script symlinks because this
         # prevents them from working. Therefore, if the path points to a file we
         # only resolve its dirname but leave the basename intact. This means our
         # path resolution might return unusable results for file symlinks that
-        # point outside the reachable space. These are edge cases in which the user
-        # is expected to resolve the realpath themselves in advance.
+        # point outside the reachable space. These are edge cases in which the
+        # user is expected to resolve the realpath themselves in advance.
         expanded_path = os.path.expanduser(path)
         if os.path.isfile(expanded_path):
             expanded_path = os.path.join(
@@ -327,19 +334,19 @@ class ChrootPathResolver(object):
         return self._ConvertPath(path, self._GetHostPath)
 
 
-def DetermineCheckout(cwd=None):
+def DetermineCheckout(cwd=None) -> CheckoutInfo:
     """Gather information on the checkout we are in.
 
     There are several checkout types, as defined by CHECKOUT_TYPE_XXX variables.
-    This function determines what checkout type |cwd| is in, for example, if |cwd|
-    belongs to a `repo` checkout.
+    This function determines what checkout type |cwd| is in, for example, if
+    |cwd| belongs to a `repo` checkout.
 
     Returns:
-      A CheckoutInfo object with these attributes:
-        type: The type of checkout.  Valid values are CHECKOUT_TYPE_*.
-        root: The root of the checkout.
-        chrome_src_dir: If the checkout is a Chrome checkout, the path to the
-          Chrome src/ directory.
+        CheckoutInfo object with these attributes:
+            type: The type of checkout.  Valid values are CHECKOUT_TYPE_*.
+            root: The root of the checkout.
+            chrome_src_dir: If the checkout is a Chrome checkout, the path to
+                the Chrome src/ directory.
     """
     checkout_type = CHECKOUT_TYPE_UNKNOWN
     root, path = None, None
@@ -394,16 +401,17 @@ def ToChrootPath(
     """Resolves current environment |path| for use in the chroot.
 
     Args:
-      path: string path to translate into chroot namespace.
-      source_path: string path to root of source checkout with chroot in it.
-      chroot_path: string name of the full chroot path to use.
-      out_path: Path name of the full out path to use.
+        path: string path to translate into chroot namespace.
+        source_path: string path to root of source checkout with chroot in it.
+        chroot_path: string name of the full chroot path to use.
+        out_path: Path name of the full out path to use.
 
     Returns:
-      The same path converted to "inside chroot" namespace.
+        The same path converted to "inside chroot" namespace.
 
     Raises:
-      ValueError: If the path references a location not available in the chroot.
+        ValueError: If the path references a location not available in the
+            chroot.
     """
     return ChrootPathResolver(
         source_path=source_path, chroot_path=chroot_path, out_path=out_path
@@ -419,13 +427,13 @@ def FromChrootPath(
     """Resolves chroot |path| for use in the current environment.
 
     Args:
-      path: string path to translate out of chroot namespace.
-      source_path: string path to root of source checkout with chroot in it.
-      chroot_path: string name of the full chroot path to use
-      out_path: Path name of the full out path to use
+        path: string path to translate out of chroot namespace.
+        source_path: string path to root of source checkout with chroot in it.
+        chroot_path: string name of the full chroot path to use
+        out_path: Path name of the full out path to use
 
     Returns:
-      The same path converted to "outside chroot" namespace.
+        The same path converted to "outside chroot" namespace.
     """
     return ChrootPathResolver(
         source_path=source_path, chroot_path=chroot_path, out_path=out_path
@@ -471,7 +479,7 @@ def ExpandDirectories(files: List[Path]) -> Iterator[Path]:
 
     This function is intended to be called by tools which take a list of file
     paths (e.g., cros format and cros lint), where expansion of directories
-    passed in would be useful.   If a directory is located inside of a git
+    passed in would be useful.   If a directory is located inside a git
     checkout, any gitignore'd files will be respected (by means of using
     "git ls-files").
 
@@ -497,9 +505,9 @@ def ProtoPathToPathlibPath(
     """Convert an absolute path to a pathlib.Path outside the chroot.
 
     TODO(b/268732304): For some reason, importing common_pb2 at the top level of
-    this file causes chromite/scripts/wrapper3_unittest.py::FindTargetTests to
-    fail. Figure out what's going on there, and move the import inside this
-    function to the top of this file.
+        this file causes chromite/scripts/wrapper3_unittest.py::FindTargetTests
+        to fail. Figure out what's going on there, and move the import inside
+        this function to the top of this file.
 
     Args:
         path: An absolute path, which might be outside the chroot or inside

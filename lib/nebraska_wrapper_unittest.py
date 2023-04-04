@@ -36,7 +36,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
         Args:
           return_code: Look at cros_build_lib.run.
           stdout: Look at cros_build_lib.run.
-          side_effect: Lookt at mock.side_effect.
+          side_effect: Look at mock.side_effect.
         """
         return self.PatchObject(
             nebraska_wrapper.RemoteNebraskaWrapper,
@@ -73,7 +73,7 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
         with self.assertRaises(nebraska_wrapper.NebraskaStartupError):
             self._nebraska._ReadPortNumber()
 
-        # Tests that after retries the port file didn't come to fruitation.
+        # Tests that after retries the port file didn't come to fruition.
         self.PatchObject(multiprocessing.Process, "is_alive", return_value=True)
         self.PatchObject(
             timeout_util,
@@ -126,7 +126,8 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
         self.PatchObject(timeout_util, "WaitForReturnTrue")
         run_command_mock = self._PatchRemoteCommand(stdout="10")
         self._nebraska._WaitUntilStarted()
-        # TODO(crbug/1065172): Invalid assertion that had previously been mocked.
+        # TODO(crbug/1065172): Invalid assertion that had previously been
+        #   mocked.
         # read_port_number_mock.assert_called_once()
         self.assertEqual(self._nebraska._pid, 10)
         run_command_mock.assert_called_once_with(
@@ -150,9 +151,9 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
 
     def testStart(self):
         """Tests Start."""
-        # Since the run() function runs in a different thread, its exception doesn't
-        # get raised on this thread, so we call the run() directly instead of
-        # Start().
+        # Since the run() function runs in a different thread, its exception
+        # doesn't get raised on this thread, so we call the run() directly
+        # instead of Start().
         run_command_mock = self._PatchRemoteCommand()
         with self.assertRaises(nebraska_wrapper.NebraskaStartupError):
             self._nebraska.run()
@@ -223,7 +224,8 @@ class RemoteNebraskaWrapperTest(cros_test_lib.MockTempDirTestCase):
         nebraska_wrapper.RemoteNebraskaWrapper.GetNebraskaSrcFile(download_dir)
         fetch_mock.assert_called_with(
             "chromium.googlesource.com",
-            "chromiumos/platform/dev-util/+/HEAD/nebraska/nebraska.py?format=text",
+            "chromiumos/platform/dev-util/+/HEAD/nebraska/nebraska.py"
+            "?format=text",
         )
 
     @cros_test_lib.pytestmark_network_test

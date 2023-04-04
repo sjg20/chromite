@@ -12,7 +12,7 @@ from chromite.lib import metrics_lib
 
 
 class MetricsTest(cros_test_lib.TestCase):
-    """Tests for metrics_libzzs."""
+    """Tests for metrics_lib."""
 
     def testEndToEnd(self):
         """Test the normal usage pattern, end-to-end."""
@@ -29,8 +29,8 @@ class MetricsTest(cros_test_lib.TestCase):
             # Create a fake usage site of the metrics.
             @metrics_lib.collect_metrics
             def measure_things():
-                # Now, in here, we should have set up this env-var. This is a bit of
-                # invasive white-box testing.
+                # Now, in here, we should have set up this env-var. This is a
+                # bit of invasive white-box testing.
                 self.assertTrue(
                     os.environ.get(metrics_lib.UTILS_METRICS_LOG_ENVVAR)
                 )

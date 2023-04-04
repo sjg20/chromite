@@ -35,10 +35,10 @@ def ChildBuildSet(parent_buildbucket_id):
     """Compute the buildset id for all slaves of a master builder.
 
     Args:
-      parent_buildbucket_id: The buildbucket id of the master build.
+        parent_buildbucket_id: The buildbucket id of the master build.
 
     Returns:
-      A string to use as a buildset for the slave builders, or None.
+        A string to use as a buildset for the slave builders, or None.
     """
     if not parent_buildbucket_id:
         return None
@@ -75,21 +75,23 @@ class RequestBuild(object):
         """Construct the object.
 
         Args:
-          build_config: A build config name to schedule.
-          luci_builder: Name of builder to execute the build, or None.
-                        For waterfall builds, this is the name of the build column.
-                        For swarming builds, this is the LUCI builder name.
-          display_label: String describing how build group on waterfall, or None.
-          branch: Name of branch to build for.
-          extra_args: Command line arguments to pass to cbuildbot in job.
-          extra_properties: Additional input properties to add to the request.
-          user_email: Email address of person requesting job, or None.
-          email_template: Name of the luci-notify template to use. None for
-                          default. Ignored if user_email is not set.
-          master_cidb_id: CIDB id of scheduling builder, or None.
-          master_buildbucket_id: buildbucket id of scheduling builder, or None.
-          bucket: Which bucket do we request the build in?
-          requested_bot: Name of bot to prefer (for performance), or None.
+            build_config: A build config name to schedule.
+            luci_builder: Name of builder to execute the build, or None.
+                For waterfall builds, this is the name of the build column.
+                For swarming builds, this is the LUCI builder name.
+            display_label: String describing how build group on waterfall, or
+                None.
+            branch: Name of branch to build for.
+            extra_args: Command line arguments to pass to cbuildbot in job.
+            extra_properties: Additional input properties to add to the request.
+            user_email: Email address of person requesting job, or None.
+            email_template: Name of the luci-notify template to use. None for
+                default. Ignored if user_email is not set.
+            master_cidb_id: CIDB id of scheduling builder, or None.
+            master_buildbucket_id: buildbucket id of scheduling builder, or
+                None.
+            bucket: Which bucket do we request the build in?
+            requested_bot: Name of bot to prefer (for performance), or None.
         """
         self.bucket = bucket
         self.extra_properties = extra_properties or {}
@@ -102,7 +104,7 @@ class RequestBuild(object):
             self.workspace_branch = site_config[build_config].workspace_branch
             self.goma_client_type = site_config[build_config].goma_client_type
         else:
-            # Use generic defaults if needed (lowest priority)
+            # Use generic defaults if needed (lowest priority).
             self.luci_builder = config_lib.LUCI_BUILDER_TRY
             self.display_label = config_lib.DISPLAY_LABEL_TRYJOB
             self.workspace_branch = None
@@ -128,7 +130,7 @@ class RequestBuild(object):
         """Generate the details for Buildbucket V2 request.
 
         Returns:
-          Parameters for V2 ScheduleBuild.
+            Parameters for V2 ScheduleBuild.
         """
         tags = {
             # buildset identifies a group of related builders.
@@ -144,8 +146,8 @@ class RequestBuild(object):
         }
 
         if self.master_cidb_id or self.master_buildbucket_id:
-            # Used by dashboards as part of grouping slave builds. Set to False for
-            # slave builds, not set otherwise.
+            # Used by dashboards as part of grouping slave builds. Set to False
+            # for slave builds, not set otherwise.
             tags["master"] = "False"
 
         # Include the extra_properties we might have passed into the tags.
@@ -155,7 +157,7 @@ class RequestBuild(object):
         # Convert tag values to strings.
         #
         # Note that cbb_master_build_id must be a string (not a number) in
-        # properties because JSON does not distnguish integers and floats, so
+        # properties because JSON does not distinguish integers and floats, so
         # nothing guarantees that 0 won't turn into 0.0.
         # Recipe expects it to be a string anyway.
         tags = {k: str(v) for k, v in tags.items() if v}
@@ -209,10 +211,11 @@ class RequestBuild(object):
         """Submit the tryjob through Git.
 
         Args:
-          dryrun: Setting to true will run everything except the final submit step.
+            dryrun: Setting to true will run everything except the final submit
+                step.
 
         Returns:
-          A ScheduledBuild instance.
+            A ScheduledBuild instance.
         """
         buildbucket_client = buildbucket_v2.BuildbucketV2()
         request = self.CreateBuildRequest()

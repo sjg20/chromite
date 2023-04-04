@@ -26,11 +26,11 @@ class Qemu(object):
     # Require enough data to read the Ehdr of the ELF.
     _MIN_ELF_LEN = 64
 
-    # Tuples of (magic, mask) for an arch.  Most only need to identify by the Ehdr
-    # fields: e_ident (16 bytes), e_type (2 bytes), e_machine (2 bytes).
+    # Tuples of (magic, mask) for an arch.  Most only need to identify by the
+    # Ehdr fields: e_ident (16 bytes), e_type (2 bytes), e_machine (2 bytes).
     #
-    # Note: These are stored as bytes rather than strings due to size limits.  See
-    # GetRegisterBinfmtStr for more details.
+    # Note: These are stored as bytes rather than strings due to size limits.
+    # See GetRegisterBinfmtStr for more details.
     _MAGIC_MASK = {
         "aarch64": (
             b"\x7f\x45\x4c\x46\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00"
@@ -204,8 +204,9 @@ class Qemu(object):
                         bmask = array.array("B", magic_mask[1])
 
                         if MaskMatches(bheader, bmagic, bmask):
-                            # Make sure we do not have ambiguous magics as this will
-                            # also confuse the kernel when it tries to find a match.
+                            # Make sure we do not have ambiguous magics as this
+                            # will also confuse the kernel when it tries to find
+                            # a match.
                             if not matched_arch is None:
                                 raise ValueError(
                                     "internal error: multiple masks matched "
@@ -261,8 +262,8 @@ class Qemu(object):
         for src_path, sysroot_path in paths:
             src_path = os.path.normpath(src_path)
             sysroot_path = os.path.normpath(sysroot_path)
-            # We use a loop here, but in practice, this should only ever execute once
-            # or twice at most.
+            # We use a loop here, but in practice, this should only ever execute
+            # once or twice at most.
             while not os.path.exists(sysroot_path) or not filecmp.cmp(
                 sysroot_path, src_path, shallow=True
             ):
@@ -289,22 +290,25 @@ class Qemu(object):
         magic, mask = cls._MAGIC_MASK[arch]
 
         # We need to use bytes rather than strings as the kernel has a limit on
-        # the register string (256 bytes!).  If we passed ['\\', '0', '0'] to the
-        # kernel instead of [b'\x00'], that's 3x as many bytes.
+        # the register string (256 bytes!).  If we passed ['\\', '0', '0'] to
+        # the kernel instead of [b'\x00'], that's 3x as many bytes.
         #
-        # However, we can't pass two bytes: NUL bytes (since the kernel uses strchr
-        # and friends) and colon bytes (since we use that as the field separator).
+        # However, we can't pass two bytes: NUL bytes (since the kernel uses
+        # strchr and friends) and colon bytes (since we use that as the field
+        # separator).
         # TODO: Once this lands, and we drop support for older kernels, we can
-        # probably drop this workaround too.  https://lkml.org/lkml/2014/9/1/181
-        # That was first released in linux-3.18 in Dec 2014.
+        #   probably drop this workaround too.
+        #   https://lkml.org/lkml/2014/9/1/181
+        #   That was first released in linux-3.18 in Dec 2014.
         #
-        # Further way of data packing: if the mask and magic use 0x00 for the same
-        # byte, then turn the magic into something else.  This way the magic can
-        # be written in raw form, but the mask will still cancel it out.
+        # Further way of data packing: if the mask and magic use 0x00 for the
+        # same byte, then turn the magic into something else.  This way the
+        # magic can be written in raw form, but the mask will still cancel it
+        # out.
         #
-        # This is a little tricky as iterating over bytes yields ints in Python 3,
-        # but bytes in Python 2, but we need to convert those ints back into bytes.
-        # That's why we use b':'[0] below.
+        # This is a little tricky as iterating over bytes yields ints in Python
+        # 3, but bytes in Python 2, but we need to convert those ints back into
+        # bytes. That's why we use b':'[0] below.
         def _MaskReplace(match):
             byte = match.group(0)
             if byte == b"\x00":

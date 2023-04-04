@@ -35,7 +35,7 @@ class ToldToDie(Exception):
 def _TeeProcessSignalHandler(signum, _frame):
     """TeeProcess custom signal handler.
 
-    This is used to decide whether or not to kill our parent.
+    This is used to decide whether to kill our parent.
     """
     raise ToldToDie(signum)
 
@@ -44,10 +44,10 @@ def _output(line, output_files, complain):
     """Print line to output_files.
 
     Args:
-      line: Line to print.
-      output_files: List of files to print to.
-      complain: Print a warning if we get EAGAIN errors. Only one error
-                is printed per line.
+        line: Line to print.
+        output_files: List of files to print to.
+        complain: Print a warning if we get EAGAIN errors. Only one error is
+            printed per line.
     """
     for f in output_files:
         offset = 0
@@ -76,10 +76,11 @@ def _output(line, output_files, complain):
 def _tee(input_fd, output_files, complain):
     """Read data from |input_fd| and write to |output_files|."""
     while True:
-        # We need to use os.read() directly because it will return to us when the
-        # other side has flushed its output (and is shorter than _BUFSIZE).  If we
-        # use python's file object helpers (like read() and readline()), it will
-        # not return until either the full buffer is filled or a newline is hit.
+        # We need to use os.read() directly because it will return to us when
+        # the other side has flushed its output (and is shorter than _BUFSIZE).
+        # If we use python's file object helpers (like read() and readline()),
+        # it will not return until either the full buffer is filled or a newline
+        # is hit.
         data = os.read(input_fd, _BUFSIZE)
         if not data:
             return
@@ -93,17 +94,16 @@ class _TeeProcess(multiprocessing.Process):
         """Write to stdout and supplied filenames.
 
         Args:
-          output_filenames: List of filenames to print to.
-          complain: Print a warning if we get EAGAIN errors.
-          error_fd: The fd to write exceptions/errors to during
-            shutdown.
-          master_pid: Pid to SIGTERM if we shutdown uncleanly.
+            output_filenames: List of filenames to print to.
+            complain: Print a warning if we get EAGAIN errors.
+            error_fd: The fd to write exceptions/errors to during shutdown.
+            master_pid: Pid to SIGTERM if we shutdown uncleanly.
         """
 
         self._reader_pipe, self.writer_pipe = os.pipe()
         self._output_filenames = output_filenames
         self._complain = complain
-        # Dupe the fd on the offchance it's stdout/stderr,
+        # Dupe the fd on the off chance it's stdout/stderr,
         # which we screw with.
         # Not passing 3 argument (0) for unbuffered output because this is not
         # supported in Python 3 and there are issues in Python 2 -- see
@@ -113,8 +113,9 @@ class _TeeProcess(multiprocessing.Process):
         multiprocessing.Process.__init__(self)
 
     def _CloseUnnecessaryFds(self):
-        # For python2 we were relying on subprocess.MAXFD but that does not exist
-        # in python3. However, the calculation below is how it was being computed.
+        # For python2 we were relying on subprocess.MAXFD but that does not
+        # exist in python3. However, the calculation below is how it was being
+        # computed.
         try:
             max_fd_value = os.sysconf("SC_OPEN_MAX")
         except ValueError:
@@ -150,8 +151,8 @@ class _TeeProcess(multiprocessing.Process):
             input_fd = self._reader_pipe
 
             # Create list of files to write to.
-            # Not passing 3 argument (0) for unbuffered output because this is not
-            # supported in Python 3 and there are issues in Python 2 -- see
+            # Not passing 3 argument (0) for unbuffered output because this is
+            # not supported in Python 3 and there are issues in Python 2 -- see
             # https://bugs.python.org/issue17404.
             output_files = [os.fdopen(sys.stdout.fileno(), "w")]
             for filename in self._output_filenames:
@@ -166,7 +167,7 @@ class _TeeProcess(multiprocessing.Process):
             tb = traceback.format_exc()
             cbuildbot_alerts.PrintBuildbotStepFailure(self._error_handle)
             self._error_handle.write(
-                f"Unhandled exception occured in tee:\n{tb}\n"
+                f"Unhandled exception occurred in tee:\n{tb}\n"
             )
             # Try to signal the parent telling them of our
             # imminent demise.
@@ -184,7 +185,7 @@ class _TeeProcess(multiprocessing.Process):
 
             # Finally, kill ourself.
             # Specifically do it in a fashion that ensures no inherited
-            # cleanup code from our parent process is ran- leave that to
+            # cleanup code from our parent process is ran - leave that to
             # the parent.
             # pylint: disable=protected-access
             os._exit(0)
@@ -234,8 +235,9 @@ class Tee(cros_build_lib.PrimaryPidContextManager):
         os.close(writer_pipe)
 
     def stop(self):
-        """Restores old stdout and stderr handles and waits for tee proc to exit."""
-        # Close unbuffered std[out|err] file objects, as well as the tee's stdin.
+        """Restore old stdout/stderr handles and wait for tee proc to exit."""
+        # Close unbuffered std[out|err] file objects, as well as the tee's
+        # stdin.
         sys.stdout.close()
         sys.stderr.close()
 

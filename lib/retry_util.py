@@ -84,12 +84,12 @@ class WithRetry(object):
     """Decorator to handle retry on exception.
 
     Examples:
-      @WithRetry(max_retry=3)
-      def _run():
-        ... do something ...
-      _run()
+        @WithRetry(max_retry=3)
+        def _run():
+            ... do something ...
+        _run()
 
-      If _run() raises an exception, it retries at most three times.
+        If _run() raises an exception, it retries at most three times.
 
     Retrying strategy.
 
@@ -97,13 +97,13 @@ class WithRetry(object):
     checks whether the retry should be continued or not based on the given
     |handler| or |exception| as follows.
     - If |handler| is given, which should be a callback which takes an exception
-      and returns bool, calls it with the thrown exception.
-      If the |handler| returns True, retry will be continued. Otherwise no
-      further retry will be made, and an exception will be raised.
+        and returns bool, calls it with the thrown exception.
+        If the |handler| returns True, retry will be continued. Otherwise, no
+        further retry will be made, and an exception will be raised.
     - If |exception| is given, which is an exception class or a tuple of
-      exception classes, iff the thrown exception is a instance of the given
-      exception class(es) (or its subclass), continues to retry. Otherwise no
-      further retry will be made, and an exception will be raised.
+        exception classes, iff the thrown exception is a instance of the given
+        exception class(es) (or its subclass), continues to retry. Otherwise, no
+        further retry will be made, and an exception will be raised.
     - If neither is given, just continues to retry on any Exception instance.
     - Note: it is not allowed to specify both |handler| and |exception| at once.
 
@@ -111,26 +111,26 @@ class WithRetry(object):
 
     Between for each attempt, some delay can be set, as follows.
     - If |sleep| is given, the delay between the first and second attempts is
-      |sleep| secs.
+        |sleep| secs.
     - The delay between the second and third attempts, and later, depends on
-      |sleep| and |backoff_factor|.
-      - If |backoff_factor| is not given, the delay will be linearly increased,
-        as |sleep| * (number of attempts). E.g., if |sleep| is 1, the delays
-        will be 1, 2, 3, 4, 5, ... and so on.
-      - If |backoff_factor| is given, the delay will be exponentially increased,
-        as |sleep| * |backoff_factor| ** (number of attempts - 1). E.g., if
-        |sleep| is 1, and |backoff_factor| is 2, the delay will be,
-        1, 2, 4, 8, 16, ... and so on
+        |sleep| and |backoff_factor|.
+        - If |backoff_factor| is not given, the delay will be linearly
+            increased, as |sleep| * (number of attempts). E.g., if |sleep| is 1,
+            the delays will be 1, 2, 3, 4, 5, ... and so on.
+        - If |backoff_factor| is given, the delay will be exponentially
+            increased, as |sleep| * |backoff_factor| ** (number of attempts -
+            1). E.g., if |sleep| is 1, and |backoff_factor| is 2, the delay will
+            be, 1, 2, 4, 8, 16, ... and so on
     - Note: Keep in mind that, if |backoff_factor| is not given, the total
-      delay time will be triangular value of |max_retry| multiplied by the
-      |sleep| value. E.g., |max_retry| is 5, and |sleep| is 10, will be
-      T5 (i.e. 5 + 4 + 3 + 2 + 1) times 10 = 150 seconds total. Rather than
-      use a large sleep value, you should lean more towards large retries
-      and lower sleep intervals, or by utilizing |backoff_factor|.
+        delay time will be triangular value of |max_retry| multiplied by the
+        |sleep| value. E.g., |max_retry| is 5, and |sleep| is 10, will be
+        T5 (i.e. 5 + 4 + 3 + 2 + 1) times 10 = 150 seconds total. Rather than
+        use a large sleep value, you should lean more towards large retries
+        and lower sleep intervals, or by utilizing |backoff_factor|.
     - In addition, for each delay, random duration of the delay can be added,
-      as 'jitter'. (Often, this helps to avoid consecutive conflicting situation)
-      |jitter| is specifies the duration of jitter delay, randomized up to
-      50% in either direction.
+        as 'jitter'. (Often, this helps to avoid consecutive conflicting
+        situation) |jitter| is specifies the duration of jitter delay,
+        randomized up to 50% in either direction.
     """
 
     def __init__(
@@ -149,26 +149,26 @@ class WithRetry(object):
         """Initialize.
 
         Args:
-          max_retry: A positive integer representing how many times to retry the
-              command before giving up.  Worst case, the command is invoked
-              (max_retry + 1) times before failing.
-          handler: Please see above for details.
-          exception: Please see above for details.
-          log_all_retries: when True, logs all retries.
-          sleep: Please see above for details.
-          backoff_factor: Please see above for details.
-          jitter: Please see above for details.
-          raise_first_exception_on_failure: determines which excecption is raised
-              upon failure after retries. If True, the first exception that was
-              encountered. Otherwise, the final one.
-          exception_to_raise: Optional exception type. If given, raises its
-              instance, instead of the one raised from the retry body.
-          status_callback: Optional callback invoked after each call of |functor|.
-              It takes two arguments: |attempt| which is the index of the last
-              attempt (0-based), and |success| representing whether the last attempt
-              was successfully done or not. If the callback raises an exception, no
-              further retry will be made, and the exception will be propagated to
-              the caller.
+            max_retry: A positive integer representing how many times to retry
+                the command before giving up.  Worst case, the command is
+                invoked (max_retry + 1) times before failing.
+            handler: Please see above for details.
+            exception: Please see above for details.
+            log_all_retries: when True, logs all retries.
+            sleep: Please see above for details.
+            backoff_factor: Please see above for details.
+            jitter: Please see above for details.
+            raise_first_exception_on_failure: determines which exception is
+                raised upon failure after retries. If True, the first exception
+                that was encountered. Otherwise, the final one.
+            exception_to_raise: Optional exception type. If given, raises its
+                instance, instead of the one raised from the retry body.
+            status_callback: Optional callback invoked after each call of
+                |functor|. It takes two arguments: |attempt| which is the index
+                of the last attempt (0-based), and |success| representing
+                whether the last attempt was successfully done or not. If the
+                callback raises an exception, no further retry will be made, and
+                the exception will be propagated to the caller.
         """
         if max_retry < 0:
             raise ValueError(
@@ -214,12 +214,12 @@ class WithRetry(object):
                     ret = func(*args, **kwargs)
                 except Exception as e:
                     # Note we're not snagging BaseException, so
-                    # MemoryError/KeyboardInterrupt and friends don't enter this except
-                    # block.
+                    # MemoryError/KeyboardInterrupt and friends don't enter this
+                    # except block.
 
-                    # If raise_first_exception_on_failure, we intentionally ignore
-                    # any failures in later attempts since we'll throw the original
-                    # failure if all retries fail.
+                    # If raise_first_exception_on_failure, we intentionally
+                    # ignore any failures in later attempts since we'll throw
+                    # the original failure if all retries fail.
                     if (
                         exc_info is None
                         or not self._raise_first_exception_on_failure
@@ -230,11 +230,12 @@ class WithRetry(object):
                         self._status_callback(attempt, False)
                     except Exception:
                         # In case callback raises an exception, quit the retry.
-                        # For further investigation, log the original exception here.
+                        # For further investigation, log the original exception
+                        # here.
                         logging.error(
-                            "Ending retry due to Exception raised by a callback. "
-                            "Original exception raised during the attempt is "
-                            "as follows: ",
+                            "Ending retry due to Exception raised by a "
+                            "callback. Original exception raised during the "
+                            "attempt is as follows: ",
                             exc_info=exc_info,
                         )
                         # Reraise the exception raised from the status_callback.
@@ -247,8 +248,9 @@ class WithRetry(object):
                         break
                     logging.debug("%s(%s)", e.__class__, e)
                 else:
-                    # Run callback in outside of try's main block, in order to avoid
-                    # accidental capture of an Exception which may be raised in callback.
+                    # Run callback in outside of try's main block, in order to
+                    # avoid accidental capture of an Exception which may be
+                    # raised in callback.
                     self._status_callback(attempt, True)
                     return ret
 
@@ -336,28 +338,29 @@ def RetryCommand(functor, max_retry, *args, **kwargs):
     """Wrapper for run that will retry a command.
 
     Args:
-      functor: run function to run; retries will only occur on
-        RunCommandError exceptions being thrown.
-      max_retry: A positive integer representing how many times to retry
-        the command before giving up.  Worst case, the command is invoked
-        (max_retry + 1) times before failing.
-      sleep: Optional keyword.  Multiplier for how long to sleep between
-        retries; will delay (1*sleep) the first time, then (2*sleep),
-        continuing via attempt * sleep.
-      retry_on: If provided, we will retry on any exit codes in the given list.
-        Note: A process will exit with a negative exit code if it is killed by a
-        signal. By default, we retry on all non-negative exit codes.
-      error_check: Optional callback to check the error output.  Return None to
-        fall back to |retry_on|, or True/False to set the retry directly.
-      log_retries: Whether to log a warning when retriable errors occur.
-      args: Positional args passed to run; see run for specifics.
-      kwargs: Optional args passed to run; see run for specifics.
+        functor: run function to run; retries will only occur on RunCommandError
+            exceptions being thrown.
+        max_retry: A positive integer representing how many times to retry the
+            command before giving up.  Worst case, the command is invoked
+            (max_retry + 1) times before failing.
+        sleep: Optional keyword.  Multiplier for how long to sleep between
+            retries; will delay (1*sleep) the first time, then (2*sleep),
+            continuing via attempt * sleep.
+        retry_on: If provided, we will retry on any exit codes in the given
+            list.
+            Note: A process will exit with a negative exit code if it is killed
+            by a signal. By default, we retry on all non-negative exit codes.
+        error_check: Optional callback to check the error output.  Return None
+            to fall back to |retry_on|, or True/False to set the retry directly.
+        log_retries: Whether to log a warning when retriable errors occur.
+        args: Positional args passed to run; see run for specifics.
+        kwargs: Optional args passed to run; see run for specifics.
 
     Returns:
-      A CompletedProcess object.
+        A CompletedProcess object.
 
     Raises:
-      RunCommandError: Raised on error.
+        RunCommandError: Raised on error.
     """
     values = kwargs.pop("retry_on", None)
     error_check = kwargs.pop("error_check", lambda x: None)
@@ -404,15 +407,15 @@ def RunCommandWithRetries(max_retry, *args, **kwargs):
     """Wrapper for run that will retry a command
 
     Args:
-      max_retry: See RetryCommand and run.
-      *args: See RetryCommand and run.
-      **kwargs: See RetryCommand and run.
+        max_retry: See RetryCommand and run.
+        args: See RetryCommand and run.
+        kwargs: See RetryCommand and run.
 
     Returns:
-      A CompletedProcess object.
+        A CompletedProcess object.
 
     Raises:
-      RunCommandError: Raised on error.
+        RunCommandError: Raised on error.
     """
     return RetryCommand(cros_build_lib.run, max_retry, *args, **kwargs)
 
@@ -425,21 +428,22 @@ def RunCurl(curl_args, *args, **kwargs):
     """Runs curl and wraps around all necessary hacks.
 
     Args:
-      curl_args: Command line to pass to curl. Must be list of str.
-      *args, **kwargs: See RunCommandWithRetries and run.
-        Note that retry_on, error_check, sleep, backoff_factor cannot be
-        overwritten.
+        curl_args: Command line to pass to curl. Must be list of str.
+        args: See RunCommandWithRetries and run.
+        kwargs: See RunCommandWithRetries and run.
+            Note that retry_on, error_check, sleep, backoff_factor cannot be
+            overwritten.
 
     Returns:
-      A CompletedProcess object.
+        A CompletedProcess object.
 
     Raises:
-      DownloadError: Whenever curl fails for any reason.
+        DownloadError: Whenever curl fails for any reason.
     """
     cmd = ["curl"] + curl_args
 
     # These values were discerned via scraping the curl manpage; they're all
-    # retry related (dns failed, timeout occurred, etc, see  the manpage for
+    # retry related (dns failed, timeout occurred, etc., see  the manpage for
     # exact specifics of each).
     # Note we allow 22 to deal w/ 500's- they're thrown by google storage
     # occasionally.  This is also thrown when getting 4xx, but curl doesn't
@@ -453,8 +457,9 @@ def RunCurl(curl_args, *args, **kwargs):
     def _CheckExit(exc):
         """Filter out specific error codes when getting exit 22
 
-        Curl will exit(22) for a wide range of HTTP codes -- both the 4xx and 5xx
-        set.  For the 4xx, we don't want to retry.  We have to look at the output.
+        Curl will exit(22) for a wide range of HTTP codes -- both the 4xx and
+        5xx set.  For the 4xx, we don't want to retry.  We have to look at the
+        output.
         """
         assert isinstance(exc, cros_build_lib.RunCommandError)
         if exc.returncode == 22:

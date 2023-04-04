@@ -15,9 +15,9 @@ def AssertIsInstance(instance, expected_type, description):
     """Raise an error if |instance| is not of |expected_type|.
 
     Args:
-      instance: instance of a Python object.
-      expected_type: expected type of |instance|.
-      description: short string describing |instance| used in error reporting.
+        instance: instance of a Python object.
+        expected_type: expected type of |instance|.
+        description: short string describing |instance| used in error reporting.
     """
     if not isinstance(instance, expected_type):
         raise ValueError(
@@ -27,13 +27,13 @@ def AssertIsInstance(instance, expected_type, description):
 
 
 def GetValueOfType(a_dict, key, value_type, value_description):
-    """Raise an exception if we cannot get |key| from |a_dict| with |value_type|.
+    """Raise exception if we cannot get |key| from |a_dict| with |value_type|.
 
     Args:
-      a_dict: a dictionary.
-      key: string key that should be in the dictionary.
-      value_type: expected type of the value at a_dict[key].
-      value_description: string describing the value used in error reporting.
+        a_dict: a dictionary.
+        key: string key that should be in the dictionary.
+        value_type: expected type of the value at a_dict[key].
+        value_description: string describing the value used in error reporting.
     """
     try:
         value = a_dict[key]
@@ -47,13 +47,13 @@ def GetValueOfType(a_dict, key, value_type, value_description):
 
 
 def PopValueOfType(a_dict, key, value_type, value_description):
-    """Raise an exception if we cannnot pop |key| from |a_dict| with |value_type|.
+    """Raise exception if we cannot pop |key| from |a_dict| with |value_type|.
 
     Args:
-      a_dict: a dictionary.
-      key: string key that should be in the dictionary.
-      value_type: expected type of the value at a_dict[key].
-      value_description: string describing the value used in error reporting.
+        a_dict: a dictionary.
+        key: string key that should be in the dictionary.
+        value_type: expected type of the value at a_dict[key].
+        value_description: string describing the value used in error reporting.
     """
     ret = GetValueOfType(a_dict, key, value_type, value_description)
     # We were able to get that value, so the key must exist.
@@ -114,10 +114,10 @@ def ParseJsonFileWithComments(path):
     Strips out comments from JSON blobs.
 
     Args:
-      path: path to JSON file.
+        path: path to JSON file.
 
     Returns:
-      Python representation of contents of JSON file.
+        Python representation of contents of JSON file.
     """
     return loads(osutils.ReadFile(path))
 
@@ -129,11 +129,11 @@ def GetNestedDictValue(a_dict, nested_key):
     GetNestedDictValue(d, ['a', 'b', 'c']) returns 'z'
 
     Args:
-      a_dict: nested dict.
-      nested_key: hierarchical key sequence.
+        a_dict: nested dict.
+        nested_key: hierarchical key sequence.
 
     Returns:
-      Value if found. None if any of keys doesn't exist.
+        Value if found. None if any of keys doesn't exist.
     """
     obj = a_dict
     for k in nested_key:

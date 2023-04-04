@@ -23,7 +23,7 @@ def _ValidateFileReplicationRule(rule):
     are specified.
 
     Args:
-      rule: (FileReplicationRule) The rule to validate.
+        rule: (FileReplicationRule) The rule to validate.
     """
     if rule.file_type == replication_config_pb2.FILE_TYPE_JSON:
         if (
@@ -77,9 +77,9 @@ def _ApplyStringReplacementRules(destination_path, rules):
     """Read the file at destination path, apply rules, and write a new file.
 
     Args:
-      destination_path: (str) Path to the destination file to read. The new file
-        will also be written at this path.
-      rules: (list[StringReplacementRule]) Rules to apply. Must not be empty.
+        destination_path: (str) Path to the destination file to read. The new
+            file will also be written at this path.
+        rules: (list[StringReplacementRule]) Rules to apply. Must not be empty.
     """
     assert rules
 
@@ -97,10 +97,11 @@ def Replicate(replication_config):
     """Run the replication described in replication_config.
 
     Args:
-      replication_config: (ReplicationConfig) Describes the replication to run.
+        replication_config: (ReplicationConfig) Describes the replication to
+            run.
     """
-    # Validate all rules before any of them are run, to decrease chance of ending
-    # with a partial replication.
+    # Validate all rules before any of them are run, to decrease chance of
+    # ending with a partial replication.
     for rule in replication_config.file_replication_rules:
         _ValidateFileReplicationRule(rule)
 
@@ -127,8 +128,9 @@ def Replicate(replication_config):
             except KeyError:
                 raise NotImplementedError(
                     (
-                        "Currently only ChromeOS Configs are supported (expected file %s "
-                        'to have a list at "$.chromeos.configs")'
+                        "Currently only ChromeOS Configs are supported "
+                        "(expected file %s to have a list at "
+                        '"$.chromeos.configs")'
                     )
                     % src
                 )

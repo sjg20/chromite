@@ -39,17 +39,16 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
     t3st-chr0m3(-review).googlesource.com. The test server configuration may be
     altered by setting the following environment variables from the parent
     process:
-      CROS_TEST_GIT_HOST: host name for git operations; defaults to
-                          t3st-chr0me.googlesource.com.
-      CROS_TEST_GERRIT_HOST: host name for Gerrit operations; defaults to
-                             t3st-chr0me-review.googlesource.com.
-      CROS_TEST_COOKIES_PATH: path to a cookies.txt file to use for git/Gerrit
-                              requests; defaults to ~/.gitcookies.
-      CROS_TEST_COOKIE_NAMES: comma-separated list of cookie names from
-                              CROS_TEST_COOKIES_PATH to set on requests; defaults
-                              to none. The current implementation only sends
-                              cookies matching the exact host name and the empty
-                              path ("/").
+        CROS_TEST_GIT_HOST: host name for git operations; defaults to
+            t3st-chr0me.googlesource.com.
+        CROS_TEST_GERRIT_HOST: host name for Gerrit operations; defaults to
+            t3st-chr0me-review.googlesource.com.
+        CROS_TEST_COOKIES_PATH: path to a cookies.txt file to use for git/Gerrit
+            requests; defaults to ~/.gitcookies.
+        CROS_TEST_COOKIE_NAMES: comma-separated list of cookie names from
+            CROS_TEST_COOKIES_PATH to set on requests; defaults to none. The
+            current implementation only sends cookies matching the exact host
+            name and the empty path ("/").
     """
 
     # pylint: disable=protected-access
@@ -110,7 +109,8 @@ class GerritTestCase(cros_test_lib.MockTempDirTestCase):
         # Create gerrit instance.
         gi = self.gerrit_instance = self._create_gerrit_instance(self.tempdir)
 
-        # This --global will use our tempdir $HOME we set above, not the real ~/.
+        # This --global will use our tempdir $HOME we set above, not the real
+        # ~/.
         cros_build_lib.dbg_run(
             ["git", "config", "--global", "http.cookiefile", gi.cookies_path],
             capture_output=True,
@@ -409,7 +409,7 @@ class GerritHelperTest(GerritTestCase):
         return gpatch
 
     def testSimpleQuery(self):
-        """Create one independent and three dependent changes, then query them."""
+        """Create and query one independent and three dependent changes."""
         project = self.createProject("testProject")
         clone_path = self.cloneProject(project)
         (head_sha1, head_changeid) = self.createCommit(clone_path)
@@ -475,7 +475,7 @@ class GerritHelperTest(GerritTestCase):
         self.assertFalse(helper.IsChangeCommitted(gpatch.gerrit_number))
 
     def testGetLatestSHA1ForBranch(self):
-        """Verifies that we can query the tip-of-tree commit in a git repository."""
+        """Verify we can query the tip-of-tree commit in a git repository."""
         project = self.createProject("testProject")
         clone_path = self.cloneProject(project)
         for _ in range(5):
@@ -494,10 +494,10 @@ class GerritHelperTest(GerritTestCase):
         )
 
     def testChangeEdit(self):
-        """Verifies that CreateChange & ChangeEdit can create CLs with changes."""
+        """Verify CreateChange & ChangeEdit can create CLs with changes."""
         project = self.createProject("testProject")
-        # Gerrit returns "Destination branch does not exist" errors if we don't push
-        # something onto the new project's branch.
+        # Gerrit returns "Destination branch does not exist" errors if we don't
+        # push something onto the new project's branch.
         clone_path = self.cloneProject(project)
         self.createCommit(clone_path)
         self.pushBranch(clone_path, "main")
@@ -507,16 +507,17 @@ class GerritHelperTest(GerritTestCase):
         self.assertEqual(len(helper.Query(project=project, path=file_path)), 0)
         change = helper.CreateChange(project, "main", "Test Change", True)
         helper.ChangeEdit(change.gerrit_number, file_path, "some file contents")
-        # After creating the change and adding a file modification, there should be
-        # a single change that touches some_file in our project.
+        # After creating the change and adding a file modification, there should
+        # be a single change that touches some_file in our project.
         self.assertEqual(len(helper.Query(project=project, path=file_path)), 1)
 
     def _ChooseReviewers(self):
-        # TODO(b/210507794): register some test accounts on test server. This fixed
-        # list of real IDs has a few problems, not limited to the following:
-        #  * Some functions behave differently if the account is inactive;
-        #  * Gerrit doesn't let you add yourself as a reviewer. So these accounts
-        #    can't run the tests correctly. ;)
+        # TODO(b/210507794): register some test accounts on test server. This
+        #   fixed list of real IDs has a few problems, not limited to the
+        #   following:
+        #       * Some functions behave differently if the account is inactive;
+        #       * Gerrit doesn't let you add yourself as a reviewer. So these
+        #           accounts can't run the tests correctly. ;)
         return ["dborowitz@google.com", "jrn@google.com"]
 
     def testSetAttentionSet(self):
@@ -739,7 +740,7 @@ class GerritParserTest(cros_test_lib.TestCase):
         return gerrit.GetGerritHelper(remote)
 
     def testGetChangeFromStdoutPass(self):
-        """Test that the proper change number is returned from the git stdout."""
+        """Verify the proper change number is returned from the git stdout."""
         stdout = (
             "remote:\nremote:\nremote:   "
             "https://example.com/c/some/project/repo/+/123 gerrit: test"
@@ -770,7 +771,7 @@ class GerritParserTest(cros_test_lib.TestCase):
         self.assertEqual(changenum, "123")
 
     def testGetChangeFromStdoutFail(self):
-        """Test that the function returns None when an improper stdout is given."""
+        """Verify the function returns None when an improper stdout is given."""
 
         # Fails because remote is not at the start of the text.
         stdout = """

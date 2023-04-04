@@ -38,12 +38,11 @@ class CBuildbotMetadata(object):
         """Constructor for CBuildbotMetadata.
 
         Args:
-          metadata_dict: Optional dictionary containing initial metadata,
-                         as returned by loading metadata from json.
-          multiprocess_manager: Optional multiprocess.Manager instance. If
-                                supplied, the metadata instance will use
-                                multiprocess containers so that its state
-                                is correctly synced across processes.
+            metadata_dict: Optional dictionary containing initial metadata,
+                as returned by loading metadata from json.
+            multiprocess_manager: Optional multiprocess.Manager instance. If
+                supplied, the metadata instance will use multiprocess containers
+                so that its state is correctly synced across processes.
         """
         super().__init__()
         if multiprocess_manager:
@@ -81,22 +80,22 @@ class CBuildbotMetadata(object):
         This method is effectively the inverse of GetDict. Existing key-values
         in metadata will be overwritten by those supplied in |metadata_dict|,
         with the exceptions of:
-         - the cl_actions list which will be extended with the contents (if any)
-         of the supplied dict's cl_actions list.
-         - the per-board metadata dict, which will be recursively extended with the
-           contents of the supplied dict's board-metadata
+            - the cl_actions list which will be extended with the contents (if
+                any) of the supplied dict's cl_actions list.
+            - the per-board metadata dict, which will be recursively extended
+                with the contents of the supplied dict's board-metadata
 
         Args:
-          metadata_dict: A dictionary of key-value pairs to be added this
-                         metadata instance. Keys should be strings, values
-                         should be json-able.
+            metadata_dict: A dictionary of key-value pairs to be added this
+                metadata instance. Keys should be strings, values should be
+                json-able.
 
         Returns:
-          self
+            self
         """
-        # This is effectively the inverse of the dictionary construction in GetDict,
-        # to reconstruct the correct internal representation of a metadata
-        # object.
+        # This is effectively the inverse of the dictionary construction in
+        # GetDict, to reconstruct the correct internal representation of a
+        # metadata object.
         metadata_dict = metadata_dict.copy()
         cl_action_list = metadata_dict.pop("cl_actions", None)
         per_board_dict = metadata_dict.pop("board-metadata", None)
@@ -112,16 +111,17 @@ class CBuildbotMetadata(object):
     def UpdateBoardDictWithDict(self, board, board_dict):
         """Update the per-board dict for |board| with |board_dict|.
 
-        Note: both |board| and and all the keys of |board_dict| musts be strings
-              that do not contain the character ':'
+        Note: both |board| and all the keys of |board_dict| musts be strings
+            that do not contain the character ':'
 
         Returns:
-          self
+            self
         """
-        # Wrap the per-board key-value pairs as key-value pairs in _per_board_dict.
-        # Note -- due to http://bugs.python.org/issue6766 it is not possible to
-        # store a multiprocess dict proxy inside another multiprocess dict proxy.
-        # That is why we are using this flattened representation of board dicts.
+        # Wrap the per-board key-value pairs as key-value pairs in
+        # _per_board_dict. Note -- due to http://bugs.python.org/issue6766 it is
+        # not possible to store a multiprocess dict proxy inside another
+        # multiprocess dict proxy. That is why we are using this flattened
+        # representation of board dicts.
         assert not ":" in board
         # Even if board_dict is {}, ensure that an entry with this board
         # gets written.
@@ -133,7 +133,7 @@ class CBuildbotMetadata(object):
         return self
 
     def UpdateKeyDictWithDict(self, key, key_metadata_dict):
-        """Update metadata for the given key with values supplied in |metadata_dict|
+        """Update metadata for |key| with values supplied in |key_metadata_dict|
 
         This method merges the dictionary for the given key with the given key
         metadata dictionary (allowing them to be effectively updated from any
@@ -142,13 +142,13 @@ class CBuildbotMetadata(object):
         This method is multiprocess safe.
 
         Args:
-          key: The key name (e.g. 'version' or 'status')
-          key_metadata_dict: A dictionary of key-value pairs to be added this
-                         metadata key. Keys should be strings, values
-                         should be json-able.
+            key: The key name (e.g. 'version' or 'status')
+            key_metadata_dict: A dictionary of key-value pairs to be added this
+                metadata key. Keys should be strings, values should be
+                json-able.
 
         Returns:
-          self
+            self
         """
         with self._subdict_update_lock:
             # If the key already exists, then use its dictionary
@@ -165,12 +165,12 @@ class CBuildbotMetadata(object):
         This method is multiprocess safe.
 
         Args:
-          key: The key name of string type.
-          value_list: A list of values to be added to this metadata key.
-                      Keys should be strings, values should be a json-able list.
+            key: The key name of string type.
+            value_list: A list of values to be added to this metadata key. Keys
+                should be strings, values should be a json-able list.
 
         Returns:
-          self
+            self
         """
         with self._subdict_update_lock:
             # If the key already exists, then use its list value
@@ -209,8 +209,9 @@ class CBuildbotMetadata(object):
         This method is in most cases an inexpensive equivalent to:
         GetDict()[key]
 
-        However, it cannot be used for items like 'cl_actions' or 'board-metadata'
-        which are not stored directly in the metadata dictionary.
+        However, it cannot be used for items like 'cl_actions' or
+        'board-metadata' which are not stored directly in the metadata
+        dictionary.
         """
         return self._metadata_dict[key]
 
@@ -221,8 +222,9 @@ class CBuildbotMetadata(object):
         This method is in most cases an inexpensive equivalent to:
         GetDict().get(key, default)
 
-        However, it cannot be used for items like 'cl_actions' or 'board-metadata'
-        which are not stored directly in the metadata dictionary.
+        However, it cannot be used for items like 'cl_actions' or
+        'board-metadata' which are not stored directly in the metadata
+        dictionary.
         """
         return self._metadata_dict.get(key, default)
 
@@ -230,8 +232,8 @@ class CBuildbotMetadata(object):
         """Return a JSON string representation of metadata.
 
         Args:
-          key: Key to return as JSON representation.  If None, returns all
-               metadata.  Default: None
+            key: Key to return as JSON representation.  If None, returns all
+                metadata.  Default: None
         """
 
         def _serialize(obj):
@@ -265,24 +267,24 @@ class CBuildbotMetadata(object):
         stages that are responsible for pieces of data, as they run.
 
         Args:
-          builder_run: BuilderRun instance for this run.
-          get_statuses_from_slaves: If True, status information of slave
-                                    builders will be recorded.
-          config: The build config for this run.  Defaults to self._run.config.
-          stage: The stage name that this metadata file is being uploaded for.
-          final_status: Whether the build passed or failed. If None, the build
-                        will be treated as still running.
-          completion_instance: The stage instance that was used to wait for slave
-                               completion. Used to add slave build information to
-                               master builder's metadata. If None, no such status
-                               information will be included. It not None, this
-                               should be a derivative of
-                               MasterSlaveSyncCompletionStage.
-          child_configs_list: The list of child config metadata.  If specified it
-                              should be added to the metadata.
+            builder_run: BuilderRun instance for this run.
+            get_statuses_from_slaves: If True, status information of slave
+                builders will be recorded.
+            config: The build config for this run.  Defaults to
+                self._run.config.
+            stage: The stage name that this metadata file is being uploaded for.
+            final_status: Whether the build passed or failed. If None, the build
+                will be treated as still running.
+            completion_instance: The stage instance that was used to wait for
+                slave completion. Used to add slave build information to master
+                builder's metadata. If None, no such status information will be
+                included. It not None, this should be a derivative of
+                MasterSlaveSyncCompletionStage.
+            child_configs_list: The list of child config metadata.  If specified
+                it should be added to the metadata.
 
         Returns:
-          A metadata dictionary suitable to be json-serialized.
+            A metadata dictionary suitable to be json-serialized.
         """
         config = config or builder_run.config
         start_time = results_lib.Results.start_time
@@ -329,8 +331,8 @@ class CBuildbotMetadata(object):
         if child_configs_list:
             metadata["child-configs"] = child_configs_list
 
-        # If we were a CQ master, then include a summary of the status of slave cq
-        # builders in metadata
+        # If we were a CQ master, then include a summary of the status of slave
+        # cq builders in metadata
         if get_statuses_from_slaves:
             statuses = completion_instance.GetSlaveStatuses()
             if not statuses:
