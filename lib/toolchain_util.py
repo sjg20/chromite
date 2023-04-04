@@ -1624,10 +1624,6 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
             raise PrepareForBuildHandlerError(
                 "Could not find kernel version to verify."
             )
-        # kernel_version for arm will look like "arm-5.15".
-        # TODO(b/268356358): Remove after M112 reaches stable.
-        if kernel_version.startswith("arm-"):
-            kernel_version = kernel_version.split("-")[-1]
 
         verified_profile_url = KERNEL_PROFILE_VETTED_URL.format(arch=self.arch)
         profile_url = KERNEL_PROFILE_URL.format(arch=self.arch)
@@ -2248,11 +2244,6 @@ class BundleArtifactHandler(_CommonPrepareBundle):
         kernel_version = self.profile_info.get("kernel_version")
         if not kernel_version:
             raise BundleArtifactsHandlerError("kernel_version not provided.")
-
-        # kernel_version for arm will look like "arm-5.15".
-        # TODO(b/268356358): Remove after M112 reaches stable.
-        if kernel_version.startswith("arm-"):
-            kernel_version = kernel_version.split("-")[-1]
 
         profile_var_name = "AFDO_PROFILE_VERSION"
         if self.arch == "arm":
