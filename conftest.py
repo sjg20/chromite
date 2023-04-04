@@ -52,8 +52,8 @@ def mock_cidb_connection():
 def assert_no_zombies():
     """Assert that tests have no active child processes after completion.
 
-    This assertion runs after class tearDown methods because of the scope='class'
-    declaration.
+    This assertion runs after class tearDown methods because of the
+    scope='class' declaration.
     """
     yield
     children = multiprocessing.active_children()
@@ -79,7 +79,7 @@ def clear_retry_stats_manager():
 
 @pytest.fixture(autouse=True)
 def set_testing_environment_variable(monkeypatch):
-    """Set an environment marker to relax certain strict checks for test code."""
+    """Set environment marker to relax certain strict checks for test code."""
     monkeypatch.setenv("CHROMITE_INSIDE_PYTEST", "1")
 
 
@@ -100,15 +100,16 @@ def singleton_manager(monkeypatch):
 def legacy_capture_output(request, capfd):
     """Adds the `capfd` fixture to TestCase-style test classes.
 
-    This fixture should only be used on cros_test_lib.TestCase test classes, since
-    it doesn't yield anything and just attaches the built-in pytest `capfd`
-    fixture to the requesting class. Tests written as standalone functions should
-    use pytest's built-in `capfd` fixture instead of this. See the documentation
-    for more information on how to use the `capfd` fixture that this provides:
+    This fixture should only be used on cros_test_lib.TestCase test classes,
+    since it doesn't yield anything and just attaches the built-in pytest
+    `capfd` fixture to the requesting class. Tests written as standalone
+    functions should use pytest's built-in `capfd` fixture instead of this. See
+    the documentation for more information on how to use the `capfd` fixture
+    that this provides:
     https://docs.pytest.org/en/latest/reference/reference.html#std-fixture-capfd
 
-    See the following documentation for an explanation of why fixtures have to be
-    provided to TestCase classes in this manner:
+    See the following documentation for an explanation of why fixtures have to
+    be provided to TestCase classes in this manner:
     https://docs.pytest.org/en/latest/how-to/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
     """
     request.cls.capfd = capfd
@@ -118,15 +119,16 @@ def legacy_capture_output(request, capfd):
 def testcase_caplog(request, caplog):
     """Adds the `caplog` fixture to TestCase-style test classes.
 
-    This fixture should only be used on cros_test_lib.TestCase test classes, since
-    it doesn't yield anything and just attaches the built-in pytest `caplog`
-    fixture to the requesting class. Tests written as standalone functions should
-    use pytest's built-in `caplog` fixture instead of this. See the documentation
-    for more information on how to use the `caplog` fixture that this provides:
+    This fixture should only be used on cros_test_lib.TestCase test classes,
+    since it doesn't yield anything and just attaches the built-in pytest
+    `caplog` fixture to the requesting class. Tests written as standalone
+    functions should use pytest's built-in `caplog` fixture instead of this. See
+    the documentation for more information on how to use the `caplog` fixture
+    that this provides:
     https://docs.pytest.org/en/latest/reference/reference.html#caplog
 
-    See the following documentation for an explanation of why fixtures have to be
-    provided to TestCase classes in this manner:
+    See the following documentation for an explanation of why fixtures have to
+    be provided to TestCase classes in this manner:
     https://docs.pytest.org/en/latest/how-to/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
     """
     request.cls.caplog = caplog
@@ -136,16 +138,16 @@ def testcase_caplog(request, caplog):
 def testcase_monkeypatch(request, monkeypatch):
     """Adds the `monkeypatch` fixture to TestCase-style test classes.
 
-    This fixture should only be used on cros_test_lib.TestCase test classes, since
-    it doesn't yield anything and just attaches the built-in pytest `monkeypatch`
-    fixture to the requesting class. Tests written as standalone functions should
-    use pytest's built-in `monkeypatch` fixture instead of this. See the
-    documentation for more information on how to use the `monkeypatch` fixture
-    that this provides:
+    This fixture should only be used on cros_test_lib.TestCase test classes,
+    since it doesn't yield anything and just attaches the built-in pytest
+    `monkeypatch` fixture to the requesting class. Tests written as standalone
+    functions should use pytest's built-in `monkeypatch` fixture instead of
+    this. See the documentation for more information on how to use the
+    `monkeypatch` fixture that this provides:
     https://docs.pytest.org/en/latest/reference/reference.html#monkeypatch
 
-    See the following documentation for an explanation of why fixtures have to be
-    provided to TestCase classes in this manner:
+    See the following documentation for an explanation of why fixtures have to
+    be provided to TestCase classes in this manner:
     https://docs.pytest.org/en/latest/how-to/unittest.html#mixing-pytest-fixtures-into-unittest-testcase-subclasses-using-marks
     """
     request.cls.monkeypatch = monkeypatch
