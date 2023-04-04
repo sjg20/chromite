@@ -18,12 +18,13 @@ class KernelArg(object):
         """Initialize the instance.
 
         Args:
-          arg: Value to use for arg.
-          value: Value to use.  If |value| is not None, then the output argument
-              will take the form of 'arg=value'.  (An empty string yields 'arg='.)
+            arg: Value to use for arg.
+            value: Value to use.  If |value| is not None, then the output
+                argument will take the form of 'arg=value'.  (An empty string
+                yields 'arg='.)
 
         Raises:
-          ValueError: Invalid quotes in |value|.
+            ValueError: Invalid quotes in |value|.
         """
         if value and (
             not isinstance(value, str)
@@ -91,19 +92,22 @@ class KernelArgList(
     Behaves as a list, with some extra features.
 
     Differences from list:
-      Creation: if given a string, the string is split into KernelArg elements.
-      Indexing: if given a string for |index|, the first element with
-          |element.key| == |index| is used.
+        Creation: if given a string, the string is split into KernelArg
+            elements.
+        Indexing: if given a string for |index|, the first element with
+            |element.key| == |index| is used.
     """
 
     def __init__(self, data=None):
         """Initialize the KernelArgList.
 
         Args:
-          data: Either an iterable yielding KernelArg elements, or string containing
-              whitespace-separated tokens of 'arg', 'arg=', and/or 'arg=value'.
-              |arg| is any string not containing whitespace or '='.
-              |value| is any string.  Use double-quotes (") if there is whitespace.
+            data: Either an iterable yielding KernelArg elements, or string
+                containing whitespace-separated tokens of 'arg', 'arg=', and/or
+                'arg=value'.
+                |arg| is any string not containing whitespace or '='.
+                |value| is any string.  Use double-quotes (") if there is
+                    whitespace.
         """
         # If we got a string, split it into KernelArg pairs.  If not, just pass
         # it through list().
@@ -156,9 +160,9 @@ class KernelArgList(
         """Return True if |item| is in the list.
 
         Args:
-          item: Either a KernelArg (which is searched for precisely), or a string
-               argument (which is compared against only |entry.arg|, ignoring
-               |entry.value|).
+            item: Either a KernelArg (which is searched for precisely), or a
+                string argument (which is compared against only |entry.arg|,
+                ignoring |entry.value|).
         """
         if isinstance(item, str):
             for kern_arg in self._data:
@@ -171,12 +175,12 @@ class KernelArgList(
     def __delitem__(self, key):
         """Delete |key| from the list.
 
-        If |key| is a string, it refers to the first occurance of |key| as an
+        If |key| is a string, it refers to the first occurrence of |key| as an
         argument in the list.
 
         Args:
-          key: Either a slice, an integer index, or a string argument to delete.
-              A string is converted to a numeric index via index().
+            key: Either a slice, an integer index, or a string argument to
+                delete. A string is converted to a numeric index via index().
         """
         if isinstance(key, str):
             idx = self.index(key)
@@ -189,15 +193,15 @@ class KernelArgList(
     def __getitem__(self, key):
         """Get |key| from the list.
 
-        If |key| is a string, it refers to the first occurance of |key| as an
+        If |key| is a string, it refers to the first occurrence of |key| as an
         argument in the list.
 
         Args:
-          key: Either a slice, an integer index, or a string argument to get.
-              A string is converted to a numeric index via index().
+            key: Either a slice, an integer index, or a string argument to get.
+                A string is converted to a numeric index via index().
 
         Raises:
-          KeyError: |key| is not found.
+            KeyError: |key| is not found.
         """
         if isinstance(key, slice):
             return KernelArgList(self._data[key])
@@ -209,13 +213,13 @@ class KernelArgList(
     def __setitem__(self, key, value):
         """Set |key| to |value|.
 
-        If |key| is a string, it refers to the first occurance of |key| as an
+        If |key| is a string, it refers to the first occurrence of |key| as an
         argument in the list.
 
         Args:
-          key: A slice, an integer index, or a string |arg| name.
-          value: If |key| is a slice, the slice will be set to KernelArgList(value).
-              Otherwise |value| must be a KernelArg.
+            key: A slice, an integer index, or a string |arg| name.
+            value: If |key| is a slice, the slice will be set to
+                KernelArgList(value). Otherwise |value| must be a KernelArg.
         """
         if isinstance(key, slice):
             self._data[key] = KernelArgList(value)
@@ -237,11 +241,11 @@ class KernelArgList(
         """Return the first element with arg=|key|.
 
         Args:
-          key: An integer index, or a string |arg| name.
-          default: Return value if |key| is not found.
+            key: An integer index, or a string |arg| name.
+            default: Return value if |key| is not found.
 
         Returns:
-          First KernelArg where arg == |key|.
+            First KernelArg where arg == |key|.
         """
         idx = self.index(key)
         if idx is None:
@@ -249,15 +253,15 @@ class KernelArgList(
         else:
             return self._data[idx]
 
-    def index(self, key):
+    def index(self, key):  # pylint: disable=arguments-differ
         """Find the index for |key|.
 
         Args:
-          key: Key to find.
+            key: Key to find.
 
         Returns:
-          The index of the first element where |element.key| == |key|.  If that is
-          not found, None is returned.
+            The index of the first element where |element.key| == |key|.  If
+            that is not found, None is returned.
         """
         if isinstance(key, int):
             return key
@@ -266,16 +270,16 @@ class KernelArgList(
                 return idx
         return None
 
-    def insert(self, index, obj):
+    def insert(self, index, obj):  # pylint: disable=arguments-differ
         """Insert |obj| before |index|.
 
         Args:
-          index: An integer index, or a string |arg| name.
-          obj: KernelArg to insert.
+            index: An integer index, or a string |arg| name.
+            obj: KernelArg to insert.
 
         Raises:
-          KeyError: String |index| given and not found.
-          ValueError: |obj| is not a KernelArg.
+            KeyError: String |index| given and not found.
+            ValueError: |obj| is not a KernelArg.
         """
         if not isinstance(obj, KernelArg):
             raise ValueError(obj)
@@ -292,16 +296,17 @@ class KernelArgList(
 
         Set elements of the list.  Depending on the type of |other|, one of the
         following is done:
-          KernelArgList([item]): self[item.arg] = item
-          dict {key: value}: self[key] = KernelArg(key, value)
-          iterable (arg, value): self[arg] = KernelArg(arg, value)
+            KernelArgList([item]): self[item.arg] = item
+            dict {key: value}: self[key] = KernelArg(key, value)
+            iterable (arg, value): self[arg] = KernelArg(arg, value)
         Also supports keyword arguments, which are passed through KernelArg()
         similar to "dict" above.
 
         Args:
-          other: Either a KernelArgList, a dict of {arg: value}, or an iterable of
-              (arg, value) pairs (which will be passed to KernelArg())
-          **kwargs: |key| and |value| are passed to KernelArg.
+            other: Either a KernelArgList, a dict of {arg: value}, or an
+                iterable of (arg, value) pairs (which will be passed to
+                KernelArg())
+            kwargs: |key| and |value| are passed to KernelArg.
         """
         if other:
             if isinstance(other, KernelArgList):
@@ -324,7 +329,7 @@ class KernelArgList(
         """Return the list of key(=value)s as a string.
 
         Args:
-          separator: Delimiter between list elements.
+            separator: Delimiter between list elements.
         """
         return separator.join(str(x) for x in self._data)
 
@@ -333,8 +338,8 @@ class CommandLine(object):
     """Make parsing the kernel command line easier.
 
     Attributes:
-      kern_args: Kernel arguments (before any '--').
-      init_args: Any arguments for init (after the first '--').
+        kern_args: Kernel arguments (before any '--').
+        init_args: Any arguments for init (after the first '--').
     """
 
     def __init__(self, cmdline):
@@ -371,17 +376,17 @@ class CommandLine(object):
         Get an argument from kern_args.
 
         Args:
-          what: Either an integer index, or a key to search for.
-          default: Value to return if nothing is found.
+            what: Either an integer index, or a key to search for.
+            default: Value to return if nothing is found.
 
         Returns:
-          If found, returns the KernelArg from the kernel cmdline.
-          Otherwise returns the provided default.
+            If found, returns the KernelArg from the kernel cmdline.
+            Otherwise returns the provided default.
 
         Raises:
-          IndexError on non-None invalid integer |what|.
-          TypeError on non-None non-integer |what| that does not match |element.key|
-              for any element.
+            IndexError: on non-None invalid integer |what|.
+            TypeError: on non-None non-integer |what| that does not match
+                |element.key| for any element.
         """
         return self.kern_args.get(what, default=default)
 
@@ -389,8 +394,8 @@ class CommandLine(object):
         """Set a kernel argument.
 
         Args:
-          key: |key| for KernelArg.
-          value: |value| for KernelArg.
+            key: |key| for KernelArg.
+            value: |value| for KernelArg.
         """
         self.kern_args.update({key: value})
 
@@ -405,7 +410,7 @@ class CommandLine(object):
         """Set the dm= argument to a DmConfig.
 
         Args:
-          dm_config: DmConfig instance to use.
+            dm_config: DmConfig instance to use.
         """
         if dm_config is None:
             if "dm" in self.kern_args:
@@ -418,16 +423,16 @@ class DmConfig(object):
     """Parse the dm= parameter.
 
     Attributes:
-      num_devices: Number of devices defined in this dmsetup config.
-      devices: OrderedDict of devices, by device name.
+        num_devices: Number of devices defined in this dmsetup config.
+        devices: OrderedDict of devices, by device name.
     """
 
     def __init__(self, boot_arg):
         """Initialize.
 
         Args:
-          boot_arg: contents of the quoted dm="..." kernel cmdline element, with or
-              without surrounding quotes.
+            boot_arg: contents of the quoted dm="..." kernel cmdline element,
+                with or without surrounding quotes.
         """
         if boot_arg.startswith('"') and boot_arg.endswith('"'):
             boot_arg = boot_arg[1:-1]
@@ -466,19 +471,19 @@ class DmDevice(object):
     """A single device in the dm= kernel parameter.
 
     Attributes:
-      name: Name of the device.
-      uuid: Uuid of the device.
-      flags: One of 'ro' or 'rw'.
-      num_rows: Number of dmsetup config lines (|config_lines|) used by this
-          device.
-      rows: List of DmLine objects for the device.
+        name: Name of the device.
+        uuid: Uuid of the device.
+        flags: One of 'ro' or 'rw'.
+        num_rows: Number of dmsetup config lines (|config_lines|) used by this
+            device.
+        rows: List of DmLine objects for the device.
     """
 
     def __init__(self, config_lines):
         """Initialize.
 
         Args:
-          config_lines: List of lines to process.  Excess elements are ignored.
+            config_lines: List of lines to process. Excess elements are ignored.
         """
         name, uuid, flags, rows = config_lines[0].split()
         self.name = name
@@ -516,8 +521,8 @@ class DmDevice(object):
         If there are multiple verity lines, only the first one is examined.
 
         Args:
-          key: verity argument to find.
-          default: Return this if |key| is not found.
+            key: verity argument to find.
+            default: Return this if |key| is not found.
         """
         for row in self.rows:
             if row.target_type == "verity":
@@ -525,13 +530,13 @@ class DmDevice(object):
         return default
 
     def UpdateVerityArg(self, key, value):
-        """Update any |key| argument in any 'verity' config line to the new value.
+        """Update any |key| arg in any 'verity' config line to the new value.
 
         If no verity lines contain |key|, then add it to all of them.
 
         Args:
-          key: Key to update if found.  Passed to KernelArg().
-          value: Passed to KernelArg().
+            key: Key to update if found.  Passed to KernelArg().
+            value: Passed to KernelArg().
         """
         for idx in range(len(self.rows)):
             if (
@@ -548,10 +553,10 @@ class DmLine(object):
     """A single line from the dmsetup config for a device.
 
     Attributes:
-      start: Logical start sector
-      num: Number of sectors.
-      target_type: target_type.  See dmsetup(8).
-      args: list of KernelArg args for the line.
+        start: Logical start sector
+        num: Number of sectors.
+        target_type: target_type.  See dmsetup(8).
+        args: list of KernelArg args for the line.
     """
 
     def __init__(self, line):

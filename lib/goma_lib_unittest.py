@@ -144,7 +144,7 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
         """Creates a basic file, such as a stats or counterz file.
 
         Args:
-          name: Filename
+            name: Filename
         """
         osutils.WriteFile(
             os.path.join(self.goma_log_dir, name), "File: " + name
@@ -154,8 +154,8 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
         """Creates a log file for testing.
 
         Args:
-          name: Log file name.
-          timestamp: timestamp that is written to the file.
+            name: Log file name.
+            timestamp: timestamp that is written to the file.
         """
         path = os.path.join(
             self.goma_log_dir,
@@ -167,7 +167,7 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
         )
 
     def testArchive(self):
-        """Test successful archive of goma logs without stats/counterz specified."""
+        """Test successful archive of goma logs without stats/counterz."""
         self._CreateLogFile(
             "compiler_proxy", datetime.datetime(2017, 4, 26, 12, 0, 0)
         )
@@ -197,7 +197,8 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
             [
                 "compiler_proxy.host.log.INFO.20170426-120000.000000.gz",
                 "gomacc.host.log.INFO.20170426-120100.000000.tar.gz",
-                "compiler_proxy-subproc.host.log.INFO.20170426-120000.000000.gz",
+                "compiler_proxy-subproc.host.log.INFO."
+                "20170426-120000.000000.gz",
             ],
         )
 
@@ -227,7 +228,8 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
             [
                 "compiler_proxy.host.log.INFO.20170426-120000.000000.gz",
                 "gomacc.host.log.INFO.20170426-120100.000000.tar.gz",
-                "compiler_proxy-subproc.host.log.INFO.20170426-120000.000000.gz",
+                "compiler_proxy-subproc.host.log.INFO."
+                "20170426-120000.000000.gz",
             ],
         )
         self.assertEqual(archiver_tuple.stats_file, "stats.binaryproto")
@@ -261,7 +263,8 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
             [
                 "compiler_proxy.host.log.INFO.20170426-120000.000000.gz",
                 "gomacc.host.log.INFO.20170426-120100.000000.tar.gz",
-                "compiler_proxy-subproc.host.log.INFO.20170426-120000.000000.gz",
+                "compiler_proxy-subproc.host.log.INFO."
+                "20170426-120000.000000.gz",
             ],
         )
 
@@ -311,7 +314,8 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
             archived_files,
             [
                 ninjalog_filename,
-                "compiler_proxy-subproc.host.log.INFO.20170821-120000.000000.gz",
+                "compiler_proxy-subproc.host.log.INFO."
+                "20170821-120000.000000.gz",
                 "compiler_proxy.host.log.INFO.20170821-120000.000000.gz",
             ],
         )
@@ -322,7 +326,8 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
             archived_tuple.log_files,
             [
                 "compiler_proxy.host.log.INFO.20170821-120000.000000.gz",
-                "compiler_proxy-subproc.host.log.INFO.20170821-120000.000000.gz",
+                "compiler_proxy-subproc.host.log.INFO."
+                "20170821-120000.000000.gz",
                 ninjalog_filename,
             ],
         )
@@ -345,6 +350,8 @@ class TestLogsArchiver(cros_test_lib.MockTempDirTestCase):
                 "cwd": "ninja_cwd",
                 "exit": 0,
                 "env": {"key1": "value1", "key2": "value2"},
-                "compiler_proxy_info": "compiler_proxy.host.log.INFO.20170821-120000.000000",
+                "compiler_proxy_info": (
+                    "compiler_proxy.host.log.INFO.20170821-120000.000000"
+                ),
             },
         )

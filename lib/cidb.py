@@ -58,15 +58,15 @@ def _IsRetryableException(e):
     Intended for use as a handler for retry_util.
 
     Args:
-      e: The exception to be filtered.
+        e: The exception to be filtered.
 
     Returns:
-      True if the query should be retried, False otherwise.
+        True if the query should be retried, False otherwise.
     """
     # Exceptions usually are raised as sqlalchemy.exc.OperationalError, but
     # occasionally also escape as MySQLdb.OperationalError. Neither of those
-    # exception types inherit from one another, so we fall back to string matching
-    # on the exception name. See crbug.com/483654
+    # exception types inherit from one another, so we fall back to string
+    # matching on the exception name. See crbug.com/483654
     if "OperationalError" in str(type(e)):
         # Unwrap the error till we get to the error raised by the DB backend.
         # Record each error_code that we encounter along the way.
@@ -137,9 +137,9 @@ class SchemaVersionedMySQLConnection(object):
         side effect: store argument in self._connect_url_args
 
         Args:
-          key: Name of the argument to read.
-          db_credentials_dir: The directory containing the credentials.
-          filename: Name of the file to read.
+            key: Name of the argument to read.
+            db_credentials_dir: The directory containing the credentials.
+            filename: Name of the file to read.
         """
         file_path = os.path.join(db_credentials_dir, filename)
         if os.path.exists(file_path):
@@ -149,9 +149,9 @@ class SchemaVersionedMySQLConnection(object):
         """Read 'query' args from the given file and update connect url.
 
         Args:
-          key: Name of the arg to read.
-          db_credentials_dir: The directory containing the credentials.
-          filename: Name of the file to read.
+            key: Name of the arg to read.
+            db_credentials_dir: The directory containing the credentials.
+            filename: Name of the file to read.
         """
         file_path = os.path.join(db_credentials_dir, filename)
         try:
@@ -186,22 +186,21 @@ class SchemaVersionedMySQLConnection(object):
         """SchemaVersionedMySQLConnection constructor.
 
         Args:
-          db_name: Name of the database to connect to.
-          db_migrations_dir: Absolute path to directory of migration scripts
-                             for this database.
-          db_credentials_dir: Absolute path to directory containing connection
-                              information to the database. For connections for GAE
-                              services, this directory may contain user.txt and
-                              password txt; For connections for normal builds, this
-                              directory may contain files names user.txt,
-                              password.txt, host.txt, port.txt, client-cert.pem,
-                              client-key.pem, and server-ca.pem. This object will
-                              silently drop the relevant mysql commandline flags for
-                              missing files in the directory.
-          for_service: Boolean indicating whether the connection is for GAE
-                       services. Unix socket will be used to connect MYSQL servers.
-          query_retry_args: An optional SqlConnectionRetryArgs tuple to tweak the
-                            retry behaviour of SQL queries.
+            db_name: Name of the database to connect to.
+            db_migrations_dir: Absolute path to directory of migration scripts
+                for this database.
+            db_credentials_dir: Absolute path to directory containing connection
+                information to the database. For connections for GAE services,
+                this directory may contain user.txt and password txt; For
+                connections for normal builds, this directory may contain files
+                names user.txt, password.txt, host.txt, port.txt,
+                client-cert.pem, client-key.pem, and server-ca.pem. This object
+                will silently drop the relevant mysql commandline flags for
+                missing files in the directory.
+            for_service: Boolean indicating whether the connection is for GAE
+                services. Unix socket will be used to connect MYSQL servers.
+            query_retry_args: An optional SqlConnectionRetryArgs tuple to tweak
+                the retry behaviour of SQL queries.
         """
         if not sqlalchemy_imported:
             raise AssertionError(
@@ -212,9 +211,10 @@ class SchemaVersionedMySQLConnection(object):
                 "similar."
             )
 
-        # Note: This is a inner class because it needs to inherit from sqlalchemy,
-        # but we do not know for sure that sqlalchemy has been successfully imported
-        # until we enter this method (i.e. this class cannot be module-level).
+        # Note: This is a inner class because it needs to inherit from
+        # sqlalchemy, but we do not know for sure that sqlalchemy has been
+        # successfully imported until we enter this method (i.e. this class
+        # cannot be module-level).
         class StrictModeListener(sqlalchemy.interfaces.PoolListener):
             """Listener to set up a connection with STRICT_ALL_TABLES."""
 
@@ -222,7 +222,7 @@ class SchemaVersionedMySQLConnection(object):
                 pass
 
             def connect(self, dbapi_con, *_args, **_kwargs):
-                """This listener ensures that STRICT_ALL_TABLES for all connections."""
+                """Ensure STRICT_ALL_TABLES for all connections."""
                 cur = dbapi_con.cursor()
                 cur.execute("SET SESSION sql_mode='STRICT_ALL_TABLES'")
                 cur.close()
@@ -253,10 +253,10 @@ class SchemaVersionedMySQLConnection(object):
             self._driver_name, **self._connect_url_args
         )
 
-        # Create a temporary engine to connect to the mysql instance, and check if
-        # a database named |db_name| exists. If not, create one. We use a temporary
-        # engine here because the real engine will be opened with a default
-        # database name given by |db_name|.
+        # Create a temporary engine to connect to the mysql instance, and check
+        # if a database named |db_name| exists. If not, create one. We use a
+        # temporary engine here because the real engine will be opened with a
+        # default database name given by |db_name|.
         temp_engine = sqlalchemy.create_engine(
             tmp_connect_url, listeners=[self._listener_class()]
         )
@@ -302,8 +302,8 @@ class SchemaVersionedMySQLConnection(object):
         """Query the database for its current schema version number.
 
         Returns:
-          The current schema version from the database's schema version table,
-          as an integer, or 0 if the table is empty or nonexistent.
+            The current schema version from the database's schema version table,
+            as an integer, or 0 if the table is empty or nonexistent.
         """
         tables = self._Execute("SHOW TABLES").fetchall()
         if (self.SCHEMA_VERSION_TABLE_NAME,) in tables:
@@ -319,8 +319,8 @@ class SchemaVersionedMySQLConnection(object):
         """Look for migration scripts and return their versions and paths."
 
         Returns:
-          A list of (schema_version, script_path) tuples of the migration
-          scripts for this database, sorted in ascending schema_version order.
+            A list of (schema_version, script_path) tuples of the migration
+            scripts for this database, sorted in ascending schema_version order.
         """
         # Look for migration script files in the migration script directory,
         # with names of the form [number]*.sql, and sort these by number.
@@ -340,8 +340,8 @@ class SchemaVersionedMySQLConnection(object):
         """Apply pending migration scripts to database, in order.
 
         Args:
-          maxVersion: The highest version migration script to apply. If
-                      unspecified, all migrations found will be applied.
+            maxVersion: The highest version migration script to apply. If
+                unspecified, all migrations found will be applied.
         """
         migrations = self._GetMigrationScripts()
 
@@ -389,11 +389,11 @@ class SchemaVersionedMySQLConnection(object):
         """Create and execute a one-row INSERT query.
 
         Args:
-          table: Table name to insert to.
-          values: Dictionary of column values to insert.
+            table: Table name to insert to.
+            values: Dictionary of column values to insert.
 
         Returns:
-          Integer primary key of the inserted row.
+            Integer primary key of the inserted row.
         """
         self._ReflectToMetadata()
         ins = self._meta.tables[table].insert().values(values)
@@ -403,27 +403,27 @@ class SchemaVersionedMySQLConnection(object):
     def _GetPrimaryKey(self, table):
         """Gets the primary key column of |table|.
 
-        This function requires that the given table have a 1-column promary key.
+        This function requires that the given table have a 1-column primary key.
 
         Args:
-          table: Name of table to primary key for.
+            table: Name of table to primary key for.
 
         Returns:
-          A sqlalchemy.sql.schema.Column representing the primary key column.
+            A sqlalchemy.sql.schema.Column representing the primary key column.
 
         Raises:
-          DBException if the table does not have a single column primary key.
+            DBException if the table does not have a single column primary key.
         """
         self._ReflectToMetadata()
         t = self._meta.tables[table]
 
         # TODO(akeshet): between sqlalchemy 0.7 and 0.8, a breaking change was
-        # made to how t.columns and t.primary_key are stored, and in sqlalchemy
-        # 0.7 t.columns does not have a .values() method. Hence this clumsy way
-        # of extracting the primary key column. Currently, our builders have 0.7
-        # installed. Once we drop support for 0.7, this code can be simply replaced
-        # by:
-        # key_columns = t.primary_key.columns.values()
+        #  made to how t.columns and t.primary_key are stored, and in sqlalchemy
+        #  0.7 t.columns does not have a .values() method. Hence this clumsy way
+        #  of extracting the primary key column. Currently, our builders have
+        #  0.7 installed. Once we drop support for 0.7, this code can be simply
+        #   replaced by:
+        #       key_columns = t.primary_key.columns.values()
         col_names = t.columns.keys()
         cols = [t.columns[n] for n in col_names]
         key_columns = [c for c in cols if c.primary_key]
@@ -438,12 +438,12 @@ class SchemaVersionedMySQLConnection(object):
         """Create and execute an UPDATE query by primary key.
 
         Args:
-          table: Table name to update.
-          row_id: Primary key value of row to update.
-          values: Dictionary of column values to update.
+            table: Table name to update.
+            row_id: Primary key value of row to update.
+            values: Dictionary of column values to update.
 
         Returns:
-          The number of rows that were updated (0 or 1).
+            The number of rows that were updated (0 or 1).
         """
         self._ReflectToMetadata()
         primary_key = self._GetPrimaryKey(table)
@@ -460,13 +460,13 @@ class SchemaVersionedMySQLConnection(object):
         """Create and execute an update query with a custom where clause.
 
         Args:
-          table: Table name to update.
-          where: Raw SQL for the where clause, in string form, e.g.
-                 'build_id = 1 and board = "tomato"'
-          values: dictionary of column values to update.
+            table: Table name to update.
+            where: Raw SQL for the where clause, in string form, e.g.
+                'build_id = 1 and board = "tomato"'.
+            values: dictionary of column values to update.
 
         Returns:
-          The number of rows that were updated.
+            The number of rows that were updated.
         """
         self._ReflectToMetadata()
         upd = self._meta.tables[table].update().where(where).values(values)
@@ -477,13 +477,13 @@ class SchemaVersionedMySQLConnection(object):
         """Create and execute a one-row one-table SELECT query by primary key.
 
         Args:
-          table: Table name to select from.
-          row_id: Primary key value of row to select.
-          columns: List of column names to select.
+            table: Table name to select from.
+            row_id: Primary key value of row to select.
+            columns: List of column names to select.
 
         Returns:
-          A column name to column value dict for the row found, if a row was found.
-          None if no row was.
+            A column name to column value dict for the row found, if a row was
+            found. None if no row was.
         """
         self._ReflectToMetadata()
         primary_key = self._GetPrimaryKey(table)
@@ -498,17 +498,17 @@ class SchemaVersionedMySQLConnection(object):
             return None
 
     def _SelectWhere(self, table, where, columns):
-        """Create and execute a one-table SELECT query with a custom where clause.
+        """Create and execute a one-table SELECT query w/ a custom where clause.
 
         Args:
-          table: Table name to update.
-          where: Raw SQL for the where clause, in string form, e.g.
-                 'build_id = 1 and board = "tomato"'
-          columns: List of column names to select.
+            table: Table name to update.
+            where: Raw SQL for the where clause, in string form, e.g.
+                'build_id = 1 and board = "tomato"'
+            columns: List of column names to select.
 
         Returns:
-          A list of column name to column value dictionaries each representing
-          a row that was selected.
+            A list of column name to column value dictionaries each representing
+            a row that was selected.
         """
         self._ReflectToMetadata()
         table_m = self._meta.tables[table]
@@ -525,14 +525,13 @@ class SchemaVersionedMySQLConnection(object):
         a new engine unique to this pid will be created.
 
         Args:
-          query: Query to execute, of type string, or sqlalchemy.Executible,
-                 or other sqlalchemy-executible statement (see sqlalchemy
-                 docs).
-          *args: Additional args passed along to .execute(...)
-          **kwargs: Additional args passed along to .execute(...)
+            query: Query to execute, of type string, or sqlalchemy.Executable,
+                or other sqlalchemy-executable statement (see sqlalchemy docs).
+            args: Additional args passed along to .execute(...)
+            kwargs: Additional args passed along to .execute(...)
 
         Returns:
-          The result of .execute(...)
+            The result of .execute(...)
         """
         return self._ExecuteWithEngine(
             query, self._GetEngine(), *args, **kwargs
@@ -542,19 +541,18 @@ class SchemaVersionedMySQLConnection(object):
         """Execute a query using |engine|, with retires.
 
         This method wraps execution of a query against an engine in retries.
-        The engine will automatically create new connections if a prior connection
-        was dropped.
+        The engine will automatically create new connections if a prior
+        connection was dropped.
 
         Args:
-          query: Query to execute, of type string, or sqlalchemy.Executible,
-                 or other sqlalchemy-executible statement (see sqlalchemy
-                 docs).
-          engine: sqlalchemy.engine to use.
-          *args: Additional args passed along to .execute(...)
-          **kwargs: Additional args passed along to .execute(...)
+            query: Query to execute, of type string, or sqlalchemy.Executable,
+                or other sqlalchemy-executable statement (see sqlalchemy docs).
+            engine: sqlalchemy.engine to use.
+            args: Additional args passed along to .execute(...)
+            kwargs: Additional args passed along to .execute(...)
 
         Returns:
-          The result of .execute(...)
+            The result of .execute(...)
         """
         f = lambda: engine.execute(query, *args, **kwargs)
 
@@ -592,7 +590,7 @@ class SchemaVersionedMySQLConnection(object):
         returns an engine that is unique to this process.
 
         Returns:
-          An sqlalchemy.engine instance for this database.
+            An sqlalchemy.engine instance for this database.
         """
         pid = os.getpid()
         if pid == self._engine_pid and self._engine:
@@ -612,7 +610,7 @@ class SchemaVersionedMySQLConnection(object):
             return self._engine
 
     def _InvalidateEngine(self):
-        """Dispose of an sqlalchemy engine."""
+        """Dispose of a sqlalchemy engine."""
         try:
             pid = os.getpid()
             if pid == self._engine_pid and self._engine:
@@ -631,8 +629,9 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
     # reference any builds.
     _SQL_FETCH_ACTIONS = (
         "SELECT c.id, b.id, action, c.reason, build_config, "
-        "change_number, patch_number, change_source, timestamp, c.buildbucket_id,"
-        " status FROM clActionTable c LEFT JOIN buildTable b ON build_id = b.id "
+        "change_number, patch_number, change_source, timestamp, "
+        "c.buildbucket_id, status "
+        "FROM clActionTable c LEFT JOIN buildTable b ON build_id = b.id "
     )
 
     _SQL_FETCH_MESSAGES = (
@@ -642,41 +641,42 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
     )
 
     # See https://stackoverflow.com/a/7745635/219138 for a discussion of how to
-    # perform "greatest-n-per-group" in SQL. I chose the LEFT OUTER JOIN solution.
+    # perform "greatest-n-per-group" in SQL. I chose the LEFT OUTER JOIN
+    # solution.
     # TODO(phobbs) JOIN with buildTable to get status.
     _SQL_FETCH_LATEST_BUILD_REQUEST = """
-  SELECT t1.*
-  FROM buildRequestTable as t1
-  LEFT OUTER JOIN buildRequestTable as t2
-    ON t1.request_reason = t2.request_reason
-       AND t1.request_build_config = t2.request_build_config
-       AND t1.timestamp < t2.timestamp
-  WHERE t2.request_build_config is NULL
-  """
+SELECT t1.*
+FROM buildRequestTable as t1
+LEFT OUTER JOIN buildRequestTable as t2
+ON t1.request_reason = t2.request_reason
+   AND t1.request_build_config = t2.request_build_config
+   AND t1.timestamp < t2.timestamp
+WHERE t2.request_build_config is NULL
+"""
 
     _SQL_FETCH_RETRIED_PRE_CQ_FAILURES = """
-  SELECT b.build_config, config_counts.failure_count, count(distinct b.id)
-  FROM buildTable as b
-    JOIN (
-      SELECT b.build_config, count(distinct b.id) as failure_count
-      FROM clActionTable as c1
-          JOIN clActionTable c2
-          JOIN buildTable as b
-      WHERE c1.change_number = c2.change_number
-          AND c1.patch_number = c2.patch_number
-          AND c1.change_source = c2.change_source
-          AND c1.action = 'pre_cq_failed'
-          AND c2.action = 'verified'
-          AND c1.build_id = b.id
-          AND b.build_config != 'pre-cq-launcher'
-          {time_constraint}
-      GROUP BY b.build_config
-    ) as config_counts
-  WHERE
-      b.build_config = config_counts.build_config
-      {time_constraint}
-  GROUP BY b.build_config
-  """
+SELECT b.build_config, config_counts.failure_count, count(distinct b.id)
+FROM buildTable as b
+JOIN (
+    SELECT b.build_config, count(distinct b.id) as failure_count
+    FROM clActionTable as c1
+        JOIN clActionTable c2
+        JOIN buildTable as b
+    WHERE c1.change_number = c2.change_number
+        AND c1.patch_number = c2.patch_number
+        AND c1.change_source = c2.change_source
+        AND c1.action = 'pre_cq_failed'
+        AND c2.action = 'verified'
+        AND c1.build_id = b.id
+        AND b.build_config != 'pre-cq-launcher'
+        {time_constraint}
+    GROUP BY b.build_config
+) as config_counts
+WHERE
+    b.build_config = config_counts.build_config
+    {time_constraint}
+GROUP BY b.build_config
+"""
 
     _DATE_FORMAT = "%Y-%m-%d"
     _DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -726,7 +726,7 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Gets the current time, according to database.
 
         Returns:
-          datetime.datetime instance.
+            datetime.datetime instance.
         """
         return self._Execute("SELECT NOW()").fetchall()[0][0]
 
@@ -746,18 +746,16 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Insert a build row.
 
         Args:
-          builder_name: buildbot builder name.
-          build_number: buildbot build number.
-          build_config: cbuildbot config of build
-          bot_hostname: hostname of bot running the build
-          master_build_id: (Optional) primary key of master build to this build.
-          timeout_seconds: (Optional) If provided, total time allocated for this
-                           build. A deadline is recorded in cidb for the current
-                           build to end.
-          important: (Optional) If provided, the |important| value for this build.
-          buildbucket_id: (Optional) If provided, the |buildbucket_id| value for
-                           this build.
-          branch: (Optional) Manifest branch name of this build.
+            builder_name: buildbot builder name.
+            build_number: buildbot build number.
+            build_config: cbuildbot config of build
+            bot_hostname: hostname of bot running the build
+            master_build_id: Primary key of master build to this build.
+            timeout_seconds: Total time allocated for this build. A deadline is
+                recorded in cidb for the current build to end.
+            important: The |important| value for this build.
+            buildbucket_id: The |buildbucket_id| value for this build.
+            branch: Manifest branch name of this build.
         """
         values = {
             "builder_name": builder_name,
@@ -786,8 +784,8 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Inserts a board-per-build entry into database.
 
         Args:
-          build_id: primary key of the build in the buildTable
-          board: String board name.
+            build_id: primary key of the build in the buildTable
+            board: String board name.
         """
         self._Insert(
             "boardPerBuildTable", {"build_id": build_id, "board": board}
@@ -798,8 +796,8 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Insert a child-config-per-build entry into database.
 
         Args:
-          build_id: primary key of the build in the buildTable
-          child_config: String child_config name.
+            build_id: primary key of the build in the buildTable
+            child_config: String child_config name.
         """
         self._Insert(
             "childConfigPerBuildTable",
@@ -817,14 +815,14 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Insert a build stage entry into database.
 
         Args:
-          build_id: primary key of the build in buildTable
-          name: Full name of build stage.
-          board: (Optional) board name, if this is a board-specific stage.
-          status: (Optional) stage status, one of constants.BUILDER_ALL_STATUSES.
-                  Default constants.BUILDER_STATUS_PLANNED.
+            build_id: primary key of the build in buildTable
+            name: Full name of build stage.
+            board: board name, if this is a board-specific stage.
+            status: stage status, one of constants.BUILDER_ALL_STATUSES.
+                Default: constants.BUILDER_STATUS_PLANNED.
 
         Returns:
-          Integer primary key of inserted stage, i.e. build_stage_id
+            Integer primary key of inserted stage, i.e. build_stage_id
         """
         return self._Insert(
             "buildStageTable",
@@ -848,11 +846,11 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Insert a build message into database.
 
         Args:
-          build_id: primary key of build recording this message.
-          message_type: Optional str name of message type.
-          message_subtype: Optional str name of message subtype.
-          message_value: Optional value of message.
-          board: Optional str name of the board.
+            build_id: primary key of build recording this message.
+            message_type: Optional str name of message type.
+            message_subtype: Optional str name of message subtype.
+            message_value: Optional value of message.
+            board: Optional str name of the board.
         """
         if message_type:
             message_type = message_type[:240]
@@ -877,11 +875,11 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Update the given metadata row in database.
 
         Args:
-          build_id: id of row to update.
-          metadata: CBuildbotMetadata instance to update with.
+            build_id: id of row to update.
+            metadata: CBuildbotMetadata instance to update with.
 
         Returns:
-          The number of build rows that were updated (0 or 1).
+            The number of build rows that were updated (0 or 1).
         """
         d = metadata.GetDict()
         versions = d.get("version") or {}
@@ -908,9 +906,9 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Update the given board-per-build metadata.
 
         Args:
-          build_id: id of the build
-          board: board to update
-          board_metadata: per-board metadata dict for this board
+            build_id: id of the build
+            board: board to update
+            board_metadata: per-board metadata dict for this board
         """
         update_dict = {
             "main_firmware_version": board_metadata.get(
@@ -929,7 +927,7 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Marks a build stage as inflight, in the database.
 
         Args:
-          build_stage_id: primary key of the build stage in buildStageTable.
+            build_stage_id: primary key of the build stage in buildStageTable.
         """
         current_timestamp = sqlalchemy.func.current_timestamp()
         return self._Update(
@@ -946,7 +944,7 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Marks a build stage as waiting, in the database.
 
         Args:
-          build_stage_id: primary key of the build stage in buildStageTable.
+            build_stage_id: primary key of the build stage in buildStageTable.
         """
         return self._Update(
             "buildStageTable",
@@ -959,8 +957,8 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Marks a build stage as finished, in the database.
 
         Args:
-          build_stage_id: primary key of the build stage in buildStageTable.
-          status: one of constants.BUILDER_COMPLETED_STATUSES
+            build_stage_id: primary key of the build stage in buildStageTable.
+            status: one of constants.BUILDER_COMPLETED_STATUSES
         """
         current_timestamp = sqlalchemy.func.current_timestamp()
         return self._Update(
@@ -984,21 +982,23 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         This will also mark the row's final=True.
 
         Args:
-          build_id: id of row to update.
-          status: Final build status, one of
-                  constants.BUILDER_COMPLETED_STATUSES.
-          summary: A summary of the build (failures) collected from all slaves.
-          metadata_url: google storage url to metadata.json file for this build,
-                        e.g. ('gs://chromeos-image-archive/master-paladin/'
-                              'R39-6225.0.0-rc1/metadata.json')
-          strict: If |strict| is True, can only update the build status when 'final'
-            is False. |strict| can only be False when the caller wants to change the
-            entry ignoring the 'final' value (For example, a build was marked as
-            status='aborted' and final='true', a cron job to adjust the finish_time
-            will call this method with strict=False).
+            build_id: id of row to update.
+            status: Final build status, one of
+                constants.BUILDER_COMPLETED_STATUSES.
+            summary: A summary of the build (failures) collected from all
+                slaves.
+            metadata_url: google storage url to metadata.json file for this
+                build, e.g. ('gs://chromeos-image-archive/master-paladin/'
+                'R39-6225.0.0-rc1/metadata.json')
+            strict: If |strict| is True, can only update the build status when
+                'final' is False. |strict| can only be False when the caller
+                wants to change the entry ignoring the 'final' value (For
+                example, a build was marked as status='aborted' and
+                final='true', a cron job to adjust the finish_time will call
+                this method with strict=False).
 
         Returns:
-          The number of rows that were updated.
+            The number of rows that were updated.
         """
         self._ReflectToMetadata()
 
@@ -1027,11 +1027,11 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         were used in a build.
 
         Args:
-          build_id: primary key of the build in the buildTable
-          child_config: String child_config name.
-          status: Final child_config status, one of
-                  constants.BUILDER_COMPLETED_STATUSES or None
-                  for default "inflight".
+            build_id: primary key of the build in the buildTable
+            child_config: String child_config name.
+            status: Final child_config status, one of
+                constants.BUILDER_COMPLETED_STATUSES or None for default
+                "inflight".
         """
         self._Execute(
             "UPDATE childConfigPerBuildTable "
@@ -1055,11 +1055,11 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Gets the status of the build.
 
         Args:
-          build_id: build id to fetch.
+            build_id: build id to fetch.
 
         Returns:
-          Dictionary for a single build (see GetBuildStatuses for keys) or
-          None if no build with this id was found.
+            Dictionary for a single build (see GetBuildStatuses for keys) or
+            None if no build with this id was found.
         """
         statuses = self.GetBuildStatuses([build_id])
         return statuses[0] if statuses else None
@@ -1069,13 +1069,13 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Gets the statuses of the builds.
 
         Args:
-          build_ids: A list of build id to fetch.
+            build_ids: A list of build id to fetch.
 
         Returns:
-          A list of dictionary with keys (id, build_config, start_time,
-          finish_time, status, waterfall, build_number, builder_name,
-          platform_version, full_version, milestone_version, important)
-          (see BUILD_STATUS_KEYS) or None if no build with this id was found.
+            A list of dictionary with keys (id, build_config, start_time,
+            finish_time, status, waterfall, build_number, builder_name,
+            platform_version, full_version, milestone_version, important)
+            (see BUILD_STATUS_KEYS) or None if no build with this id was found.
         """
         return self._SelectWhere(
             "buildTable",
@@ -1088,12 +1088,12 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Gets all the stages for all listed build_ids.
 
         Args:
-          build_ids: list of build ids of the builds to fetch the stages for.
+            build_ids: list of build ids of the builds to fetch the stages for.
 
         Returns:
-          A list containing, for each stage of the builds found, a dictionary with
-          keys (id, build_id, name, board, status, last_updated, start_time,
-          finish_time, final).
+            A list containing, for each stage of the builds found, a dictionary
+            with keys (id, build_id, name, board, status, last_updated,
+            start_time, finish_time, final).
         """
         if not build_ids:
             return []
@@ -1135,13 +1135,13 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         This function is a modified copy of GetBuildsStages().
 
         Args:
-          buildbucket_ids: list of buildbucket ids of the builds to fetch the
+            buildbucket_ids: list of buildbucket ids of the builds to fetch the
             stages for.
 
         Returns:
-          A list containing, for each stage of the builds found, a dictionary with
-          keys (id, build_id, name, board, status, last_updated, start_time,
-          finish_time, final).
+            A list containing, for each stage of the builds found, a dictionary
+            with keys (id, build_id, name, board, status, last_updated,
+            start_time, finish_time, final).
         """
         if not buildbucket_ids:
             return []
@@ -1181,17 +1181,17 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Gets the statuses of slave builders to given build.
 
         Args:
-          master_build_id: build id of the master build to fetch the slave
-                           statuses for.
-          buildbucket_ids: A list of buildbucket_ids (string). If it's given,
-            only fetch the builds with buildbucket_id in the buildbucket_ids.
-            Default to None.
+            master_build_id: build id of the master build to fetch the slave
+                statuses for.
+            buildbucket_ids: A list of buildbucket_ids (string). If it's given,
+                only fetch the builds with buildbucket_id in the
+                buildbucket_ids. Default to None.
 
         Returns:
-          A list containing a dictionary with keys BUILD_STATUS_KEYS.
-          If buildbucket_ids is None, the list contains all slave builds found
-          in the buildTable; else, the list only contains the slave builds
-          with |buildbucket_id| in the buildbucket_ids list.
+            A list containing a dictionary with keys BUILD_STATUS_KEYS.
+            If buildbucket_ids is None, the list contains all slave builds found
+            in the buildTable; else, the list only contains the slave builds
+            with |buildbucket_id| in the buildbucket_ids list.
         """
         if buildbucket_ids is None:
             return self._SelectWhere(
@@ -1218,10 +1218,11 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Gets the failure entries for all listed buildbucket_ids.
 
         Args:
-          buildbucket_ids: list of build ids of the builds to fetch failures for.
+            buildbucket_ids: list of build ids of the builds to fetch failures
+                for.
 
         Returns:
-          A list of failure_message_lib.StageFailure instances.
+            A list of failure_message_lib.StageFailure instances.
         """
         if not buildbucket_ids:
             return []
@@ -1256,41 +1257,42 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
     ):
         """Returns basic information about most recent builds for build config.
 
-        By default this function returns the most recent builds. Some arguments can
-        restrict the result to older builds.
+        By default, this function returns the most recent builds. Some arguments
+        can restrict the result to older builds.
 
         Args:
-          build_config: config name of the build to get history.
-          num_results: Number of builds to search back. Set this to
-              CIDBConnection.NUM_RESULTS_NO_LIMIT to request no limit on the number
-              of results.
-          ignore_build_id: (Optional) Ignore a specific build. This is most useful
-              to ignore the current build when querying recent past builds from a
-              build in flight.
-          start_date: (Optional, type: datetime.date) Get builds that occured on or
-              after this date.
-          end_date: (Optional, type:datetime.date) Get builds that occured on or
-              before this date.
-          branch: (Optional) Return only results for this branch.
-          milestone_version: (Optional) Return only results for this
-              milestone_version.
-          platform_version: (Optional) Return only results for this
-              platform_version.
-          starting_build_id: (Optional) The minimum build_id for which data should
-              be retrieved.
-          ending_build_id: (Optional) The maximum build_id for which data should
-              be retrieved.
-          waterfall: (Optional) The waterfall for which data should be retrieved.
-          buildbot_generation: (Optional) The buildbot_generation for which data
-              should be retrieved.
-          final: (Optional) If True, only retrieve final (ie finished) builds.
-          reverse: (Optional) If True, retrieve builds in reversed order (old ones
-              first).
+            build_config: config name of the build to get history.
+            num_results: Number of builds to search back. Set this to
+                CIDBConnection.NUM_RESULTS_NO_LIMIT to request no limit on the
+                number of results.
+            ignore_build_id: (Optional) Ignore a specific build. This is most
+                useful to ignore the current build when querying recent past
+                builds from a build in flight.
+            start_date: (Optional, type: datetime.date) Get builds that occurred
+                on or after this date.
+            end_date: (Optional, type:datetime.date) Get builds that occurred on
+                or before this date.
+            branch: (Optional) Return only results for this branch.
+            milestone_version: (Optional) Return only results for this
+                milestone_version.
+            platform_version: (Optional) Return only results for this
+                platform_version.
+            starting_build_id: (Optional) The minimum build_id for which data
+                should be retrieved.
+            ending_build_id: (Optional) The maximum build_id for which data
+                should be retrieved.
+            waterfall: (Optional) The waterfall for which data should be
+                retrieved.
+            buildbot_generation: (Optional) The buildbot_generation for which
+                data should be retrieved.
+            final: (Optional) If True, only retrieve final (ie finished) builds.
+            reverse: (Optional) If True, retrieve builds in reversed order (old
+                ones first).
 
         Returns:
-          A sorted list of dicts containing up to |number| dictionaries for
-          build statuses in descending order (if |reverse| is True, ascending
-          order). See BUILD_STATUS_KEYS for valid keys in the dictionary.
+            A sorted list of dicts containing up to |number| dictionaries for
+            build statuses in descending order (if |reverse| is True, ascending
+            order). See BUILD_STATUS_KEYS for valid keys in the dictionary.
         """
         return self.GetBuildsHistory(
             [build_config],
@@ -1329,42 +1331,39 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
     ):
         """Returns basic information about most recent builds for build configs.
 
-        By default this function returns the most recent builds. Some arguments can
-        restrict the result to older builds.
+        By default, this function returns the most recent builds. Some arguments
+        can restrict the result to older builds.
 
         Args:
-          build_configs: config names of the builds to get history. If None is
-              given, all build configs are covered.
-          num_results: Number of builds to search back. Set this to
-              CIDBConnection.NUM_RESULTS_NO_LIMIT to request no limit on the number
-              of results.
-          ignore_build_id: (Optional) Ignore a specific build. This is most useful
-              to ignore the current build when querying recent past builds from a
-              build in flight.
-          start_date: (Optional, type: datetime.date) Get builds that occured on or
-              after this date.
-          end_date: (Optional, type:datetime.date) Get builds that occured on or
-              before this date.
-          branch: (Optional) Return only results for this branch.
-          milestone_version: (Optional) Return only results for this
-              milestone_version.
-          platform_version: (Optional) Return only results for this
-              platform_version.
-          starting_build_id: (Optional) The minimum build_id for which data should
-              be retrieved.
-          ending_build_id: (Optional) The maximum build_id for which data should
-              be retrieved.
-          waterfall: (Optional) The waterfall for which data should be retrieved.
-          buildbot_generation: (Optional) The buildbot_generation for which data
-              should be retrieved.
-          final: (Optional) If True, only retrieve final (ie finished) builds.
-          reverse: (Optional) If True, retrieve builds in reversed order (old ones
-              first).
+            build_configs: config names of the builds to get history. If None is
+                given, all build configs are covered.
+            num_results: Number of builds to search back. Set this to
+                CIDBConnection.NUM_RESULTS_NO_LIMIT to request no limit on the
+                number of results.
+            ignore_build_id: (Optional) Ignore a specific build. This is most
+                useful to ignore the current build when querying recent past
+                builds from a build in flight.
+            start_date: (Optional, type: datetime.date) Get builds that occurred
+                on or after this date.
+            end_date: (Optional, type:datetime.date) Get builds that occurred on
+                or before this date.
+            branch: (Optional) Return only results for this branch.
+            milestone_version: Return only results for this milestone_version.
+            platform_version: Return only results for this platform_version.
+            starting_build_id: The minimum build_id for which data should be
+                retrieved.
+            ending_build_id: The maximum build_id for which data should be
+                retrieved.
+            waterfall: The waterfall for which data should be retrieved.
+            buildbot_generation: The buildbot_generation for which data should
+                be retrieved.
+            final: Only retrieve final (ie finished) builds.
+            reverse: Retrieve builds in reversed order (old ones first).
 
         Returns:
-          A sorted list of dicts containing up to |number| dictionaries for
-          build statuses in descending order (if |reverse| is True, ascending
-          order). See BUILD_STATUS_KEYS for valid keys in the dictionary.
+            A sorted list of dicts containing up to |number| dictionaries for
+            build statuses in descending order (if |reverse| is True, ascending
+            order). See BUILD_STATUS_KEYS for valid keys in the dictionary.
         """
         where_clauses = []
         if build_configs:
@@ -1431,16 +1430,16 @@ class CIDBConnection(SchemaVersionedMySQLConnection):
         """Gets build messages from buildMessageTable.
 
         Args:
-          build_id: The build to get messages for.
-          message_type: Get messages with the specific message_type (string) if
-            message_type is not None.
-          message_subtype: Get messages with the specific message_subtype (stirng)
-            if message_subtype is not None.
+            build_id: The build to get messages for.
+            message_type: Get messages with the specific message_type (string)
+                if message_type is not None.
+            message_subtype: Get messages with the specific message_subtype
+                (string) if message_subtype is not None.
 
         Returns:
-          A list of build message dictionaries, where each dictionary contains
-          keys build_id, build_config, builder_name, build_number, message_type,
-          message_subtype, message_value, timestamp, board.
+            A list of build message dictionaries, where each dictionary contains
+            keys build_id, build_config, builder_name, build_number,
+            message_type, message_subtype, message_value, timestamp, board.
         """
         where_clause = ["build_id = %s" % build_id]
         if message_type is not None:
@@ -1482,7 +1481,7 @@ CONNECTION_TYPE_INV = "invalid"  # invalidated connection
 
 
 class CIDBConnectionFactoryClass(factory.ObjectFactory):
-    """Factory class used by builders to fetch the appropriate cidb connection"""
+    """Factory used by builders to fetch the appropriate cidb connection."""
 
     _CIDB_CONNECTION_TYPES = {
         CONNECTION_TYPE_PROD: memoize.Memoize(
@@ -1508,8 +1507,8 @@ class CIDBConnectionFactoryClass(factory.ObjectFactory):
         ):
             return True
 
-        # Otherwise, only allow transitions between none -> none, mock -> mock, and
-        # mock -> none.
+        # Otherwise, only allow transitions between none -> none, mock -> mock,
+        # and mock -> none.
         if from_setup == CONNECTION_TYPE_MOCK:
             if to_setup in (CONNECTION_TYPE_NONE, CONNECTION_TYPE_MOCK):
                 return True
@@ -1525,14 +1524,14 @@ class CIDBConnectionFactoryClass(factory.ObjectFactory):
         )
 
     def IsCIDBSetup(self):
-        """Returns True iff GetCIDBConnectionForBuilder is ready to be called."""
+        """Return True iff GetCIDBConnectionForBuilder is ready to be called."""
         return self.is_setup
 
     def GetCIDBConnectionType(self):
         """Returns the type of db connection that is set up.
 
         Returns:
-          One of ('prod', 'debug', 'mock', 'none', 'invalid', None)
+            One of ('prod', 'debug', 'mock', 'none', 'invalid', None)
         """
         return self.setup_type
 
@@ -1548,16 +1547,16 @@ class CIDBConnectionFactoryClass(factory.ObjectFactory):
     def SetupProdCidb(self):
         """Sets up CIDB to use the prod instance of the database.
 
-        May be called only once, and may not be called after any other CIDB Setup
-        method, otherwise it will raise an AssertionError.
+        May be called only once, and may not be called after any other CIDB
+        Setup method, otherwise it will raise an AssertionError.
         """
         self.Setup(CONNECTION_TYPE_PROD)
 
     def SetupDebugCidb(self):
         """Sets up CIDB to use the debug instance of the database.
 
-        May be called only once, and may not be called after any other CIDB Setup
-        method, otherwise it will raise an AssertionError.
+        May be called only once, and may not be called after any other CIDB
+        Setup method, otherwise it will raise an AssertionError.
         """
         self.Setup(CONNECTION_TYPE_DEBUG)
 
@@ -1565,10 +1564,10 @@ class CIDBConnectionFactoryClass(factory.ObjectFactory):
         """Sets up CIDB to use a mock object. May be called more than once.
 
         Args:
-          mock_cidb: (optional) The mock cidb object to be returned by
-                     GetCIDBConnection. If not supplied, then CIDB will be
-                     considered not set up, but future calls to set up a
-                     non-(mock or None) connection will fail.
+            mock_cidb: The mock cidb object to be returned by GetCIDBConnection.
+                If not supplied, then CIDB will be considered not set up, but
+                future calls to set up a non-(mock or None) connection will
+                fail.
         """
         self.Setup(CONNECTION_TYPE_MOCK, mock_cidb)
 
@@ -1591,14 +1590,14 @@ class CIDBConnectionFactoryClass(factory.ObjectFactory):
     def GetCIDBConnectionForBuilder(self):
         """Get a CIDBConnection.
 
-        A call to one of the CIDB Setup methods must have been made before calling
-        this factory method.
+        A call to one of the CIDB Setup methods must have been made before
+        calling this factory method.
 
         Returns:
-          A CIDBConnection instance connected to either the prod or debug
-          instance of the database, or a mock connection, depending on which
-          Setup method was called. Returns None if CIDB has been explicitly
-          set up for that using SetupNoCidb.
+            A CIDBConnection instance connected to either the prod or debug
+            instance of the database, or a mock connection, depending on which
+            Setup method was called. Returns None if CIDB has been explicitly
+            set up for that using SetupNoCidb.
         """
         return self.GetInstance()
 

@@ -30,10 +30,11 @@ class Builder:
         """Initialize this class.
 
         Args:
-          board: The board to build the kernel for.
-          work_dir: The directory for keeping intermediary files.
-          install_root: A directory to put the built kernel files (e.g. vmlinuz).
-          jobs: The number of packages to build in parallel.
+            board: The board to build the kernel for.
+            work_dir: The directory for keeping intermediary files.
+            install_root: A directory to put the built kernel files (e.g.
+                vmlinuz).
+            jobs: The number of packages to build in parallel.
         """
         self._board = board
         self._work_dir = pathlib.Path(work_dir)
@@ -51,9 +52,9 @@ class Builder:
         """Builds a custom kernel and initramfs.
 
         Args:
-          kernel_flags: A list of USE flags for building the kernel.
-          use_flags_override: A list of USE flags to override the default env USE
-                              variable.
+            kernel_flags: A list of USE flags for building the kernel.
+            use_flags_override: A list of USE flags to override the default env
+                USE variable.
         """
         pkgdir = self._work_dir / "packages"
         logging.info("Using PKGDIR: %s", pkgdir)
@@ -62,18 +63,18 @@ class Builder:
                 str(pkgdir), kernel_flags, use_flags_override
             )
         finally:
-            # The reason we need to specifically remove the pkgdir is that some of the
-            # content of this directory will be read-only by non-root and tools like
-            # shutil.rmtree won't be able to remove them. So we just do a force
-            # delete.
+            # The reason we need to specifically remove the pkgdir is that some
+            # content of this directory will be read-only by non-root and tools
+            # like shutil.rmtree won't be able to remove them. So we just do a
+            # force delete.
             try:
                 cros_build_lib.sudo_run(["rm", "-rf", str(pkgdir)])
             except cros_build_lib.RunCommandError as e:
                 logging.error(
                     "Failed to delete directory %s with error: %s", pkgdir, e
                 )
-                # For whatever reason it failed but, for now we just ignore it. It is
-                # probably going to fail at the end anyway.
+                # For whatever reason it failed but, for now we just ignore it.
+                # It is probably going to fail at the end anyway.
 
     def _CreateCustomKernel(
         self,
@@ -83,12 +84,13 @@ class Builder:
     ):
         """Internal function for CreateCustomKernel()
 
-        This code is mainly borrowed from src/scripts/build_library/build_common.sh.
+        This code is mainly borrowed from
+        src/scripts/build_library/build_common.sh.
 
         Args:
-          pkgdir: The path to a working dir for installing packages.
-          kernel_flags: See CreateCustomKernel().
-          use_flags_override: See CreateCustomKernel().
+            pkgdir: The path to a working dir for installing packages.
+            kernel_flags: See CreateCustomKernel().
+            use_flags_override: See CreateCustomKernel().
         """
         logging.info("Building custom kernel.")
         # Clean up any leftover state in custom directories.
@@ -99,13 +101,13 @@ class Builder:
         build_target = build_target_lib.BuildTarget(self._board)
         emerge = build_target.get_command("emerge")
 
-        # Update chromeos-initramfs to contain the latest binaries from the build
-        # tree. This is basically just packaging up already-built binaries from
-        # root. We are careful not to muck with the existing prebuilts so that
-        # prebuilts can be uploaded in parallel.
+        # Update chromeos-initramfs to contain the latest binaries from the
+        # build tree. This is basically just packaging up already-built binaries
+        # from root. We are careful not to muck with the existing prebuilts so
+        # that prebuilts can be uploaded in parallel.
         #
-        # TODO(davidjames): Implement ABI deps so that chromeos-initramfs will be
-        # rebuilt automatically when its dependencies change.
+        # TODO(davidjames): Implement ABI deps so that chromeos-initramfs will
+        #   be rebuilt automatically when its dependencies change.
         logging.info("Building initramfs package.")
         try:
             cros_build_lib.run(
@@ -120,9 +122,9 @@ class Builder:
 
         # Verify all dependencies of the kernel are installed. This should be a
         # no-op, but it's good to check in case a developer didn't run
-        # build_packages.  We need the `expand_virtual` call to workaround a bug in
-        # portage where it only installs the virtual pkg.
-        logging.info("Verifiying dependecies of the kernel.")
+        # build_packages.  We need the `expand_virtual` call to work around a
+        # bug in portage where it only installs the virtual pkg.
+        logging.info("Verifying dependencies of the kernel.")
         try:
             kernel = cros_build_lib.run(
                 [
@@ -147,11 +149,11 @@ class Builder:
                 "dependencies are built: %s" % e
             )
 
-        # Build the kernel. This uses the standard root so that we can pick up the
-        # initramfs from there. But we don't actually install the kernel to the
-        # standard root, because that'll muck up the kernel debug symbols there,
-        # which we want to upload in parallel.
-        logging.info("Builing the custom kernel.")
+        # Build the kernel. This uses the standard root so that we can pick up
+        # the initramfs from there. But we don't actually install the kernel to
+        # the standard root, because that'll muck up the kernel debug symbols
+        # there, which we want to upload in parallel.
+        logging.info("Building the custom kernel.")
         try:
             cros_build_lib.run(
                 [emerge, self.jobs, "--buildpkgonly", kernel],
@@ -199,16 +201,17 @@ class Builder:
         """Builds the final initramfs kernel image.
 
         Args:
-          output: The output file to put the final kernel image.
-          boot_args: A string of kernel boot arguments.
-          serial: Serial ports for printks.
-          keys_dir: The path to kernel keys directories. Default is dev keys.
-          public_key: Filename to the public key whose private part signed the
-                      keyblock.
-          private_key: Filename to the private key whose public part is baked into
-                       the keyblock.
-          keyblock: Filename to the kernel keyblock.
-          disable_rootfs_verification: If True, the rootfs verification is disabled.
+            output: The output file to put the final kernel image.
+            boot_args: A string of kernel boot arguments.
+            serial: Serial ports for printks.
+            keys_dir: The path to kernel keys directories. Default is dev keys.
+            public_key: Filename to the public key whose private part signed the
+                keyblock.
+            private_key: Filename to the private key whose public part is baked
+                into the keyblock.
+            keyblock: Filename to the kernel keyblock.
+            disable_rootfs_verification: If True, the rootfs verification is
+                disabled.
         """
         logging.info("Building kernel image into %s.", output)
 

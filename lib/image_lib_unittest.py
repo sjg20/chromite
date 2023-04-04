@@ -205,7 +205,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
         self.detach_mock.assert_called_once()
 
     def gcFunc(self):
-        """This function isolates a local variable so it'll be garbage collected."""
+        """Isolates a local variable so it'll be garbage collected."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH)
         lb.Attach()
         self.rc_mock.assertCommandContains(
@@ -301,7 +301,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
             )
 
     def testMountingMountedPartReturnsName(self):
-        """Test that Mount returns the directory name even when already mounted."""
+        """Verify Mount returns the directory name even when already mounted."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH, destination=self.tempdir)
         lb.Attach()
         dirname = "%s/dir-%d" % (self.tempdir, lb._gpt_table[0].number)
@@ -312,7 +312,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
         lb.close()
 
     def testRemountCallsMount(self):
-        """Test that Mount returns the directory name even when already mounted."""
+        """Verify Mount returns the directory name even when already mounted."""
         lb = image_lib.LoopbackPartitions(FAKE_PATH, destination=self.tempdir)
         lb.Attach()
         devname = "%sp%d" % (LOOP_DEV, lb._gpt_table[0].number)
@@ -399,9 +399,9 @@ class LsbUtilsTest(cros_test_lib.MockTempDirTestCase):
     """Tests the various LSB utilities."""
 
     def setUp(self):
-        # Patch osutils.IsRootUser() to pretend running as root, so reading/writing
-        # the lsb-release file doesn't require escalated privileges and the test can
-        # clean itself up correctly.
+        # Patch osutils.IsRootUser() to pretend running as root, so
+        # reading/writing the lsb-release file doesn't require escalated
+        # privileges and the test can clean itself up correctly.
         self.PatchObject(osutils, "IsRootUser", return_value=True)
 
     def testWriteLsbRelease(self):
@@ -545,8 +545,8 @@ class SecurityTestConfigTest(cros_test_lib.RunCommandTempDirTestCase):
         clone_patch.assert_called_once()
         self.assertCommandContains(["git", "checkout", self.vboot_hash])
 
-        # Make sure it doesn't try to clone & checkout again after already having
-        # done so successfully.
+        # Make sure it doesn't try to clone & checkout again after already
+        # having done so successfully.
         clone_patch = self.PatchObject(git, "Clone")
         self.config._VbootCheckout()
         clone_patch.assert_not_called()
@@ -707,7 +707,7 @@ class GetImagesToBuildTests(cros_test_lib.MockTestCase):
     """Tests the GetImagesToBuild function."""
 
     def testExpectedInput(self):
-        """Pass in all the expected image type and check the expected image name."""
+        """Pass in all expected image types and check expected image names."""
         for k in constants.IMAGE_TYPE_TO_NAME:
             image = image_lib.GetImagesToBuild([k])
             self.assertEqual(len(image), 1)
@@ -719,7 +719,7 @@ class GetImagesToBuildTests(cros_test_lib.MockTestCase):
             image_lib.GetImagesToBuild([constants.IMAGE_TYPE_DEV, "invalid"])
 
     def testInvalidImageCombination(self):
-        """Pass in an invalid image type combination and check for ValueError."""
+        """Verify an invalid image type combination raises a ValueError."""
         with self.assertRaises(ValueError):
             image_lib.GetImagesToBuild(
                 [constants.IMAGE_TYPE_DEV, constants.FACTORY_IMAGE_BIN]
@@ -897,8 +897,8 @@ class CreateBuildDirTests(cros_test_lib.MockTempDirTestCase):
         self.assertTrue(symlink_dir.is_symlink())
         self.assertEqual(self.image_dir, os.readlink(symlink_dir))
 
-        # Now test the case where the build directory already exists with replace as
-        # false.
+        # Now test the case where the build directory already exists with
+        # replace as false.
         with self.assertRaises(FileExistsError):
             build_dir, output_dir, symlink_dir = image_lib.CreateBuildDir(
                 self.build_top_dir,
@@ -953,7 +953,7 @@ class CreateBuildDirTests(cros_test_lib.MockTempDirTestCase):
         self.assertEqual(self.image_dir_attempt, os.readlink(symlink_dir))
 
     def testBuildAttemptDate(self):
-        """Test with chrome_branch, version string with date and build attempt."""
+        """Test with chrome_branch, version string, date, and build attempt."""
         build_dir, output_dir, symlink_dir = image_lib.CreateBuildDir(
             self.build_top_dir,
             self.output_top_dir,

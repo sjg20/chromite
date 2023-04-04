@@ -65,15 +65,15 @@ def WrapMultiprocessing(callback, *args, **kwargs):
     """Wraps a callback with a short value of TMPDIR.
 
     This is intended to wrap calls to multiprocessing to ensure any sockets
-    created during initialization are created under the /tmp tree rather than in a
-    custom temp directory. This is needed because TMPDIR might be really long, and
-    named sockets are limited to 108 characters.
+    created during initialization are created under the /tmp tree rather than in
+    a custom temp directory. This is needed because TMPDIR might be really long,
+    and named sockets are limited to 108 characters.
 
     Examples:
-      errors = WrapMultiprocessing(multiprocessing.Value, 'i')
+        errors = WrapMultiprocessing(multiprocessing.Value, 'i')
 
     Returns:
-      The return value of the callback function with the specified args
+        The return value of the callback function with the specified args
     """
     # Use a short directory in /tmp. Do not use /tmp directly to keep these
     # temporary files together and because certain environments do not like too
@@ -93,7 +93,8 @@ def _get_sync_manager():
     """Create a SyncManager for use in Manager below
 
     This is put into a helper function so it can be used inside
-    WrapMultiprocessing to adjust TMPDIR to avoid paths too long for UNIX sockets.
+    WrapMultiprocessing to adjust TMPDIR to avoid paths too long for UNIX
+    sockets.
     """
     m = HackTimeoutSyncManager()
     # SyncManager doesn't handle KeyboardInterrupt exceptions well; pipes get
@@ -108,17 +109,17 @@ def Manager():
     """Create a background process for managing interprocess communication.
 
     This manager wraps multiprocessing.Manager() and ensures that any sockets
-    created during initialization are created under the /tmp tree rather than in a
-    custom temp directory. This is needed because TMPDIR might be really long, and
-    named sockets are limited to 108 characters.
+    created during initialization are created under the /tmp tree rather than in
+    a custom temp directory. This is needed because TMPDIR might be really long,
+    and named sockets are limited to 108 characters.
 
     Examples:
-      with Manager() as manager:
+        with Manager() as manager:
         queue = manager.Queue()
         ...
 
     Returns:
-      The return value of multiprocessing.Manager()
+        The return value of multiprocessing.Manager()
     """
     return WrapMultiprocessing(_get_sync_manager)
 
@@ -151,14 +152,15 @@ class _BackgroundTask(multiprocessing.Process):
     to a temporary file and is printed when the 'Wait' function is called.
     """
 
-    # The time we give Python to startup and exit.
+    # The time we give Python to start up and exit.
     STARTUP_TIMEOUT = 60 * 5
     EXIT_TIMEOUT = 60 * 10
 
     # The time we allow processes to be silent. This is in place so that we
     # eventually catch hanging processes, and print the remainder of our output.
-    # Do not increase this. Instead, adjust your program to print regular progress
-    # updates, so that cbuildbot (and buildbot) can know that it has not hung.
+    # Do not increase this. Instead, adjust your program to print regular
+    # progress updates, so that cbuildbot (and buildbot) can know that it has
+    # not hung.
     SILENT_TIMEOUT = 60 * 145
 
     # The amount by which we reduce the SILENT_TIMEOUT every time we launch
@@ -171,7 +173,7 @@ class _BackgroundTask(multiprocessing.Process):
     SIGTERM_TIMEOUT = 30
     SIGKILL_TIMEOUT = 60
 
-    # How long we allow debug commands to run (so we don't hang will trying to
+    # How long we allow debug commands to run (so we don't hang while trying to
     # recover from a hang).
     DEBUG_CMD_TIMEOUT = 60
 
@@ -188,13 +190,14 @@ class _BackgroundTask(multiprocessing.Process):
         number of simultaneous parallel tasks.
 
         Args:
-          task: The task (a functor) to run in the background.
-          queue: A queue to be used for managing communication between the parent
-            and child process. This queue must be valid for the length of the
-            life of the child process, until the parent has collected its status.
-          semaphore: The lock to hold while |task| runs.
-          task_args: A list of args to pass to the |task|.
-          task_kwargs: A dict of optional args to pass to the |task|.
+            task: The task (a functor) to run in the background.
+            queue: A queue to be used for managing communication between the
+                parent and child process. This queue must be valid for the
+                length of the life of the child process, until the parent has
+                collected its status.
+            semaphore: The lock to hold while |task| runs.
+            task_args: A list of args to pass to the |task|.
+            task_kwargs: A dict of optional args to pass to the |task|.
         """
         multiprocessing.Process.__init__(self)
         self._task = task
@@ -237,7 +240,7 @@ class _BackgroundTask(multiprocessing.Process):
         random issues causing the bot to die.
 
         Returns:
-          Stdout on success
+            Stdout on success
         """
         log_level = kwargs["debug_level"]
         try:
@@ -298,9 +301,9 @@ class _BackgroundTask(multiprocessing.Process):
         """Kill process with signal, ignoring if the process is dead.
 
         Args:
-          sig: Signal to send.
-          log_level: The log level of log messages.
-          first: Whether this is the first signal we've sent.
+            sig: Signal to send.
+            log_level: The log level of log messages.
+            first: Whether this is the first signal we've sent.
         """
         self._killing.set()
         self._WaitForStartup()
@@ -363,8 +366,8 @@ class _BackgroundTask(multiprocessing.Process):
             sys.stdout.flush()
             sys.stderr.flush()
 
-            # File position pointers are shared across processes, so we must open
-            # our own file descriptor to ensure output is not lost.
+            # File position pointers are shared across processes, so we must
+            # open our own file descriptor to ensure output is not lost.
             self._WaitForStartup()
             silent_death_time = time.time() + self.SILENT_TIMEOUT
             results = []
@@ -394,8 +397,8 @@ class _BackgroundTask(multiprocessing.Process):
                         pass
 
                     if not running:
-                        # Wait for the process to actually exit. If the child doesn't exit
-                        # in a timely fashion, kill it.
+                        # Wait for the process to actually exit. If the child
+                        # doesn't exit in a timely fashion, kill it.
                         self.join(self.EXIT_TIMEOUT)
                         if self.exitcode is None:
                             msg = "%r hung for %r seconds" % (
@@ -525,8 +528,8 @@ class _BackgroundTask(multiprocessing.Process):
         with open(self._output.name, "wb", 0) as output:
             # Back up sys.std{err,out}. These aren't used, but we keep a copy so
             # that they aren't garbage collected. We intentionally don't restore
-            # the old stdout and stderr at the end, because we want shutdown errors
-            # to also be sent to the same log file.
+            # the old stdout and stderr at the end, because we want shutdown
+            # errors to also be sent to the same log file.
             _orig_stdout, _orig_stderr = sys.stdout, sys.stderr
 
             # Replace std{out,err} with unbuffered file objects.
@@ -569,8 +572,8 @@ class _BackgroundTask(multiprocessing.Process):
         to exit.
 
         Args:
-          bg_tasks: A list filled with _BackgroundTask objects.
-          log_level: The log level of log messages.
+            bg_tasks: A list filled with _BackgroundTask objects.
+            log_level: The log level of log messages.
         """
         logging.log(log_level, "Killing tasks: %r", bg_tasks)
         siglist = (
@@ -612,20 +615,20 @@ class _BackgroundTask(multiprocessing.Process):
         This function launches the provided functions in the background, yields,
         and then waits for the functions to exit.
 
-        The output from the functions is saved to a temporary file and printed as if
-        they were run in sequence.
+        The output from the functions is saved to a temporary file and printed
+        as if they were run in sequence.
 
-        If exceptions occur in the steps, we join together the tracebacks and print
-        them after all parallel tasks have finished running. Further, a
+        If exceptions occur in the steps, we join together the tracebacks and
+        print them after all parallel tasks have finished running. Further, a
         BackgroundFailure is raised with full stack traces of all exceptions.
 
         Args:
-          steps: A list of functions to run.
-          max_parallel: The maximum number of simultaneous tasks to run in parallel.
-            By default, run all tasks in parallel.
-          halt_on_error: After the first exception occurs, halt any running steps,
-            and squelch any further output, including any exceptions that might
-            occur.
+            steps: A list of functions to run.
+            max_parallel: The maximum number of simultaneous tasks to run in
+                parallel. By default, run all tasks in parallel.
+            halt_on_error: After the first exception occurs, halt any running
+                steps, and squelch any further output, including any exceptions
+                that might occur.
         """
 
         semaphore = None
@@ -661,9 +664,11 @@ class _BackgroundTask(multiprocessing.Process):
                 if bg_tasks:
                     cls._KillChildren(bg_tasks, log_level=logging.DEBUG)
 
-                # Propagate any exceptions; foreground exceptions take precedence.
+                # Propagate any exceptions; foreground exceptions take
+                # precedence.
                 if foreground_except is not None:
-                    # contextlib ignores caught exceptions unless explicitly re-raised.
+                    # contextlib ignores caught exceptions unless explicitly
+                    # re-raised.
                     raise foreground_except[1].with_traceback(
                         foreground_except[2]
                     )
@@ -679,12 +684,12 @@ class _BackgroundTask(multiprocessing.Process):
         BackgroundFailure once we've finished processing the items in the queue.
 
         Args:
-          queue: A queue of tasks to run. Add tasks to this queue, and they will
-            be run.
-          task: Function to run on each queued input.
-          onexit: Function to run after all inputs are processed.
-          task_args: A list of args to pass to the |task|.
-          task_kwargs: A dict of optional args to pass to the |task|.
+            queue: A queue of tasks to run. Add tasks to this queue, and they
+                will be run.
+            task: Function to run on each queued input.
+            onexit: Function to run after all inputs are processed.
+            task_args: A list of args to pass to the |task|.
+            task_kwargs: A dict of optional args to pass to the |task|.
         """
         if task_args is None:
             task_args = []
@@ -695,8 +700,8 @@ class _BackgroundTask(multiprocessing.Process):
 
         errors = []
         while True:
-            # Wait for a new item to show up on the queue. This is a blocking wait,
-            # so if there's nothing to do, we just sit here.
+            # Wait for a new item to show up on the queue. This is a blocking
+            # wait, so if there's nothing to do, we just sit here.
             x = queue.get()
             if isinstance(x, _AllTasksComplete):
                 # All tasks are complete, so we should exit.
@@ -741,26 +746,27 @@ def RunParallelSteps(
     BackgroundFailure is raised with full stack traces of all exceptions.
 
     Examples:
-      # This snippet will execute in parallel:
-      #   somefunc()
-      #   anotherfunc()
-      #   funcfunc()
-      steps = [somefunc, anotherfunc, funcfunc]
-      RunParallelSteps(steps)
-      # Blocks until all calls have completed.
+        # This snippet will execute in parallel:
+        #   somefunc()
+        #   anotherfunc()
+        #   funcfunc()
+        steps = [somefunc, anotherfunc, funcfunc]
+        RunParallelSteps(steps)
+        # Blocks until all calls have completed.
 
     Args:
-      steps: A list of functions to run.
-      max_parallel: The maximum number of simultaneous tasks to run in parallel.
-        By default, run all tasks in parallel.
-      halt_on_error: After the first exception occurs, halt any running steps,
-        and squelch any further output, including any exceptions that might occur.
-      return_values: If set to True, RunParallelSteps returns a list containing
-        the return values of the steps.  Defaults to False.
+        steps: A list of functions to run.
+        max_parallel: The maximum number of simultaneous tasks to run in
+            parallel. By default, run all tasks in parallel.
+        halt_on_error: After the first exception occurs, halt any running steps,
+            and squelch any further output, including any exceptions that might
+            occur.
+        return_values: If set to True, RunParallelSteps returns a list
+            containing the return values of the steps.  Defaults to False.
 
     Returns:
-      If |return_values| is True, the function will return a list containing the
-      return values of the steps.
+        If |return_values| is True, the function will return a list containing
+        the return values of the steps.
     """
 
     def ReturnWrapper(queue, fn):
@@ -771,12 +777,12 @@ def RunParallelSteps(
     queues = []
     with contextlib.ExitStack() as stack:
         if return_values:
-            # We use a managed queue here, because the child process will wait for the
-            # queue(pipe) to be flushed (i.e., when items are read from the queue)
-            # before exiting, and with a regular queue this may result in hangs for
-            # large return values.  But with a managed queue, the manager process will
-            # read the items and hold on to them until the managed queue goes out of
-            # scope and is cleaned up.
+            # We use a managed queue here, because the child process will wait
+            # for the queue(pipe) to be flushed (i.e., when items are read from
+            # the queue) before exiting, and with a regular queue this may
+            # result in hangs for large return values.  But with a managed
+            # queue, the manager process will read the items and hold on to them
+            # until the managed queue goes out of scope and is cleaned up.
             manager = stack.enter_context(Manager())
             for step in steps:
                 queue = manager.Queue()
@@ -816,29 +822,29 @@ def BackgroundTaskRunner(task, *args, **kwargs):
     BackgroundFailure is raised with full stack traces of all exceptions.
 
     Examples:
-      # This will run somefunc(1, 'small', 'cow', foo='bar') in the background
-      # as soon as data is added to the queue (i.e. queue.put() is called).
+        # This will run somefunc(1, 'small', 'cow', foo='bar') in the background
+        # as soon as data is added to the queue (i.e. queue.put() is called).
 
-      def somefunc(arg1, arg2, arg3, foo=None):
-        ...
+        def somefunc(arg1, arg2, arg3, foo=None):
+            ...
 
-      with BackgroundTaskRunner(somefunc, 1, foo='bar') as queue:
-        ... do random stuff ...
-        queue.put(['small', 'cow'])
-        ... do more random stuff while somefunc() runs ...
-      # Exiting the with statement will block until all calls have completed.
+        with BackgroundTaskRunner(somefunc, 1, foo='bar') as queue:
+            ... do random stuff ...
+            queue.put(['small', 'cow'])
+            ... do more random stuff while somefunc() runs ...
+        # Exiting the with statement will block until all calls have completed.
 
     Args:
-      task: Function to run on each queued input.
-      queue: A queue of tasks to run. Add tasks to this queue, and they will
-        be run in the background.  If None, one will be created on the fly.
-      processes: Number of processes to launch.
-      onexit: Function to run in each background process after all inputs are
-        processed.
-      halt_on_error: After the first exception occurs, halt any running steps, and
-        squelch any further output, including any exceptions that might occur.
-        Halts on exceptions in any of the background processes, or in the
-        foreground process using the BackgroundTaskRunner.
+        task: Function to run on each queued input.
+        queue: A queue of tasks to run. Add tasks to this queue, and they will
+            be run in the background.  If None, one will be created on the fly.
+        processes: Number of processes to launch.
+        onexit: Function to run in each background process after all inputs are
+            processed.
+        halt_on_error: After the first exception occurs, halt any running steps,
+            and squelch any further output, including any exceptions that might
+            occur. Halts on exceptions in any of the background processes, or in
+            the foreground process using the BackgroundTaskRunner.
     """
 
     queue = kwargs.pop("queue", None)
@@ -872,7 +878,7 @@ def BackgroundTaskRunner(task, *args, **kwargs):
 
 
 def RunTasksInProcessPool(task, inputs, processes=None, onexit=None):
-    """Run the specified function with each supplied input in a pool of processes.
+    """Run |task| with each supplied input in a pool of processes.
 
     This function runs task(*x) for x in inputs in a pool of processes. This
     function blocks until all tasks are completed.
@@ -886,33 +892,33 @@ def RunTasksInProcessPool(task, inputs, processes=None, onexit=None):
     BackgroundFailure is raised with full stack traces of all exceptions.
 
     Examples:
-      # This snippet will execute in parallel:
-      #   somefunc('hi', 'fat', 'code')
-      #   somefunc('foo', 'bar', 'cow')
+        # This snippet will execute in parallel:
+        #   somefunc('hi', 'fat', 'code')
+        #   somefunc('foo', 'bar', 'cow')
 
-      def somefunc(arg1, arg2, arg3):
+        def somefunc(arg1, arg2, arg3):
+            ...
         ...
-      ...
-      inputs = [
-        ['hi', 'fat', 'code'],
-        ['foo', 'bar', 'cow'],
-      ]
-      RunTasksInProcessPool(somefunc, inputs)
-      # Blocks until all calls have completed.
+        inputs = [
+            ['hi', 'fat', 'code'],
+            ['foo', 'bar', 'cow'],
+        ]
+        RunTasksInProcessPool(somefunc, inputs)
+        # Blocks until all calls have completed.
 
     Args:
-      task: Function to run on each input.
-      inputs: List of inputs.
-      processes: Number of processes, at most, to launch.
-      onexit: Function to run in each background process after all inputs are
-        processed.
+        task: Function to run on each input.
+        inputs: List of inputs.
+        processes: Number of processes, at most, to launch.
+        onexit: Function to run in each background process after all inputs are
+            processed.
 
     Returns:
-      Returns a list containing the return values of the task for each input.
+        Returns a list containing the return values of the task for each input.
     """
     if not processes:
-        # - Use >=16 processes by default, in case it's a network-bound operation.
-        # - Try to use all of the CPUs, in case it's a CPU-bound operation.
+        # Use >=16 processes by default, in case it's a network-bound operation.
+        # Try to use all the CPUs, in case it's a CPU-bound operation.
         processes = min(max(16, multiprocessing.cpu_count()), len(inputs))
 
     with Manager() as manager:
@@ -920,7 +926,7 @@ def RunTasksInProcessPool(task, inputs, processes=None, onexit=None):
         out_queue = manager.Queue()
         fn = lambda idx, task_args: out_queue.put((idx, task(*task_args)))
 
-        # Micro-optimization: Setup the queue so that BackgroundTaskRunner
+        # Micro-optimization: Set up the queue so that BackgroundTaskRunner
         # doesn't have to set up another Manager process.
         queue = manager.Queue()
 
@@ -941,9 +947,9 @@ def ExitWithParent(sig=signal.SIGHUP):
     Note: this uses libc, so it only works on linux.
 
     Args:
-      sig: Signal to recieve. Defaults to SIGHUP.
+        sig: Signal to receive. Defaults to SIGHUP.
 
     Returns:
-      Whether we were successful in setting the deathsignal flag
+        Whether we were successful in setting the deathsignal flag
     """
     return prctl.prctl(prctl.Option.SET_PDEATHSIG, sig) is not None

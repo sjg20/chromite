@@ -48,7 +48,7 @@ def FindRepoDir(path):
     """Returns the nearest higher-level repo dir from the specified path.
 
     Args:
-      path: The path to use. Defaults to cwd.
+        path: The path to use. Defaults to cwd.
     """
     return osutils.FindInPathParents(".repo", path, test_func=os.path.isdir)
 
@@ -66,9 +66,9 @@ def IsSubmoduleCheckoutRoot(path, remote, url):
     """Tests to see if a directory is the root of a git submodule checkout.
 
     Args:
-      path: The directory to test.
-      remote: The remote to compare the |url| with.
-      url: The exact URL the |remote| needs to be pointed at.
+        path: The directory to test.
+        remote: The remote to compare the |url| with.
+        url: The exact URL the |remote| needs to be pointed at.
     """
     if os.path.isdir(path):
         remote_url = cros_build_lib.run(
@@ -87,10 +87,10 @@ def GetGitGitdir(pwd):
     """Probes for a git gitdir directory rooted at a directory.
 
     Args:
-      pwd: Directory to probe. If a checkout, should be the root.
+        pwd: Directory to probe. If a checkout, should be the root.
 
     Returns:
-      Path of the gitdir directory. None if the directory is not a git repo.
+        Path of the gitdir directory. None if the directory is not a git repo.
     """
     dotgit = os.path.join(pwd, ".git")
 
@@ -116,10 +116,10 @@ def IsGitRepositoryCorrupted(cwd):
     """Verify that the specified git repository is not corrupted.
 
     Args:
-      cwd: The git repository to verify.
+        cwd: The git repository to verify.
 
     Returns:
-      True if the repository is corrupted.
+        True if the repository is corrupted.
     """
     cmd = ["fsck", "--no-progress", "--no-dangling"]
     try:
@@ -160,12 +160,12 @@ def GetGitRepoRevision(cwd, branch="HEAD", short=False):
     """Find the revision of a branch.
 
     Args:
-      cwd: The git repository to work with.
-      branch: Branch name. Defaults to current branch.
-      short: If set, output shorter unique SHA-1.
+        cwd: The git repository to work with.
+        branch: Branch name. Defaults to current branch.
+        short: If set, output shorter unique SHA-1.
 
     Returns:
-      Revision SHA-1.
+        Revision SHA-1.
     """
     cmd = ["rev-parse", branch]
     if short:
@@ -177,15 +177,16 @@ def IsReachable(cwd, to_ref, from_ref):
     """Determine whether one commit ref is reachable from another.
 
     Args:
-      cwd: The git repository to work with.
-      to_ref: The commit ref that may be reachable.
-      from_ref: The commit ref that |to_ref| may be reachable from.
+        cwd: The git repository to work with.
+        to_ref: The commit ref that may be reachable.
+        from_ref: The commit ref that |to_ref| may be reachable from.
 
     Returns:
-      True if |to_ref| is reachable from |from_ref|.
+        True if |to_ref| is reachable from |from_ref|.
 
     Raises:
-      RunCommandError: if some error occurs, such as a commit ref not existing.
+        RunCommandError: if some error occurs, such as a commit ref not
+            existing.
     """
     try:
         RunGit(cwd, ["merge-base", "--is-ancestor", to_ref, from_ref])
@@ -200,11 +201,11 @@ def DoesCommitExistInRepo(cwd, commit):
     """Determine whether a commit (SHA1 or ref) exists in a repo.
 
     Args:
-      cwd: A directory within the project repo.
-      commit: The commit to look for. This can be a SHA1 or it can be a ref.
+        cwd: A directory within the project repo.
+        commit: The commit to look for. This can be a SHA1, or it can be a ref.
 
     Returns:
-      True if the commit exists in the repo.
+        True if the commit exists in the repo.
     """
     try:
         RunGit(cwd, ["rev-list", "-n1", commit, "--"])
@@ -216,7 +217,7 @@ def DoesCommitExistInRepo(cwd, commit):
 
 
 def GetCurrentBranchOrId(cwd):
-    """Returns current branch of a repo, commit ID if repo is on detached HEAD."""
+    """Returns the current branch, or commit ID if repo is on detached HEAD."""
     return (
         GetCurrentBranch(cwd)
         or RunGit(cwd, ["rev-parse", "HEAD"]).stdout.strip()
@@ -224,7 +225,7 @@ def GetCurrentBranchOrId(cwd):
 
 
 def GetCurrentBranch(cwd):
-    """Returns current branch of a repo, and None if repo is on detached HEAD."""
+    """Returns the current branch, or None if repo is on detached HEAD."""
     try:
         ret = RunGit(cwd, ["symbolic-ref", "-q", "HEAD"])
         return StripRefsHeads(ret.stdout.strip(), False)
@@ -277,7 +278,8 @@ class ProjectCheckout(dict):
         """Constructor.
 
         Args:
-          attrs: The attributes associated with this checkout, as a dictionary.
+            attrs: The attributes associated with this checkout, as a
+                dictionary.
         """
         dict.__init__(self, attrs)
 
@@ -291,8 +293,8 @@ class ProjectCheckout(dict):
         """Get the path to the checkout.
 
         Args:
-          absolute: If True, return an absolute path. If False,
-            return a path relative to the repo root.
+            absolute: If True, return an absolute path. If False, return a path
+                relative to the repo root.
         """
         return self["local_path"] if absolute else self["path"]
 
@@ -301,21 +303,19 @@ class Manifest(object):
     """SAX handler that parses the manifest document.
 
     Attributes:
-      checkouts_by_name: A dictionary mapping the names for <project> tags to a
-        list of ProjectCheckout objects.
-      checkouts_by_path: A dictionary mapping paths for <project> tags to a single
-        ProjectCheckout object.
-      default: The attributes of the <default> tag.
-      includes: A list of XML files that should be pulled in to the manifest.
-        These includes are represented as a list of (name, path) tuples.
-      manifest_include_dir: If given, this is where to start looking for
-        include targets.
-      projects: DEPRECATED. A dictionary mapping the names for <project> tags to
-        a single ProjectCheckout object. This is now deprecated, since each
-        project can map to multiple ProjectCheckout objects.
-      remotes: A dictionary mapping <remote> tags to the associated attributes.
-      revision: The revision of the manifest repository. If not specified, this
-        will be TOT.
+        checkouts_by_name: A dictionary mapping the names for <project> tags to
+            a list of ProjectCheckout objects.
+        checkouts_by_path: A dictionary mapping paths for <project> tags to a
+            single ProjectCheckout object.
+        default: The attributes of the <default> tag.
+        includes: A list of XML files that should be pulled in to the manifest.
+            These includes are represented as a list of (name, path) tuples.
+        manifest_include_dir: If given, this is where to start looking for
+            include targets.
+        remotes: A dictionary mapping <remote> tags to the associated
+            attributes.
+        revision: The revision of the manifest repository. If not specified,
+            this will be TOT.
     """
 
     _instance_cache = {}
@@ -324,9 +324,9 @@ class Manifest(object):
         """Initialize this instance.
 
         Args:
-          source: The path to the manifest to parse.  May be a file handle.
-          manifest_include_dir: If given, this is where to start looking for
-            include targets.
+            source: The path to the manifest to parse.  May be a file handle.
+            manifest_include_dir: If given, this is where to start looking for
+                include targets.
         """
         self.source = source
         self.default = {}
@@ -399,12 +399,15 @@ class Manifest(object):
                     "No manifest_include_dir given, but an include was "
                     "encountered; attrs=%r" % (attrs,),
                 )
-            # Include is calculated relative to the manifest that has the include;
-            # thus set the path temporarily to the dirname of the target.
+            # Include is calculated relative to the manifest that has the
+            # include; thus set the path temporarily to the dirname of the
+            # target.
             original_include_dir = self.manifest_include_dir
             include_path = os.path.realpath(
                 os.path.join(original_include_dir, attrs["name"])
             )
+            # TODO: self.includes is cast to a tuple in __init__, so this
+            #  doesn't work. Is this never called?
             self.includes.append((attrs["name"], include_path))
             self._RunParser(include_path, finalize=False)
 
@@ -432,7 +435,7 @@ class Manifest(object):
         """Sets up useful properties for a project.
 
         Args:
-          attrs: The attribute dictionary of a <project> tag.
+            attrs: The attribute dictionary of a <project> tag.
         """
         for key in ("remote", "revision"):
             attrs.setdefault(key, self.default.get(key))
@@ -445,20 +448,22 @@ class Manifest(object):
         )
         remote_name = attrs["remote_alias"] = self.remotes[remote]["alias"]
 
-        # 'repo manifest -r' adds an 'upstream' attribute to the project tag for the
-        # manifests it generates.  We can use the attribute to get a valid branch
-        # instead of a sha1 for these types of manifests.
+        # 'repo manifest -r' adds an 'upstream' attribute to the project tag for
+        # the manifests it generates.  We can use the attribute to get a valid
+        # branch instead of a sha1 for these types of manifests.
         upstream = attrs.get("upstream", attrs["revision"])
         if IsSHA1(upstream):
-            # The current version of repo we use has a bug: When you create a new
-            # repo checkout from a revlocked manifest, the 'upstream' attribute will
-            # just point at a SHA1. The default revision will still be correct,
-            # however. For now, return the default revision as our best guess as to
-            # what the upstream branch for this repository would be. This guess may
-            # sometimes be wrong, but it's correct for all of the repositories where
-            # we need to push changes (e.g., the overlays).
-            # TODO(davidjames): Either fix the repo bug, or update our logic here to
-            # check the manifest repository to find the right tracking branch.
+            # The current version of repo we use has a bug: When you create a
+            # new repo checkout from a revlocked manifest, the 'upstream'
+            # attribute will just point at a SHA1. The default revision will
+            # still be correct, however. For now, return the default revision as
+            # our best guess as to what the upstream branch for this repository
+            # would be. This guess may sometimes be wrong, but it's correct for
+            # all of the repositories where we need to push changes (e.g., the
+            # overlays).
+            # TODO(davidjames): Either fix the repo bug, or update our logic
+            #   here to check the manifest repository to find the right tracking
+            #   branch.
             upstream = self.default.get("revision", "refs/heads/master")
 
         attrs["tracking_branch"] = "refs/remotes/%s/%s" % (
@@ -543,23 +548,24 @@ class ManifestCheckout(Manifest):
         """Initialize this instance.
 
         Args:
-          path: Path into a manifest checkout (doesn't have to be the root).
-          manifest_path: If supplied, the manifest to use.  Else the manifest
-            in the root of the checkout is used.  May be a seekable file handle.
-          search: If True, the path can point into the repo, and the root will
-            be found automatically.  If False, the path *must* be the root, else
-            an OSError ENOENT will be thrown.
+            path: Path into a manifest checkout (doesn't have to be the root).
+            manifest_path: If supplied, the manifest to use.  Else the manifest
+                in the root of the checkout is used.  May be a seekable file
+                handle.
+            search: If True, the path can point into the repo, and the root will
+                be found automatically.  If False, the path *must* be the root,
+                else an OSError ENOENT will be thrown.
 
         Raises:
-          OSError: if a failure occurs.
+            OSError: if a failure occurs.
         """
         self.root, manifest_path = self._NormalizeArgs(
             path, manifest_path, search=search
         )
 
         self.manifest_path = os.path.realpath(manifest_path)
-        # The include dir is always the manifest repo, not where the manifest file
-        # happens to live.
+        # The include dir is always the manifest repo, not where the manifest
+        # file happens to live.
         manifest_include_dir = os.path.join(self.root, ".repo", "manifests")
         self.manifest_branch = self._GetManifestsBranch(self.root)
         self._content_merging = {}
@@ -588,11 +594,11 @@ class ManifestCheckout(Manifest):
         """Returns the list of checkouts for a given |project|/|branch|.
 
         Args:
-          project: Project name to search for.
-          branch: Branch to use.
+            project: Project name to search for.
+            branch: Branch to use.
 
         Returns:
-          A list of ProjectCheckout objects.
+            A list of ProjectCheckout objects.
         """
         checkouts = []
         for checkout in self.checkouts_by_name.get(project, []):
@@ -607,16 +613,16 @@ class ManifestCheckout(Manifest):
         """Returns the checkout associated with a given project/branch.
 
         Args:
-          project: The project to look for.
-          branch: The branch that the project is tracking.
-          strict: Raise AssertionError if a checkout cannot be found.
+            project: The project to look for.
+            branch: The branch that the project is tracking.
+            strict: Raise AssertionError if a checkout cannot be found.
 
         Returns:
-          A ProjectCheckout object.
+            A ProjectCheckout object.
 
         Raises:
-          AssertionError if there is more than one checkout associated with the
-          given project/branch combination.
+            AssertionError: if there is more than one checkout associated with
+                the given project/branch combination.
         """
         checkouts = self.FindCheckouts(project, branch)
         if len(checkouts) < 1:
@@ -633,7 +639,7 @@ class ManifestCheckout(Manifest):
         """List the checkouts in the manifest.
 
         Returns:
-          A list of ProjectCheckout objects.
+            A list of ProjectCheckout objects.
         """
         return list(self.checkouts_by_path.values())
 
@@ -646,11 +652,11 @@ class ManifestCheckout(Manifest):
         checkout, return None.
 
         Args:
-          path: Path to examine.
-          strict: If True, fail when no checkout is found.
+            path: Path to examine.
+            strict: If True, fail when no checkout is found.
 
         Returns:
-          None if no checkout is found, else the checkout.
+            None if no checkout is found, else the checkout.
         """
         # Realpath everything sans the target to keep people happy about
         # how symlinks are handled; exempt the final node since following
@@ -691,12 +697,12 @@ class ManifestCheckout(Manifest):
         """Get the tracking branch of the manifest repository.
 
         Returns:
-          The branch name.
+            The branch name.
         """
-        # Suppress the normal "if it ain't refs/heads, we don't want none o' that"
-        # check for the merge target; repo writes the ambiguous form of the branch
-        # target for `repo init -u url -b some-branch` usages (aka, 'main'
-        # instead of 'refs/heads/main').
+        # Suppress the normal "if it ain't refs/heads, we don't want none o'
+        # that" check for the merge target; repo writes the ambiguous form of
+        # the branch target for `repo init -u url -b some-branch` usages (aka,
+        # 'main' instead of 'refs/heads/main').
         path = os.path.join(root, ".repo", "manifests")
         current_branch = GetCurrentBranch(path)
         if current_branch != "default":
@@ -735,12 +741,13 @@ class ManifestCheckout(Manifest):
         """Return an instance, reusing an existing one if possible.
 
         Args:
-          path: The pathway into a checkout; the root will be found automatically.
-          manifest_path: if given, the manifest.xml to use instead of the
-            checkouts internal manifest.  Use with care.
-          search: If True, the path can point into the repo, and the root will
-            be found automatically.  If False, the path *must* be the root, else
-            an OSError ENOENT will be thrown.
+            path: The pathway into a checkout; the root will be found
+                automatically.
+            manifest_path: if given, the manifest.xml to use instead of the
+                checkouts internal manifest.  Use with care.
+            search: If True, the path can point into the repo, and the root will
+                be found automatically.  If False, the path *must* be the root,
+                else an OSError ENOENT will be thrown.
         """
         root, manifest_path = cls._NormalizeArgs(
             path, manifest_path, search=search
@@ -773,15 +780,15 @@ def RunGit(
     and being able to throw useful errors for it).
 
     Args:
-      git_repo: Pathway to the git repo to operate on.  If None, the cwd is
-          used.
-      cmd: A sequence of the git subcommand to run.  The 'git' prefix is
-        added automatically.  If you wished to run 'git remote update',
-        this would be ['remote', 'update'] for example.
-      kwargs: Any run or GenericRetry options/overrides to use.
+        git_repo: Pathway to the git repo to operate on.  If None, the cwd is
+            used.
+        cmd: A sequence of the git subcommand to run.  The 'git' prefix is added
+            automatically.  If you wished to run 'git remote update', this would
+            be ['remote', 'update'] for example.
+        kwargs: Any run or GenericRetry options/overrides to use.
 
     Returns:
-      A CompletedProcess object.
+        A CompletedProcess object.
     """
     kwargs.setdefault("print_cmd", False)
     kwargs.setdefault("cwd", git_repo)
@@ -796,9 +803,9 @@ def Init(git_repo, branch="main"):
     """Create a new git repository, in the given location.
 
     Args:
-      git_repo: Path for where to create a git repo. Directory will be created if
-                it doesnt exist.
-      branch: The initial branch name.
+        git_repo: Path for where to create a git repo. Directory will be created
+            if it doesnt exist.
+        branch: The initial branch name.
     """
     osutils.SafeMakedirs(git_repo)
     RunGit(git_repo, ["init", "-b", branch])
@@ -815,14 +822,15 @@ def Clone(
     """Clone a git repository, into the given directory.
 
     Args:
-      dest_path: Path to clone into. Will be created if it doesn't exist.
-      git_url: Git URL to clone from.
-      reference: Path to a git repositry to reference in the clone. See
-        documentation for `git clone --reference`.
-      depth: Create a shallow clone with the given history depth. Cannot be used
-        with 'reference'.
-      branch: Branch to use for the initial HEAD. Defaults to the remote's HEAD.
-      single_branch: Clone only the requested branch.
+        dest_path: Path to clone into. Will be created if it doesn't exist.
+        git_url: Git URL to clone from.
+        reference: Path to a git repository to reference in the clone. See
+            documentation for `git clone --reference`.
+        depth: Create a shallow clone with the given history depth. Cannot be
+            used with |reference|.
+        branch: Branch to use for the initial HEAD. Defaults to the remote's
+            HEAD.
+        single_branch: Clone only the requested branch.
     """
     if reference and depth:
         raise ValueError("reference and depth are mutually exclusive")
@@ -843,9 +851,9 @@ def ShallowFetch(git_repo, git_url, sparse_checkout=None):
     """Fetch a shallow git repository.
 
     Args:
-      git_repo: Path of the git repo.
-      git_url: Url to fetch the git repository from.
-      sparse_checkout: List of file paths to fetch.
+        git_repo: Path of the git repo.
+        git_url: Url to fetch the git repository from.
+        sparse_checkout: List of file paths to fetch.
     """
     Init(git_repo)
     RunGit(git_repo, ["remote", "add", "origin", git_url])
@@ -899,12 +907,12 @@ def MatchBranchName(git_repo, pattern, namespace=""):
     """Return branches who match the specified regular expression.
 
     Args:
-      git_repo: The git repository to operate upon.
-      pattern: The regexp to search with.
-      namespace: The namespace to restrict search to (e.g. 'refs/heads/').
+        git_repo: The git repository to operate upon.
+        pattern: The regexp to search with.
+        namespace: The namespace to restrict search to (e.g. 'refs/heads/').
 
     Returns:
-      List of matching branch names (with |namespace| trimmed).
+        List of matching branch names (with |namespace| trimmed).
     """
     output = RunGit(git_repo, ["ls-remote", git_repo, namespace + "*"]).stdout
     branches = [x.split()[1] for x in output.splitlines()]
@@ -931,13 +939,13 @@ def MatchSingleBranchName(*args, **kwargs):
     """Match exactly one branch name, else throw an exception.
 
     Args:
-      See MatchBranchName for more details; all args are passed on.
+        See MatchBranchName for more details; all args are passed on.
 
     Returns:
-      The branch name.
+        The branch name.
 
     Raises:
-      raise AmbiguousBranchName if we did not match exactly one branch.
+        raise AmbiguousBranchName if we did not match exactly one branch.
     """
     ret = MatchBranchName(*args, **kwargs)
     if len(ret) != 1:
@@ -955,25 +963,25 @@ def GetTrackingBranchViaGitConfig(
     """Pull the remote and upstream branch of a local branch
 
     Args:
-      git_repo: The git repository to operate upon.
-      branch: The branch to inspect.
-      for_checkout: Whether to return localized refspecs, or the remote's
-        view of it.
-      allow_broken_merge_settings: Repo in a couple of spots writes invalid
-        branch.mybranch.merge settings; if these are encountered, they're
-        normally treated as an error and this function returns None.  If
-        this option is set to True, it suppresses this check.
-      recurse: If given and the target is local, then recurse through any
-        remote=. (aka locals).  This is enabled by default, and is what allows
-        developers to have multiple local branches of development dependent
-        on one another; disabling this makes that work flow impossible,
-        thus disable it only with good reason.  The value given controls how
-        deeply to recurse.  Defaults to tracing through 10 levels of local
-        remotes. Disabling it is a matter of passing 0.
+        git_repo: The git repository to operate upon.
+        branch: The branch to inspect.
+        for_checkout: Whether to return localized refspecs, or the remote's
+            view of it.
+        allow_broken_merge_settings: Repo in a couple of spots writes invalid
+            branch.mybranch.merge settings; if these are encountered, they're
+            normally treated as an error and this function returns None.  If
+            this option is set to True, it suppresses this check.
+        recurse: If given and the target is local, then recurse through any
+            remote=. (aka locals).  This is enabled by default, and is what
+            allows developers to have multiple local branches of development
+            dependent on one another; disabling this makes that work flow
+            impossible, thus disable it only with good reason.  The value given
+            controls how deeply to recurse.  Defaults to tracing through 10
+            levels of local remotes. Disabling it is a matter of passing 0.
 
     Returns:
-      A RemoteRef, or None.  If for_checkout, then it returns the localized
-      version of it.
+        A RemoteRef, or None.  If for_checkout, then it returns the localized
+        version of it.
     """
     try:
         cmd = [
@@ -993,8 +1001,8 @@ def GetTrackingBranchViaGitConfig(
                 # There isn't anything we can do here.
                 return None
             elif "remote" not in vals:
-                # Repo v1.9.4 and up occasionally invalidly leave the remote out.
-                # Only occurs for the manifest repo fortunately.
+                # Repo v1.9.4 and up occasionally invalidly leave the remote
+                # out. Only occurs for the manifest repo, fortunately.
                 vals["remote"] = "origin"
         remote, rev = vals["remote"], vals["merge"]
         # Suppress non branches; repo likes to write revisions and tags here,
@@ -1014,8 +1022,8 @@ def GetTrackingBranchViaGitConfig(
         elif remote == ".":
             if recurse == 0:
                 raise Exception(
-                    "While tracing out tracking branches, we recursed too deeply: "
-                    "bailing at %s" % branch
+                    "While tracing out tracking branches, we recursed too "
+                    "deeply: bailing at %s" % branch
                 )
             return GetTrackingBranchViaGitConfig(
                 git_repo,
@@ -1040,18 +1048,18 @@ def GetTrackingBranchViaManifest(
     """Gets the appropriate push branch via the manifest if possible.
 
     Args:
-      git_repo: The git repo to operate upon.
-      for_checkout: Whether to return localized refspecs, or the remote's
-        view of it.  Note that depending on the remote, the remote may differ
-        if for_push is True or set to False.
-      for_push: Controls whether the remote and refspec returned is explicitly
-        for pushing.
-      manifest: A Manifest instance if one is available, else a
-        ManifestCheckout is created and used.
+        git_repo: The git repo to operate upon.
+        for_checkout: Whether to return localized refspecs, or the remote's
+            view of it.  Note that depending on the remote, the remote may
+            differ if for_push is True or set to False.
+        for_push: Controls whether the remote and refspec returned is explicitly
+            for pushing.
+        manifest: A Manifest instance if one is available, else a
+            ManifestCheckout is created and used.
 
     Returns:
-      A RemoteRef, or None.  If for_checkout, then it returns the localized
-      version of it.
+        A RemoteRef, or None.  If for_checkout, then it returns the localized
+        version of it.
     """
     try:
         if manifest is None:
@@ -1105,22 +1113,22 @@ def GetTrackingBranch(
         depending on fallback.
 
     Args:
-      git_repo: Git repository to operate upon.
-      branch: Find the tracking branch for this branch.  Defaults to the
-        current branch for |git_repo|.
-      for_checkout: Whether to return localized refspecs, or the remotes
-        view of it.
-      fallback: If true and no remote/branch could be discerned, return
-        'origin', 'main'.  If False, you get None.
-        Note that depending on the remote, the remote may differ
-        if for_push is True or set to False.
-      for_push: Controls whether the remote and refspec returned is explicitly
-        for pushing.
-      manifest: A Manifest instance if one is available, else a
-        ManifestCheckout is created and used.
+        git_repo: Git repository to operate upon.
+        branch: Find the tracking branch for this branch.  Defaults to the
+            current branch for |git_repo|.
+        for_checkout: Whether to return localized refspecs, or the remotes
+            view of it.
+        fallback: If true and no remote/branch could be discerned, return
+            'origin', 'main'.  If False, you get None. Note that depending on
+            the remote, the remote may differ if for_push is True or set to
+            False.
+        for_push: Controls whether the remote and refspec returned is explicitly
+            for pushing.
+        manifest: A Manifest instance if one is available, else a
+            ManifestCheckout is created and used.
 
     Returns:
-      A RemoteRef, or None.
+        A RemoteRef, or None.
     """
     result = GetTrackingBranchViaManifest(
         git_repo,
@@ -1154,10 +1162,10 @@ def CreateBranch(git_repo, branch, branch_point="HEAD", track=False):
     """Create a branch.
 
     Args:
-      git_repo: Git repository to act on.
-      branch: Name of the branch to create.
-      branch_point: The ref to branch from.  Defaults to 'HEAD'.
-      track: Whether to setup the branch to track its starting ref.
+        git_repo: Git repository to act on.
+        branch: Name of the branch to create.
+        branch_point: The ref to branch from.  Defaults to 'HEAD'.
+        track: Whether to set up the branch to track its starting ref.
     """
     cmd = ["checkout", "-B", branch, branch_point]
     if track:
@@ -1169,7 +1177,7 @@ def AddPath(path):
     """Use 'git add' on a path.
 
     Args:
-      path: Path to the git repository and the path to add.
+        path: Path to the git repository and the path to add.
     """
     dirname, filename = os.path.split(path)
     RunGit(dirname, ["add", "--", filename])
@@ -1179,7 +1187,7 @@ def RmPath(path):
     """Use 'git rm' on a file.
 
     Args:
-      path: Path to the git repository and the path to rm.
+        path: Path to the git repository and the path to rm.
     """
     dirname, filename = os.path.split(path)
     RunGit(dirname, ["rm", "--", filename])
@@ -1192,13 +1200,13 @@ def GetObjectAtRev(git_repo, obj, rev, binary=False):
     instance, without modifying the working directory.
 
     Args:
-      git_repo: Path to a directory in the git repository to query.
-      obj: The name of the object to read.
-      rev: The revision to retrieve.
-      binary: If true, return bytes instead of decoding as a UTF-8 string.
+        git_repo: Path to a directory in the git repository to query.
+        obj: The name of the object to read.
+        rev: The revision to retrieve.
+        binary: If true, return bytes instead of decoding as a UTF-8 string.
 
     Returns:
-      The content of the object.
+        The content of the object.
     """
     rev_obj = "%s:%s" % (rev, obj)
     encoding = None if binary else "utf-8"
@@ -1209,9 +1217,9 @@ def RevertPath(git_repo, filename, rev):
     """Revert a single file back to a particular revision and 'add' it with git.
 
     Args:
-      git_repo: Path to the directory holding the file.
-      filename: Name of the file to revert.
-      rev: Revision to revert the file to.
+        git_repo: Path to the directory holding the file.
+        filename: Name of the file to revert.
+        rev: Revision to revert the file to.
     """
     RunGit(git_repo, ["checkout", rev, "--", filename])
 
@@ -1236,19 +1244,19 @@ def Log(
     For more detailed description of the parameters, run `git help log`.
 
     Args:
-      git_repo: Path to a directory in the git repository.
-      format: Passed directly to the --format flag.
-      after: Passed directly to --after flag.
-      until: Passed directly to --until flag.
-      reverse: If true, set --reverse flag.
-      date: Passed directly to --date flag.
-      max_count: Passed directly to --max-count flag.
-      grep: Passed directly to --grep flag.
-      rev: Commit (or revision range) to log.
-      paths: List of paths to log commits for (enumerated after final -- ).
+        git_repo: Path to a directory in the git repository.
+        format: Passed directly to the --format flag.
+        after: Passed directly to --after flag.
+        until: Passed directly to --until flag.
+        reverse: If true, set --reverse flag.
+        date: Passed directly to --date flag.
+        max_count: Passed directly to --max-count flag.
+        grep: Passed directly to --grep flag.
+        rev: Commit (or revision range) to log.
+        paths: List of paths to log commits for (enumerated after final -- ).
 
     Returns:
-      The raw log output as a string.
+        The raw log output as a string.
     """
     cmd = ["log"]
     if format:
@@ -1360,11 +1368,11 @@ def GetChangeId(git_repo, rev="HEAD"):
     """Retrieve the Change-Id from the commit message
 
     Args:
-      git_repo: Path to the git repository where the commit is
-      rev: Commit to inspect, defaults to HEAD
+        git_repo: Path to the git repository where the commit is.
+        rev: Commit to inspect, defaults to HEAD.
 
     Returns:
-      The Gerrit Change-Id assigned to the commit if it exists.
+        The Gerrit Change-Id assigned to the commit if it exists.
     """
     log = Log(git_repo, max_count=1, format="format:%B", rev=rev)
     m = re.findall(r"^Change-Id: (I[a-fA-F0-9]{40})$", log, flags=re.M)
@@ -1382,14 +1390,14 @@ def Commit(
     """Commit with git.
 
     Args:
-      git_repo: Path to the git repository to commit in.
-      message: Commit message to use.
-      amend: Whether to 'amend' the CL, default False
-      allow_empty: Whether to allow an empty commit. Default False.
-      reset_author: Whether to reset author according to current config.
+        git_repo: Path to the git repository to commit in.
+        message: Commit message to use.
+        amend: Whether to 'amend' the CL, default False
+        allow_empty: Whether to allow an empty commit. Default False.
+        reset_author: Whether to reset author according to current config.
 
     Returns:
-      The Gerrit Change-ID assigned to the CL if it exists.
+        The Gerrit Change-ID assigned to the CL if it exists.
     """
     cmd = ["commit", "-m", message]
     if amend:
@@ -1419,9 +1427,9 @@ class RawDiffEntry(NamedTuple):
         score: Similarity between the source and the target.
         src_file: Path for "src".
         dst_file: Path for "dst". Only exists for C or R.
-        extra_modes: Mode for the file in the other parent commits.
+        extra_src_modes: Mode for the file in the other parent commits.
             Only for merge commits.
-        extra_shas: SHA1 for the file in the other parent commits;
+        extra_src_shas: SHA1 for the file in the other parent commits;
             0{40} if creation or unmerged.
             Only for merge commits.
     """
@@ -1461,7 +1469,7 @@ def _match_merge_commit(line: str) -> RawDiffEntry:
         A corresponding RawDiffEntry object.
 
     Raises:
-        If the commit is ill-formated, ValueError is raised.
+        If the commit is ill-formatted, ValueError is raised.
     """
 
     leading_colons = re.findall(r"^::+", line)
@@ -1511,7 +1519,7 @@ def _match_commit(line: str) -> RawDiffEntry:
         A corresponding RawDiffEntry object.
 
     Raises:
-        If the commit is ill-formated, ValueError is raised.
+        If the commit is ill-formatted, ValueError is raised.
     """
 
     # A regular expression is used to parse the normal commits.
@@ -1527,14 +1535,14 @@ def RawDiff(path, target):
     """Return the parsed raw format diff of target
 
     Args:
-      path: Path to the git repository to diff in.
-      target: The target to diff.
+        path: Path to the git repository to diff in.
+        target: The target to diff.
 
     Returns:
-      A list of RawDiffEntry's.
+        A list of RawDiffEntry's.
 
     Raises:
-        If the diff is ill-formated, ValueError is raised.
+        If the diff is ill-formatted, ValueError is raised.
     """
     entries = []
 
@@ -1560,14 +1568,14 @@ def UploadCL(
     """Upload a CL to gerrit. The CL should be checked out currently.
 
     Args:
-      git_repo: Path to the git repository with the CL to upload checked out.
-      remote: The remote to upload the CL to.
-      branch: Branch to upload to.
-      local_branch: Branch to upload.
-      draft: Whether to upload as a draft.
-      reviewers: Add the reviewers to the CL.
-      kwargs: Extra options for GitPush. Output capture defaults to False so
-        that the URL for new or updated CLs is shown to the user.
+        git_repo: Path to the git repository with the CL to upload checked out.
+        remote: The remote to upload the CL to.
+        branch: Branch to upload to.
+        local_branch: Branch to upload.
+        draft: Whether to upload as a draft.
+        reviewers: Add the reviewers to the CL.
+        kwargs: Extra options for GitPush. Output capture defaults to False so
+            that the URL for new or updated CLs is shown to the user.
     """
     ref = ("refs/drafts/%s" if draft else "refs/for/%s") % branch
     if reviewers:
@@ -1592,13 +1600,13 @@ def GitPush(
     """Wrapper for pushing to a branch.
 
     Args:
-      git_repo: Git repository to act on.
-      refspec: The local ref to push to the remote.
-      push_to: A RemoteRef object representing the remote ref to push to.
-      force: Whether to bypass non-fastforward checks.
-      dry_run: If True, do everything except actually push the remote ref.
-      skip: Log the git command that would have been run, but don't run it; this
-        avoids e.g. remote access checks that still apply to |dry_run|.
+        git_repo: Git repository to act on.
+        refspec: The local ref to push to the remote.
+        push_to: A RemoteRef object representing the remote ref to push to.
+        force: Whether to bypass non-fastforward checks.
+        dry_run: If True, do everything except actually push the remote ref.
+        skip: Log the git command that would have been run, but don't run it;
+            this avoids e.g. remote access checks that still apply to |dry_run|.
     """
     cmd = ["push", push_to.remote, "%s:%s" % (refspec, push_to.ref)]
     if force:
@@ -1618,13 +1626,12 @@ def CreatePushBranch(branch, git_repo, sync=True, remote_push_branch=None):
     """Create a local branch for pushing changes inside a repo repository.
 
     Args:
-      branch: Local branch to create.
-      git_repo: Git repository to create the branch in.
-      sync: Update remote before creating push branch.
-      remote_push_branch: A RemoteRef to push to. i.e.,
-                          RemoteRef('cros', 'main').  By default it tries to
-                          automatically determine which tracking branch to use
-                          (see GetTrackingBranch()).
+        branch: Local branch to create.
+        git_repo: Git repository to create the branch in.
+        sync: Update remote before creating push branch.
+        remote_push_branch: A RemoteRef to push to. i.e.,
+            RemoteRef('cros', 'main').  By default, it tries to automatically
+            determine which tracking branch to use (see GetTrackingBranch()).
     """
     if not remote_push_branch:
         remote_push_branch = GetTrackingBranch(git_repo, for_push=True)
@@ -1637,17 +1644,17 @@ def CreatePushBranch(branch, git_repo, sync=True, remote_push_branch=None):
 
 
 def SyncPushBranch(git_repo, remote, target, use_merge=False, **kwargs):
-    """Sync and rebase or merge a local push branch to the latest remote version.
+    """Sync and rebase/merge a local push branch to the latest remote version.
 
     Args:
-      git_repo: Git repository to rebase in.
-      remote: The remote returned by GetTrackingBranch(for_push=True)
-      target: The branch name returned by GetTrackingBranch().  Must
-        start with refs/remotes/ (specifically must be a proper remote
-        target rather than an ambiguous name).
-      use_merge: Default: False. If True, use merge to bring local branch up to
-        date with remote branch. Otherwise, use rebase.
-      kwargs: Arguments passed through to RunGit.
+        git_repo: Git repository to rebase in.
+        remote: The remote returned by GetTrackingBranch(for_push=True)
+        target: The branch name returned by GetTrackingBranch().  Must start
+            with refs/remotes/ (specifically must be a proper remote target
+            rather than an ambiguous name).
+        use_merge: Default: False. If True, use merge to bring local branch up
+            to date with remote branch. Otherwise, use rebase.
+        kwargs: Arguments passed through to RunGit.
     """
     subcommand = "merge" if use_merge else "rebase"
 
@@ -1679,18 +1686,20 @@ def PushBranch(
     function.
 
     Args:
-      branch: Local branch to push.  Branch should have already been created
-        with a local change committed ready to push to the remote branch.  Must
-        also already be checked out to that branch.
-      git_repo: Git repository to push from.
-      dryrun: Git push --dry-run if set to True.
-      staging_branch: Push change commits to the staging_branch if it's not None
-      auto_merge: Enable Gerrit's auto-merge feature. See here for more info:
-        https://gerrit-review.googlesource.com/Documentation/user-upload.html#auto_merge
-        Note: The setting must be enabled in Gerrit UI for the specific repo.
+        branch: Local branch to push.  Branch should have already been created
+            with a local change committed ready to push to the remote branch.
+            Must also already be checked out to that branch.
+        git_repo: Git repository to push from.
+        dryrun: Git push --dry-run if set to True.
+        staging_branch: Push change commits to the staging_branch if it's not
+            None.
+        auto_merge: Enable Gerrit's auto-merge feature. See here for more info:
+            https://gerrit-review.googlesource.com/Documentation/user-upload.html#auto_merge
+            Note: The setting must be enabled in Gerrit UI for the specific
+            repo.
 
     Raises:
-      GitPushFailed if push was unsuccessful after retries
+        GitPushFailed if push was unsuccessful after retries
     """
     remote_ref = GetTrackingBranch(
         git_repo, branch, for_checkout=False, for_push=True
@@ -1711,7 +1720,8 @@ def PushBranch(
             + "%notify=NONE,submit",
             project_name=remote_ref.project_name,
         )
-    # reference = staging_branch if staging_branch is not None else remote_ref.ref
+    # reference = staging_branch if staging_branch is not None else
+    # remote_ref.ref
     if staging_branch is not None:
         remote_ref = remote_ref._replace(ref=staging_branch)
 
@@ -1749,7 +1759,7 @@ def CleanAndDetachHead(git_repo):
     """Remove all local changes and checkout a detached head.
 
     Args:
-      git_repo: Directory of git repository.
+        git_repo: Directory of git repository.
     """
     RunGit(git_repo, ["am", "--abort"], check=False)
     RunGit(git_repo, ["rebase", "--abort"], check=False)
@@ -1764,8 +1774,8 @@ def CleanAndCheckoutUpstream(git_repo, refresh_upstream=True):
     also be switched to a detached head pointing at the latest origin.
 
     Args:
-      git_repo: Directory of git repository.
-      refresh_upstream: If True, run a remote update prior to checking it out.
+        git_repo: Directory of git repository.
+        refresh_upstream: If True, run a remote update prior to checking it out.
     """
     remote_ref = GetTrackingBranch(git_repo, for_push=refresh_upstream)
     CleanAndDetachHead(git_repo)
@@ -1798,10 +1808,10 @@ def GetChromiteTrackingBranch():
 
     # Not a manifest checkout.
     logging.notice(
-        "Chromite checkout at %s isn't controlled by repo, nor is it on a "
-        "branch (or if it is, the tracking configuration is missing or broken).  "
-        "Falling back to assuming the chromite checkout is derived from "
-        "'main'; this *may* result in breakage." % cwd
+        f"Chromite checkout at {cwd} isn't controlled by repo, nor is it on a "
+        f"branch (or if it is, the tracking configuration is missing or "
+        f"broken).  Falling back to assuming the chromite checkout is derived "
+        f"from 'main'; this *may* result in breakage."
     )
     return "main"
 
@@ -1810,8 +1820,9 @@ def GarbageCollection(git_repo, prune_all=False):
     """Cleanup unnecessary files and optimize the local repository.
 
     Args:
-      git_repo: Directory of git repository.
-      prune_all: If True, prune all loose objects regardless of gc.pruneExpire.
+        git_repo: Directory of git repository.
+        prune_all: If True, prune all loose objects regardless of
+            gc.pruneExpire.
     """
     # Use --auto so it only runs if housekeeping is necessary.
     cmd = ["gc", "--auto"]
@@ -1829,7 +1840,7 @@ def DeleteStaleLocks(git_repo):
     accessing the repo (such as at the beginning of a fresh build).
 
     Args:
-      git_repo: Directory of git repository.
+        git_repo: Directory of git repository.
     """
     git_gitdir = GetGitGitdir(git_repo)
     if not git_gitdir:
@@ -1848,10 +1859,10 @@ def GetUrlFromRemoteOutput(remote_output: str) -> str:
     The URL must begin with https://.
 
     Args:
-      remote_output: The git remote output.
+        remote_output: The git remote output.
 
     Returns:
-      URL in remote git output, or None if a URL couldn't be found.
+        URL in remote git output, or None if a URL couldn't be found.
     """
     match = re.search(
         r"^remote:\s+(?P<url>https://[^\s]+)", remote_output, flags=re.MULTILINE

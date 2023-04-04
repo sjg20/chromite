@@ -82,8 +82,8 @@ class ErrorParser(html.parser.HTMLParser):
 
     def error(self, message):
         # Pylint correctly flags a missing abstract method, but the error is in
-        # Python itself.  We can delete this method once we move to Python 3.10+.
-        # https://bugs.python.org/issue31844
+        # Python itself.  We can delete this method once we move to Python
+        # 3.10+. https://bugs.python.org/issue31844
         pass
 
 
@@ -117,7 +117,7 @@ GOB_ERROR_REASON_CLOSED_CHANGE = "CLOSED CHANGE"
 
 
 class GOBError(Exception):
-    """Exception class for errors commuicating with the gerrit-on-borg service."""
+    """Exception class for errors communicating with the GOB service."""
 
     def __init__(self, http_status=None, reason=None):
         self.http_status = http_status
@@ -139,8 +139,9 @@ class InternalGOBError(GOBError):
 
 
 def _QueryString(param_dict, first_param=None):
-    """Encodes query parameters in the key:val[+key:val...] format specified here:
+    """Encodes query parameters in the key:val[+key:val...] format.
 
+    Format specified here:
     https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
     """
     q = [urllib.parse.quote(first_param)] if first_param else []
@@ -155,13 +156,14 @@ def GetCookies(host, path, cookie_paths=None):
     header. All requests made by this library are HTTPS.
 
     Args:
-      host: The hostname of the Gerrit service.
-      path: The path on the Gerrit service, already including /a/ if applicable.
-      cookie_paths: Files to look in for cookies. Defaults to looking in the
-        standard places where GoB places cookies.
+        host: The hostname of the Gerrit service.
+        path: The path on the Gerrit service, already including /a/ if
+            applicable.
+        cookie_paths: Files to look in for cookies. Defaults to looking in the
+            standard places where GoB places cookies.
 
     Returns:
-      A dict of cookie name to value, with no URL encoding applied.
+        A dict of cookie name to value, with no URL encoding applied.
     """
     cookies = {}
     if cookie_paths is None:
@@ -205,7 +207,7 @@ def CreateHttpReq(
                 "Bearer %s" % credentials.get_access_token().access_token,
             )
         except gce.HttpAccessTokenRefreshError as e:
-            logging.debug("Failed to retreive gce access token: %s", e)
+            logging.debug("Failed to retrieve gce access token: %s", e)
         # Not in an Appengine or GCE environment.
         except httplib2.ServerNotFoundError as e:
             pass
@@ -224,7 +226,8 @@ def CreateHttpReq(
             headers.setdefault("Authorization", "Bearer %s" % git_creds)
         else:
             logging.debug(
-                "No gitcookies file, Appengine credentials, or LUCI git creds found."
+                "No gitcookies file, Appengine credentials, or LUCI git creds "
+                "found."
             )
 
     if "User-Agent" not in headers:
@@ -276,27 +279,29 @@ def FetchUrl(
     """Fetches the http response from the specified URL.
 
     Args:
-      host: The hostname of the Gerrit service.
-      path: The path on the Gerrit service. This will be prefixed with '/a'
+        host: The hostname of the Gerrit service.
+        path: The path on the Gerrit service. This will be prefixed with '/a'
             automatically.
-      reqtype: The request type. Can be GET or POST.
-      headers: A mapping of extra HTTP headers to pass in with the request.
-      body: A string of data to send after the headers are finished.
-      expect: The status code(s) to expect as "success".  For some requests,
-              Gerrit will return 204 to confirm proper processing of the request.
-      ignore_404: For many requests, gerrit-on-borg will return 404 if the request
-                  doesn't match the database contents.  In most such cases, we
-                  want the API to return None rather than raise an Exception.
+        reqtype: The request type. Can be GET or POST.
+        headers: A mapping of extra HTTP headers to pass in with the request.
+        body: A string of data to send after the headers are finished.
+        expect: The status code(s) to expect as "success".  For some requests,
+            Gerrit will return 204 to confirm proper processing of the request.
+        ignore_404: For many requests, gerrit-on-borg will return 404 if the
+            request doesn't match the database contents.  In most such cases, we
+            want the API to return None rather than raise an Exception.
 
     Returns:
-      The connection's reply, as bytes.
+        The connection's reply, as bytes.
     """
     if isinstance(expect, int):
         expect = (expect,)
 
     @timeout_util.TimeoutDecorator(REQUEST_TIMEOUT_SECONDS)
     def _FetchUrlHelper():
-        err_prefix = f"A transient error occured while querying {host}/{path}\n"
+        err_prefix = (
+            f"A transient error occurred while querying {host}/{path}\n"
+        )
         try:
             _request = CreateHttpReq(
                 host, path, reqtype=reqtype, headers=headers, body=body
@@ -304,8 +309,8 @@ def FetchUrl(
             with urllib.request.urlopen(_request) as response:
                 return _ProcessResponse(response, err_prefix)
         except urllib.error.HTTPError as e:
-            # Any non-HTTP/2xx status is thrown as an exception even though it's the
-            # response.  We handle the actual HTTP codes below.
+            # Any non-HTTP/2xx status is thrown as an exception even though it's
+            # the response.  We handle the actual HTTP codes below.
             return _ProcessResponse(e, err_prefix)
         except socket.error as ex:
             logging.warning("%s%s", err_prefix, str(ex))
@@ -317,14 +322,14 @@ def FetchUrl(
         """Process the Response object.
 
         Args:
-          response: the url response object to parse.
-          err_prefix: the prefix to use.
+            response: the url response object to parse.
+            err_prefix: the prefix to use.
 
         Returns:
-          The server's reply, as bytes.
+            The server's reply, as bytes.
 
         Raises:
-          GOBError with the failure status code and reason.
+            GOBError with the failure status code and reason.
         """
         # Normal/good responses.
         response_body = response.read()
@@ -376,8 +381,8 @@ def FetchUrl(
 
         logging.warning(err_prefix)
 
-        # If GOB output contained expected error message, reduce log visibility of
-        # raw GOB output reported below.
+        # If GOB output contained expected error message, reduce log visibility
+        # of raw GOB output reported below.
         ep = ErrorParser()
         ep.feed(response_body.decode("utf-8"))
         ep.close()
@@ -444,17 +449,17 @@ def QueryChanges(
     """Queries a gerrit-on-borg server for changes matching query terms.
 
     Args:
-      host: The Gerrit server hostname.
-      param_dict: A dictionary of search parameters, as documented here:
-          https://gerrit-review.googlesource.com/Documentation/user-search.html
-      first_param: A change identifier
-      limit: Maximum number of results to return.
-      o_params: A list of additional output specifiers, as documented here:
-          https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
-      start: Offset in the result set to start at.
+        host: The Gerrit server hostname.
+        param_dict: A dictionary of search parameters, as documented here:
+            https://gerrit-review.googlesource.com/Documentation/user-search.html
+        first_param: A change identifier
+        limit: Maximum number of results to return.
+        o_params: A list of additional output specifiers, as documented here:
+            https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
+        start: Offset in the result set to start at.
 
     Returns:
-      A list of json-decoded query results.
+        A list of json-decoded query results.
     """
     # Note that no attempt is made to escape special characters; YMMV.
     if not param_dict and not first_param:
@@ -497,7 +502,7 @@ def MultiQueryChanges(
 
 
 def GetGerritFetchUrl(host):
-    """Given a gerrit host name returns URL of a gerrit instance to fetch from."""
+    """Returns URL of a gerrit instance to fetch from for gerrit |host| name."""
     return "https://%s/" % host
 
 
@@ -564,8 +569,8 @@ def GetChangeReviewers(host, change):
     """Get information about all reviewers attached to a change.
 
     Args:
-      host: The Gerrit host to interact with.
-      change: The Gerrit change ID.
+        host: The Gerrit host to interact with.
+        change: The Gerrit change ID.
     """
     warnings.warn("GetChangeReviewers is deprecated; use GetReviewers instead.")
     GetReviewers(host, change)
@@ -577,15 +582,15 @@ def CreateChange(
     """Creates an empty change.
 
     Args:
-      host: The Gerrit host to interact with.
-      project: The name of the Gerrit project for the change.
-      branch: Branch for the change.
-      subject: Initial commit message for the change.
-      publish: If True, will publish the CL after uploading. Stays in WIP mode
-          otherwise.
+        host: The Gerrit host to interact with.
+        project: The name of the Gerrit project for the change.
+        branch: Branch for the change.
+        subject: Initial commit message for the change.
+        publish: If True, will publish the CL after uploading. Stays in WIP mode
+            otherwise.
 
     Returns:
-      A JSON response dict.
+        A JSON response dict.
     """
     path = "changes/"
     body = {"project": project, "branch": branch, "subject": subject}
@@ -608,13 +613,13 @@ def ChangeEdit(
     """Attaches file modifications to an open change.
 
     Args:
-      host: The Gerrit host to interact with.
-      change: A Gerrit change number.
-      filepath: Path of the file in the repo to modify.
-      contents: New contents of the file.
+        host: The Gerrit host to interact with.
+        change: A Gerrit change number.
+        filepath: Path of the file in the repo to modify.
+        contents: New contents of the file.
 
     Returns:
-      A JSON response dict.
+        A JSON response dict.
     """
     path = "%s/edit/%s" % (
         _GetChangePath(change),
@@ -631,11 +636,11 @@ def PublishChangeEdit(host: str, change: str) -> Dict[str, Any]:
     """Publishes any open edits in a change.
 
     Args:
-      host: The Gerrit host to interact with.
-      change: A Gerrit change number.
+        host: The Gerrit host to interact with.
+        change: A Gerrit change number.
 
     Returns:
-      A JSON response dict.
+        A JSON response dict.
     """
     path = "%s/edit:publish" % _GetChangePath(change)
     body = {"notify": "NONE"}
@@ -717,9 +722,9 @@ def CheckChange(host, change, sha1=None):
     and mark the change as 'MERGED' if it exists.
 
     Args:
-      host: The Gerrit host to interact with.
-      change: The Gerrit change ID.
-      sha1: An optional hint of the commit's SHA1 in Git.
+        host: The Gerrit host to interact with.
+        change: The Gerrit change ID.
+        sha1: An optional hint of the commit's SHA1 in Git.
     """
     path = "%s/check" % (_GetChangePath(change),)
     if sha1:
@@ -736,8 +741,8 @@ def MarkPrivate(host, change):
     """Marks the given CL as private.
 
     Args:
-      host: The gob host to interact with.
-      change: CL number on the given host.
+        host: The gob host to interact with.
+        change: CL number on the given host.
     """
     path = "%s/private" % _GetChangePath(change)
     try:
@@ -757,8 +762,8 @@ def MarkNotPrivate(host, change):
     """Sets the private bit on given CL to False.
 
     Args:
-      host: The gob host to interact with.
-      change: CL number on the given host.
+        host: The gob host to interact with.
+        change: CL number on the given host.
     """
     path = "%s/private.delete" % _GetChangePath(change)
     try:
@@ -777,9 +782,9 @@ def MarkWorkInProgress(host, change, msg=""):
     """Marks the given CL as Work-In-Progress.
 
     Args:
-      host: The gob host to interact with.
-      change: CL number on the given host.
-      msg: Message to post together with the action.
+        host: The gob host to interact with.
+        change: CL number on the given host.
+        msg: Message to post together with the action.
     """
     path = "%s/wip" % _GetChangePath(change)
     body = {"message": msg}
@@ -790,9 +795,9 @@ def MarkReadyForReview(host, change, msg=""):
     """Marks the given CL as Ready-For-Review.
 
     Args:
-      host: The gob host to interact with.
-      change: CL number on the given host.
-      msg: Message to post together with the action.
+        host: The gob host to interact with.
+        change: CL number on the given host.
+        msg: Message to post together with the action.
     """
     path = "%s/ready" % _GetChangePath(change)
     body = {"message": msg}
@@ -803,11 +808,11 @@ def GetAttentionSet(host: str, change: str) -> Optional[Dict[str, Any]]:
     """Get information about the attention set of a change.
 
     Args:
-      host: The Gerrit host to interact with.
-      change: The Gerrit change ID.
+        host: The Gerrit host to interact with.
+        change: The Gerrit change ID.
 
     Returns:
-      A JSON response dict.
+        A JSON response dict.
     """
     path = "%s/attention" % _GetChangePath(change)
     return FetchUrlJson(host, path)
@@ -857,8 +862,8 @@ def GetReviewers(host, change):
     """Get information about all reviewers attached to a change.
 
     Args:
-      host: The Gerrit host to interact with.
-      change: The Gerrit change ID.
+        host: The Gerrit host to interact with.
+        change: The Gerrit change ID.
     """
     path = "%s/reviewers" % _GetChangePath(change)
     return FetchUrlJson(host, path)
@@ -883,7 +888,7 @@ def AddReviewers(host, change, add=None, notify=None):
 
 
 def RemoveReviewers(host, change, remove=None, notify=None):
-    """Remove reveiewers from a change."""
+    """Remove reviewers from a change."""
     if not remove:
         return
     if isinstance(remove, str):
@@ -960,10 +965,10 @@ def SetHashtags(host, change, add, remove):
     """Adds and / or removes hashtags from a change.
 
     Args:
-      host: Hostname (without protocol prefix) of the gerrit server.
-      change: A gerrit change number.
-      add: a list of hashtags to be added.
-      remove: a list of hashtags to be removed.
+        host: Hostname (without protocol prefix) of the gerrit server.
+        change: A gerrit change number.
+        add: a list of hashtags to be added.
+        remove: a list of hashtags to be removed.
     """
     path = "%s/hashtags" % _GetChangePath(change)
     return FetchUrlJson(
@@ -1026,8 +1031,8 @@ def ResetReviewLabels(
         elif new_revision != revision:
             raise GOBError(
                 http_status=200,
-                reason='While resetting labels on change "%s", a new patchset was '
-                "uploaded." % change,
+                reason=f'While resetting labels on change "{change}", a new '
+                "patchset was uploaded.",
             )
 
 
@@ -1056,11 +1061,11 @@ def GetFileContentsOnHead(git_url: str, filepath: str) -> str:
     Retrieves the contents from Gitiles via its API, not Gerrit's.
 
     Args:
-      git_url: URL for the repository to get the file contents from.
-      filepath: Path of the file in the repository.
+        git_url: URL for the repository to get the file contents from.
+        filepath: Path of the file in the repository.
 
     Returns:
-      The contents of the file as a string.
+        The contents of the file as a string.
     """
     return GetFileContents(git_url, filepath, ref="HEAD")
 
@@ -1071,12 +1076,12 @@ def GetFileContents(git_url: str, filepath: str, ref="HEAD") -> str:
     Retrieves the contents from Gitiles via its API, not Gerrit's.
 
     Args:
-      git_url: URL for the repository to get the file contents from.
-      filepath: Path of the file in the repository.
-      ref: The ref to use, e.g. HEAD or refs/heads/main
+        git_url: URL for the repository to get the file contents from.
+        filepath: Path of the file in the repository.
+        ref: The ref to use, e.g. HEAD or refs/heads/main
 
     Returns:
-      The contents of the file as a string.
+        The contents of the file as a string.
     """
     parsed_url = urllib.parse.urlparse(git_url)
     path = parsed_url[2].rstrip("/") + f"/+/{ref}/{filepath}?format=TEXT"
@@ -1091,14 +1096,14 @@ def GetFileContentsFromGerrit(
     """Returns the current contents of a file from the Gerrit.
 
     Args:
-      host: The Gerrit host to interact with.
-      change: A Gerrit change number.
-      filepath: Path of the file in the repo to retrieve.
-      revision: The specific revision in the change. Defaults or None to the
-          latest revision.
+        host: The Gerrit host to interact with.
+        change: A Gerrit change number.
+        filepath: Path of the file in the repo to retrieve.
+        revision: The specific revision in the change. Defaults or None to the
+            latest revision.
 
     Returns:
-      Contents of the file.
+        Contents of the file.
     """
     if revision is None:
         revision = "current"
@@ -1144,11 +1149,11 @@ def GetCommitDate(git_url, commit):
     information - you should assume UTC.
 
     Args:
-      git_url: URL for the repository to get the commit date from.
-      commit: A git commit identifier (e.g. a sha1).
+        git_url: URL for the repository to get the commit date from.
+        commit: A git commit identifier (e.g. a sha1).
 
     Returns:
-      A datetime object.
+        A datetime object.
     """
     parsed_url = urllib.parse.urlparse(git_url)
     path = "%s/+log/%s?n=1&format=JSON" % (parsed_url.path.rstrip("/"), commit)

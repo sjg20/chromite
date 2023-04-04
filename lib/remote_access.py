@@ -52,7 +52,7 @@ REBOOT_SSH_CONNECT_TIMEOUT = 2
 REBOOT_SSH_CONNECT_ATTEMPTS = 2
 CHECK_INTERVAL = 5
 DEFAULT_SSH_PORT = 22
-# Ssh returns status 255 when it encounters errors in its own code.  Otherwise
+# Ssh returns status 255 when it encounters errors in its own code.  Otherwise,
 # it returns the status of the command that it ran on the host, including
 # possibly 255.  Here we assume that 255 indicates only ssh errors.  This may
 # be a reasonable guess for our purposes.
@@ -80,8 +80,8 @@ class SSHConnectionError(RemoteAccessException):
         """
         # Checking for string output is brittle, but there's no exit code that
         # indicates why SSH failed so this might be the best we can do.
-        # RemoteAccess.RemoteSh() sets LC_MESSAGES=C so we only need to check for
-        # the English error message.
+        # RemoteAccess.RemoteSh() sets LC_MESSAGES=C, so we only need to check
+        # for the English error message.
         # Verified for OpenSSH_6.6.1p1.
         return "REMOTE HOST IDENTIFICATION HAS CHANGED" in str(self)
 
@@ -114,12 +114,12 @@ def NormalizePort(port, str_ok=True):
     """Checks if |port| is a valid port number and returns the number.
 
     Args:
-      port: The port to normalize.
-      str_ok: Accept |port| in string. If set False, only accepts
-        an integer. Defaults to True.
+        port: The port to normalize.
+        str_ok: Accept |port| in string. If set False, only accepts
+            an integer. Defaults to True.
 
     Returns:
-      A port number (integer).
+        A port number (integer).
     """
     err_msg = "%s is not a valid port number." % port
 
@@ -139,25 +139,25 @@ def GetUnusedPort(
     """Returns a currently unused port.
 
     Examples:
-      Note: Since this does not guarantee the port remains unused when you
-      attempt to bind it, your code should retry in a loop like so:
-      while True:
-        try:
-          port = remote_access.GetUnusedPort()
-          <attempt to bind the port>
-          break
-        except socket.error as e:
-          if e.errno == errno.EADDRINUSE:
-            continue
-          <fallback/raise>
+        Note: Since this does not guarantee the port remains unused when you
+        attempt to bind it, your code should retry in a loop like so:
+        while True:
+            try:
+                port = remote_access.GetUnusedPort()
+                <attempt to bind the port>
+                break
+            except socket.error as e:
+                if e.errno == errno.EADDRINUSE:
+                    continue
+                <fallback/raise>
 
     Args:
-      ip: IP to use to bind the port.
-      family: Address family.
-      stype: Socket type.
+        ip: IP to use to bind the port.
+        family: Address family.
+        stype: Socket type.
 
     Returns:
-      A port number (integer).
+        A port number (integer).
     """
     s = None
     try:
@@ -180,17 +180,17 @@ def RunCommandFuncWrapper(func, msg, *args, **kwargs):
     logs error |msg| if check is set.
 
     Args:
-      func: The function to call.
-      msg: The message to display if the command failed.
-      ignore_failures: If True, ignore failures during the command.
-      *args: Arguments to pass to |func|.
-      **kwargs: Keyword arguments to pass to |func|.
+        func: The function to call.
+        msg: The message to display if the command failed.
+        ignore_failures: If True, ignore failures during the command.
+        args: Arguments to pass to |func|.
+        kwargs: Keyword arguments to pass to |func|.
 
     Returns:
-      The result of |func|.
+        The result of |func|.
 
     Raises:
-      cros_build_lib.RunCommandError if the command failed and check is set.
+        cros_build_lib.RunCommandError if the command failed and check is set.
     """
     check = kwargs.pop("check", True)
     ignore_failures = kwargs.pop("ignore_failures", False)
@@ -217,10 +217,10 @@ def CompileSSHConnectSettings(**kwargs):
     resulting arguments are passed into an SSH call.
 
     Args:
-      kwargs: A dictionary of ssh_config settings.
+        kwargs: A dictionary of ssh_config settings.
 
     Returns:
-      A list of arguments to pass to SSH.
+        A list of arguments to pass to SSH.
     """
     settings = {
         "ConnectTimeout": 60,
@@ -245,23 +245,24 @@ def RemoveKnownHost(host, known_hosts_path=KNOWN_HOSTS_PATH):
     to remove hosts from the file.
 
     Args:
-      host: The host name to remove from the known_hosts file.
-      known_hosts_path: Path to the known_hosts file to change. Defaults
-                        to the standard SSH known_hosts file path.
+        host: The host name to remove from the known_hosts file.
+        known_hosts_path: Path to the known_hosts file to change.
+            Defaults to the standard SSH known_hosts file path.
 
     Raises:
-      cros_build_lib.RunCommandError if ssh-keygen fails.
+        cros_build_lib.RunCommandError if ssh-keygen fails.
     """
     # `ssh-keygen -R` creates a backup file to retain the old 'known_hosts'
-    # content and never deletes it. Using TempDir here to make sure both the temp
-    # files created by us and `ssh-keygen -R` are deleted afterwards.
+    # content and never deletes it. Using TempDir here to make sure both the
+    # temp files created by us and `ssh-keygen -R` are deleted afterwards.
     with osutils.TempDir(prefix="remote-access-") as tempdir:
         temp_file = os.path.join(tempdir, "temp_known_hosts")
         try:
             # Using shutil.copy2 to preserve the file ownership and permissions.
             shutil.copy2(known_hosts_path, temp_file)
         except IOError:
-            # If |known_hosts_path| doesn't exist neither does |host| so we're done.
+            # If |known_hosts_path| doesn't exist, neither does |host| so we're
+            # done.
             return
         cros_build_lib.dbg_run(
             ["ssh-keygen", "-R", host, "-f", temp_file], capture_output=True
@@ -321,15 +322,17 @@ class RemoteAccess(object):
         """Construct the object.
 
         Args:
-          remote_host: The ip or hostname of the remote test machine.  The test
-                       machine should be running a ChromeOS test image.
-          tempdir: A directory that RemoteAccess can use to store temporary files.
-                   It's the responsibility of the caller to remove it.
-          port: The ssh port of the test machine to connect to.
-          username: The ssh login username (default: root).
-          private_key: The identify file to pass to `ssh -i` (default: testing_rsa).
-          debug_level: Logging level to use for all run invocations.
-          interactive: If set to False, pass /dev/null into stdin for the sh cmd.
+            remote_host: The ip or hostname of the remote test machine.  The
+                test machine should be running a ChromeOS test image.
+            tempdir: A directory that RemoteAccess can use to store temporary
+                files. It's the responsibility of the caller to remove it.
+            port: The ssh port of the test machine to connect to.
+            username: The ssh login username (default: root).
+            private_key: The identify file to pass to `ssh -i` (default:
+                testing_rsa).
+            debug_level: Logging level to use for all run invocations.
+            interactive: If set to False, pass /dev/null into stdin for the sh
+                cmd.
         """
         # TODO(vapier): Convert this to Path.
         self.tempdir = str(tempdir)
@@ -389,10 +392,10 @@ class RemoteAccess(object):
         """Returns the ssh command that can be used to connect to the device
 
         Args:
-          connect_settings: dict of additional ssh options
+            connect_settings: dict of additional ssh options
 
         Returns:
-          ['ssh', '...', 'user@host']
+            ['ssh', '...', 'user@host']
         """
         ssh_cmd = self._GetSSHCmd(connect_settings=connect_settings)
         ssh_cmd.append(self.target_ssh_url)
@@ -412,27 +415,27 @@ class RemoteAccess(object):
         """Run a sh command on the remote device through ssh.
 
         Args:
-          cmd: The command string or list to run. None or empty string/list will
-               start an interactive session.
-          connect_settings: The SSH connect settings to use.
-          check: Throw an exception when the command exits with a non-zero
-                 returncode.  This does not cover the case where the ssh command
-                 itself fails (return code 255).  See ssh_error_ok.
-          ssh_error_ok: Does not throw an exception when the ssh command itself
-                        fails (return code 255).
-          remote_sudo: If set, run the command in remote shell with sudo.
-          remote_user: If set, run the command as the specified user.
-          **kwargs: See cros_build_lib.run documentation.
+            cmd: The command string or list to run. None or empty string/list
+                will start an interactive session.
+            connect_settings: The SSH connect settings to use.
+            check: Throw an exception when the command exits with a non-zero
+                returncode.  This does not cover the case where the ssh command
+                itself fails (return code 255).  See ssh_error_ok.
+            ssh_error_ok: Does not throw an exception when the ssh command
+                itself fails (return code 255).
+            remote_sudo: If set, run the command in remote shell with sudo.
+            remote_user: If set, run the command as the specified user.
+            kwargs: See cros_build_lib.run documentation.
 
         Returns:
-          A CompletedProcess object.  The returncode is the returncode of the
-          command, or 255 if ssh encountered an error (could not connect, connection
-          interrupted, etc.)
+            A CompletedProcess object.  The returncode is the returncode of the
+            command, or 255 if ssh encountered an error (could not connect,
+            connection interrupted, etc.)
 
         Raises:
-          RunCommandError when error is not ignored through the check flag.
-          SSHConnectionError when ssh command error is not ignored through
-          the ssh_error_ok flag.
+            RunCommandError when error is not ignored through the check flag.
+            SSHConnectionError when ssh command error is not ignored through
+            the ssh_error_ok flag.
         """
         if "capture_output" not in kwargs:
             kwargs.setdefault("stdout", True)
@@ -485,19 +488,20 @@ class RemoteAccess(object):
     def CreateTunnel(
         self, to_local=None, to_remote=None, connect_settings=None
     ):
-        """Establishes a SSH tunnel to the remote device as a background process.
+        """Establishes SSH tunnel to the remote device as a background process.
 
         Args:
-          to_local: A list of PortForwardSpec objects to forward from the local
-              machine to the remote machine.
-          to_remote: A list of PortForwardSpec to forward from the remote machine
-              to the local machine.
-          connect_settings: The SSH connect settings to use.
+            to_local: A list of PortForwardSpec objects to forward from the
+                local machine to the remote machine.
+            to_remote: A list of PortForwardSpec to forward from the remote
+                machine to the local machine.
+            connect_settings: The SSH connect settings to use.
 
         Returns:
-          A Popen object. Note that it represents an already started background
-          process. Calling poll() on the return value can be used to check that
-          the tunnel is still running. To close the tunnel call terminate().
+            A Popen object. Note that it represents an already started
+            background process. Calling poll() on the return value can be used
+            to check that the tunnel is still running. To close the tunnel call
+            terminate().
         """
 
         ssh_cmd = self._GetSSHCmd(connect_settings=connect_settings)
@@ -529,8 +533,9 @@ class RemoteAccess(object):
         If rebooting is True and an ssh error occurs, None is returned.
         """
         if rebooting:
-            # In tests SSH seems to be waiting rather longer than would be expected
-            # from these parameters. These values produce a ~5 second wait.
+            # In tests SSH seems to be waiting rather longer than would be
+            # expected from these parameters. These values produce a ~5 second
+            # wait.
             connect_settings = CompileSSHConnectSettings(
                 ConnectTimeout=REBOOT_SSH_CONNECT_TIMEOUT,
                 ConnectionAttempts=REBOOT_SSH_CONNECT_ATTEMPTS,
@@ -566,7 +571,7 @@ class RemoteAccess(object):
         device has rebooted.  May throw exceptions.
 
         Returns:
-          True if the device has successfully rebooted, False otherwise.
+            True if the device has successfully rebooted, False otherwise.
         """
         new_boot_id = self._GetBootId(rebooting=True)
         if new_boot_id is None:
@@ -594,11 +599,12 @@ class RemoteAccess(object):
         """Await reboot away from old_boot_id.
 
         Args:
-          old_boot_id: The boot_id that must be transitioned away from for success.
-          timeout_sec: How long to wait for reboot.
+            old_boot_id: The boot_id that must be transitioned away from for
+                success.
+            timeout_sec: How long to wait for reboot.
 
         Returns:
-          True if the device has successfully rebooted.
+            True if the device has successfully rebooted.
         """
         try:
             timeout_util.WaitForReturnTrue(
@@ -614,8 +620,8 @@ class RemoteAccess(object):
         """Reboot the remote device."""
         logging.info("Rebooting %s...", self.remote_host)
         old_boot_id = self._GetBootId()
-        # Use ssh_error_ok=True in the remote shell invocations because the reboot
-        # might kill sshd before the connection completes normally.
+        # Use ssh_error_ok=True in the remote shell invocations because the
+        # reboot might kill sshd before the connection completes normally.
         self.RemoteSh(["reboot"], ssh_error_ok=True, remote_sudo=True)
         time.sleep(CHECK_INTERVAL)
         if not self.AwaitReboot(old_boot_id, timeout_sec):
@@ -645,21 +651,21 @@ class RemoteAccess(object):
         rsyncs the path from the remote device to the local machine.
 
         Args:
-          src: The local src directory.
-          dest: The remote dest directory.
-          to_local: If set, rsync remote path to local path.
-          follow_symlinks: If set, transform symlinks into referent
-            path. Otherwise, copy symlinks as symlinks.
-          recursive: Whether to recursively copy entire directories.
-          inplace: If set, cause rsync to overwrite the dest files in place.  This
-            conserves space, but has some side effects - see rsync man page.
-          verbose: If set, print more verbose output during rsync file transfer.
-          sudo: If set, invoke the command via sudo.
-          remote_sudo: If set, run the command in remote shell with sudo.
-          compress: If set, compress file data during the transfer.
-          files_from: If set, read paths from this file (plus some other changes to
-            behaviour per rsync's --files-from).
-          **kwargs: See cros_build_lib.run documentation.
+            src: The local src directory.
+            dest: The remote dest directory.
+            to_local: If set, rsync remote path to local path.
+            follow_symlinks: If set, transform symlinks into referent
+                path. Otherwise, copy symlinks as symlinks.
+            recursive: Whether to recursively copy entire directories.
+            inplace: Cause rsync to overwrite the dest files in place. This
+                conserves space, but has some side effects - see rsync man page.
+            verbose: Print more verbose output during rsync file transfer.
+            sudo: If set, invoke the command via sudo.
+            remote_sudo: If set, run the command in remote shell with sudo.
+            compress: If set, compress file data during the transfer.
+            files_from: Read paths from this file (plus some other changes to
+                behaviour per rsync's --files-from).
+            kwargs: See cros_build_lib.run documentation.
         """
         kwargs.setdefault("debug_level", self.debug_level)
 
@@ -733,19 +739,19 @@ class RemoteAccess(object):
         """Scp a file or directory to the remote device.
 
         Args:
-          src: The local src file or directory.
-          dest: The remote dest location.
-          to_local: If set, scp remote path to local path.
-          recursive: Whether to recursively copy entire directories.
-          verbose: If set, print more verbose output during scp file transfer.
-          sudo: If set, invoke the command via sudo.
-          remote_sudo: If set, run the command in remote shell with sudo.
-          compress: If set, passes the -C flag to scp to enable compression.
-          **kwargs: See cros_build_lib.run documentation.
+            src: The local src file or directory.
+            dest: The remote dest location.
+            to_local: If set, scp remote path to local path.
+            recursive: Whether to recursively copy entire directories.
+            verbose: If set, print more verbose output during scp file transfer.
+            sudo: If set, invoke the command via sudo.
+            remote_sudo: If set, run the command in remote shell with sudo.
+            compress: If set, passes the -C flag to scp to enable compression.
+            kwargs: See cros_build_lib.run documentation.
 
         Returns:
-          A CompletedProcess object containing the information and return code of
-          the scp command.
+            A CompletedProcess object containing the information and return code
+            of the scp command.
         """
         remote_sudo = kwargs.pop("remote_sudo", False)
         if remote_sudo and self.username != ROOT_ACCOUNT:
@@ -800,9 +806,10 @@ class RemoteAccess(object):
         """Run a local command and pipe it to a remote sh command over ssh.
 
         Args:
-          producer_cmd: Command to run locally with its results piped to |cmd|.
-          cmd: Command to run on the remote device.
-          **kwargs: See RemoteSh for documentation.
+            producer_cmd: Command to run locally with its results piped to
+                |cmd|.
+            cmd: Command to run on the remote device.
+            kwargs: See RemoteSh for documentation.
         """
         result = cros_build_lib.run(
             producer_cmd, print_cmd=False, capture_output=True
@@ -864,15 +871,15 @@ class RemoteDevice(object):
         """Initializes a RemoteDevice object.
 
         Args:
-          hostname: The hostname of the device.
-          port: The ssh port of the device.
-          username: The ssh login username.
-          base_dir: The base work directory to create on the device, or None.
-          connect_settings: Default SSH connection settings.
-          private_key: The identify file to pass to `ssh -i`.
-          debug_level: Setting debug level for logging.
-          ping: Whether to ping the device before attempting to connect.
-          connect: True to set up the connection, otherwise set up will
+            hostname: The hostname of the device.
+            port: The ssh port of the device.
+            username: The ssh login username.
+            base_dir: The base work directory to create on the device, or None.
+            connect_settings: Default SSH connection settings.
+            private_key: The identify file to pass to `ssh -i`.
+            debug_level: Setting debug level for logging.
+            ping: Whether to ping the device before attempting to connect.
+            connect: True to set up the connection, otherwise set up will
             be automatically deferred until device use.
         """
         self.hostname = hostname
@@ -906,10 +913,10 @@ class RemoteDevice(object):
         """Returns True if the device is pingable.
 
         Args:
-          timeout: Timeout in seconds (default: 20 seconds).
+            timeout: Timeout in seconds (default: 20 seconds).
 
         Returns:
-          True if the device responded to the ping before |timeout|.
+            True if the device responded to the ping before |timeout|.
         """
         try:
             addrlist = socket.getaddrinfo(self.hostname, 22)
@@ -1015,8 +1022,8 @@ class RemoteDevice(object):
     def IsSELinuxAvailable(self):
         """Check whether the device has SELinux compiled in."""
         # Note that SELinux can be enabled for some devices that lack SELinux
-        # tools, so we need to check for the existence of the restorecon bin along
-        # with the sysfs check.
+        # tools, so we need to check for the existence of the restorecon bin
+        # along with the sysfs check.
         return self.HasProgramInPath("restorecon") and self.IfFileExists(
             "/sys/fs/selinux/enforce"
         )
@@ -1034,16 +1041,17 @@ class RemoteDevice(object):
         """Register a cleanup command to be run on the device in Cleanup().
 
         Args:
-          cmd: command to run. See RemoteAccess.RemoteSh documentation.
-          **kwargs: keyword arguments to pass along with cmd. See
-            RemoteAccess.RemoteSh documentation.
+            cmd: command to run. See RemoteAccess.RemoteSh documentation.
+            kwargs: keyword arguments to pass along with cmd. See
+                RemoteAccess.RemoteSh documentation.
         """
         self.cleanup_cmds.append((cmd, kwargs))
 
     def Cleanup(self):
-        """Remove work/temp directories and run all registered cleanup commands."""
+        """Remove work/temp dirs and run all registered cleanup commands."""
         for cmd, kwargs in self.cleanup_cmds:
-            # We want to run through all cleanup commands even if there are errors.
+            # We want to run through all cleanup commands even if there are
+            # errors.
             kwargs.setdefault("check", False)
             try:
                 self.run(cmd, **kwargs)
@@ -1062,8 +1070,8 @@ class RemoteDevice(object):
         file size is larger than chunk size. Fall back to scp mode otherwise.
 
         Args:
-          src: Local path as a string.
-          dest: rsync/scp path of the form <host>:/<path> as a string.
+            src: Local path as a string.
+            dest: rsync/scp path of the form <host>:/<path> as a string.
         """
         src_filename = os.path.basename(src)
         chunk_prefix = src_filename + "_"
@@ -1089,7 +1097,7 @@ class RemoteDevice(object):
                 cleanup_cmd = ["rm", "-f", chunks]
                 self.run(cleanup_cmd)
             except IOError:
-                logging.err("Could not complete the payload transfer...")
+                logging.error("Could not complete the payload transfer...")
                 raise
         logging.info(
             "Successfully copy %s to %s in chunks in parallel", src, dest
@@ -1099,29 +1107,33 @@ class RemoteDevice(object):
         """Copy path to device.
 
         Args:
-          src: Local path as a string.
-          dest: rsync/scp path of the form <host>:/<path> as a string.
-          mode: must be one of 'rsync', 'scp', or 'parallel'.
-            * Use rsync --compress when copying compressible (factor > 2, text/log)
-            files. This uses a quite a bit of CPU but preserves bandwidth.
-            * Use rsync without compression when delta transfering a whole directory
-            tree which exists at the destination and changed very little (say
-            telemetry directory or unpacked stateful or unpacked rootfs). It also
-            often works well for an uncompressed archive, copied over a previous
-            copy (which must exist at the destination) needing minor updates.
-            * Use scp when we have incompressible files (say already compressed),
-            especially if we know no previous version exist at the destination.
-            * Use parallel when we want to transfer a large file with chunks
-            and transfer them in degree of parallelism for speed especially for
-            slow network (congested, long haul, worse SNR).
+            src: Local path as a string.
+            dest: rsync/scp path of the form <host>:/<path> as a string.
+            mode: must be one of 'rsync', 'scp', or 'parallel'.
+                * Use rsync --compress when copying compressible (factor > 2,
+                    text/log) files. This uses a quite a bit of CPU but
+                    preserves bandwidth.
+                * Use rsync without compression when delta transferring a whole
+                    directory tree which exists at the destination and changed
+                    very little (say telemetry directory or unpacked stateful
+                    or unpacked rootfs). It also often works well for an
+                    uncompressed archive, copied over a previous copy (which
+                    must exist at the destination) needing minor updates.
+                * Use scp when we have incompressible files (say already
+                    compressed), especially if we know no previous version
+                    exist at the destination.
+                * Use parallel when we want to transfer a large file with chunks
+                    and transfer them in degree of parallelism for speed
+                    especially for slow network (congested, long haul, worse
+                    SNR).
         """
         assert mode in ["rsync", "scp", "parallel"]
         logging.info(
             "[mode:%s] copy: %s -> %s:%s", mode, src, self.hostname, dest
         )
         if mode == "parallel":
-            # Chop and send chunks in parallel only if the file size is larger than
-            # CHUNK_SIZE.
+            # Chop and send chunks in parallel only if the file size is larger
+            # than CHUNK_SIZE.
             if os.stat(src).st_size > CHUNK_SIZE:
                 self._CopyToDeviceInParallel(src, dest)
                 return
@@ -1131,7 +1143,8 @@ class RemoteDevice(object):
                 )
                 mode = "scp"
         msg = "Could not copy %s to device." % src
-        # Fall back to scp if device has no rsync. Happens when stateful is cleaned.
+        # Fall back to scp if device has no rsync. Happens when stateful is
+        # cleaned.
         if mode == "scp" or not self.HasRsync():
             # scp always follow symlinks
             kwargs.pop("follow_symlinks", None)
@@ -1147,12 +1160,13 @@ class RemoteDevice(object):
         Adding --compress recommended for text like log files.
 
         Args:
-          src: rsync/scp path of the form <host>:/<path> as a string.
-          dest: Local path as a string.
-          mode: See mode on CopyToDevice.
+            src: rsync/scp path of the form <host>:/<path> as a string.
+            dest: Local path as a string.
+            mode: See mode on CopyToDevice.
         """
         msg = "Could not copy %s from device." % src
-        # Fall back to scp if device has no rsync. Happens when stateful is cleaned.
+        # Fall back to scp if device has no rsync. Happens when stateful is
+        # cleaned.
         if mode == "scp" or not self.HasRsync():
             # scp always follow symlinks
             kwargs.pop("follow_symlinks", None)
@@ -1192,7 +1206,7 @@ class RemoteDevice(object):
         """Checks if the given directory is writable on the device.
 
         Args:
-          path: Directory on the device to check.
+            path: Directory on the device to check.
         """
         tmp_file = os.path.join(path, ".tmp.remote_access.is.writable")
         result = self.agent.RemoteSh(
@@ -1207,11 +1221,11 @@ class RemoteDevice(object):
         """Check if the given file is executable on the device.
 
         Args:
-          path: full path to the file on the device to check.
+            path: full path to the file on the device to check.
 
         Returns:
-          True if the file is executable, and false if the file does not exist or is
-          not executable.
+            True if the file is executable, and false if the file does not exist
+            or is not executable.
         """
         cmd = [
             "test",
@@ -1230,35 +1244,35 @@ class RemoteDevice(object):
         """Gets the size of the given file on the device.
 
         Args:
-          path: full path to the file on the device.
+            path: full path to the file on the device.
 
         Returns:
-          Size of the file in number of bytes.
+            Size of the file in number of bytes.
 
         Raises:
-          ValueError if failed to get file size from the remote output.
-          cros_build_lib.RunCommandError if |path| does not exist or the remote
-          command to get file size has failed.
+            ValueError: if failed to get file size from the remote output.
+            cros_build_lib.RunCommandError: if |path| does not exist or the
+                remote command to get file size has failed.
         """
         cmd = ["du", "-Lb", "--max-depth=0", path]
         result = self.run(cmd, remote_sudo=True, capture_output=True)
         return int(result.stdout.split()[0])
 
     def CatFile(self, path, max_size=1000000, encoding="utf-8"):
-        """Reads the file on device to string if its size is less than |max_size|.
+        """Reads the file on device to string if its size is < |max_size|.
 
         Args:
-          path: The full path to the file on the device to read.
-          max_size: Read the file only if its size is less than |max_size| in bytes.
-            If None, do not check its size and always cat the path.
-          encoding: Encoding for return value.  Use None to get bytes.
+            path: The full path to the file on the device to read.
+            max_size: Read the file only if its size is less than |max_size| in
+                bytes. If None, do not check its size and always cat the path.
+            encoding: Encoding for return value.  Use None to get bytes.
 
         Returns:
-          A string of the file content.
+            A string of the file content.
 
         Raises:
-          CatFileError if failed to read the remote file or the file size is larger
-          than |max_size|.
+            CatFileError: if failed to read the remote file or the file size is
+                larger than |max_size|.
         """
         if max_size is not None:
             try:
@@ -1287,13 +1301,14 @@ class RemoteDevice(object):
         """Deletes a path on the remote device.
 
         Args:
-          path: The path on the remote device that should be deleted.
-          relative_to_work_dir: If true, the path is relative to |self.work_dir|.
-          recursive: If true, the |path| is deleted recursively.
+            path: The path on the remote device that should be deleted.
+            relative_to_work_dir: If true, the path is relative to
+                |self.work_dir|.
+            recursive: If true, the |path| is deleted recursively.
 
         Raises:
-          cros_build_lib.RunCommandError if |path| does not exist or the remote
-          command to delete the |path| has failed.
+            cros_build_lib.RunCommandError: if |path| does not exist or the
+                remote command to delete the |path| has failed.
         """
         if relative_to_work_dir:
             path = os.path.join(self.work_dir, path)
@@ -1314,12 +1329,12 @@ class RemoteDevice(object):
         """Get all the running pids on the device with the executable path.
 
         Args:
-          exe: The executable path to get pids for.
-          full_path: Whether |exe| is a full executable path.
+            exe: The executable path to get pids for.
+            full_path: Whether |exe| is a full executable path.
 
         Raises:
-          RunningPidsError when failing to parse out pids from command output.
-          SSHConnectionError when error occurs during SSH connection.
+            RunningPidsError when failing to parse out pids from command output.
+            SSHConnectionError when error occurs during SSH connection.
         """
         try:
             cmd = ["pgrep", exe]
@@ -1340,14 +1355,16 @@ class RemoteDevice(object):
         return self.agent.RemoteReboot(timeout_sec=timeout_sec)
 
     def run(self, cmd, **kwargs):
-        """Executes a shell command on the device with output captured by default.
+        """Executes a shell command on the device.
+
+        Output captured by default.
 
         Also sets environment variables using dictionary provided by
         keyword argument |extra_env|.
 
         Args:
-          cmd: command to run. See RemoteAccess.RemoteSh documentation.
-          **kwargs: keyword arguments to pass along with cmd. See
+            cmd: command to run. See RemoteAccess.RemoteSh documentation.
+            kwargs: keyword arguments to pass along with cmd. See
             RemoteAccess.RemoteSh documentation.
         """
         kwargs.setdefault("debug_level", self.debug_level)
@@ -1384,8 +1401,8 @@ class RemoteDevice(object):
                     raise ValueError(
                         "'shell' must be False when 'cmd' is a list."
                     )
-                # Support pathlib & strings to match subprocess, but allow other types
-                # through so they still fail.
+                # Support pathlib & strings to match subprocess, but allow other
+                # types through, so they still fail.
                 shell_cmd = " ".join(
                     str(x) if isinstance(x, pathlib.PurePath) else x
                     for x in cmd
@@ -1433,7 +1450,7 @@ class RemoteDevice(object):
         device has rebooted.  May throw exceptions.
 
         Returns:
-          True if the device has successfully rebooted, false otherwise.
+            True if the device has successfully rebooted, false otherwise.
         """
         return self.agent.CheckIfRebooted(old_boot_id)
 
@@ -1441,10 +1458,11 @@ class RemoteDevice(object):
         """Await reboot away from old_boot_id.
 
         Args:
-          old_boot_id: The boot_id that must be transitioned away from for success.
+            old_boot_id: The boot_id that must be transitioned away from for
+                success.
 
         Returns:
-          True if the device has successfully rebooted.
+            True if the device has successfully rebooted.
         """
         return self.agent.AwaitReboot(old_boot_id)
 
@@ -1452,13 +1470,14 @@ class RemoteDevice(object):
         """Returns a decompressor command on a remote device.
 
         Args:
-          compression: The type of compression desired. See cros_build_lib.CompressionType.*.
+            compression: The type of compression desired. See
+                cros_build_lib.CompressionType.*.
 
         Returns:
-          command to a decompressor as a string list.
+            command to a decompressor as a string list.
 
         Raises:
-          ValueError: If compression is unknown.
+            ValueError: If compression is unknown.
         """
 
         if compression == cros_build_lib.CompressionType.XZ:
@@ -1483,7 +1502,7 @@ class RemoteDevice(object):
 
 
 class ChromiumOSDevice(RemoteDevice):
-    """Basic commands to interact with a ChromiumOS device over SSH connection."""
+    """Basic commands to interact with a ChromiumOS device over SSH."""
 
     MAKE_DEV_SSD_BIN = "/usr/share/vboot/bin/make_dev_ssd.sh"
     MOUNT_ROOTFS_RW_CMD = ["mount", "-o", "remount,rw", "/"]
@@ -1493,9 +1512,10 @@ class ChromiumOSDevice(RemoteDevice):
         """Initializes this object.
 
         Args:
-          hostname: A network hostname.
-          include_dev_paths: If true, add DEV_BIN_PATHS to $PATH for all commands.
-          kwargs: Args to pass to the parent constructor.
+            hostname: A network hostname.
+            include_dev_paths: If true, add DEV_BIN_PATHS to $PATH for all
+                commands.
+            kwargs: Args to pass to the parent constructor.
         """
         super().__init__(hostname, **kwargs)
         self._orig_path = None
@@ -1522,8 +1542,8 @@ class ChromiumOSDevice(RemoteDevice):
     def path(self):
         """The $PATH variable on the device prepended with DEV_BIN_PATHS."""
         if not self._path:
-            # If the remote path already has our dev paths (which is common), then
-            # there is no need for us to prepend.
+            # If the remote path already has our dev paths (which is common),
+            # then there is no need for us to prepend.
             orig_paths = self.orig_path.split(":")
             for path in reversed(DEV_BIN_PATHS.split(":")):
                 if path not in orig_paths:
@@ -1538,9 +1558,9 @@ class ChromiumOSDevice(RemoteDevice):
         """The /etc/lsb-release content on the device.
 
         Returns a dict of entries in /etc/lsb-release file. If multiple entries
-        have the same key, only the first entry is recorded. Returns an empty dict
-        if the reading command failed or the file is corrupted (i.e., does not have
-        the format of <key>=<value> for every line).
+        have the same key, only the first entry is recorded. Returns an empty
+        dict if the reading command failed or the file is corrupted (i.e., does
+        not have the format of <key>=<value> for every line).
         """
         if not self._lsb_release:
             try:
@@ -1617,14 +1637,15 @@ class ChromiumOSDevice(RemoteDevice):
         # TODO(yjhong): Make sure an update is not pending.
         logging.info("Need to reboot to actually disable the verification.")
         self.Reboot(timeout_sec=timeout_sec)
-        # After reboot, the rootfs is mounted read-only, so remount as read-write.
+        # After reboot, the rootfs is mounted read-only, so remount as
+        # read-write.
         self._RemountRootfsAsWritable()
 
     def MountRootfsReadWrite(self):
         """Checks mount types and remounts them as read-write if needed.
 
         Returns:
-          True if rootfs is mounted as read-write. False otherwise.
+            True if rootfs is mounted as read-write. False otherwise.
         """
         if not self._RootfsIsReadOnly():
             return True
@@ -1650,14 +1671,16 @@ class ChromiumOSDevice(RemoteDevice):
         self.run(["crossystem", "clear_tpm_owner_request=1"])
 
     def run(self, cmd, **kwargs):
-        """Executes a shell command on the device with output captured by default.
+        """Executes a shell command on the device.
+
+        Output captured by default.
 
         Also makes sure $PATH is set correctly by adding DEV_BIN_PATHS to
         'PATH' in |extra_env| if self._include_dev_paths is True.
 
         Args:
-          cmd: command to run. See RemoteAccess.RemoteSh documentation.
-          **kwargs: keyword arguments to pass along with cmd. See
+            cmd: command to run. See RemoteAccess.RemoteSh documentation.
+            kwargs: keyword arguments to pass along with cmd. See
             RemoteAccess.RemoteSh documentation.
         """
         if self._include_dev_paths:

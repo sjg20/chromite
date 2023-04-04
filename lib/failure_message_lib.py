@@ -60,10 +60,10 @@ class StageFailure(_StageFailure):
         """Create StageFailure from a StageFailureMessage instance.
 
         Args:
-          stage_failure_message: An instance of StageFailureMessage.
+            stage_failure_message: An instance of StageFailureMessage.
 
         Returns:
-          An instance of StageFailure.
+            An instance of StageFailure.
         """
         return StageFailure(
             stage_failure_message.failure_id,
@@ -92,12 +92,13 @@ class StageFailure(_StageFailure):
         """Get StageFailure from value dictionaries.
 
         Args:
-          failure_dict: A dict presenting values of a tuple from failureTable.
-          stage_dict: A dict presenting values of a tuple from buildStageTable.
-          build_dict: A dict presenting values of a tuple from buildTable.
+            failure_dict: A dict presenting values of a tuple from failureTable.
+            stage_dict: A dict presenting values of a tuple from
+                buildStageTable.
+            build_dict: A dict presenting values of a tuple from buildTable.
 
         Returns:
-          An instance of StageFailure.
+            An instance of StageFailure.
         """
         return StageFailure(
             failure_dict["id"],
@@ -134,10 +135,10 @@ class StageFailureMessage(object):
         """Construct a StageFailureMessage instance.
 
         Args:
-          stage_failure: An instance of StageFailure.
-          extra_info: The extra info of the origin failure, default to None.
-          stage_prefix_name: The prefix name (string) of the failed stage,
-            default to None.
+            stage_failure: An instance of StageFailure.
+            extra_info: The extra info of the origin failure, default to None.
+            stage_prefix_name: The prefix name (string) of the failed stage,
+                default to None.
         """
         self.failure_id = stage_failure.id
         self.build_stage_id = stage_failure.build_stage_id
@@ -156,7 +157,8 @@ class StageFailureMessage(object):
         if stage_prefix_name is not None:
             self.stage_prefix_name = stage_prefix_name
         else:
-            # No stage_prefix_name provided, extra prefix name from stage_failure.
+            # No stage_prefix_name provided, extra prefix name from
+            # stage_failure.
             self.stage_prefix_name = self._ExtractStagePrefixName(
                 self.stage_name
             )
@@ -181,11 +183,11 @@ class StageFailureMessage(object):
         """Decode extra info json into dict.
 
         Args:
-          extra_info: The extra_info of the origin exception, default to None.
+            extra_info: The extra_info of the origin exception, default to None.
 
         Returns:
-          An empty dict if extra_info is None; extra_info itself if extra_info is
-          a dict; else, load the json string into a dict and return it.
+            An empty dict if extra_info is None; extra_info itself if extra_info
+            is a dict; else, load the json string into a dict and return it.
         """
         if not extra_info:
             return {}
@@ -203,18 +205,18 @@ class StageFailureMessage(object):
         """Extract stage prefix name given a full stage name.
 
         Format examples in our current CIDB buildStageTable:
-          HWTest [bvt-arc] -> HWTest
-          HWTest -> HWTest
-          ImageTest -> ImageTest
-          ImageTest [amd64-generic] -> ImageTest
-          VMTest (attempt 1) -> VMTest
-          VMTest [amd64-generic] (attempt 1) -> VMTest
+            HWTest [bvt-arc] -> HWTest
+            HWTest -> HWTest
+            ImageTest -> ImageTest
+            ImageTest [amd64-generic] -> ImageTest
+            VMTest (attempt 1) -> VMTest
+            VMTest [amd64-generic] (attempt 1) -> VMTest
 
         Args:
-          stage_name: The full stage name (string) recorded in CIDB.
+            stage_name: The full stage name (string) recorded in CIDB.
 
         Returns:
-          The prefix stage name (string).
+            The prefix stage name (string).
         """
         pattern = r"([^ ]+)( +\[([^]]+)\])?( +\(([^)]+)\))?"
         m = re.compile(pattern).match(stage_name)
@@ -251,8 +253,8 @@ class CompoundFailureMessage(StageFailureMessage):
         """Construct a CompoundFailureMessage instance.
 
         Args:
-          stage_failure: An instance of StageFailure.
-          kwargs: Extra message information to pass to StageFailureMessage.
+            stage_failure: An instance of StageFailure.
+            kwargs: Extra message information to pass to StageFailureMessage.
         """
         super().__init__(stage_failure, **kwargs)
 
@@ -271,10 +273,10 @@ class CompoundFailureMessage(StageFailureMessage):
         """Convert a regular failure message instance to CompoundFailureMessage.
 
         Args:
-          failure_message: An instance of StageFailureMessage.
+            failure_message: An instance of StageFailureMessage.
 
         Returns:
-          A CompoundFailureMessage instance.
+            A CompoundFailureMessage instance.
         """
         return CompoundFailureMessage(
             StageFailure.GetStageFailureFromMessage(failure_message),
@@ -286,20 +288,20 @@ class CompoundFailureMessage(StageFailureMessage):
         """Check whether the inner failure list is empty.
 
         Returns:
-          True if self.inner_failures is empty; else, False.
+            True if self.inner_failures is empty; else, False.
         """
         return not bool(self.inner_failures)
 
     def HasExceptionCategories(self, exception_categories):
-        """Check whether any of the inner failures matches the exception categories.
+        """Check if any of the inner failures matches the exception categories.
 
         Args:
-          exception_categories: A set of exception categories (members of
-            constants.EXCEPTION_CATEGORY_ALL_CATEGORIES).
+            exception_categories: A set of exception categories (members of
+                constants.EXCEPTION_CATEGORY_ALL_CATEGORIES).
 
         Returns:
-          True if any of the inner failures matches a memeber in
-          exception_categories; else, False.
+            True if any of the inner failures matches a member in
+            exception_categories; else, False.
         """
         return any(
             x.exception_category in exception_categories
@@ -307,15 +309,15 @@ class CompoundFailureMessage(StageFailureMessage):
         )
 
     def MatchesExceptionCategories(self, exception_categories):
-        """Check whether all of the inner failures matches the exception categories.
+        """Check if all the inner failures matches the exception categories.
 
         Args:
-          exception_categories: A set of exception categories (members of
-            constants.EXCEPTION_CATEGORY_ALL_CATEGORIES).
+            exception_categories: A set of exception categories (members of
+                constants.EXCEPTION_CATEGORY_ALL_CATEGORIES).
 
         Returns:
-          True if all of the inner failures match a memeber in
-          exception_categories; else, False.
+            True if all the inner failures match a member in
+            exception_categories; else, False.
         """
         return not self.HasEmptyList() and all(
             x.exception_category in exception_categories
@@ -331,12 +333,12 @@ class FailureMessageManager(object):
         """Create a failure message instance depending on the exception type.
 
         Args:
-          stage_failure: An instance of StageFailure.
-          kwargs: Extra message information to pass to StageFailureMessage.
+            stage_failure: An instance of StageFailure.
+            kwargs: Extra message information to pass to StageFailureMessage.
 
         Returns:
-          A failure message instance of StageFailureMessage class (or its
-            sub-class)
+            A failure message instance of StageFailureMessage class (or its
+            subclass)
         """
         if stage_failure.exception_type in BUILD_SCRIPT_FAILURE_TYPES:
             return BuildScriptFailureMessage(stage_failure, **kwargs)
@@ -349,15 +351,16 @@ class FailureMessageManager(object):
     def ReconstructMessages(cls, failure_messages):
         """Reconstruct failure messages by nesting messages.
 
-        A failure message with not none outer_failure_id is an inner failure of its
-        outer failure message(failure_id == outer_failure_id). This method takes a
-        list of failure messages, reconstructs the list by 1) converting the outer
-        failure message into a CompoundFailureMessage instance 2) insert the inner
-        failure messages to the inner_failures list of their outer failure messages.
+        A failure message with not none outer_failure_id is an inner failure of
+        its outer failure message(failure_id == outer_failure_id). This method
+        takes a list of failure messages, reconstructs the list by 1) converting
+        the outer failure message into a CompoundFailureMessage instance 2)
+        insert the inner failure messages to the inner_failures list of their
+        outer failure messages.
         CompoundFailures in CIDB aren't nested
         (see failures_lib.ReportStageFailure), so there isn't another
-        inner failure list layer in a inner failure message and there're no circular
-        dependencies.
+        inner failure list layer in a inner failure message and there are no
+        circular dependencies.
 
         For example, given failure_messages list
           [A(failure_id=1),
@@ -367,18 +370,24 @@ class FailureMessageManager(object):
            E(failure_id=5, outer_failure_id=4),
            F(failure_id=6)]
         this method returns a reconstructed list:
-          [A(failure_id=1, inner_failures=[B(failure_id=2, outer_failure_id=1),
-                                           C(failure_id=3, outer_failure_id=1)]),
-           D(failure_id=4, inner_failures=[E(failure_id=5, outer_failure_id=4)]),
-           F(failure_id=6)]
+            [
+                A(failure_id=1, inner_failures=[
+                    B(failure_id=2, outer_failure_id=1),
+                    C(failure_id=3, outer_failure_id=1)
+                ]),
+                D(failure_id=4, inner_failures=[
+                    E(failure_id=5, outer_failure_id=4)
+                ]),
+                F(failure_id=6)
+            ]
 
         Args:
-          failure_messages: A list a failure message instances not nested.
+            failure_messages: A list a failure message instances not nested.
 
         Returns:
-          A list of failure message instances of StageFailureMessage class (or its
-            sub-class). Failure messages with not None outer_failure_id are nested
-            into the inner_failures list of their outer failure messages.
+            A list of failure message instances of StageFailureMessage class (or
+            its subclass). Failure messages with not None outer_failure_id are
+            nested into the inner_failures list of their outer failure messages.
         """
         failure_message_dict = {x.failure_id: x for x in failure_messages}
 
@@ -404,11 +413,11 @@ class FailureMessageManager(object):
         """Construct stage failure messages from failure entries from CIDB.
 
         Args:
-          stage_failures: A list of StageFailure instances.
+            stage_failures: A list of StageFailure instances.
 
         Returns:
-          A list of stage failure message instances of StageFailureMessage class
-          (or its sub-class). See return type of ReconstructMessages().
+            A list of stage failure message instances of StageFailureMessage
+            class (or its subclass). See return type of ReconstructMessages().
         """
         failure_messages = [cls.CreateMessage(f) for f in stage_failures]
 
