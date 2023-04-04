@@ -34,7 +34,7 @@ class Error(Exception):
 
 
 class NotInRepoError(Error):
-    """A repo operation was attempted outside of a repo repository."""
+    """A repo operation was attempted outside a repo repository."""
 
 
 class ProjectNotFoundError(Error):
@@ -48,10 +48,11 @@ class Repository(object):
         """Initialize Repository.
 
         Args:
-          root: Path to the root of a repo repository; must contain a .repo subdir.
+            root: Path to the root of a repo repository; must contain a .repo
+                subdir.
 
         Raises:
-          NotInRepoError: root didn't contain a .repo subdir.
+            NotInRepoError: root didn't contain a .repo subdir.
         """
         self.root = os.path.abspath(root)
         self._repo_dir = os.path.join(self.root, ".repo")
@@ -80,21 +81,21 @@ class Repository(object):
         """Initialize and return a new Repository with `repo init`.
 
         Args:
-          root: Path to the new repo root. Must not be within an existing
-            repo repository.
-          manifest_url: Manifest repository URL.
-          manifest_branch: Manifest branch or revision.
-          manifest_name: Initial manifest file from manifest repository.
-          mirror: If True, create a repo mirror instead of a checkout.
-          reference: Location of a mirror directory to reference.
-          depth: Create shallow git clones with the given depth.
-          groups: Restrict manifest projects to the given groups.
-          repo_url: Repo command repository URL.
-          repo_branch: Repo command repository branch or revision.
+            root: Path to the new repo root. Must not be within an existing
+                repo repository.
+            manifest_url: Manifest repository URL.
+            manifest_branch: Manifest branch or revision.
+            manifest_name: Initial manifest file from manifest repository.
+            mirror: If True, create a repo mirror instead of a checkout.
+            reference: Location of a mirror directory to reference.
+            depth: Create shallow git clones with the given depth.
+            groups: Restrict manifest projects to the given groups.
+            repo_url: Repo command repository URL.
+            repo_branch: Repo command repository branch or revision.
 
         Raises:
-          Error: root already contained a .repo subdir.
-          RunCommandError: `repo init` failed.
+            Error: root already contained a .repo subdir.
+            RunCommandError: `repo init` failed.
         """
         existing_root = git.FindRepoCheckoutRoot(root)
         if existing_root is not None:
@@ -132,7 +133,7 @@ class Repository(object):
         """Searches for a repo directory and returns a Repository if found.
 
         Args:
-          path: The path where the search starts.
+            path: The path where the search starts.
         """
         repo_root = git.FindRepoCheckoutRoot(path)
         if repo_root is None:
@@ -144,10 +145,10 @@ class Repository(object):
         """Searches for a repo directory and returns a Repository if found.
 
         Args:
-          path: The path where the search starts.
+            path: The path where the search starts.
 
         Raises:
-          NotInRepoError: if no Repository is found.
+            NotInRepoError: if no Repository is found.
         """
         repo = cls.Find(path)
         if repo is None:
@@ -158,18 +159,19 @@ class Repository(object):
         """Wrapper for `repo`.
 
         Args:
-          repo_cmd: List of arguments to pass to `repo`.
-          cwd: The path to run the command in. Defaults to Repository root.
-            Must be within the root.
-          capture_output: Whether to capture the output, making it available in the
-            CompletedProcess object, or print it to stdout/err. Defaults to False.
+            repo_cmd: List of arguments to pass to `repo`.
+            cwd: The path to run the command in. Defaults to Repository root.
+                Must be within the root.
+            capture_output: Whether to capture the output, making it available
+                in the CompletedProcess object, or print it to stdout/err.
+                Defaults to False.
 
         Returns:
-          A CompletedProcess object.
+            A CompletedProcess object.
 
         Raises:
-          NotInRepoError: if cwd is not within the Repository root.
-          RunCommandError: if the command failed.
+            NotInRepoError: if cwd is not within the Repository root.
+            RunCommandError: if the command failed.
         """
         # Use the checkout's copy of repo so that it doesn't have to be in PATH.
         # repo has 'python' in shebang, which may call python2. So use python3
@@ -205,16 +207,16 @@ class Repository(object):
         """Run `repo sync`.
 
         Args:
-          projects: A list of project names to sync.
-          local_only: Only update working tree; don't fetch.
-          current_branch: Fetch only the current branch.
-          jobs: Number of projects to sync in parallel.
-          manifest_path: Path to a manifest XML file to use for this sync.
-          cwd: The path to run the command in. Defaults to Repository root.
+            projects: A list of project names to sync.
+            local_only: Only update working tree; don't fetch.
+            current_branch: Fetch only the current branch.
+            jobs: Number of projects to sync in parallel.
+            manifest_path: Path to a manifest XML file to use for this sync.
+            cwd: The path to run the command in. Defaults to Repository root.
 
         Raises:
-          NotInRepoError: if cwd is not within the Repository root.
-          RunCommandError: if the command failed.
+            NotInRepoError: if cwd is not within the Repository root.
+            RunCommandError: if the command failed.
         """
         args = _ListArg(projects)
         if local_only:
@@ -235,14 +237,14 @@ class Repository(object):
         """Run `repo start`.
 
         Args:
-          name: The name of the branch to create.
-          projects: A list of projects to create the branch in. Defaults to
-            creating in all projects.
-          cwd: The path to run the command in. Defaults to Repository root.
+            name: The name of the branch to create.
+            projects: A list of projects to create the branch in. Defaults to
+                creating in all projects.
+            cwd: The path to run the command in. Defaults to Repository root.
 
         Raises:
-          NotInRepoError: if cwd is not within the Repository root.
-          RunCommandError: if `repo start` failed.
+            NotInRepoError: if cwd is not within the Repository root.
+            RunCommandError: if `repo start` failed.
         """
         if projects is None:
             projects = ["--all"]
@@ -251,19 +253,19 @@ class Repository(object):
         self._Run(["start", name] + projects, cwd=cwd)
 
     def List(self, projects=None, cwd=None):
-        """Run `repo list` and returns a list of ProjectInfos for synced projects.
+        """Run `repo list` to get a list of ProjectInfos for synced projects.
 
         Note that this may produce a different list than Manifest().Projects()
         due to partial project syncing (e.g. `repo init -g minilayout`).
 
         Args:
-          projects: A list of projects to return. Defaults to all projects.
-          cwd: The path to run the command in. Defaults to Repository root.
+            projects: A list of projects to return. Defaults to all projects.
+            cwd: The path to run the command in. Defaults to Repository root.
 
         Raises:
-          ProjectNotFoundError: if a project in 'projects' was not found.
-          NotInRepoError: if cwd is not within the Repository root.
-          RunCommandError: if `repo list` otherwise failed.
+            ProjectNotFoundError: if a project in 'projects' was not found.
+            NotInRepoError: if cwd is not within the Repository root.
+            RunCommandError: if `repo list` otherwise failed.
         """
         projects = _ListArg(projects)
         try:
@@ -286,12 +288,13 @@ class Repository(object):
         """Run `repo manifest` and return a repo_manifest.Manifest.
 
         Args:
-          revision_locked: If True, create a "revision locked" manifest with each
-          project's revision set to that project's current HEAD.
+            revision_locked: If True, create a "revision locked" manifest with
+                each project's revision set to that project's current HEAD.
 
         Raises:
-          RunCommandError: if `repo list` otherwise failed.
-          repo_manifest.Error: if the output couldn't be parsed into a Manifest.
+            RunCommandError: if `repo list` otherwise failed.
+            repo_manifest.Error: if the output couldn't be parsed into a
+                Manifest.
         """
         cmd = ["manifest"]
         if revision_locked:
@@ -303,15 +306,15 @@ class Repository(object):
         """Efficiently `cp` the .repo directory, using hardlinks if possible.
 
         Args:
-          dest_root: Path to copy the .repo directory into. Must exist and must
-            not already contain a .repo directory.
+            dest_root: Path to copy the .repo directory into. Must exist and
+                must not already contain a .repo directory.
 
         Returns:
-          A Repository pointing at dest_root.
+            A Repository pointing at dest_root.
 
         Raises:
-          Error: if dest_root already contained a .repo subdir.
-          RunCommandError: if `cp` failed.
+            Error: if dest_root already contained a .repo subdir.
+            RunCommandError: if `cp` failed.
         """
         existing_root = git.FindRepoCheckoutRoot(dest_root)
         if existing_root is not None:
@@ -320,8 +323,8 @@ class Repository(object):
         dest_path = os.path.abspath(dest_root)
 
         with _RmDirOnError(os.path.join(dest_root, ".repo")):
-            # First, try to hard link project objects to dest_dir; this may fail if
-            # e.g. the src and dest are on different mounts.
+            # First, try to hard link project objects to dest_dir; this may fail
+            # if e.g. the src and dest are on different mounts.
             for project in self.List():
                 objects_dir = PROJECT_OBJECTS_PATH_FORMAT % project.name
                 try:
@@ -359,9 +362,9 @@ class Repository(object):
                     cwd=self.root,
                 )
             except cros_build_lib.RunCommandError as e:
-                # Despite the --no-clobber, `cp` still complains when trying to copy a
-                # file to its existing hard link. Filter these errors from the output
-                # to see if there were any real failures.
+                # Despite the --no-clobber, `cp` still complains when trying to
+                # copy a file to its existing hard link. Filter these errors
+                # from the output to see if there were any real failures.
                 errors = e.stderr.splitlines()
                 real_errors = [
                     x for x in errors if "are the same file" not in x
@@ -376,11 +379,11 @@ def _ListArg(arg):
     """Return a new list from arg.
 
     Args:
-      arg: If a non-string iterable, return a new list with its contents. If
-        None, return an empty list.
+        arg: If a non-string iterable, return a new list with its contents. If
+            None, return an empty list.
 
     Raises:
-      TypeError: if arg is a string or non-iterable (except None).
+        TypeError: if arg is a string or non-iterable (except None).
     """
     if isinstance(arg, str):
         raise TypeError("string not allowed")

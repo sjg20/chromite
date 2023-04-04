@@ -47,8 +47,8 @@ class LocalSqlServerTestCase(cros_test_lib.TempDirTestCase):
 
     - This test must run insde the chroot.
     - This class provides attributes:
-      - mysqld_host: The IP of the local mysqld server.
-      - mysqld_port: The port of the local mysqld server.
+        - mysqld_host: The IP of the local mysqld server.
+        - mysqld_port: The port of the local mysqld server.
     """
 
     # Neither of these are in the PATH for a non-sudo user.
@@ -63,8 +63,8 @@ class LocalSqlServerTestCase(cros_test_lib.TempDirTestCase):
         self._mysqld_dir = None
         self._mysqld_runner = None
 
-        # This class has assumptions about the mariadb installation that are only
-        # guaranteed to hold inside the chroot.
+        # This class has assumptions about the mariadb installation that are
+        # only guaranteed to hold inside the chroot.
         cros_build_lib.AssertInsideChroot()
 
     def setUp(self):
@@ -117,8 +117,8 @@ class LocalSqlServerTestCase(cros_test_lib.TempDirTestCase):
         ]
         try:
             # Retry at:
-            # 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 255 seconds total timeout in case
-            # of failure.
+            # 1 + 2 + 4 + 8 + 16 + 32 + 64 + 128 = 255 seconds total timeout in
+            # case of failure.
             # Smaller timeouts make this check flaky on heavily loaded builders.
             retry_util.RunCommandWithRetries(
                 cmd=cmd,
@@ -195,10 +195,10 @@ class CIDBIntegrationTest(LocalSqlServerTestCase):
         """Create a CIDBConnection with the local mysqld instance.
 
         Args:
-          cidb_user: The mysql user to connect as.
+            cidb_user: The mysql user to connect as.
 
         Returns:
-          The created CIDBConnection object.
+            The created CIDBConnection object.
         """
         creds_dir_path = os.path.join(self.tempdir, "local_cidb_creds")
         osutils.RmDir(creds_dir_path, ignore_missing=True)
@@ -227,12 +227,12 @@ class CIDBIntegrationTest(LocalSqlServerTestCase):
         """Create an empty database with migrations applied.
 
         Args:
-          max_schema_version: The highest schema version migration to apply,
-          defaults to None in which case all migrations will be applied.
+            max_schema_version: The highest schema version migration to apply,
+                defaults to None in which case all migrations will be applied.
 
         Returns:
-          A CIDBConnection instance, connected to a an empty database as the
-          root user.
+            A CIDBConnection instance, connected to empty database as the
+            root user.
         """
         # Note: We do not use the cidb.CIDBConnectionFactory
         # in this module. That factory method is used only to construct
@@ -271,7 +271,7 @@ class SchemaDumpTest(CIDBIntegrationTest):
         """Helper to dump the schema.
 
         Returns:
-          CIDB database schema as a single string.
+            CIDB database schema as a single string.
         """
         cmd = [
             "mysqldump",
@@ -330,11 +330,11 @@ class CIDBMigrationsTest(CIDBIntegrationTest):
             db.ApplySchemaMigrations(i)
 
     def testWaterfallMigration(self):
-        """Test that migrating waterfall from enum to varchar preserves value."""
+        """Verify migrating waterfall from enum to varchar preserves value."""
         self.skipTest("Skipped obsolete waterfall migration test.")
-        # This test no longer runs. It was used only to confirm the correctness of
-        # migration #41. In #43, the InsertBuild API changes in a way that is not
-        # compatible with this test.
+        # This test no longer runs. It was used only to confirm the correctness
+        # of migration #41. In #43, the InsertBuild API changes in a way that is
+        # not compatible with this test.
         # The test code remains in place for demonstration purposes only.
         db = self._PrepareFreshDatabase(40)
         build_id = db.InsertBuild(
@@ -432,7 +432,7 @@ def GetTestDataSeries(test_data_path):
     """Get metadata from json files at |test_data_path|.
 
     Returns:
-      A list of CBuildbotMetadata objects, sorted by their start time.
+        A list of CBuildbotMetadata objects, sorted by their start time.
     """
     filenames = glob.glob(os.path.join(test_data_path, "*.json"))
     metadatas = []
@@ -472,8 +472,8 @@ class DataSeries0Test(CIDBIntegrationTest):
             len(metadatas), 630, "Did not load expected amount of " "test data"
         )
 
-        # Perform some smoke check queries against the database, connected
-        # as the readonly user. Apply schema migrations first to ensure that we can
+        # Perform some smoke check queries against the database, connected as
+        # the readonly user. Apply schema migrations first to ensure that we can
         # use the latest version or the readonly password.
         db.ApplySchemaMigrations()
         readonly_db = self.LocalCIDBConnection(self.CIDB_USER_READONLY)
@@ -562,10 +562,10 @@ class DataSeries0Test(CIDBIntegrationTest):
     def _last_updated_time_checks(self, db):
         """Sanity checks on the last_updated column."""
         # We should have a diversity of last_updated times. Since the timestamp
-        # resolution is only 1 second, and we have lots of parallelism in the test,
-        # we won't have a distinct last_updated time per row.
-        # As the test is now local, almost everything happens together, so we check
-        # for a tiny number of distinct timestamps.
+        # resolution is only 1 second, and we have lots of parallelism in the
+        # test, we won't have a distinct last_updated time per row.
+        # As the test is now local, almost everything happens together, so we
+        # check for a tiny number of distinct timestamps.
         distinct_last_updated = (
             db._GetEngine()
             .execute("select count(distinct last_updated) from buildTable")
@@ -586,14 +586,14 @@ class DataSeries0Test(CIDBIntegrationTest):
             ids_by_last_updated.index(1), ids_by_last_updated.index(200)
         )
 
-        # However, build #1 (which was a master build) should have been last updated
-        # AFTER build #2 which was its slave.
+        # However, build #1 (which was a master build) should have been last
+        # updated AFTER build #2 which was its slave.
         self.assertGreater(
             ids_by_last_updated.index(1), ids_by_last_updated.index(2)
         )
 
     def _start_and_finish_time_checks(self, db):
-        """Sanity checks that correct data was recorded, and can be retrieved."""
+        """Quick checks that correct data was recorded, and can be retrieved."""
         max_start_time = (
             db._GetEngine()
             .execute("select max(start_time) from buildTable")
@@ -621,7 +621,8 @@ class DataSeries0Test(CIDBIntegrationTest):
         mismatching_times = (
             db._GetEngine()
             .execute(
-                "select count(*) from buildTable where finish_time != last_updated"
+                "select count(*) from buildTable"
+                "where finish_time != last_updated"
             )
             .fetchall()[0][0]
         )
@@ -757,7 +758,7 @@ class BuildTableTest(CIDBIntegrationTest):
         )
 
     def _GetBuildToBuildbucketIdList(self, slave_statuses):
-        """Convert slave_statuses to a list of (build_config, buildbucket_id)."""
+        """Convert slave_statuses to list of (build_config, buildbucket_id)."""
         return [
             (x["build_config"], x["buildbucket_id"]) for x in slave_statuses
         ]
@@ -894,7 +895,8 @@ class DataSeries1Test(CIDBIntegrationTest):
         main_firmware_versions = (
             bot_db._GetEngine()
             .execute(
-                "select count(distinct main_firmware_version) from boardPerBuildTable"
+                "select count(distinct main_firmware_version) "
+                "from boardPerBuildTable"
             )
             .fetchall()[0][0]
         )
@@ -904,7 +906,8 @@ class DataSeries1Test(CIDBIntegrationTest):
         mismatching_times = (
             bot_db._GetEngine()
             .execute(
-                "select count(*) from buildTable where finish_time != last_updated"
+                "select count(*) from buildTable "
+                "where finish_time != last_updated"
             )
             .fetchall()[0][0]
         )
@@ -914,12 +917,12 @@ class DataSeries1Test(CIDBIntegrationTest):
         """Helper method to simulate an individual canary build.
 
         Args:
-          db: cidb instance to use for simulation
-          metadata: CBuildbotMetadata instance of build to simulate.
-          master_build_id: Optional id of master build.
+            db: cidb instance to use for simulation
+            metadata: CBuildbotMetadata instance of build to simulate.
+            master_build_id: Optional id of master build.
 
         Returns:
-          build_id of build that was simulated.
+            build_id of build that was simulated.
         """
         build_id = _SimulateBuildStart(db, metadata, master_build_id)
         metadata_dict = metadata.GetDict()

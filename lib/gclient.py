@@ -30,7 +30,7 @@ def FindGclientFile(path):
     """Returns the nearest higher-level gclient file from the specified path.
 
     Args:
-      path: The path to use. Defaults to cwd.
+        path: The path to use. Defaults to cwd.
     """
     return osutils.FindInPathParents(".gclient", path, test_func=os.path.isfile)
 
@@ -47,11 +47,11 @@ def LoadGclientFile(path):
     """Load a gclient file and return the solutions defined by the gclient file.
 
     Args:
-      path: The gclient file to load.
+        path: The gclient file to load.
 
     Returns:
-      A list of solutions defined by the gclient file or an empty list if no
-      solutions exists.
+        A list of solutions defined by the gclient file or an empty list if no
+        solutions exists.
     """
     global_scope = {}
     # Similar to depot_tools, we use exec() to evaluate the gclient file,
@@ -68,15 +68,15 @@ def _FindOrAddSolution(solutions, name):
     """Find a solution of the specified name from the given list of solutions.
 
     If no solution with the specified name is found, a solution with the
-    specified name is appended to the given list of solutions. This function thus
-    always returns a solution.
+    specified name is appended to the given list of solutions. This function
+    thus always returns a solution.
 
     Args:
-      solutions: The list of solutions to search from.
-      name: The solution name to search for.
+        solutions: The list of solutions to search from.
+        name: The solution name to search for.
 
     Returns:
-      The solution with the specified name.
+        The solution with the specified name.
     """
     for solution in solutions:
         if solution["name"] == name:
@@ -112,7 +112,7 @@ def _GetGclientURLs(internal, rev):
     See WriteConfigFile below.
 
     Returns:
-      Tuple of (name, url, deps_file).
+        Tuple of (name, url, deps_file).
     """
     if rev is None or git.IsSHA1(rev) or rev == "HEAD":
         # Regular chromium checkout; src may float to origin/main or be pinned.
@@ -127,10 +127,11 @@ def _GetGclientURLs(internal, rev):
         except ValueError:
             major = None
         # Starting with m90, start using the normal gclient fetch process rather
-        # than buildspecs. But keep using buildspecs for older versions for safety.
+        # than buildspecs. But keep using buildspecs for older versions for
+        # safety.
         if major and major < 90 and internal:
-            # Internal buildspec: check out the buildspec repo and set deps_file to
-            # the path to the desired release spec.
+            # Internal buildspec: check out the buildspec repo and set deps_file
+            # to the path to the desired release spec.
             site_params = config_lib.GetSiteParams()
             url = site_params.INTERNAL_GOB_URL + "/chrome/tools/buildspec.git"
 
@@ -139,8 +140,8 @@ def _GetGclientURLs(internal, rev):
 
             return "CHROME_DEPS", url, "releases/%s/%s" % (rev, deps_file)
         else:
-            # Normal gclient fetch process: use the main chromium src repository,
-            # pinned to the release tag.
+            # Normal gclient fetch process: use the main chromium src
+            # repository, pinned to the release tag.
             url = constants.CHROMIUM_GOB_URL + "@" + rev
             return "src", url, None
 
@@ -190,8 +191,8 @@ def _GetGclientSpec(internal, rev, template, use_cache, managed, git_cache_dir):
 
     if use_cache:
         if not os.path.exists(git_cache_dir):
-            # Horrible hack, but we need a place to put the cache, and it can change
-            # dynamically (such as when inside the chroot).
+            # Horrible hack, but we need a place to put the cache, and it can
+            # change dynamically (such as when inside the chroot).
             git_cache_dir = "/tmp/git-cache"
 
         result += "cache_dir = '%s'\n" % git_cache_dir
@@ -212,26 +213,26 @@ def WriteConfigFile(
     """Initialize the specified directory as a gclient checkout.
 
     For gclient documentation, see:
-      https://chromium.googlesource.com/chromium/tools/depot_tools/+/HEAD/README.gclient.md
+        https://chromium.googlesource.com/chromium/tools/depot_tools/+/HEAD/README.gclient.md
 
     Args:
-      gclient: Path to gclient.
-      cwd: Directory to sync.
-      internal: Whether you want an internal checkout.
-      rev: Revision or tag to use.
-          - If None, use the latest from trunk.
-          - If this is a sha1, use the specified revision.
-          - Otherwise, treat this as a chrome version string.
-      template: An optional file to provide a template of gclient solutions.
-                _GetGclientSolutions iterates through the solutions specified
-                by the template and performs appropriate modifications such as
-                filling information like url and revision and adding extra
-                solutions.
-      use_cache: An optional Boolean flag to indicate if the git cache should
-                 be used when available (on a continuous-integration builder).
-      managed: Default value of gclient config's 'managed' field. Default True
-               (see crbug.com/624177).
-      git_cache_dir: Git Cache directory to use. If None will use /b /git-cache.
+        gclient: Path to gclient.
+        cwd: Directory to sync.
+        internal: Whether you want an internal checkout.
+        rev: Revision or tag to use.
+            - If None, use the latest from trunk.
+            - If this is a sha1, use the specified revision.
+            - Otherwise, treat this as a chrome version string.
+        template: An optional file to provide a template of gclient solutions.
+            _GetGclientSolutions iterates through the solutions specified by the
+            template and performs appropriate modifications such as filling
+            information like url and revision and adding extra solutions.
+        use_cache: An optional Boolean flag to indicate if the git cache should
+            be used when available (on a continuous-integration builder).
+        managed: Default value of gclient config's 'managed' field. Default True
+            (see crbug.com/624177).
+        git_cache_dir: Git Cache directory to use. If None will use
+            /b/git-cache.
     """
     if not git_cache_dir:
         git_cache_dir = "/b/git-cache"
@@ -247,8 +248,8 @@ def Revert(gclient, cwd):
     """Revert all local changes.
 
     Args:
-      gclient: Path to gclient.
-      cwd: Directory to revert.
+        gclient: Path to gclient.
+        cwd: Directory to revert.
     """
     cros_build_lib.run([gclient, "revert", "--nohooks"], cwd=cwd)
 
@@ -257,15 +258,15 @@ def Sync(gclient, cwd, reset=False, nohooks=True, verbose=True, run_args=None):
     """Sync the specified directory using gclient.
 
     Args:
-      gclient: Path to gclient.
-      cwd: Directory to sync.
-      reset: Reset to pristine version of the source code.
-      nohooks: If set, add '--nohooks' argument.
-      verbose: If set, add '--verbose' argument.
-      run_args: If set (dict), pass to run as kwargs.
+        gclient: Path to gclient.
+        cwd: Directory to sync.
+        reset: Reset to pristine version of the source code.
+        nohooks: If set, add '--nohooks' argument.
+        verbose: If set, add '--verbose' argument.
+        run_args: If set (dict), pass to run as kwargs.
 
     Returns:
-      A CompletedProcess object.
+        A CompletedProcess object.
     """
     if run_args is None:
         run_args = {}

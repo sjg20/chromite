@@ -45,10 +45,11 @@ class RecordedTraceback(object):
         """Construct a RecordedTraceback object.
 
         Args:
-          failed_stage: The stage that failed during the build. E.g., HWTest [bvt]
-          failed_prefix: The prefix of the stage that failed. E.g., HWTest
-          exception: The raw exception object.
-          traceback: The full stack trace for the failure, as a string.
+            failed_stage: The stage that failed during the build.
+                E.g., HWTest [bvt]
+            failed_prefix: The prefix of the stage that failed. E.g., HWTest
+            exception: The raw exception object.
+            traceback: The full stack trace for the failure, as a string.
         """
         self.failed_stage = failed_stage
         self.failed_prefix = failed_prefix
@@ -71,12 +72,13 @@ class _Results(object):
     SPLIT_TOKEN = r"\_O_/"
 
     def __init__(self):
-        # List of results for all stages that's built up as we run. Members are of
-        #  the form ('name', SUCCESS | FORGIVEN | Exception, None | description)
+        # List of results for all stages that's built up as we run. Members are
+        # of the form:
+        #   ('name', SUCCESS | FORGIVEN | Exception, None | description)
         self._results_log = []
 
-        # A list of instances of failure_message_lib.StageFailureMessage to present
-        # the exceptions threw by failed stages.
+        # A list of instances of failure_message_lib.StageFailureMessage to
+        # present the exceptions threw by failed stages.
         self._failure_message_results = []
 
         # Stages run in a previous run and restored. Stored as a dictionary of
@@ -93,7 +95,7 @@ class _Results(object):
         """Check to see if this stage was previously completed.
 
         Returns:
-          A boolean showing the stage was successful in the previous run.
+            A boolean showing the stage was successful in the previous run.
         """
         return self._previous.get(name)
 
@@ -105,9 +107,9 @@ class _Results(object):
         This method returns true if all was successful or forgiven or skipped.
 
         Args:
-          buildstore: A BuildStore instance to make DB calls.
-          buildbucket_id: buildbucket_id of the build to check.
-          name: stage name of current stage.
+            buildstore: A BuildStore instance to make DB calls.
+            buildbucket_id: buildbucket_id of the build to check.
+            name: stage name of current stage.
         """
         build_succeess = all(
             entry.result in self.NON_FAILURE_TYPES
@@ -126,12 +128,12 @@ class _Results(object):
     def _BuildSucceededFromCIDB(
         self, buildstore=None, buildbucket_id=None, name=None
     ):
-        """Return True if all stages recorded in buildbucket have passing states.
+        """Return True if all stages recorded in buildbucket passed.
 
         Args:
-          buildstore: A BuildStore instance to make DB calls.
-          buildbucket_id: buildbucket_id of the build to check.
-          name: stage name of current stage.
+            buildstore: A BuildStore instance to make DB calls.
+            buildbucket_id: buildbucket_id of the build to check.
+            name: stage name of current stage.
         """
         if (
             buildstore is not None
@@ -187,21 +189,20 @@ class _Results(object):
         """Store off an additional stage result.
 
         Args:
-          name: The name of the stage (e.g. HWTest [bvt])
-          result:
-            Result should be one of:
-              Results.SUCCESS if the stage was successful.
-              Results.SKIPPED if the stage was skipped.
-              Results.FORGIVEN if the stage had warnings.
-              Otherwise, it should be the exception stage errored with.
-          description:
-            The textual backtrace of the exception, or None
-          prefix: The prefix of the stage (e.g. HWTest). Defaults to
-            the value of name.
-          board: The board associated with the stage, if any. Defaults to ''.
-          time: How long the result took to complete.
-          build_stage_id: The id of the failed build stage to record, default to
-            None.
+            name: The name of the stage (e.g. HWTest [bvt])
+            result:
+                Result should be one of:
+                    Results.SUCCESS if the stage was successful.
+                    Results.SKIPPED if the stage was skipped.
+                    Results.FORGIVEN if the stage had warnings.
+                    Otherwise, it should be the exception stage errored with.
+            description: The textual backtrace of the exception, or None
+            prefix: The prefix of the stage (e.g. HWTest). Defaults to
+                the value of name.
+            board: The board associated with the stage, if any. Defaults to ''.
+            time: How long the result took to complete.
+            build_stage_id: The id of the failed build stage to record, default
+                None.
         """
         if prefix is None:
             prefix = name
@@ -222,7 +223,7 @@ class _Results(object):
         """Fetch stage results.
 
         Returns:
-          A list with one entry per stage run with a result.
+            A list with one entry per stage run with a result.
         """
         return self._results_log
 
@@ -230,7 +231,7 @@ class _Results(object):
         """Fetch stage results.
 
         Returns:
-          A list of stages names that were completed in a previous run.
+            A list of stages names that were completed in a previous run.
         """
         return self._previous
 
@@ -242,7 +243,7 @@ class _Results(object):
             out.write(self.SPLIT_TOKEN.join(str(x) for x in entry) + "\n")
 
     def RestoreCompletedStages(self, out):
-        """Load the successfully completed stages from the provided file |out|."""
+        """Load the successfully completed stages from |out|."""
         # Read the file, and strip off the newlines.
         for line in out:
             record = line.strip().split(self.SPLIT_TOKEN)
@@ -260,13 +261,13 @@ class _Results(object):
         """Get a list of the exceptions that failed the build.
 
         Returns:
-          A list of RecordedTraceback objects.
+            A list of RecordedTraceback objects.
         """
         tracebacks = []
         for entry in self._results_log:
-            # If entry.result is not in NON_FAILURE_TYPES, then the stage failed, and
-            # entry.result is the exception object and entry.description is a string
-            # containing the full traceback.
+            # If entry.result is not in NON_FAILURE_TYPES, then the stage
+            # failed, and entry.result is the exception object and
+            # entry.description is a string containing the full traceback.
             if entry.result not in self.NON_FAILURE_TYPES:
                 traceback = RecordedTraceback(
                     entry.name, entry.prefix, entry.result, entry.description
@@ -275,11 +276,11 @@ class _Results(object):
         return tracebacks
 
     def Report(self, out, current_version=None):
-        """Generate a user friendly text display of the results data.
+        """Generate a user-friendly text display of the result data.
 
         Args:
-          out: Output stream to write to (e.g. sys.stdout).
-          current_version: Chrome OS version associated with this report.
+            out: Output stream to write to (e.g. sys.stdout).
+            current_version: Chrome OS version associated with this report.
         """
         results = self._results_log
 
@@ -312,8 +313,9 @@ class _Results(object):
             else:
                 status = "FAIL"
                 if isinstance(result, cros_build_lib.RunCommandError):
-                    # If there was a run error, give just the command that failed, not
-                    # its full argument list, since those are usually too long.
+                    # If there was a run error, give just the command that
+                    # failed, not its full argument list, since those are
+                    # usually too long.
                     details = " in %s" % result.cmd[0]
                 elif isinstance(result, failures_lib.BuildScriptFailure):
                     # BuildScriptFailure errors publish a 'short' name of the

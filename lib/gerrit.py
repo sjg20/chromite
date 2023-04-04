@@ -256,16 +256,16 @@ class GerritHelper(object):
         """Free-form query of a gerrit change that expects a single result.
 
         Args:
-          change: A gerrit change number.
-          **kwargs:
-            dryrun: Don't query the gerrit server; just return None.
-            must_match: Raise an exception if the query comes back empty.  If this
-                is False, an unsatisfied query will return None.
+            change: A gerrit change number.
+            **kwargs:
+                dryrun: Don't query the gerrit server; just return None.
+                must_match: Raise an exception if the query comes back empty.
+                    If this is False, an unsatisfied query will return None.
             Refer to Query() docstring for remaining arguments.
 
         Returns:
-          If kwargs['raw'] == True, return a python dict representing the
-          change; otherwise, return a cros_patch.GerritPatch object.
+            If kwargs['raw'] == True, return a python dict representing the
+            change; otherwise, return a cros_patch.GerritPatch object.
         """
         query_kwds = kwargs
         dryrun = query_kwds.get("dryrun")
@@ -299,24 +299,25 @@ class GerritHelper(object):
         """Free-form query for gerrit changes.
 
         Args:
-          change: ChangeId, git commit hash, or gerrit number for a change.
-          sort: A functor to extract a sort key from a cros_patch.GerritChange
-              object, for sorting results..  If this is None, results will not be
-              sorted.
-          current_patch: If True, ask the gerrit server for extra information about
-              the latest uploaded patch.
-          options: Deprecated.
-          dryrun: If True, don't query the gerrit server; return an empty list.
-          raw: If True, return a list of python dict's representing the query
-              results.  Otherwise, return a list of cros_patch.GerritPatch.
-          start: Offset in the result set to start at.
-          bypass_cache: Query each change to make sure data is up to date.
-          verbose: Whether to get all revisions and details about a change.
-          kwargs: A dict of query parameters, as described here:
-            https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
+            change: ChangeId, git commit hash, or gerrit number for a change.
+            sort: A functor to extract a sort key from a cros_patch.GerritChange
+                object, for sorting results.  If this is None, results will not
+                be sorted.
+            current_patch: If True, ask the gerrit server for extra information
+                about the latest uploaded patch.
+            options: Deprecated.
+            dryrun: If True, don't query the gerrit server; return an empty
+                list.
+            raw: If True, return a list of python dict's representing the query
+                results.  Otherwise, return a list of cros_patch.GerritPatch.
+            start: Offset in the result set to start at.
+            bypass_cache: Query each change to make sure data is up to date.
+            verbose: Whether to get all revisions and details about a change.
+            **kwargs: A dict of query parameters, as described here:
+                https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
 
         Returns:
-          A list of python dicts or cros_patch.GerritChange.
+            A list of python dicts or cros_patch.GerritChange.
         """
         query_kwds = kwargs
         if options:
@@ -356,7 +357,8 @@ class GerritHelper(object):
             kwargs["commit"] = change
             change = None
         elif change and cros_patch.ParseChangeID(change):
-            # Use change:change-id for accurate query results (crbug.com/357876).
+            # Use change:change-id for accurate query results
+            # (crbug.com/357876).
             kwargs["change"] = change
             change = None
         elif change and cros_patch.ParseFullChangeID(change):
@@ -406,9 +408,9 @@ class GerritHelper(object):
             )
             result.extend(moar)
 
-        # NOTE: Query results are served from the gerrit cache, which may be stale.
-        # To make sure the patch information is accurate, re-request each query
-        # result directly, circumventing the cache.  For reference:
+        # NOTE: Query results are served from the gerrit cache, which may be
+        # stale. To make sure the patch information is accurate, re-request each
+        # query result directly, circumventing the cache.  For reference:
         #   https://code.google.com/p/chromium/issues/detail?id=302072
         if bypass_cache:
             result = self.GetMultipleChangeDetail(
@@ -431,11 +433,11 @@ class GerritHelper(object):
         """Query the gerrit server for multiple changes using GetChangeDetail.
 
         Args:
-          changes: A sequence of gerrit change numbers.
-          verbose: (optional) Whether to return more properties of the change
+            changes: A sequence of gerrit change numbers.
+            verbose: (optional) Whether to return more properties of the change.
 
         Returns:
-          A list of the raw output of GetChangeDetail.
+            A list of the raw output of GetChangeDetail.
         """
         inputs = [[change] for change in changes]
         return parallel.RunTasksInProcessPool(
@@ -448,10 +450,10 @@ class GerritHelper(object):
         """Query the gerrit server for multiple changes.
 
         Args:
-          changes: A sequence of gerrit change numbers.
+            changes: A sequence of gerrit change numbers.
 
         Returns:
-          A list of cros_patch.GerritPatch.
+            A list of cros_patch.GerritPatch.
         """
         if not changes:
             return
@@ -479,8 +481,8 @@ class GerritHelper(object):
         returned.
         """
         # TODO(davidjames): Deprecate the ability to pass in strings to these
-        # functions -- API users should just pass in a GerritPatch instead or use
-        # the gob_util APIs directly.
+        #   functions -- API users should just pass in a GerritPatch instead or
+        #   use the gob_util APIs directly.
         if isinstance(change, cros_patch.GerritPatch):
             return change.gerrit_number
 
@@ -495,14 +497,14 @@ class GerritHelper(object):
         to add file modifications to the change.
 
         Args:
-          project: The name of the gerrit project for the change.
-          branch: Branch for the change.
-          message: Initial commit message for the change.
-          publish: If True, will publish the CL after uploading. Stays in WIP mode
-              otherwise.
+            project: The name of the gerrit project for the change.
+            branch: Branch for the change.
+            message: Initial commit message for the change.
+            publish: If True, will publish the CL after uploading. Stays in WIP
+                mode otherwise.
 
         Returns:
-          A cros_patch.GerritChange for the created change.
+            A cros_patch.GerritChange for the created change.
         """
         resp = gob_util.CreateChange(
             self.host, project, branch, message, publish
@@ -514,9 +516,9 @@ class GerritHelper(object):
         """Attaches file modifications to an open change.
 
         Args:
-          change: A gerrit change number.
-          path: Path of the file in the repo to modify.
-          contents: New contents of the file.
+            change: A gerrit change number.
+            path: Path of the file in the repo to modify.
+            contents: New contents of the file.
         """
         gob_util.ChangeEdit(self.host, change, path, contents)
         gob_util.PublishChangeEdit(self.host, change)
@@ -536,15 +538,15 @@ class GerritHelper(object):
         """Update the review labels on a gerrit change.
 
         Args:
-          change: A gerrit change number.
-          msg: A text comment to post to the review.
-          labels: A dict of label/value to set on the review.
-          notify: A string, parameter controlling gerrit's email generation.
-          reviewers: List of people to add as reviewers.
-          cc: List of people to add to CC.
-          ready: Mark CL as ready.
-          wip: Mark CL as work-in-progress.
-          dryrun: If True, don't actually update the review.
+            change: A gerrit change number.
+            msg: A text comment to post to the review.
+            labels: A dict of label/value to set on the review.
+            notify: A string, parameter controlling gerrit's email generation.
+            reviewers: List of people to add as reviewers.
+            cc: List of people to add to CC.
+            ready: Mark CL as ready.
+            wip: Mark CL as work-in-progress.
+            dryrun: If True, don't actually update the review.
         """
         if dryrun:
             if msg:
@@ -766,8 +768,8 @@ class GerritHelper(object):
         )
         change_number = self._get_changenumber_from_stdout(ret.stdout)
 
-        # If we fail to grab a change number from the stdout then fall back to the
-        # ChangeID.
+        # If we fail to grab a change number from the stdout then fall back to
+        # the ChangeID.
         change_number = change_number or git.GetChangeId(cwd)
 
         def PatchQuery():
@@ -783,15 +785,17 @@ def GetGerritPatchInfo(patches):
     """Query Gerrit server for patch information using string queries.
 
     Args:
-      patches: A list of patch IDs to query. Internal patches start with a '*'.
+        patches: A list of patch IDs to query. Internal patches start with a
+            '*'.
 
     Returns:
-      A list of GerritPatch objects describing each patch.  Only the first
-      instance of a requested patch is returned.
+        A list of GerritPatch objects describing each patch.  Only the first
+        instance of a requested patch is returned.
 
     Raises:
-      PatchException if a patch can't be found.
-      ValueError if a query string cannot be converted to a PatchQuery object.
+        PatchException: if a patch can't be found.
+        ValueError: if a query string cannot be converted to a PatchQuery
+            object.
     """
     return GetGerritPatchInfoWithPatchQueries(
         [cros_patch.ParsePatchDep(p) for p in patches]

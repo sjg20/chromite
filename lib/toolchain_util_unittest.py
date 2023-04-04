@@ -229,7 +229,8 @@ class ProfilesNameHelperTest(cros_test_lib.MockTempDirTestCase):
                 current_day_profile, "unsupported_type"
             )
         self.assertEqual(
-            "'unsupported_type' is currently not supported to check profile age.",
+            "'unsupported_type' is currently not supported to check profile "
+            "age.",
             str(context.exception),
         )
 
@@ -667,7 +668,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             )
 
     def testPrepareUnverifiedChromeLlvmOrderfileExists(self):
-        """Test that PrepareUnverfiedChromeLlvmOrderfile works when POINTLESS."""
+        """Verify PrepareUnverifiedChromeLlvmOrderfile works when POINTLESS."""
         self.SetUpPrepare(
             "UnverifiedChromeLlvmOrderfile",
             {"UnverifiedChromeLlvmOrderfile": ["gs://publish/location"]},
@@ -680,7 +681,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         )
 
     def testPrepareUnverifiedChromeLlvmOrderfileMissing(self):
-        """Test that PrepareUnverfiedChromeLlvmOrderfile works when NEEDED."""
+        """Verify PrepareUnverifiedChromeLlvmOrderfile works when NEEDED."""
         self.SetUpPrepare(
             "UnverifiedChromeLlvmOrderfile",
             {"UnverifiedChromeLlvmOrderfile": ["gs://publish/location"]},
@@ -694,7 +695,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         )
 
     def testPrepareVerifiedChromeLlvmOrderfileExists(self):
-        """Test that PrepareVerfiedChromeLlvmOrderfile works when POINTLESS."""
+        """Test that PrepareVerifiedChromeLlvmOrderfile works when POINTLESS."""
         self.SetUpPrepare(
             "VerifiedChromeLlvmOrderfile",
             {
@@ -714,7 +715,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
         self.patch_ebuild.assert_called_once()
 
     def testPrepareVerifiedChromeLlvmOrderfileMissing(self):
-        """Test that PrepareVerfiedChromeLlvmOrderfile works when NEEDED."""
+        """Test that PrepareVerifiedChromeLlvmOrderfile works when NEEDED."""
         self.SetUpPrepare(
             "VerifiedChromeLlvmOrderfile",
             {
@@ -845,7 +846,7 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
             self.obj.Prepare()
 
     def testPrepareUnverifiedChromeBenchmarkAfdoFileMultArtifacts(self):
-        """Test raised exception when there are multiple artifacts of one type."""
+        """Test raised exception on multiple artifacts of one type."""
         self.setupUnverifiedChromeBenchmarkAfdoFileInputProperties()
         # Published artifact is missing, multiple debug binary artifacts.
         self.gsc_exists.return_value = False
@@ -1146,8 +1147,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
                 os.path.join(
                     toolchain_util.RELEASE_PROFILE_VETTED_URL,
                     (
-                        f"chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
-                        "benchmark-78.0.3839.0-r1-redacted.afdo.xz"
+                        "chromeos-chrome-amd64-atom-78-3876.0-"
+                        f"{self.week_old_ts}-benchmark-78.0.3839.0-r1"
+                        "-redacted.afdo.xz"
                     ),
                 )
             ),
@@ -1159,8 +1161,9 @@ class PrepareForBuildHandlerTest(PrepareBundleTest):
                 "UNVETTED_AFDO_FILE": os.path.join(
                     self.chroot.tmp,
                     (
-                        f"chromeos-chrome-amd64-atom-78-3876.0-{self.week_old_ts}-"
-                        "benchmark-78.0.3839.0-r1-redacted.afdo"
+                        "chromeos-chrome-amd64-atom-78-3876.0-"
+                        f"{self.week_old_ts}-benchmark-78.0.3839.0-r1"
+                        "-redacted.afdo"
                     ),
                 )
             },
@@ -1475,7 +1478,8 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         invalid_chrome = Path(invalid_dir, "chrome")
         with self.assertRaisesRegex(
             toolchain_util.BundleArtifactsHandlerError,
-            f"'{self.chroot.full_path(invalid_chrome)}' chrome binary does not exist",
+            f"'{self.chroot.full_path(invalid_chrome)}' chrome binary does not "
+            "exist",
         ):
             self.obj._CheckArguments(chrome_binary, invalid_chrome)
 
@@ -1590,7 +1594,8 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
 
         with self.assertRaisesRegex(
             toolchain_util.BundleArtifactsHandlerError,
-            f"Could not find UNVETTED_ORDERFILE version in {constants.CHROME_PN}",
+            "Could not find UNVETTED_ORDERFILE version in "
+            f"{constants.CHROME_PN}",
         ):
             self.obj.Bundle()
 
@@ -2310,8 +2315,9 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
                 )
             )
             # Make MockList() a little bit smarter.
-            # Give the list of files glob matching "path" from gs_context.List(path).
-            # fnmatch() is what glob() is eventually calling.
+            # Give the list of files glob matching "path" from
+            # gs_context.List(path). fnmatch() is what glob() is eventually
+            # calling.
             return [
                 res for res in results if fnmatch.fnmatch(res.url, _args[0])
             ]

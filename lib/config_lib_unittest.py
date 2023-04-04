@@ -212,8 +212,8 @@ class BuildConfigClassTest(cros_test_lib.TestCase):
         result = base.derive(site_config.templates.derived)
         self.assertEqual(result.foo, "base one")
 
-        # Template with fixed override after stacking template (all callable magic
-        # should disappear).
+        # Template with fixed override after stacking template (all callable
+        # magic should disappear).
         result = base.derive(site_config.templates.fixed)
         self.assertEqual(result.foo, "fixed")
 
@@ -276,9 +276,9 @@ class BuildConfigClassTest(cros_test_lib.TestCase):
                     getattr(obj3, attr),
                 )
         else:
-            # This should be an object that copy.deepcopy didn't copy (probably an
-            # immutable object.) If not, the test needs to be updated to handle this
-            # kind of object.
+            # This should be an object that copy.deepcopy didn't copy (probably
+            # an immutable object.) If not, the test needs to be updated to
+            # handle this kind of object.
             self.assertIs(obj1, obj2)
 
     def testDeepCopy(self):
@@ -425,7 +425,7 @@ class SiteConfigTest(cros_test_lib.TestCase):
         self.site_config = site_config
 
     def testAddedContents(self):
-        """Verify that our complex config looks like we expect, before saving."""
+        """Verify our complex config looks like we expect, before saving."""
         expected = {
             "default": {
                 "_template": None,
@@ -671,8 +671,8 @@ class SiteConfigTest(cros_test_lib.TestCase):
         #
         # BUG ALERT ON TEST FAILURE
         #
-        # assertDictEqual can correctly compare these structs for equivalence, but
-        # has a bug when displaying differences on failure. The embedded
+        # assertDictEqual can correctly compare these structs for equivalence,
+        # but has a bug when displaying differences on failure. The embedded
         # HWTestConfig values are correctly compared, but ALWAYS display as
         # different, if something else triggers a failure.
         #
@@ -827,7 +827,7 @@ class SiteConfigFindTests(cros_test_lib.TestCase):
         self.assertCountEqual(results_slaves, [slave_a, slave_b])
 
     def testGetSlaveConfigMapForMasterImportant(self):
-        """Test GetSlaveConfigMapForMaster, GetSlavesForMaster important only."""
+        """Test GetSlaveConfigMapForMaster/GetSlavesForMaster important only."""
 
         site_config = MockSiteConfig()
         master = site_config.Add(

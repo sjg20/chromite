@@ -199,8 +199,8 @@ def GetHWTestEnv(builder_run_config, model_config=None, suite_config=None):
 class AttrDict(dict):
     """Dictionary with 'attribute' access.
 
-    This is identical to a dictionary, except that string keys can be addressed as
-    read-only attributes.
+    This is identical to a dictionary, except that string keys can be addressed
+    as read-only attributes.
     """
 
     def __getattr__(self, name):
@@ -224,15 +224,17 @@ class BuildConfig(AttrDict):
     def deepcopy(self):
         """Create a deep copy of this object.
 
-        This is a specialized version of copy.deepcopy() for BuildConfig objects. It
-        speeds up deep copies by 10x because we know in advance what is stored
-        inside a BuildConfig object and don't have to do as much introspection. This
-        function is called a lot during setup of the config objects so optimizing it
-        makes a big difference. (It saves seconds off the load time of this module!)
+        This is a specialized version of copy.deepcopy() for BuildConfig
+        objects. It speeds up deep copies by 10x because we know in advance what
+        is stored inside a BuildConfig object and don't have to do as much
+        introspection. This function is called a lot during setup of the config
+        objects so optimizing it makes a big difference. (It saves seconds off
+        the load time of this module!)
         """
         result = BuildConfig(self)
 
-        # Here is where we handle all values that need deepcopy instead of shallow.
+        # Here is where we handle all values that need deepcopy instead of
+        # shallow.
         for k, v in result.items():
             if v is not None:
                 if k == "child_configs":
@@ -270,28 +272,32 @@ class BuildConfig(AttrDict):
         for update_config in inherits:
             for name, value in update_config.items():
                 if callable(value):
-                    # If we are applying to a fixed value, we resolve to a fixed value.
-                    # Otherwise, we save off a callable to apply later, perhaps with
-                    # nested callables (IE: we curry them). This allows us to use
-                    # callables in templates, and apply templates to each other and still
-                    # get the expected result when we use them later on.
+                    # If we are applying to a fixed value, we resolve to a fixed
+                    # value. Otherwise, we save off a callable to apply later,
+                    # perhaps with nested callables (IE: we curry them). This
+                    # allows us to use callables in templates, and apply
+                    # templates to each other and still get the expected result
+                    # when we use them later on.
                     #
-                    # Delaying the resolution of callables is safe, because "Add()" always
-                    # applies against the default, which has fixed values for everything.
+                    # Delaying the resolution of callables is safe, because
+                    # "Add()" always applies against the default, which has
+                    # fixed values for everything.
 
                     if name in self:
                         # apply it to the current value.
                         if callable(self[name]):
-                            # If we have no fixed value to resolve with, stack the callables.
+                            # If we have no fixed value to resolve with, stack
+                            # the callables.
                             def stack(new_callable, old_callable):
-                                """Helper method to isolate namespace for closure."""
+                                """Helper to isolate namespace for closure."""
                                 return lambda fixed: new_callable(
                                     old_callable(fixed)
                                 )
 
                             self[name] = stack(value, self[name])
                         else:
-                            # If the current value was a fixed value, apply the callable.
+                            # If the current value was a fixed value, apply the
+                            # callable.
                             self[name] = value(self[name])
                     else:
                         # If we had no value to apply it to, save it for later.
@@ -431,8 +437,8 @@ class TastVMTestConfig(object):
 
     def __init__(self, suite_name, test_exprs, timeout=DEFAULT_TEST_TIMEOUT):
         """Constructor -- see members above."""
-        # This is an easy mistake to make and results in confusing errors later when
-        # a list of one-character strings gets passed to the tast command.
+        # This is an easy mistake to make and results in confusing errors later
+        # when a list of one-character strings gets passed to the tast command.
         if not isinstance(test_exprs, list):
             raise TypeError("test_exprs must be list of strings")
         self.suite_name = suite_name
@@ -594,9 +600,10 @@ class HWTestConfig(object):
         self.suite_min_duts = suite_min_duts
         self.suite_args = suite_args
         self.offload_failures_only = offload_failures_only
-        # Usually whether to run in skylab is controlled by 'enable_skylab_hw_test'
-        # in build config. But for some particular suites, we want to exclude them
-        # from Skylab even if the build config is migrated to Skylab.
+        # Usually whether to run in skylab is controlled by
+        # 'enable_skylab_hw_test' in build config. But for some particular
+        # suites, we want to exclude them from Skylab even if the build config
+        # is migrated to Skylab.
         self.enable_skylab = enable_skylab
         self.quota_account = quota_account
 
@@ -605,8 +612,8 @@ class HWTestConfig(object):
         self.timeout = max(HWTestConfig.BRANCHED_HW_TEST_TIMEOUT, self.timeout)
 
         # Set minimum_duts default to 0, which means that lab will not check the
-        # number of available duts to meet the minimum requirement before creating
-        # a suite job for branched build.
+        # number of available duts to meet the minimum requirement before
+        # creating a suite job for branched build.
         self.minimum_duts = 0
 
     def SetBranchedValuesForSkylab(self):
@@ -684,8 +691,9 @@ def DefaultSettings():
         name=None,
         # A list of boards to build.
         boards=None,
-        # A list of ModelTestConfig objects that represent all of the models
-        # supported by a given unified build and their corresponding test config.
+        # A list of ModelTestConfig objects that represent all the models
+        # supported by a given unified build and their corresponding test
+        # config.
         models=[],
         # This value defines what part of the Golden Eye UI is responsible for
         # displaying builds of this build config. The value is required, and
@@ -702,8 +710,8 @@ def DefaultSettings():
         profile=None,
         # This bot pushes changes to the overlays.
         master=False,
-        # A basic_builder is a special configuration which does not perform tests
-        # or mutate external config.
+        # A basic_builder is a special configuration which does not perform
+        # tests or mutate external config.
         basic_builder=False,
         # If this bot triggers slave builds, this will contain a list of
         # slave config names.
@@ -721,11 +729,11 @@ def DefaultSettings():
         debug_cidb=False,
         # Timeout for the build as a whole (in seconds).
         build_timeout=(5 * 60 + 30) * 60,
-        # A list of NotificationConfig objects describing who to notify of builder
-        # failures.
+        # A list of NotificationConfig objects describing who to notify of
+        # builder failures.
         notification_configs=[],
         # An integer. If this builder fails this many times consecutively, send
-        # an alert email to the recipients health_alert_recipients. This does
+        # an alert email to the recipients' health_alert_recipients. This does
         # not apply to tryjobs. This feature is similar to the ERROR_WATERMARK
         # feature of upload_symbols, and it may make sense to merge the features
         # at some point.
@@ -840,8 +848,8 @@ def DefaultSettings():
         # A list of all VMTestConfig objects to use if VM Tests are forced on
         # (--vmtest command line or trybot). None means no override.
         vm_tests_override=None,
-        # If true, in addition to upload vm test result to artifact folder, report
-        # results to other dashboard as well.
+        # If true, in addition to upload vm test result to artifact folder,
+        # report results to other dashboard as well.
         vm_test_report_to_dashboards=False,
         # The number of times to run the VMTest stage. If this is >1, then we
         # will run the stage this many times, stopping if we encounter any
@@ -850,8 +858,8 @@ def DefaultSettings():
         # If True, run SkylabHWTestStage instead of HWTestStage for suites that
         # use pools other than pool:cts.
         enable_skylab_hw_tests=False,
-        # If set, this is the URL of the bug justifying why hw_tests are disabled
-        # on a builder that should always have hw_tests.
+        # If set, this is the URL of the bug justifying why hw_tests are
+        # disabled on a builder that should always have hw_tests.
         hw_tests_disabled_bug="",
         # If True, run SkylabHWTestStage instead of HWTestStage for suites that
         # use pool:cts.
@@ -911,10 +919,10 @@ def DefaultSettings():
         # Whether to build GCE images suitable for passing directly to
         # "gcloud compute images create".
         gce_image=False,
-        # b/186631313: On reven the base image has a graphical installer enabled,
-        # which is used to recover the device. Recovery images in the traditional
-        # sense can not be booted on reven devices, which run legacy BIOS or UEFI
-        # firmware.
+        # b/186631313: On reven the base image has a graphical installer
+        # enabled, which is used to recover the device. Recovery images in the
+        # traditional sense can not be booted on reven devices, which run legacy
+        # BIOS or UEFI firmware.
         #
         # When base_is_recovery is set to True, we:
         #   * Validate that the images list contains a base image.
@@ -1004,8 +1012,9 @@ def DefaultSettings():
         # Run the binhost_test stage. Only makes sense for builders that have no
         # boards.
         binhost_test=False,
-        # If specified, it is passed on to the PushImage script as '--sign-types'
-        # commandline argument.  Must be either None or a list of image types.
+        # If specified, it is passed on to the PushImage script as
+        # '--sign-types' commandline argument.  Must be either None or a list of
+        # image types.
         sign_types=None,
         # TODO(sosa): Collapse to one option.
         # ========== Dev installer prebuilts options =======================
@@ -1050,8 +1059,8 @@ def DefaultSettings():
         # a LUCI Scheduler for this build on swarming (not buildbot).
         # See: https://goo.gl/VxSzFf
         schedule=None,
-        # This is the list of git repos which can trigger this build in swarming.
-        # Implies that schedule is set, to "triggered".
+        # This is the list of git repos which can trigger this build in
+        # swarming. Implies that schedule is set, to "triggered".
         # The format is of the form:
         #   [ (<git repo url>, (<ref1>, <ref2>, …)),
         #    …]
@@ -1099,8 +1108,8 @@ def GerritInstanceParameters(name, instance):
 
 
 def DefaultSiteParameters():
-    # Enumeration of valid site parameters; any/all site parameters must be here.
-    # All site parameters should be documented.
+    # Enumeration of valid site parameters; any/all site parameters must be
+    # here. All site parameters should be documented.
     default_site_params = {}
 
     manifest_project = "chromiumos/manifest"
@@ -1185,10 +1194,10 @@ def DefaultSiteParameters():
             weave_remote,
         ),
         # Mapping 'remote name' -> regexp that matches names of repositories on
-        # that remote that can be branched when creating CrOS branch.
-        # Branching script will actually create a new git ref when branching
-        # these projects. It won't attempt to create a git ref for other projects
-        # that may be mentioned in a manifest. If a remote is missing from this
+        # that remote that can be branched when creating CrOS branch. Branching
+        # script will actually create a new git ref when branching these
+        # projects. It won't attempt to create a git ref for other projects that
+        # may be mentioned in a manifest. If a remote is missing from this
         # dictionary, all projects on that remote are considered to not be
         # branchable.
         BRANCHABLE_PROJECTS={
@@ -1250,8 +1259,8 @@ class SiteConfig(dict):
 
     def GetDefault(self):
         """Create the canonical default build configuration."""
-        # Enumeration of valid settings; any/all config settings must be in this.
-        # All settings must be documented.
+        # Enumeration of valid settings; any/all config settings must be in
+        # this. All settings must be documented.
         return BuildConfig(**self._defaults)
 
     def GetTemplates(self):
@@ -1445,7 +1454,7 @@ class SiteConfig(dict):
         return result
 
     def AddWithoutTemplate(self, name, *args, **kwargs):
-        """Add a config containing only explicitly listed values (no defaults)."""
+        """Add config containing only explicitly listed values (no defaults)."""
         self.Add(name, None, *args, **kwargs)
 
     def AddGroup(self, name, *args, **kwargs):
@@ -1522,9 +1531,9 @@ class SiteConfig(dict):
     def AddTemplate(self, name, *args, **kwargs):
         """Create a template named |name|.
 
-        Templates are used to define common settings that are shared across types
-        of builders. They help reduce duplication in config_dump.json, because we
-        only define the template and its settings once.
+        Templates are used to define common settings that are shared across
+        types of builders. They help reduce duplication in config_dump.json,
+        because we only define the template and its settings once.
 
         Args:
             name: The name of the template.
@@ -1570,14 +1579,15 @@ class SiteConfig(dict):
 
         return result
 
-    def _MarshalTemplates(self):
+    def _MarshalTemplates(self) -> dict:
         """Return a version of self._templates with only used templates.
 
         Templates have callables/delete keys resolved against GetDefault() to
         ensure they can be safely saved to json.
 
         Returns:
-            Dict copy of self._templates with all unreferenced templates removed.
+            Dict copy of self._templates with all unreferenced templates
+            removed.
         """
         defaults = self.GetDefault()
 
@@ -1623,8 +1633,8 @@ class SiteConfig(dict):
     def DumpExpandedConfigToString(self):
         """Dump the SiteConfig to Json with all configs full expanded.
 
-        This is intended for debugging default/template behavior. The dumped JSON
-        can't be reloaded (at least not reliably).
+        This is intended for debugging default/template behavior. The dumped
+        JSON can't be reloaded (at least not reliably).
         """
         return PrettyJsonDict(self)
 
@@ -1810,8 +1820,8 @@ def GroupBoardsByBuilder(board_list):
         # http://b/180437658
         if b["name"] in GOLDENEYE_IGNORED_BOARDS:
             continue
-        # Invalid build configs being written out with no configs array, thus the
-        # default. See https://crbug.com/1005803.
+        # Invalid build configs being written out with no configs array, thus
+        # the default. See https://crbug.com/1005803.
         for config in b.get(CONFIG_TEMPLATE_CONFIGS, []):
             builder = config[CONFIG_TEMPLATE_BUILDER]
             if builder not in builder_to_boards_dict:
@@ -1876,8 +1886,8 @@ def GetArchBoardDict(ge_build_config):
 
     for b in ge_build_config[CONFIG_TEMPLATE_BOARDS]:
         board_name = b[CONFIG_TEMPLATE_NAME]
-        # Invalid build configs being written out with no configs array, thus the
-        # default. See https://crbug.com/947712.
+        # Invalid build configs being written out with no configs array, thus
+        # the default. See https://crbug.com/947712.
         for config in b.get(CONFIG_TEMPLATE_CONFIGS, []):
             arch = config[CONFIG_TEMPLATE_ARCH]
             arch_board_dict.setdefault(arch, set()).add(board_name)
@@ -2032,8 +2042,8 @@ def GetConfig():
 def GetSiteParams():
     """Get the site parameter configs.
 
-    This is the new, preferred method of accessing the site parameters, instead of
-    SiteConfig.params.
+    This is the new, preferred method of accessing the site parameters, instead
+    of SiteConfig.params.
 
     Returns:
         AttrDict of site parameters
@@ -2046,8 +2056,8 @@ def GetSiteParams():
 def append_useflags(useflags):
     """Used to append a set of useflags to existing useflags.
 
-    Useflags that shadow prior use flags will cause the prior flag to be removed.
-    (e.g. appending '-foo' to 'foo' will cause 'foo' to be removed)
+    Useflags that shadow prior use flags will cause the prior flag to be
+    removed. (e.g. appending '-foo' to 'foo' will cause 'foo' to be removed)
 
     Examples:
         new_config = base_config.derive(

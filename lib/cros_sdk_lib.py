@@ -52,11 +52,13 @@ class ChrootDeprecatedError(Error):
     """Raised when the chroot is too old to update."""
 
     def __init__(self, version):
-        # Message defined here because it's long and gives specific instructions.
+        # Message defined here because it's long and gives specific
+        # instructions.
         super().__init__(
             f"Upgrade hook missing for your chroot version {version}.\n"
-            "Your chroot is so old that some updates have been deprecated and it "
-            "will need to be recreated. A fresh chroot can be built with:\n"
+            "Your chroot is so old that some updates have been deprecated and "
+            "it will need to be recreated. A fresh chroot can be built "
+            "with:\n"
             "    cros_sdk --replace"
         )
 
@@ -158,8 +160,8 @@ def IsChrootReady(chroot):
     """Checks if the chroot is mounted and set up.
 
     /etc/cros_chroot_version is set to the current version of the chroot at the
-    end of the setup process.  If this file exists and contains a non-zero value,
-    the chroot is ready for use.
+    end of the setup process.  If this file exists and contains a non-zero
+    value, the chroot is ready for use.
 
     Args:
       chroot: Full path to the chroot to examine.
@@ -174,8 +176,9 @@ def IsChrootReady(chroot):
 def MountChrootPaths(path: Union[Path, str], out_dir: Path):
     """Setup all the mounts for |path|.
 
-    NB: This assumes running in a unique mount namespace.  If it is running in the
-    root mount namespace, then it will probably change settings for the worse.
+    NB: This assumes running in a unique mount namespace.  If it is running in
+    the root mount namespace, then it will probably change settings for the
+    worse.
     """
     KNOWN_FILESYSTEMS = set(
         x.split()[-1]
@@ -186,20 +189,20 @@ def MountChrootPaths(path: Union[Path, str], out_dir: Path):
 
     logging.debug("Mounting chroot paths at %s", path)
 
-    # Mark all existing mounts as slave mounts: that means changes made to mounts
-    # in the parent mount namespace will propagate down (like unmounts).
+    # Mark all existing mounts as slave mounts: that means changes made to
+    # mounts in the parent mount namespace will propagate down (like unmounts).
     osutils.Mount(None, "/", None, osutils.MS_REC | osutils.MS_SLAVE)
 
-    # If the mount path is already mounted, make it private so we can make changes
-    # without it propagating back out.
+    # If the mount path is already mounted, make it private so we can make
+    # changes without it propagating back out.
     for info in osutils.IterateMountPoints():
         if info.destination == str(path):
             osutils.Mount(None, path, None, osutils.MS_REC | osutils.MS_PRIVATE)
             break
 
-    # The source checkout must be mounted first.  We'll be mounting paths into the
-    # chroot, and that chroot lives inside SOURCE_ROOT, so if we did the recursive
-    # bind at the end, we'd double bind things.
+    # The source checkout must be mounted first.  We'll be mounting paths into
+    # the chroot, and that chroot lives inside SOURCE_ROOT, so if we did the
+    # recursive bind at the end, we'd double bind things.
     osutils.Mount(
         constants.SOURCE_ROOT,
         path / constants.CHROOT_SOURCE_ROOT[1:],
@@ -235,8 +238,8 @@ def MountChrootPaths(path: Union[Path, str], out_dir: Path):
             )
         except PermissionError:
             # We're in an environment where we can't mount binfmt_misc (e.g. a
-            # container), so ignore it for now.  We need it for unittests via qemu,
-            # but nothing else currently.
+            # container), so ignore it for now.  We need it for unittests via
+            # qemu, but nothing else currently.
             pass
 
     if "configfs" in KNOWN_FILESYSTEMS:
@@ -370,19 +373,19 @@ def GetFileSystemDebug(path: str, run_ps: bool = True) -> FileSystemDebugInfo:
 def CleanupChrootMount(chroot=None, buildroot=None, delete=False):
     """Unmounts a chroot and cleans up attached devices.
 
-    This function attempts to perform all of the cleanup steps even if the chroot
+    This function attempts to perform all the cleanup steps even if the chroot
     directory isn't present.  This ensures that a partially destroyed chroot
     can still be cleaned up.  This function does not remove the actual chroot
     directory or its content.
 
     Args:
-      chroot: Full path to the chroot to examine, or None to find it relative
-          to |buildroot|.
-      buildroot: Ignored if |chroot| is set.  If |chroot| is None, find the chroot
-          relative to |buildroot|.
-      delete: Delete chroot contents after cleaning up.  If
-          |delete| is False, the chroot contents will still be present and
-          can be immediately re-mounted without recreating a fresh chroot.
+        chroot: Full path to the chroot to examine, or None to find it relative
+            to |buildroot|.
+        buildroot: Ignored if |chroot| is set.  If |chroot| is None, find the
+            chroot relative to |buildroot|.
+        delete: Delete chroot contents after cleaning up.  If |delete| is False,
+            the chroot contents will still be present and can be immediately
+            re-mounted without recreating a fresh chroot.
     """
     if chroot is None and buildroot is None:
         raise ValueError("need either |chroot| or |buildroot| to search")
@@ -392,12 +395,13 @@ def CleanupChrootMount(chroot=None, buildroot=None, delete=False):
     try:
         osutils.UmountTree(chroot)
     except cros_build_lib.RunCommandError as e:
-        # TODO(lamontjones): Dump some information to help find the process still
-        # inside the chroot, causing crbug.com/923432.  In the end, this is likely
-        # to become fuser -k.
+        # TODO(lamontjones): Dump some information to help find the process
+        #   still inside the chroot, causing crbug.com/923432.  In the end, this
+        #   is likely to become fuser -k.
         fs_debug = GetFileSystemDebug(chroot, run_ps=True)
         raise Error(
-            "Umount failed: %s.\nfuser output=%s\nlsof output=%s\nps output=%s\n"
+            "Umount failed: %s.\nfuser output=%s\nlsof output=%s\nps "
+            "output=%s\n"
             % (e.stderr, fs_debug.fuser, fs_debug.lsof, fs_debug.ps)
         )
 
@@ -489,7 +493,8 @@ class ChrootUpdater(object):
 
     def __init__(self, version_file=None, hooks_dir=None):
         if version_file:
-            # We have one. Just here to skip the logic below since we don't need it.
+            # We have one. Just here to skip the logic below since we don't need
+            # it.
             default_version_file = None
         elif cros_build_lib.IsInsideChroot():
             # Use the absolute path since we're inside the chroot.
@@ -516,16 +521,17 @@ class ChrootUpdater(object):
         """Get the chroot version.
 
         Returns:
-          int
+            int
 
         Raises:
-          InvalidChrootVersionError when the file contents are not a valid version.
-          IOError when the file cannot be read.
-          UninitializedChrootError when the version file does not exist.
+            InvalidChrootVersionError: when the file contents are not a valid
+                version.
+            IOError: when the file cannot be read.
+            UninitializedChrootError: when the version file does not exist.
         """
         if self._version is None:
-            # Check for existence so IOErrors from osutils.ReadFile are limited to
-            # permissions problems.
+            # Check for existence so IOErrors from osutils.ReadFile are limited
+            # to permissions problems.
             if not os.path.exists(self._version_file):
                 raise UninitializedChrootError(
                     "Version file does not exist: %s" % self._version_file
@@ -594,13 +600,13 @@ class ChrootUpdater(object):
 
         # Create the relevant ChrootUpdates.
         updates = []
-        # Current version has already been run and we need to run the latest, so +1
-        # for each end of the version range.
+        # Current version has already been run and we need to run the latest, so
+        # +1 for each end of the version range.
         for version in range(self.GetVersion() + 1, self.latest_version + 1):
-            # Deprecation check: Deprecation is done by removing old scripts. Updates
-            # must form a continuous sequence. If the sequence is broken between the
-            # chroot's current version and the most recent, then the chroot must be
-            # recreated.
+            # Deprecation check: Deprecation is done by removing old scripts.
+            # Updates must form a continuous sequence. If the sequence is broken
+            # between the chroot's current version and the most recent, then the
+            # chroot must be recreated.
             if version not in hooks:
                 raise ChrootDeprecatedError(self.GetVersion())
 
@@ -624,8 +630,9 @@ class ChrootUpdater(object):
         for hook in os.listdir(self._hooks_dir):
             version = int(hook.split("_", 1)[0])
 
-            # Sanity check: Each version may only have a single script. Multiple CLs
-            # landed at the same time and no one noticed the version overlap.
+            # Sanity check: Each version may only have a single script. Multiple
+            # CLs landed at the same time and no one noticed the version
+            # overlap.
             if version in hook_files:
                 raise VersionHasMultipleHooksError(
                     "Version %s has multiple hooks." % version
@@ -648,14 +655,14 @@ class ChrootCreator:
     DEFAULT_TZ = "usr/share/zoneinfo/PST8PDT"
 
     # Groups to add the user to inside the chroot.
-    # This group list is a bit dated and probably contains a number of items that
-    # no longer make sense.
+    # This group list is a bit dated and probably contains a number of items
+    # that no longer make sense.
     # TODO(crbug.com/762445): Remove "adm".
     # TODO(build): Remove cdrom & floppy.
     # TODO(build): See if audio is still needed.  Host distros might use diff
-    # "audio" group, so we wouldn't get access to /dev/snd/ nodes directly.
+    #   "audio" group, so we wouldn't get access to /dev/snd/ nodes directly.
     # TODO(build): See if video is still needed.  Host distros might use diff
-    # "video" group, so we wouldn't get access to /dev/dri/ nodes directly.
+    #   "video" group, so we wouldn't get access to /dev/dri/ nodes directly.
     DEFGROUPS = {"adm", "cdrom", "floppy", "audio", "video", "portage"}
 
     def __init__(
@@ -670,13 +677,14 @@ class ChrootCreator:
         """Initialize.
 
         Args:
-          chroot_path: Path where the new chroot will be created.
-          sdk_tarball: Path to a downloaded Chromium OS SDK tarball.
-          out_dir: Path to a directory that will hold build outputs.
-          cache_dir: Path to a directory that will be used for caching files.
-          usepkg: If False, pass --nousepkg to cros_setup_toolchains inside the
-              chroot.
-          chroot_upgrade: If True, upgrade toolchain/SDK when entering the chroot.
+            chroot_path: Path where the new chroot will be created.
+            sdk_tarball: Path to a downloaded Chromium OS SDK tarball.
+            out_dir: Path to a directory that will hold build outputs.
+            cache_dir: Path to a directory that will be used for caching files.
+            usepkg: If False, pass --nousepkg to cros_setup_toolchains inside
+                the chroot.
+            chroot_upgrade: If True, upgrade toolchain/SDK when entering the
+                chroot.
         """
         self.chroot_path = chroot_path
         self.sdk_tarball = sdk_tarball
@@ -733,12 +741,13 @@ class ChrootCreator:
     ):
         """Setup the current user inside the chroot.
 
-        The user account name & id are synced with the active account outside of the
-        SDK.  This helps facilitate copying of files in & out of the SDK without the
-        need of sudo.
+        The user account name & id are synced with the active account outside of
+        the SDK.  This helps facilitate copying of files in & out of the SDK
+        without the need of sudo.
 
-        The user account must not already exist inside the SDK (as a pre-existing
-        reserved name) otherwise we can't create it with the right uid.
+        The user account must not already exist inside the SDK (as a
+        pre-existing reserved name) otherwise we can't create it with the right
+        uid.
 
         Args:
           user: The username to create.
@@ -783,12 +792,13 @@ class ChrootCreator:
         """Setup the current user's groups inside the chroot.
 
         This will create the user's primary group and add them to a bunch of
-        supplemental groups.  The primary group is synced with the active account
-        outside of the SDK to help facilitate accessing of files & resources (e.g.
-        any /dev nodes).
+        supplemental groups.  The primary group is synced with the active
+        account outside the SDK to help facilitate accessing of files &
+        resources (e.g. any /dev nodes).
 
-        The primary group must not already exist inside the SDK (as a pre-existing
-        reserved name) otherwise we can't create it with the right gid.
+        The primary group must not already exist inside the SDK (as a
+        pre-existing reserved name) otherwise we can't create it with the right
+        gid.
 
         Args:
           user: The username to add to groups.
@@ -813,8 +823,8 @@ class ChrootCreator:
         for i, line in enumerate(lines):
             entry = line.split(":")
             if entry[0] == group:
-                # If the group exists with the same gid, no need to add a new one.
-                # This often comes up with e.g. the "users" group.
+                # If the group exists with the same gid, no need to add a new
+                # one. This often comes up with e.g. the "users" group.
                 if entry[2] == str(gid):
                     return
                 cros_build_lib.Die(
@@ -888,9 +898,12 @@ class ChrootCreator:
         # Add chromite/sdk/bin and chromite/bin into the path globally. We rely
         # on 'env-update' getting called later (make_chroot.sh).
         env_d = etc_dir / "env.d" / "99chromiumos"
+        chroot_chromite_bin = (
+            constants.CHROOT_SOURCE_ROOT / constants.CHROMITE_BIN_SUBDIR
+        )
         env_d.write_text(
             f"""\
-PATH="{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/bin:{constants.CHROOT_SOURCE_ROOT}/chromite/bin"
+PATH="{constants.CHROOT_SOURCE_ROOT}/chromite/sdk/bin:{chroot_chromite_bin}"
 CROS_WORKON_SRCROOT="{constants.CHROOT_SOURCE_ROOT}"
 PORTAGE_USERNAME="{user}"
 """,
@@ -978,7 +991,8 @@ $ cros_sdk --delete%s
 
         self._make_chroot()
 
-        # TODO(build): Delete this once all users migrate to cros_chroot_version.
+        # TODO(build): Delete this once all users migrate to
+        # cros_chroot_version.
         osutils.Touch(self.chroot_path / "etc" / "debian_chroot")
 
         self.print_success_summary()

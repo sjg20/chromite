@@ -126,11 +126,12 @@ def ValidateCipdURL(value):
 def ParseBool(value):
     """Parse bool argument into a bool value.
 
-    For the existing type=bool functionality, the parser uses the built-in bool(x)
-    function to determine the value.  This function will only return false if x
-    is False or omitted.  Even with this type specified, however, arguments that
-    are generated from a command line initially get parsed as a string, and for
-    any string value passed in to bool(x), it will always return True.
+    For the existing type=bool functionality, the parser uses the built-in
+    bool(x) function to determine the value.  This function will only return
+    false if x is False or omitted.  Even with this type specified, however,
+    arguments that are generated from a command line initially get parsed as a
+    string, and for any string value passed in to bool(x), it will always return
+    True.
 
     Args:
         value: String representing a boolean value.
@@ -232,8 +233,8 @@ class DeviceParser(object):
     `cros deploy` only makes sense with an SSH device, but `cros flash` can use
     SSH, USB, or file device schemes.
 
-    If the device input is malformed or the scheme is wrong, an error message will
-    be printed and the program will exit.
+    If the device input is malformed or the scheme is wrong, an error message
+    will be printed and the program will exit.
 
     Valid device inputs are:
         - [ssh://][username@]hostname[:port].
@@ -279,9 +280,9 @@ class DeviceParser(object):
     def __call__(self, value):
         """Parses a device input and enforces constraints.
 
-        DeviceParser is an object so that a set of valid schemes can be specified,
-        but argparse expects a parsing function, so we overload __call__() for
-        argparse to use.
+        DeviceParser is an object so that a set of valid schemes can be
+        specified, but argparse expects a parsing function, so we overload
+        __call__() for argparse to use.
 
         Args:
             value: String representing a device target. See class comments for
@@ -299,7 +300,8 @@ class DeviceParser(object):
             self._EnforceConstraints(device, value)
             return device
         except ValueError as e:
-            # argparse ignores exception messages, so print the message manually.
+            # argparse ignores exception messages, so print the message
+            # manually.
             logging.error(e)
             raise
         except Exception as e:
@@ -347,9 +349,9 @@ class DeviceParser(object):
 
         # crbug.com/1069325: Starting in python 3.7 urllib has different parsing
         # results. 127.0.0.1:9999 parses as scheme='127.0.0.1' path='9999'
-        # instead of scheme='' path='127.0.0.1:9999'. We want that parsed as ssh.
-        # Check for '.' or 'localhost' in the scheme to catch the most common cases
-        # for this result.
+        # instead of scheme='' path='127.0.0.1:9999'. We want that parsed as
+        # ssh. Check for '.' or 'localhost' in the scheme to catch the most
+        # common cases for this result.
         if (
             not parsed.scheme
             or "." in parsed.scheme
@@ -359,8 +361,8 @@ class DeviceParser(object):
             if value and value[0] == "/":
                 scheme = DEVICE_SCHEME_FILE
             else:
-                # urlparse won't provide hostname/username/port unless a scheme is
-                # specified so we need to re-parse.
+                # urlparse won't provide hostname/username/port unless a scheme
+                # is specified, so we need to reparse.
                 parsed = urllib.parse.urlparse(
                     "%s://%s" % (DEVICE_SCHEME_SSH, value)
                 )
@@ -372,11 +374,11 @@ class DeviceParser(object):
             hostname = parsed.hostname
             port = parsed.port
             if hostname == "localhost" and not port:
-                # Use of localhost as the actual machine is uncommon enough relative to
-                # the use of KVM that we require users to specify localhost:22 if they
-                # actually want to connect to the localhost.  Otherwise the expectation
-                # is that they intend to access the VM but forget or didn't know to use
-                # port 9222.
+                # Use of localhost as the actual machine is uncommon enough
+                # relative to the use of KVM that we require users to specify
+                # localhost:22 if they actually want to connect to the
+                # localhost.  Otherwise, the expectation is that they intend to
+                # access the VM but forget or didn't know to use port 9222.
                 raise ValueError(
                     "To connect to localhost, use ssh://localhost:22 "
                     "explicitly, or use ssh://localhost:9222 for the local"
@@ -403,7 +405,8 @@ class DeviceParser(object):
         elif scheme == DEVICE_SCHEME_SERVO:
             # Parse the identifier type and value.
             servo_type, _, servo_id = parsed.path.partition(":")
-            # Don't want to do the netloc before the split in case of serial number.
+            # Don't want to do the netloc before the split in case of serial
+            # number.
             servo_type = servo_type.lower()
 
             return self._parse_servo(servo_type, servo_id)
@@ -471,9 +474,14 @@ class _AppendOption(argparse.Action):
 class _AppendOptionValue(argparse.Action):
     """Append the command line option to dest. Useful for pass along arguments.
 
-    parser.add_argument('-b', '--barg', dest='out', action='append_option_value')
-    options = parser.parse_args(['--barg', 'foo', '-b', 'bar'])
-    options.out == ['-barg', 'foo', '-b', 'bar']
+    parser.add_argument(
+        "-b",
+        "--barg",
+        dest="out",
+        action="append_option_value",
+    )
+    options = parser.parse_args(["--barg", "foo", "-b", "bar"])
+    options.out == ["-barg", "foo", "-b", "bar"]
     """
 
     def __call__(self, parser, namespace, values, option_string=None):
@@ -511,7 +519,8 @@ class _EnumAction(argparse.Action):
             def _parse_arg(arg):
                 if arg not in valid_inputs:
                     raise argparse.ArgumentTypeError(
-                        f"{arg!r} is not recognized.  Choose from {valid_inputs!r}"
+                        f"{arg!r} is not recognized.  Choose from "
+                        f"{valid_inputs!r}"
                     )
                 return self.enum[arg.upper()]
 
@@ -966,7 +975,8 @@ class BaseParser(object):
     def DoPostParseSetup(self, opts, args):
         """Method called to handle post opts/args setup.
 
-        This can be anything from logging setup to positional arg count validation.
+        This can be anything from logging setup to positional arg count
+        validation.
 
         Args:
             opts: optparse.Values or argparse.Namespace instance
@@ -1149,35 +1159,37 @@ class ArgumentParser(BaseParser, argparse.ArgumentParser):
     def _RegisterActions(self):
         """Update the container's actions.
 
-        This method builds out a new action class to register for each action type.
-        The new action class allows handling the deprecated argument without any
-        other changes to the argument parser logic. See _DeprecatedAction.
+        This method builds out a new action class to register for each action
+        type. The new action class allows handling the deprecated argument
+        without any other changes to the argument parser logic. See
+        _DeprecatedAction.
         """
         for action in _DEPRECATE_ACTIONS:
             current_class = self._registry_get("action", action, object)
-            # Base classes for the new class. The _DeprecatedAction must be first to
-            # ensure its method overrides are called first.
+            # Base classes for the new class. The _DeprecatedAction must be
+            # first to ensure its method overrides are called first.
             bases = (_DeprecatedAction, current_class)
             try:
                 self.register(
                     "action", action, type("deprecated-wrapper", bases, {})
                 )
             except TypeError:
-                # Method resolution order error. This occurs when the _DeprecatedAction
-                # class is inherited multiple times, so we've already registered the
-                # replacement class. The underlying _ActionsContainer gets passed
-                # around, so this may get triggered in non-obvious ways.
+                # Method resolution order error. This occurs when the
+                # _DeprecatedAction class is inherited multiple times, so we've
+                # already registered the replacement class. The underlying
+                # _ActionsContainer gets passed around, so this may get
+                # triggered in non-obvious ways.
                 continue
 
     def add_common_argument_to_group(self, group, *args, **kwargs):
         """Adds the given argument to the group.
 
-        This argument is expected to show up across the base parser and subparsers
-        that might be added later on.  The default argparse module does not handle
-        this scenario well -- it processes the base parser first (defaults and the
-        user arguments), then it processes the subparser (defaults and arguments).
-        That means defaults in the subparser will clobber user arguments passed in
-        to the base parser!
+        This argument is expected to show up across the base parser and
+        subparsers that might be added later on.  The default argparse module
+        does not handle this scenario well -- it processes the base parser first
+        (defaults and the user arguments), then it processes the subparser
+        (defaults and arguments). That means defaults in the subparser will
+        clobber user arguments passed in to the base parser!
         """
         default = kwargs.pop("default", None)
         kwargs["default"] = argparse.SUPPRESS
@@ -1187,12 +1199,14 @@ class ArgumentParser(BaseParser, argparse.ArgumentParser):
 
     def parse_args(self, args=None, namespace=None):
         """Translates OptionParser call to equivalent ArgumentParser call."""
-        # If no Namespace object is specified then use our custom ArgumentNamespace.
+        # If no Namespace object is specified then use our custom
+        # ArgumentNamespace.
         if namespace is None:
             namespace = ArgumentNamespace()
 
-        # Unlike OptionParser, ArgParser works only with a single namespace and no
-        # args. Re-use BaseParser DoPostParseSetup but only take the namespace.
+        # Unlike OptionParser, ArgParser works only with a single namespace and
+        # no args. Re-use BaseParser DoPostParseSetup but only take the
+        # namespace.
         namespace = argparse.ArgumentParser.parse_args(
             self, args=args, namespace=namespace
         )
@@ -1246,8 +1260,8 @@ def RunInsideChroot(command=None, chroot_args=None):
     """Restart the current command inside the chroot.
 
     This method is only valid for any code that is run via ScriptWrapperMain.
-    It allows proper cleanup of the local context by raising an exception handled
-    in ScriptWrapperMain.
+    It allows proper cleanup of the local context by raising an exception
+    handled in ScriptWrapperMain.
 
     Args:
         command: An instance of CliCommand to be restarted inside the chroot.
@@ -1306,8 +1320,8 @@ def ReExec():
     """Restart the current command.
 
     This method is only valid for any code that is run via ScriptWrapperMain.
-    It allows proper cleanup of the local context by raising an exception handled
-    in ScriptWrapperMain.
+    It allows proper cleanup of the local context by raising an exception
+    handled in ScriptWrapperMain.
     """
     # The command to exec.
     raise ExecRequiredError(sys.argv[:])
@@ -1382,8 +1396,9 @@ def ScriptWrapperMain(
         )
         sys.stderr.flush()
     except SystemExit as e:
-        # Right now, let this crash through- longer term, we'll update the scripts
-        # in question to not use sys.exit, and make this into a flagged error.
+        # Right now, let this crash through - longer term, we'll update the
+        # scripts in question to not use sys.exit, and make this into a flagged
+        # error.
         raise
     except ChrootRequiredError as e:
         ret = _RestartInChroot(e.cmd, e.chroot_args, e.extra_env)

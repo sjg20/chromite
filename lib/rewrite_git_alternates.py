@@ -104,11 +104,11 @@ def _UpdateGitAlternates(proj_root, projects):
 
 
 def _GetProjects(repo_root):
-    # Note that we cannot rely upon projects.list, nor repo list, nor repo forall
-    # here to be authoritive.
+    # Note that we cannot rely upon projects.list, nor repo list, nor repo
+    # forall here to be authoritative.
     # if we rely on the manifest contents, the local tree may not yet be
-    # updated- thus if we drop the alternate for that project, that project is no
-    # longer usable (which can tick off repo sync).
+    # updated - thus if we drop the alternate for that project, that project is
+    # no longer usable (which can tick off repo sync).
     # Thus, we just iterate over the raw underlying projects store, and generate
     # alternates for that; we regenerate based on either the manifest changing,
     # local_manifest having changed, or projects.list having changed (which
@@ -199,16 +199,16 @@ def _RebuildRepoCheckout(target_root, reference_map, alternates_dir):
 
 
 def WalkReferences(repo_root, max_depth=5, suppress=()):
-    """Given a repo checkout root, find the repo's it references up to max_depth.
+    """Given a repo checkout root, find the repos it references up to max_depth.
 
     Args:
-      repo_root: The root of a repo checkout to start from
-      max_depth: Git internally limits the max alternates depth to 5;
-        this option exists to adjust how deep we're willing to look.
-      suppress: List of repos already seen (and so to ignore).
+        repo_root: The root of a repo checkout to start from
+        max_depth: Git internally limits the max alternates depth to 5;
+            this option exists to adjust how deep we're willing to look.
+        suppress: List of repos already seen (and so to ignore).
 
     Returns:
-      List of repository roots required for this repo_root.
+        List of repository roots required for this repo_root.
     """
 
     original_root = repo_root
@@ -218,9 +218,9 @@ def WalkReferences(repo_root, max_depth=5, suppress=()):
         repo_root = os.path.abspath(repo_root)
 
         if repo_root in seen:
-            # Cyclic reference graph; break out of it, if someone induced this the
-            # necessary objects should be in place.  If they aren't, really isn't
-            # much that can be done.
+            # Cyclic reference graph; break out of it, if someone induced this
+            # the necessary objects should be in place.  If they aren't, really
+            # isn't much that can be done.
             return
 
         yield repo_root
@@ -252,12 +252,12 @@ def RebuildRepoCheckout(
     """Rebuild a repo checkout's 'alternate tree' rewriting the repo to use it
 
     Args:
-      repo_root: absolute path to the root of a repository checkout
-      initial_reference: absolute path to the root of the repository that is
-        shared
-      chroot_reference_root: if given, repo_root will have it's chroot
-        alternates tree configured with this pathway, enabling repo access to
-        work from within the chroot.
+        repo_root: absolute path to the root of a repository checkout.
+        initial_reference: absolute path to the root of the repository that is
+            shared.
+        chroot_reference_root: if given, repo_root will have it's chroot
+            alternates tree configured with this pathway, enabling repo access
+            to work from within the chroot.
     """
 
     reference_roots = list(

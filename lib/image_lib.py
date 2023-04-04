@@ -78,14 +78,14 @@ class LoopbackPartitions(object):
         """Initialize.
 
         Args:
-          path: Path to the backing file.
-          destination: Base path to mount partitions.  If not specified, then
-              calling Mount() will create a temporary directory and use it.
-          part_ids: Mount these partitions at context manager entry.  This is only
-              used during initialization of the context manager.
-          mount_opts: Use these mount_opts for mounting |part_ids|.  This is only
-              used during initialization of the context manager.
-          delete: Whether to automatically tear down the loopback device.
+            path: Path to the backing file.
+            destination: Base path to mount partitions.  If not specified, then
+                calling Mount() will create a temporary directory and use it.
+            part_ids: Mount these partitions at context manager entry.  This is
+                only used during initialization of the context manager.
+            mount_opts: Use these mount_opts for mounting |part_ids|.  This is
+                only used during initialization of the context manager.
+            delete: Whether to automatically tear down the loopback device.
         """
         self.path = path
         self.destination = destination
@@ -327,12 +327,12 @@ class LoopbackPartitions(object):
         """Return the loopback device for a partition.
 
         Args:
-          part_id: partition name (str) or number (int)
+            part_id: partition name (str) or number (int)
 
         Returns:
-          String with name of loopback device (e.g. '/dev/loop3p2').  If there are
-          multiple partitions that match part_id, then the first one from the
-          partition table is returned.
+            String with name of loopback device (e.g. '/dev/loop3p2').  If there
+            are multiple partitions that match part_id, then the first one from
+            the partition table is returned.
         """
         part_info = self.GetPartitionInfo(part_id)
         return "%sp%d" % (self.dev, part_info.number)
@@ -341,12 +341,12 @@ class LoopbackPartitions(object):
         """Return the partition info for the given partition ID.
 
         Args:
-          part_id: partition name (str) or number (int)
+            part_id: partition name (str) or number (int)
 
         Returns:
-          A PartitionInfo object representing the given partition ID. If there are
-          multiple partitions that match part_id, then the first one from the
-          partition table is returned.
+            A PartitionInfo object representing the given partition ID. If there
+            are multiple partitions that match part_id, then the first one from
+            the partition table is returned.
         """
         for part in self._gpt_table:
             if part_id == part.name or part_id == part.number:
@@ -357,7 +357,7 @@ class LoopbackPartitions(object):
         """Return tuple of mount point and symlink for a given PartitionInfo.
 
         Args:
-          part: A PartitionInfo object.
+            part: A PartitionInfo object.
 
         Returns:
           (mount_point, symlink) tuple.
@@ -370,11 +370,12 @@ class LoopbackPartitions(object):
         """Mount the given part_ids in subdirectories of the given destination.
 
         Args:
-          part_ids: list of partition names (str) or numbers (int)
-          mount_opts: list of mount options to be applied for these partitions.
+            part_ids: list of partition names (str) or numbers (int)
+            mount_opts: list of mount options to be applied for these
+                partitions.
 
         Returns:
-          List of mountpoint paths.
+            List of mountpoint paths.
         """
         ret = []
         for part_id in part_ids:
@@ -390,8 +391,7 @@ class LoopbackPartitions(object):
         """Mount the given part_ids in subdirectories of the given destination.
 
         Args:
-          part_ids: list of partition names (str) or numbers (int)
-          mount_opts: list of mount options to be applied for these partitions.
+            part_ids: list of partition names (str) or numbers (int).
         """
         for part_id in part_ids:
             for part in self._gpt_table:
@@ -427,8 +427,8 @@ class LoopbackPartitions(object):
         ro_compat_ofs = offset + 0x464 + 3
         logging.info("Enabling RW mount writing 0x00 to %d", ro_compat_ofs)
         # We shouldn't need the sync here, but we sometimes see flakes with some
-        # kernels where it looks like the metadata written isn't seen when we try
-        # to mount later on.  Adding a sync for 1 byte shouldn't be too bad.
+        # kernels where it looks like the metadata written isn't seen when we
+        # try to mount later on.  Adding a sync for 1 byte shouldn't be too bad.
         cros_build_lib.sudo_run(
             [
                 "dd",
@@ -454,8 +454,8 @@ class LoopbackPartitions(object):
         ro_compat_ofs = offset + 0x464 + 3
         logging.info("Disabling RW mount writing 0xff to %d", ro_compat_ofs)
         # We shouldn't need the sync here, but we sometimes see flakes with some
-        # kernels where it looks like the metadata written isn't seen when we try
-        # to mount later on.  Adding a sync for 1 byte shouldn't be too bad.
+        # kernels where it looks like the metadata written isn't seen when we
+        # try to mount later on.  Adding a sync for 1 byte shouldn't be too bad.
         cros_build_lib.sudo_run(
             [
                 "dd",
@@ -497,7 +497,8 @@ class LoopbackPartitions(object):
     def _Unmount(self, part):
         """Unmount a partition that was mounted by _Mount."""
         dest_number, _ = self._GetMountPointAndSymlink(part)
-        # Due to crosbug/358933, the RmDir call might fail. So we skip the cleanup.
+        # Due to crosbug/358933, the RmDir call might fail. So we skip the
+        # cleanup.
         osutils.UmountDir(dest_number, cleanup=False)
         self._mounted.remove(part)
         self._to_be_rmdir.add(dest_number)
@@ -577,8 +578,8 @@ def WriteLsbRelease(sysroot, fields):
     """Writes out the /etc/lsb-release file into the given sysroot.
 
     Args:
-      sysroot: The sysroot to write the lsb-release file to.
-      fields: A dictionary of all the fields and values to write.
+        sysroot: The sysroot to write the lsb-release file to.
+        fields: A dictionary of all the fields and values to write.
     """
     content = "\n".join("%s=%s" % (k, v) for k, v in fields.items()) + "\n"
 
@@ -613,13 +614,13 @@ def GetLatestImageLink(
     """Get the path for the `latest` image symlink for the given board.
 
     Args:
-      board: The name of the board.
-      force_chroot: Get the path as if we are inside the chroot, whether
-        or not we actually are.
-      pointer: Symlink name for image dir.
+        board: The name of the board.
+        force_chroot: Get the path as if we are inside the chroot, whether we
+            actually are.
+        pointer: Symlink name for image dir.
 
     Returns:
-      str - The `latest` image symlink path.
+        str - The `latest` image symlink path.
     """
     base = (
         constants.CHROOT_SOURCE_ROOT if force_chroot else constants.SOURCE_ROOT
@@ -644,24 +645,29 @@ class VbootCheckoutError(Error):
     """Error checking out the stable vboot source."""
 
 
-def SecurityTest(board=None, image=None, baselines=None, vboot_hash=None):
+def SecurityTest(
+    board: Optional[str] = None,
+    image: Optional[str] = None,
+    baselines: Optional[str] = None,
+    vboot_hash: Optional[str] = None,
+):
     """Image security tests.
 
     Args:
-      board: str - The board whose image should be tested. Used when |image| is
-        not provided or is a basename. Defaults to the default board.
-      image: str - The path to an image that should be tested, or the basename of
-        the desired image in the |board|'s build directory.
-      baselines: str - The path to a directory containing the baseline configs.
-      vboot_hash: str - The commit hash to checkout for the vboot_reference clone.
+        board: The board whose image should be tested. Used when |image| is not
+            provided or is a basename. Defaults to the default board.
+        image: The path to an image that should be tested, or the basename of
+            the desired image in the |board|'s build directory.
+        baselines: The path to a directory containing the baseline configs.
+        vboot_hash: The commit hash to checkout for the vboot_reference clone.
 
     Returns:
-      bool - True on success, False on failure.
+        bool - True on success, False on failure.
 
     Raises:
-      SecurityTestArgumentError when one or more arguments are not valid.
-      VbootCheckoutError when the vboot_reference repository cannot be cloned or
-          the |vboot_hash| cannot be checked out.
+        SecurityTestArgumentError: when one or more arguments are not valid.
+        VbootCheckoutError: when the vboot_reference repository cannot be cloned
+            or the |vboot_hash| cannot be checked out.
     """
     if not cros_build_lib.IsInsideChroot():
         cmd = ["security_test_image"]
@@ -692,8 +698,8 @@ def SecurityTest(board=None, image=None, baselines=None, vboot_hash=None):
                     return True
                 else:
                     raise SecurityTestArgumentError(
-                        "Could not locate security baselines from %s with private "
-                        "manifest." % baselines
+                        f"Could not locate security baselines from {baselines} "
+                        "with private manifest."
                     )
         logging.info("Loading baselines from %s", baselines)
 
@@ -721,15 +727,15 @@ def SecurityTest(board=None, image=None, baselines=None, vboot_hash=None):
         return not failures
 
 
-def BuildImagePath(board, image):
+def BuildImagePath(board: str, image: str):
     """Build a fully qualified path to the image.
 
     Args:
-      board: str - The name of the board whose image is being tested when an
-        image path is not specified.
-      image: str - The path to an image (in which case |image| is simply returned)
-        or the basename of the image file to use. When |image| is a basename, the
-        |board| build directory is always used to find it.
+        board: The name of the board whose image is being tested when an image
+            path is not specified.
+        image: The path to an image (in which case |image| is simply returned)
+            or the basename of the image file to use. When |image| is a
+            basename, the |board| build directory is always used to find it.
     """
     # Prefer an image path if provided.
     if image and os.sep in image:
@@ -773,15 +779,17 @@ class SecurityTestConfig(object):
     )
     _VBOOT_CHECKS_REL_DIR = "scripts/image_signing"
 
-    def __init__(self, image, baselines, vboot_hash, directory):
+    def __init__(
+        self, image: str, baselines: str, vboot_hash: str, directory: str
+    ):
         """SecurityTest run configuration.
 
         Args:
-          image: str - Path to an image.
-          baselines: str - Path to the security baselines.
-          vboot_hash: str - Commit hash for the vboot_reference.
-          directory: str - The directory to use for the vboot_reference checkout.
-            Usually a temporary directory.
+            image: Path to an image.
+            baselines: Path to the security baselines.
+            vboot_hash: Commit hash for the vboot_reference.
+            directory: The directory to use for the vboot_reference checkout.
+                Usually a temporary directory.
         """
         self.image = image
         self.baselines = baselines
@@ -793,21 +801,21 @@ class SecurityTestConfig(object):
         )
         self._checked_out = False
 
-    def RunCheck(self, check, pass_config):
+    def RunCheck(self, check: str, pass_config: bool) -> bool:
         """Run the given check.
 
         Args:
-          check: str - A config.vboot_dir/ensure_|check|.sh check name.
-          pass_config: bool - Whether the check has a corresponding
-              `ensure_|check|.config` file to pass.
+            check: A config.vboot_dir/ensure_|check|.sh check name.
+            pass_config: Whether the check has a corresponding
+                `ensure_|check|.config` file to pass.
 
         Returns:
-          bool - True on success, False on failure.
+            True on success, False on failure.
 
         Raises:
-          SecurityConfigDirectoryError if the directory does not exist.
-          VbootCheckoutError if the vboot reference repo could not be cloned or the
-            vboot_hash could not be checked out.
+            SecurityConfigDirectoryError: if the directory does not exist.
+            VbootCheckoutError: if the vboot reference repo could not be cloned
+                or the vboot_hash could not be checked out.
         """
         self._VbootCheckout()
 
@@ -853,7 +861,7 @@ class SecurityTestConfig(object):
             self._checked_out = True
 
     def _RunCommand(self, cmd, *args, **kwargs):
-        """Run a command ensuring the signing bin directory is included in PATH."""
+        """Run a command with the signing bin directory in PATH."""
         extra_env = {
             "PATH": "%s:%s" % (signing.CROS_SIGNING_BIN_DIR, os.environ["PATH"])
         }
@@ -919,10 +927,10 @@ def GetImageDiskPartitionInfo(image_path):
     """Returns the disk partition table of an image.
 
     Args:
-      image_path: Path to the image file.
+        image_path: Path to the image file.
 
     Returns:
-      A list of ParitionInfo items.
+        A list of PartitionInfo items.
     """
     if cros_build_lib.IsInsideChroot():
         disk = cgpt.Disk.FromImage(image_path)
@@ -936,18 +944,19 @@ def GetImageDiskPartitionInfo(image_path):
             for p in disk.partitions.values()
         ]
     else:
-        # Outside chroot, use `parted`. Parted 3.2 and earlier has a bug where it
-        # will complain that partitions are overlapping even when they are not. It
-        # does this in a specific case: when inserting a one-sector partition into
-        # a layout where that partition is snug in between two other partitions
-        # that have smaller partition numbers. With disk_layout_v2.json, this
-        # happens when inserting partition 10, KERN-A, since the blank padding
-        # before it was removed.
-        # Work around this by telling parted to ignore this "failure" interactively.
+        # Outside chroot, use `parted`. Parted 3.2 and earlier has a bug where
+        # it will complain that partitions are overlapping even when they are
+        # not. It does this in a specific case: when inserting a one-sector
+        # partition into a layout where that partition is snug in between two
+        # other partitions that have smaller partition numbers. With
+        # disk_layout_v2.json, this happens when inserting partition 10, KERN-A,
+        # since the blank padding before it was removed.
+        # Work around this by telling parted to ignore this "failure"
+        # interactively.
         # Yes, the three dashes are correct, and yes, it _is_ weird.
         # TODO(build): Change -m to --json once Parted 3.5 (released Apr 2022)
-        # is available "everywhere".  That probably means once our baseline
-        # Ubuntu LTS supports it.
+        #  is available "everywhere".  That probably means once our baseline
+        #  Ubuntu LTS supports it.
         cmd = [
             "parted",
             "---pretend-input-tty",
@@ -974,14 +983,14 @@ def GetImagesToBuild(image_types: List[str]) -> Set[str]:
     """Construct the images to build from the image type.
 
     Args:
-      image_types: list of image types.
+        image_types: list of image types.
 
     Returns:
-      A list of image name to build.
+        A list of image name to build.
 
     Raises:
-      ValueError if an invalid image type is given as input or if factory shim
-      image is requested along with any other image type.
+        ValueError: if an invalid image type is given as input or if factory
+            shim image is requested along with any other image type.
     """
     image_names = set()
 
@@ -1009,15 +1018,15 @@ def GetBuildImageEnvvars(
     """Get the environment variables required to build the given images.
 
     Args:
-      image_names: The list of images to build.
-      board: The board for which the images will be built.
-      version_info: ChromeOS version information that needs to be populated.
-      build_dir: Directory in which to compose the image.
-      output_dir: Directory in which to place image result.
-      env_var_init: Initial environment variables to use.
+        image_names: The list of images to build.
+        board: The board for which the images will be built.
+        version_info: ChromeOS version information that needs to be populated.
+        build_dir: Directory in which to compose the image.
+        output_dir: Directory in which to place image result.
+        env_var_init: Initial environment variables to use.
 
     Returns:
-      A dictionary of environment variables.
+        A dictionary of environment variables.
     """
     if not env_var_init:
         env_var_init = {}
@@ -1044,8 +1053,8 @@ def GetBuildImageEnvvars(
         env_var_init["CHROMEOS_PATCH"] = version_info.patch_number
         env_var_init["CHROMEOS_VERSION_STRING"] = version_info.VersionString()
 
-    # TODO(rchandrasekar): Remove 'BUILD_DIR' and 'OUTPUT_DIR' env variables after
-    # image creation is moved out of build_image.sh script.
+    # TODO(rchandrasekar): Remove 'BUILD_DIR' and 'OUTPUT_DIR' env variables
+    #   after image creation is moved out of build_image.sh script.
     if build_dir:
         env_var_init["BUILD_DIR"] = str(build_dir)
 
@@ -1069,21 +1078,21 @@ def CreateBuildDir(
     """Create the build directory based on input arguments.
 
     Args:
-      build_root: Directory in which to compose the image.
-      output_root: Directory in which to place the image result.
-      chrome_branch: Chrome branch number to use.
-      version: The version string to use for the output directory.
-      board: The board for which the image is generated.
-      symlink: The output directory symlink to be created.
-      replace: Whether to remove and replace the existing directory.
-      build_attempt: build attempt count to append to directory name.
-      output_suffix: Any user given output suffix to append to directory name.
+        build_root: Directory in which to compose the image.
+        output_root: Directory in which to place the image result.
+        chrome_branch: Chrome branch number to use.
+        version: The version string to use for the output directory.
+        board: The board for which the image is generated.
+        symlink: The output directory symlink to be created.
+        replace: Whether to remove and replace the existing directory.
+        build_attempt: build attempt count to append to directory name.
+        output_suffix: Any user given output suffix to append to directory name.
 
     Returns:
-      A tuple of build directory, output directory and symlink directory.
+        A tuple of build directory, output directory and symlink directory.
 
     Raises:
-      FileExistsError when the output build directory already exists.
+        FileExistsError when the output build directory already exists.
     """
     image_dir = f"R{chrome_branch}-{version}"
 

@@ -46,10 +46,10 @@ def GetMetricFieldSpec(fields=None):
     """Return the corresponding field_spec for metric fields.
 
     Args:
-      fields: Dictionary containing metric fields.
+        fields: Dictionary containing metric fields.
 
     Returns:
-      field_spec: List containing any *Field object associated with metric.
+        field_spec: List containing any *Field object associated with metric.
     """
     field_spec = []
     if fields:
@@ -72,13 +72,13 @@ def AddCommonFields(fields=None, field_spec=None):
     """Add cbuildbot-wide common fields to a given field set.
 
     Args:
-      fields: Dictionary containing metric fields to which common metric fields
-              will be added.
-      field_spec: List containing any *Field object associated with metric.
+        fields: Dictionary containing metric fields to which common metric
+            fields will be added.
+        field_spec: List containing any *Field object associated with metric.
 
     Returns:
-      Dictionary containing complete set of metric fields to be applied to
-      metric and a list of corresponding field_spec.
+        Dictionary containing complete set of metric fields to be applied to
+        metric and a list of corresponding field_spec.
     """
     metric_fields = dict(_CommonMetricFields) if _CommonMetricFields else {}
 
@@ -102,20 +102,20 @@ def SetupTsMonGlobalState(
     """Uses a stub argument parser to get the default behavior from ts-mon.
 
     Args:
-      service_name: The name of the task we are sending metrics from.
-      indirect: Whether to create a metrics.METRICS_QUEUE object and a separate
-                process for indirect metrics flushing. Useful for forking,
-                because forking would normally create a duplicate ts_mon thread.
-      suppress_exception: True to silence any exception during the setup. Default
-                is set to True.
-      short_lived: Whether this process is short-lived and should use the autogen
-                hostname prefix.
-      auto_flush: Whether to create a thread to automatically flush metrics every
-                minute.
-      common_metric_fields: Dictionary containing the metric fields that will be
-                added to all metrics.
-      debug_file: If non-none, send metrics to this path instead of to PubSub.
-      task_num: (Default 0) The task_num target field of the metrics to emit.
+        service_name: The name of the task we are sending metrics from.
+        indirect: Whether to create a metrics.METRICS_QUEUE object and a
+            separate process for indirect metrics flushing. Useful for forking,
+            because forking would normally create a duplicate ts_mon thread.
+        suppress_exception: True to silence any exception during the setup.
+            Default is set to True.
+        short_lived: Whether this process is short-lived and should use the
+            autogen hostname prefix.
+        auto_flush: Whether to create a thread to automatically flush metrics
+            every minute.
+        common_metric_fields: Dictionary containing the metric fields that will
+            be added to all metrics.
+        debug_file: If non-none, send metrics to this path instead of to PubSub.
+        task_num: (Default 0) The task_num target field of the metrics to emit.
     """
     if not config:
         return TrivialContextManager()
@@ -143,9 +143,9 @@ def _SetupTsMonFromOptions(options, suppress_exception):
     """Sets up ts-mon global state given parsed argparse options.
 
     Args:
-      options: An argparse options object containing ts-mon flags.
-      suppress_exception: True to silence any exception during the setup. Default
-                          is set to True.
+        options: An argparse options object containing ts-mon flags.
+        suppress_exception: True to silence any exception during the setup.
+            Default is set to True.
     """
     discovery.logger.setLevel(logging.WARNING)
     try:
@@ -169,13 +169,13 @@ def _GenerateTsMonArgparseOptions(
     """Generates an arg list for ts-mon to consume.
 
     Args:
-      service_name: The name of the task we are sending metrics from.
-      short_lived: Whether this process is short-lived and should use the autogen
-                   hostname prefix.
-      auto_flush: Whether to create a thread to automatically flush metrics every
-                  minute.
-      debug_file: If non-none, send metrics to this path instead of to PubSub.
-      task_num: Override the default task num of 0.
+        service_name: The name of the task we are sending metrics from.
+        short_lived: Whether this process is short-lived and should use the
+            autogen hostname prefix.
+        auto_flush: Whether to create a thread to automatically flush metrics
+            every minute.
+        debug_file: If non-none, send metrics to this path instead of to PubSub.
+        task_num: Override the default task num of 0.
     """
     parser = argparse.ArgumentParser()
     config.add_argparse_options(parser)
@@ -192,7 +192,7 @@ def _GenerateTsMonArgparseOptions(
     if debug_file:
         args.extend(["--ts-mon-endpoint", "file://" + debug_file])
 
-    # Short lived processes will have autogen: prepended to their hostname and
+    # Short-lived processes will have autogen: prepended to their hostname and
     # use task-number=PID to trigger shorter retention policies under
     # chrome-infra@, and used by a Monarch precomputation to group across the
     # task number.
@@ -223,15 +223,16 @@ def _CreateTsMonFlushingProcess(options):
 
     Useful for multiprocessing scenarios where we don't want multiple ts-mon
     threads send contradictory metrics. Instead, functions in
-    chromite.lib.metrics will send their calls to a Queue, which is consumed by a
-    dedicated flushing process.
+    chromite.lib.metrics will send their calls to a Queue, which is consumed by
+    a dedicated flushing process.
 
     Args:
-      options: An argparse options object to configure ts-mon with.
+        options: An argparse options object to configure ts-mon with.
 
     Side effects:
-      Sets chromite.lib.metrics.MESSAGE_QUEUE, which causes the metric functions
-      to send their calls to the Queue instead of creating the metrics.
+        Sets chromite.lib.metrics.MESSAGE_QUEUE, which causes the metric
+        functions to send their calls to the Queue instead of creating the
+        metrics.
     """
     # If this is nested, we don't need to create another queue and another
     # message consumer. Do nothing to continue to use the existing queue.
@@ -269,7 +270,7 @@ def _CleanupMetricsFlushingProcess():
     if not flushing_process.is_alive():
         return
 
-    # Send the sentinal value for "flush one more time and exit".
+    # Send the sentinel value for "flush one more time and exit".
     try:
         message_q.put(None)
     # If the flushing process quits, the message Queue can become full.
@@ -290,8 +291,8 @@ def _SetupAndConsumeMessages(message_q, options):
     """Sets up ts-mon, and starts a MetricConsumer loop.
 
     Args:
-      message_q: The metric multiprocessing.Queue to read from.
-      options: An argparse options object to configure ts-mon with.
+        message_q: The metric multiprocessing.Queue to read from.
+        options: An argparse options object to configure ts-mon with.
     """
     # Configure ts-mon, but don't start up a sending thread.
     _SetupTsMonFromOptions(options, suppress_exception=True)
@@ -375,7 +376,7 @@ class MetricConsumer(object):
                 pass
 
     def _WaitToFlush(self):
-        """Sleeps until the next time we can call metrics.Flush(), then flushes."""
+        """Sleep until the next time we can call metrics.Flush(), then flush."""
         time_delta = time.time() - self.last_flush
         time.sleep(max(0, FLUSH_INTERVAL - time_delta))
         metrics.Flush(reset_after=self.reset_after_flush)
@@ -399,7 +400,7 @@ def _MethodCallRepr(message):
     """Gives a string representation of |obj|.|method|(*|args|, **|kwargs|)
 
     Args:
-      message: A MetricCall object.
+        message: A MetricCall object.
     """
     if not message:
         return repr(message)
