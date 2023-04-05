@@ -1245,7 +1245,7 @@ wheel: <
         Args:
             gs_uri: The URI of a file on Google Storage.
             contents: String or bytes with contents to write to the file.
-            kwargs: See additional options that Copy takes.
+            **kwargs: See additional options that Copy takes.
 
         Raises:
             See Copy.
@@ -1258,7 +1258,7 @@ wheel: <
 
         Args:
             path: The path to get a listing of.
-            kwargs: See options that DoCommand takes.
+            **kwargs: See options that DoCommand takes.
 
         Returns:
             A list of paths that matched |path|.  Might be more than one if a
@@ -1287,7 +1287,7 @@ wheel: <
             path: The path to get a listing of.
             details: Whether to include size/timestamp info.
             generation: Whether to include metadata info & historical versions.
-            kwargs: See options that DoCommand takes.
+            **kwargs: See options that DoCommand takes.
 
         Returns:
             A list of GSListResult objects that matched |path|.  Might be more
@@ -1365,7 +1365,7 @@ wheel: <
                 file.
             dest_path: Fully qualified local path or full gs:// path of the dest
                 file.
-            kwargs: See options that DoCommand takes.
+            **kwargs: See options that DoCommand takes.
         """
         cmd = ["mv", "--", src_path, dest_path]
         return self.DoCommand(cmd, **kwargs)
@@ -1376,7 +1376,7 @@ wheel: <
         Args:
             path: gs:// url that will have acl applied to it.
             acl: An ACL permissions file or canned ACL.
-            kwargs: See options that DoCommand takes.
+            **kwargs: See options that DoCommand takes.
         """
         if acl is None:
             if not self.acl:
@@ -1406,7 +1406,7 @@ wheel: <
                 Exactly one of this argument or acl_args must be set.
             acl_args: A list of arguments for the gsutil acl ch command. Exactly
                 one of this argument or acl_args must be set.
-            kwargs: See options that DoCommand takes.
+            **kwargs: See options that DoCommand takes.
         """
         if acl_args_file and acl_args:
             raise GSContextException(
@@ -1441,7 +1441,7 @@ wheel: <
 
         Args:
             path: Local path or gs:// url to check.
-            kwargs: Flags to pass to DoCommand.
+            **kwargs: Flags to pass to DoCommand.
 
         Returns:
             True if the path exists; otherwise returns False.
@@ -1463,7 +1463,7 @@ wheel: <
             path: Full gs:// url of the file to delete.
             recursive: Remove recursively starting at path.
             ignore_missing: Whether to suppress errors about missing files.
-            kwargs: Flags to pass to DoCommand.
+            **kwargs: Flags to pass to DoCommand.
         """
         cmd = ["rm"]
         if "recurse" in kwargs:
@@ -1499,7 +1499,7 @@ wheel: <
 
         Args:
             path: A GS path for files to Stat. Wildcards are NOT supported.
-            kwargs: Flags to pass to DoCommand.
+            **kwargs: Flags to pass to DoCommand.
 
         Returns:
             A GSStatResult object with all fields populated.

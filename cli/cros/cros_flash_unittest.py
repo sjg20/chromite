@@ -58,7 +58,7 @@ class CrosFlashTest(
             device: expected device hostname; currently only SSH devices
                 are supported.
             image: expected image parameter.
-            kwargs: keyword arguments expected in the call to flash.Flash().
+            **kwargs: keyword arguments expected in the call to flash.Flash().
                 Arguments unspecified here are checked against their default
                 value for `cros flash`.
         """

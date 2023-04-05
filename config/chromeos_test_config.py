@@ -261,12 +261,12 @@ class HWTestList(object):
         """Return an HWTestConfig that runs the provided Tast test suite.
 
         Args:
-          suite_name: String suite name, e.g. constants.HWTEST_TAST_CQ_SUITE.
-          kwargs: Dict containing additional keyword args to use when constructing
-                  the HWTestConfig.
+            suite_name: String suite name, e.g. constants.HWTEST_TAST_CQ_SUITE.
+            **kwargs: Dict containing additional keyword args to use when
+                constructing the HWTestConfig.
 
         Returns:
-          HWTestConfig object for running the suite.
+            HWTestConfig object for running the suite.
         """
         kwargs = kwargs.copy()
 

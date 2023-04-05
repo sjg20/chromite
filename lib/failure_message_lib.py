@@ -254,7 +254,7 @@ class CompoundFailureMessage(StageFailureMessage):
 
         Args:
             stage_failure: An instance of StageFailure.
-            kwargs: Extra message information to pass to StageFailureMessage.
+            **kwargs: Extra message information to pass to StageFailureMessage.
         """
         super().__init__(stage_failure, **kwargs)
 
@@ -334,7 +334,7 @@ class FailureMessageManager(object):
 
         Args:
             stage_failure: An instance of StageFailure.
-            kwargs: Extra message information to pass to StageFailureMessage.
+            **kwargs: Extra message information to pass to StageFailureMessage.
 
         Returns:
             A failure message instance of StageFailureMessage class (or its

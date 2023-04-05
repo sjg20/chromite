@@ -60,7 +60,7 @@ class CrosDeployTest(
         Args:
             device: expected device hostname.
             packages: expected packages list.
-            kwargs: keyword arguments expected in the call to Deployer.Run().
+            **kwargs: keyword arguments expected in the call to Deployer.Run().
                 Arguments unspecified here are checked against their default
                 value for `cros deploy`.
         """

@@ -609,8 +609,8 @@ class TestCase(unittest.TestCase, metaclass=StackedSetup):
         Args:
           exception: The expected exception type to intecept.
           functor: The function to invoke.
-          args: Positional args to pass to the function.
-          kwargs: Optional args to pass to the function.  Note we pull
+          *args: Positional args to pass to the function.
+          **kwargs: Optional args to pass to the function.  Note we pull
             exact_kls, msg, and check_attrs from these kwargs.
           exact_kls: If given, the exception raise must be *exactly* that class
             type; derivatives are a failure.
@@ -1175,7 +1175,7 @@ class TempDirTestCase(TestCase):
         Args:
           path: The path relative to the temp directory to write to.
           content: Content to write. May be either an iterable, or a string.
-          kwargs: Additional args to pass to osutils.WriteFile.
+          **kwargs: Additional args to pass to osutils.WriteFile.
         """
         osutils.WriteFile(os.path.join(self.tempdir, path), content, **kwargs)
 

@@ -33,7 +33,7 @@ def DeferSignals(*args):
     is run after the critical block has exited.
 
     Args:
-        args: Which signals to ignore.  If none are given, defaults to
+        *args: Which signals to ignore.  If none are given, defaults to
             SIGINT and SIGTERM.
     """
     signals = args

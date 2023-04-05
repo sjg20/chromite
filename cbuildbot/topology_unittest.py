@@ -24,8 +24,8 @@ class TopologyTest(cros_test_lib.TestCase):
 def FakeFetchTopology(keyvals=None):
     """Setup topology without the need for a DB
 
-    args:
-      keyvals: optional dictionary to populate topology
+    Args:
+        keyvals: optional dictionary to populate topology
     """
     keyvals = keyvals if keyvals is not None else {}
 

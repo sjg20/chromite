@@ -85,7 +85,7 @@ class Device(object):
         Args:
             cmd: command to run.
             stream_output: Stream output of long-running commands.
-            kwargs: additional args (see documentation for RemoteDevice.run).
+            **kwargs: additional args (see documentation for RemoteDevice.run).
 
         Returns:
             cros_build_lib.CompletedProcess object.

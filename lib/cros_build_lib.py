@@ -386,7 +386,7 @@ def sudo_run(
             purely prefixes it with sudo.
         user: The user to run the command as.
         preserve_env: Whether to preserve the environment.
-        kwargs: See run() options, it's a direct pass thru to it.
+        **kwargs: See run() options, it's a direct pass thru to it.
             Note that this supports a 'strict' keyword that defaults to True.
             If set to False, it'll suppress strict sudo behavior.
 
@@ -1310,7 +1310,7 @@ def CreateTarball(
             defaults to ".".
         timeout: The number of seconds to wait on soft failure.
         extra_args: A list of extra args to pass to "tar".
-        kwargs: Any run options/overrides to use.
+        **kwargs: Any run options/overrides to use.
 
     Returns:
         The cmd_result object returned by the run invocation.

@@ -141,8 +141,8 @@ def RetryWithStats(category, handler, max_retry, functor, *args, **kwargs):
         handler: See retry_util.GenericRetry.
         max_retry: See retry_util.GenericRetry.
         functor: See retry_util.GenericRetry.
-        args: See retry_util.GenericRetry.
-        kwargs: See retry_util.GenericRetry.
+        *args: See retry_util.GenericRetry.
+        **kwargs: See retry_util.GenericRetry.
 
     Returns:
         See retry_util.GenericRetry raises.

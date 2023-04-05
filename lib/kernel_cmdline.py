@@ -306,7 +306,7 @@ class KernelArgList(
             other: Either a KernelArgList, a dict of {arg: value}, or an
                 iterable of (arg, value) pairs (which will be passed to
                 KernelArg())
-            kwargs: |key| and |value| are passed to KernelArg.
+            **kwargs: |key| and |value| are passed to KernelArg.
         """
         if other:
             if isinstance(other, KernelArgList):

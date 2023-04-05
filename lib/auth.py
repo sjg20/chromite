@@ -169,7 +169,7 @@ def GetAccessToken(**kwargs):
     AccessTokenError.
 
     Args:
-        kwargs: A list of keyword arguments to pass to _TokenAndLoginIfNeed.
+        **kwargs: A list of keyword arguments to pass to _TokenAndLoginIfNeed.
 
     Returns:
         The access token string or None if failed to get access token.

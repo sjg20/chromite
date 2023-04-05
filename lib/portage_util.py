@@ -2826,10 +2826,10 @@ def _Portageq(command, board=None, sysroot=None, **kwargs):
     """Run a portageq command.
 
     Args:
-      command: list - Portageq command to run excluding portageq.
-      board: [str] - Specific board to query.
-      sysroot: The sysroot to query.
-      kwargs: Additional run arguments.
+        command: list - Portageq command to run excluding portageq.
+        board: [str] - Specific board to query.
+        sysroot: The sysroot to query.
+        **kwargs: Additional run arguments.
 
     Returns:
       cros_build_lib.CompletedProcess

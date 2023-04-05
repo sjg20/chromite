@@ -785,7 +785,7 @@ def RunGit(
         cmd: A sequence of the git subcommand to run.  The 'git' prefix is added
             automatically.  If you wished to run 'git remote update', this would
             be ['remote', 'update'] for example.
-        kwargs: Any run or GenericRetry options/overrides to use.
+        **kwargs: Any run or GenericRetry options/overrides to use.
 
     Returns:
         A CompletedProcess object.
@@ -1574,7 +1574,7 @@ def UploadCL(
         local_branch: Branch to upload.
         draft: Whether to upload as a draft.
         reviewers: Add the reviewers to the CL.
-        kwargs: Extra options for GitPush. Output capture defaults to False so
+        **kwargs: Extra options for GitPush. Output capture defaults to False so
             that the URL for new or updated CLs is shown to the user.
     """
     ref = ("refs/drafts/%s" if draft else "refs/for/%s") % branch
@@ -1654,7 +1654,7 @@ def SyncPushBranch(git_repo, remote, target, use_merge=False, **kwargs):
             rather than an ambiguous name).
         use_merge: Default: False. If True, use merge to bring local branch up
             to date with remote branch. Otherwise, use rebase.
-        kwargs: Arguments passed through to RunGit.
+        **kwargs: Arguments passed through to RunGit.
     """
     subcommand = "merge" if use_merge else "rebase"
 

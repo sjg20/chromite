@@ -302,7 +302,7 @@ class GceContext(object):
                 instances.
             static_address: External IP address to assign to the instance as a
                 string. If None an ephemeral address will be used.
-            kwargs: Other possible Instance Resource properties.
+            **kwargs: Other possible Instance Resource properties.
                 https://cloud.google.com/compute/docs/reference/latest/instances#resource
                 Note that values from kwargs will overrule properties
                 constructed from positional arguments, i.e., name, image, zone,

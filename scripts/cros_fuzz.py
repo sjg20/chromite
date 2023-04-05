@@ -609,8 +609,8 @@ def RunSysrootCommand(command, **kwargs):
     """Runs command while chrooted into sysroot and returns the output.
 
     Args:
-      command: A command to run in the sysroot.
-      kwargs: Extra arguments to pass to cros_build_lib.sudo_run.
+        command: A command to run in the sysroot.
+        **kwargs: Extra arguments to pass to cros_build_lib.sudo_run.
 
     Returns:
       The result of a call to cros_build_lib.sudo_run.

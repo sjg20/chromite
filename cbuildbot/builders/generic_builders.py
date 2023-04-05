@@ -97,12 +97,12 @@ class Builder(object):
         """Wrapper to run a stage.
 
         Args:
-          stage: A BuilderStage class.
-          args: args to pass to stage constructor.
-          kwargs: kwargs to pass to stage constructor.
+            stage: A BuilderStage class.
+            *args: args to pass to stage constructor.
+            **kwargs: kwargs to pass to stage constructor.
 
         Returns:
-          Whatever the stage's Run method returns.
+            Whatever the stage's Run method returns.
         """
         stage_instance = self._GetStageInstance(stage, *args, **kwargs)
         return stage_instance.Run()

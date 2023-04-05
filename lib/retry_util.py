@@ -353,8 +353,8 @@ def RetryCommand(functor, max_retry, *args, **kwargs):
         error_check: Optional callback to check the error output.  Return None
             to fall back to |retry_on|, or True/False to set the retry directly.
         log_retries: Whether to log a warning when retriable errors occur.
-        args: Positional args passed to run; see run for specifics.
-        kwargs: Optional args passed to run; see run for specifics.
+        *args: Positional args passed to run; see run for specifics.
+        **kwargs: Optional args passed to run; see run for specifics.
 
     Returns:
         A CompletedProcess object.
@@ -408,8 +408,8 @@ def RunCommandWithRetries(max_retry, *args, **kwargs):
 
     Args:
         max_retry: See RetryCommand and run.
-        args: See RetryCommand and run.
-        kwargs: See RetryCommand and run.
+        *args: See RetryCommand and run.
+        **kwargs: See RetryCommand and run.
 
     Returns:
         A CompletedProcess object.
@@ -429,8 +429,8 @@ def RunCurl(curl_args, *args, **kwargs):
 
     Args:
         curl_args: Command line to pass to curl. Must be list of str.
-        args: See RunCommandWithRetries and run.
-        kwargs: See RunCommandWithRetries and run.
+        *args: See RunCommandWithRetries and run.
+        **kwargs: See RunCommandWithRetries and run.
             Note that retry_on, error_check, sleep, backoff_factor cannot be
             overwritten.
 

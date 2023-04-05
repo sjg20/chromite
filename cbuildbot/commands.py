@@ -131,12 +131,13 @@ def RunBuildScript(buildroot, cmd, chromite_cmd=False, **kwargs):
     PARALLEL_EMERGE_STATUS_FILE variable.
 
     Args:
-      buildroot: The root of the build directory.
-      cmd: The command to run.
-      chromite_cmd: Whether the command should be evaluated relative to the
-        chromite/bin subdir of the |buildroot|.
-      kwargs: Optional args passed to run; see cros_build_lib.run for specifics.
-        In addition, if 'sudo' kwarg is True, sudo_run will be used.
+        buildroot: The root of the build directory.
+        cmd: The command to run.
+        chromite_cmd: Whether the command should be evaluated relative to the
+            chromite/bin subdir of the |buildroot|.
+        **kwargs: Optional args passed to run; see cros_build_lib.run for
+            specifics. In addition, if 'sudo' kwarg is True, sudo_run will be
+            used.
     """
     assert not kwargs.get("shell", False), "Cannot execute shell commands"
     kwargs.setdefault("cwd", buildroot)
@@ -1756,17 +1757,18 @@ def _HWTestCreate(cmd, debug=False, **kwargs):
     """Start a suite in the HWTest lab, and return its id.
 
     This method runs a command to create the suite. Since we are using
-    swarming client, which contiuously send request to swarming server
+    swarming client, which continuously send request to swarming server
     to poll task result, there is no need to retry on any network
     related failures.
 
     Args:
-      cmd: Proxied run_suite command.
-      debug: If True, log command rather than running it.
-      kwargs: args to be passed to RunSwarmingCommand.
+        cmd: Proxied run_suite command.
+        debug: If True, log command rather than running it.
+        **kwargs: args to be passed to RunSwarmingCommand.
 
     Returns:
-      Job id of created suite. Returned id will be None if no job id was created.
+        Job id of created suite. Returned id will be None if no job id was
+        created.
     """
     # Start the suite.
     start_cmd = list(cmd) + ["-c"]
@@ -1805,9 +1807,9 @@ def _HWTestWait(cmd, job_id, **kwargs):
     exception will be raised in _HWTestDumpJson step.
 
     Args:
-      cmd: Proxied run_suite command.
-      job_id: The job id of the suite that was created.
-      kwargs: args to be passed to RunSwarmingCommand.
+        cmd: Proxied run_suite command.
+        job_id: The job id of the suite that was created.
+        **kwargs: args to be passed to RunSwarmingCommand.
 
     Returns:
       True if all tests pass.
@@ -1871,9 +1873,9 @@ def _HWTestDumpJson(cmd, job_id, **kwargs):
     """Consume HWTest suite json output and return passed/failed subsystems dict.
 
     Args:
-      cmd: Proxied run_suite command.
-      job_id: The job id of the suite that was created.
-      kwargs: args to be passed to RunSwarmingCommand.
+        cmd: Proxied run_suite command.
+        job_id: The job id of the suite that was created.
+        **kwargs: args to be passed to RunSwarmingCommand.
 
     Returns:
       The parsed json_dump dictionary.

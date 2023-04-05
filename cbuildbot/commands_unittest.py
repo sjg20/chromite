@@ -43,10 +43,10 @@ class RunBuildScriptTest(cros_test_lib.RunCommandTempDirTestCase):
         """Test the RunBuildScript function.
 
         Args:
-          in_chroot: Whether to enter the chroot or not.
-          error: error result message to simulate.
-          raises: If the command should fail, the exception to be raised.
-          kwargs: Extra kwargs passed to RunBuildScript.
+            in_chroot: Whether to enter the chroot or not.
+            error: error result message to simulate.
+            raises: If the command should fail, the exception to be raised.
+            **kwargs: Extra kwargs passed to RunBuildScript.
         """
 
         # Write specified error message to status file.

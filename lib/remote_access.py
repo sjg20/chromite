@@ -183,8 +183,8 @@ def RunCommandFuncWrapper(func, msg, *args, **kwargs):
         func: The function to call.
         msg: The message to display if the command failed.
         ignore_failures: If True, ignore failures during the command.
-        args: Arguments to pass to |func|.
-        kwargs: Keyword arguments to pass to |func|.
+        *args: Arguments to pass to |func|.
+        **kwargs: Keyword arguments to pass to |func|.
 
     Returns:
         The result of |func|.
@@ -217,7 +217,7 @@ def CompileSSHConnectSettings(**kwargs):
     resulting arguments are passed into an SSH call.
 
     Args:
-        kwargs: A dictionary of ssh_config settings.
+        **kwargs: A dictionary of ssh_config settings.
 
     Returns:
         A list of arguments to pass to SSH.
@@ -425,7 +425,7 @@ class RemoteAccess(object):
                 itself fails (return code 255).
             remote_sudo: If set, run the command in remote shell with sudo.
             remote_user: If set, run the command as the specified user.
-            kwargs: See cros_build_lib.run documentation.
+            **kwargs: See cros_build_lib.run documentation.
 
         Returns:
             A CompletedProcess object.  The returncode is the returncode of the
@@ -665,7 +665,7 @@ class RemoteAccess(object):
             compress: If set, compress file data during the transfer.
             files_from: Read paths from this file (plus some other changes to
                 behaviour per rsync's --files-from).
-            kwargs: See cros_build_lib.run documentation.
+            **kwargs: See cros_build_lib.run documentation.
         """
         kwargs.setdefault("debug_level", self.debug_level)
 
@@ -747,7 +747,7 @@ class RemoteAccess(object):
             sudo: If set, invoke the command via sudo.
             remote_sudo: If set, run the command in remote shell with sudo.
             compress: If set, passes the -C flag to scp to enable compression.
-            kwargs: See cros_build_lib.run documentation.
+            **kwargs: See cros_build_lib.run documentation.
 
         Returns:
             A CompletedProcess object containing the information and return code
@@ -809,7 +809,7 @@ class RemoteAccess(object):
             producer_cmd: Command to run locally with its results piped to
                 |cmd|.
             cmd: Command to run on the remote device.
-            kwargs: See RemoteSh for documentation.
+            **kwargs: See RemoteSh for documentation.
         """
         result = cros_build_lib.run(
             producer_cmd, print_cmd=False, capture_output=True
@@ -1042,7 +1042,7 @@ class RemoteDevice(object):
 
         Args:
             cmd: command to run. See RemoteAccess.RemoteSh documentation.
-            kwargs: keyword arguments to pass along with cmd. See
+            **kwargs: keyword arguments to pass along with cmd. See
                 RemoteAccess.RemoteSh documentation.
         """
         self.cleanup_cmds.append((cmd, kwargs))
@@ -1364,8 +1364,8 @@ class RemoteDevice(object):
 
         Args:
             cmd: command to run. See RemoteAccess.RemoteSh documentation.
-            kwargs: keyword arguments to pass along with cmd. See
-            RemoteAccess.RemoteSh documentation.
+            **kwargs: keyword arguments to pass along with cmd. See
+                RemoteAccess.RemoteSh documentation.
         """
         kwargs.setdefault("debug_level", self.debug_level)
         kwargs.setdefault("connect_settings", self.connect_settings)
@@ -1515,7 +1515,7 @@ class ChromiumOSDevice(RemoteDevice):
             hostname: A network hostname.
             include_dev_paths: If true, add DEV_BIN_PATHS to $PATH for all
                 commands.
-            kwargs: Args to pass to the parent constructor.
+            **kwargs: Args to pass to the parent constructor.
         """
         super().__init__(hostname, **kwargs)
         self._orig_path = None
@@ -1680,8 +1680,8 @@ class ChromiumOSDevice(RemoteDevice):
 
         Args:
             cmd: command to run. See RemoteAccess.RemoteSh documentation.
-            kwargs: keyword arguments to pass along with cmd. See
-            RemoteAccess.RemoteSh documentation.
+            **kwargs: keyword arguments to pass along with cmd. See
+                RemoteAccess.RemoteSh documentation.
         """
         if self._include_dev_paths:
             extra_env = kwargs.pop("extra_env", {})

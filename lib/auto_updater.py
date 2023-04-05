@@ -940,7 +940,7 @@ class ChromiumOSUpdater(BaseUpdater):
 
         Args:
             cmd: the command to be run by device.
-            kwargs: the parameters for device to run the command.
+            **kwargs: the parameters for device to run the command.
 
         Returns:
             the output of running the command.

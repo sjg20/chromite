@@ -70,7 +70,7 @@ class CrosTransferBaseClassTest(cros_test_lib.MockTestCase):
 
         Args:
             device: a remote_access.ChromiumOSDeviceHandler object.
-            kwargs: contains parameter name and value pairs for any argument
+            **kwargs: contains parameter name and value pairs for any argument
                 accepted by auto_updater_transfer.LocalTransfer. The values
                 provided through kwargs will supersede the defaults set within
                 this function.
@@ -155,7 +155,7 @@ class CrosLocalTransferTest(cros_test_lib.MockTempDirTestCase):
 
         Args:
             device: a remote_access.ChromiumOSDeviceHandler object.
-            kwargs: contains parameter name and value pairs for any argument
+            **kwargs: contains parameter name and value pairs for any argument
                 accepted by auto_updater_transfer.LocalTransfer. The values
                 provided through kwargs will supersede the defaults set within
                 this function.
@@ -242,7 +242,7 @@ class CrosLabEndToEndPayloadTransferTest(cros_test_lib.MockTempDirTestCase):
 
         Args:
             device: a remote_access.ChromiumOSDeviceHandler object.
-            kwargs: contains parameter name and value pairs for any argument
+            **kwargs: contains parameter name and value pairs for any argument
                 accepted by auto_updater_transfer.LabEndToEndPayloadTransfer.
                 The values provided through kwargs will supersede the defaults
                 set within this function.

@@ -867,13 +867,13 @@ class PatchSeries(object):
         tracking branch/paths/content-merging at what is passed through here.
 
         Args:
-          git_repo: Absolute path to the git repository to operate upon.
-          tracking_branch: Which tracking branch patches should apply against.
-          kwargs: See PatchSeries.__init__ for the various optional args;
-            note forced_manifest cannot be used here.
+            git_repo: Absolute path to the git repository to operate upon.
+            tracking_branch: Which tracking branch patches should apply against.
+            **kwargs: See PatchSeries.__init__ for the various optional args;
+                note forced_manifest cannot be used here.
 
         Returns:
-          A PatchSeries instance w/ a forced manifest.
+            A PatchSeries instance w/ a forced manifest.
         """
 
         if "forced_manifest" in kwargs:

@@ -1314,7 +1314,7 @@ def MountDir(
       makedirs: Create |dst_path| if it doesn't exist.
       mount_opts: List of options to pass to `mount`.
       skip_mtab: Whether to write new entries to /etc/mtab.
-      kwargs: Pass all other args to run.
+      **kwargs: Pass all other args to run.
     """
     if sudo:
         runcmd = cros_build_lib.sudo_run
@@ -1348,7 +1348,7 @@ def MountTmpfsDir(
       name: Friendly name to include in mount output.
       size: Size of the temp fs.
       mount_opts: List of options to pass to `mount`.
-      kwargs: Pass all other args to MountDir.
+      **kwargs: Pass all other args to MountDir.
     """
     mount_opts = list(mount_opts) + ["size=%s" % size]
     MountDir(name, path, fs_type="tmpfs", mount_opts=mount_opts, **kwargs)

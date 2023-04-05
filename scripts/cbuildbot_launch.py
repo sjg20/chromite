@@ -86,11 +86,11 @@ def field(fields, **kwargs):
     """Helper for inserting more fields into a metrics fields dictionary.
 
     Args:
-      fields: Dictionary of metrics fields.
-      kwargs: Each argument is a key/value pair to insert into dict.
+        fields: Dictionary of metrics fields.
+        **kwargs: Each argument is a key/value pair to insert into dict.
 
     Returns:
-      Copy of original dictionary with kwargs set as fields.
+        Copy of original dictionary with kwargs set as fields.
     """
     f = fields.copy()
     f.update(kwargs)

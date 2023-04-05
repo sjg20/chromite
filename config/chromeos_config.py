@@ -693,8 +693,8 @@ def UpdateBoardConfigs(board_configs, boards, *args, **kwargs):
     Args:
       board_configs: Dict in CreateBoardConfigs format to filter from.
       boards: Iterable of boards to update in the dict.
-      args: List of templates to apply.
-      kwargs: Individual keys to update.
+      *args: List of templates to apply.
+      **kwargs: Individual keys to update.
 
     Returns:
       Copy of board_configs dict with boards boards update with templates

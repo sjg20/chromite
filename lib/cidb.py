@@ -527,8 +527,8 @@ class SchemaVersionedMySQLConnection(object):
         Args:
             query: Query to execute, of type string, or sqlalchemy.Executable,
                 or other sqlalchemy-executable statement (see sqlalchemy docs).
-            args: Additional args passed along to .execute(...)
-            kwargs: Additional args passed along to .execute(...)
+            *args: Additional args passed along to .execute(...)
+            **kwargs: Additional args passed along to .execute(...)
 
         Returns:
             The result of .execute(...)
@@ -548,8 +548,8 @@ class SchemaVersionedMySQLConnection(object):
             query: Query to execute, of type string, or sqlalchemy.Executable,
                 or other sqlalchemy-executable statement (see sqlalchemy docs).
             engine: sqlalchemy.engine to use.
-            args: Additional args passed along to .execute(...)
-            kwargs: Additional args passed along to .execute(...)
+            *args: Additional args passed along to .execute(...)
+            **kwargs: Additional args passed along to .execute(...)
 
         Returns:
             The result of .execute(...)

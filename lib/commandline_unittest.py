@@ -886,7 +886,7 @@ class TestRunInsideChroot(cros_test_lib.MockTestCase):
             expected_cmd: Command that should be executed inside the chroot.
             expected_chroot_args: Args that should be passed as chroot args.
             log_level_args: Args that set the log level of cros_sdk.
-            kwargs: Additional args to pass to RunInsideChroot().
+            **kwargs: Additional args to pass to RunInsideChroot().
         """
         with self.assertRaises(commandline.ChrootRequiredError) as cm:
             commandline.RunInsideChroot(self.cmd, **kwargs)

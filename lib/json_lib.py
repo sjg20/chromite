@@ -77,7 +77,7 @@ def loads(
         data: JSON data.
         strip_utf8_bom: Remove leading UTF-8 BOM.
         strip_hash_comments: Strip # comments.
-        kwargs: Passed to json.loads().
+        **kwargs: Passed to json.loads().
 
     Returns:
         The parsed JSON data.
@@ -103,7 +103,7 @@ def load(fp, **kwargs):
 
     Args:
         fp: A file handle that can be .read().
-        kwargs: Passed to loads().
+        **kwargs: Passed to loads().
     """
     return loads(fp.read(), **kwargs)
 

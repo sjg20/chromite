@@ -248,8 +248,8 @@ class RepoRepository(object):
         """Run 'repo init' and clean up repo manifest on init failures.
 
         Args:
-          args: args to pass to cros_build_lib.run.
-          kwargs: kwargs to pass to cros_build_lib.run.
+            *args: args to pass to cros_build_lib.run.
+            **kwargs: kwargs to pass to cros_build_lib.run.
         """
         try:
             kwargs.setdefault("cwd", self.directory)

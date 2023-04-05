@@ -238,7 +238,7 @@ def _CreateWrapper(wrapper_path: str, template: str, **kwargs: Any) -> None:
     Args:
       wrapper_path: path to the wrapper.
       template: wrapper template.
-      kwargs: fields to be set in the template.
+      **kwargs: fields to be set in the template.
     """
     osutils.WriteFile(
         wrapper_path, template.format(**kwargs), makedirs=True, sudo=True
@@ -334,7 +334,7 @@ class Sysroot(object):
         Pass args as if calling os.path.join().
 
         Args:
-          args: path components to join.
+          *args: path components to join.
 
         Returns:
           The path within the sysroot.
@@ -709,7 +709,7 @@ class Sysroot(object):
           board_overlays: List of board overlays.
           portdir_overlays: List of portage overlays.
           header: Header comment string; must start with #.
-          kwargs: Additional configuration values to set.
+          **kwargs: Additional configuration values to set.
 
         Returns:
           Configuration string.

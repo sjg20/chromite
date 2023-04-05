@@ -188,8 +188,8 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
         provided by the optional named arguments.
 
         Args:
-          template: a string with named substitution fields
-          kwargs: named attributes to override the defaults
+            template: a string with named substitution fields
+            **kwargs: named attributes to override the defaults
         """
         attrs = dict(self.all_attrs, **kwargs)
         return template % attrs
@@ -198,9 +198,9 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
         """Populates a Google Storage path template w/ optional suffix.
 
         Args:
-          base_path: a path string template with named substitution fields
-          suffix: a path suffix to append to the given base path
-          kwargs: named attributes to override the defaults
+            base_path: a path string template with named substitution fields
+            suffix: a path suffix to append to the given base path
+            **kwargs: named attributes to override the defaults
         """
         template = base_path
         if suffix:

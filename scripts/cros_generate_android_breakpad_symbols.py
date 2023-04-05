@@ -130,9 +130,9 @@ def _UnpackGenerateBreakpad(elf_file, *args, **kwargs):
     elf_file, and fills in dump_sym_cmd.
 
     Args:
-      elf_file: Name of the file to generate breakpad symbols for.
-      args: See cros_generate_breakpad_symbols.GenerateBreakpadSymbol.
-      kwargs: See cros_generate_breakpad_symbols.GenerateBreakpadSymbol.
+        elf_file: Name of the file to generate breakpad symbols for.
+        *args: See cros_generate_breakpad_symbols.GenerateBreakpadSymbol.
+        **kwargs: See cros_generate_breakpad_symbols.GenerateBreakpadSymbol.
     """
     # We try to unpack, and just see if it works. Real failures caused by
     # something other than a binary that's already unpacked will be logged and

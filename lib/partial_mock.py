@@ -687,7 +687,7 @@ class PartialCmdMock(PartialMock):
             args: Set of expected command-line arguments.
             cmd_arg_index: The index of the command list in the positional
                 call_args. Defaults to the last positional argument.
-            kwargs: Set of expected keyword arguments.
+            **kwargs: Set of expected keyword arguments.
             mock_attr: Which attributes's mock is being referenced.
         """
         for call_args, call_kwargs in self.patched[mock_attr].call_args_list:

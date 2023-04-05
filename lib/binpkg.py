@@ -412,7 +412,7 @@ def GrabRemotePackageIndex(binhost_url, **kwargs):
 
     Args:
         binhost_url: Base URL of remote packages (PORTAGE_BINHOST).
-        kwargs: Additional RunCommand parameters.
+        **kwargs: Additional RunCommand parameters.
 
     Returns:
         A PackageIndex object, if the Packages file can be retrieved. If the

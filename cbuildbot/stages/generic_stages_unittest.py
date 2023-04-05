@@ -230,14 +230,14 @@ class StageTestCase(
         BuilderStage._StringifyException.
 
         Args:
-          exception: See unittest.TestCase.assertRaises.
-          functor: See unittest.TestCase.assertRaises.
-          args: See unittest.TestCase.assertRaises.
-          kwargs: See unittest.TestCase.assertRaises.
+            exception: See unittest.TestCase.assertRaises.
+            functor: See unittest.TestCase.assertRaises.
+            *args: See unittest.TestCase.assertRaises.
+            **kwargs: See unittest.TestCase.assertRaises.
 
         Raises:
-          Unittest failures if the expected exception is not raised, or
-          _StringifyException exceptions if that process fails.
+            Unittest failures if the expected exception is not raised, or
+            _StringifyException exceptions if that process fails.
         """
         try:
             functor(*args, **kwargs)

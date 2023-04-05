@@ -260,8 +260,8 @@ class BuildConfig(AttrDict):
         value for the given key (or None) to compute the new value.
 
         Args:
-            args: Dictionaries or templates to update this config with.
-            kwargs: Settings to inject; see DefaultSettings for valid values.
+            *args: Dictionaries or templates to update this config with.
+            **kwargs: Settings to inject; see DefaultSettings for valid values.
 
         Returns:
             self after changes are applied.
@@ -320,8 +320,8 @@ class BuildConfig(AttrDict):
         value for the given key (or None) to compute the new value.
 
         Args:
-            args: Mapping instances to mixin.
-            kwargs: Settings to inject; see DefaultSettings for valid values.
+            *args: Mapping instances to mixin.
+            **kwargs: Settings to inject; see DefaultSettings for valid values.
 
         Returns:
             A new _config instance.
@@ -1419,10 +1419,10 @@ class SiteConfig(dict):
             name: The name to label this configuration; this is what cbuildbot
                 would see.
             template: BuildConfig to use as a template for this build.
-            args: BuildConfigs to patch into this config. First one (if present)
+            *args: BuildConfigs to patch into this config. First one (if present)
                 is considered the template. See AddTemplate for help on
                 templates.
-            kwargs: BuildConfig values to explicitly set on this config.
+            **kwargs: BuildConfig values to explicitly set on this config.
 
         Returns:
             The BuildConfig just added to the SiteConfig.
@@ -1463,10 +1463,10 @@ class SiteConfig(dict):
         Args:
             name: The name to label this configuration; this is what cbuildbot
                 would see.
-            args: Configurations to build in this group. The first config in
+            *args: Configurations to build in this group. The first config in
                 the group is considered the primary configuration and is used
                 for syncing and creating the chroot.
-            kwargs: Override values to use for the parent config.
+            **kwargs: Override values to use for the parent config.
 
         Returns:
             A new BuildConfig instance.
@@ -1537,8 +1537,8 @@ class SiteConfig(dict):
 
         Args:
             name: The name of the template.
-            args: See the docstring of BuildConfig.derive.
-            kwargs: See the docstring of BuildConfig.derive.
+            *args: See the docstring of BuildConfig.derive.
+            **kwargs: See the docstring of BuildConfig.derive.
         """
         assert name not in self._templates, "Template %s already exists." % name
 
