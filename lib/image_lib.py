@@ -52,9 +52,14 @@ def _DumpPartitionInfo() -> None:
 
     loop_file_paths = list(Path("/dev").glob("loop*p*"))
     cros_build_lib.run(
-        ["fuser", "-mv"] + loop_file_paths, check=False, log_output=True
+        ["fuser", "-mv"] + loop_file_paths,
+        check=False,
+        log_output=True,
+        encoding="utf-8",
     )
-    cros_build_lib.run(["losetup", "-a"], check=False, log_output=True)
+    cros_build_lib.run(
+        ["losetup", "-a"], check=False, log_output=True, encoding="utf-8"
+    )
 
 
 class LoopbackPartitions(object):
