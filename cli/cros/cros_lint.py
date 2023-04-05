@@ -581,6 +581,7 @@ _FILENAME_PATTERNS_TOOL_MAP = {
     frozenset({".gn"}): (_GnlintFile, _NonExecLintFile),
     frozenset({"DIR_METADATA"}): (_DirMdLintFile, _NonExecLintFile),
     frozenset({"OWNERS*"}): (_OwnersLintFile, _NonExecLintFile),
+    frozenset({"Dockerfile", "Makefile"}): (_NonExecLintFile,),
 }
 
 
