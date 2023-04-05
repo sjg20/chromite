@@ -434,6 +434,11 @@ class DocStringChecker(pylint.checkers.BaseChecker):
             ("docstring-deprecated-annotations"),
             _MessageCP019,
         ),
+        "C9020": (
+            "Duplicate arg documentation found: |%(arg)s|",
+            ("docstring-duplicate-argument"),
+            _MessageCP019,
+        ),
     }
 
     def __init__(self, *args, **kwargs):
@@ -836,6 +841,7 @@ class DocStringChecker(pylint.checkers.BaseChecker):
         # TODO: Should we verify arg order matches doc order ?
         # TODO: Should we check indentation of wrapped docs ?
         missing_args = []
+        found_args = set()
         for arg in itertools.chain(node.args.args, node.args.kwonlyargs):
             # Ignore class related args.
             if arg.name in ("cls", "self"):
@@ -850,6 +856,13 @@ class DocStringChecker(pylint.checkers.BaseChecker):
                 aline = l.lstrip()
                 m = arg_re.match(aline)
                 if m:
+                    if arg.name in found_args:
+                        margs = {"arg": l}
+                        self.add_message(
+                            "C9020", node=node, line=node.fromlineno, args=margs
+                        )
+                    found_args.add(arg.name)
+
                     if m.group(1) is not None:
                         margs = {"arg": l}
                         self.add_message(
@@ -862,8 +875,8 @@ class DocStringChecker(pylint.checkers.BaseChecker):
                         self.add_message(
                             "C9012", node=node, line=node.fromlineno, args=margs
                         )
-                    break
-            else:
+
+            if arg.name not in found_args:
                 missing_args.append(arg.name)
 
         if missing_args:

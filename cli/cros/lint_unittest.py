@@ -657,6 +657,15 @@ class DocStringCheckerTest(CheckerTestCase):
          """,
                 ("moo",),
             ),
+            (
+                """duplicated arg
+
+                Args:
+                    moo: Ok.
+                    moo: Ok.
+                """,
+                ("moo",),
+            ),
         )
         for dc, args in datasets:
             self.results = []
