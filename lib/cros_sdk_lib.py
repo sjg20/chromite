@@ -417,20 +417,20 @@ def MigrateStatePaths(chroot: chroot_lib.Chroot, lock: locking.FileLock):
     out_path.
     """
     for src_suffix, dst_suffix in _CHROOT_STATE_MIGRATIONS:
-        # If the |src| directory is non-empty (or, includes only a README),
-        # migrate its contents to |dst|.
+        # If the |src| directory is non-empty (aside from a README), migrate
+        # its contents to |dst|.
         src = Path(chroot.path) / src_suffix
         dst = chroot.out_path / dst_suffix
 
         try:
-            src_list = [i for i in src.iterdir()]
+            src_list = list(src.iterdir())
         except FileNotFoundError:
             continue
         except NotADirectoryError:
             continue
-        if len(src_list) == 0:
+        if not src_list:
             continue
-        if len(src_list) == 1 and src_list[0] == src / "README":
+        if src_list == [src / "README"]:
             continue
 
         logging.info(
