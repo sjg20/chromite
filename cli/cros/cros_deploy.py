@@ -9,6 +9,7 @@ import logging
 from chromite.cli import command
 from chromite.cli import deploy
 from chromite.lib import commandline
+from chromite.utils import timer
 
 
 @command.command_decorator("deploy")
@@ -131,21 +132,22 @@ For more information of cros build usage:
     def Run(self):
         """Run cros deploy."""
         commandline.RunInsideChroot(self)
-        deploy.Deploy(
-            self.options.device,
-            self.options.packages,
-            board=self.options.board,
-            emerge=self.options.emerge,
-            update=self.options.update,
-            deep=self.options.deep,
-            deep_rev=self.options.deep_rev,
-            clean_binpkg=self.options.clean_binpkg,
-            root=self.options.root,
-            strip=self.options.strip,
-            emerge_args=self.options.emerge_args,
-            ssh_private_key=self.options.private_key,
-            ping=self.options.ping,
-            force=self.options.force,
-            dry_run=self.options.dryrun,
-        )
-        logging.info("cros deploy completed successfully.")
+        with timer.Timer() as t:
+            deploy.Deploy(
+                self.options.device,
+                self.options.packages,
+                board=self.options.board,
+                emerge=self.options.emerge,
+                update=self.options.update,
+                deep=self.options.deep,
+                deep_rev=self.options.deep_rev,
+                clean_binpkg=self.options.clean_binpkg,
+                root=self.options.root,
+                strip=self.options.strip,
+                emerge_args=self.options.emerge_args,
+                ssh_private_key=self.options.private_key,
+                ping=self.options.ping,
+                force=self.options.force,
+                dry_run=self.options.dryrun,
+            )
+        logging.notice("cros deploy completed successfully in %s", t)
