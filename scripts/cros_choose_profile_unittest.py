@@ -131,8 +131,8 @@ class ProfileTest(cros_test_lib.TempDirTestCase):
 
         # Contents to write to the corresponding file.
 
-        # self.profile_override is assumed to be a profile name in testGetProfile.
-        # Update code there if this changes.
+        # self.profile_override is assumed to be a profile name in
+        # testGetProfile. Update code there if this changes.
         self.profile_override = "profile1"
         path_contents = {
             b1_board_setup: 'ARCH="arch"\nBOARD_OVERLAY="/board1-overlay"',
@@ -193,8 +193,8 @@ class ProfileTest(cros_test_lib.TempDirTestCase):
         )
 
         for profile_name, parent in self.profile_expected_parent.items():
-            # Call ChooseProfile for the given profile and check contents as specified
-            # by self.profile_expected_parent (built in setUp).
+            # Call ChooseProfile for the given profile and check contents as
+            # specified by self.profile_expected_parent (built in setUp).
 
             profile_dir = self.profile_directory[profile_name]
             profile = cros_choose_profile.Profile(

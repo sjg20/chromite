@@ -311,7 +311,7 @@ class XBuddy:
         return xbuddy_config
 
     def _ManageBuilds(self) -> bool:
-        """Checks if xBuddy is managing local builds using the current config."""
+        """Check if xBuddy is managing local builds using the current config."""
         try:
             return self.ParseBoolean(self.config.get(GENERAL, "manage_builds"))
         except configparser.Error:
@@ -333,19 +333,20 @@ class XBuddy:
         """Given the full xbuddy config, look up an alias for path rewrite.
 
         Args:
-          alias: The xbuddy path that could be one of the aliases in the
-            rewrite table.
-          board: The board to fill in with when paths are rewritten. Can be from
-            the update request xml or the default board from devserver. If None,
-            defers to the value given during XBuddy initialization.
-          version: The version to fill in when rewriting paths. Could be a specific
-            version number or a version alias like LATEST. If None, defers to the
-            value given during XBuddy initialization, or LATEST.
+            alias: The xbuddy path that could be one of the aliases in the
+                rewrite table.
+            board: The board to fill in with when paths are rewritten. Can be
+                from the update request xml or the default board from devserver.
+                If None, defers to the value given during XBuddy initialization.
+            version: The version to fill in when rewriting paths. Could be a
+                specific version number or a version alias like LATEST. If None,
+                defers to the value given during XBuddy initialization, or
+                LATEST.
 
         Returns:
-          A pair (val, suffix) where val is the rewritten path, or the original
-          string if no rewrite was found; and suffix is the assigned location
-          suffix, or the default suffix if none was found.
+            A pair (val, suffix) where val is the rewritten path, or the
+            original string if no rewrite was found; and suffix is the assigned
+            location suffix, or the default suffix if none was found.
         """
         try:
             suffix = self.config.get(LOCATION_SUFFIXES, alias)
@@ -432,10 +433,11 @@ class XBuddy:
         list_subdirectory: bool = False,
         with_release: bool = True,
     ) -> str:
-        """Returns most recent version number found in a google storage directory.
+        """Get most recent version number found in a google storage directory.
 
-        This lists out the contents of the given GS bucket or regex to GS buckets,
-        and tries to grab the newest version found in the directory names.
+        This lists out the contents of the given GS bucket or regex to GS
+        buckets, and tries to grab the newest version found in the directory
+        names.
 
         Args:
           path: directory location on google storage to check.
@@ -506,7 +508,7 @@ class XBuddy:
         }
 
     def _LookupVersion(self, board: str, suffix: str, version: str) -> str:
-        """Search GS image releases for the highest match to a version prefix."""
+        """Search GS image releases for the highest match to a version."""
         # Build the pattern for GS to match.
         logging.debug(
             "Checking gs for latest '%s' image with prefix '%s'", board, version
@@ -534,7 +536,8 @@ class XBuddy:
         """Returns the remote build_id for the given board and version.
 
         Raises:
-          XBuddyException: If we failed to resolve the version to a valid build_id.
+            XBuddyException: If we failed to resolve the version to a valid
+                build_id.
         """
         build_id_as_is = devserver_constants.IMAGE_DIR % {
             "board": board,
@@ -574,8 +577,8 @@ class XBuddy:
         logging.debug(
             "Checking gs for full version for %s of %s", base_version, board
         )
-        # TODO(garnold) We might want to accommodate version prefixes and pick the
-        # most recent found, as done in _LookupVersion().
+        # TODO(garnold) We might want to accommodate version prefixes and pick
+        #   the most recent found, as done in _LookupVersion().
         latest_addr = devserver_constants.GS_LATEST_BASE_VERSION % {
             "image_dir": devserver_constants.GS_IMAGE_DIR,
             "board": board,
@@ -595,24 +598,24 @@ class XBuddy:
         """Handle version aliases for remote payloads in GS.
 
         Args:
-          board: as specified in the original call. (i.e. x86-generic, parrot)
-          suffix: The location suffix, to be added to board name.
-          version: as entered in the original call. can be
-            {TBD, 0. some custom alias as defined in a config file}
-            1. fully qualified build version.
-            2. latest
-            3. latest-{channel}
-            4. latest-official-{board suffix}
-            5. version prefix (i.e. RX-Y.X, RX-Y, RX)
-          image_dir: image directory to check in Google Storage. If none,
-            the default bucket is used.
+            board: as specified in the original call. (i.e. x86-generic, parrot)
+            suffix: The location suffix, to be added to board name.
+            version: as entered in the original call. can be
+                {TBD, 0. some custom alias as defined in a config file}
+                1. fully qualified build version.
+                2. latest
+                3. latest-{channel}
+                4. latest-official-{board suffix}
+                5. version prefix (i.e. RX-Y.X, RX-Y, RX)
+            image_dir: image directory to check in Google Storage. If none,
+                the default bucket is used.
 
         Returns:
-          Tuple of (Location where the image dir is actually found on GS (build_id),
-          best guess for the channel).
+            Tuple of (Location where the image dir is actually found on GS
+            (build_id), best guess for the channel).
 
         Raises:
-          XBuddyException: If we failed to resolve the version to a valid url.
+            XBuddyException: If we failed to resolve the version to a valid url.
         """
         # Only the last segment of the alias is variable relative to the rest.
         version_tuple = version.rsplit("-", 1)
@@ -676,14 +679,14 @@ class XBuddy:
         the real image dir in the local /build/images directory.
 
         Args:
-          board: board that image was built for.
+            board: board that image was built for.
 
         Returns:
-          The discovered version of the image.
+            The discovered version of the image.
 
         Raises:
-          XBuddyException if neither test nor dev image was found in latest built
-          directory.
+            XBuddyException: if neither test nor dev image was found in latest
+                built directory.
         """
         latest_local_dir = image_lib.GetLatestImageLink(board)
         if not latest_local_dir or not os.path.exists(latest_local_dir):
@@ -727,7 +730,8 @@ class XBuddy:
                 ]
             )
 
-        # Symlink undiscovered images, and update timestamps if manage_builds is on.
+        # Symlink undiscovered images, and update timestamps if manage_builds is
+        # on.
         for build_id in build_ids:
             link = os.path.join(self.static_dir, build_id)
             target = os.path.join(self.images_dir, build_id)
@@ -803,7 +807,8 @@ class XBuddy:
             os.unlink(time_file)
             clear_dir = os.path.join(self.static_dir, b_path)
             try:
-                # Handle symlinks, in the case of links to local builds if enabled.
+                # Handle symlinks, in the case of links to local builds if
+                # enabled.
                 if os.path.islink(clear_dir):
                     target = os.readlink(clear_dir)
                     logging.debug("Deleting locally built image at %s", target)
@@ -914,25 +919,27 @@ class XBuddy:
         that is used rather than board.
 
         Args:
-          path_list: [board, version, alias] as split from the xbuddy call url.
-          board: Board whos artifacts we are looking for. Only used if no board was
-            given during XBuddy initialization.
-          version: Version whose artifacts we are looking for. Used if no version
-            was given during XBuddy initialization. If None, defers to LATEST.
-          lookup_only: If true just look up the artifact, if False stage it.
-            TODO(ahassani): If true, it should also return the file name.
-          image_dir: Google Storage image archive to search in if requesting a
-            remote artifact. If none uses the default bucket.
+            path_list: [board, version, alias] as split from the xbuddy call
+                url.
+            board: Board whose artifacts we are looking for. Only used if no
+                board was given during XBuddy initialization.
+            version: Version whose artifacts we are looking for. Used if no
+                version was given during XBuddy initialization. If None, defers
+                to LATEST.
+            lookup_only: If true just look up the artifact, if False stage it.
+                TODO(ahassani): If true, it should also return the file name.
+            image_dir: Google Storage image archive to search in if requesting a
+                remote artifact. If none uses the default bucket.
 
         Returns:
-          build_id: Path to the image or update directory on the devserver or
-            in Google Storage. e.g. 'x86-generic/R26-4000.0.0'
-          file_name: of the artifact in the build_id directory.
+            build_id: Path to the image or update directory on the devserver or
+                in Google Storage. e.g. 'x86-generic/R26-4000.0.0'
+            file_name: of the artifact in the build_id directory.
 
         Raises:
-          XBuddyException: if the path could not be translated
-          build_artifact.ArtifactDownloadError: if we failed to download the
-                                                artifact.
+            XBuddyException: if the path could not be translated.
+            build_artifact.ArtifactDownloadError: if we failed to download the
+                artifact.
         """
         path = "/".join(path_list)
         default_board = self._board or board
@@ -960,8 +967,8 @@ class XBuddy:
                 else xbuddy_components.image_type
             )
 
-            # If there was an image type discovered, get the file name otherwise, just
-            # return with no file name.
+            # If there was an image type discovered, get the file name
+            # otherwise, just return with no file name.
             if image_type:
                 file_name = os.path.join(
                     artifact_dir, LOCAL_ALIAS_TO_FILENAME[image_type]

@@ -30,7 +30,8 @@ class NestedOrUnsupportedError(Error):
 
 def _dedupe_in_order(iterable) -> List:
     """Dedupe elements while maintaining order."""
-    # This uses Python dict insertion order that is guaranteed in newer versions.
+    # This uses Python dict insertion order that is guaranteed in newer
+    # versions.
     return dict((x, None) for x in iterable).keys()
 
 

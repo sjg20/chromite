@@ -26,8 +26,8 @@ def Data(
     Returns:
         Formatted data.
     """
-    # If the file is one line, assume it should be condensed.  If it isn't, assume
-    # it should be human readable.
+    # If the file is one line, assume it should be condensed.  If it isn't,
+    # assume it should be human-readable.
     try:
         obj = json.loads(data)
     except json.decoder.JSONDecodeError as e:

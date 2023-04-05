@@ -29,7 +29,8 @@ class TestFileLib(cros_test_lib.TempDirTestCase):
         based on hashlib, and we'd like to have an independent implementation to
         compare against (rather than the two modules be bug-for-bug compatible).
         """
-        # The shasum utility returns hashes in base 16 encoding.  We need base 64.
+        # The shasum utility returns hashes in base 16 encoding.
+        # We need base 64.
         hash16 = cros_build_lib.run(
             [util, file_path], stdout=True
         ).stdout.split(b" ")[0]

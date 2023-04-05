@@ -100,16 +100,17 @@ def _sort_children(nodes: List[minidom.Node]) -> List[minidom.Node]:
 
     def flush(*args):
         """Sort the current block of nodes and yield them to the caller."""
-        # The nodes might contain more than just projects.  Sorting all the nodes
-        # is tricky as we don't know how to compare <project> to whitespace text
-        # nodes such that they stay in the right order.  Instead, we'll extract all
-        # of the project nodes and sort them.  If things were sorted, then we yield
-        # the block as-is.  If things weren't sorted, we'll weave the existing block
-        # together with the sorted block by yielding the next sorted project.  This
-        # can lead to slightly undesirable behavior when a comment node is for a
-        # specific project, but we leave it to the developer to fix that.  Fixing
-        # this in the code is possible, but would require a bit more logic, so we
-        # won't bother for now since it should be pretty rare.
+        # The nodes might contain more than just projects.  Sorting all the
+        # nodes is tricky as we don't know how to compare <project> to
+        # whitespace text nodes such that they stay in the right order.
+        # Instead, we'll extract all the project nodes and sort them.  If things
+        # were sorted, then we yield the block as-is.  If things weren't sorted,
+        # we'll weave the existing block together with the sorted block by
+        # yielding the next sorted project.  This can lead to slightly
+        # undesirable behavior when a comment node is for a specific project,
+        # but we leave it to the developer to fix that.  Fixing this in the code
+        # is possible, but would require a bit more logic, so we won't bother
+        # for now since it should be pretty rare.
         #
         # For example, <comment><proj b><proj a> will be sorted as
         # <comment><proj a><proj b> instead of <proj a><comment><proj b>.
@@ -127,8 +128,8 @@ def _sort_children(nodes: List[minidom.Node]) -> List[minidom.Node]:
         yield from args
         pending_nodes.clear()
 
-    # Walk the nodes and gather them as groups.  Blank lines and non-project nodes
-    # mark the end of a group of nodes.
+    # Walk the nodes and gather them as groups.  Blank lines and non-project
+    # nodes mark the end of a group of nodes.
     pending_nodes = []
     for node in nodes:
         if node.nodeType == node.COMMENT_NODE:
@@ -183,20 +184,23 @@ def Data(
                     comment = comment_indent.join(lines)
                 buffer.write(f"{indent}<!-- {comment} -->")
 
-                # For some reason the minidom implementation doesn't generate text nodes
-                # in the top level, so comments all get compacted into a single line.
-                # Fake it by inserting our own text node newline.
+                # For some reason the minidom implementation doesn't generate
+                # text nodes in the top level, so comments all get compacted
+                # into a single line. Fake it by inserting our own text node
+                # newline.
                 # https://bugs.python.org/issue42341
                 if not level:
                     buffer.write("\n")
             elif node.nodeType == node.TEXT_NODE:
-                # These are inter-node whitespace (indentation) and newlines.  We will
-                # handle reformatting of indentation below, but we want to preserve any
-                # existing newlines as we largely don't enforce anything with them atm.
+                # These are inter-node whitespace (indentation) and newlines.
+                # We will handle reformatting of indentation below, but we want
+                # to preserve any existing newlines as we largely don't enforce
+                # anything with them atm.
                 output = node.data.strip(" ")
                 # We don't allow multiple blank lines in a row.
                 output = re.sub(r"\n\n\n+", "\n\n", output)
-                # Finally, strip non-whitespace characters.  There never should be any.
+                # Finally, strip non-whitespace characters.  There never should
+                # be any.
                 buffer.write(re.sub(r"[^\s]+", "", output))
             else:
                 # We don't expect any other node type in manifests currently.
@@ -214,10 +218,12 @@ def Data(
                         if not first and node.nodeName not in ONE_LINE_NODES:
                             buffer.write("\n" + attr_indent)
                         first = False
-                        # No attributes currently need leading/trailing whitespace.
+                        # No attributes currently need leading/trailing
+                        # whitespace.
                         value = value.strip()
-                        # No attributes currently use embedded whitespace.  This might
-                        # change, but enforce it for now until someone complains.
+                        # No attributes currently use embedded whitespace.  This
+                        # might change, but enforce it for now until someone
+                        # complains.
                         value = re.sub(r"\s+", "", value)
                         buffer.write(f' {name}="{value}"')
 

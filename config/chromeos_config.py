@@ -587,14 +587,15 @@ def GeneralTemplates(site_config):
         site_config.templates.tast_vm_asan_tests,
         profile="asan",
         # TODO(crbug.com/1080416): Investigate why rootfs verification fails and
-        # re-enable it. It used to work till late 2019.
+        #   re-enable it. It used to work till late 2019.
         rootfs_verification=False,
-        # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
+        # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware
+        # testing.
         disk_layout="16gb-rootfs",
-        # TODO(deymo): ASan builders generate bigger files, in particular a bigger
-        # Chrome binary, that update_engine can't handle in delta payloads due to
-        # memory limits. Remove the following lines once crbug.com/329248 is
-        # fixed.
+        # TODO(deymo): ASan builders generate bigger files, in particular a
+        #   bigger Chrome binary, that update_engine can't handle in delta
+        #   payloads due to memory limits. Remove the following lines once
+        #   crbug.com/329248 is fixed.
         images=["base", "test"],
         chrome_sdk=False,
         vm_tests=[],
@@ -632,7 +633,7 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
     )
     board_names = separate_board_names | unified_board_names
 
-    # TODO(crbug.com/648473): Remove these, after GE adds them to their data set.
+    # TODO(crbug.com/648473): Remove these after GE adds them to their data set.
     board_names = board_names.union(boards_dict["all_boards"])
 
     result = dict()
@@ -734,7 +735,8 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
         # power_DarkResumeShutdownServer after issue crosbug/689598 is fixed.
         # According to crosbug/653496 security_OpenFDs will not work for
         # non-official builds, so we need to leave it permanently disabled.
-        # Need to reenable power_DarkResumeDisplay after crosbug/703250 is fixed.
+        # Need to reenable power_DarkResumeDisplay after crosbug/703250 is
+        # fixed.
         # Need to reenable cheets_SELinuxTest after crosbug/693308 is fixed.
         # Add strict_toolchain_checks to perform toolchain-related checks
         useflags=config_lib.append_useflags(
@@ -792,8 +794,8 @@ def ToolchainBuilders(site_config, boards_dict, ge_build_config):
         site_config.templates.llvm_toolchain,
         useflags=config_lib.append_useflags(["llvm-tot"]),
         description="Full release builds with a near-top-of-tree LLVM. Since "
-        "this uses internal sources, it should only be used with LLVM revisions "
-        "that have been reviewed manually somehow",
+        "this uses internal sources, it should only be used with LLVM "
+        "revisions that have been reviewed manually somehow",
     )
 
     #
@@ -933,8 +935,8 @@ def FullBuilders(site_config, boards_dict, ge_build_config):
 def InformationalBuilders(site_config, boards_dict, ge_build_config):
     """Create all informational builders.
 
-    We have a number of informational builders that are built, but whose output is
-    not directly used for anything other than reporting success or failure.
+    We have a number of informational builders that are built, but whose output
+    is not directly used for anything other than reporting success or failure.
 
     Args:
       site_config: config_lib.SiteConfig to be modified by adding templates
@@ -985,7 +987,8 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         site_config.templates.fuzzer,
         boards=["amd64-generic"],
         description="Build for fuzzing testing",
-        # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
+        # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware
+        # testing.
         disk_layout="4gb-rootfs",
         image_test=None,
         board_replace=True,
@@ -1023,7 +1026,8 @@ def InformationalBuilders(site_config, boards_dict, ge_build_config):
         site_config.templates.informational,
         boards=["amd64-generic"],
         description="Build with Undefined Behavior Sanitizer (Clang)",
-        # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware testing.
+        # THESE IMAGES CAN DAMAGE THE LAB and cannot be used for hardware
+        # testing.
         disk_layout="16gb-rootfs",
         board_replace=True,
         vm_tests=[],
@@ -1252,8 +1256,8 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
             slave_configs=[],
             sync_chrome=True,
             chrome_sdk=False,
-            # Because PST is 8 hours from UTC, these times are the same in both. But
-            # daylight savings time is NOT adjusted for
+            # Because PST is 8 hours from UTC, these times are the same in both.
+            # But daylight savings time is NOT adjusted for
             schedule=schedule,
         )
 
@@ -1328,10 +1332,10 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
           board_name: A string board name.
 
         Returns:
-          A dict mapping suite types to booleans indicating whether this suite on
-            this board is to be run on Skylab. Current suite types:
-            - cts: all suites using pool:cts,
-            - default: the rest of the suites.
+            A dict mapping suite types to booleans indicating whether this suite
+            on this board is to be run on Skylab. Current suite types:
+                - cts: all suites using pool:cts,
+                - default: the rest of the suites.
         """
         return {
             "cts": board_name in _release_enable_skylab_cts_hwtest,
@@ -1473,8 +1477,8 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
             for group in builder_group_dict[builder]:
                 board_group = builder_group_dict[builder][group]
 
-                # Leaders are built on baremetal builders and run all tests needed by
-                # the related boards.
+                # Leaders are built on baremetal builders and run all tests
+                # needed by the related boards.
                 for board in board_group.leader_boards:
                     config_name = GetConfigName(
                         builder, board[config_lib.CONFIG_TEMPLATE_NAME]
@@ -1484,8 +1488,8 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
                     )
                     _AssignToMaster(site_config[config_name])
 
-                # Followers are built on GCE instances, and turn off testing that breaks
-                # on GCE. The missing tests run on the leader board.
+                # Followers are built on GCE instances, and turn off testing
+                # that breaks on GCE. The missing tests run on the leader board.
                 for board in board_group.follower_boards:
                     config_name = GetConfigName(
                         builder, board[config_lib.CONFIG_TEMPLATE_NAME]
@@ -2200,7 +2204,8 @@ def SpecialtyBuilders(site_config):
                 ["config/luci-scheduler.cfg"],
             ],
             [
-                "https://chrome-internal.googlesource.com/chromeos/infra/config",
+                "https://chrome-internal.googlesource.com/chromeos/infra/"
+                "config",
                 ["refs/heads/main"],
                 ["generated/luci-scheduler.cfg"],
             ],
@@ -2281,7 +2286,8 @@ def TryjobMirrors(site_config):
 
         tryjob_name = build_name + "-tryjob"
 
-        # Don't overwrite mirrored versions that were explicitly created earlier.
+        # Don't overwrite mirrored versions that were explicitly created
+        # earlier.
         if tryjob_name in site_config:
             continue
 
@@ -2376,7 +2382,8 @@ def BranchScheduleConfig():
     ]
 
     # The three active release branches.
-    # (<branch>, [<android PFQs>], <chrome PFQ>, [<orderfiles>], [<Chrome AFDOs>])
+    # (<branch>, [<android PFQs>], <chrome PFQ>, [<orderfiles>],
+    #  [<Chrome AFDOs>])
     # Note: <chrome PFQ> is no longer actually doing anything pre-flight: pupr
     # does that as of 2020-09-15.  It needs to run because it *does* update the
     # CWP profiles.
@@ -2442,7 +2449,8 @@ def BranchScheduleConfig():
         android_schedule,
     ) in zip(RELEASES, PFQ_SCHEDULE):
         release_num = re.search(r"release-R(\d+)-.*", branch).group(1)
-        # All branches except LTS are only triggered by a Chrome uprev, or manually.
+        # All branches except LTS are only triggered by a Chrome uprev, or
+        # manually.
         is_lts = bool(builder == config_lib.LUCI_BUILDER_LTS_RELEASE)
         schedule = LTS_SCHEDULE if is_lts else "triggered"
         branch_builds.append(
@@ -2460,8 +2468,8 @@ def BranchScheduleConfig():
                         [r"regexp:refs/heads/%s\\..*" % branch],
                         [
                             (
-                                "chromeos-base/chromeos-chrome/chromeos-chrome-%s.*.ebuild"
-                                % release_num
+                                "chromeos-base/chromeos-chrome/"
+                                "chromeos-chrome-%s.*.ebuild" % release_num
                             )
                         ],
                     ]

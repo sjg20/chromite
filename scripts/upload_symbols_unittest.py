@@ -101,8 +101,8 @@ STACK CFI 1234
         fullname = os.path.join(self.data, filename)
         osutils.SafeMakedirs(os.path.dirname(fullname))
 
-        # If a file size is given, force that to be the minimum file size. Create
-        # a sparse file so large files are practical.
+        # If a file size is given, force that to be the minimum file size.
+        # Create a sparse file so large files are practical.
         with open(fullname, "w+b") as f:
             f.truncate(size)
             f.seek(0)
@@ -130,8 +130,9 @@ class SymbolServerRequestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_POST(self):
         """Handle a POST request"""
-        # Drain the data from the client.  If we don't, we might write the response
-        # and close the socket before the client finishes, so they die with EPIPE.
+        # Drain the data from the client.  If we don't, we might write the
+        # response and close the socket before the client finishes, so they die
+        # with EPIPE.
         clen = int(self.headers.get("Content-Length", "0"))
         self.rfile.read(clen)
 
@@ -299,7 +300,8 @@ class UploadSymbolsHelpersTest(cros_test_lib.TestCase):
         result = upload_symbols.BatchGenerator(range(7), 2)
         self.assertEqual(list(result), [[0, 1], [2, 3], [4, 5], [6]])
 
-        # Prove that we are streaming the results, not generating them all at once.
+        # Prove that we are streaming the results, not generating them all at
+        # once.
         result = upload_symbols.BatchGenerator(itertools.repeat(0), 2)
         self.assertEqual(next(result), [0, 0])
 
@@ -313,7 +315,8 @@ class FindSymbolFilesTest(SymbolsTestBase):
             os.path.join("nested", "inner.sym")
         ).file_name
 
-        # CreateTarball is having issues outside the chroot from open file tests.
+        # CreateTarball is having issues outside the chroot from open file
+        # tests.
         #
         # self.tarball = os.path.join(self.tempdir, 'syms.tar.gz')
         # cros_build_lib.CreateTarball(
@@ -556,8 +559,8 @@ class PerformSymbolFilesUploadTest(SymbolsTestBase):
     def testPerformSymbolsFileUploadMixed(self):
         """Upload symbols in mixed starting states.
 
-        Demonstrate that INITIAL and ERROR are uploaded, but DUPLICATE/UPLOADED are
-        ignored.
+        Demonstrate that INITIAL and ERROR are uploaded, but DUPLICATE/UPLOADED
+        are ignored.
         """
         symbols = [
             self.sym_initial,
@@ -595,7 +598,8 @@ class PerformSymbolFilesUploadTest(SymbolsTestBase):
 
         # potentially twice as many errors as we should attempt.
         for _ in range(symbol_count):
-            # Each loop will get unique SymbolFile instances that use the same files.
+            # Each loop will get unique SymbolFile instances that use the same
+            # files.
             fail = self.createSymbolFile("fail.sym")
             fail_file = fail.file_name
             symbols.append(self.createSymbolFile("pass.sym"))

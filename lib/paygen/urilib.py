@@ -139,7 +139,8 @@ def URLRetrieve(src_url, dest_path):
         if e.errno is None:
             raise MissingURLError("Unable to download %s" % src_url)
 
-        # If the domain is invalid the errno shows up as 'socket error', weirdly.
+        # If the domain is invalid the errno shows up as 'socket error',
+        # weirdly.
         try:
             int(e.errno)
 
@@ -183,7 +184,7 @@ def Copy(src_uri, dest_uri):
 
 
 def GetPathExcludingProtocol(uri):
-    """Returns the path of the given URI excluding the protocol and its separator.
+    """Get the path of the given URI excluding the protocol and its separator.
 
     Args:
       uri: The uri to extract the base name, e.g.:

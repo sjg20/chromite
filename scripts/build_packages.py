@@ -222,7 +222,8 @@ def get_parser() -> commandline.ArgumentParser:
         group,
         "internal",
         False,
-        "Build the internal version of chrome(set the chrome_internal USE flag).",
+        "Build the internal version of chrome (set the chrome_internal USE "
+        "flag).",
         deprecation_note,
     )
     build_shell_bool_style_args(
@@ -371,8 +372,8 @@ def get_parser() -> commandline.ArgumentParser:
     )
 
     # --run-goma option is designed to be used on bots.
-    # If you're trying to build packages with goma in your local dev env, this is
-    # *not* the option you're looking for. Please see comments below.
+    # If you're trying to build packages with goma in your local dev env, this
+    # is *not* the option you're looking for. Please see comments below.
     # This option; 1) starts goma, 2) builds packages (expecting that goma is
     # used), then 3) stops goma explicitly.
     # 4) is a request from the goma team, so that stats/logs can be taken.
@@ -389,7 +390,7 @@ def get_parser() -> commandline.ArgumentParser:
         group,
         "run_goma",
         False,
-        "If set to true, (re)starts goma, builds packages, and then stops goma..",
+        "When set, (re)starts goma, builds packages, and then stops goma.",
         deprecation_note,
         alternate_name="run-goma",
     )
@@ -477,9 +478,9 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
     commandline.RunInsideChroot()
     parser, opts = parse_args(argv)
 
-    # If the opts.board is not set, then it means user hasn't specified a default
-    # board in 'src/scripts/.default_board' and didn't specify it as input
-    # argument.
+    # If the opts.board is not set, then it means user hasn't specified a
+    # default board in 'src/scripts/.default_board' and didn't specify it as
+    # input argument.
     if not opts.board:
         parser.error("--board is required")
 

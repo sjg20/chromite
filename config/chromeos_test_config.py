@@ -13,8 +13,8 @@ from chromite.lib import constants
 
 vmtest_boards = frozenset(
     [
-        # Full VMTest support on ChromeOS is currently limited to devices derived
-        # from betty & co.
+        # Full VMTest support on ChromeOS is currently limited to devices
+        # derived from betty & co.
         "amd64-generic",  # Has kernel 4.4, used with public Chromium.
         "amd64-generic-vm",  # amd64-generic with optimization for VMs.
         "betty",  # amd64 Chrome OS VM board with 32 bit arm/x86 ARC++ ABI.
@@ -35,7 +35,8 @@ class HWTestList(object):
         """Helper class for creating hwtests.
 
         Args:
-          ge_build_config: Dictionary containing the decoded GE configuration file.
+            ge_build_config: Dictionary containing the decoded GE configuration
+                file.
         """
         self.is_release_branch = ge_build_config[
             config_lib.CONFIG_TEMPLATE_RELEASE_BRANCH
@@ -59,8 +60,8 @@ class HWTestList(object):
                 constants.HWTEST_TAST_CQ_SUITE,
                 **self._bvtInlineHWTestArgs(kwargs),
             ),
-            # Start informational Tast tests before the installer suite to let the
-            # former run even if the latter fails: https://crbug.com/911921
+            # Start informational Tast tests before the installer suite to let
+            # the former run even if the latter fails: https://crbug.com/911921
             self.TastConfig(
                 constants.HWTEST_TAST_INFORMATIONAL_SUITE,
                 **self._asyncHWTestArgs(kwargs),
@@ -104,14 +105,14 @@ class HWTestList(object):
         return kwargs
 
     def DefaultListCanary(self, **kwargs):
-        """Returns a default list of config_lib.HWTestConfig's for a canary build.
+        """Get a default list of config_lib.HWTestConfig's for a canary build.
 
         Args:
           *kwargs: overrides for the configs
         """
         # Set minimum_duts default to 4, which means that lab will check the
-        # number of available duts to meet the minimum requirement before creating
-        # the suite job for canary builds.
+        # number of available duts to meet the minimum requirement before
+        # creating the suite job for canary builds.
         kwargs.setdefault("minimum_duts", 4)
         kwargs.setdefault("file_bugs", True)
         kwargs["blocking"] = False
@@ -165,8 +166,9 @@ class HWTestList(object):
         """Return a list of HWTestConfigs for PFQ which uses a shared pool.
 
         The returned suites will run in quotascheduler by default, which is
-        shared with other types of builders (canaries, cq). The first suite in the
-        list is a blocking sanity suite that verifies the build will not break dut.
+        shared with other types of builders (canaries, cq). The first suite in
+        the list is a blocking sanity suite that verifies the build will not
+        break dut.
         """
         sanity_dict = dict(
             pool=constants.HWTEST_QUOTA_POOL,
@@ -214,7 +216,7 @@ class HWTestList(object):
         )
 
     def ToolchainTestFull(self, machine_pool, **kwargs):
-        """Return full set of HWTESTConfigs to run toolchain correctness tests."""
+        """Get full set of HWTESTConfigs to run toolchain correctness tests."""
         default_dict = dict(
             pool=machine_pool,
             file_bugs=False,
@@ -270,9 +272,9 @@ class HWTestList(object):
         """
         kwargs = kwargs.copy()
 
-        # Tast test suites run at most three jobs (for system, Chrome, and Android
-        # tests) and have short timeouts, so request at most 1 DUT (while retaining
-        # passed-in requests for 0 DUTs).
+        # Tast test suites run at most three jobs (for system, Chrome, and
+        # Android tests) and have short timeouts, so request at most 1 DUT
+        # (while retaining passed-in requests for 0 DUTs).
         if kwargs.get("minimum_duts", 0):
             kwargs["minimum_duts"] = 1
         if kwargs.get("suite_min_duts", 0):
@@ -311,9 +313,9 @@ def InsertHwTestsOverrideDefaults(build):
 
         # Adjust for manual test environment.
         for hw_config in build["hw_tests_override"]:
-            # Explicitly set quota account to preserve pre-QuotaScheduler behaviour:
-            # Skylab tasks created for tryjobs compete with the general
-            # suite_scheduler triggered tasks.
+            # Explicitly set quota account to preserve pre-QuotaScheduler
+            # behaviour: Skylab tasks created for tryjobs compete with the
+            # general suite_scheduler triggered tasks.
             hw_config.pool = constants.HWTEST_QUOTA_POOL
             hw_config.quota_account = constants.HWTEST_QUOTA_ACCOUNT_SUITES
 
@@ -422,8 +424,8 @@ def GeneralTemplates(site_config, ge_build_config):
         "default_hw_tests_override",
         hw_tests_override=hw_test_list.DefaultList(
             # Explicitly set quota account to preserve pre-QuotaScheduler
-            # behaviour: Skylab tasks created for tryjobs compete with the general
-            # suite_scheduler triggered tasks.
+            # behaviour: Skylab tasks created for tryjobs compete with the
+            # general suite_scheduler triggered tasks.
             pool=constants.HWTEST_QUOTA_POOL,
             quota_account=constants.HWTEST_QUOTA_ACCOUNT_SUITES,
             file_bugs=False,

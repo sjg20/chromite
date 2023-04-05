@@ -62,23 +62,27 @@ def parse_datetime(text):
 
 
 def parse_rfc3339_datetime(value):
-    """Parses RFC 3339 datetime string (as used in Timestamp proto JSON encoding).
+    """Parses RFC 3339 datetime string.
+
+    RFC 3339 used in Timestamp proto JSON encoding.
 
     Keeps only microsecond precision (dropping nanoseconds).
 
     Examples of the input:
-      2017-08-17T04:21:32.722952943Z
-      1972-01-01T10:00:20.021-05:00
+        2017-08-17T04:21:32.722952943Z
+        1972-01-01T10:00:20.021-05:00
 
     Returns:
-      datetime.datetime in UTC (regardless of timezone of the original string).
+        datetime.datetime in UTC (regardless of timezone of the original
+        string).
 
     Raises:
-      ValueError on errors.
+        ValueError on errors.
     """
-    # Adapted from protobuf/internal/well_known_types.py Timestamp.FromJsonString.
-    # We can't use the original, since it's marked as internal. Also instantiating
-    # proto messages here to parse a string would been odd.
+    # Adapted from protobuf/internal/well_known_types.py
+    # Timestamp.FromJsonString. We can't use the original, since it's marked as
+    # internal. Also instantiating proto messages here to parse a string would
+    # have been odd.
     timezone_offset = value.find("Z")
     if timezone_offset == -1:
         timezone_offset = value.find("+")
@@ -226,7 +230,7 @@ def milliseconds_since_epoch(now):
 
 
 def datetime_to_rfc2822(dt):
-    """datetime -> string value for Last-Modified header as defined by RFC2822."""
+    """datetime -> string for Last-Modified header as defined by RFC2822."""
     if not isinstance(dt, datetime):
         raise TypeError(
             "Expecting datetime object, got %s instead" % type(dt).__name__
@@ -236,7 +240,7 @@ def datetime_to_rfc2822(dt):
 
 
 def datetime_to_timestamp(value):
-    """Converts UTC datetime to integer timestamp in microseconds since epoch."""
+    """Convert UTC datetime to integer timestamp in microseconds since epoch."""
     if not isinstance(value, datetime):
         raise ValueError(
             "Expecting datetime object, got %s instead" % type(value).__name__
@@ -248,7 +252,7 @@ def datetime_to_timestamp(value):
 
 
 def timestamp_to_datetime(value):
-    """Converts integer timestamp in microseconds since epoch to UTC datetime."""
+    """Convert integer timestamp in microseconds since epoch to UTC datetime."""
     if not isinstance(value, numbers.Real):
         raise ValueError(
             "Expecting a number, got %s instead" % type(value).__name__
@@ -302,8 +306,8 @@ class _Cache(object):
     def get_wrapper(self):
         """Returns a callable object that can be used in place of |func|.
 
-        It's basically self.get_value, updated by functools.wraps to look more like
-        original function.
+        It's basically self.get_value, updated by functools.wraps to look more
+        like original function.
         """
         # functools.wraps doesn't like 'instancemethod', use lambda as a proxy.
         # pylint: disable=W0108
@@ -313,12 +317,12 @@ class _Cache(object):
 
 
 def cache(func):
-    """Decorator that implements permanent cache of a zero-parameter function."""
+    """Decorator for a permanent cache of a zero-parameter function."""
     return _Cache(func, None).get_wrapper()
 
 
 def cache_with_expiration(expiration_sec):
-    """Decorator that implements in-memory cache for a zero-parameter function."""
+    """Decorator for in-memory cache for a zero-parameter function."""
 
     def decorator(func):
         return _Cache(func, expiration_sec).get_wrapper()
@@ -337,7 +341,8 @@ def clear_cache(func):
 def get_token_fingerprint(blob):
     """Given a blob with a token returns first 16 bytes of its SHA256 as hex.
 
-    It can be used to identify this particular token in logs without revealing it.
+    It can be used to identify this particular token in logs without revealing
+    it.
     """
     assert isinstance(blob, str)
     if isinstance(blob, str):

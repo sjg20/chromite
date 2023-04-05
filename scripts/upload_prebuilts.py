@@ -105,10 +105,10 @@ def _GsUpload(gs_context, acl, local_file, remote_file):
     """Upload to GS bucket.
 
     Args:
-      gs_context: A lib.gs.GSContext instance.
-      acl: The ACL to use for uploading the file.
-      local_file: The local file to be uploaded.
-      remote_file: The remote location to upload to.
+        gs_context: A lib.gs.GSContext instance.
+        acl: The ACL to use for uploading the file.
+        local_file: The local file to be uploaded.
+        remote_file: The remote location to upload to.
     """
     CANNED_ACLS = [
         "public-read",
@@ -121,18 +121,19 @@ def _GsUpload(gs_context, acl, local_file, remote_file):
     if acl in CANNED_ACLS:
         gs_context.Copy(local_file, remote_file, acl=acl)
     else:
-        # For private uploads we assume that the overlay board is set up properly
-        # and a googlestore_acl.xml is present. Otherwise, this script errors.
-        # We set version=0 here to ensure that the ACL is set only once (see
-        # http://b/15883752#comment54).
+        # For private uploads we assume that the overlay board is set up
+        # properly and a googlestore_acl.xml is present. Otherwise, this script
+        # errors. We set version=0 here to ensure that the ACL is set only once
+        # (see http://b/15883752#comment54).
         try:
             gs_context.Copy(local_file, remote_file, version=0)
         except gs.GSContextPreconditionFailed as ex:
-            # If we received a GSContextPreconditionFailed error, we know that the
-            # file exists now, but we don't know whether our specific update
+            # If we received a GSContextPreconditionFailed error, we know that
+            # the file exists now, but we don't know whether our specific update
             # succeeded. See http://b/15883752#comment62
             logging.warning(
-                "Assuming upload succeeded despite PreconditionFailed errors: %s",
+                "Assuming upload succeeded despite PreconditionFailed errors: "
+                "%s",
                 ex,
             )
 
@@ -149,15 +150,15 @@ def RemoteUpload(gs_context, acl, files, pool=10):
     Create a pool of process and call _GsUpload with the proper arguments.
 
     Args:
-      gs_context: A lib.gs.GSContext instance.
-      acl: The canned acl used for uploading. acl can be one of: "public-read",
-           "public-read-write", "authenticated-read", "bucket-owner-read",
-           "bucket-owner-full-control", or "private".
-      files: dictionary with keys to local files and values to remote path.
-      pool: integer of maximum proesses to have at the same time.
+        gs_context: A lib.gs.GSContext instance.
+        acl: The canned acl used for uploading. acl can be one of:
+            "public-read", "public-read-write", "authenticated-read",
+            "bucket-owner-read", "bucket-owner-full-control", or "private".
+        files: dictionary with keys to local files and values to remote path.
+        pool: integer of maximum processes to have at the same time.
 
     Returns:
-      Return a set of tuple arguments of the failed uploads
+        Return a set of tuple arguments of the failed uploads
     """
     upload = functools.partial(_GsUpload, gs_context, acl)
     tasks = [[key, value] for key, value in files.items()]
@@ -168,12 +169,12 @@ def GenerateUploadDict(base_local_path, base_remote_path, pkgs):
     """Build a dictionary of local remote file key pairs to upload.
 
     Args:
-      base_local_path: The base path to the files on the local hard drive.
-      base_remote_path: The base path to the remote paths.
-      pkgs: The packages to upload.
+        base_local_path: The base path to the files on the local hard drive.
+        base_remote_path: The base path to the remote paths.
+        pkgs: The packages to upload.
 
     Returns:
-      Returns a dictionary of local_path/remote_path pairs
+        Returns a dictionary of local_path/remote_path pairs
     """
     upload_files = {}
     for pkg in pkgs:
@@ -197,11 +198,11 @@ def GetBoardOverlay(build_path, target):
     """Get the path to the board variant.
 
     Args:
-      build_path: The path to the root of the build directory
-      target: The target board as a BuildTarget object.
+        build_path: The path to the root of the build directory.
+        target: The target board as a BuildTarget object.
 
     Returns:
-      The last overlay configured for the given board as a string.
+        The last overlay configured for the given board as a string.
     """
     board = target.board_variant
     overlays = portage_util.FindOverlays(
@@ -215,12 +216,12 @@ def DeterminePrebuiltConfFile(build_path, target):
     """Determine the prebuilt.conf file that needs to be updated for prebuilts.
 
     Args:
-      build_path: The path to the root of the build directory
-      target: String representation of the board. This includes host and board
-        targets
+        build_path: The path to the root of the build directory.
+        target: String representation of the board. This includes host and board
+            targets.
 
     Returns:
-      A string path to a prebuilt.conf file to be updated.
+        A string path to a prebuilt.conf file to be updated.
     """
     if _HOST_ARCH == target:
         # We are host.
@@ -242,9 +243,9 @@ def UpdateBinhostConfFile(filepath: str, key: str, value: str) -> None:
     The updated file will be committed, but not submitted.
 
     Args:
-      filepath: Path to the key-value store file to update.
-      key: Key to update.
-      value: New value for key.
+        filepath: Path to the key-value store file to update.
+        key: Key to update.
+        value: New value for key.
     """
     dirname, basename = os.path.split(os.path.abspath(filepath))
     osutils.SafeMakedirs(dirname)
@@ -263,11 +264,11 @@ def GenerateHtmlIndex(files, index, board, version, remote_location):
     """Given the list of |files|, generate an index.html at |index|.
 
     Args:
-      files: The list of files to link to.
-      index: The path to the html index.
-      board: Name of the board this index is for.
-      version: Build version this index is for.
-      remote_location: Remote gs location prebuilts are uploaded to.
+        files: The list of files to link to.
+        index: The path to the html index.
+        board: Name of the board this index is for.
+        version: Build version this index is for.
+        remote_location: Remote gs location prebuilts are uploaded to.
     """
     title = "Package Prebuilt Index: %s / %s" % (board, version)
 
@@ -281,14 +282,14 @@ def GenerateHtmlIndex(files, index, board, version, remote_location):
 
 
 def _GrabAllRemotePackageIndexes(binhost_urls):
-    """Grab all of the packages files associated with a list of binhost_urls.
+    """Grab all the packages files associated with a list of binhost_urls.
 
     Args:
-      binhost_urls: The URLs for the directories containing the Packages files we
-                    want to grab.
+        binhost_urls: The URLs for the directories containing the Packages files
+            we want to grab.
 
     Returns:
-      A list of PackageIndex objects.
+        A list of PackageIndex objects.
     """
     pkg_indexes = []
     for url in binhost_urls:
@@ -323,26 +324,28 @@ class PrebuiltUploader(object):
         This object can upload host or prebuilt files to Google Storage.
 
         Args:
-          upload_location: The upload location.
-          acl: The canned acl used for uploading to Google Storage. acl can be one
-               of: "public-read", "public-read-write", "authenticated-read",
-               "bucket-owner-read", "bucket-owner-full-control", "project-private",
-               or "private" (see "gsutil help acls"). If we are not uploading to
-               Google Storage, this parameter is unused.
-          binhost_base_url: The URL used for downloading the prebuilts.
-          pkg_indexes: Old uploaded prebuilts to compare against. Instead of
-              uploading duplicate files, we just link to the old files.
-          build_path: The path to the directory containing the chroot.
-          packages: Packages to upload.
-          skip_upload: Don't actually upload the tarballs.
-          binhost_conf_dir: Directory where to store binhost.conf files.
-          dryrun: Don't push or upload prebuilts.
-          target: BuildTarget managed by this builder.
-          slave_targets: List of BuildTargets managed by slave builders.
-          version: A unique string, intended to be included in the upload path,
-              which identifies the version number of the uploaded prebuilts.
-          report: Dict in which to collect information to report to the user.
-          chroot: Path to the chroot containing the prebuilts.
+            upload_location: The upload location.
+            acl: The canned acl used for uploading to Google Storage. acl can be
+                one of: "public-read", "public-read-write",
+                "authenticated-read", "bucket-owner-read",
+                "bucket-owner-full-control", "project-private", or "private"
+                (see "gsutil help acls"). If we are not uploading to Google
+                Storage, this parameter is unused.
+            binhost_base_url: The URL used for downloading the prebuilts.
+            pkg_indexes: Old uploaded prebuilts to compare against. Instead of
+                uploading duplicate files, we just link to the old files.
+            build_path: The path to the directory containing the chroot.
+            packages: Packages to upload.
+            skip_upload: Don't actually upload the tarballs.
+            binhost_conf_dir: Directory where to store binhost.conf files.
+            dryrun: Don't push or upload prebuilts.
+            target: BuildTarget managed by this builder.
+            slave_targets: List of BuildTargets managed by slave builders.
+            version: A unique string, intended to be included in the upload
+                path, which identifies the version number of the uploaded
+                prebuilts.
+            report: Dict in which to collect information to report to the user.
+            chroot: Path to the chroot containing the prebuilts.
         """
         self._upload_location = upload_location
         self._acl = acl
@@ -382,8 +385,9 @@ class PrebuiltUploader(object):
         """Upload host or board prebuilt files to Google Storage space.
 
         Args:
-          package_path: The path to the packages dir.
-          url_suffix: The remote subdirectory where we should upload the packages.
+            package_path: The path to the packages dir.
+            url_suffix: The remote subdirectory where we should upload the
+                packages.
         """
         # Process Packages file, removing duplicates and filtered packages.
         pkg_index = binpkg.GrabLocalPackageIndex(package_path)
@@ -456,19 +460,21 @@ class PrebuiltUploader(object):
         """Upload a tarball of the sdk at the specified path to Google Storage.
 
         Args:
-          board_path: The path to the board dir.
-          url_suffix: The remote subdirectory where we should upload the packages.
-          prepackaged: If given, a tarball that has been packaged outside of this
-                       script and should be used.
-          toolchains_overlay_tarballs: List of toolchains overlay tarball
-              specifications to upload. Items take the form
-              "toolchains_spec:/path/to/tarball".
-          toolchains_overlay_upload_path: Path template under the bucket to place
-              toolchains overlay tarballs.
-          toolchain_tarballs: List of toolchain tarballs to upload.
-          toolchain_upload_path: Path under the bucket to place toolchain tarballs.
-          sync_remote_latest_sdk_file: If True, update the remote latest SDK
-              file in Google Storage to point to the newly uploaded SDK.
+            board_path: The path to the board dir.
+            url_suffix: The remote subdirectory where we should upload the
+                packages.
+            prepackaged: If given, a tarball that has been packaged outside of
+                this script and should be used.
+            toolchains_overlay_tarballs: List of toolchains overlay tarball
+                specifications to upload. Items take the form
+                "toolchains_spec:/path/to/tarball".
+            toolchains_overlay_upload_path: Path template under the bucket to
+                place toolchains overlay tarballs.
+            toolchain_tarballs: List of toolchain tarballs to upload.
+            toolchain_upload_path: Path under the bucket to place toolchain
+                tarballs.
+            sync_remote_latest_sdk_file: If True, update the remote latest SDK
+                file in Google Storage to point to the newly uploaded SDK.
         """
         remote_location = "%s/%s" % (
             self._upload_location.rstrip("/"),
@@ -555,7 +561,8 @@ class PrebuiltUploader(object):
         for required_key in ("LATEST_SDK",):
             if required_key not in existing_keyval:
                 raise ValueError(
-                    f"Remote pointer file {remote_pointerfile} missing expected key {required_key}:\n{existing_keyval}"
+                    f"Remote pointer file {remote_pointerfile} missing "
+                    f"expected key {required_key}:\n{existing_keyval}"
                 )
 
         # If any values were not specified in args, use the existing values.
@@ -613,20 +620,20 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
         packages associated with all targets that have been "setup" with the
         current host's chroot. For instance, if this host has been used to build
         x86-generic, it will sync the host packages associated with
-        'i686-pc-linux-gnu'. If this host has also been used to build arm-generic,
-        it will also sync the host packages associated with
+        'i686-pc-linux-gnu'. If this host has also been used to build
+        arm-generic, it will also sync the host packages associated with
         'armv7a-cros-linux-gnueabi'.
 
         Args:
-          key: The variable key to update in the git file.
-          git_sync: If set, update make.conf of target to reference the latest
-              prebuilt packages generated here.
-          sync_binhost_conf: If set, update binhost config file in
-              chromiumos-overlay for the host.
+            key: The variable key to update in the git file.
+            git_sync: If set, update make.conf of target to reference the latest
+                prebuilt packages generated here.
+            sync_binhost_conf: If set, update binhost config file in
+                chromiumos-overlay for the host.
         """
-        # Slave boards are listed before the master board so that the master board
-        # takes priority (i.e. x86-generic preflight host prebuilts takes priority
-        # over preflight host prebuilts from other builders.)
+        # Slave boards are listed before the master board so that the master
+        # board takes priority (i.e. x86-generic preflight host prebuilts takes
+        # priority over preflight host prebuilts from other builders.)
         binhost_urls = []
         for target in self._GetTargets():
             url_suffix = _REL_HOST_PATH % {
@@ -680,22 +687,24 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
         """Synchronize board prebuilt files.
 
         Args:
-          key: The variable key to update in the git file.
-          git_sync: If set, update make.conf of target to reference the latest
-              prebuilt packages generated here.
-          sync_binhost_conf: If set, update binhost config file in
-              chromiumos-overlay for the current board.
-          upload_board_tarball: Include a tarball of the board in our upload.
-          prepackaged_board: A tarball of the board built outside of this script.
-          toolchains_overlay_tarballs: List of toolchains overlay tarball
-              specifications to upload. Items take the form
-              "toolchains_spec:/path/to/tarball".
-          toolchains_overlay_upload_path: Path template under the bucket to place
-              toolchains overlay tarballs.
-          toolchain_tarballs: A list of toolchain tarballs to upload.
-          toolchain_upload_path: Path under the bucket to place toolchain tarballs.
-          sync_remote_latest_sdk_file: If True, update the remote latest SDK
-              file in Google Storage to point to the newly uploaded SDK.
+            key: The variable key to update in the git file.
+            git_sync: If set, update make.conf of target to reference the latest
+                prebuilt packages generated here.
+            sync_binhost_conf: If set, update binhost config file in
+                chromiumos-overlay for the current board.
+            upload_board_tarball: Include a tarball of the board in our upload.
+            prepackaged_board: A tarball of the board built outside of this
+                script.
+            toolchains_overlay_tarballs: List of toolchains overlay tarball
+                specifications to upload. Items take the form
+                "toolchains_spec:/path/to/tarball".
+            toolchains_overlay_upload_path: Path template under the bucket to
+                place toolchains overlay tarballs.
+            toolchain_tarballs: A list of toolchain tarballs to upload.
+            toolchain_upload_path: Path under the bucket to place toolchain
+                tarballs.
+            sync_remote_latest_sdk_file: If True, update the remote latest SDK
+                file in Google Storage to point to the newly uploaded SDK.
         """
         updated_binhosts = set()
         for target in self._GetTargets():
@@ -711,8 +720,8 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
 
             # Process the target board differently if it is the main --board.
             if self._target == target and not self._skip_upload:
-                # This strips "chroot" prefix because that is sometimes added as the
-                # --prepend-version argument (e.g. by chromiumos-sdk bot).
+                # This strips "chroot" prefix because that is sometimes added as
+                # the --prepend-version argument (e.g. by chromiumos-sdk bot).
                 # TODO(build): Clean it up to be less hard-coded.
                 version_str = self._version[len("chroot-") :]
 
@@ -773,8 +782,8 @@ LATEST_SDK_UPREV_TARGET=\"{latest_sdk_uprev_target}\""""
                 UpdateBinhostConfFile(binhost_conf, key, url_value)
 
         if sync_binhost_conf:
-            # Clear all old binhosts. The files must be left empty in case anybody
-            # is referring to them.
+            # Clear all old binhosts. The files must be left empty in case
+            # anybody is referring to them.
             all_binhosts = set(
                 glob.glob(
                     os.path.join(
@@ -808,11 +817,11 @@ def ParseOptions(argv):
     """Returns options given by the user and the target specified.
 
     Args:
-      argv: The args to parse.
+        argv: The args to parse.
 
     Returns:
-      A tuple containing a parsed options object and BuildTarget.
-      The target instance is None if no board is specified.
+        A tuple containing a parsed options object and BuildTarget.
+        The target instance is None if no board is specified.
     """
     parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
     parser.add_argument(

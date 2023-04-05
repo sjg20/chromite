@@ -689,8 +689,14 @@ def FindDataCollectorArtifacts(
                 # |android_package| is required to separate artifacts for bertha
                 # and cheets.
                 root_paths = [
-                    f"{runtime_artifacts_bucket_url}/{android_package}/{bucket}_{arch}_{build_type}",
-                    f"{runtime_artifacts_bucket_url}/{bucket}_{arch}_{build_type}",
+                    (
+                        f"{runtime_artifacts_bucket_url}/{android_package}/"
+                        f"{bucket}_{arch}_{build_type}"
+                    ),
+                    (
+                        f"{runtime_artifacts_bucket_url}/"
+                        f"{bucket}_{arch}_{build_type}"
+                    ),
                 ]
 
                 for _, root_path in enumerate(root_paths):

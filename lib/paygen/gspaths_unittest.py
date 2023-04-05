@@ -56,12 +56,12 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
         "%(board)s.tar.xz"
     )
     _FULL_PAYLOAD_NAME_TEMPLATE = (
-        "chromeos_%(image_version)s_%(board)s_%(image_channel)s_full_%(key)s.bin-"
-        "%(random_str)s.signed"
+        "chromeos_%(image_version)s_%(board)s_%(image_channel)s_full_%(key)s"
+        ".bin-%(random_str)s.signed"
     )
     _DELTA_PAYLOAD_NAME_TEMPLATE = (
-        "chromeos_%(src_version)s-%(image_version)s_%(board)s_%(image_channel)s_"
-        "delta_%(key)s.bin-%(random_str)s.signed"
+        "chromeos_%(src_version)s-%(image_version)s_%(board)s_"
+        "%(image_channel)s_delta_%(key)s.bin-%(random_str)s.signed"
     )
     _FULL_DLC_PAYLOAD_NAME_TEMPLATE = (
         "dlc_%(dlc_id)s_%(dlc_package)s_%(image_version)s_%(board)s_"
@@ -80,8 +80,8 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
         "%(unsigned_image_type)s.bin-%(random_str)s"
     )
     _UNSIGNED_DELTA_PAYLOAD_NAME_TEMPLATE = (
-        "chromeos_%(src_version)s-%(image_version)s_%(board)s_%(image_channel)s_"
-        "delta_%(unsigned_image_type)s.bin-%(random_str)s"
+        "chromeos_%(src_version)s-%(image_version)s_%(board)s_"
+        "%(image_channel)s_delta_%(unsigned_image_type)s.bin-%(random_str)s"
     )
 
     # Compound templates.
@@ -255,7 +255,8 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
             gspaths.ChromeosReleases.DLCImageUri(
                 self.build, "termina-dlc", "package", "dlc.img"
             ),
-            "gs://crt/foo-channel/board-name/1.2.3/dlc/termina-dlc/package/dlc.img",
+            "gs://crt/foo-channel/board-name/1.2.3/dlc/termina-dlc/package/"
+            "dlc.img",
         )
 
     def testUnsignedImageArchiveName(self):
@@ -363,7 +364,8 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
             uri_basic, os_type=gspaths.OSType.MINIOS
         )
         self.assertEqual(basic_minios_image, expected_basic_minios)
-        # Use the same str as miniOS is derived from the same underlying CrOS image.
+        # Use the same str as miniOS is derived from the same underlying CrOS
+        # image.
         self.assertTrue(expected_basic_str in str(basic_minios_image))
 
         npo_image = gspaths.ChromeosReleases.ParseImageUri(
@@ -533,7 +535,8 @@ class GsPathsChromeosReleasesTest(cros_test_lib.TestCase):
             src_version=self.src_version,
         )
 
-        # Isolate the actual random string, transplant it in the reference template.
+        # Isolate the actual random string, transplant it in the reference
+        # template.
         full_random_str = full.split("-")[-1].partition(".")[0]
         self.assertEqual(
             full,

@@ -610,7 +610,10 @@ def copy_dlc_image(base_path: str, output_dir: str) -> List[str]:
         dlc_re = (
             f"({dlc_lib.DLC_ID_RE}/{dlc_lib.DLC_PACKAGE}/{dlc_lib.DLC_IMAGE})"
         )
-        dlc_data_re = f"({dlc_lib.DLC_ID_RE}/{dlc_lib.DLC_PACKAGE})/{dlc_lib.DLC_TMP_META_DIR}/{dlc_lib.IMAGELOADER_JSON}"
+        dlc_data_re = (
+            f"({dlc_lib.DLC_ID_RE}/{dlc_lib.DLC_PACKAGE})/"
+            f"{dlc_lib.DLC_TMP_META_DIR}/{dlc_lib.IMAGELOADER_JSON}"
+        )
         pat = f"/{dlc_build_dir}/{dlc_re}$"
         pat_data = f"/{dlc_build_dir}/{dlc_data_re}$"
         for path in osutils.DirectoryIterator(dlc_source_path):

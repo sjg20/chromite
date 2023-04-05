@@ -118,8 +118,8 @@ def _parse_summary_log_from_lines_iterator(log_lines, no_duplicates=False):
                 raise DuplicatePackageError()
             continue
 
-        # Match the ebuild phase and log entry. If we don't have a package set yet,
-        # then the log we're reading is malformed.
+        # Match the ebuild phase and log entry. If we don't have a package set
+        # yet, then the log we're reading is malformed.
         entry_match = LOG_ENTRY.match(line.strip())
         if entry_match:
             if not cpv:
@@ -128,9 +128,9 @@ def _parse_summary_log_from_lines_iterator(log_lines, no_duplicates=False):
             level = entry_match.group("level")
             continue
 
-        # All other lines are then the actual messages printed by ebuilds. Append
-        # them to their respective categories. If anything is unset by this point,
-        # the log is again malformed.
+        # All other lines are then the actual messages printed by ebuilds.
+        # Append them to their respective categories. If anything is unset by
+        # this point, the log is again malformed.
         if not all((cpv, phase, level)):
             raise MalformedLogError()
         contents[cpv][level][phase] += line

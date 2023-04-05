@@ -98,7 +98,7 @@ _SERIAL_NUMBER_OPTION_OVERRIDE = {
 
 
 def get_serial_option(servo_type: str) -> str:
-    """Returns the variable to be used with a given servo to get DUT's serial."""
+    """Return the variable to be used with a given servo to get DUT's serial."""
     return _SERIAL_NUMBER_OPTION_OVERRIDE.get(servo_type, _SERIAL_NUMBER_OPTION)
 
 
@@ -145,11 +145,11 @@ class ServoConfig(NamedTuple):
     Attributes:
         dut_control_on: 2d array formatted like
             [["cmd1", "arg1", "arg2"], ["cmd2", "arg3", "arg4"]]
-            with commands that need to be ran before flashing,
+            with commands that need to be run before flashing,
             where cmd1 will be run before cmd2.
         dut_control_off: 2d array formatted like
             [["cmd1", "arg1", "arg2"], ["cmd2", "arg3", "arg4"]]
-            with commands that need to be ran after flashing,
+            with commands that need to be run after flashing,
             where cmd1 will be run before cmd2.
         programmer: programmer argument (-p) for flashrom and futility.
     """

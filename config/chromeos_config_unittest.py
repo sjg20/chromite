@@ -190,12 +190,12 @@ class FindConfigsForBoardTest(cros_test_lib.TestCase):
     def testOneFullConfigPerBoard(self):
         """There is at most one 'full' config for a board."""
 
-        # Verifies the number of external 'full' and internal 'release'
-        # build per board.  This is to ensure that we fail any new configs that
-        # wrongly have names like *-bla-release or *-bla-full. This case can also
-        # be caught if the new suffix was added to
-        # config_lib.CONFIG_TYPE_DUMP_ORDER
-        # (see testNonOverlappingConfigTypes), but that's not guaranteed to happen.
+        # Verifies the number of external 'full' and internal 'release' build
+        # per board.  This is to ensure that we fail any new configs that
+        # wrongly have names like *-bla-release or *-bla-full. This case can
+        # also be caught if the new suffix was added to
+        # config_lib.CONFIG_TYPE_DUMP_ORDER (see testNonOverlappingConfigTypes),
+        # but that's not guaranteed to happen.
         def AtMostNumConfigs(board, label, configs, number):
             if len(configs) > number:
                 self.fail(
@@ -218,11 +218,11 @@ class FindConfigsForBoardTest(cros_test_lib.TestCase):
 
 
 class UnifiedBuildConfigTestCase(object):
-    """Base test class that builds a fake config model based on unified builds"""
+    """Base test class that builds a fake unibuild config model."""
 
     def setUp(self):
-        # Code assumes at least one non-unified build exists, so we're accommodating
-        # that by keeping the non-unified reef board.
+        # Code assumes at least one non-unified build exists, so we're
+        # accommodating that by keeping the non-unified reef board.
         self._fake_ge_build_config_json = """
 {
   "metadata_version": "1.0",
@@ -406,8 +406,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
                 self.assertTrue(config.master)
                 self.assertIsNotNone(config.slave_configs)
 
-                # If a builder lists slave config names, ensure they are all valid, and
-                # have an assigned waterfall.
+                # If a builder lists slave config names, ensure they are all
+                # valid, and have an assigned waterfall.
                 for slave_name in config.slave_configs:
                     self.assertIn(slave_name, self.site_config)
             else:
@@ -587,7 +587,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
     def testBuildType(self):
         """Verifies that all configs use valid build types."""
         for build_name, config in self.site_config.items():
-            # For builders that have explicit classes, this check doesn't make sense.
+            # For builders that have explicit classes, this check doesn't make
+            # sense.
             if config["builder_class_name"]:
                 continue
             self.assertIn(
@@ -656,7 +657,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
                         )
 
     def testHWTestsArchivingHWTestArtifacts(self):
-        """Make sure all configs upload artifacts that need them for hw testing."""
+        """Verify all configs upload artifacts that need them for hw testing."""
         for build_name, config in self.site_config.items():
             if config.hw_tests or config.hw_tests_override:
                 self.assertTrue(
@@ -710,15 +711,17 @@ class CBuildBotTest(ChromeosConfigTestBase):
                     or check_name.startswith("novato-")
                     or check_name.startswith("amd64-generic-")
                 ):
-                    # Betty is vm-only, so never does hardware tests.  See crbug/998427.
+                    # Betty is vm-only, so never does hardware tests.  See
+                    # crbug/998427.
                     continue
                 elif check_name not in expected_exceptions:
-                    # If it's not listed as an exception, it needs to run hardware tests.
+                    # If it's not listed as an exception, it needs to run
+                    # hardware tests.
                     if not config.hw_tests and not config.hw_tests_disabled_bug:
                         missing_tests.add(build_name)
                 elif config.hw_tests:
-                    # It is listed as an exception, and it is running hardware tests.  It
-                    # must be removed from the exceptions list.
+                    # It is listed as an exception, and it is running hardware
+                    # tests.  It must be removed from the exceptions list.
                     running_tests.add(build_name)
         # Assert at the end, so that we can print the entire list.
         self.assertEqual(
@@ -756,8 +759,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
             if config["master"] and config["manifest_version"]:
                 self.assertTrue(config["internal"], error)
             elif not config["master"] and config["manifest_version"]:
-                # Unified slaves can rev either public or both depending on whether
-                # they are internal or not.
+                # Unified slaves can rev either public or both depending on
+                # whether they are internal or not.
                 if not config["internal"]:
                     self.assertEqual(
                         config["overlays"], constants.PUBLIC_OVERLAYS, error
@@ -771,8 +774,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
                 self.assertEqual(
                     len(configs),
                     len(set(repr(x) for x in configs)),
-                    "Duplicate board in slaves of %s will cause upload prebuilts"
-                    " failures" % build_name,
+                    "Duplicate board in slaves of %s will cause upload "
+                    "prebuilts failures" % build_name,
                 )
 
     def _getSlaveConfigsForMaster(self, master_config_name):
@@ -810,9 +813,9 @@ class CBuildBotTest(ChromeosConfigTestBase):
 
                 self.assertTrue(
                     saw_config_for_branch,
-                    "No config found for %s branch. "
-                    "As this is the %s branch, all release configs that are being used "
-                    "must end in %s." % (branch, tracking_branch, branch),
+                    "No config found for %s branch. As this is the %s branch, "
+                    "all release configs that are being used must end in %s."
+                    % (branch, tracking_branch, branch),
                 )
 
     def testNoNewBuildersOnlyGroups(self):
@@ -876,8 +879,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
             if config["use_chrome_lkgm"]:
                 self.assertTrue(
                     config["internal"],
-                    "Chrome lkgm currently only works with an internal manifest: %s"
-                    % (build_name,),
+                    "Chrome lkgm currently only works with an internal "
+                    "manifest: %s" % (build_name,),
                 )
 
     def _HasValidSuffix(self, config_name, config_types):
@@ -939,8 +942,8 @@ class CBuildBotTest(ChromeosConfigTestBase):
     def testPaygenTestDependancies(self):
         """paygen testing requires upload_hw_test_artifacts."""
         for build_name, config in self.site_config.items():
-            # This requirement doesn't apply to payloads(-tryjob)
-            # builds. Payloads(-tryjob) are using artifacts from a previous build.
+            # This requirement doesn't apply to payloads(-tryjob) builds.
+            # Payloads(-tryjob) are using artifacts from a previous build.
             if build_name.endswith("-payloads") or build_name.endswith(
                 "-payloads-tryjob"
             ):
@@ -986,7 +989,7 @@ class CBuildBotTest(ChromeosConfigTestBase):
                 )
 
     def testBuildRecoveryImageFlags(self):
-        """Ensure the right flags are disabled when building the recovery image."""
+        """Ensure the right flags are disabled building a recovery image."""
         incompatible_flags = ["paygen", "signer_tests"]
         for build_name, config in self.site_config.items():
             for flag in incompatible_flags:
@@ -1166,7 +1169,8 @@ class TemplateTest(ChromeosConfigTestBase):
             # scheduled as a priority builder.
             if name.endswith("-rapid"):
                 return
-            # Tryjob configs should be tested based on what they are mirrored from.
+            # Tryjob configs should be tested based on what they are mirrored
+            # from.
             if name.endswith("-tryjob"):
                 name = name[: -len("-tryjob")]
 
@@ -1182,7 +1186,10 @@ class TemplateTest(ChromeosConfigTestBase):
                         name.endswith(template), msg % (name, template)
                     )
                 else:
-                    msg = "Child config of %s has name that does not match its template"
+                    msg = (
+                        "Child config of %s has name that does not match its "
+                        "template"
+                    )
                     self.assertTrue(
                         child_configs[0].name.endswith(template), msg % name
                     )
@@ -1223,7 +1230,7 @@ class BoardConfigsTest(ChromeosConfigTestBase):
             self.assertIn(board, self.internal_board_configs)
 
     def _verifyNoTests(self, board_configs):
-        """Defining tests in board specific templates doesn't work as expected."""
+        """Defining tests in board specific templates doesn't work."""
         for board, template in board_configs.items():
             self.assertFalse(
                 "vm_tests" in template and template.vm_tests,

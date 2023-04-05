@@ -449,12 +449,15 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
                 for runtime_data in runtime_datas:
                     paths = [
                         (
-                            f"{self.runtime_artifacts_bucket_url}/{self.android_package}/"
-                            f"{runtime_data}_{arch}_{build_type}_{android_version}.tar"
+                            f"{self.runtime_artifacts_bucket_url}/"
+                            f"{self.android_package}/"
+                            f"{runtime_data}_{arch}_"
+                            f"{build_type}_{android_version}.tar"
                         ),
                         (
                             f"{self.runtime_artifacts_bucket_url}/"
-                            f"{runtime_data}_{arch}_{build_type}_{android_version}.tar"
+                            f"{runtime_data}_{arch}_"
+                            f"{build_type}_{android_version}.tar"
                         ),
                     ]
                     for _, path in enumerate(paths):

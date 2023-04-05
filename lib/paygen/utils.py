@@ -19,13 +19,13 @@ MINOR_VERSION = "PAYLOAD_MINOR_VERSION"
 
 
 def ListdirFullpath(directory):
-    """Return all files in a directory with full pathnames.
+    """Return all files in a directory with full path names.
 
     Args:
-      directory: directory to find files for.
+        directory: directory to find files for.
 
     Returns:
-      Full paths to every file in that directory.
+        Full paths to every file in that directory.
     """
     return [os.path.join(directory, f) for f in os.listdir(directory)]
 
@@ -39,7 +39,7 @@ class RestrictedAttrDict(dict):
     _slots = ()
 
     def __init__(self, *args, **kwargs):
-        """Ensure that only the expected keys are added during initialization."""
+        """Ensure that only the expected keys are added."""
         dict.__init__(self, *args, **kwargs)
 
         # Ensure all slots are at least populated with None.
@@ -111,11 +111,11 @@ class RestrictedAttrDict(dict):
         The ordering of attributes in self._slots is honored in string.
 
         Args:
-          delim: String for separating key/value elements in result.
-          equal: String to put between key and associated value in result.
+            delim: String for separating key/value elements in result.
+            equal: String to put between key and associated value in result.
 
         Returns:
-          A string like "a='foo', b=12".
+            A string like "a='foo', b=12".
         """
         slots = [s for s in self._slots if self[s] is not None]
         elems = ["%s%s%r" % (s, equal, self[s]) for s in slots]
@@ -127,8 +127,8 @@ class RestrictedAttrDict(dict):
         If they key value is set to the default value, set it to None.
 
         Args:
-          key: Key value to check and possibly clear.
-          default: Default value to compare the key value against.
+            key: Key value to check and possibly clear.
+            default: Default value to compare the key value against.
         """
         if self[key] == default:
             self[key] = None
@@ -138,10 +138,11 @@ def ReadLsbRelease(sysroot):
     """Reads the /etc/lsb-release file out of the given sysroot.
 
     Args:
-      sysroot: The path to sysroot of an image to read sysroot/etc/lsb-release.
+        sysroot: The path to sysroot of an image to read
+            sysroot/etc/lsb-release.
 
     Returns:
-      The lsb-release file content in a dictionary of key/values.
+        The lsb-release file content in a dictionary of key/values.
     """
     lsb_release_file = os.path.join(sysroot, "etc", "lsb-release")
     lsb_release = {}
@@ -157,11 +158,11 @@ def ReadMinorVersion(sysroot: str):
     """Reads the /etc/update_engine.conf file out of the given sysroot.
 
     Args:
-      sysroot: The path to sysroot of an image to read
+        sysroot: The path to sysroot of an image to read
         sysroot/etc/update_engine.conf
 
     Returns:
-      The the minor version.
+        The minor version.
     """
     update_engine_conf = os.path.join(sysroot, "etc", "update_engine.conf")
     versions = key_value_store.LoadFile(update_engine_conf)
@@ -171,7 +172,7 @@ def ReadMinorVersion(sysroot: str):
 
 
 class MemoryConsumptionSemaphore(object):
-    """A semaphore that tries to acquire only if there is enough memory available.
+    """Semaphore that tries to acquire only if there is enough memory available.
 
     Watch the free memory of the host in order to not oversubscribe. Also,
     rate limit so that memory consumption of previously launched
@@ -199,19 +200,19 @@ class MemoryConsumptionSemaphore(object):
         """Create a new MemoryConsumptionSemaphore.
 
         Args:
-          system_available_buffer_bytes: The number of bytes to reserve on the
-            system as a buffer against moving into swap (or OOM).
-          single_proc_max_bytes: The number of bytes we expect a process to consume
-            on the system.
-          quiescence_time_seconds: The number of seconds to wait at a minimum
-            between acquires. The purpose is to ensure the subprocess begins to
-            consume a stable amount of memory.
-          unchecked_acquires: The number acquires to allow without checking
-            available memory. This is to allow users to supply a mandatory minimum
-            even if the semaphore would otherwise not allow it (because of the
-            current available memory being to low).
-          total_max: The upper bound of maximum concurrent runs (default 10).
-          clock: Function that gets float time.
+            system_available_buffer_bytes: The number of bytes to reserve on the
+                system as a buffer against moving into swap (or OOM).
+            single_proc_max_bytes: The number of bytes we expect a process to
+                consume on the system.
+            quiescence_time_seconds: The number of seconds to wait at a minimum
+                between acquires. The purpose is to ensure the subprocess begins
+                to consume a stable amount of memory.
+            unchecked_acquires: The number acquires to allow without checking
+                available memory. This is to allow users to supply a mandatory
+                minimum even if the semaphore would otherwise not allow it
+                (because of the current available memory being to low).
+            total_max: The upper bound of maximum concurrent runs (default 10).
+            clock: Function that gets float time.
         """
         self.quiescence_time_seconds = quiescence_time_seconds
         self.unchecked_acquires = unchecked_acquires
@@ -268,7 +269,7 @@ class MemoryConsumptionSemaphore(object):
         """Calculate max utilization to determine if another should be allowed.
 
         Returns:
-          Boolean if you're allowed to consume (acquire).
+            Boolean if you're allowed to consume (acquire).
         """
         with self._lock:
             one_more_total = (
@@ -290,11 +291,11 @@ class MemoryConsumptionSemaphore(object):
         if there is enough available memory to proceed, or potentially timeout.
 
         Args:
-          timeout: Time to block for available memory before return.
+            timeout: Time to block for available memory before return.
 
         Returns:
-          True if you should go, and a text representation of the reason for the
-          acquire result.
+            True if you should go, and a text representation of the reason for
+            the acquire result.
         """
 
         # Remeasure the base.
@@ -328,7 +329,7 @@ class MemoryConsumptionSemaphore(object):
                 MemoryConsumptionSemaphore.SYSTEM_POLLING_INTERVAL_SECONDS
             )
 
-        # There was no moment before timeout where we could have ran the task.
+        # There was no moment before timeout where we could have run the task.
         return AcquireResult(
             False,
             "Timed out (due to quiescence, " "total max, or avail memory)",

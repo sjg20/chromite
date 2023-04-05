@@ -268,7 +268,8 @@ class SignerPayloadsClientGoogleStorageTest(
                 cmd = ["tar", "-xjf", archive_file.name]
                 cros_build_lib.run(cmd, stdout=True, stderr=True, cwd=tmp_dir)
 
-                # Check that the expected (and only the expected) contents are present
+                # Check that the expected (and only the expected) contents are
+                # present.
                 extracted_file_names = os.listdir(tmp_dir)
                 self.assertEqual(
                     len(extracted_file_names), len(self.hash_names)
@@ -421,34 +422,37 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
 
             expected_sigs_hex = (
                 (
-                    "ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6dd32b43"
-                    "5f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0fd98041ec36d6f"
-                    "63b867bcf219804200616590a41a727c2685b48340efb4b480f1ef448fc7bc3f"
-                    "b1c4b53209e950ecc721b07a52a41d9c025fd25602340c93d5295211308caa29"
-                    "a03ed18516cf61411c508097d5b47620d643ed357b05213b2b9fa3a3f938d6c4"
-                    "f52b85c3f9774edc376902458344d1c1cd72bc932f033c076c76fee2400716fe"
-                    "652306871ba923021ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716"
-                    "aabfb6133482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241",
+                    "ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6"
+                    "dd32b435f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0"
+                    "fd98041ec36d6f63b867bcf219804200616590a41a727c2685b48340e"
+                    "fb4b480f1ef448fc7bc3fb1c4b53209e950ecc721b07a52a41d9c025f"
+                    "d25602340c93d5295211308caa29a03ed18516cf61411c508097d5b47"
+                    "620d643ed357b05213b2b9fa3a3f938d6c4f52b85c3f9774edc376902"
+                    "458344d1c1cd72bc932f033c076c76fee2400716fe652306871ba9230"
+                    "21ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716aabfb613"
+                    "3482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241",
                 ),
                 (
-                    "2d909ca5b33a7fb6f2323ca0bf9de2e4f2266c73da4b6948a517dffa96783e08"
-                    "ca36411d380f6e8a20011f599d8d73576b2a141a57c0873d089726e24f62c7e0"
-                    "346ba5fbde68414b0f874b627fb1557a6e9658c8fac96c54f458161ea770982b"
-                    "fa9fe514120635e5ccb32e8219b9069cb0bf8063fba48d60d649c5af203cccef"
-                    "ca5dbc2191f81f0215edbdee4ec8c1553e69b83036aca3e840227d317ff6cf8b"
-                    "968c973f698db1ce59f6871303dcdbe839400c5df4d2e6e505d68890010a4459"
-                    "6ca9fee77f4db6ea3448d98018437c319fc8c5f4603ef94b04e3a4eafa206b73"
-                    "91a2640d43128310285bc0f1c7e5060d37c433d663b1c6f01110b9a43f2a74f4",
+                    "2d909ca5b33a7fb6f2323ca0bf9de2e4f2266c73da4b6948a517dffa9"
+                    "6783e08ca36411d380f6e8a20011f599d8d73576b2a141a57c0873d08"
+                    "9726e24f62c7e0346ba5fbde68414b0f874b627fb1557a6e9658c8fac"
+                    "96c54f458161ea770982bfa9fe514120635e5ccb32e8219b9069cb0bf"
+                    "8063fba48d60d649c5af203cccefca5dbc2191f81f0215edbdee4ec8c"
+                    "1553e69b83036aca3e840227d317ff6cf8b968c973f698db1ce59f687"
+                    "1303dcdbe839400c5df4d2e6e505d68890010a44596ca9fee77f4db6e"
+                    "a3448d98018437c319fc8c5f4603ef94b04e3a4eafa206b7391a2640d"
+                    "43128310285bc0f1c7e5060d37c433d663b1c6f01110b9a43f2a74f4",
                 ),
                 (
-                    "23791c99ab937f1ae5d4988afc9ceca39c290ac90e3da9f243f9a0b1c86c3c32"
-                    "ab7241d43dfc233da412bab989cf02f15a01fe9ea4b2dc7dc9182117547836d6"
-                    "9310af3aa005ee3a6deb9602bc676dcc103bf3f7831d64ab844b4785c5c8b4b1"
-                    "4467e6b5ab6bf34c12f7534e0d5140151c8f28e8276e703dd6332c2bab9e7f4a"
-                    "495215998ff56e476b81bd6b8d765e1f87da50c22cd52c9afa8c43a6528ab898"
-                    "6d7a273d9136d5aff5c4d95985d16eeec7380539ef963e0784a0de42b42890df"
-                    "c83702179f69f5c6eca4630807fbc4ab6241017e0942b15feada0b240e9729bf"
-                    "33bf456bd419da63302477e147963550a45c6cf60925ff48ad7b309fa158dcb2",
+                    "23791c99ab937f1ae5d4988afc9ceca39c290ac90e3da9f243f9a0b1c"
+                    "86c3c32ab7241d43dfc233da412bab989cf02f15a01fe9ea4b2dc7dc9"
+                    "182117547836d69310af3aa005ee3a6deb9602bc676dcc103bf3f7831"
+                    "d64ab844b4785c5c8b4b14467e6b5ab6bf34c12f7534e0d5140151c8f"
+                    "28e8276e703dd6332c2bab9e7f4a495215998ff56e476b81bd6b8d765"
+                    "e1f87da50c22cd52c9afa8c43a6528ab8986d7a273d9136d5aff5c4d9"
+                    "5985d16eeec7380539ef963e0784a0de42b42890dfc83702179f69f5c"
+                    "6eca4630807fbc4ab6241017e0942b15feada0b240e9729bf33bf456b"
+                    "d419da63302477e147963550a45c6cf60925ff48ad7b309fa158dcb2",
                 ),
             )
 
@@ -485,24 +489,26 @@ class SignerPayloadsClientIntegrationTest(cros_test_lib.MockTempDirTestCase):
 
             expected_sigs_hex = (
                 (
-                    "ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6dd32b43"
-                    "5f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0fd98041ec36d6f"
-                    "63b867bcf219804200616590a41a727c2685b48340efb4b480f1ef448fc7bc3f"
-                    "b1c4b53209e950ecc721b07a52a41d9c025fd25602340c93d5295211308caa29"
-                    "a03ed18516cf61411c508097d5b47620d643ed357b05213b2b9fa3a3f938d6c4"
-                    "f52b85c3f9774edc376902458344d1c1cd72bc932f033c076c76fee2400716fe"
-                    "652306871ba923021ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716"
-                    "aabfb6133482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241",
+                    "ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6"
+                    "dd32b435f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0"
+                    "fd98041ec36d6f63b867bcf219804200616590a41a727c2685b48340e"
+                    "fb4b480f1ef448fc7bc3fb1c4b53209e950ecc721b07a52a41d9c025f"
+                    "d25602340c93d5295211308caa29a03ed18516cf61411c508097d5b47"
+                    "620d643ed357b05213b2b9fa3a3f938d6c4f52b85c3f9774edc376902"
+                    "458344d1c1cd72bc932f033c076c76fee2400716fe652306871ba9230"
+                    "21ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716aabfb613"
+                    "3482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241",
                 ),
                 (
-                    "ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6dd32b43"
-                    "5f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0fd98041ec36d6f"
-                    "63b867bcf219804200616590a41a727c2685b48340efb4b480f1ef448fc7bc3f"
-                    "b1c4b53209e950ecc721b07a52a41d9c025fd25602340c93d5295211308caa29"
-                    "a03ed18516cf61411c508097d5b47620d643ed357b05213b2b9fa3a3f938d6c4"
-                    "f52b85c3f9774edc376902458344d1c1cd72bc932f033c076c76fee2400716fe"
-                    "652306871ba923021ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716"
-                    "aabfb6133482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241",
+                    "ba4c7a86b786c609bf6e4c5fb9c47525608678caa532bea8acc457aa6"
+                    "dd32b435f094b331182f2e167682916990c40ff7b6b0128de3fa45ad0"
+                    "fd98041ec36d6f63b867bcf219804200616590a41a727c2685b48340e"
+                    "fb4b480f1ef448fc7bc3fb1c4b53209e950ecc721b07a52a41d9c025f"
+                    "d25602340c93d5295211308caa29a03ed18516cf61411c508097d5b47"
+                    "620d643ed357b05213b2b9fa3a3f938d6c4f52b85c3f9774edc376902"
+                    "458344d1c1cd72bc932f033c076c76fee2400716fe652306871ba9230"
+                    "21ce245e0c778ad9e0e50e87a169b2aea338c4dc8b5c0c716aabfb613"
+                    "3482e8438b084a09503db27ca546e910f8938f7805a8a76a3b0d0241",
                 ),
             )
 
@@ -524,9 +530,9 @@ class UnofficialPayloadSignerTest(cros_test_lib.TestCase):
     """Test suit for testing unofficial local payload signer."""
 
     def setUp(self):
-        # UnofficialSignerPayloadsClient need a temporary directory inside chroot so
-        # cros_test_lib.TempDirTestCase will not work if we run this unittest
-        # outside the chroot.
+        # UnofficialSignerPayloadsClient need a temporary directory inside
+        # chroot so cros_test_lib.TempDirTestCase will not work if we run this
+        # unittest outside the chroot.
         with chroot_util.TempDirInChroot(delete=False) as dir_in_chroot:
             self._temp_dir = dir_in_chroot
 
@@ -544,26 +550,26 @@ class UnofficialPayloadSignerTest(cros_test_lib.TestCase):
             self.assertIn(b"BEGIN PUBLIC KEY", public_key.read())
 
     def testGetHashSignatures(self):
-        """Tests we correclty sign given hashes."""
+        """Tests we correctly sign given hashes."""
         hashes = (b"0" * 32, b"1" * 32)
         keyset = "foo-keys"
         expected_sigs_hex = (
-            "4732bf3c12b5795d5f4dd015cf8a65d8294186710f71e1530aa3b10d364ed15dc71ce"
-            "f3bed312fd3f805d1b4ee79c1b868f7b8e175199d1c145838044fa3d037d67b142140"
-            "a7187cb18cd8fb6897cc88481cb258e9ba87e6508a3eb2670b13542107dfea51417ab"
-            "b3ee30c8ea81242d1b69c92b8c531e7b3799a28285c26ce5e9834648cf9601bdaf042"
-            "57ffe97111b7497e14e4530ef9d4e9b6cdbf473304fee948af68fb6c992340e20bcf7"
-            "8f0c6c28d7ea7d8f35322bc61d5d1456b3b868c16bfca9747887750e2734544b2dc0d"
-            "22f68866e6456243ad53fc847d957b7fc1e87d0b4eafbb98b61810a86bf5b587b7241"
-            "d0f92ba4323da3fc57ccd883fdc4d",
-            "63cefceefb45688c5af557949fd0ec408245f5867e1453d2037c2125511a0ef5d7ead"
-            "88cfebe04f6cda176a91707a6002a3a618fbb0ae8c956c0e7b56e1f29fb50c3ec3d47"
-            "e786131c07b14d15cf768bbaceefd8d900526d79f08a985df910f31d33c97ec9f1599"
-            "02e8478f4d0a1766bb21ea81677c67d11b2b17b0f4cf41599dcadb76549ee0b69badc"
-            "a94ba5fae3b54cea75468a7a670991ba595f622d21ccb1f47edf0366503200e4ee7fe"
-            "c686908f9099e4fc53f4a963769b42b856d2a8c94a15318d0620b7ed0b425989c599f"
-            "fd363390a82c175f4ebab80f46d2f07585f5924fe1014233ba76ca6a2b047baee0231"
-            "41ab38a027f56c963dd70550204ad",
+            "4732bf3c12b5795d5f4dd015cf8a65d8294186710f71e1530aa3b10d364ed15dc"
+            "71cef3bed312fd3f805d1b4ee79c1b868f7b8e175199d1c145838044fa3d037d6"
+            "7b142140a7187cb18cd8fb6897cc88481cb258e9ba87e6508a3eb2670b1354210"
+            "7dfea51417abb3ee30c8ea81242d1b69c92b8c531e7b3799a28285c26ce5e9834"
+            "648cf9601bdaf04257ffe97111b7497e14e4530ef9d4e9b6cdbf473304fee948a"
+            "f68fb6c992340e20bcf78f0c6c28d7ea7d8f35322bc61d5d1456b3b868c16bfca"
+            "9747887750e2734544b2dc0d22f68866e6456243ad53fc847d957b7fc1e87d0b4"
+            "eafbb98b61810a86bf5b587b7241d0f92ba4323da3fc57ccd883fdc4d",
+            "63cefceefb45688c5af557949fd0ec408245f5867e1453d2037c2125511a0ef5d"
+            "7ead88cfebe04f6cda176a91707a6002a3a618fbb0ae8c956c0e7b56e1f29fb50"
+            "c3ec3d47e786131c07b14d15cf768bbaceefd8d900526d79f08a985df910f31d3"
+            "3c97ec9f159902e8478f4d0a1766bb21ea81677c67d11b2b17b0f4cf41599dcad"
+            "b76549ee0b69badca94ba5fae3b54cea75468a7a670991ba595f622d21ccb1f47"
+            "edf0366503200e4ee7fec686908f9099e4fc53f4a963769b42b856d2a8c94a153"
+            "18d0620b7ed0b425989c599ffd363390a82c175f4ebab80f46d2f07585f5924fe"
+            "1014233ba76ca6a2b047baee023141ab38a027f56c963dd70550204ad",
         )
 
         expected_sigs = [[base64.b16decode(x, True)] for x in expected_sigs_hex]

@@ -77,7 +77,10 @@ class CreateManifestFromSdkTest(cros_test_lib.MockTempDirTestCase):
         expected_manifest_path = (
             dest_dir / f"{constants.SDK_TARBALL_NAME}.Manifest"
         )
-        expected_json_input = '{"version": "1", "packages": {"dev-python/django": [["1.5.12-r3", {}]], "dev-python/urllib3": [["1.25.10", {}]]}}'
+        expected_json_input = (
+            '{"version": "1", "packages": {"dev-python/django": '
+            '[["1.5.12-r3", {}]], "dev-python/urllib3": [["1.25.10", {}]]}}'
+        )
         write_file_patch.assert_called_with(
             expected_manifest_path,
             expected_json_input,

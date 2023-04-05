@@ -52,13 +52,13 @@ def FindAndroidCandidates(package_dir):
     """Return a tuple of Android's unstable ebuild and stable ebuilds.
 
     Args:
-      package_dir: The path to where the package ebuild is stored.
+        package_dir: The path to where the package ebuild is stored.
 
     Returns:
-      Tuple [unstable_ebuild, stable_ebuilds].
+        Tuple [unstable_ebuild, stable_ebuilds].
 
     Raises:
-      Exception: if no unstable ebuild exists for Android.
+        Exception: if no unstable ebuild exists for Android.
     """
     stable_ebuilds = []
     unstable_ebuilds = []
@@ -83,18 +83,19 @@ def UpdateDataCollectorArtifacts(
 ):
     r"""Finds and includes into variables artifacts from arc.DataCollector.
 
-    This verifies default android version. In case artificts are not found for
+    This verifies default android version. In case artifacts are not found for
     default Android version it tries to find artifacts for pinned version. If
     pinned version is provided, it is required artifacts exist for the pinned
     version.
 
     Args:
-      android_version: The \d+ build id of Android.
-      runtime_artifacts_bucket_url: root of runtime artifacts
-      package_name: android package name. Used to determine the pinned version if exists.
+        android_version: The \d+ build id of Android.
+        runtime_artifacts_bucket_url: root of runtime artifacts
+        package_name: android package name. Used to determine the pinned version
+            if exists.
 
     Returns:
-      dictionary with filled ebuild variables.
+        dictionary with filled ebuild variables.
     """
     # Check the existing version. If we find any artifacts, use them.
     variables = android.FindDataCollectorArtifacts(
@@ -104,7 +105,7 @@ def UpdateDataCollectorArtifacts(
         runtime_artifacts_bucket_url,
     )
     if variables:
-        # Data artificts were found.
+        # Data artifacts were found.
         return variables
 
     # Check pinned version for the current branch.
@@ -152,28 +153,29 @@ def MarkAndroidEBuildAsStable(
     to its new version.
 
     Args:
-      stable_candidate: ebuild that corresponds to the stable ebuild we are
-        revving from.  If None, builds the a new ebuild given the version
-        with revision set to 1.
-      unstable_ebuild: ebuild corresponding to the unstable ebuild for Android.
-      android_package: android package name.
-      android_version: The \d+ build id of Android.
-      package_dir: Path to the android-container package dir.
-      build_branch: branch of Android builds.
-      arc_bucket_url: URL of the target ARC build gs bucket.
-      runtime_artifacts_bucket_url: root of runtime artifacts
+        stable_candidate: ebuild that corresponds to the stable ebuild we are
+            revving from.  If None, builds the new ebuild given the version with
+            revision set to 1.
+        unstable_ebuild: ebuild corresponding to the unstable ebuild for
+            Android.
+        android_package: android package name.
+        android_version: The \d+ build id of Android.
+        package_dir: Path to the android-container package dir.
+        build_branch: branch of Android builds.
+        arc_bucket_url: URL of the target ARC build gs bucket.
+        runtime_artifacts_bucket_url: root of runtime artifacts
 
     Returns:
-      Tuple[str, List[str], List[str]] if revved, or None
-      1. Full portage version atom (including rc's, etc) that was revved.
-      2. List of files to be `git add`ed.
-      3. List of files to be `git rm`ed.
+        Tuple[str, List[str], List[str]] if revved, or None
+        1. Full portage version atom (including rc's, etc.) that was revved.
+        2. List of files to be `git add`ed.
+        3. List of files to be `git rm`ed.
     """
 
     def IsTheNewEBuildRedundant(new_ebuild, stable_ebuild):
         """Returns True if the new ebuild is redundant.
 
-        This is True if there if the current stable ebuild is the exact same copy
+        This is True if the current stable ebuild is the exact same copy
         of the new one.
         """
         if not stable_ebuild:
@@ -249,7 +251,7 @@ def _PrepareGitBranch(overlay_dir):
     applied), rebase the new branch on top of it.
 
     Args:
-      overlay_dir: The overlay directory.
+        overlay_dir: The overlay directory.
     """
     existing_branch = git.GetCurrentBranch(overlay_dir)
     repo_util.Repository.MustFind(overlay_dir).StartBranch(
@@ -305,7 +307,7 @@ def GetParser():
     parser.add_argument(
         "--skip_commit",
         action="store_true",
-        help="Skip commiting uprev changes to git",
+        help="Skip committing uprev changes to git",
     )
     return parser
 
@@ -381,9 +383,9 @@ def main(argv):
             )
 
         output["android_atom"] = android_atom
-        # This field is read by the PUpr uprev handler for creating CLs. We cannot
-        # return absolute paths because this script runs inside chroot but the uprev
-        # handler runs outside.
+        # This field is read by the PUpr uprev handler for creating CLs. We
+        # cannot return absolute paths because this script runs inside chroot
+        # but the uprev handler runs outside.
         # Here we return paths relative to |overlay_dir|.
         output["modified_files"] = [
             os.path.relpath(f, overlay_dir)
@@ -392,6 +394,6 @@ def main(argv):
 
     # The output is being parsed by service.packages.uprev_android and has to be
     # in its own single line. When invoked from chromite API endpoints, entering
-    # chroot can generate junk messages on stdout, so we prefix our output with a
-    # line break to further ensure that.
+    # chroot can generate junk messages on stdout, so we prefix our output with
+    # a line break to further ensure that.
     print("\n" + json.dumps(output, sort_keys=True))

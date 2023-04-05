@@ -123,7 +123,7 @@ class MainTest(TestImageTest):
         self.assertEqual("/tmp", os.getcwd())
 
     def testBoardAndDirectory(self):
-        """Verify that "--board", "--test_results_root" are passed to the tests."""
+        """Verify "--board", "--test_results_root" are passed to the tests."""
 
         class AttributeTest(image_test_lib.ImageTestCase):
             """Stub test class to hold board and directory."""

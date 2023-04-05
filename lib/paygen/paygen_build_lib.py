@@ -199,7 +199,7 @@ def _FilterForBasic(artifacts):
 
 
 def _FilterForUnsignedImageArchives(artifacts):
-    """Return only instances of UnsignedImageArchive from a list of artifacts."""
+    """Return instances of UnsignedImageArchive from a list of artifacts."""
     return [
         x
         for x in artifacts
@@ -306,12 +306,12 @@ def _FillInPayloadUri(payload, random_str=None):
 def _FilterNonPayloadUris(payload_uris):
     """Filters out non-payloads from a list of GS URIs.
 
-    This essentially filters out known auxiliary artifacts whose names resemble /
-    derive from a respective payload name, such as files with .log and
+    This essentially filters out known auxiliary artifacts whose names
+    resemble/derive from a respective payload name, such as files with .log and
     .metadata-signature extensions.
 
     Args:
-      payload_uris: a list of GS URIs (potentially) corresopnding to payloads
+      payload_uris: a list of GS URIs (potentially) corresponding to payloads
 
     Returns:
       A filtered list of URIs.
@@ -342,21 +342,22 @@ class PayloadTest(utils.RestrictedAttrDict):
     """A payload test definition.
 
     This specifies the payload to test, and (if it's a full payload) what source
-    version to test an upgrade from. Delta payloads implicitly specify the source
-    version.
+    version to test an upgrade from. Delta payloads implicitly specify the
+    source version.
 
     You must either use a delta payload, or specify both the src_channel and
     src_version.
 
     Attributes:
-      payload: A gspaths.Payload object describing the payload to be tested.
-      src_channel: The channel of the image to test updating from. Required if the
-        payload is a full payload, required to be None if it's a delta.
-      src_version: The version of the image to test updating from. Required if the
-        payload is a full payload, required to be None if it's a delta.
-      payload_type: The type of update we are doing with this payload. Possible
-        types are in PAYLOAD_TYPES.
-      applicable_models: A list of models that a paygen test should run against.
+        payload: A gspaths.Payload object describing the payload to be tested.
+        src_channel: The channel of the image to test updating from. Required if
+            the payload is a full payload, required to be None if it's a delta.
+        src_version: The version of the image to test updating from. Required if
+            the payload is a full payload, required to be None if it's a delta.
+        payload_type: The type of update we are doing with this payload.
+            Possible types are in PAYLOAD_TYPES.
+        applicable_models: A list of models that a paygen test should run
+            against.
     """
 
     _slots = (
@@ -453,28 +454,28 @@ class PaygenBuild(object):
         """Fetch the parsed Golden Eye payload generation configuration.
 
         Args:
-          board: Board name in builder format (not release) or None for '*'
-          channel: Channel name in 'stable' or 'stable-channel' format. Or None for
-            '*'.
+            board: Board name in builder format (not release) or None for '*'.
+            channel: Channel name in 'stable' or 'stable-channel' format. Or
+                None for '*'.
 
         Returns:
-          List of GE delta values matching specification. Sample delta value:
+            List of GE delta values matching specification. Sample delta value:
 
-          {
-            'board': {
-              'public_codename': 'x86-alex-he',
-              'is_active': true,
-              'builder_name': 'x86-alex_he'
-            },
-            'delta_type': 'MILESTONE',
-            'channel': 'stable',
-            'chrome_os_version': '8530.81.0',
-            'chrome_version': '53.0.2785.103',
-            'milestone': 53,
-            'generate_delta': true,
-            'delta_payload_tests': true,
-            'full_payload_tests': false
-          }
+            {
+                'board': {
+                    'public_codename': 'x86-alex-he',
+                    'is_active': true,
+                    'builder_name': 'x86-alex_he'
+                },
+                'delta_type': 'MILESTONE',
+                'channel': 'stable',
+                'chrome_os_version': '8530.81.0',
+                'chrome_version': '53.0.2785.103',
+                'milestone': 53,
+                'generate_delta': true,
+                'delta_payload_tests': true,
+                'full_payload_tests': false
+            }
         """
         # We express channels in two different namespaces. Convert to the
         # namespace used by GE, if needed.
@@ -510,16 +511,18 @@ class PaygenBuild(object):
         """Returns the chromeos-image-archive equivalents for the build.
 
         Args:
-          board: The board name (per chromeos-releases).
-          version: The build version.
+            board: The board name (per chromeos-releases).
+            version: The build version.
 
         Returns:
-          A tuple consisting of the archive board name, build name and build URI.
+            A tuple consisting of the archive board name, build name and build
+            URI.
 
         Raises:
-          ArchiveError: if we could not compute the mapping.
+            ArchiveError: if we could not compute the mapping.
         """
-        # Map chromeos-releases board name to its chromeos-image-archive equivalent.
+        # Map chromeos-releases board name to its chromeos-image-archive
+        # equivalent.
         archive_board_candidates = set(
             [
                 archive_board
@@ -537,7 +540,8 @@ class PaygenBuild(object):
 
         archive_board = archive_board_candidates.pop()
 
-        # Find something in the respective chromeos-image-archive build directory.
+        # Find something in the respective chromeos-image-archive build
+        # directory.
         archive_build_search_uri = gspaths.ChromeosImageArchive.BuildUri(
             archive_board, "*", version
         )
@@ -634,21 +638,21 @@ class PaygenBuild(object):
         """Return a list of images associated with a given build.
 
         Args:
-          build: The build to find images for.
-          os_type: The OS type to parse URI as.
+            build: The build to find images for.
+            os_type: The OS type to parse URI as.
 
         Returns:
-          A list of images associated with the build. This may include premp, and mp
-          images.
+            A list of images associated with the build. This may include premp,
+            and mp images.
 
         Raises:
-          BuildCorrupt: Raised if unexpected images are found.
-          ImageMissing: Raised if expected images are missing.
+            BuildCorrupt: Raised if unexpected images are found.
+            ImageMissing: Raised if expected images are missing.
         """
-        # Ideally, |image_type| below should be constrained to the type(s) expected
-        # for the board. But the board signing configs are not easily accessible at
-        # this point, so we use the wildcard here and rely on the signers to upload
-        # the expected artifacts.
+        # Ideally, |image_type| below should be constrained to the type(s)
+        # expected for the board. But the board signing configs are not easily
+        # accessible at this point, so we use the wildcard here and rely on the
+        # signers to upload the expected artifacts.
         search_uri = gspaths.ChromeosReleases.ImageUri(
             build, key="*", image_type="*", image_channel="*", image_version="*"
         )
@@ -676,20 +680,20 @@ class PaygenBuild(object):
         """Return a list of images associated with a given build.
 
         Args:
-          build: The build to find images for.
+            build: The build to find images for.
 
         Returns:
-          A list of images associated with the build. This may include premp, and mp
-          images.
+            A list of images associated with the build. This may include premp,
+            and mp images.
 
         Raises:
-          BuildCorrupt: Raised if unexpected images are found.
-          ImageMissing: Raised if expected images are missing.
+            BuildCorrupt: Raised if unexpected images are found.
+            ImageMissing: Raised if expected images are missing.
         """
-        # Ideally, |image_type| below should be constrained to the type(s) expected
-        # for the board. But the board signing configs are not easily accessible at
-        # this point, so we use the wildcard here and rely on the signers to upload
-        # the expected artifacts.
+        # Ideally, |image_type| below should be constrained to the type(s)
+        # expected for the board. But the board signing configs are not easily
+        # accessible at this point, so we use the wildcard here and rely on the
+        # signers to upload the expected artifacts.
         search_uri = gspaths.ChromeosReleases.ImageUri(
             build, key="*", image_type="*", image_channel="*", image_version="*"
         )
@@ -713,18 +717,18 @@ class PaygenBuild(object):
         max_retry=3, exception=ImageMissing, sleep=BUILD_DISCOVER_RETRY_SLEEP
     )
     def _DiscoverTestImage(self, build, os_type):
-        """Return a list of unsigned image archives associated with a given build.
+        """Return a list of unsigned image archives associated with |build|.
 
         Args:
-          build: The build to find images for.
-          os_type: The OS type to parse URI as.
+            build: The build to find images for.
+            os_type: The OS type to parse URI as.
 
         Returns:
-          A gspaths.UnsignedImageArchive instance.
+            A gspaths.UnsignedImageArchive instance.
 
         Raises:
-          BuildCorrupt: Raised if unexpected images are found.
-          ImageMissing: Raised if expected images are missing.
+            BuildCorrupt: Raised if unexpected images are found.
+            ImageMissing: Raised if expected images are missing.
         """
         search_uri = gspaths.ChromeosReleases.UnsignedImageUri(
             build, milestone="*", image_type="test"
@@ -787,19 +791,19 @@ class PaygenBuild(object):
         """Find the deltas to generate between two builds.
 
         We should generate deltas all combinations of:
-          Test image -> Test image
-          PreMP signed image -> PreMP signed image
-          MP signed image -> MP signed image.
+            Test image -> Test image
+            PreMP signed image -> PreMP signed image
+            MP signed image -> MP signed image.
 
-        Any given build should have exactly one test image, and zero or one of each
-        signed type.
+        Any given build should have exactly one test image, and zero or one of
+        each signed type.
 
         Args:
-          source_images: All images associated with the source build.
-          images: All images associated with the target build.
+            source_images: All images associated with the source build.
+            images: All images associated with the target build.
 
         Returns:
-          A list of gspaths.Payload objects.
+            A list of gspaths.Payload objects.
         """
         results = []
 
@@ -889,29 +893,31 @@ class PaygenBuild(object):
     def _DiscoverRequiredPayloads(self):
         """Find the payload definitions for the current build.
 
-        This method finds the images for the current build, and for all builds we
-        need deltas from, and decides exactly what payloads are needed.
+        This method finds the images for the current build, and for all builds
+        we need deltas from, and decides exactly what payloads are needed.
 
         Returns:
-          [<gspaths.Payload>...], [<PayloadTest>...]
+            [<gspaths.Payload>...], [<PayloadTest>...]
 
-          The list of payloads does NOT have URLs populated, and has not
-          been tested for existence. delta payloads are NOT present if we are
-          skipping them.
+            The list of payloads does NOT have URLs populated, and has not
+            been tested for existence. delta payloads are NOT present if we are
+            skipping them.
 
         Raises:
-          BuildNotReady: If the current build doesn't seem to have all of it's
-              images available yet. This commonly happens because the signer hasn't
-              finished signing the current build.
-          BuildCorrupt: If current or previous builds have unexpected images.
-          ImageMissing: Raised if expected images are missing for previous builds.
+            BuildNotReady: If the current build doesn't seem to have all of it's
+                images available yet. This commonly happens because the signer
+                hasn't finished signing the current build.
+            BuildCorrupt: If current or previous builds have unexpected images.
+            ImageMissing: Raised if expected images are missing for previous
+                builds.
         """
         payloads = []
         payload_tests = []
 
         try:
-            # When discovering the images for our current build, they might not be
-            # discoverable right away (GS eventual consistency). So, we retry.
+            # When discovering the images for our current build, they might not
+            # be discoverable right away (GS eventual consistency). So, we
+            # retry.
             images = self._DiscoverSignedImages(
                 self._build, os_type=gspaths.OSType.CROS
             )
@@ -1128,7 +1134,7 @@ class PaygenBuild(object):
         It will keep going, even if there is a failure.
 
         Args:
-          payloads: gspath.Payload objects defining all of the payloads to generate.
+          payloads: gspath.Payload objects defining the payloads to generate.
 
         Raises:
           Any arbitrary exception raised by CreateAndUploadPayload.
@@ -1138,15 +1144,16 @@ class PaygenBuild(object):
             for payload in payloads
         ]
 
-        # Most of the operations in paygen for one single payload is single threaded
-        # and mostly IO bound (downloading images, extracting partitions, waiting
-        # for signers, signing payload, etc). The only part that requires special
-        # attention is generating an unsigned payload which internally has a
-        # massively parallel implementation. So, here we allow multiple processes to
-        # run simultaneously and we restrict the number of processes that do the
-        # unsigned payload generation by looking at the available memory and seeing
-        # if additional runs would exceed allowed memory use thresholds (look at
-        # the MemoryConsumptionSemaphore in utils.py).
+        # Most of the operations in paygen for one single payload is single
+        # threaded and mostly IO bound (downloading images, extracting
+        # partitions, waiting for signers, signing payload, etc.). The only part
+        # that requires special attention is generating an unsigned payload
+        # which internally has a massively parallel implementation. So, here we
+        # allow multiple processes to run simultaneously and we restrict the
+        # number of processes that do the unsigned payload generation by looking
+        # at the available memory and seeing if additional runs would exceed
+        # allowed memory use thresholds (look at the MemoryConsumptionSemaphore
+        # in utils.py).
         parallel.RunTasksInProcessPool(
             paygen_payload_lib.CreateAndUploadPayload, payloads_args
         )
@@ -1296,7 +1303,8 @@ class PaygenBuild(object):
         """Create necessary test artifacts and initiate Autotest runs.
 
         Args:
-          payload_tests: An iterable of PayloadTest objects defining payload tests.
+            payload_tests: An iterable of PayloadTest objects defining payload
+                tests.
         """
         # Create inner hierarchy for dumping Autotest control files.
         control_dir = os.path.join(self._work_dir, "autotests")
@@ -1390,10 +1398,11 @@ class PaygenBuild(object):
         that match the default URI for the given payload.
 
         Args:
-          payload: gspaths.Payload instance.
+            payload: gspaths.Payload instance.
 
         Returns:
-          List of URIs for existing payloads that match the default payload pattern.
+            List of URIs for existing payloads that match the default payload
+            pattern.
         """
         search_uri = DefaultPayloadUri(payload, random_str="*")
         return _FilterNonPayloadUris(self._ctx.LS(search_uri))
@@ -1418,10 +1427,11 @@ class PaygenBuild(object):
 
                 payloads, payload_tests = self._DiscoverRequiredPayloads()
 
-                # Find out which payloads already exist, updating the payload object's
-                # URI accordingly. In doing so we're creating a list of all payload
-                # objects and their skip/exist attributes. We're also recording whether
-                # this run will be skipping any actual work.
+                # Find out which payloads already exist, updating the payload
+                # object's URI accordingly. In doing so we're creating a list of
+                # all payload objects and their skip/exist attributes. We're
+                # also recording whether this run will be skipping any actual
+                # work.
                 for p in payloads:
                     try:
                         result = self._FindExistingPayloads(p)
@@ -1454,8 +1464,9 @@ class PaygenBuild(object):
                 else:
                     logging.info("No new payloads to generate")
 
-                # Check that the build has a corresponding archive directory. The lab
-                # can only execute control files for tests from this location.
+                # Check that the build has a corresponding archive directory.
+                # The lab can only execute control files for tests from this
+                # location.
                 (
                     archive_board,
                     archive_build,
@@ -1570,7 +1581,8 @@ def _TestPlan(payload_test_configs, suite_name=None, build=None):
 
     for payload_test in payload_test_configs:
         # TKO parser requires that label format can be parsed by
-        # site_utils.parse_job_name to get build, build_version, board and suite.
+        # site_utils.parse_job_name to get build, build_version, board and
+        # suite.
         # A parsable label format for autoupdate_EndtoEnd test should be:
         #   reef-release/R74-XX.0.0/paygen_au_canary/autoupdate_E2E_***_XX.0.0
         shown_test_name = "%s_%s" % (
@@ -1588,7 +1600,7 @@ def _TestPlan(payload_test_configs, suite_name=None, build=None):
                     # Matching autoupdate_EndToEndTest control file.
                     max_retries=1,
                     execution_environment=(
-                        test_metadata_pb2.AutotestTest.EXECUTION_ENVIRONMENT_SERVER
+                        test_metadata_pb2.AutotestTest.EXECUTION_ENVIRONMENT_SERVER  # pylint: disable=line-too-long
                     ),
                 ),
                 test_args=test_args,

@@ -45,57 +45,57 @@ class LockNotAcquired(Exception):
 class Lock(object):
     """This class manages a google storage file as a form of lock.
 
-    This class can be used in conjuction with a "with" clause to ensure
+    This class can be used in conjunction with a "with" clause to ensure
     the lock is released, or directly.
 
     Method 1:
-      # USE when not looping to acquire the same lock repeatedly.
-      try:
-        with gslock.Lock("gs://chromoes-releases/lock-file"):
-          # Protected code
-          ...
-      except LockNotAcquired:
-        # Error handling
-        ...
+        # USE when not looping to acquire the same lock repeatedly.
+        try:
+            with gslock.Lock("gs://chromoes-releases/lock-file"):
+                # Protected code
+                ...
+        except LockNotAcquired:
+            # Error handling
+            ...
 
     Method 2:
-      # USE when looping to acquire the same lock repeatedly.
-      lock = gslock.Lock("gs://chromoes-releases/lock-file")
-      while True:
-        with lock:
-          # Protected code
-          ...
-        except LockNotAcquired:
-          # Error handling
-          ...
+        # USE when looping to acquire the same lock repeatedly.
+        lock = gslock.Lock("gs://chromoes-releases/lock-file")
+        while True:
+            with lock:
+                # Protected code
+                ...
+            except LockNotAcquired:
+                # Error handling
+                ...
 
     Method 3:
-      lock = gslock.Lock("gs://chromoes-releases/lock-file")
-      try:
-        lock.Acquire()
-      except LockNotAcquired:
-        # Error handling
-      # Protected code
-      ...
-      lock.Release()
+        lock = gslock.Lock("gs://chromoes-releases/lock-file")
+        try:
+            lock.Acquire()
+        except LockNotAcquired:
+            # Error handling
+        # Protected code
+        ...
+        lock.Release()
 
-      Locking is strictly atomic, except when timeouts are involved.
+    Locking is strictly atomic, except when timeouts are involved.
 
-      It assumes that local server time is in sync with Google Storage server
-      time.
+    It assumes that local server time is in sync with Google Storage server
+    time.
     """
 
     def __init__(self, gs_path, lock_timeout_mins=120, dry_run=False, ctx=None):
         """Initializer for the lock.
 
         Args:
-          gs_path: Path to the potential GS file we use for lock management.
-          lock_timeout_mins: How long should an existing lock be considered valid?
-            This timeout should be long enough that it's never hit unless a server
-            is unexpectedly rebooted, lost network connectivity or had some other
-            catastrophic error.
-          dry_run: do nothing, always succeed
-          ctx: chromite.lib.gs.GSContext to use.
+            gs_path: Path to the potential GS file we use for lock management.
+            lock_timeout_mins: How long should an existing lock be considered
+                valid? This timeout should be long enough that it's never hit
+                unless a server is unexpectedly rebooted, lost network
+                connectivity or had some other catastrophic error.
+            dry_run: do nothing, always succeed
+            ctx: chromite.lib.gs.GSContext to use.
         """
         self._gs_path = gs_path
         self._timeout = datetime.timedelta(minutes=lock_timeout_mins)
@@ -108,14 +108,14 @@ class Lock(object):
         """Check to see if an existing lock has timed out.
 
         Returns:
-          True if the lock is expired. False otherwise.
+            True if the lock is expired. False otherwise.
         """
         try:
             stat_results = self._ctx.Stat(self._gs_path)
         except gs.GSNoSuchKey:
-            # If we couldn't figure out when the file was last modified, it might
-            # have already been released. In any case, it's probably not safe to try
-            # to clear the lock, so we'll return False here.
+            # If we couldn't figure out when the file was last modified, it
+            # might have already been released. In any case, it's probably not
+            # safe to try to clear the lock, so we'll return False here.
             return False, 0
 
         modified = stat_results.creation_time
@@ -127,7 +127,7 @@ class Lock(object):
         """Attempt to acquire the lock.
 
         Raises:
-          LockNotAcquired: If the lock isn't acquired.
+            LockNotAcquired: If the lock isn't acquired.
         """
         try:
             self._generation = self._ctx.Copy(
@@ -141,21 +141,21 @@ class Lock(object):
                 if not self._dry_run:
                     raise LockProbeError("Unable to detect generation")
         except gs.GSContextPreconditionFailed:
-            # Find the lock contents. Either use this for error reporting, or to find
-            # out if we already own it.
+            # Find the lock contents. Either use this for error reporting, or to
+            # find out if we already own it.
             contents = "Unknown"
             try:
                 contents = self._ctx.Cat(self._gs_path)
             except gs.GSContextException:
                 pass
 
-            # If we thought we were creating the file it's possible for us to already
-            # own it because the Copy command above can retry. If the first attempt
-            # works but returns a retryable error, it will fail with
-            # GSContextPreconditionFailed on the second attempt.
+            # If we thought we were creating the file it's possible for us to
+            # already own it because the Copy command above can retry. If the
+            # first attempt works but returns a retryable error, it will fail
+            # with GSContextPreconditionFailed on the second attempt.
             if self._generation == 0 and contents == self._contents:
-                # If the lock contains our contents, we own it, but don't know the
-                # generation.
+                # If the lock contains our contents, we own it, but don't know
+                # the generation.
                 try:
                     stat_results = self._ctx.Stat(self._gs_path)
                     self._generation = stat_results.generation
@@ -176,7 +176,7 @@ class Lock(object):
         Will remove an existing lock if it has timed out.
 
         Raises:
-          LockNotAcquired if it is unable to get the lock.
+            LockNotAcquired if it is unable to get the lock.
         """
         try:
             self._AcquireLock()
@@ -208,7 +208,7 @@ class Lock(object):
         """Resets the timeout on a lock you are holding.
 
         Raises:
-          LockNotAcquired if it can't Renew the lock for any reason.
+            LockNotAcquired if it can't Renew the lock for any reason.
         """
         if int(self._generation) == 0:
             raise LockNotAcquired("Lock not held")

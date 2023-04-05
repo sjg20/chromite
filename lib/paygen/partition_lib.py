@@ -114,9 +114,9 @@ def ExtractRoot(image, root_out, truncate=True):
     if not truncate:
         return
 
-    # We only update the filesystem part of the partition, which is stored in the
-    # gpt script. So we need to truncated it to the file system size if asked for.
-    # Currently we only support truncating ext filesystems.
+    # We only update the filesystem part of the partition, which is stored in
+    # the gpt script. So we need to truncated it to the file system size if
+    # asked for. Currently, we only support truncating ext filesystems.
     if not image_lib.IsExt2Image(root_out):
         logging.warning("Not truncating rootfs due to unsupported filesystem.")
         return
