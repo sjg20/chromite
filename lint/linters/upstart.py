@@ -139,7 +139,9 @@ def Data(
             logging.error("    %s", cmd)
         logging.error(
             "Please use a tmpfiles.d config for the commands or have "
-            'them reviewed by security and add "# croslint: disable:"'
+            'them reviewed by security and add "# croslint: disable:". '
+            "A security consultation bug can be filed through:\n"
+            "https://b.corp.google.com/issues/new?component=1030291"
         )
         ret = False
 
