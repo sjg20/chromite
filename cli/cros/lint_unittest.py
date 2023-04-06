@@ -7,6 +7,7 @@
 import collections
 import io
 import os
+from typing import NamedTuple
 
 import astroid
 
@@ -102,8 +103,8 @@ class TestNode(object):
         fromlineno=0,
         path="foo.py",
         args=(),
-        vararg="",
-        kwarg="",
+        vararg=None,
+        kwarg=None,
         kwonlyargs=(),
         names=None,
         lineno=0,
@@ -562,8 +563,17 @@ class DocStringCheckerTest(CheckerTestCase):
 
     def testGoodFuncArgs(self):
         """Verify normal args in Args are allowed"""
+
+        class TestData(NamedTuple):
+            """Helper for creating testcases."""
+
+            dc: str
+            args: tuple
+            vararg: str = None
+            kwarg: str = None
+
         datasets = (
-            (
+            TestData(
                 """args are correct, and cls is ignored
 
          Args:
@@ -573,10 +583,8 @@ class DocStringCheckerTest(CheckerTestCase):
                     "cls",
                     "moo",
                 ),
-                None,
-                None,
             ),
-            (
+            TestData(
                 """args are correct, and self is ignored
 
          Args:
@@ -590,7 +598,7 @@ class DocStringCheckerTest(CheckerTestCase):
                 "args",
                 "kwargs",
             ),
-            (
+            TestData(
                 """args are allowed to wrap
 
          Args:
@@ -600,8 +608,7 @@ class DocStringCheckerTest(CheckerTestCase):
              to describe its fatness
          """,
                 ("moo",),
-                None,
-                "kwargs",
+                kwarg="kwargs",
             ),
         )
         for dc, args, vararg, kwarg in datasets:
@@ -613,8 +620,17 @@ class DocStringCheckerTest(CheckerTestCase):
 
     def testBadFuncArgs(self):
         """Verify bad/missing args in Args are caught"""
+
+        class TestData(NamedTuple):
+            """Helper for creating testcases."""
+
+            dc: str
+            args: tuple
+            vararg: str = None
+            kwarg: str = None
+
         datasets = (
-            (
+            TestData(
                 """missing 'bar'
 
          Args:
@@ -625,7 +641,7 @@ class DocStringCheckerTest(CheckerTestCase):
                     "bar",
                 ),
             ),
-            (
+            TestData(
                 """missing 'cow' but has 'bloop'
 
          Args:
@@ -633,7 +649,7 @@ class DocStringCheckerTest(CheckerTestCase):
          """,
                 ("bloop",),
             ),
-            (
+            TestData(
                 """too much space after colon
 
          Args:
@@ -641,7 +657,7 @@ class DocStringCheckerTest(CheckerTestCase):
          """,
                 ("moo",),
             ),
-            (
+            TestData(
                 """not enough space after colon
 
          Args:
@@ -649,7 +665,7 @@ class DocStringCheckerTest(CheckerTestCase):
          """,
                 ("moo",),
             ),
-            (
+            TestData(
                 """deprecated use of type
 
          Args:
@@ -657,7 +673,7 @@ class DocStringCheckerTest(CheckerTestCase):
          """,
                 ("moo",),
             ),
-            (
+            TestData(
                 """duplicated arg
 
                 Args:
@@ -666,10 +682,28 @@ class DocStringCheckerTest(CheckerTestCase):
                 """,
                 ("moo",),
             ),
+            TestData(
+                """*args must be *args, not args
+
+                Args:
+                    args: Foo.
+                """,
+                (),
+                "args",
+            ),
+            TestData(
+                """**kwargs must be **kwargs, not kwargs
+
+                Args:
+                    kwargs: Foo.
+                """,
+                (),
+                kwarg="kwargs",
+            ),
         )
-        for dc, args in datasets:
+        for dc, args, vararg, kwarg in datasets:
             self.results = []
-            node = TestNode(doc=dc, args=args)
+            node = TestNode(doc=dc, args=args, vararg=vararg, kwarg=kwarg)
             sections = self.checker._parse_docstring_sections(node, node.lines)
             self.checker._check_all_args_in_doc(node, node.lines, sections)
             self.assertLintFailed()

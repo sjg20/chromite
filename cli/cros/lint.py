@@ -439,6 +439,11 @@ class DocStringChecker(pylint.checkers.BaseChecker):
             ("docstring-duplicate-argument"),
             _MessageCP019,
         ),
+        "C9021": (
+            "Unknown arg documentation found: |%(arg)s|",
+            ("docstring-unknown-argument"),
+            _MessageCP019,
+        ),
     }
 
     def __init__(self, *args, **kwargs):
@@ -883,6 +888,57 @@ class DocStringChecker(pylint.checkers.BaseChecker):
             margs = {"arg": "|, |".join(missing_args)}
             self.add_message(
                 "C9010", node=node, line=node.fromlineno, args=margs
+            )
+
+        # Check special named arguments.
+        args_exp = node.args.vararg == "args"
+        args_re = re.compile(r"(\*?args):")
+        args_found = None
+        kwargs_exp = node.args.kwarg == "kwargs"
+        kwargs_re = re.compile(r"((\*\*)?kwargs):")
+        kwargs_found = None
+        for l in section.lines:
+            aline = l.lstrip()
+            m = args_re.match(aline)
+            if m:
+                if args_found:
+                    margs = {"arg": l}
+                    self.add_message(
+                        "C9020", node=node, line=node.fromlineno, args=margs
+                    )
+                args_found = m.group(1)
+
+            m = kwargs_re.match(aline)
+            if m:
+                if kwargs_found:
+                    margs = {"arg": l}
+                    self.add_message(
+                        "C9020", node=node, line=node.fromlineno, args=margs
+                    )
+                kwargs_found = m.group(1)
+
+        # args/kwargs shouldn't be documented if the func doesn't use them.
+        if args_found == "*args" and not args_exp:
+            margs = {"arg": args_found}
+            self.add_message(
+                "C9021", node=node, line=node.fromlineno, args=margs
+            )
+        if kwargs_found == "**kwargs" and not kwargs_exp:
+            margs = {"arg": kwargs_found}
+            self.add_message(
+                "C9021", node=node, line=node.fromlineno, args=margs
+            )
+
+        # Only accept "*args" & "**kwargs".
+        if args_exp and args_found and args_found != "*args":
+            margs = {"arg": args_found}
+            self.add_message(
+                "C9011", node=node, line=node.fromlineno, args=margs
+            )
+        if kwargs_exp and kwargs_found and kwargs_found != "**kwargs":
+            margs = {"arg": kwargs_found}
+            self.add_message(
+                "C9011", node=node, line=node.fromlineno, args=margs
             )
 
     def _check_func_signature(self, node):
