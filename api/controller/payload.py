@@ -120,8 +120,8 @@ def GeneratePayload(
         artifacts = payload_config.GeneratePayload()
     except paygen_payload_lib.PayloadGenerationSkippedException as e:
         # If paygen was skipped, provide a reason if possible.
-        if isinstance(e, paygen_payload_lib.NoMiniOSPartitionException):
-            reason = payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE
+        if isinstance(e, paygen_payload_lib.MiniOSException):
+            reason = e.return_code()
             output_proto.failure_reason = reason
 
     _SetGeneratePayloadOutputProto(output_proto, artifacts)

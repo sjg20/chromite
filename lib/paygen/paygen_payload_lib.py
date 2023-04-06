@@ -16,6 +16,7 @@ import tempfile
 import threading
 import time
 
+from chromite.api.gen.chromite.api import payload_pb2
 from chromite.lib import cgpt
 from chromite.lib import chroot_util
 from chromite.lib import constants
@@ -70,8 +71,25 @@ class PayloadGenerationSkippedException(BaseException):
     """
 
 
-class NoMiniOSPartitionException(PayloadGenerationSkippedException):
+class MiniOSException(PayloadGenerationSkippedException):
+    """Base class for MiniOS-related exceptions."""
+
+    def return_code(self):
+        return payload_pb2.GenerationResponse.UNSPECIFIED
+
+
+class NoMiniOSPartitionException(MiniOSException):
     """Raised when generating a miniOS payload for an img with no miniOS part."""
+
+    def return_code(self):
+        return payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE
+
+
+class MiniOSPatritionMismatchException(MiniOSException):
+    """Raised when there is a mismatch in recovery key count for source and target."""
+
+    def return_code(self):
+        return payload_pb2.GenerationResponse.MINIOS_COUNT_MISMATCH
 
 
 class PaygenSigner(object):
@@ -419,8 +437,7 @@ class PaygenPayload(object):
         """
         if self.payload.minios:
             try:
-                if self._EitherImageIsMissingMiniOSPayload():
-                    raise NoMiniOSPartitionException
+                self._CheckEitherImageIsMissingMiniOSPayload()
             except Error as e:
                 logging.warning(
                     "Caught exception checking whether images have miniOS parts: %s",
@@ -429,33 +446,31 @@ class PaygenPayload(object):
             return True
         return False
 
-    def _EitherImageIsMissingMiniOSPayload(self):
+    def _CheckEitherImageIsMissingMiniOSPayload(self):
         """Determines whether the source or target image has no miniOS parts.
 
         If this is a full payload, then there is no src image. In that case, only
         the tgt image will be evaluated.
 
-        Returns:
-          bool: True if either the target image or the source image (if it exists)
-              has no miniOS partition.
+        Raises:
+          MiniOSException: One of several miniOS errors.
         """
-        if not self._ImageHasMiniOSPartition(self.tgt_image_file):
+        try:
+            self._CheckImageHasMiniOSPartition(self.tgt_image_file)
+        except:
             logging.info("Target missing miniOS partition")
-            return True
-        if self.payload.src_image and not self._ImageHasMiniOSPartition(
-            self.src_image_file
-        ):
-            return True
-        return False
+            raise
+        if self.payload.src_image:
+            self._CheckImageHasMiniOSPartition(self.src_image_file)
 
-    def _ImageHasMiniOSPartition(self, image_file):
-        """Returns whether the given image has a miniOS partition.
+    def _CheckImageHasMiniOSPartition(self, image_file):
+        """Checks whether the given image has a miniOS partition.
 
         Args:
           image_file: Local path to the image file.
 
-        Returns:
-          bool: True if the image has a miniOS partition.
+        Raises:
+          MiniOSException: One of several miniOS errors.
         """
         disk = cgpt.Disk.FromImage(image_file)
         try:
@@ -464,10 +479,9 @@ class PaygenPayload(object):
             # payload generation when either A || B partitions aren't set.
             if len(parts) != 2:
                 logging.info("MiniOS partition count did not match.")
-                return False
+                raise MiniOSPatritionMismatchException
         except KeyError:
-            return False
-        return True
+            raise NoMiniOSPartitionException
 
     def _PreparePartitions(self, part_a: bool = True):
         """Prepares parameters related to partitions of the given image.

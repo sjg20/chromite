@@ -140,3 +140,19 @@ class PayloadApiTests(
             response_code,
             controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE,
         )
+
+    def testNoMiniOSPartitionMismatch(self):
+        """Test a miniOS paygen request with a partition count mismatch."""
+        patch = self.PatchObject(paygen_payload_lib, "PaygenPayload")
+        patch.side_effect = paygen_payload_lib.MiniOSPatritionMismatchException
+        response_code = payload.GeneratePayload(
+            self.minios_req, self.result, self.api_config
+        )
+        self.assertEqual(
+            self.result.failure_reason,
+            payload_pb2.GenerationResponse.MINIOS_COUNT_MISMATCH,
+        )
+        self.assertEqual(
+            response_code,
+            controller.RETURN_CODE_UNSUCCESSFUL_RESPONSE_AVAILABLE,
+        )

@@ -1069,12 +1069,46 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         )
         check_minios_mock = self.PatchObject(
             paygen_payload_lib.PaygenPayload,
-            "_EitherImageIsMissingMiniOSPayload",
-            return_value=True,
+            "_CheckEitherImageIsMissingMiniOSPayload",
+        )
+        check_minios_mock.side_effect = (
+            paygen_payload_lib.NoMiniOSPartitionException
         )
 
         # Run the test.
         with self.assertRaises(paygen_payload_lib.NoMiniOSPartitionException):
+            gen.Run()
+
+        # Check expected calls.
+        self.assertEqual(
+            prep_image_mock.call_args_list,
+            [
+                mock.call(payload.tgt_image, gen.tgt_image_file),
+            ],
+        )
+        check_minios_mock.assert_called_once_with()
+
+    def testCreateSignedMiniOSFullWithMiniOSPartitionMismatch(self):
+        """Test the overall payload generation process with miniOS."""
+        payload = self.full_minios_payload
+        gen = self._GetStdGenerator(payload=payload, work_dir="/work")
+
+        # Set up stubs.
+        prep_image_mock = self.PatchObject(
+            paygen_payload_lib.PaygenPayload, "_PrepareImage"
+        )
+        check_minios_mock = self.PatchObject(
+            paygen_payload_lib.PaygenPayload,
+            "_CheckEitherImageIsMissingMiniOSPayload",
+        )
+        check_minios_mock.side_effect = (
+            paygen_payload_lib.MiniOSPatritionMismatchException
+        )
+
+        # Run the test.
+        with self.assertRaises(
+            paygen_payload_lib.MiniOSPatritionMismatchException
+        ):
             gen.Run()
 
         # Check expected calls.
@@ -1097,8 +1131,7 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         )
         check_minios_mock = self.PatchObject(
             paygen_payload_lib.PaygenPayload,
-            "_EitherImageIsMissingMiniOSPayload",
-            return_value=False,
+            "_CheckEitherImageIsMissingMiniOSPayload",
         )
         prep_part_mock = self.PatchObject(
             paygen_payload_lib.PaygenPayload, "_PreparePartitions"
