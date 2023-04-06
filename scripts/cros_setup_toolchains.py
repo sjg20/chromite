@@ -220,7 +220,7 @@ class Crossdev(object):
                 )
             else:
                 # Build the crossdev command.
-                cmd = ["crossdev", "--show-target-cfg", "--ex-gdb"]
+                cmd = ["crossdev", "--stable", "--show-target-cfg", "--ex-gdb"]
                 # Enable libxcrypt for all linux-gnu targets.
                 if "cros-linux-gnu" in target:
                     cmd.extend(CROSSDEV_LIBXCRYPT_ARGS)
@@ -292,7 +292,7 @@ class Crossdev(object):
             config_only: Just update.
         """
         configured_targets = cls._CACHE.setdefault("configured_targets", [])
-        cmdbase = ["crossdev", "--show-fail-log"]
+        cmdbase = ["crossdev", "--stable", "--show-fail-log"]
         cmdbase.extend(["--env", "FEATURES=splitdebug"])
         # Pick stable by default, and override as necessary.
         cmdbase.extend(["-P", "--oneshot"])
