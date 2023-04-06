@@ -472,22 +472,21 @@ def ConvertGsUploadUri(upload_uri: str) -> str:
 
 def CreateFilteredPackageIndex(
     package_path: str,
-    devinstall_package_list: List[str],
+    package_list: List[str],
     package_index_path: str,
     upload_uri: str,
     upload_path: str,
     sudo: bool = False,
 ) -> None:
-    """Create Package file for dev-install process.
+    """Create Package file with filtered packages.
 
     The created package file (package_index_path) contains only the
-    packages from the system packages file (in package_path) that are in the
-    devinstall_package_list. The new package file will use the provided values
+    specified packages. The new package file will use the provided values
     for upload_uri and upload_path.
 
     Args:
         package_path: Absolute path to the standard Packages file.
-        devinstall_package_list: Packages from packages.installable.
+        package_list: Packages to filter.
         package_index_path: Absolute path for new Packages file.
         upload_uri: The URI where prebuilts will be uploaded.
         upload_path: The path at the URI for the prebuilts.
@@ -495,17 +494,17 @@ def CreateFilteredPackageIndex(
     """
 
     def ShouldFilterPackage(package: dict) -> bool:
-        """Local func to filter packages not in the devinstall_package_list
+        """Local func to filter packages not in the package_list.
 
         Args:
-            package: Dictionary with key 'CPV' and package name as value
+            package: Dictionary with key 'CPV' and package name as value.
 
         Returns:
-            True (filter) if not in the devinstall_package_list, else False
-                (don't filter) if in the devinstall_package_list
+            True (filter) if not in the package_list, else False
+                (don't filter) if in the package_list.
         """
         value = package["CPV"]
-        if value in devinstall_package_list:
+        if value in package_list:
             return False
         else:
             return True
