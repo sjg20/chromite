@@ -251,6 +251,7 @@
     snappy-release
     soraka-libcamera-release
     soraka-release
+    staryu-release
     strongbad-kernelnext-release
     strongbad-release
     strongbad-userdebug-release
@@ -1139,6 +1140,7 @@
     snappy-release-tryjob
     soraka-libcamera-release-tryjob
     soraka-release-tryjob
+    staryu-release-tryjob
     strongbad-kernelnext-release-tryjob
     strongbad-release-tryjob
     strongbad-userdebug-release-tryjob
@@ -1376,6 +1378,11 @@
   soraka-llvm-toolchain-tryjob
   soraka-payloads-tryjob
   soraka-release-tryjob
+  staryu-full-tryjob
+  staryu-llvm-next-toolchain-tryjob
+  staryu-llvm-toolchain-tryjob
+  staryu-payloads-tryjob
+  staryu-release-tryjob
   strongbad-factory-strongbad-13963.B-factorybranch-tryjob
   strongbad-factory-trogdor-13443.B-factorybranch-tryjob
   strongbad-factory-trogdor-15210.B-factorybranch-tryjob
