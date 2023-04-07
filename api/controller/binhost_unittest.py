@@ -10,6 +10,8 @@ from unittest import mock
 from chromite.api import api_config
 from chromite.api.controller import binhost
 from chromite.api.gen.chromite.api import binhost_pb2
+from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import binpkg
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -196,6 +198,110 @@ class PrepareBinhostUploadsTest(
             binhost.PrepareBinhostUploads(
                 input_proto, self.response, self.api_config
             )
+
+
+class UpdatePackageIndexTest(
+    cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin
+):
+    """Unit tests for BinhostService/UpdatePackageIndex."""
+
+    def setUp(self):
+        self._original_pkg_index = binpkg.PackageIndex()
+        self._original_pkg_index.header["A"] = "B"
+        self._original_pkg_index.packages = [
+            {
+                "CPV": "foo/bar",
+                "KEY": "value",
+            },
+            {
+                "CPV": "cat/pkg",
+                "KEY": "also_value",
+            },
+        ]
+        self._pkg_index_fp = os.path.join(
+            self.tempdir,
+            "path/to/packages/Packages",
+        )
+
+    def _write_original_package_index(self):
+        """Write the package index to the tempdir.
+
+        Note that if an input_proto specifies location=INSIDE, then they will
+        not be able to find the written file, since the tempdir isn't actually
+        inside a chroot.
+        """
+        osutils.Touch(self._pkg_index_fp, makedirs=True)
+        self._original_pkg_index.WriteFile(self._pkg_index_fp)
+
+    def testValidateOnly(self):
+        """Check that a validate only call does not execute any logic."""
+        self._write_original_package_index()
+        patch = self.PatchObject(binpkg.PackageIndex, "ReadFilePath")
+        request = binhost_pb2.UpdatePackageIndexRequest(
+            package_index_file=common_pb2.Path(
+                path=self._pkg_index_fp,
+                location=common_pb2.Path.Location.OUTSIDE,
+            ),
+            set_upload_location=True,
+        )
+        response = binhost_pb2.UpdatePackageIndexResponse()
+        binhost.UpdatePackageIndex(request, response, self.validate_only_config)
+        patch.assert_not_called()
+
+    def testMustProvideSomeCommand(self):
+        """Test that an error is raised if no update types are specified."""
+        self._write_original_package_index()
+        request = binhost_pb2.UpdatePackageIndexRequest(
+            package_index_file=common_pb2.Path(
+                path=self._pkg_index_fp,
+                location=common_pb2.Path.OUTSIDE,
+            ),
+            uri="gs://chromeos-prebuilt/board/amd64-host/packages",
+        )
+        response = binhost_pb2.UpdatePackageIndexResponse()
+        with self.assertRaises(cros_build_lib.DieSystemExit):
+            binhost.UpdatePackageIndex(request, response, self.api_config)
+
+    def testSetUploadLocation(self):
+        """Test setting the package upload location in the index file.
+
+        This test includes correctly parsing the input uri.
+        """
+        # Arrange
+        self._write_original_package_index()
+
+        # Act
+        request = binhost_pb2.UpdatePackageIndexRequest(
+            package_index_file=common_pb2.Path(
+                path=self._pkg_index_fp,
+                location=common_pb2.Path.Location.OUTSIDE,
+            ),
+            set_upload_location=True,
+            uri="gs://chromeos-prebuilt/board/amd64-host/packages/",
+        )
+        response = binhost_pb2.UpdatePackageIndexResponse()
+        binhost.UpdatePackageIndex(request, response, self.api_config)
+
+        # Assert
+        new_pkg_index = binpkg.PackageIndex()
+        new_pkg_index.ReadFilePath(self._pkg_index_fp)
+        self.assertEqual(new_pkg_index.header["URI"], "gs://chromeos-prebuilt")
+        self.assertDictEqual(
+            new_pkg_index.packages[0],
+            {
+                "CPV": "cat/pkg",
+                "KEY": "also_value",
+                "PATH": "board/amd64-host/packages/cat/pkg.tbz2",
+            },
+        )
+        self.assertDictEqual(
+            new_pkg_index.packages[1],
+            {
+                "CPV": "foo/bar",
+                "KEY": "value",
+                "PATH": "board/amd64-host/packages/foo/bar.tbz2",
+            },
+        )
 
 
 class SetBinhostTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):

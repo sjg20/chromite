@@ -14,6 +14,7 @@ from chromite.api import faux
 from chromite.api import validate
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromite.api import binhost_pb2
+from chromite.lib import binpkg
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
@@ -228,6 +229,43 @@ def PrepareDevInstallBinhostUploads(
         shutil.copyfile(full_src_pkg_path, full_target_src_path)
         output_proto.upload_targets.add().path = upload_target
     output_proto.upload_targets.add().path = "Packages"
+
+
+def _UpdatePackageIndexResponse(_input_proto, _output_proto, _config):
+    """Set up a fake successful response."""
+
+
+@faux.success(_UpdatePackageIndexResponse)
+@faux.empty_error
+@validate.require("package_index_file")
+@validate.require_any("set_upload_location")
+@validate.validation_complete
+def UpdatePackageIndex(
+    input_proto: binhost_pb2.UpdatePackageIndexRequest,
+    _output_proto: binhost_pb2.UpdatePackageIndexResponse,
+    _config: "api_config.ApiConfig",
+):
+    """Implementation for the BinhostService/UpdatePackageIndex endpoint."""
+    # Load the index file.
+    index_path = controller_util.pb2_path_to_pathlib_path(
+        input_proto.package_index_file,
+        chroot=input_proto.chroot,
+    )
+    pkgindex = binpkg.PackageIndex()
+    pkgindex.ReadFilePath(index_path)
+
+    # Set the upload location for all packages.
+    if input_proto.set_upload_location:
+        if not input_proto.uri:
+            raise ValueError("set_upload_location is True, but no uri provided")
+        parsed_uri = urllib.parse.urlparse(input_proto.uri)
+        pkgindex.SetUploadLocation(
+            gs.GetGsURL(parsed_uri.netloc, for_gsutil=True).rstrip("/"),
+            parsed_uri.path.lstrip("/"),
+        )
+
+    # Write the updated index file back to its original location.
+    pkgindex.WriteFile(index_path)
 
 
 def _SetBinhostResponse(_input_proto, output_proto, _config):
