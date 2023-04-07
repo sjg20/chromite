@@ -4,6 +4,8 @@
 
 """Unittests for CPV parsing module."""
 
+from pathlib import Path
+
 import pytest
 
 from chromite.lib.parser import package_info
@@ -36,6 +38,20 @@ def test_parse_atom():
     assert pkg.package == "bar"
     assert not pkg.version
     assert not pkg.revision
+
+
+def test_parse_path():
+    """Validate that parsing an ebuild Path."""
+    pkg = package_info.parse(Path("foo/bar/bar-1.2.3-r3.ebuild"))
+    assert pkg.category == "foo"
+    assert pkg.package == "bar"
+    assert pkg.version == "1.2.3"
+    assert pkg.revision == 3
+
+
+@pytest.mark.xfail(raises=package_info.ParseTypeError)
+def test_parse_bad_path():
+    package_info.parse(Path("not/an/ebuild.txt"))
 
 
 @pytest.mark.xfail(raises=ValueError)

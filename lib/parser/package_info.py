@@ -6,6 +6,7 @@
 
 import collections
 import functools
+from pathlib import Path
 import re
 import string
 from typing import Union
@@ -117,17 +118,22 @@ def SplitCPV(cpv, strict=True):
     return CPV(category=category, cp=cp, cpv=real_cpv, cpf=cpf, **m._asdict())
 
 
-def parse(cpv: Union[str, CPV, "PackageInfo"]):
+def parse(cpv: Union[str, Path, CPV, "PackageInfo"]):
     """Parse a package to a PackageInfo object.
 
     Args:
       cpv: Any package type. This function can parse strings, translate CPVs to a
         PackageInfo instance, and will simply return the argument if given a
-        PackageInfo instance.
+        PackageInfo instance.  If given a Path, this will treat the path as the
+        path to an ebuild.
 
     Returns:
       PackageInfo
     """
+    if isinstance(cpv, Path):
+        if not cpv.suffix == ".ebuild":
+            raise ParseTypeError(f"{cpv} must be a path to an ebuild")
+        cpv = f"{cpv.parent.parent.name}/{cpv.stem}"
     if isinstance(cpv, PackageInfo):
         return cpv
     elif isinstance(cpv, CPV):
