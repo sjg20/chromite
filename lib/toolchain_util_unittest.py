@@ -263,18 +263,14 @@ class PrepareBundleTest(cros_test_lib.RunCommandTempDirTestCase):
         self.kernel_package = "chromeos-kernel-3_18"
         self.profile_info = {"arch": "amd64"}
         self.chrome_PV = "chromeos-base/chromeos-chrome-78.0.3893.0_rc-r1"
-        self.chrome_ebuild = os.path.realpath(
-            os.path.join(
-                os.path.dirname(__file__),
-                "..",
-                "..",
-                "src",
-                "third_party",
-                "chromiumos-overlay",
-                os.path.dirname(self.chrome_PV),
-                "chromeos-chrome",
-                "%s.ebuild" % os.path.basename(self.chrome_PV),
-            )
+        self.chrome_ebuild = os.path.join(
+            self.tempdir,
+            "src",
+            "third_party",
+            "chromiumos-overlay",
+            os.path.dirname(self.chrome_PV),
+            "chromeos-chrome",
+            f"{os.path.basename(self.chrome_PV)}.ebuild",
         )
         self.chrome_pkg = package_info.parse(self.chrome_PV)
         self.glob = self.PatchObject(
@@ -1586,11 +1582,7 @@ class BundleArtifactHandlerTest(PrepareBundleTest):
         ebuild_path = self.obj._GetEbuildInfo(
             toolchain_util.constants.CHROME_PN
         ).path
-        self.WriteTempFile(
-            self.chroot.full_path(self.sysroot, ebuild_path),
-            "",
-            makedirs=True,
-        )
+        self.WriteTempFile(ebuild_path, "", makedirs=True)
 
         with self.assertRaisesRegex(
             toolchain_util.BundleArtifactsHandlerError,
