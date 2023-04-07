@@ -177,6 +177,7 @@ GROUP_BASELINE = dict(
                 "cros_healthd",
                 "nvpd",
                 "ml-core",
+                "runtime_probe",
             },
         ),
         GroupEntry(group="cdrw", gid=80, users={"cros-disks"}),
