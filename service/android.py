@@ -685,27 +685,16 @@ def FindDataCollectorArtifacts(
     for bucket in buckets:
         for arch in archs:
             for build_type in build_types:
-                # TODO(b/255854925): remove path without |android_package|.
-                # |android_package| is required to separate artifacts for bertha
-                # and cheets.
-                root_paths = [
-                    (
-                        f"{runtime_artifacts_bucket_url}/{android_package}/"
-                        f"{bucket}_{arch}_{build_type}"
-                    ),
-                    (
-                        f"{runtime_artifacts_bucket_url}/"
-                        f"{bucket}_{arch}_{build_type}"
-                    ),
-                ]
+                root_path = (
+                    f"{runtime_artifacts_bucket_url}/{android_package}/"
+                    f"{bucket}_{arch}_{build_type}"
+                )
 
-                for _, root_path in enumerate(root_paths):
-                    path = f"{root_path}_{android_version}.tar"
-                    if gs_context.Exists(path):
-                        variables[
-                            (f"{arch}_{build_type}_{bucket}").upper()
-                        ] = f"{root_path}_{version_reference}.tar"
-                        break
+                if gs_context.Exists(f"{root_path}_{android_version}.tar"):
+                    variables[
+                        (f"{arch}_{build_type}_{bucket}").upper()
+                    ] = f"{root_path}_{version_reference}.tar"
+                    break
 
     return variables
 

@@ -447,23 +447,15 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         for arch in archs:
             for build_type in build_types:
                 for runtime_data in runtime_datas:
-                    paths = [
-                        (
-                            f"{self.runtime_artifacts_bucket_url}/"
-                            f"{self.android_package}/"
-                            f"{runtime_data}_{arch}_"
-                            f"{build_type}_{android_version}.tar"
-                        ),
-                        (
-                            f"{self.runtime_artifacts_bucket_url}/"
-                            f"{runtime_data}_{arch}_"
-                            f"{build_type}_{android_version}.tar"
-                        ),
-                    ]
-                    for _, path in enumerate(paths):
-                        self.gs_mock.AddCmdResult(
-                            ["stat", "--", path], side_effect=_RaiseGSNoSuchKey
-                        )
+                    path = (
+                        f"{self.runtime_artifacts_bucket_url}/"
+                        f"{self.android_package}/"
+                        f"{runtime_data}_{arch}_"
+                        f"{build_type}_{android_version}.tar"
+                    )
+                    self.gs_mock.AddCmdResult(
+                        ["stat", "--", path], side_effect=_RaiseGSNoSuchKey
+                    )
 
     def setupMockRuntimeArtifactsPin(self, pin_version):
         """Helper to mock a runtime artifacts pin on GS."""
@@ -494,11 +486,15 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         self.setupMockRuntimeDataBuild(android_version)
 
         # Override few as existing.
-        path1 = "gs://r/ureadahead_pack_host_x86_64_user_100.tar"
-        path2 = "gs://r/packages_reference_arm_userdebug_100.tar"
-        path3 = "gs://r/gms_core_cache_arm_userdebug_100.tar"
-        path4 = "gs://r/tts_cache_arm64_user_100.tar"
-        path5 = "gs://r/dex_opt_cache_x86_user_100.tar"
+        path1 = (
+            "gs://r/android-package/ureadahead_pack_host_x86_64_user_100.tar"
+        )
+        path2 = (
+            "gs://r/android-package/packages_reference_arm_userdebug_100.tar"
+        )
+        path3 = "gs://r/android-package/gms_core_cache_arm_userdebug_100.tar"
+        path4 = "gs://r/android-package/tts_cache_arm64_user_100.tar"
+        path5 = "gs://r/android-package/dex_opt_cache_x86_user_100.tar"
 
         self.gs_mock.AddCmdResult(
             ["stat", "--", path1], stdout=_STAT_OUTPUT % path1
@@ -523,11 +519,17 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
             self.runtime_artifacts_bucket_url,
         )
 
-        expectation1 = "gs://r/ureadahead_pack_host_x86_64_user_${PV}.tar"
-        expectation2 = "gs://r/packages_reference_arm_userdebug_${PV}.tar"
-        expectation3 = "gs://r/gms_core_cache_arm_userdebug_${PV}.tar"
-        expectation4 = "gs://r/tts_cache_arm64_user_${PV}.tar"
-        expectation5 = "gs://r/dex_opt_cache_x86_user_${PV}.tar"
+        expectation1 = (
+            "gs://r/android-package/ureadahead_pack_host_x86_64_user_${PV}.tar"
+        )
+        expectation2 = (
+            "gs://r/android-package/packages_reference_arm_userdebug_${PV}.tar"
+        )
+        expectation3 = (
+            "gs://r/android-package/gms_core_cache_arm_userdebug_${PV}.tar"
+        )
+        expectation4 = "gs://r/android-package/tts_cache_arm64_user_${PV}.tar"
+        expectation5 = "gs://r/android-package/dex_opt_cache_x86_user_${PV}.tar"
 
         self.assertDictEqual(
             variables,
