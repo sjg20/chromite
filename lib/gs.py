@@ -1357,6 +1357,16 @@ wheel: <
         else:
             return self.Stat(path, **kwargs).content_length
 
+    def GetCreationTime(self, path: str, **kwargs) -> datetime.datetime:
+        """Returns the creation time of a single object."""
+        return self.Stat(path, **kwargs).creation_time
+
+    def GetCreationTimeSince(
+        self, path: str, since_date: datetime.datetime, **kwargs
+    ) -> datetime.timedelta:
+        """Returns the time since since_date of a single object."""
+        return since_date - self.GetCreationTime(path, **kwargs)
+
     def Move(self, src_path, dest_path, **kwargs):
         """Move/rename to/from GS bucket.
 

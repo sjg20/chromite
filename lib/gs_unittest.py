@@ -23,6 +23,32 @@ from chromite.lib import partial_mock
 from chromite.lib import retry_stats
 
 
+GS_PACKAGES_PATH = "gs://test/Packages"
+GS_PACKAGES_WRONG_PATH = "gs://test/Pack"
+
+STAT_DATE_FORMAT = "%a, %d %b %Y %H:%M:%S %Z"
+NOW_RAW = datetime.datetime.now()
+NOW_STRING = datetime.datetime.strftime(
+    NOW_RAW.replace(tzinfo=datetime.timezone.utc), STAT_DATE_FORMAT
+)
+
+# Need to re-convert the date string into a datetime object since timezone
+# isn't included in NOW_RAW from datetime.now().
+NOW_DATETIME = datetime.datetime.strptime(NOW_STRING, STAT_DATE_FORMAT)
+STAT_OUTPUT_NOW = f"""{GS_PACKAGES_PATH}:
+    Creation time:    {NOW_STRING}
+    Content-Language: en
+    Content-Length:   74
+    Content-Type:   application/octet-stream
+    Hash (crc32c):    BBPMPA==
+    Hash (md5):   ms+qSYvgI9SjXn8tW/5UpQ==
+    ETag:     CNCgocbmqMACEAE=
+    Generation:   1408776800850000
+    Metageneration:   1
+    """
+STAT_OUTPUT_ERR = f"No URLs matched: {GS_PACKAGES_WRONG_PATH}"
+
+
 def PatchGS(*args, **kwargs):
     """Convenience method for patching GSContext."""
     return mock.patch.object(gs.GSContext, *args, **kwargs)
@@ -325,6 +351,109 @@ class UnmockedGetSizeTest(cros_test_lib.TempDirTestCase):
 
         osutils.WriteFile(f, "f" * 10)
         self.assertEqual(ctx.GetSize(f), 10)
+
+
+class GetCreationTimeTest(AbstractGSContextTest):
+    """Test GetCreationTime functionality."""
+
+    def testBasic(self):
+        """Simple test."""
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", GS_PACKAGES_PATH], stdout=STAT_OUTPUT_NOW
+        )
+        ctx = gs.GSContext()
+        result = ctx.GetCreationTime(GS_PACKAGES_PATH)
+        self.gs_mock.assertCommandContains(["stat", "--", GS_PACKAGES_PATH])
+        self.assertEqual(result, NOW_DATETIME)
+
+    def testURlNoExist(self):
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", GS_PACKAGES_WRONG_PATH],
+            stderr=STAT_OUTPUT_ERR,
+            returncode=1,
+        )
+        ctx = gs.GSContext()
+        self.assertRaises(
+            gs.GSNoSuchKey, ctx.GetCreationTime, GS_PACKAGES_WRONG_PATH
+        )
+        self.gs_mock.assertCommandContains(
+            ["stat", "--", GS_PACKAGES_WRONG_PATH]
+        )
+
+
+class UnMockedGetCreationTimeTest(cros_test_lib.TempDirTestCase):
+    """Test GetCreationTime functionality without mocks."""
+
+    @cros_test_lib.pytestmark_network_test
+    def testGetCreationTime(self):
+        """Test getting the creation time of a file."""
+        ctx = gs.GSContext()
+        with gs.TemporaryURL("testGetCreationTime") as url:
+            self.assertRaises(gs.GSNoSuchKey, ctx.GetCreationTime, url)
+
+            ctx.CreateWithContents(url, "test file contents")
+
+            result = ctx.GetCreationTime(url)
+        self.assertIsInstance(result, datetime.datetime)
+
+
+class GetCreationTimeSinceTest(AbstractGSContextTest):
+    """Test GetCreationTimeSince functionality."""
+
+    OLDER_RAW = NOW_RAW - datetime.timedelta(days=10)
+    OLDER_STRING = datetime.datetime.strftime(
+        OLDER_RAW.replace(tzinfo=datetime.timezone.utc), STAT_DATE_FORMAT
+    )
+
+    STAT_OUTPUT_OLDER = f"""{GS_PACKAGES_PATH}:
+        Creation time:    {OLDER_STRING}
+        Content-Language: en
+        Content-Length:   74
+        Content-Type:   application/octet-stream
+        Hash (crc32c):    BBPMPA==
+        Hash (md5):   ms+qSYvgI9SjXn8tW/5UpQ==
+        ETag:     CNCgocbmqMACEAE=
+        Generation:   1408776800850000
+        Metageneration:   1
+      """
+
+    def testBasic(self):
+        """Simple test."""
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", GS_PACKAGES_PATH], stdout=self.STAT_OUTPUT_OLDER
+        )
+        ctx = gs.GSContext()
+        result = ctx.GetCreationTimeSince(GS_PACKAGES_PATH, NOW_RAW)
+        self.gs_mock.assertCommandContains(["stat", "--", GS_PACKAGES_PATH])
+        self.assertEqual(result.days, 10)
+
+    def testURlNoExist(self):
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", GS_PACKAGES_WRONG_PATH],
+            stderr=STAT_OUTPUT_ERR,
+            returncode=1,
+        )
+        ctx = gs.GSContext()
+        with self.assertRaises(gs.GSNoSuchKey):
+            ctx.GetCreationTimeSince(GS_PACKAGES_WRONG_PATH, self.OLDER_RAW)
+
+
+class UnMockedGetCreationTimeSinceTest(cros_test_lib.TempDirTestCase):
+    """Test GetCreationTimeSince functionality without mocks."""
+
+    @cros_test_lib.pytestmark_network_test
+    def testGetCreationTimeSince(self):
+        """Test getting the creation time of a file."""
+        ctx = gs.GSContext()
+        with gs.TemporaryURL("testGetCreationTime") as url:
+            with self.assertRaises(gs.GSNoSuchKey):
+                self.assertRaises(gs.GSNoSuchKey, ctx.GetCreationTimeSince, url)
+                ctx.GetCreationTimeSince(url, NOW_RAW)
+
+            ctx.CreateWithContents(url, "test file contents")
+
+            result = ctx.GetCreationTimeSince(url, NOW_RAW)
+        self.assertIsInstance(result, datetime.timedelta)
 
 
 class LSTest(AbstractGSContextTest):
