@@ -434,23 +434,41 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
     def setupMockRuntimeDataBuild(self, android_version):
         """Helper to mock a build for runtime data."""
 
-        archs = ["arm", "arm64", "x86", "x86_64"]
-        build_types = ["user", "userdebug"]
-        runtime_datas = [
+        _ARCHS = ("arm", "arm64", "x86", "x86_64")
+        _BUILD_TYPES = ("user", "userdebug")
+        _UREADAHEAD_DATA = "ureadahead_pack_host"
+        _RUNTIME_DATAS = (
             "packages_reference",
             "gms_core_cache",
-            "ureadahead_pack_host",
+            _UREADAHEAD_DATA,
             "tts_cache",
             "dex_opt_cache",
-        ]
+        )
 
-        for arch in archs:
-            for build_type in build_types:
-                for runtime_data in runtime_datas:
+        for arch in _ARCHS:
+            for build_type in _BUILD_TYPES:
+                for runtime_data in _RUNTIME_DATAS:
                     path = (
                         f"{self.runtime_artifacts_bucket_url}/"
                         f"{self.android_package}/"
                         f"{runtime_data}_{arch}_"
+                        f"{build_type}_{android_version}.tar"
+                    )
+                    self.gs_mock.AddCmdResult(
+                        ["stat", "--", path], side_effect=_RaiseGSNoSuchKey
+                    )
+
+        _BINARY_TRANSLATION_TYPES = ("houdini", "ndk", "native")
+        for arch in _ARCHS:
+            for build_type in _BUILD_TYPES:
+                for binary_translation_type in _BINARY_TRANSLATION_TYPES:
+                    if "x86" in arch and binary_translation_type == "native":
+                        continue
+
+                    path = (
+                        f"{self.runtime_artifacts_bucket_url}/"
+                        f"{self.android_package}/"
+                        f"{_UREADAHEAD_DATA}_{arch}_{binary_translation_type}_"
                         f"{build_type}_{android_version}.tar"
                     )
                     self.gs_mock.AddCmdResult(
@@ -486,6 +504,7 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         self.setupMockRuntimeDataBuild(android_version)
 
         # Override few as existing.
+        path0 = "gs://r/android-package/ureadahead_pack_host_x86_64_houdini_user_100.tar"
         path1 = (
             "gs://r/android-package/ureadahead_pack_host_x86_64_user_100.tar"
         )
@@ -496,6 +515,9 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         path4 = "gs://r/android-package/tts_cache_arm64_user_100.tar"
         path5 = "gs://r/android-package/dex_opt_cache_x86_user_100.tar"
 
+        self.gs_mock.AddCmdResult(
+            ["stat", "--", path0], stdout=_STAT_OUTPUT % path0
+        )
         self.gs_mock.AddCmdResult(
             ["stat", "--", path1], stdout=_STAT_OUTPUT % path1
         )
@@ -519,6 +541,7 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
             self.runtime_artifacts_bucket_url,
         )
 
+        expectation0 = "gs://r/android-package/ureadahead_pack_host_x86_64_houdini_user_${PV}.tar"
         expectation1 = (
             "gs://r/android-package/ureadahead_pack_host_x86_64_user_${PV}.tar"
         )
@@ -534,6 +557,7 @@ class RuntimeArtifactsTest(cros_test_lib.MockTestCase):
         self.assertDictEqual(
             variables,
             {
+                "X86_64_HOUDINI_USER_UREADAHEAD_PACK_HOST": expectation0,
                 "X86_64_USER_UREADAHEAD_PACK_HOST": expectation1,
                 "ARM_USERDEBUG_PACKAGES_REFERENCE": expectation2,
                 "ARM_USERDEBUG_GMS_CORE_CACHE": expectation3,

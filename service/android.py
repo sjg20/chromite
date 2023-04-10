@@ -672,29 +672,51 @@ def FindDataCollectorArtifacts(
     gs_context = gs.GSContext()
     variables = {}
 
-    buckets = [
-        "ureadahead_pack_host",
+    _UREADAHEAD_BUCKET = "ureadahead_pack_host"
+    _BUCKETS = (
+        # TODO(b/271894843): Remove _UREADAHEAD_BUCKET once it's no longer used.
+        _UREADAHEAD_BUCKET,
         "packages_reference",
         "gms_core_cache",
         "tts_cache",
         "dex_opt_cache",
-    ]
-    archs = ["arm", "arm64", "x86", "x86_64"]
-    build_types = ["user", "userdebug"]
+    )
+    _ARCHES = ("arm", "arm64", "x86", "x86_64")
+    _BUILD_TYPES = ("user", "userdebug")
 
-    for bucket in buckets:
-        for arch in archs:
-            for build_type in build_types:
+    for bucket in _BUCKETS:
+        for arch in _ARCHES:
+            for build_type in _BUILD_TYPES:
                 root_path = (
                     f"{runtime_artifacts_bucket_url}/{android_package}/"
                     f"{bucket}_{arch}_{build_type}"
                 )
-
                 if gs_context.Exists(f"{root_path}_{android_version}.tar"):
                     variables[
                         (f"{arch}_{build_type}_{bucket}").upper()
                     ] = f"{root_path}_{version_reference}.tar"
-                    break
+
+    _BINARY_TRANSLATION_TYPES = ("houdini", "ndk", "native")
+    # Special format for _UREADAHEAD_BUCKET.
+    for arch in _ARCHES:
+        for build_type in _BUILD_TYPES:
+            for binary_translation_type in _BINARY_TRANSLATION_TYPES:
+                if "x86" in arch and binary_translation_type == "native":
+                    # Ignore invalid format combinations.
+                    continue
+
+                root_path = (
+                    f"{runtime_artifacts_bucket_url}/{android_package}/"
+                    f"{_UREADAHEAD_BUCKET}_{arch}_{binary_translation_type}_"
+                    f"{build_type}"
+                )
+                if gs_context.Exists(f"{root_path}_{android_version}.tar"):
+                    variables[
+                        (
+                            f"{arch}_{binary_translation_type}_{build_type}_"
+                            f"{_UREADAHEAD_BUCKET}"
+                        ).upper()
+                    ] = f"{root_path}_{version_reference}.tar"
 
     return variables
 
