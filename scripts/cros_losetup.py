@@ -8,6 +8,7 @@ We have a long history of the kernel flaking when working with loopback devices,
 so this helper takes care of setting up & tearing it down reliably.
 """
 
+import logging
 from pathlib import Path
 import sys
 from typing import List, Optional
@@ -18,6 +19,46 @@ from chromite.lib import cros_build_lib
 from chromite.lib import image_lib
 from chromite.lib import osutils
 from chromite.utils import pformat
+
+
+_UDEV_RULE_TEMPLATE = """# Don't edit this file.
+# This file will be updated by chromite.
+# This rule looks for images mounted from cros checkout and ignores
+# udev processing (b/273697462 for more context).
+SUBSYSTEM!="block", GOTO="block_udev_end"
+KERNELS!="loop[0-9]*", GOTO="block_udev_end"
+ENV{DEVTYPE}=="disk", TEST!="loop/backing_file", GOTO="block_udev_end"
+ENV{DEVTYPE}=="partition", ENV{ID_PART_ENTRY_SCHEME}!="gpt", \
+    GOTO="block_udev_end"
+
+ATTRS{loop/backing_file}=="%s/*", ENV{CROS_IGNORE_LOOP_DEV}="1"
+
+ENV{CROS_IGNORE_LOOP_DEV}=="1", ENV{SYSTEMD_READY}="0", \
+    ENV{UDEV_DISABLE_PERSISTENT_STORAGE_RULES_FLAG}="1", ENV{UDISKS_IGNORE}="1"
+
+LABEL="block_udev_end"
+"""
+_UDEV_RULE_FILE = Path("/etc/udev/rules.d/99-chromite-loop-dev.rules")
+
+
+def _create_udev_loopdev_ignore_rule():
+    """Create udev rules to ignore processing cros image loop device events."""
+    if cros_build_lib.IsInsideChroot():
+        return
+
+    new_rule = _UDEV_RULE_TEMPLATE % constants.SOURCE_ROOT
+    try:
+        existing_rule = _UDEV_RULE_FILE.read_text(encoding="utf-8")
+    except FileNotFoundError:
+        existing_rule = None
+    if existing_rule == new_rule:
+        return
+
+    logging.debug(
+        "Creating udev rule to ignore loop device in %s.", _UDEV_RULE_FILE
+    )
+    _UDEV_RULE_FILE.write_text(new_rule, encoding="utf-8")
+    cros_build_lib.run(["udevadm", "control", "--reload-rules"], check=False)
 
 
 def get_parser() -> commandline.ArgumentParser:
@@ -58,6 +99,8 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
             check=False,
         )
         return result.returncode
+
+    _create_udev_loopdev_ignore_rule()
 
     if opts.subcommand == "attach":
         loop_path = image_lib.LoopbackPartitions.attach_image(opts.path)
