@@ -542,21 +542,21 @@ def ReadSymsHeader(sym_file, name_for_errors):
     """Parse the header of the symbol file
 
     The first line of the syms file will read like:
-      MODULE Linux arm F4F6FA6CCBDEF455039C8DE869C8A2F40 blkid
+        MODULE Linux arm F4F6FA6CCBDEF455039C8DE869C8A2F40 blkid
 
     https://code.google.com/p/google-breakpad/wiki/SymbolFiles
 
     Args:
-      sym_file: The symbol file to parse
-      name_for_errors: A name for error strings. Can be the name of the elf file
-          that generated the symbol file, or the name of the symbol file if the
-          symbol file has already been moved to a meaningful location.
+        sym_file: The symbol file to parse
+        name_for_errors: A name for error strings. Can be the name of the elf
+            file that generated the symbol file, or the name of the symbol file
+            if the symbol file has already been moved to a meaningful location.
 
     Returns:
-      A SymbolHeader object
+        A SymbolHeader object
 
     Raises:
-      ValueError if the first line of |sym_file| is invalid
+        ValueError if the first line of |sym_file| is invalid
     """
     with file_util.Open(sym_file, "rb") as f:
         header = f.readline().decode("utf-8").split()
@@ -584,19 +584,20 @@ def GenerateBreakpadSymbol(
     """Generate the symbols for |elf_file| using |debug_file|
 
     Args:
-      elf_file: The file to dump symbols for
-      debug_file: Split debug file to use for symbol information
-      breakpad_dir: The dir to store the output symbol file in
-      strip_cfi: Do not generate CFI data
-      sysroot: Path to the sysroot with the elf_file under it
-      num_errors: An object to update with the error count (needs a .value member)
-      found_files: A multiprocessing.managers.ListProxy list containing
-          ExpectedFiles, representing which of the "should always be present"
-          files have been processed.
-      dump_syms_cmd: Command to use for dumping symbols.
+        elf_file: The file to dump symbols for
+        debug_file: Split debug file to use for symbol information
+        breakpad_dir: The dir to store the output symbol file in
+        strip_cfi: Do not generate CFI data
+        sysroot: Path to the sysroot with the elf_file under it
+        num_errors: An object to update with the error count (needs a .value
+            member).
+        found_files: A multiprocessing.managers.ListProxy list containing
+            ExpectedFiles, representing which of the "should always be present"
+            files have been processed.
+        dump_syms_cmd: Command to use for dumping symbols.
 
     Returns:
-      The name of symbol file written out on success, or the failure count.
+        The name of symbol file written out on success, or the failure count.
     """
     assert breakpad_dir
     if num_errors is None:
@@ -750,7 +751,7 @@ def GenerateBreakpadSymbol(
             return 0
 
         # Move the dumped symbol file to the right place:
-        # /build/$BOARD/usr/lib/debug/breakpad/<module-name>/<id>/<module-name>.sym
+        # /$SYSROOT/usr/lib/debug/breakpad/<module-name>/<id>/<module-name>.sym
         header = ReadSymsHeader(temp, elf_file)
         logging.info("Dumped %s as %s : %s", elf_file, header.name, header.id)
         sym_file = os.path.join(
@@ -784,21 +785,23 @@ def GenerateBreakpadSymbols(
     once we rewrite cros_generate_breakpad_symbols in python.
 
     Args:
-      board: The board whose symbols we wish to generate
-      breakpad_dir: The full path to the breakpad directory where symbols live
-      strip_cfi: Do not generate CFI data
-      generate_count: If set, only generate this many symbols (meant for testing)
-      sysroot: The root where to find the corresponding ELFs
-      num_processes: Number of jobs to run in parallel
-      clean_breakpad: Should we `rm -rf` the breakpad output dir first; note: we
-        do not do any locking, so do not run more than one in parallel when True
-      exclude_dirs: List of dirs (relative to |sysroot|) to not search
-      file_list: Only generate symbols for files in this list. Each file must be a
-        full path (including |sysroot| prefix).
-        TODO(build): Support paths w/o |sysroot|.
+        board: The board whose symbols we wish to generate
+        breakpad_dir: The full path to the breakpad directory where symbols live
+        strip_cfi: Do not generate CFI data
+        generate_count: If set, only generate this many symbols (meant for
+            testing)
+        sysroot: The root where to find the corresponding ELFs
+        num_processes: Number of jobs to run in parallel
+        clean_breakpad: Should we `rm -rf` the breakpad output dir first; note:
+            we do not do any locking, so do not run more than one in parallel
+            when True
+        exclude_dirs: List of dirs (relative to |sysroot|) to not search
+        file_list: Only generate symbols for files in this list. Each file must
+            be a full path (including |sysroot| prefix).
+            TODO(build): Support paths w/o |sysroot|.
 
     Returns:
-      The number of errors that were encountered.
+        The number of errors that were encountered.
     """
     if sysroot is None:
         sysroot = build_target_lib.get_default_sysroot_path(board)
@@ -820,8 +823,8 @@ def GenerateBreakpadSymbols(
     logging.info("generating breakpad symbols using %s", debug_dir)
 
     # Let's locate all the debug_files and elfs first along with the debug file
-    # sizes.  This way we can start processing the largest files first in parallel
-    # with the small ones.
+    # sizes.  This way we can start processing the largest files first in
+    # parallel with the small ones.
     # If |file_list| was given, ignore all other files.
     targets = []
     for root, dirs, files in os.walk(debug_dir):
@@ -863,8 +866,8 @@ def GenerateBreakpadSymbols(
             elf_path = os.path.relpath(elf_file, sysroot)
             debug_only = elf_path in ALLOWED_DEBUG_ONLY_FILES
             if not os.path.exists(elf_file) and not debug_only:
-                # Sometimes we filter out programs from /usr/bin but leave behind
-                # the .debug file.
+                # Sometimes we filter out programs from /usr/bin but leave
+                # behind the .debug file.
                 logging.warning("Skipping missing %s", elf_file)
                 continue
 
@@ -1002,8 +1005,8 @@ def main(argv):
     )
     if ret:
         logging.error("encountered %i problem(s)", ret)
-        # Since exit(status) gets masked, clamp it to 1 so we don't inadvertently
-        # return 0 in case we are a multiple of the mask.
+        # Since exit(status) gets masked, clamp it to 1 so we don't
+        # inadvertently return 0 in case we are a multiple of the mask.
         ret = 1
 
     return ret

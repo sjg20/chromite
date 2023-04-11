@@ -123,10 +123,10 @@ class LimitFuzzingTest(cros_test_lib.TestCase):
         self.corpus = None
 
     def _Helper(self, expected_command=None):
-        """Calls LimitFuzzing and asserts fuzz_command equals |expected_command|.
+        """Call LimitFuzzing and assert fuzz_command equals |expected_command|.
 
-        If |expected| is None, then it is set to self.fuzz_command before calling
-        LimitFuzzing.
+        If |expected| is None, then it is set to self.fuzz_command before
+        calling LimitFuzzing.
         """
         if expected_command is None:
             expected_command = self.fuzz_command[:]
@@ -150,7 +150,7 @@ class LimitFuzzingTest(cros_test_lib.TestCase):
         self._Helper(expected)
 
     def testNoLimitOrCorpus(self):
-        """Tests that a limit is added when user specifies no corpus or limit."""
+        """Test a limit is added when user specifies no corpus or limit."""
         expected = self.fuzz_command + [DEFAULT_MAX_TOTAL_TIME_OPTION]
         self._Helper(expected)
 
@@ -210,7 +210,7 @@ class RunFuzzerTest(RunSysrootCommandMockTestCase):
         self._Helper()
 
     def testFuzzArgs(self):
-        """Tests that the correct command is used when fuzz_args is specified."""
+        """Test the correct command is used when fuzz_args is specified."""
         fuzz_args = [DEFAULT_MAX_TOTAL_TIME_OPTION, "-fake_arg=fake_value"]
         self.expected_command.extend(fuzz_args)
         self.fuzz_args = " ".join(fuzz_args)
@@ -294,7 +294,7 @@ class RunSysrootCommandTest(cros_test_lib.RunCommandTestCase):
     """Tests RunSysrootCommand."""
 
     def testRunSysrootCommand(self):
-        """Tests RunSysrootCommand creates a proper command to run in sysroot."""
+        """Test RunSysrootCommand creates a proper command to run in sysroot."""
         command = ["./fuzz", "-rss_limit_mb=4096"]
         sysroot_path = _SetPathToSysroot()
         cros_fuzz.RunSysrootCommand(command)
@@ -309,7 +309,7 @@ class GetBuildExtraEnvTest(cros_test_lib.TestCase):
     TEST_ENV_VAR = "TEST_VAR"
 
     def testUseAndFeaturesNotClobbered(self):
-        """Tests that values of certain environment variables are appended to."""
+        """Test values of certain environment variables are appended to."""
         vars_and_values = {"FEATURES": "foo", "USE": "bar"}
         for var, value in vars_and_values.items():
             os.environ[var] = value

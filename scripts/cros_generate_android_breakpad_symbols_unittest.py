@@ -73,8 +73,10 @@ INFO: Expansion     : 57344 bytes
             ("\n", "\n"),
             ("noise\n", "noise\n"),
             (
-                "MODULE Linux arm64 E3D562057466309CED960047D474EBF00 libssl.so\n",
-                "MODULE Linux arm64 E3D562057466309CED960047D474EBF00 libssl.so\n",
+                "MODULE Linux arm64 "
+                "E3D562057466309CED960047D474EBF00 libssl.so\n",
+                "MODULE Linux arm64 "
+                "E3D562057466309CED960047D474EBF00 libssl.so\n",
             ),
             (
                 "FUNC dcfc a8 0 dtls1_discard_fragment_body\n",

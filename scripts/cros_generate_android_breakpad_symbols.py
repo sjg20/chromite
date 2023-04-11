@@ -45,13 +45,14 @@ def FindExpansionOffset(unpack_result):
     Will return 0 if no adjustment is needed.
 
     Args:
-      unpack_result: CompletedProcess from the relocation_packer command.
+        unpack_result: CompletedProcess from the relocation_packer command.
 
     Returns:
-      Integer offset to adjust symbols by. May be 0.
+        Integer offset to adjust symbols by. May be 0.
 
     Raises:
-      OffsetDiscoveryError if the unpack succeeds, but we can't parse the output.
+        OffsetDiscoveryError: if the unpack succeeds, but we can't parse the
+            output.
     """
     if unpack_result.returncode != 0:
         return 0
@@ -81,18 +82,18 @@ def _AdjustLineSymbolOffset(line, offset):
     """Adjust the symbol offset for one line of a breakpad file.
 
     Args:
-      line: One line of the file.
-      offset: int to adjust the symbol by.
+        line: One line of the file.
+        offset: int to adjust the symbol by.
 
     Returns:
-      The adjusted line, or original line if there is no change.
+        The adjusted line, or original line if there is no change.
     """
     for regexp in ADDRESS_REGEXPS:
         m = regexp.search(line)
         if m:
             address = int(m.group(1), 16)
 
-            # We ignore 0 addresses, since the zero's are fillers for unknowns.
+            # We ignore 0 addresses, since the zeros are fillers for unknowns.
             if address:
                 address += offset
 
@@ -109,8 +110,8 @@ def _AdjustSymbolOffset(breakpad_file, offset):
     Updates the file in place.
 
     Args:
-      breakpad_file: File to read and update in place.
-      offset: Integer to move symbols by.
+        breakpad_file: File to read and update in place.
+        offset: Integer to move symbols by.
     """
     logging.info(
         "Adjusting symbols in %s with offset %d.", breakpad_file, offset
@@ -126,8 +127,8 @@ def _UnpackGenerateBreakpad(elf_file, *args, **kwargs):
     """Unpack Android relocation symbols, and GenerateBreakpadSymbol
 
     This method accepts exactly the same arguments as
-    cros_generate_breakpad_symbols.GenerateBreakpadSymbol, except that it requires
-    elf_file, and fills in dump_sym_cmd.
+    cros_generate_breakpad_symbols.GenerateBreakpadSymbol, except that it
+    requires elf_file, and fills in dump_sym_cmd.
 
     Args:
         elf_file: Name of the file to generate breakpad symbols for.
@@ -168,11 +169,11 @@ def GenerateBreakpadSymbols(breakpad_dir, symbols_dir):
     """Generate symbols for all binaries in symbols_dir.
 
     Args:
-      breakpad_dir: The full path in which to write out breakpad symbols.
-      symbols_dir: The full path to the binaries to process from.
+        breakpad_dir: The full path in which to write out breakpad symbols.
+        symbols_dir: The full path to the binaries to process from.
 
     Returns:
-      The number of errors that were encountered.
+        The number of errors that were encountered.
     """
     osutils.SafeMakedirs(breakpad_dir)
     logging.info("generating breakpad symbols from %s", symbols_dir)
@@ -205,8 +206,8 @@ def ProcessSymbolsZip(zip_archive, breakpad_dir):
     expected in the zip.
 
     Args:
-      zip_archive: Name of the zip file to process.
-      breakpad_dir: Root directory for writing out breakpad files.
+        zip_archive: Name of the zip file to process.
+        breakpad_dir: Root directory for writing out breakpad files.
     """
     with osutils.TempDir(prefix="extracted-") as extract_dir:
         logging.info("Extracting %s into %s", zip_archive, extract_dir)

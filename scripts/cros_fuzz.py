@@ -9,34 +9,34 @@ Run "cros_fuzz" in the chroot for a list of command or "cros_fuzz $COMMAND
 can perform:
 
 coverage: Generate a coverage report for a given fuzzer (specified by "--fuzzer"
-  option). You almost certainly want to specify the package to build (using
-  the "--package" option) so that a coverage build is done, since a coverage
-  build is needed to generate a report. If your fuzz target is running on
-  ClusterFuzz already, you can use the "--download" option to download the
-  corpus from ClusterFuzz. Otherwise, you can use the "--corpus" option to
-  specify the path of the corpus to run the fuzzer on and generate a report.
-  The corpus will be copied to the sysroot so that the fuzzer can use it.
-  Note that "--download" and "--corpus" are mutually exclusive.
+    option). You almost certainly want to specify the package to build (using
+    the "--package" option) so that a coverage build is done, since a coverage
+    build is needed to generate a report. If your fuzz target is running on
+    ClusterFuzz already, you can use the "--download" option to download the
+    corpus from ClusterFuzz. Otherwise, you can use the "--corpus" option to
+    specify the path of the corpus to run the fuzzer on and generate a report.
+    The corpus will be copied to the sysroot so that the fuzzer can use it.
+    Note that "--download" and "--corpus" are mutually exclusive.
 
 reproduce: Runs the fuzzer specified by the "--fuzzer" option on a testcase
   (path specified by the "--testcase" argument). Optionally does a build when
-  the "--package" option is used. The type of build can be specified using the
+    the "--package" option is used. The type of build can be specified using the
   "--build_type" argument.
 
 download: Downloads the corpus from ClusterFuzz of the fuzzer specified by the
   "--fuzzer" option. The path of the directory the corpus directory is
-  downloaded to can be specified using the "--directory" option.
+    downloaded to can be specified using the "--directory" option.
 
 shell: Sets up the sysroot for fuzzing and then chroots into the sysroot giving
-  you a shell that is ready to fuzz.
+    you a shell that is ready to fuzz.
 
 setup: Sets up the sysroot for fuzzing (done prior to doing "reproduce", "shell"
-  and "coverage" commands).
+    and "coverage" commands).
 
 cleanup: Undoes "setup".
 
 Note that cros_fuzz will print every shell command it runs if you set the
-log-level to debug ("--log-level debug"). Otherwise it will print commands that
+log-level to debug ("--log-level debug"). Otherwise, it will print commands that
 fail.
 """
 
@@ -82,7 +82,7 @@ DEFAULT_PROFRAW_PATH = "/default.profraw"
 # 0 runs means execute everything in the corpus and do no mutations.
 RUNS_DEFAULT_VALUE = 0
 # An arbitrary but short amount of time to run a fuzzer to get some coverage
-# data (when a corpus hasn't been provided and we aren't told to download one.
+# data (when a corpus hasn't been provided and we aren't told to download one).
 MAX_TOTAL_TIME_DEFAULT_VALUE = 30
 
 
@@ -105,9 +105,9 @@ class SysrootPath(object):
     Useful for dealing with paths that we must interact with when chrooted into
     the sysroot and outside of it.
 
-    For example, if we need to interact with the "/tmp" directory of the sysroot,
-    SysrootPath('/tmp').sysroot returns the path of the directory if we are in
-    chrooted into the sysroot, i.e. "/tmp".
+    For example, if we need to interact with the "/tmp" directory of the
+    sysroot, SysrootPath('/tmp').sysroot returns the path of the directory if we
+    are in chrooted into the sysroot, i.e. "/tmp".
 
     SysrootPath('/tmp').chroot returns the path of the directory when in the
     cros_sdk i.e. SYSROOT_DIRECTORY + "/tmp" (this will probably be
@@ -121,7 +121,7 @@ class SysrootPath(object):
         """Constructor.
 
         Args:
-          path: An absolute path representing something in the sysroot.
+            path: An absolute path representing something in the sysroot.
         """
 
         assert path.startswith("/")
@@ -134,10 +134,10 @@ class SysrootPath(object):
         """Sets path_to_sysroot
 
         Args:
-          board: The board we will use for our sysroot.
+            board: The board we will use for our sysroot.
 
         Returns:
-          The path to the sysroot (the value of path_to_sysroot).
+            The path to the sysroot (the value of path_to_sysroot).
         """
         cls.path_to_sysroot = build_target_lib.get_default_sysroot_path(board)
         return cls.path_to_sysroot
@@ -147,7 +147,7 @@ class SysrootPath(object):
         """Get the path of the object in the Chrome OS SDK chroot.
 
         Returns:
-          The path this object represents when chrooted into the sysroot.
+            The path this object represents when chrooted into the sysroot.
         """
         assert (
             self.path_to_sysroot is not None
@@ -159,7 +159,7 @@ class SysrootPath(object):
         """Get the path of the object when in the sysroot.
 
         Returns:
-          The path this object represents when in the Chrome OS SDK .
+            The path this object represents when in the Chrome OS SDK .
         """
         return os.path.join("/", *self.path_list)
 
@@ -168,23 +168,24 @@ class SysrootPath(object):
         """Is a path in the sysroot.
 
         Args:
-          path: The path we are checking is in the sysroot.
+            path: The path we are checking is in the sysroot.
 
         Returns:
-          True if path is within the sysroot's path in the chroot.
+            True if path is within the sysroot's path in the chroot.
         """
         assert cls.path_to_sysroot
         return path.startswith(cls.path_to_sysroot)
 
     @classmethod
     def FromChrootPathInSysroot(cls, path):
-        """Converts a chroot-relative path that is in sysroot into sysroot-relative.
+        """Converts a chroot-relative path in sysroot into sysroot-relative.
 
         Args:
-          path: The chroot-relative path we are converting to sysroot relative.
+            path: The chroot-relative path we are converting to sysroot
+                relative.
 
         Returns:
-          The sysroot relative version of |path|.
+            The sysroot relative version of |path|.
         """
         assert cls.IsPathInSysroot(path)
         common_prefix = os.path.commonprefix([cls.path_to_sysroot, path])
@@ -197,12 +198,12 @@ def GetScriptStoragePath(relative_path):
     Get a path of a directory this script will store things in.
 
     Args:
-      relative_path: The path relative to the root of the script storage
-        directory.
+        relative_path: The path relative to the root of the script storage
+            directory.
 
     Returns:
-      The SysrootPath representing absolute path of |relative_path| in the script
-      storage directory.
+        The SysrootPath representing absolute path of |relative_path| in the
+        script storage directory.
     """
     path = os.path.join(SCRIPT_STORAGE_PATH, relative_path)
     return SysrootPath(path)
@@ -212,11 +213,11 @@ def GetSysrootPath(path):
     """Get the chroot-relative path of a path in the sysroot.
 
     Args:
-      path: An absolute path in the sysroot that we will get the path in the
-        chroot for.
+        path: An absolute path in the sysroot that we will get the path in the
+            chroot for.
 
     Returns:
-      The chroot-relative path of |path| in the sysroot.
+        The chroot-relative path of |path| in the sysroot.
     """
     return SysrootPath(path).chroot
 
@@ -225,10 +226,10 @@ def GetCoverageDirectory(fuzzer):
     """Get a coverage report directory for a fuzzer
 
     Args:
-      fuzzer: The fuzzer to get the coverage report directory for.
+        fuzzer: The fuzzer to get the coverage report directory for.
 
     Returns:
-      The location of the coverage report directory for the |fuzzer|.
+        The location of the coverage report directory for the |fuzzer|.
     """
     relative_path = os.path.join(COVERAGE_REPORT_DIRECTORY_NAME, fuzzer)
     return GetScriptStoragePath(relative_path)
@@ -238,10 +239,10 @@ def GetFuzzerSysrootPath(fuzzer):
     """Get the path in the sysroot of a fuzzer.
 
     Args:
-      fuzzer: The fuzzer to get the path of.
+        fuzzer: The fuzzer to get the path of.
 
     Returns:
-      The path of |fuzzer| in the sysroot.
+        The path of |fuzzer| in the sysroot.
     """
     return SysrootPath(os.path.join("/", "usr", "libexec", "fuzzers", fuzzer))
 
@@ -250,10 +251,10 @@ def GetProfdataPath(fuzzer):
     """Get the profdata file of a fuzzer.
 
     Args:
-      fuzzer: The fuzzer to get the profdata file of.
+        fuzzer: The fuzzer to get the profdata file of.
 
     Returns:
-      The path of the profdata file that should be used by |fuzzer|.
+        The path of the profdata file that should be used by |fuzzer|.
     """
     return GetScriptStoragePath("%s.profdata" % fuzzer)
 
@@ -262,8 +263,8 @@ def GetPathForCopy(parent_directory, chroot_path):
     """Returns a path in the script storage directory to copy chroot_path.
 
     Returns a SysrootPath representing the location where |chroot_path| should
-    copied. This path will be in the parent_directory which will be in the script
-    storage directory.
+    be copied. This path will be in the parent_directory which will be in the
+    script storage directory.
     """
     basename = os.path.basename(chroot_path)
     return GetScriptStoragePath(os.path.join(parent_directory, basename))
@@ -272,21 +273,22 @@ def GetPathForCopy(parent_directory, chroot_path):
 def CopyCorpusToSysroot(src_corpus_path):
     """Copies corpus into the sysroot.
 
-    Copies corpus into the sysroot. Doesn't copy if corpus is already in sysroot.
+    Copies corpus into the sysroot. Doesn't copy if corpus is already in
+    sysroot.
 
     Args:
-      src_corpus_path: A path (in the chroot) to a corpus that will be copied into
-        sysroot.
+        src_corpus_path: A path (in the chroot) to a corpus that will be copied
+            into sysroot.
 
     Returns:
-      The path in the sysroot that the corpus was copied to.
+        The path in the sysroot that the corpus was copied to.
     """
     if src_corpus_path is None:
         return None
 
     if SysrootPath.IsPathInSysroot(src_corpus_path):
-        # Don't copy if |src_testcase_path| is already in sysroot. Just return it in
-        # the format expected by the caller.
+        # Don't copy if |src_testcase_path| is already in sysroot. Just return
+        # it in the format expected by the caller.
         return SysrootPath(src_corpus_path)
 
     dest_corpus_path = GetPathForCopy(CORPUS_DIRECTORY_NAME, src_corpus_path)
@@ -302,15 +304,15 @@ def CopyTestcaseToSysroot(src_testcase_path):
     sysroot.
 
     Args:
-      src_testcase_path: A path (in the chroot) to a testcase that will be copied
-        into sysroot.
+        src_testcase_path: A path (in the chroot) to a testcase that will be
+            copied into sysroot.
 
     Returns:
-      The path in the sysroot that the testcase was copied to.
+        The path in the sysroot that the testcase was copied to.
     """
     if SysrootPath.IsPathInSysroot(src_testcase_path):
-        # Don't copy if |src_testcase_path| is already in sysroot. Just return it in
-        # the format expected by the caller.
+        # Don't copy if |src_testcase_path| is already in sysroot. Just return
+        # it in the format expected by the caller.
         return SysrootPath(src_testcase_path)
 
     dest_testcase_path = GetPathForCopy(
@@ -330,11 +332,11 @@ def sudo_run(*args, **kwargs):
     default.
 
     Args:
-      *args: Positional arguments to pass to cros_build_lib.sudo_run.
-      *kwargs: Keyword arguments to pass to cros_build_lib.sudo_run.
+        *args: Positional arguments to pass to cros_build_lib.sudo_run.
+        **kwargs: Keyword arguments to pass to cros_build_lib.sudo_run.
 
     Returns:
-      The value returned by calling cros_build_lib.sudo_run.
+        The value returned by calling cros_build_lib.sudo_run.
     """
     kwargs.setdefault("debug_level", logging.DEBUG)
     return cros_build_lib.sudo_run(*args, **kwargs)
@@ -344,11 +346,11 @@ def GetLibFuzzerOption(option_name, option_value):
     """Gets the libFuzzer command line option with the specified name and value.
 
     Args:
-      option_name: The name of the libFuzzer option.
-      option_value: The value of the libFuzzer option.
+        option_name: The name of the libFuzzer option.
+        option_value: The value of the libFuzzer option.
 
     Returns:
-      The libFuzzer option composed of |option_name| and |option_value|.
+        The libFuzzer option composed of |option_name| and |option_value|.
     """
     return "-%s=%s" % (option_name, option_value)
 
@@ -365,14 +367,14 @@ def IsOptionLimit(option):
 def LimitFuzzing(fuzz_command, corpus):
     """Limits how long fuzzing will go if unspecified.
 
-    Adds a reasonable limit on how much fuzzing will be done unless there already
-    is some kind of limit. Mutates fuzz_command.
+    Adds a reasonable limit on how much fuzzing will be done unless there
+    already is some kind of limit. Mutates fuzz_command.
 
     Args:
-      fuzz_command: A command to run a fuzzer. Used to determine if a limit needs
-        to be set. Mutated if it is needed to specify a limit.
-      corpus: The corpus that will be passed to the fuzzer. If not None then
-        fuzzing is limited by running everything in the corpus once.
+        fuzz_command: A command to run a fuzzer. Used to determine if a limit
+            needs to be set. Mutated if it is needed to specify a limit.
+        corpus: The corpus that will be passed to the fuzzer. If not None then
+            fuzzing is limited by running everything in the corpus once.
     """
     if any(IsOptionLimit(x) for x in fuzz_command[1:]):
         # Don't do anything if there is already a limit.
@@ -398,16 +400,16 @@ def LimitFuzzing(fuzz_command, corpus):
 def GetFuzzExtraEnv(extra_options=None):
     """Gets extra_env for fuzzing.
 
-    Gets environment varaibles and values for running libFuzzer. Sets defaults and
-    allows user to specify extra sanitizer options.
+    Gets environment variables and values for running libFuzzer. Sets defaults
+    and allows user to specify extra sanitizer options.
 
     Args:
-      extra_options: A dict containing sanitizer options to set in addition to the
-        defaults.
+        extra_options: A dict containing sanitizer options to set in addition to
+            the defaults.
 
     Returns:
-      A dict containing environment variables and their values that can be used in
-      the environment libFuzzer runs in.
+        A dict containing environment variables and their values that can be
+        used in the environment libFuzzer runs in.
     """
     if extra_options is None:
         extra_options = {}
@@ -438,13 +440,13 @@ def RunFuzzer(
     """Runs the fuzzer while chrooted into the sysroot.
 
     Args:
-      fuzzer: The fuzzer to run.
-      corpus_path: A path to a corpus (not necessarily in the sysroot) to run the
-        fuzzer on.
-      fuzz_args: Additional arguments to pass to the fuzzer when running it.
-      testcase_path: A path to a testcase (not necessarily in the sysroot) to run
-        the fuzzer on.
-      crash_expected: Is it normal for the fuzzer to crash on this run?
+        fuzzer: The fuzzer to run.
+        corpus_path: A path to a corpus (not necessarily in the sysroot) to run
+            the fuzzer on.
+        fuzz_args: Additional arguments to pass to the fuzzer when running it.
+        testcase_path: A path to a testcase (not necessarily in the sysroot) to
+            run the fuzzer on.
+        crash_expected: Is it normal for the fuzzer to crash on this run?
     """
     logging.info("Running fuzzer: %s", fuzzer)
     fuzzer_sysroot_path = GetFuzzerSysrootPath(fuzzer)
@@ -460,9 +462,9 @@ def RunFuzzer(
         fuzz_command.append(corpus_path)
 
     if crash_expected:
-        # Don't return nonzero when fuzzer OOMs, leaks, or timesout, since we don't
-        # want an exception in those cases. The user may be trying to reproduce
-        # those issues.
+        # Don't return nonzero when fuzzer OOMs, leaks, or timesout, since we
+        # don't want an exception in those cases. The user may be trying to
+        # reproduce those issues.
         fuzz_command += ["-error_exitcode=0", "-timeout_exitcode=0"]
 
         # We must set exitcode=0 or else the fuzzer will return nonzero on
@@ -481,7 +483,7 @@ def MergeProfraw(fuzzer):
     """Merges profraw file from a fuzzer and creates a profdata file.
 
     Args:
-      fuzzer: The fuzzer to merge the profraw file from.
+        fuzzer: The fuzzer to merge the profraw file from.
     """
     profdata_path = GetProfdataPath(fuzzer)
     command = [
@@ -501,11 +503,11 @@ def GenerateCoverageReport(fuzzer, shared_libraries):
     """Generates an HTML coverage report from a fuzzer run.
 
     Args:
-      fuzzer: The fuzzer to generate the coverage report for.
-      shared_libraries: Libraries loaded dynamically by |fuzzer|.
+        fuzzer: The fuzzer to generate the coverage report for.
+        shared_libraries: Libraries loaded dynamically by |fuzzer|.
 
     Returns:
-      The path of the coverage report.
+        The path of the coverage report.
     """
     fuzzer_path = GetFuzzerSysrootPath(fuzzer).chroot
     command = ["llvm-cov", "show", "-object", fuzzer_path]
@@ -527,14 +529,15 @@ def GenerateCoverageReport(fuzzer, shared_libraries):
 def GetSharedLibraries(binary_path):
     """Gets the shared libraries used by a binary.
 
-    Gets the shared libraries used by the binary. Based on GetSharedLibraries from
-    src/tools/code_coverage/coverage_utils.py in Chromium.
+    Gets the shared libraries used by the binary. Based on GetSharedLibraries
+    from src/tools/code_coverage/coverage_utils.py in Chromium.
 
     Args:
-      binary_path: The path to the binary we want to find the shared libraries of.
+        binary_path: The path to the binary we want to find the shared libraries
+            of.
 
     Returns:
-      The shared libraries used by |binary_path|.
+        The shared libraries used by |binary_path|.
     """
     logging.info("Finding shared libraries for targets (if any).")
     shared_libraries = []
@@ -554,7 +557,8 @@ def GetSharedLibraries(binary_path):
         )
 
         if IsInstrumentedWithClangCoverage(shared_library_path):
-            # Do not add non-instrumented libraries. Otherwise, llvm-cov errors out.
+            # Do not add non-instrumented libraries. Otherwise, llvm-cov errors
+            # out.
             shared_libraries.append(shared_library_path)
 
     logging.debug(
@@ -570,11 +574,11 @@ def IsInstrumentedWithClangCoverage(binary_path):
     """Determines if a binary is instrumented with clang source based coverage.
 
     Args:
-      binary_path: The path of the binary (executable or library) we are checking
-        is instrumented with clang source based coverage.
+        binary_path: The path of the binary (executable or library) we are
+            checking is instrumented with clang source based coverage.
 
     Returns:
-      True if the binary is instrumented with clang source based coverage.
+        True if the binary is instrumented with clang source based coverage.
     """
     with open(binary_path, "rb") as file_handle:
         elf_file = ELFFile(file_handle)
@@ -587,12 +591,12 @@ def RunFuzzerAndGenerateCoverageReport(fuzzer, corpus, fuzz_args):
     Gets a coverage report for a fuzzer.
 
     Args:
-      fuzzer: The fuzzer to run and generate the coverage report for.
-      corpus: The path to a corpus to run the fuzzer on.
-      fuzz_args: Additional arguments to pass to the fuzzer.
+        fuzzer: The fuzzer to run and generate the coverage report for.
+        corpus: The path to a corpus to run the fuzzer on.
+        fuzz_args: Additional arguments to pass to the fuzzer.
 
     Returns:
-      The path to the coverage report.
+        The path to the coverage report.
     """
     corpus_path = CopyCorpusToSysroot(corpus)
     if corpus_path:
@@ -613,7 +617,7 @@ def RunSysrootCommand(command, **kwargs):
         **kwargs: Extra arguments to pass to cros_build_lib.sudo_run.
 
     Returns:
-      The result of a call to cros_build_lib.sudo_run.
+        The result of a call to cros_build_lib.sudo_run.
     """
     command = ["chroot", SysrootPath.path_to_sysroot] + command
     return sudo_run(command, **kwargs)
@@ -623,10 +627,10 @@ def GetBuildExtraEnv(build_type):
     """Gets the extra_env for building a package.
 
     Args:
-      build_type: The type of build we want to do.
+        build_type: The type of build we want to do.
 
     Returns:
-      The extra_env to use when building.
+        The extra_env to use when building.
     """
     if build_type is None:
         build_type = BuildType.ASAN
@@ -647,8 +651,8 @@ def GetBuildExtraEnv(build_type):
     if build_type == BuildType.COVERAGE:
         # We must use ASan when doing coverage builds.
         use_flags.append(BuildType.ASAN)
-        # Use noclean so that a coverage report can be generated based on the source
-        # code.
+        # Use noclean so that a coverage report can be generated based on the
+        # source code.
         features_flags.append("noclean")
 
     return {
@@ -661,9 +665,10 @@ def BuildPackage(package, board, build_type):
     """Builds a package on a specified board.
 
     Args:
-      package: The package to build. Nothing is built if None.
-      board: The board to build the package on.
-      build_type: The type of the build to do (e.g. asan, msan, ubsan, coverage).
+        package: The package to build. Nothing is built if None.
+        board: The board to build the package on.
+        build_type: The type of the build to do (e.g. asan, msan, ubsan,
+            coverage).
     """
     if package is None:
         return
@@ -683,8 +688,8 @@ def BuildPackage(package, board, build_type):
         command += ["--no-usepkg"]
 
     # Print the output of the build command. Do this because it is familiar to
-    # devs and we don't want to leave them not knowing about the build's progress
-    # for a long time.
+    # devs and we don't want to leave them not knowing about the build's
+    # progress for a long time.
     cros_build_lib.run(command, extra_env=extra_env)
 
 
@@ -696,15 +701,15 @@ def DownloadFuzzerCorpus(fuzzer, dest_directory=None):
     if permission to read from bucket is denied.
 
     Args:
-      fuzzer: The name of the fuzzer who's corpus we want to download.
-      dest_directory: The directory to download the corpus to.
+        fuzzer: The name of the fuzzer whose corpus we want to download.
+        dest_directory: The directory to download the corpus to.
 
     Returns:
-      The path to the downloaded corpus.
+        The path to the downloaded corpus.
 
     Raises:
-      gs.NoSuchKey: A corpus for the fuzzer doesn't exist.
-      gs.GSCommandError: The corpus failed to download for another reason.
+        gs.NoSuchKey: A corpus for the fuzzer doesn't exist.
+        gs.GSCommandError: The corpus failed to download for another reason.
     """
     if not fuzzer.startswith("chromeos_"):
         # ClusterFuzz internally appends "chromeos_" to chromeos targets' names.
@@ -743,7 +748,8 @@ def DownloadFuzzerCorpus(fuzzer, dest_directory=None):
     # Try to authenticate if we were denied permission to access the corpus.
     except gs.GSCommandError as exception:
         logging.error(
-            "gsutil failed to download the corpus. You may need to log in. See:\n"
+            "gsutil failed to download the corpus. You may need to log in. "
+            "See:\n"
             "https://chromium.googlesource.com/chromiumos/docs/+/HEAD/gsutil.md"
             "#setup\n"
             "for instructions on doing this."
@@ -757,16 +763,16 @@ def Reproduce(fuzzer, testcase_path):
     """Runs a fuzzer in the sysroot on a testcase.
 
     Args:
-      fuzzer: The fuzzer to run.
-      testcase_path: The path (not necessarily in the sysroot) of the testcase to
-        run the fuzzer on.
+        fuzzer: The fuzzer to run.
+        testcase_path: The path (not necessarily in the sysroot) of the testcase
+            to run the fuzzer on.
     """
     testcase_sysroot_path = CopyTestcaseToSysroot(testcase_path).sysroot
     RunFuzzer(fuzzer, testcase_path=testcase_sysroot_path, crash_expected=True)
 
 
 def SetUpSysrootForFuzzing():
-    """Sets up the the sysroot for fuzzing
+    """Sets up the sysroot for fuzzing
 
     Prepares the sysroot for fuzzing. Idempotent.
     """
@@ -833,8 +839,8 @@ class ToolManager(object):
             ["cp", self.ASAN_SYMBOLIZE_PATH, self.asan_symbolize_sysroot_path]
         )
         # Install the LLVM binaries.
-        # TODO(metzman): Build these tools so that we don't mess up when board is
-        # for a different ISA.
+        # TODO(metzman): Build these tools so that we don't mess up when board
+        #   is for a different ISA.
         for llvm_binary in self._GetLLVMBinaries():
             llvm_binary.Install()
 
@@ -847,7 +853,7 @@ class ToolManager(object):
             llvm_binary.Uninstall()
 
     def _GetLLVMBinaries(self):
-        """Creates LllvmBinary objects for each binary name in LLVM_BINARY_NAMES."""
+        """Creates LlvmBinary objects for each binary in LLVM_BINARY_NAMES."""
         return [LlvmBinary(x) for x in self.LLVM_BINARY_NAMES]
 
 
@@ -881,8 +887,8 @@ class LlvmBinary(object):
 
         Sets up an llvm binary in the sysroot so that it can be run there.
         """
-        # Create a directory for installing |binary| and all of its dependencies in
-        # the sysroot.
+        # Create a directory for installing |binary| and all of its dependencies
+        # in the sysroot.
         binary_rel_path = ["usr", "bin", self.binary]
         binary_chroot_path = os.path.join("/", *binary_rel_path)
         if not os.path.exists(binary_chroot_path):
@@ -922,7 +928,8 @@ class LlvmBinary(object):
 class DeviceManager(object):
     """Class that creates or removes devices from /dev in sysroot.
 
-    SetUp and CleanUp methods are idempotent. Both are safe to call at any point.
+    SetUp and CleanUp methods are idempotent. Both are safe to call at any
+    point.
     """
 
     DEVICE_MKNOD_PARAMS = {
@@ -943,8 +950,8 @@ class DeviceManager(object):
     def SetUp(self):
         """Sets up devices in the sysroot's /dev.
 
-        Creates /dev/null, /dev/random, and /dev/urandom. If they already exist then
-        recreates them.
+        Creates /dev/null, /dev/random, and /dev/urandom. If they already exist
+        then recreates them.
         """
         self.CleanUp()
         osutils.SafeMakedirsNonRoot(self.dev_path_chroot)
@@ -1018,10 +1025,10 @@ def StripFuzzerPrefixes(fuzzer_name):
     accident.
 
     Args:
-      fuzzer_name: The fuzzer who's name may contain prefixes.
+        fuzzer_name: The fuzzer whose name may contain prefixes.
 
     Returns:
-      The name of the fuzz target without prefixes.
+        The name of the fuzz target without prefixes.
     """
     initial_name = fuzzer_name
 
@@ -1037,8 +1044,8 @@ def StripFuzzerPrefixes(fuzzer_name):
 
     if initial_name != fuzzer_name:
         logging.warning(
-            "%s contains a prefix from ClusterFuzz (one or more of %s) that is not "
-            "part of the fuzzer's name. Interpreting --fuzzer as %s.",
+            "%s contains a prefix from ClusterFuzz (one or more of %s) that is "
+            "not part of the fuzzer's name. Interpreting --fuzzer as %s.",
             initial_name,
             clusterfuzz_prefixes,
             fuzzer_name,
@@ -1054,7 +1061,7 @@ def ExecuteShellCommand():
     spawns in the sysroot.
 
     Returns:
-      The exit code of the shell command.
+        The exit code of the shell command.
     """
     SetUpSysrootForFuzzing()
     return EnterSysrootShell()
@@ -1086,18 +1093,19 @@ def ExecuteCoverageCommand(options):
     with source based coverage.
 
     Args:
-      options: The parsed arguments passed to this program.
+        options: The parsed arguments passed to this program.
     """
     BuildPackage(options.package, options.board, BuildType.COVERAGE)
 
     fuzzer = StripFuzzerPrefixes(options.fuzzer)
     fuzzer_sysroot_path = GetFuzzerSysrootPath(fuzzer)
     if not IsInstrumentedWithClangCoverage(fuzzer_sysroot_path.chroot):
-        # Don't run the fuzzer if it isn't instrumented with source based coverage.
-        # Quit and let the user know how to build the fuzzer properly.
+        # Don't run the fuzzer if it isn't instrumented with source based
+        # coverage. Quit and let the user know how to build the fuzzer properly.
         cros_build_lib.Die(
-            "%s is not instrumented with source based coverage.\nSpecify --package "
-            'to do a coverage build or build with USE flag: "coverage".',
+            "%s is not instrumented with source based coverage.\nSpecify "
+            "--package to do a coverage build or build with USE flag: "
+            '"coverage".',
             fuzzer,
         )
 
@@ -1136,7 +1144,7 @@ def ExecuteReproduceCommand(options):
     May build the fuzzer before running.
 
     Args:
-      options: The parsed arguments passed to this program.
+        options: The parsed arguments passed to this program.
     """
     if options.build_type and not options.package:
         raise Exception(
@@ -1168,7 +1176,7 @@ def InstallBaseDependencies(options):
     """Installs the base packages needed to chroot in board sysroot.
 
     Args:
-      options: The parsed arguments passed to this program.
+        options: The parsed arguments passed to this program.
     """
     package = "virtual/implicit-system"
     if not portage_util.IsPackageInstalled(
@@ -1182,11 +1190,11 @@ def ParseArgs(argv):
     """Parses program arguments.
 
     Args:
-      argv: The program arguments we want to parse.
+        argv: The program arguments we want to parse.
 
     Returns:
-      An options object which will tell us which command to run and which options
-      to use for that command.
+        An options object which will tell us which command to run and which
+        options to use for that command.
     """
     parser = commandline.ArgumentParser(description=__doc__)
 
@@ -1277,10 +1285,10 @@ def main(argv):
     """Parses arguments and executes a command.
 
     Args:
-      argv: The prorgram arguments.
+        argv: The program arguments.
 
     Returns:
-      0 on success. Non-zero on failure.
+        0 on success. Non-zero on failure.
     """
     cros_build_lib.AssertInsideChroot()
     options = ParseArgs(argv)

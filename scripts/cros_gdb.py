@@ -67,11 +67,11 @@ class GdbEarlyExitError(GdbException):
 
 
 class GdbCannotDetectBoardError(GdbException):
-    """Raised when board isn't specified and can't be automatically determined."""
+    """Board isn't specified and can't be automatically determined."""
 
 
 class GdbSimpleChromeBinaryError(GdbException):
-    """Raised when none or multiple chrome binaries are under out_${board} dir."""
+    """None or multiple chrome binaries are under out_${board} dir."""
 
 
 class BoardSpecificGdb(object):
@@ -182,8 +182,8 @@ To install the debug symbols for all available packages, run:
                         target_binary = os.path.join(root, f)
                     else:
                         raise GdbSimpleChromeBinaryError(
-                            "There are multiple %s under %s. Please specify the path to "
-                            "the binary via --binary"
+                            "There are multiple %s under %s. Please specify "
+                            "the path to the binary via --binary"
                             % (binary_name, output_dir)
                         )
         if target_binary is None:
@@ -251,9 +251,9 @@ To install the debug symbols for all available packages, run:
                 "Cannot find file %s (in sysroot)." % sysroot_inf_cmd
             )
 
-        # Check to see if inf_cmd is stripped, and if so, check to see if debug file
-        # exists.  If not, tell user and give them the option of quitting & getting
-        # the debug info.
+        # Check to see if inf_cmd is stripped, and if so, check to see if debug
+        # file exists.  If not, tell user and give them the option of quitting &
+        # getting the debug info.
         if sysroot_inf_cmd:
             stripped_info = cros_build_lib.run(
                 ["file", sysroot_inf_cmd], capture_output=True, encoding="utf-8"
@@ -387,8 +387,9 @@ To install the debug symbols for all available packages, run:
                             % (passwd_db, user)
                         )
 
-                    # Maybe we should see if it needs to be updated?  Like if they
-                    # changed UIDs?  But we don't really check that elsewhere ...
+                    # Maybe we should see if it needs to be updated?  Like if
+                    # they changed UIDs?  But we don't really check that
+                    # elsewhere ...
                     return
 
             acct = (
@@ -413,8 +414,8 @@ To install the debug symbols for all available packages, run:
             return
 
         if self.remote_process_name:
-            # Look for a process with the specified name on the remote device; if
-            # found, get its pid.
+            # Look for a process with the specified name on the remote device;
+            # if found, get its pid.
             pname = self.remote_process_name
             if pname == "browser":
                 all_chrome_pids = set(
@@ -469,7 +470,7 @@ To install the debug symbols for all available packages, run:
         return cross_gdb
 
     def GetGdbInitCommands(self, inferior_cmd, device=None):
-        """Generate list of commands with which to initialize the gdb session."""
+        """Generate list of commands with which to initialize a gdb session."""
         gdb_init_commands = []
 
         if self.remote:
