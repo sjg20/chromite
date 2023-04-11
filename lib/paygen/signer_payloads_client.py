@@ -32,18 +32,19 @@ SIGNER_PRIORITY = 45
 
 
 class SignerPayloadsClientGoogleStorage(object):
-    """This class implements the Google Storage signer interface for payloads."""
+    """Implements the Google Storage signer interface for payloads."""
 
     def __init__(self, build, work_dir=None, unique=None, ctx=None):
-        """This initializer identifies the build an payload that need signatures.
+        """This identifies the build and payload that need signatures.
 
         Args:
-          build: An instance of gspaths.Build that defines the build.
-          work_dir: A directory inside the chroot to be used for temporarily
-            manipulating files. The directory should be cleaned by the caller. If it
-            is not passed, a temporary directory will be created.
-          unique: Force known 'unique' id. Mostly for unittests.
-          ctx: GS Context to use for GS operations.
+            build: An instance of gspaths.Build that defines the build.
+            work_dir: A directory inside the chroot to be used for temporarily
+                manipulating files. The directory should be cleaned by the
+                caller. If it is not passed, a temporary directory will be
+                created.
+            unique: Force known 'unique' id. Mostly for unittests.
+            ctx: GS Context to use for GS operations.
         """
         self._build = build
         self._ctx = ctx if ctx is not None else gs.GSContext()
@@ -67,16 +68,17 @@ class SignerPayloadsClientGoogleStorage(object):
         )
 
     def _CleanSignerFilesByKeyset(self, hashes, keyset, timeout=600):
-        """Helper method that cleans up GS files associated with a single keyset.
+        """Helper that cleans up GS files associated with a single keyset.
 
         Args:
-          hashes: A list of hash values to be signed by the signer in string format.
-            They are all expected to be 32 bytes in length.
-          keyset: keyset to have the hashes signed with.
-          timeout: Timeout for acquiring the lock on the files to clean.
+            hashes: A list of hash values to be signed by the signer in string
+                format. They are all expected to be 32 bytes in length.
+            keyset: keyset to have the hashes signed with.
+            timeout: Timeout for acquiring the lock on the files to clean.
 
         Raises:
-          gslock.LockNotAcquired if we can't get a lock on the data within timeout.
+            gslock.LockNotAcquired if we can't get a lock on the data within
+            timeout.
         """
         hash_names = self._CreateHashNames(len(hashes))
 
@@ -110,12 +112,12 @@ class SignerPayloadsClientGoogleStorage(object):
         Safe to call repeatedly.
 
         Args:
-          hashes: A list of hash values to be signed by the signer in string format.
-            They are all expected to be 32 bytes in length.
-          keysets: list of keysets to have the hashes signed with.
+            hashes: A list of hash values to be signed by the signer in string
+                format. They are all expected to be 32 bytes in length.
+            keysets: list of keysets to have the hashes signed with.
 
         Raises:
-          May raise GSLibError if there is an extraordinary GS problem.
+            May raise GSLibError if there is an extraordinary GS problem.
         """
         for keyset in keysets:
             self._CleanSignerFilesByKeyset(hashes, keyset)
@@ -129,10 +131,10 @@ class SignerPayloadsClientGoogleStorage(object):
         """Construct the URI used to upload a set of instructions.
 
         Args:
-          keyset: name of the keyset contained in this instruction set.
+            keyset: name of the keyset contained in this instruction set.
 
         Returns:
-          URI for the given instruction set as a string.
+            URI for the given instruction set as a string.
         """
         return os.path.join(
             self.signing_base_dir, "%s.payload.signer.instructions" % keyset
@@ -144,7 +146,7 @@ class SignerPayloadsClientGoogleStorage(object):
         These names are arbitrary, and only used when working with the signer.
 
         Args:
-          hash_count: How many hash names are needed?
+            hash_count: How many hash names are needed?
         """
         result = []
         for i in range(1, hash_count + 1):
@@ -158,11 +160,11 @@ class SignerPayloadsClientGoogleStorage(object):
         already included.
 
         Args:
-          hash_names: The list of input_names passed to the signer.
-          keyset: Keyset name passed to the signer.
+            hash_names: The list of input_names passed to the signer.
+            keyset: Keyset name passed to the signer.
 
         Returns:
-          List of URIs expected back from the signer.
+            List of URIs expected back from the signer.
         """
         result = []
         for hash_name in hash_names:
@@ -183,9 +185,9 @@ class SignerPayloadsClientGoogleStorage(object):
         the caller to ensure it's cleaned up.
 
         Args:
-          archive_file: Name of file to put the tar contents into.
-          hashes: List of hashes to sign, stored in strings.
-          hash_names: File names expected in the signer request.
+            archive_file: Name of file to put the tar contents into.
+            hashes: List of hashes to sign, stored in strings.
+            hash_names: File names expected in the signer request.
         """
         try:
             tmp_dir = tempfile.mkdtemp(dir=self._work_dir)
@@ -206,12 +208,12 @@ class SignerPayloadsClientGoogleStorage(object):
         """Create the signing instructions to send to the signer.
 
         Args:
-          hash_names: The names of the hash files in the archive to sign.
-          keyset: Which keyset to sign the hashes with. Valid keysets are defined on
-            the signer. 'update_signer' is currently valid.
+            hash_names: The names of the hash files in the archive to sign.
+            keyset: Which keyset to sign the hashes with. Valid keysets are
+                defined on the signer. 'update_signer' is currently valid.
 
         Returns:
-          A string that contains the contents of the instructions to send.
+            A string that contains the contents of the instructions to send.
         """
 
         pattern = """
@@ -253,7 +255,7 @@ versionrev = %(version)s
         }
 
     def _SignerRequestUri(self, instructions_uri):
-        """Find the URI of the empty file to create to ask the signer to sign."""
+        """Find the URI of the empty file to create to prompt signing."""
 
         exp = r"^gs://%s/(?P<postbucket>.*)$" % self._build.bucket
         m = re.match(exp, instructions_uri)
@@ -271,11 +273,11 @@ versionrev = %(version)s
         """Wait until all uris exist, or timeout.
 
         Args:
-          signature_uris: list of uris to check for.
-          timeout: time in seconds to wait for all uris to be created.
+            signature_uris: list of uris to check for.
+            timeout: time in seconds to wait for all uris to be created.
 
         Returns:
-          True if the signatures all exist, or False.
+            True if the signatures all exist, or False.
         """
         end_time = time.time() + timeout
 
@@ -297,10 +299,10 @@ versionrev = %(version)s
         """Download the list of URIs to in-memory strings.
 
         Args:
-          signature_uris: List of URIs to download.
+            signature_uris: List of URIs to download.
 
         Returns:
-          List of signatures in bytes.
+            List of signatures in bytes.
         """
 
         results = []
@@ -323,25 +325,26 @@ versionrev = %(version)s
         """Take an arbitrary list of hash files, and get them signed.
 
         Args:
-          hashes: A list of hash values to be signed by the signer as bytes. They
-            are all expected to be 32 bytes in length.
-          keysets: list of keysets to have the hashes signed with. The default is
-            almost certainly what you want. These names must match valid keysets on
-            the signer.
+            hashes: A list of hash values to be signed by the signer as bytes.
+                They are all expected to be 32 bytes in length.
+            keysets: list of keysets to have the hashes signed with. The default
+                is almost certainly what you want. These names must match valid
+                keysets on the signer.
 
         Returns:
-          A list of lists of signatures as bytes in the order of the |hashes|.
-          The list of signatures will correspond to the list of keysets passed
-          in.
+            A list of lists of signatures as bytes in the order of the |hashes|.
+            The list of signatures will correspond to the list of keysets passed
+            in.
 
-          hashes, keysets=['update_signer', 'update_signer-v2'] ->
-            hashes[0]                                  hashes[1] ...
-          [ [sig_update_signer, sig_update_signer-v2], [...],    ... ]
+            hashes, keysets=['update_signer', 'update_signer-v2'] ->
+                hashes[0]                                  hashes[1] ...
+            [ [sig_update_signer, sig_update_signer-v2], [...],    ... ]
 
-          Returns None if the process failed.
+            Returns None if the process failed.
 
         Raises:
-          Can raise a variety of GSLibError errors in extraordinary conditions.
+            Can raise a variety of GSLibError errors in extraordinary
+            conditions.
         """
 
         try:
@@ -409,18 +412,18 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
 
         For example there is no test key that can be picked up by
         gs://chromeos-release-test bucket, so this way we can reliably sign and
-        verify a payload when needed. Also it can be used to sign payloads locally
-        when needed. delta_generator accepts a --private_key flag that allows
-        signing the payload inplace. However, it is better to go through the whole
-        process of signing the payload, assuming we don't have access to the signers
-        at that time. This allows us the keep the signing process (or at least part
-        of it) tested constantly.
+        verify a payload when needed. Also, it can be used to sign payloads
+        locally when needed. delta_generator accepts a --private_key flag that
+        allows signing the payload inplace. However, it is better to go through
+        the whole process of signing the payload, assuming we don't have access
+        to the signers at that time. This allows us the keep the signing process
+        (or at least part of it) tested constantly.
 
         Args:
-          private_key: A 2048 bits private key in PEM format for signing.
-          work_dir: A directory inside the chroot to be used for temporarily
-            manipulating files. The directory should be cleaned by the caller. If
-            None is passed, the directory will be created.
+            private_key: A 2048 bits private key in PEM format for signing.
+            work_dir: A directory inside the chroot to be used for temporarily
+                manipulating files. The directory should be cleaned by the
+                caller. If None is passed, the directory will be created.
         """
         assert (
             private_key
@@ -436,7 +439,7 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
         This is useful for verifying the payload signed by an unofficial key.
 
         Args:
-          public_key: The path to write the public key to.
+            public_key: The path to write the public key to.
         """
         cmd = [
             "openssl",
@@ -450,13 +453,13 @@ class UnofficialSignerPayloadsClient(SignerPayloadsClientGoogleStorage):
         cros_build_lib.run(cmd, stdout=True, stderr=subprocess.STDOUT)
 
     def GetHashSignatures(self, hashes, keysets=("update_signer",)):
-        """See SignerPayloadsClientGoogleStorage._GetHashsignatures().
+        """See SignerPayloadsClientGoogleStorage._GetHashSignatures().
 
-        Instead of waiting for the signers to sign the hashes, we just sign then and
-        copy them to the requested files. It doesn't really support keysets at this
-        point.
+        Instead of waiting for the signers to sign the hashes, we just sign then
+        and copy them to the requested files. It doesn't really support keysets
+        at this point.
         """
-        logging.info("Signing the hashes with unoffical keys.")
+        logging.info("Signing the hashes with unofficial keys.")
 
         key_path = os.path.join(self._work_dir, "update_key.pem")
         filelib.Copy(self._private_key, key_path)

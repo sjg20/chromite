@@ -109,7 +109,7 @@ class BlockedTest(image_test_lib.ImageTestCase):
             )
 
     def TestBlockedFileTypes(self):
-        """Fail if there are files of prohibited types (such as C++ source code).
+        """Fail if there are files of prohibited types (e.g. C++ source code).
 
         The allow list has higher precedence than the block list.
         """
@@ -186,8 +186,8 @@ class BlockedTest(image_test_lib.ImageTestCase):
     def TestValidInterpreter(self):
         """Fail if a script's interpreter is not found, or not executable.
 
-        A script interpreter is anything after the #! sign, up to the end of line
-        or the first space.
+        A script interpreter is anything after the #! sign, up to the end of
+        line or the first space.
         """
         failures = []
 
@@ -272,9 +272,9 @@ class LinkageTest(image_test_lib.ImageTestCase):
         if self._IsPackageMerged("x11-base/xorg-server"):
             binaries.append("usr/bin/Xorg")
 
-        # When chrome is built with USE="pgo_generate", rootfs chrome is actually a
-        # symlink to a real binary which is in the stateful partition. So we do not
-        # check for a valid chrome binary in that case.
+        # When chrome is built with USE="pgo_generate", rootfs chrome is
+        # actually a symlink to a real binary which is in the stateful
+        # partition. So we do not check for a valid chrome binary in that case.
         if not self._IsPackageMerged(
             "chromeos-base/chromeos-chrome[pgo_generate]"
         ):
@@ -301,7 +301,8 @@ class LinkageTest(image_test_lib.ImageTestCase):
 
         ldpaths = lddtree.LoadLdpaths(image_test_lib.ROOT_A)
         for to_test in itertools.chain(binaries, libraries):
-            # to_test could be a symlink, we need to resolve it relative to ROOT_A.
+            # to_test could be a symlink, we need to resolve it relative to
+            # ROOT_A.
             while os.path.islink(to_test):
                 link = os.readlink(to_test)
                 if link.startswith("/"):
@@ -320,7 +321,8 @@ class LinkageTest(image_test_lib.ImageTestCase):
                     "intel-ipu6.so",
                     # Deps mounted from squashfs at runtime.
                     "camera.qcom.core.so",
-                    # libasound_module_ctl_ipaudio.so dep outside normal search paths.
+                    # libasound_module_ctl_ipaudio.so dep outside normal search
+                    # paths.
                     "libasound_module_pcm_ipaudio.so",
                     # libfwupdutil.so dep outside normal search paths.
                     "libfwupdutil.so",
@@ -436,7 +438,8 @@ class SymbolsTest(image_test_lib.ImageTestCase):
     def _GetSymbols(self, file_name):
         """Return a 2-tuple (import, export) of an ELF file |file_name|.
 
-        Import and export in the returned tuple are sets of strings (symbol names).
+        Import and export in the returned tuple are sets of strings (symbol
+        names).
         """
         if file_name in self._known_symtabs:
             return self._known_symtabs[file_name]
@@ -457,8 +460,8 @@ class SymbolsTest(image_test_lib.ImageTestCase):
         """Ensure all ELF files' imported symbols are available in ROOT-A.
 
         In this test, we find all imported symbols and exported symbols from all
-        ELF files on the system. This test will fail if the set of imported symbols
-        is not a subset of exported symbols.
+        ELF files on the system. This test will fail if the set of imported
+        symbols is not a subset of exported symbols.
 
         This test DOES NOT simulate ELF loading. "TestLinkage" does that with
         `lddtree`.
@@ -525,12 +528,12 @@ class SymbolsTest(image_test_lib.ImageTestCase):
 
         excluded_files = set(
             [
-                # These libraries are built against Android NDK's libc and have several
-                # imports that will appear to be unsatisfied.
+                # These libraries are built against Android NDK's libc and have
+                # several imports that will appear to be unsatisfied.
                 "libmojo_core_arc32.so",
                 "libmojo_core_arc64.so",
-                # The camera shared libraries these libraries need are mounted at
-                # runtime.
+                # The camera shared libraries these libraries need are mounted
+                # at runtime.
                 "libcros_camera.so",
                 "camera_hal/intel-ipu6.so",
                 "camera.qcom.core.so",
@@ -825,9 +828,10 @@ class CroshTest(image_test_lib.ImageTestCase):
 
     def TestUnknownModules(self):
         """Only permit known crosh modules on the system."""
-        # Do *not* add modules to this list until they've been reviewed by security
-        # or someone in the crosh/OWNERS list.  Insecure code here can easily cause
-        # compromise of CrOS system security in verified mode.  It has happened.
+        # Do *not* add modules to this list until they've been reviewed by
+        # security or someone in the crosh/OWNERS list.  Insecure code here can
+        # easily cause compromise of CrOS system security in verified mode.  It
+        # has happened.
         ALLOWED = {
             "dev.d": {"50-crosh.sh"},
             "extra.d": set(),
@@ -891,7 +895,7 @@ class SymlinkTest(image_test_lib.ImageTestCase):
         "/usr/share/portage": {"/usr/local/share/portage"},
         # Needed for the ARC++/ARCVM dual build. For test images only.
         "/opt/google/vms/android": {"/usr/local/vms/android"},
-        # TODO(b/150806692): Clenaup this library symlink.
+        # TODO(b/150806692): Cleanup this library symlink.
         # Allow /opt/pita/lib path to point to any /run path. For PluginVM DLC.
         "/opt/pita/lib": {"/run/*"},
     }
@@ -1006,15 +1010,15 @@ class IntelWifiTest(image_test_lib.ImageTestCase):
         """List all the firmware files supported by the driver.
 
         The iwlwifi driver has the path of the various firmware versions that it
-        supports built in. The list of firmware versions is available through the
-        'modinfo' command.
+        supports built in. The list of firmware versions is available through
+        the 'modinfo' command.
 
         Args:
-          kernel: A string containing the kernel version.
+            kernel: A string containing the kernel version.
 
         Returns:
-          A list of strings containing the names of all the firmware files that can
-          be loaded by the iwlwifi driver.
+            A list of strings containing the names of all the firmware files
+            that can be loaded by the iwlwifi driver.
         """
         # The iwlwifi module lists the firmware files that it can load.
         # Typical output of the 'modinfo' command:
@@ -1039,8 +1043,8 @@ class IntelWifiTest(image_test_lib.ImageTestCase):
                 cmd, print_cmd=False, capture_output=True, encoding="utf-8"
             )
         except cros_build_lib.RunCommandError as e:
-            # It's not necessarily an error to have enabled the firmware but not the
-            # iwlwifi driver (e.g. bringup) -> log a warning, not an error.
+            # It's not necessarily an error to have enabled the firmware but not
+            # the iwlwifi driver (e.g. bringup) -> log a warning, not an error.
             logging.warning("Could not query iwlwifi driver.")
             logging.warning(
                 '"%s" returned code %d.', " ".join(cmd), e.returncode
@@ -1089,7 +1093,8 @@ class IntelWifiTest(image_test_lib.ImageTestCase):
         if "iwlwifi-all" in iwlwifi_flags:
             self.skipTest("All firmware files have been installed.")
 
-        # Find the kernel version of the image, necessary to call 'modinfo' later.
+        # Find the kernel version of the image, necessary to call 'modinfo'
+        # later.
         kernel = self._FindKernelVersion()
         if kernel is None:
             self.skipTest("Failed to detect the kernel version.")
@@ -1099,13 +1104,13 @@ class IntelWifiTest(image_test_lib.ImageTestCase):
             self.skipTest("Could not find iwlwifi module.")
 
         iwlwifi_files = self._GetIwlwifiFirmwareFiles()
-        # We have at least one iwlwifi-* flag listed in LINUX_FIRMWARE, ensure that
-        # at least one firmware file is present.
+        # We have at least one iwlwifi-* flag listed in LINUX_FIRMWARE, ensure
+        # that at least one firmware file is present.
         self.assertTrue(iwlwifi_files, "No iwlwifi firmware file installed.")
 
-        # Ensure that for every iwlwifi-* flag listed in LINUX_FIRMWARE, the driver
-        # has at least one corresponding firmware file listed, and at least one of
-        # the firmware files is present on the rootfs.
+        # Ensure that for every iwlwifi-* flag listed in LINUX_FIRMWARE, the
+        # driver has at least one corresponding firmware file listed, and at
+        # least one of the firmware files is present on the rootfs.
         for flag in iwlwifi_flags:
             supported_fw = {x for x in modinfo_files if x.startswith(flag)}
             available_fw = {x for x in iwlwifi_files if x.startswith(flag)}
@@ -1132,8 +1137,8 @@ class DBusServiceTest(image_test_lib.ImageTestCase):
         """Check D-Bus service files for delegation to Upstart.
 
         crbug.com/1025914: To prevent D-Bus activated services from running
-        indefinitely, each D-Bus activated service file should have an associated
-        Upstart job that manages the lifecycle of the service.
+        indefinitely, each D-Bus activated service file should have an
+        associated Upstart job that manages the lifecycle of the service.
 
         The Exec clause can either start with "Exec=/sbin/start(whitespace)"
         (delegate to upstart) or should be "Exec=/sbin/false" (D-Bus service

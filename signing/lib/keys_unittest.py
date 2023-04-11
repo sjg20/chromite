@@ -59,7 +59,8 @@ class KeysetMock(keys.Keyset):
 
     def __init__(self, key_dir, has_loem_ini=True):
         """Create a Keyset with root_of_trust-specific keys, and populate it."""
-        # We do not actually create files for the KeyPairs, since the tests care.
+        # We do not actually create files for the KeyPairs, since the tests
+        # care.
 
         # Create the key_dir.
         osutils.SafeMakedirs(key_dir)
@@ -70,8 +71,8 @@ class KeysetMock(keys.Keyset):
         # Save key.versions.
         self._versions.Save()
 
-        # By default, we have root_of_trust-specific keys, and want loem.ini.  If
-        # not, don't create them.
+        # By default, we have root_of_trust-specific keys, and want loem.ini.
+        # If not, don't create them.
         if has_loem_ini:
             self.WriteIniFile()
         else:
@@ -96,8 +97,9 @@ class KeysetMock(keys.Keyset):
             self.root_of_trust_map[root_of_trust] = root_of_trust
 
     # TODO(lamontjones): This may eventually make sense to move into
-    # keys.Keyset(), if it ever becomes the thing that creates a keyset directory.
-    # Today, we only read the keyset from the directory, we do not update it.
+    # keys.Keyset(), if it ever becomes the thing that creates a keyset
+    # directory. Today, we only read the keyset from the directory, we do not
+    # update it.
     def WriteIniFile(self):
         """Writes alias to file"""
         if self.ROOT_OF_TRUST_NAMES:

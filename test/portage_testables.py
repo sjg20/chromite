@@ -109,7 +109,7 @@ class Overlay(object):
         return ebuild_path.is_file()
 
     def _write_layout_conf(self):
-        """Write out the layout.conf as part of this Overlay's initialization."""
+        """Write the layout.conf as part of this Overlay's initialization."""
         layout_conf_path = self.path / "metadata" / "layout.conf"
         parent_names = " ".join(m.name for m in self.parent_overlays or [])
         conf = {
@@ -150,8 +150,8 @@ class Overlay(object):
             / (pkg.package + "-" + pkg.version + ".ebuild")
         )
 
-        # EAPI must be the first thing defined in a ebuild, so write this config
-        # before anything else.
+        # EAPI must be the first thing defined in an ebuild, so write this
+        # config before anything else.
         base_conf = {
             "EAPI": pkg.eapi,
             "KEYWORDS": pkg.keywords,
@@ -198,8 +198,8 @@ class Overlay(object):
     ):
         """Create a profile in this overlay.
 
-        Creates a profile with the given settings and writes the profile with those
-        settings to the Overlay's directory.
+        Creates a profile with the given settings and writes the profile with
+        those settings to the Overlay's directory.
         """
         path = Path(path) if path else Path("base")
         if path in self.profiles:
@@ -234,7 +234,7 @@ class Overlay(object):
 
 
 class Sysroot(object):
-    """Sysroot object representing a functional Portage directory for testing."""
+    """Sysroot object representing a functional Portage directory."""
 
     # These PORTDIR_OVERLAY entries are necessary for any Portage operations to
     # function as the chroot's profile is parsed first, even if that profile is
@@ -310,8 +310,9 @@ class Sysroot(object):
 
         This method sets up the equivalent calling environment to the `emerge`
         wrappers we generate but targeted at this specific sysroot, which has
-        an arbitrary path in the test environment. This means that Portage commands
-        such as `equery list '*'` will correctly run against this sysroot.
+        an arbitrary path in the test environment. This means that Portage
+        commands such as `equery list '*'` will correctly run against this
+        sysroot.
         """
         extra_env = self._env
         extra_env.update(kwargs.pop("extra_env", {}))
@@ -381,13 +382,13 @@ class Package(object):
 
     @property
     def package_info(self) -> package_info.PackageInfo:
-        """Returns a PackageInfo object constructed from this package's metadata."""
+        """Get a PackageInfo object constructed from this package's metadata."""
         return package_info.parse(
             f"{self.category}/{self.package}-{self.version}"
         )
 
     def format_eclass_line(self) -> str:
-        """Returns a string containing this package's eclass inheritance line."""
+        """Get a string containing this package's eclass inheritance line."""
         if self.inherit and isinstance(self.inherit, str):
             return f"inherit {self.inherit}\n"
         elif self.inherit:

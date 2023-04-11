@@ -1419,8 +1419,8 @@ class SiteConfig(dict):
             name: The name to label this configuration; this is what cbuildbot
                 would see.
             template: BuildConfig to use as a template for this build.
-            *args: BuildConfigs to patch into this config. First one (if present)
-                is considered the template. See AddTemplate for help on
+            *args: BuildConfigs to patch into this config. First one (if
+                present) is considered the template. See AddTemplate for help on
                 templates.
             **kwargs: BuildConfig values to explicitly set on this config.
 

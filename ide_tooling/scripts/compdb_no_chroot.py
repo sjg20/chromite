@@ -32,15 +32,17 @@ class Converter:
         self.which = which
 
     def convert_filepath(self, filepath: str) -> str:
-        # If out-of-tree build is enabled, source files under /mnt/host/source are
-        # used. This directory is inaccessible outside chroot, so we convert it.
+        # If out-of-tree build is enabled, source files under /mnt/host/source
+        # are used. This directory is inaccessible outside chroot, so we convert
+        # it.
         m = re.fullmatch(MNT_HOST_SOURCE_RE, filepath)
         if m:
             return os.path.join(self.external_trunk_path, m[1])
 
-        # If out-of-tree build is disabled, source files are copied in a temporary
-        # directory, and the filepath may point to the copied file. We convert this
-        # so that code navigation doesn't jump to the file in chroot.
+        # If out-of-tree build is disabled, source files are copied in a
+        # temporary directory, and the filepath may point to the copied file. We
+        # convert this so that code navigation doesn't jump to the file in
+        # chroot.
         # We use a heuristic (using /platform2/ as a marker) here to support
         # platform2 packages.
         # TODO(oka): Revisit this logic to support packages outside platform2.
@@ -60,19 +62,20 @@ class Converter:
         """Converts include option to work outside chroot.
 
         Examples:
-          platform2 directory is converted, and the original one that is
-          invisible outside chroot is omitted.
-          .../mnt/host/source/src/platform2
-          -> /path/to/chromiumos/src/platform2
+            platform2 directory is converted, and the original one that is
+            invisible outside chroot is omitted.
+            .../mnt/host/source/src/platform2
+            -> /path/to/chromiumos/src/platform2
 
-          platform2 directory is converted, and the original one that is
-          visible outside chroot is also kept.
-          .../tmp/whatever/platform2
-          -> /path/to/chromiumos/src/platform2  .../tmp/whatever/platform2
+            platform2 directory is converted, and the original one that is
+            visible outside chroot is also kept.
+            .../tmp/whatever/platform2
+            -> /path/to/chromiumos/src/platform2  .../tmp/whatever/platform2
 
-          Paths having no corresponding sources outside chroot are not converted.
-          gen/include
-          -> gen/include
+            Paths having no corresponding sources outside chroot are not
+            converted.
+            gen/include
+            -> gen/include
         """
 
         filepath = option[2:]
@@ -203,9 +206,10 @@ def main():
     data = json.loads(text)
     external_trunk_path = sys.argv[1]
     if not os.path.exists(external_trunk_path):
-        # The external_trunk_path points to the chromiumos trunk path *outside* chroot,
-        # and it may not exist inside chroot, where the script is run (b:259342928).
-        # We still show a warning here for debuggability because the path usually exists.
+        # The external_trunk_path points to the chromiumos trunk path *outside*
+        # chroot, and it may not exist inside chroot, where the script is run
+        # (b:259342928). We still show a warning here for debuggability because
+        # the path usually exists.
         print(
             f"{external_trunk_path} does not exist inside chroot",
             file=sys.stderr,

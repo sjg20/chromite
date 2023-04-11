@@ -237,9 +237,9 @@ def main(argv):
     logging.notice("Processing: %s", " ".join(x[0] for x in keysets))
 
     for setname, directory in keysets:
-        # TODO(lamontjones): consider flattening the namespace by combining multiple
-        # directories/sets into a common directory.  That would require adding
-        # version numbers to colliding files.
+        # TODO(lamontjones): consider flattening the namespace by combining
+        #  multiple directories/sets into a common directory. That would require
+        #  adding version numbers to colliding files.
         keydata.ImportKeyset(setname, directory)
 
     keydata.WriteRepoYaml()

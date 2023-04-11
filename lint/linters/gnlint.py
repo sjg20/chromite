@@ -355,7 +355,8 @@ def GnLintDefines(gndata):
                     issues.append(
                         Issue(
                             n.get("location"),
-                            f"incorrect style; flag should be {flag}=${{use...}}",
+                            "incorrect style; flag should be "
+                            f"{flag}=${{use...}}",
                         )
                     )
 

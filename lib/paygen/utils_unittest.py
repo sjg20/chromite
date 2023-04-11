@@ -64,7 +64,7 @@ class TestUtils(cros_test_lib.TempDirTestCase):
         self.assertEqual(a, b)
 
     def testRestrictedAttrDictHashingDerivedClasses(self):
-        """Tests that RestrictedAttrDict hashing works in derviced classes."""
+        """Tests that RestrictedAttrDict hashing works in derived classes."""
 
         class A(utils.RestrictedAttrDict):
             """Derived class A."""
@@ -234,7 +234,8 @@ class TestUtils(cros_test_lib.TempDirTestCase):
         self.assertEqual(_semaphore.acquire(ACQUIRE_TIMEOUT).result, True)
         _semaphore.release()
 
-        # Should want two bytes, have a whole lot (but you'll block for 2 seconds).
+        # Should want two bytes, have a whole lot (but you'll block for 2
+        # seconds).
         _semaphore._get_system_available = self.mock_get_system_available(
             2**64 - 2
         )
@@ -276,7 +277,8 @@ class TestUtils(cros_test_lib.TempDirTestCase):
         self.assertEqual(_semaphore.acquire(ACQUIRE_TIMEOUT).result, True)
         _semaphore.release()
 
-        # Get the lock or die trying. We spin fast here instead of ACQUIRE_TIMEOUT.
+        # Get the lock or die trying. We spin fast here instead of
+        # ACQUIRE_TIMEOUT.
         while not _semaphore.acquire(1).result:
             continue
         _semaphore.release()
@@ -343,7 +345,8 @@ class TestUtils(cros_test_lib.TempDirTestCase):
             x.daemon = True
             x.start()
 
-        # ~Maximum 600 seconds realtime, keeps clock ticking for overall timeout.
+        # ~Maximum 600 seconds realtime, keeps clock ticking for overall
+        # timeout.
         for _ in range(60000):
             time.sleep(0.01)
             mock_clock.add_time(0.1)

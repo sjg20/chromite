@@ -224,7 +224,7 @@ class GnLintTests(LintTestCase):
         # }
         self._CheckLinter(
             linters.gnlint.GnLintStaticSharedLibMixing,
-            # pylint: disable=disable line-too-long
+            # pylint: disable=line-too-long
             [
                 {
                     "child": [
@@ -320,7 +320,6 @@ class GnLintTests(LintTestCase):
         # }
         self._CheckLinter(
             linters.gnlint.GnLintStaticSharedLibMixing,
-            # pylint: disable=disable line-too-long
             [
                 {
                     "child": [
@@ -454,7 +453,6 @@ class GnLintTests(LintTestCase):
         # }
         self._CheckLinter(
             linters.gnlint.GnLintOrderingWithinTarget,
-            # pylint: disable=disable line-too-long
             [
                 {
                     "child": [
@@ -519,7 +517,6 @@ class GnLintTests(LintTestCase):
         # }
         self._CheckLinter(
             linters.gnlint.GnLintOrderingWithinTarget,
-            # pylint: disable=disable line-too-long
             [
                 {
                     "child": [

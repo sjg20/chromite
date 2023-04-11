@@ -180,7 +180,8 @@ def UpdateKeyInLocalFile(filepath: str, key: str, value: str) -> bool:
     # The value can be wrapped in either single-quotes or double-quotes.
     # Either the key or the quoted value can be padded by whitespace.
     re_any_key_value = re.compile(
-        r"^\s*(?P<key>[A-Za-z-_.]+)\s*=\s*(?P<quote>['\"])(?P<value>.*)(?P=quote)\s*$",
+        r"^\s*(?P<key>[A-Za-z-_.]+)\s*="
+        r"\s*(?P<quote>['\"])(?P<value>.*)(?P=quote)\s*$",
     )
 
     def _extract_key_value(line: str) -> Optional[Tuple[str, str]]:
@@ -205,7 +206,8 @@ def UpdateKeyInLocalFile(filepath: str, key: str, value: str) -> bool:
         current_lines = []
         print(f"Creating new file {filepath}")
 
-    # Scan current lines, copy all vars to new_lines, change the line with |key|.
+    # Scan current lines, copy all vars to new_lines, change the line with
+    # |key|.
     found = False
     for line in current_lines:
         # Strip newlines from end of line. We already add newlines below.

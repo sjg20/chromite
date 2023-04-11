@@ -29,9 +29,9 @@ class BiosSigner(signer.FutilitySigner):
         """Init BiosSigner
 
         Args:
-          sig_id: Signature ID (aka loem id)
-          sig_dir: Signature Output Directory (i.e shellball/keyset)
-          preamble_flags: preamble flags passed to futility
+            sig_id: Signature ID (aka loem id)
+            sig_dir: Signature Output Directory (i.e shellball/keyset)
+            preamble_flags: preamble flags passed to futility
         """
         self.sig_id = sig_id
         self.sig_dir = sig_dir
@@ -41,9 +41,9 @@ class BiosSigner(signer.FutilitySigner):
         """Returns futility arguments for signing bios
 
         Args:
-          keyset: keyset used for signing
-          input_name: bios image
-          output_name: output firmware file
+            keyset: keyset used for signing
+            input_name: bios image
+            output_name: output firmware file
         """
         fw_key = keyset.keys["firmware_data_key"]
         kernel_key = keyset.keys["kernel_subkey"]
@@ -94,12 +94,12 @@ class ECSigner(signer.BaseSigner):
         """Sign EC image
 
         Args:
-          keyset: keyset used for this signing step
-          input_name: ec image path to be signed (i.e. to ec.bin)
-          output_name: bios image path to be updated with new hashes
+            keyset: keyset used for this signing step
+            input_name: ec image path to be signed (i.e. to ec.bin)
+            output_name: bios image path to be updated with new hashes
 
         Raises:
-          SigningFailedError: if a signing fails
+            SigningFailedError: if a signing fails
         """
         # Use absolute paths since we use a temp directory
         ec_path = os.path.abspath(input_name)
@@ -158,9 +158,9 @@ class GBBSigner(signer.FutilitySigner):
         """Return args for signing GBB
 
         Args:
-          keyset: Keyset used for signing
-          input_name: Firmware image
-          output_name: Bios path (i.e. tobios.bin)
+            keyset: Keyset used for signing
+            input_name: Firmware image
+            output_name: Bios path (i.e. tobios.bin)
         """
         return [
             "gbb",
@@ -200,16 +200,17 @@ class FirmwareSigner(signer.BaseSigner):
         """Perform one signing based on the given args.
 
         Args:
-          keyset: keyset directory used for signing,
-          shellball_dir: location of extracted shellball
-          bios_image: relitive path of bios.bin in shellball
-          ec_image: relative path of ec.bin in shellball
-          model_name: name of target's model_name as define in signer_config.csv
-          key_id: subkey id to be used for signing
-          keyset_out_dir: relative path of keyset output dir in shellball
+            keyset: keyset directory used for signing,
+            shellball_dir: location of extracted shellball
+            bios_image: relative path of bios.bin in shellball
+            ec_image: relative path of ec.bin in shellball
+            model_name: name of target's model_name as define in
+                signer_config.csv
+            key_id: subkey id to be used for signing
+            keyset_out_dir: relative path of keyset output dir in shellball
 
         Raises:
-          SigningFailedError: if a signing fails
+            SigningFailedError: if a signing fails
         """
 
         if key_id:
@@ -243,16 +244,16 @@ class FirmwareSigner(signer.BaseSigner):
     def Sign(self, keyset, input_name, output_name):
         """Sign Firmware shellball.
 
-        Signing is based on if 'signer_config.csv', then all rows defined in file
-        are signed. Else all bios*.bin in shellball will be signed.
+        Signing is based on if 'signer_config.csv', then all rows defined in
+        file are signed. Else all bios*.bin in shellball will be signed.
 
         Args:
-          keyset: keyset directory, with subkeys[key_id] if defined
-          input_name: location of extracted shellball
-          output_name: unused
+            keyset: keyset directory, with subkeys[key_id] if defined
+            input_name: location of extracted shellball
+            output_name: unused
 
         Raises:
-          SigningFailedError: if a signing step fails
+            SigningFailedError: if a signing step fails
         """
         shellball_dir = input_name
         signerconfig_csv = os.path.join(shellball_dir, "signer_config.csv")
@@ -310,7 +311,7 @@ class Shellball(object):
         """Initial Shellball, no disk changes.
 
         Args:
-          filename: filename of shellball
+            filename: filename of shellball
         """
         self.filename = filename
 
@@ -343,7 +344,7 @@ class Shellball(object):
             raise ShellballExtractError(err.msg)
 
     def Repack(self, src_dir):
-        """Repack shellball with the given directory, raises RepackFailed on fail.
+        """Repack shellball with |src_dir|, raises RepackFailed on fail.
 
         Only supports shellballs that honor '--sb_repack' which should include
         everything that has been signed since 2014
@@ -394,18 +395,18 @@ def _MountImagePartition(
 
     The mount option will be:
 
-      -o offset=XXX,sizelimit=YYY,(*mount_opts)
+        -o offset=XXX,sizelimit=YYY,(*mount_opts)
 
     Args:
-      image_file: A path to the image file (chromiumos_base_image.bin).
-      part_id: A partition name or number.
-      destination: A path to the mount point.
-      gpt_table: A list of PartitionInfo objects. See
-        image_lib.GetImageDiskPartitionInfo.
-      sudo: Same as MountDir.
-      makedirs: Same as MountDir.
-      mount_opts: Same as MountDir.
-      skip_mtab: Same as MountDir.
+        image_file: A path to the image file (chromiumos_base_image.bin).
+        part_id: A partition name or number.
+        destination: A path to the mount point.
+        gpt_table: A list of PartitionInfo objects. See
+            image_lib.GetImageDiskPartitionInfo.
+        sudo: Same as MountDir.
+        makedirs: Same as MountDir.
+        mount_opts: Same as MountDir.
+        skip_mtab: Same as MountDir.
     """
 
     if gpt_table is None:
@@ -437,8 +438,8 @@ def ResignImageFirmware(image_file, keyset):
     """Resign the given firmware image.
 
     Args:
-      image_file: string path to image.
-      keyset: Keyset to use for signing.
+        image_file: string path to image.
+        keyset: Keyset to use for signing.
 
     Raises SignerFailedError
     """
@@ -474,10 +475,10 @@ def SignerConfigsFromCSV(signer_config_file):
     go/cros-unibuild-signing
 
     Args:
-      signer_config_file: File descriptor for signer_configs.csv.
+        signer_config_file: File descriptor for signer_configs.csv.
 
     Returns:
-      List of dicts in the signer_configs file.
+        List of dicts in the signer_configs file.
     """
     csv_reader = csv.DictReader(signer_config_file)
 
@@ -492,8 +493,8 @@ def WriteSignerNotes(keyset, outfile):
     """Writes signer notes (a.k.a. VERSION.signer) to file.
 
     Args:
-      keyset: keyset used for generating signer file.
-      outfile: file object that signer notes are written to.
+        keyset: keyset used for generating signer file.
+        outfile: file object that signer notes are written to.
     """
     recovery_key = keyset.keys["recovery_key"]
     outfile.write("Signed with keyset in %s\n" % recovery_key.keydir)

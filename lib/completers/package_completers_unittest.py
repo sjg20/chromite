@@ -73,7 +73,7 @@ def test_package(monkeypatch, get_ebuilds, simple_parser):
 
 
 def test_package_atom(monkeypatch, get_ebuilds, simple_parser):
-    """Test that the package atom completer returns packages without versions."""
+    """Verify the package atom completer returns packages without versions."""
 
     def mock_sysroot(sysroot_path, *_args, **_kwargs):
         assert sysroot_path == "/"

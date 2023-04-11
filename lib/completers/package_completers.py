@@ -14,8 +14,8 @@ from chromite.lib import sysroot_lib
 
 
 def package(
-    prefix, action, parser, parsed_args
-) -> List[str]:  # pylint: disable=unused-argument
+    prefix, action, parser, parsed_args  # pylint: disable=unused-argument
+) -> List[str]:
     """List all packages with the package version."""
     packages = (
         portage_util.SplitEbuildPath(x) for x in _get_ebuilds(parsed_args)
@@ -24,8 +24,8 @@ def package(
 
 
 def package_atom(
-    prefix, action, parser, parsed_args
-) -> List[str]:  # pylint: disable=unused-argument
+    prefix, action, parser, parsed_args  # pylint: disable=unused-argument
+) -> List[str]:
     """List all packages without the package version."""
     return [portage_util.EbuildToCP(x) for x in _get_ebuilds(parsed_args)]
 

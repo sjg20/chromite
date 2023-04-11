@@ -15,8 +15,8 @@ from chromite.lib import portage_util
 
 
 def build_target(
-    prefix, action, parser, parsed_args
-) -> List[str]:  # pylint: disable=unused-argument
+    prefix, action, parser, parsed_args  # pylint: disable=unused-argument
+) -> List[str]:
     """List all possible build targets."""
     RE_NAME = re.compile(r"^overlay-(.*?)(-private)?$")
     overlay_paths = portage_util.FindOverlays(constants.BOTH_OVERLAYS)
@@ -34,8 +34,8 @@ def build_target(
 
 
 def built_build_target(
-    prefix, action, parser, parsed_args
-) -> Iterator[str]:  # pylint: disable=unused-argument
+    prefix, action, parser, parsed_args  # pylint: disable=unused-argument
+) -> Iterator[str]:
     """List build targets with a sysroot."""
     p = f"{prefix}*/etc/portage"
     yield from (

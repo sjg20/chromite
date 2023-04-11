@@ -33,20 +33,21 @@ class TestConfig(object):
         """Initialize a test configuration.
 
         Args:
-          board: the board being tested (e.g. 'x86-alex')
-          name: a descriptive name of the test
-          is_delta_update: whether this is a delta update test (Boolean)
-          source_release: the source image version (e.g. '2672.0.0')
-          target_release: the target image version (e.g. '2673.0.0')
-          source_payload_uri: source payload URI ('gs://...') or None
-          target_payload_uri: target payload URI ('gs://...')
-          suite_name: the name of the test suite (default: 'au')
-          source_archive_uri: location of source build artifacts
-          payload_type: The type of update we are doing with this payload. Possible
-            types are in defined in PAYLOAD_TYPES at
-            chromite/lib/paygen/paygen_build_lib.
-          applicable_models: A list of models that this config should run against.
-            Only used for FSI configs. None indicates it can run on any board.
+            board: the board being tested (e.g. 'x86-alex')
+            name: a descriptive name of the test
+            is_delta_update: whether this is a delta update test (Boolean)
+            source_release: the source image version (e.g. '2672.0.0')
+            target_release: the target image version (e.g. '2673.0.0')
+            source_payload_uri: source payload URI ('gs://...') or None
+            target_payload_uri: target payload URI ('gs://...')
+            suite_name: the name of the test suite (default: 'au')
+            source_archive_uri: location of source build artifacts
+            payload_type: The type of update we are doing with this payload.
+                Possible types are in defined in PAYLOAD_TYPES at
+                chromite/lib/paygen/paygen_build_lib.
+            applicable_models: A list of models that this config should run
+                against. Only used for FSI configs. None indicates it can run on
+                any board.
         """
         self.board = board
         self.name = name
@@ -80,7 +81,7 @@ class TestConfig(object):
         """Returns job name to use when creating an autotest job.
 
         Returns:
-          A job name that conforms to the suite naming style.
+            A job name that conforms to the suite naming style.
         """
         return "%s-release/%s/%s/%s.%s" % (
             self.board,
@@ -94,9 +95,9 @@ class TestConfig(object):
         """Returns the name of the name of the control file to store this in.
 
         Returns:
-          The control file name that should be generated for this test.
-          A unique name suffix is used to keep from collisions per target
-          release/board.
+            The control file name that should be generated for this test.
+            A unique name suffix is used to keep from collisions per target
+            release/board.
         """
         return "control.%s" % self.unique_name_suffix()
 

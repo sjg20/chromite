@@ -37,12 +37,12 @@ class KeyPair(object):
     keys, including file names, and version.
 
     Attributes:
-      name: name of keypair
-      keydir: location of key files
-      version: version of key
-      public: public key file complete path
-      private: private key file complete path
-      keyblock: keyblock file complete path
+        name: name of keypair
+        keydir: location of key files
+        version: version of key
+        public: public key file complete path
+        private: private key file complete path
+        keyblock: keyblock file complete path
     """
 
     # On disk, we have (valid) file names like:
@@ -52,10 +52,11 @@ class KeyPair(object):
     # - kernel_subkey.vbprivk
     # - key_ec_efs.vbprik2 (which pairs with .vbpubk2, instead of .vbpubk)
 
-    # All of the following regular expressions are used to validate names and
+    # All the following regular expressions are used to validate names and
     # extensions. From KeyPair's perspective, a name is simply a string of 2 or
-    # more alphanumeric characters, possibly containing a single '.' somewhere in
-    # the middle, with one of two valid extensions ('.vbprik2' or '.vbprivk').
+    # more alphanumeric characters, possibly containing a single '.' somewhere
+    # in the middle, with one of two valid extensions ('.vbprik2' or
+    # '.vbprivk').
     _name_re = re.compile(r"\w+\.?\w+$")
 
     # Valid key file name endings:
@@ -77,11 +78,11 @@ class KeyPair(object):
         """Initialize KeyPair.
 
         Args:
-          name: name of key
-          keydir: directory containing key files
-          version: version of the key (forced to int)
-          pub_ext: file extension used for public key
-          priv_ext: file extension used for private key
+            name: name of key
+            keydir: directory containing key files
+            version: version of the key (forced to int)
+            pub_ext: file extension used for public key
+            priv_ext: file extension used for private key
         """
         self.name = name
         self.keydir = keydir
@@ -134,11 +135,11 @@ class KeyPair(object):
         """Extract the name and extension from the filename.
 
         Args:
-          file_name: a filename that may or may not be a private key.  Leading
-              directories are ignored.
+            file_name: a filename that may or may not be a private key.  Leading
+                directories are ignored.
 
         Returns:
-          None or re.MatchObject with named groups 'name' and 'ext'.
+            None or re.MatchObject with named groups 'name' and 'ext'.
         """
         basename = file_name.split("/")[-1]
         return cls._priv_filename_re.match(basename)
@@ -163,8 +164,8 @@ class KeyPair(object):
         """Returns key's sha1sum returns.
 
         Raises:
-          SignerKeyError: If error getting sha1sum from public key
-          RunCommandError: if vbutil_key fails
+            SignerKeyError: If error getting sha1sum from public key
+            RunCommandError: if vbutil_key fails
         """
         res = cros_build_lib.run(
             ["vbutil_key", "--unpack", self.public],
@@ -185,8 +186,8 @@ class KeyVersions(object):
     """Manage key.versions file
 
     Attributes:
-      saved: True if the file on disk matches the contents of the instance.  None
-          of the methods save the instance to disk automatically.
+        saved: True if the file on disk matches the contents of the instance.
+            None of the methods save the instance to disk automatically.
     """
 
     def __init__(self, filename):
@@ -217,7 +218,7 @@ class KeyVersions(object):
                 "kernel_key_version": 1,
                 "kernel_version": 1,
             }
-        # Caller is resonsible for calling Save()
+        # Caller is responsible for calling Save()
 
     def _KeyName(self, key):
         """return the correct name to use when looking up version."""
@@ -248,20 +249,20 @@ class KeyVersions(object):
             pass
         self._versions[key] = version
         self.saved = False
-        # Caller is resonsible for calling Save()
+        # Caller is responsible for calling Save()
 
     def Increment(self, key):
         """Increment key's version.  Caller is responsible for calling Save().
 
         Args:
-          key: name of the key.
+            key: name of the key.
 
         Returns:
-          Incremented version.
+            Incremented version.
 
         Raises:
-          VersionOverflowError: version is 16 bit, and incrementing would cause
-              overflow.
+            VersionOverflowError: version is 16 bit, and incrementing would
+                cause overflow.
         """
         key = self._KeyName(key)
         if self._versions[key] == 0xFFFF:
@@ -269,7 +270,7 @@ class KeyVersions(object):
         self._versions[key] += 1
         self.saved = False
         return self._versions[key]
-        # Caller is resonsible for calling Save()
+        # Caller is responsible for calling Save()
 
     def Save(self):
         """Save KeyVersions to disk if needed."""
@@ -291,25 +292,25 @@ class Keyset(object):
     A Keyset is the collection of KeyPairs needed to work with a specific Build
     Target image.
     This includes both keys shared by the Build (self.keys):
-      - installer_kernel_data_key
-      - kernel_data_key
-      - kernel_subkey
-      - recovery
-      - recovery_kernel_data_key
+        - installer_kernel_data_key
+        - kernel_data_key
+        - kernel_subkey
+        - recovery
+        - recovery_kernel_data_key
     as well as keys specific to the artifact (self._root_of_trust_keys):
-      - root_key
-      - firmware_data_key
+        - root_key
+        - firmware_data_key
 
     Attributes:
-      keys: dict of keypairs, indexed on key's name
-      root_of_trust_map: dict of root_of_trust alias (e.g., 'loem1') to use for
-          each root_of_trust name (e.g.  'ACME').  Keys in the table are both
-          root_of_trust names and root_of_trust aliases, so that
-          root_of_trust_map[root_of_trust_map[root_of_trust_name]] works.
+        keys: dict of keypairs, indexed on key's name
+        root_of_trust_map: dict of root_of_trust alias (e.g., 'loem1') to use
+            for each root_of_trust name (e.g.  'ACME').  Keys in the table are
+            both root_of_trust names and root_of_trust aliases, so that
+            root_of_trust_map[root_of_trust_map[root_of_trust_name]] works.
     """
 
-    # If we have a root_of_trust name, it is of the form 'name.root_of_trust', so
-    # we will simply split('.') the name to get the components.  If this is a
+    # If we have a root_of_trust name, it is of the form 'name.root_of_trust',
+    # so we will simply split('.') the name to get the components.  If this is a
     # unified root_of_trust, then there are per-root_of_trust keys, and
     # self.root_of_trust_key_prefixes will be set to this.
     _root_of_trust_key_names = set(("firmware_data_key", "root_key"))
@@ -317,10 +318,11 @@ class Keyset(object):
     def __init__(self, key_dir=None):
         """Initialize the Keyset from key_dir, if given.
 
-        Args:
-          key_dir: directory from which to load Keyset.  [default=None]
+        Note: every public key and keyblock must have an accompanying private
+            key.
 
-        Note: every public key and keyblock must have an accompanying private key
+        Args:
+            key_dir: directory from which to load Keyset.  [default=None]
         """
         self.keys = {}
         self.key_dir = key_dir
@@ -330,8 +332,9 @@ class Keyset(object):
         self.name = "unknown"
         if key_dir and os.path.exists(key_dir):
             # Get all root_of_trust aliases.  The legacy code base refers to
-            # 'root_of_trust' as 'loem'. We need to support the on-disk structures
-            # which have a table of 'XX = ALIAS', with the implied name 'loemXX'.
+            # 'root_of_trust' as 'loem'. We need to support the on-disk
+            # structures which have a table of 'XX = ALIAS', with the implied
+            # name 'loemXX'.
             loem_config_filename = os.path.join(key_dir, "loem.ini")
             if os.path.exists(loem_config_filename):
                 logging.debug("Reading loem.ini file")
@@ -347,10 +350,12 @@ class Keyset(object):
                                 "Adding loem alias %s %s", loem, alias
                             )
                             self.root_of_trust_map[loem] = alias
-                            # We also want loemXX to point to loemXX, since our callers tend
-                            # to use both name and alias interchangably.
-                            # TODO(lamontjones) evaluate whether or not we should force it to
-                            # be indexed by only name, instead of both.
+                            # We also want loemXX to point to loemXX, since our
+                            # callers tend to use both name and alias
+                            # interchangeably.
+                            # TODO(lamontjones) evaluate whether or not we
+                            #   should force it to be indexed by only name,
+                            #   instead of both.
                             self.root_of_trust_map[alias] = alias
                 else:
                     logging.warning("Error reading loem.ini file")
@@ -375,8 +380,8 @@ class Keyset(object):
                             version=self._versions.Get(key_name, 1),
                             priv_ext=match.group("ext"),
                         )
-                        # AddKey will detect whether or not this is a root_of_trust-specific
-                        # key and do the right thing.
+                        # AddKey will detect whether this is a
+                        # root_of_trust-specific key and do the right thing.
                         self.AddKey(key)
 
     def __eq__(self, other):
@@ -400,15 +405,15 @@ class Keyset(object):
         """Add key to Keyset.
 
         Args:
-          key: The KeyPair to add.  key.name is checked to see if it is
-              root_of_trust-specific, and the correct group is used.
+            key: The KeyPair to add.  key.name is checked to see if it is
+                root_of_trust-specific, and the correct group is used.
         """
         if "." in key.name:
             key_name, root_of_trust_name = key.name.split(".")
-            # Some of the legacy keyfiles have .vN.vprivk suffixes, even though they
-            # are not root_of_trust keys. (They are backup keys for older versions of
-            # the key.) Restricting the root_of_trust_keys to those in
-            # _root_of_trust_key_prefixes helps with that.
+            # Some legacy keyfiles have .vN.vprivk suffixes, even though they
+            # are not root_of_trust keys. (They are backup keys for older
+            # versions of the key.) Restricting the root_of_trust_keys to those
+            # in _root_of_trust_key_prefixes helps with that.
             if key_name in self._root_of_trust_key_prefixes:
                 logging.debug(
                     "Found root_of_trust %s.%s", key_name, root_of_trust_name
@@ -419,15 +424,16 @@ class Keyset(object):
 
     def AddRootOfTrustKey(self, key_name, root_of_trust_alias, key):
         """Attach the root_of_trust-specific key to the base key."""
-        # _root_of_trust_keys['loem2']['root_key'] = KeyPair('root_key.loem2', ...)
+        # _root_of_trust_keys['loem2']['root_key'] = KeyPair(
+        #   'root_key.loem2', ...)
         self._root_of_trust_keys[root_of_trust_alias][key_name] = key
 
     def KeyExists(self, key_name, require_public=False, require_private=False):
         """Returns if key is in Keyset and exists.
 
-        If this Keyset has root_of_trust-specific keys, then root_of_trust-specific
-        keys will only be found if GetBuildKeyset() has been called to get the
-        root_of_trust-specific Keyset.
+        If this Keyset has root_of_trust-specific keys, then
+        root_of_trust-specific keys will only be found if GetBuildKeyset() has
+        been called to get the root_of_trust-specific Keyset.
         """
         return key_name in self.keys and self.keys[key_name].Exists(
             require_public=require_public, require_private=require_private
@@ -437,8 +443,8 @@ class Keyset(object):
         """Returns if keyblock exists
 
         If this Keyset has root_of_trust-specific keys, then keyblocks for
-        root_of_trust-specific keys will only be found if GetBuildKeyset() has been
-        called to get the root_of_trust-specific Keyset.
+        root_of_trust-specific keys will only be found if GetBuildKeyset() has
+        been called to get the root_of_trust-specific Keyset.
         """
         return key_name in self.keys and self.keys[key_name].KeyblockExists()
 
@@ -446,10 +452,10 @@ class Keyset(object):
         """Get root_of_trust-specific keys by keyname.
 
         Args:
-          key_name: name of root_of_trust-specific key.  e.g., 'root_key'
+            key_name: name of root_of_trust-specific key.  e.g., 'root_key'
 
         Returns:
-          dict of root_of_trust_alias: key
+            dict of root_of_trust_alias: key
         """
         ret = {}
         for k, v in self._root_of_trust_keys.items():
@@ -460,17 +466,18 @@ class Keyset(object):
         return ret
 
     def GetBuildKeyset(self, root_of_trust_name):
-        """Returns new Keyset containing keys based on the root_of_trust_name given.
+        """Get new Keyset containing keys based on the root_of_trust_name given.
 
         The following keys are included:
-        * This root_of_trust's root_of_trust-specific keys
-        * Any non-root_of_trust-specific keys.
+            * This root_of_trust's root_of_trust-specific keys
+            * Any non-root_of_trust-specific keys.
 
         Args:
-          root_of_trust_name: either the root_of_trust name (e.g., 'acme') or alias
-              (e.g., 'loem1').
+            root_of_trust_name: either the root_of_trust name (e.g., 'acme') or
+                alias (e.g., 'loem1').
 
-        Raises SignerRootOfTrustKeyMissingError if subkey not found
+        Raises:
+            SignerRootOfTrustKeyMissingError if subkey not found
         """
         ks = Keyset()
 

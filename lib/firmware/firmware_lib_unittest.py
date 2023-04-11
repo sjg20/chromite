@@ -139,7 +139,8 @@ class FlashTest(cros_test_lib.RunCommandTestCase):
                         "futility",
                         "update",
                         "-p",
-                        "raiden_debug_spi:target=AP,custom_rst=true,serial=123456ab",
+                        "raiden_debug_spi:target=AP,custom_rst=true,"
+                        "serial=123456ab",
                         "-i",
                         mock.ANY,
                         "--force",

@@ -32,10 +32,10 @@ def _PathForVbootSigningScripts(path=None):
     """Get extra_env for finding vboot_reference scripts.
 
     Args:
-      path: path to vboot_reference/scripts/image_signing.
+        path: path to vboot_reference/scripts/image_signing.
 
     Returns:
-      Dictionary to pass to run's extra_env so that it finds the scripts.
+        Dictionary to pass to run's extra_env so that it finds the scripts.
     """
     if not path:
         path = os.path.join(
@@ -52,11 +52,11 @@ def GetKernelConfig(loop_kern, check=True):
     """Get the kernel config for |loop_kern|.
 
     Args:
-      loop_kern: Device file for the partition to inspect.
-      check: Whether failure to read the command line is acceptable.
+        loop_kern: Device file for the partition to inspect.
+        check: Whether failure to read the command line is acceptable.
 
     Returns:
-      String containing the kernel arguments, or None.
+        String containing the kernel arguments, or None.
     """
     ret = cros_build_lib.sudo_run(
         ["dump_kernel_config", loop_kern],
@@ -74,11 +74,11 @@ def _GetKernelCmdLine(loop_kern, check=True):
     """Get the kernel commandline for |loop_kern|.
 
     Args:
-      loop_kern: Device file for the partition to inspect.
-      check: Whether failure to read the command line is acceptable.
+        loop_kern: Device file for the partition to inspect.
+        check: Whether failure to read the command line is acceptable.
 
     Returns:
-      CommandLine() containing the kernel config.
+        CommandLine() containing the kernel config.
     """
     config = GetKernelConfig(loop_kern, check)
     if config is None:
@@ -98,24 +98,25 @@ def SignImage(
 ):
     """Sign the image file.
 
-    A Chromium OS image file (INPUT) always contains 2 partitions (kernel A & B).
-    This function will rebuild hash data by DM_PARTNO, resign kernel partitions by
-    their KEYBLOCK and PRIVKEY files, and then write to OUTPUT file. Note some
-    special images (specified by IMAGE_TYPE, like 'recovery' or 'factory_install')
-    may have additional steps (ex, tweaking verity hash or not stripping files)
-    when generating output file.
+    A Chromium OS image file (INPUT) always contains 2 partitions (kernel A &
+    B). This function will rebuild hash data by DM_PARTNO, resign kernel
+    partitions by their KEYBLOCK and PRIVKEY files, and then write to OUTPUT
+    file. Note some special images (specified by IMAGE_TYPE, like 'recovery' or
+    'factory_install') may have additional steps (ex, tweaking verity hash or
+    not stripping files) when generating output file.
 
     Args:
-      image_type: Type of image (e.g., 'factory', 'recovery').
-      input_file: Image to sign. (read-only: copied to output_file).
-      output_file: Signed image. (file is created here)
-      kernel_part_id: partition number (or name) for the kernel (usually 2,
-          4 on recovery media.)
-      keydir: Path of keyset dir to use.
-      keyA_prefix: Prefix for kernA key (e.g., 'recovery_').
-      vboot_path: Vboot_reference/scripts/image_signing dir path.
+        image_type: Type of image (e.g., 'factory', 'recovery').
+        input_file: Image to sign. (read-only: copied to output_file).
+        output_file: Signed image. (file is created here)
+        kernel_part_id: partition number (or name) for the kernel (usually 2,
+            4 on recovery media.)
+        keydir: Path of keyset dir to use.
+        keyA_prefix: Prefix for kernA key (e.g., 'recovery_').
+        vboot_path: Vboot_reference/scripts/image_signing dir path.
 
-    Raises SignImageException
+    Raises:
+        SignImageException
     """
     extra_env = _PathForVbootSigningScripts(vboot_path)
     logging.info("Preparing %s image...", image_type)
@@ -132,11 +133,12 @@ def SignImage(
             SignUefiBinaries(image, rootfs_dir, keyset, vboot_path=vboot_path)
             image.Unmount(("ROOT-A",))
 
-            # TODO(lamontjones): From this point on, all we really want at the moment
-            # is the loopback devicefile names, but that may change as we implement
-            # more of the shell functions.
+            # TODO(lamontjones): From this point on, all we really want at the
+            #   moment is the loopback devicefile names, but that may change as
+            #   we implement more of the shell functions.
             #
-            # We do not actually want to have any filesystems mounted at this point.
+            # We do not actually want to have any filesystems mounted at this
+            # point.
 
             loop_kernA = image.GetPartitionDevName("KERN-A")
             loop_rootfs = image.GetPartitionDevName("ROOT-A")
@@ -240,26 +242,31 @@ class CalculateRootfsHash(object):
     instance.
 
     Examples:
-      (See UpdateRootfsHash below)
-      image = image_lib.LoopbackPartitions(image_path)
-      rootfs_hash = CalculateRootfsHash(
-          image, kernel_cmdline.CommandLine(image.GetPartitionDevName('KERN-A')))
-      <copy or compare updated hashtree, dm_config, kernel_cmdline to the image>
-      <do other things, confident that when rootfs_hash is garbage collected, the
-      underlying new hashtree file will be deleted.>
+        (See UpdateRootfsHash below)
+        image = image_lib.LoopbackPartitions(image_path)
+        rootfs_hash = CalculateRootfsHash(
+            image, kernel_cmdline.CommandLine(
+                image.GetPartitionDevName('KERN-A')
+            )
+        )
+        <copy or compare updated hashtree, dm_config,
+        kernel_cmdline to the image>
+        <do other things, confident that when rootfs_hash is garbage collected,
+        the underlying new hashtree file will be deleted.>
 
     Attributes:
-      calculated_dm_config: Updated DmConfig for the kernel
-      calculated_kernel_cmdline: New kernel_cmdline.CommandLine
-      hashtree_filename: Name of the temporary file containing the new hashtree.
+        calculated_dm_config: Updated DmConfig for the kernel
+        calculated_kernel_cmdline: New kernel_cmdline.CommandLine
+        hashtree_filename: Name of the temporary file containing the new
+            hashtree.
     """
 
     def __init__(self, image, cmd_line):
         """Create the hash_image for the rootfs.
 
         Args:
-          image: image_lib.LoopbackPartitions() for the image.
-          cmd_line: kernel_cmdline.CommandLine for the kernel.
+            image: image_lib.LoopbackPartitions() for the image.
+            cmd_line: kernel_cmdline.CommandLine for the kernel.
         """
         self.image = image
         self.cmd_line = cmd_line
@@ -320,7 +327,7 @@ def ClearResignFlag(image):
     """Remove any /root/.need_to_be_signed file from the rootfs.
 
     Args:
-      image: image_lib.LoopbackPartitions instance for this image.
+        image: image_lib.LoopbackPartitions instance for this image.
     """
     # Check and clear the need_to_resign tag file.
     rootfs_dir = image.Mount(("ROOT-A",), mount_opts=("rw",))[0]
@@ -335,10 +342,10 @@ def UpdateRootfsHash(image, loop_kern, keyset, keyA_prefix):
     """Update the root filesystem hash.
 
     Args:
-      image: image_lib.LoopbackPartitions instance for this image.
-      loop_kern: Device file name for the kernel partition to hash.
-      keyset: Kernel_cmdline.Keyset to use.
-      keyA_prefix: Prefix for kernA key (e.g., 'recovery_').
+        image: image_lib.LoopbackPartitions instance for this image.
+        loop_kern: Device file name for the kernel partition to hash.
+        keyset: Kernel_cmdline.Keyset to use.
+        keyA_prefix: Prefix for kernA key (e.g., 'recovery_').
     """
     logging.info(
         "Updating rootfs hash and updating cmdline for kernel partitions"
@@ -406,9 +413,9 @@ def _UpdateKernelConfig(loop_kern, cmdline, key):
     """Update the kernel config for |loop_kern|.
 
     Args:
-      loop_kern: Device file for the partition to inspect.
-      cmdline: CommandLine instance to set.
-      key: Key to use.
+        loop_kern: Device file for the partition to inspect.
+        cmdline: CommandLine instance to set.
+        key: Key to use.
     """
     with tempfile.NamedTemporaryFile() as temp:
         temp.file.write(cmdline.Format().encode("utf-8"))
@@ -437,12 +444,12 @@ def UpdateStatefulPartitionVblock(image, keyset):
     """Update the SSD install-able vblock file on stateful partition.
 
     This is deprecated because all new images should have a SSD boot-able kernel
-    in partition 4. However, the signer needs to be able to sign new & old images
-    (crbug.com/449450#c13) so we will probably never remove this.
+    in partition 4. However, the signer needs to be able to sign new & old
+    images (crbug.com/449450#c13) so we will probably never remove this.
 
     Args:
-      image: image_lib.LoopbackPartitions() for the image.
-      keyset: Keyset to use for signing
+        image: image_lib.LoopbackPartitions() for the image.
+        keyset: Keyset to use for signing
     """
     with tempfile.NamedTemporaryFile(dir=image.destination) as tmpfile:
         loop_kern = image.GetPartitionDevName("KERN-B")
@@ -555,7 +562,7 @@ def DumpConfig(image_file):
     primarily for debugging of images.
 
     Args:
-      image_file: path to the image file from which to dump kernel configs.
+        image_file: path to the image file from which to dump kernel configs.
     """
     with image_lib.LoopbackPartitions(image_file) as image:
         for kernel_part in ("KERN-A", "KERN-B"):

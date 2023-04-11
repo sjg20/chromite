@@ -55,7 +55,8 @@ class GenerateTest(cros_test_lib.TestCase):
             try:
                 self.assertEqual(got, expected)
             except Exception as e:
-                # Update the golden file so that manual modification is not needed.
+                # Update the golden file so that manual modification is not
+                # needed.
                 with open(expected_file, "w", encoding="utf-8") as outfile:
                     json.dump(got, outfile, indent=2, sort_keys=True)
                 raise e

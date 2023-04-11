@@ -481,16 +481,18 @@ class TestCalculateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
         self.assertEqual(
             kernel_cmdline.DmConfig(
                 "1 vroot none ro 1,0 3891200 verity "
-                "payload=PARTUUID=%U/PARTNROFF=1 hashtree=PARTUUID=%U/PARTNROFF=1 "
+                "payload=PARTUUID=%U/PARTNROFF=1 "
+                "hashtree=PARTUUID=%U/PARTNROFF=1 "
                 "hashstart=3891200 alg=sha1 "
-                "root_hexdigest=9999999999999999999999999999999999999999 salt=bbbbb"
+                "root_hexdigest=9999999999999999999999999999999999999999 "
+                "salt=bbbbb"
                 "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
             ),
             rootfs_hash.calculated_dm_config,
         )
         self.assertEqual(
-            "console= loglevel=7 init=/sbin/init cros_secure oops=panic panic=-1 "
-            "root=/dev/dm-0 rootwait ro dm_verity.error_behavior=3 "
+            "console= loglevel=7 init=/sbin/init cros_secure oops=panic "
+            "panic=-1 root=/dev/dm-0 rootwait ro dm_verity.error_behavior=3 "
             'dm_verity.max_bios=-1 dm_verity.dev_wait=1 dm="1 vroot none ro '
             "1,0 3891200 verity payload=PARTUUID=%U/PARTNROFF=1 "
             "hashtree=PARTUUID=%U/PARTNROFF=1 hashstart=3891200 alg=sha1 "
@@ -514,13 +516,14 @@ class TestCalculateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
         # We don't actually care about the return, it's checked elsewhere.
         file_name = rootfs_hash.hashtree_filename
         self.assertExists(file_name)
-        # We poke __del__ directly because Python does not guarantee when it will
-        # be called relative to a del statement.  The only thing del guarantees is
-        # decrementing the object ref counter, not when the GC runs and clears it.
+        # We poke __del__ directly because Python does not guarantee when it
+        # will be called relative to a del statement.  The only thing del
+        # guarantees is decrementing the object ref counter, not when the GC
+        # runs and clears it.
         rootfs_hash.__del__()
         self.assertNotExists(file_name)
-        # Call it explicitly for fun.  This makes sure the func can be called more
-        # than once which is how the code is written.
+        # Call it explicitly for fun.  This makes sure the func can be called
+        # more than once which is how the code is written.
         del rootfs_hash
 
     def testSaltOptional(self):
@@ -559,8 +562,8 @@ class TestCalculateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
             rootfs_hash.calculated_dm_config.Format(),
         )
         self.assertEqual(
-            "console= loglevel=7 init=/sbin/init cros_secure oops=panic panic=-1 "
-            "root=/dev/dm-0 rootwait ro dm_verity.error_behavior=3 "
+            "console= loglevel=7 init=/sbin/init cros_secure oops=panic "
+            "panic=-1 root=/dev/dm-0 rootwait ro dm_verity.error_behavior=3 "
             'dm_verity.max_bios=-1 dm_verity.dev_wait=1 dm="1 vroot none ro '
             "1,0 3891200 verity payload=PARTUUID=%U/PARTNROFF=1 "
             "hashtree=PARTUUID=%U/PARTNROFF=1 hashstart=3891200 alg=sha1 "
@@ -637,13 +640,13 @@ class TestUpdateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
         )
         self.assertEqual(5, self.rc.call_count)
         expected_kernel_cmdline = kernel_cmdline.CommandLine(
-            "console= loglevel=7 init=/sbin/init cros_secure oops=panic panic=-1 "
-            "root=/dev/dm-0 rootwait ro dm_verity.error_behavior=3 "
-            'dm_verity.max_bios=-1 dm_verity.dev_wait=1 dm="1 vroot none ro 1,0 '
-            '800 verity alg=sha1" noinitrd cros_debug vt.global_cursor_default=0 '
-            "kern_guid=%U add_efi_memmap boot=local noresume noswap "
-            "i915.modeset=1 tpm_tis.force=1 tpm_tis.interrupts=0 "
-            "nmi_watchdog=panic,lapic disablevmx=off"
+            "console= loglevel=7 init=/sbin/init cros_secure oops=panic "
+            "panic=-1 root=/dev/dm-0 rootwait ro dm_verity.error_behavior=3 "
+            'dm_verity.max_bios=-1 dm_verity.dev_wait=1 dm="1 vroot none ro '
+            '1,0 800 verity alg=sha1" noinitrd cros_debug '
+            "vt.global_cursor_default=0 kern_guid=%U add_efi_memmap "
+            "boot=local noresume noswap i915.modeset=1 tpm_tis.force=1 "
+            "tpm_tis.interrupts=0 nmi_watchdog=panic,lapic disablevmx=off"
         )
         expected_calls = [
             mock.call(
@@ -677,13 +680,13 @@ class TestUpdateRootfsHash(cros_test_lib.RunCommandTempDirTestCase):
         )
         self.assertEqual(5, self.rc.call_count)
         expected_kernel_cmdline = kernel_cmdline.CommandLine(
-            "console= loglevel=7 init=/sbin/init cros_secure oops=panic panic=-1 "
-            "root=/dev/dm-0 rootwait ro dm_verity.error_behavior=3 "
-            'dm_verity.max_bios=-1 dm_verity.dev_wait=1 dm="1 vroot none ro 1,0 '
-            '800 verity alg=sha1" noinitrd cros_debug vt.global_cursor_default=0 '
-            "kern_guid=%U add_efi_memmap boot=local noresume noswap "
-            "i915.modeset=1 tpm_tis.force=1 tpm_tis.interrupts=0 "
-            "nmi_watchdog=panic,lapic disablevmx=off"
+            "console= loglevel=7 init=/sbin/init cros_secure oops=panic "
+            "panic=-1 root=/dev/dm-0 rootwait ro dm_verity.error_behavior=3 "
+            'dm_verity.max_bios=-1 dm_verity.dev_wait=1 dm="1 vroot none ro '
+            '1,0 800 verity alg=sha1" noinitrd cros_debug '
+            "vt.global_cursor_default=0 kern_guid=%U add_efi_memmap "
+            "boot=local noresume noswap i915.modeset=1 tpm_tis.force=1 "
+            "tpm_tis.interrupts=0 nmi_watchdog=panic,lapic disablevmx=off"
         )
         expected_calls = [
             mock.call(
@@ -958,8 +961,8 @@ class TestUpdateLegacyBootloader(cros_test_lib.RunCommandTempDirTestCase):
                     "--",
                     "sed",
                     "-iE",
-                    "s/\\broot_hexdigest=[a-z0-9]+/root_hexdigest=9999999999999999999"
-                    "999999999999999999999/g",
+                    "s/\\broot_hexdigest=[a-z0-9]+/root_hexdigest="
+                    "9999999999999999999999999999999999999999/g",
                 ]
                 + sorted(uefi["sys_cfgs"]),
             ),
