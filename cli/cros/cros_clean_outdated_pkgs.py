@@ -25,7 +25,7 @@ from chromite.scripts import cros_setup_toolchains
 from chromite.utils import pms
 
 
-IGNORED_REPOSITORIES = frozenset(["crossdev"])
+IGNORED_REPOSITORIES = frozenset(["crossdev", "toolchains"])
 
 # TODO: better detect all packages that are part of "system profile" or are
 # otherwise crucial, and must never be removed, like bash, portage or awk.
