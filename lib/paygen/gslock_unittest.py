@@ -22,10 +22,10 @@ def _InProcessAcquire(lock_uri):
     This helper has to be pickleable, so can't be a member of the test class.
 
     Args:
-      lock_uri: URI of the lock to acquire.
+        lock_uri: URI of the lock to acquire.
 
     Returns:
-      boolean telling if this method got the lock.
+        boolean telling if this method got the lock.
     """
     lock = gslock.Lock(lock_uri)
     try:
@@ -43,10 +43,10 @@ def _InProcessDoubleAcquire(lock_uri):
     This helper has to be pickleable, so can't be a member of the test class.
 
     Args:
-      lock_uri: URI of the lock to acquire.
+        lock_uri: URI of the lock to acquire.
 
     Returns:
-      int describing how many times it acquired a lock.
+        int describing how many times it acquired a lock.
     """
     count = 0
 
@@ -71,13 +71,14 @@ def _InProcessDataUpdate(lock_uri_data_uri):
     This helper has to be pickleable, so can't be a member of the test class.
 
     Args:
-      lock_uri_data_uri: Tuple containing (lock_uri, data_uri). Passed as a tuple,
-        since multiprocessing.Pool.map only allows a single argument in.
-      lock_uri: URI of the lock to acquire.
-      data_uri: URI of the data file to create/increment.
+        lock_uri_data_uri: Tuple containing (lock_uri, data_uri). Passed as a
+            tuple, since multiprocessing.Pool.map only allows a single argument
+            in.
+        lock_uri: URI of the lock to acquire.
+        data_uri: URI of the data file to create/increment.
 
     Returns:
-      boolean describing if this method got the lock.
+        boolean describing if this method got the lock.
     """
     lock_uri, data_uri = lock_uri_data_uri
     ctx = gs.GSContext()
@@ -133,7 +134,7 @@ class GSLockTest(cros_test_lib.MockTestCase):
 
     @cros_test_lib.pytestmark_network_test
     def testLockRepetition(self):
-        """Test aquiring same lock multiple times."""
+        """Test acquiring same lock multiple times."""
         # Force a known host name.
         self.PatchObject(
             cros_build_lib, "MachineDetails", return_value="TestHost"
@@ -217,7 +218,7 @@ class GSLockTest(cros_test_lib.MockTestCase):
         ) as pool:
             results = pool.map(_InProcessDoubleAcquire, [lock_uri] * count)
 
-            # Clean up the lock sinc the processes explicitly only acquire.
+            # Clean up the lock since the processes explicitly only acquire.
             self.ctx.Remove(lock_uri)
 
             # Ensure that only one of them got the lock (and got it twice).
@@ -226,7 +227,7 @@ class GSLockTest(cros_test_lib.MockTestCase):
 
     @cros_test_lib.pytestmark_network_test
     def testMultiProcessDataUpdate(self):
-        """Have lots of processes update a GS file proctected by a lock."""
+        """Have lots of processes update a GS file protected by a lock."""
         count = self.NUM_THREADS
         with gs.TemporaryURL("gslock") as lock_uri, multiprocessing.Pool(
             processes=count
@@ -243,7 +244,7 @@ class GSLockTest(cros_test_lib.MockTestCase):
 
     @cros_test_lib.pytestmark_network_test
     def testDryrunLock(self):
-        """Ensure that lcok can be obtained and released in dry-run mode."""
+        """Ensure that lock can be obtained and released in dry-run mode."""
         with gs.TemporaryURL("gslock") as lock_uri:
             lock = gslock.Lock(lock_uri, dry_run=True)
             self.assertIsNone(lock.Acquire())
@@ -252,7 +253,7 @@ class GSLockTest(cros_test_lib.MockTestCase):
 
     @cros_test_lib.pytestmark_network_test
     def testDryrunLockRepetition(self):
-        """Test aquiring same lock multiple times in dry-run mode."""
+        """Test acquiring same lock multiple times in dry-run mode."""
         with gs.TemporaryURL("gslock") as lock_uri:
             lock = gslock.Lock(lock_uri, dry_run=True)
             self.assertIsNone(lock.Acquire())

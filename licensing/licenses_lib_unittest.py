@@ -54,7 +54,9 @@ class LicenseLibTest(cros_test_lib.TempDirTestCase):
             },
             "CPL": {
                 "contents": "ChromeOS Partner License",
-                "dir": "src/private-overlays/chromeos-partner-overlay/licenses/CPL",
+                "dir": (
+                    "src/private-overlays/chromeos-partner-overlay/licenses/CPL"
+                ),
                 "board": "chromeos-partner",
                 "type": self.LICENSE_CUSTOM,
             },
@@ -126,7 +128,7 @@ repo-name = %(repo_name)s
 masters = %(masters)s
 """
 
-        # Convenince variables for ebuild dictionary building.
+        # Convenience variables for ebuild dictionary building.
         foo_eb_dir = os.path.join(
             self.tempdir, "src/overlays/overlay-foo/category"
         )
@@ -372,7 +374,10 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
         self.assertEqual(expected, sorted(result))
 
     def testFindLicenseType(self):
-        """Tests the type (gentoo/custom) for licenses are correctly identified."""
+        """Tests the type for licenses are correctly identified.
+
+        e.g. gentoo vs custom.
+        """
         # Doesn't exist anywhere.
         self.assertRaises(
             AssertionError,

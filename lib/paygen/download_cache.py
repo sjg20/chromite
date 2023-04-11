@@ -35,8 +35,8 @@ def _DefaultFetchFunc(uri, cache_file):
     This simply downloads the uri into the cache file using urilib
 
     Args:
-      uri: The URI to download.
-      cache_file: The path to put the downloaded file in.
+        uri: The URI to download.
+        cache_file: The path to put the downloaded file in.
     """
     urilib.Copy(uri, cache_file)
 
@@ -48,11 +48,11 @@ class DownloadCache(object):
     threads.
 
     Examples:
-      # This will create the cache dir, and purge old contents.
-      cache = DownloadCache('/tmp/my_cache')
+        # This will create the cache dir, and purge old contents.
+        cache = DownloadCache('/tmp/my_cache')
 
-      # file is copied into file, blocking for download if needed.
-      cache.GetFileCopy('gs://bucket/foo', '/tmp/foo')
+        # file is copied into file, blocking for download if needed.
+        cache.GetFileCopy('gs://bucket/foo', '/tmp/foo')
     """
 
     # Name of the purge management lock over the entire cache.
@@ -69,12 +69,13 @@ class DownloadCache(object):
         cache_size.
 
         Args:
-          cache_dir: The directory in which to create the cache.
-          max_age: Purge files not used for this number of seconds. None for no
-            max_age.
-          cache_size: Purge the least recently used files until the cache is below
-            this size in bytes. None for no size limit.  If no condition is
-            provided, we purge all files unused for one full day.
+            cache_dir: The directory in which to create the cache.
+            max_age: Purge files not used for this number of seconds. None for
+                no max_age.
+            cache_size: Purge the least recently used files until the cache is
+                below this size in bytes. None for no size limit.  If no
+                condition is provided, we purge all files unused for one full
+                day.
         """
         # One directory for cached files, one for lock files.
         self._cache_dir = os.path.realpath(cache_dir)
@@ -87,10 +88,11 @@ class DownloadCache(object):
         self._SetupCache()
 
     def _SetupCache(self):
-        """Make sure that our cache contains only files/directories we expect."""
+        """Ensure that our cache contains only files/directories we expect."""
         try:
             osutils.SafeMakedirs(self._cache_dir)
-            # The purge lock ensures nobody else is modifying the cache in any way.
+            # The purge lock ensures nobody else is modifying the cache in any
+            # way.
             with self._PurgeLock(blocking=False, shared=False):
                 # We have changed the layout of our cache directories over time.
                 # Clean up any left over files.
@@ -114,17 +116,19 @@ class DownloadCache(object):
                 if not os.path.exists(self._lock_dir):
                     os.makedirs(self._lock_dir)
         except locking.LockNotAcquiredError:
-            # If we can't get an exclusive lock on the cache, someone else set it up.
+            # If we can't get an exclusive lock on the cache, someone else set
+            # it up.
             pass
 
     def _UriToCacheFile(self, uri):
-        """Convert a URI to an cache file (full path).
+        """Convert a URI to a cache file (full path).
 
         Args:
-          uri: The uri of the file to be cached locally.
+            uri: The uri of the file to be cached locally.
 
         Returns:
-          The full path file name of the cache file associated with a given URI.
+            The full path file name of the cache file associated with a given
+            URI.
         """
         # We use the md5 hash of the URI as our file name. This allows us to
         # store all cache files in a single directory, which removes race
@@ -141,11 +145,11 @@ class DownloadCache(object):
         getting any kind of _CacheFileLock.
 
         Args:
-          blocking: Block until the lock is available?
-          shared: Get a shared lock, or an exclusive lock?
+            blocking: Block until the lock is available?
+            shared: Get a shared lock, or an exclusive lock?
 
         Returns:
-          Locking.FileLock (acquired)
+            Locking.FileLock (acquired)
         """
         lock_file = os.path.join(self._cache_dir, self._CACHE_LOCK)
         lock = locking.FileLock(
@@ -166,12 +170,12 @@ class DownloadCache(object):
         of cache file lock.
 
         Args:
-          cache_file: The full path of file in cache to lock.
-          blocking: Block until the lock is available?
-          shared: Get a shared lock, or an exclusive lock?
+            cache_file: The full path of file in cache to lock.
+            blocking: Block until the lock is available?
+            shared: Get a shared lock, or an exclusive lock?
 
         Returns:
-          Locking.FileLock (acquired)
+            Locking.FileLock (acquired)
         """
         lock_file = os.path.join(self._lock_dir, os.path.basename(cache_file))
         lock = locking.FileLock(
@@ -185,10 +189,10 @@ class DownloadCache(object):
         Is a no-op if cache lock is not acquirable.
 
         Args:
-          max_age: Overrides the __init__ max_age for this one purge. Mostly
+            max_age: Overrides the __init__ max_age for this one purge. Mostly
             intended for unittests.
-          cache_size: Overrides the __init__ cache_size for this one purge. Mostly
-            intended for unittests.
+            cache_size: Overrides the __init__ cache_size for this one purge.
+                Mostly intended for unittests.
         """
         max_age = self._max_age if max_age is None else max_age
         cache_size = self._cache_size if cache_size is None else cache_size
@@ -224,7 +228,8 @@ class DownloadCache(object):
                 # See crbug.com/1016555.
 
         except locking.LockNotAcquiredError:
-            # If we can't get an exclusive lock on the file, it's in use, leave it.
+            # If we can't get an exclusive lock on the file, it's in use, leave
+            # it.
             pass
 
     def _FetchIntoCache(self, uri, cache_file, fetch_func=_DefaultFetchFunc):
@@ -236,15 +241,15 @@ class DownloadCache(object):
         it does nothing.
 
         Args:
-          uri: The uri of the file.
-          cache_file: The location in the cache to download too.
-          fetch_func: Function to get the file.
+            uri: The uri of the file.
+            cache_file: The location in the cache to download too.
+            fetch_func: Function to get the file.
 
         Returns:
-          True if a file was downloaded, False otherwise. (used in unittests)
+            True if a file was downloaded, False otherwise. (used in unittests)
 
         Raises:
-          May raise any download error associated with the URI's protocol.
+            May raise any download error associated with the URI's protocol.
         """
         try:
             # Write protect the file before modifying it.
@@ -259,19 +264,20 @@ class DownloadCache(object):
                         cache_file, stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH
                     )
                 except:
-                    # If there was any error with the download, make sure no partial
-                    # file was left behind.
+                    # If there was any error with the download, make sure no
+                    # partial file was left behind.
                     logging.info("Failed to fetch %s to %s", uri, cache_file)
                     if os.path.exists(cache_file):
                         os.unlink(cache_file)
                     raise
 
         except locking.LockNotAcquiredError:
-            # In theory, if it's already locked, that either means a download is in
-            # progress, or there is a shared lock which means it's already present.
+            # In theory, if it's already locked, that either means a download is
+            # in progress, or there is a shared lock which means it's already
+            # present.
             return False
 
-        # Try to cleanup the cache after we just grew it.
+        # Try to clean up the cache after we just grew it.
         self.Purge()
         return True
 
@@ -294,19 +300,18 @@ class DownloadCache(object):
         This method may block while trying to download and/or lock the file.
 
         Args:
-          uri: The uri of the file to access.
-          fetch_func: A function to produce the file if it isn't already in the
-            cache.
+            uri: The uri of the file to access.
+            fetch_func: A function to produce the file if it isn't already in
+                the cache.
 
         Returns:
-          File object opened with 'rb' mode.
+            File object opened with 'rb' mode.
 
         Raises:
-          Exceptions from a failed download are passed through 'as is' from
-          the underlying download mechanism.
-
-          RetriesExhaustedError if we need a large number of attempts to
-          download the same file.
+            Exception: Exceptions from a failed download are passed through 'as
+                is' from the underlying download mechanism.
+            RetriesExhaustedError: if we need a large number of attempts to
+                download the same file.
         """
         cache_file = self._UriToCacheFile(uri)
 
@@ -316,27 +321,29 @@ class DownloadCache(object):
                 # Attempt to download the file, if needed.
                 self._FetchIntoCache(uri, cache_file, fetch_func)
 
-                # Get a shared lock on the file. This can block if another process
-                # has a non-shared lock (ie: they are downloading).
+                # Get a shared lock on the file. This can block if another
+                # process has a non-shared lock (ie: they are downloading).
                 with self._CacheFileLock(
                     cache_file, shared=True, blocking=True
                 ):
                     if os.path.exists(cache_file):
-                        # Touch the timestamp on cache file to help purging logic.
+                        # Touch the timestamp on cache file to help purging
+                        # logic.
                         osutils.Touch(cache_file)
 
                         # pylint: disable=consider-using-with
                         return open(cache_file, "rb")
                     else:
-                        # We don't have the file in our cache. There are three ways this
-                        # can happen:
+                        # We don't have the file in our cache. There are three
+                        # ways this can happen:
                         #
-                        # A) Another process was trying to download, blocked our download,
-                        #    then got a download error.
-                        # B) Another process removed the file(illegally). We will recover as
-                        #    soon as all read-only locks are released.
-                        # C) Our download failed without throwing an exception. We will
-                        #    block forever if this continues to happen.
+                        # A) Another process was trying to download, blocked our
+                        #   download, then got a download error.
+                        # B) Another process removed the file(illegally). We
+                        #   will recover as soon as all read-only locks are
+                        #   released.
+                        # C) Our download failed without throwing an exception.
+                        #   We will block forever if this continues to happen.
 
                         # Sleep so we don't spin too quickly, then try again.
                         time.sleep(self._GET_FILE_SPIN_DELAY)
@@ -346,17 +353,17 @@ class DownloadCache(object):
     def GetFileCopy(self, uri, filepath):
         """Copy a cache file into your file (downloading as needed).
 
-        Copy the file into your specified filename (creating or overridding). It
+        Copy the file into your specified filename (creating or overriding). It
         will be downloaded into the cache first, if needed. It is your
         responsibility to manage filepath after it is populated.
 
         Args:
-          uri: The uri of the file to access.
-          filepath: The name of the file to copy uri contents into.
+            uri: The uri of the file to access.
+            filepath: The name of the file to copy uri contents into.
 
         Raises:
-          Exceptions from a failed download are passed through 'as is' from
-          the underlying download mechanism.
+            Exception: Exceptions from a failed download are passed through 'as
+                is' from the underlying download mechanism.
         """
         with self.GetFileObject(uri) as src:
             with open(filepath, "w+b") as dest:

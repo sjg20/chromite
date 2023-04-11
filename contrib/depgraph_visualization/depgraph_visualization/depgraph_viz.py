@@ -52,13 +52,14 @@ def CreateRuntimeTree(sysroot: str, pkg_list: str) -> Dict[str, List[str]]:
     of only RDEPEDS packages and dependencies.
 
     Args:
-      sysroot: The path to the root directory into which the package is
-        pretend to be merged. This value is also used for setting
-        PORTAGE_CONFIGROOT.
-      pkg_list: The list of packages to extract their dependencies from.
+        sysroot: The path to the root directory into which the package is
+            pretend to be merged. This value is also used for setting
+            PORTAGE_CONFIGROOT.
+        pkg_list: The list of packages to extract their dependencies from.
 
     Returns:
-      Returns a dictionary of runtime packages with their immediate dependencies.
+        Returns a dictionary of runtime packages with their immediate
+        dependencies.
     """
 
     # Setup for dependency extraction.

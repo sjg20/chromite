@@ -44,17 +44,17 @@ class PackageNode(object):
 class DepVisualizer(object):
     """Process dependency information into visualizable data.
 
-    Typical usage:
-      dep_vis = DepVisualizer(dep_tree)
-      dep_vis.VisualizeGraph()
+    Examples:
+        dep_vis = DepVisualizer(dep_tree)
+        dep_vis.VisualizeGraph()
     """
 
     def __init__(self, dep_tree: Dict[str, List[str]]):
         """Dependency Visualizer init.
 
         Args:
-          dep_tree: A dictionary were package names
-                    mapped to their runtime dependency list.
+            dep_tree: A dictionary were package names mapped to their runtime
+                dependency list.
         """
         # For purposes of speed and simplicity the dependency nodes are
         # tracked using a dictionary where the key is the name of the
@@ -71,8 +71,8 @@ class DepVisualizer(object):
         them to pkg_dict.
 
         Args:
-          pkg_name: the name of a package.
-          pkg_dependencies: list of the names of the package's dependency.
+            pkg_name: the name of a package.
+            pkg_dependencies: list of the names of the package's dependency.
         """
         pkg_node = self.pkg_dict.setdefault(pkg_name, PackageNode(pkg_name))
         for dependency in pkg_dependencies:
@@ -89,22 +89,22 @@ class DepVisualizer(object):
         other words those nodes with no reverse dependencies.
 
         Returns:
-          A generator of PackageNodes.
+            A generator of PackageNodes.
         """
         return (x for x in self.pkg_dict.values() if not x.rvs_dependencies)
 
     def VisualizeGraph(self, output_name="DepGraph", output_dir="."):
-        """Create a HTML file with the visualization of the dependency graph.
+        """Create an HTML file with the visualization of the dependency graph.
 
-        Pyvis helps us create a HTML file with all the packages and their
-        relationships in a timely manner; average execution time for this function
-        is 2-3 seconds (in a cloud top instance).
+        Pyvis helps us create an HTML file with all the packages and their
+        relationships in a timely manner; average execution time for this
+        function is 2-3 seconds (in a cloud top instance).
         The resulting HTML file by default is named 'DepGraph'
         and is written in the current directory of this file.
 
         Args:
-          output_name: Name of the output HTML file.
-          output_dir: Directory of the output HTML file.
+            output_name: Name of the output HTML file.
+            output_dir: Directory of the output HTML file.
         """
         import pyvis  # pylint: disable=import-error
 
@@ -129,16 +129,16 @@ class DepVisualizer(object):
             queue.append(root.GetDependencies())
             net.add_node(root.name, shape="star", color="red", mass=1)
 
-        # This function (only) adds the nodes in the graph using a BFS traversal.
-        # It also colors nodes in shades of green and blue depending
+        # This function (only) adds the nodes in the graph using a BFS
+        # traversal. It also colors nodes in shades of green and blue depending
         # on their depth level.
         _BfsColoring(net, queue, seen_pkgs)
 
         # We add the edges after adding the nodes because Pyvis is
         # optimized this way.
         for pkg, node in self.pkg_dict.items():
-            # In Pyvis you add directed edges by passing a list of lists with the
-            # name of the parent and child.
+            # In Pyvis you add directed edges by passing a list of lists with
+            # the name of the parent and child.
             net.add_edges([pkg, child.name] for child in node.GetDependencies())
 
         # force_atlas_2based is a mathematical model to calculate
@@ -156,12 +156,12 @@ class DepVisualizer(object):
         """Creates 4 histograms with dependency and rvs dependency distribution.
 
         The amount of packages with a certain range of dependencies and
-        reverse dependencies ranges from 600 to 1 so we split the histograms
+        reverse dependencies ranges from 600 to 1, so we split the histograms
         of both into two; giving us four in total.
 
         Args:
-          build_name: Name of the target build
-          path: Path to output files.
+            build_name: Name of the target build.
+            path: Path to output files.
         """
         # Prepare data to plot.
         dep_count = [len(n.dependencies) for n in self.pkg_dict.values()]
@@ -223,11 +223,11 @@ def _SaveHistogram(
     Plots and saves a histogram as a png file.
 
     Args:
-      data: List with data points.
-      bins: List with ranges for the histogram.
-      name: Name of the output file.
-      path: Path of the output file.
-      color: Color in either rgb or hexadecimal format.
+        data: List with data points.
+        bins: List with ranges for the histogram.
+        name: Name of the output file.
+        path: Path of the output file.
+        color: Color in either rgb or hexadecimal format.
     """
 
     plt.hist(data, bins=bins, edgecolor="black", color=[color])
@@ -255,9 +255,9 @@ def _BfsColoring(net, queue: List[Iterator[PackageNode]], seen_pkgs: Set[str]):
     Correct type hitting to be added for 'net'.
 
     Args:
-      net: pyvis.network.Network instance.
-      queue: List of generators that yield PackageNodes.
-      seen_pkgs: Name set of all visited packages.
+        net: pyvis.network.Network instance.
+        queue: List of generators that yield PackageNodes.
+        seen_pkgs: Name set of all visited packages.
     """
     green = 255
     blue = 0
@@ -277,10 +277,10 @@ def _BfsColoring(net, queue: List[Iterator[PackageNode]], seen_pkgs: Set[str]):
                 vertex_degree = len(node.rvs_dependencies) + len(
                     node.dependencies
                 )
-                # Give nodes custom format based on their vertex degree.
-                # The most connected nodes have at most 200+ edges and at least 20.
-                # 13% of all nodes have 50% of all dependencies
-                # and 3% have 50% of all reverse dependencies.
+                # Give nodes custom format based on their vertex degree. The
+                # most connected nodes have at most 200+ edges and at least 20.
+                # 13% of all nodes have 50% of all dependencies and 3% have 50%
+                # of all reverse dependencies.
                 mass = 3 if vertex_degree >= 20 else 1
                 shade = "#effffb" if vertex_degree >= 20 else color
                 shape = "diamond" if vertex_degree >= 20 else "dot"
@@ -302,14 +302,14 @@ def _RgbColorGrade(green: int, blue: int, rate=51) -> Tuple[str, int, int]:
     thus a high rate creates a good contrast between near and deep nodes.
 
     Args:
-      green: int value between [0, 255] for the green component.
-      blue: int value between [0, 255] for the blue component.
-      rate: rate of change between shades of green and blue.
+        green: int value between [0, 255] for the green component.
+        blue: int value between [0, 255] for the blue component.
+        rate: rate of change between shades of green and blue.
 
     Returns:
-      A tuple of three values, the first being a RGB formatted string color,
-      the second the next value for the green component, and third the next
-      value for the blue component.
+        A tuple of three values, the first being an RGB formatted string color,
+        the second the next value for the green component, and third the next
+        value for the blue component.
     """
 
     if green not in range(

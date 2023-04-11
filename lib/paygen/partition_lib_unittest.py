@@ -76,7 +76,8 @@ class PartitionLibMockTest(cros_test_lib.RunCommandTempDirTestCase):
 
     def testIsGptImage(self):
         """Tests we correctly identify an Gpt image."""
-        # Tests correct arguments are passed and Gpt image is correctly identified.
+        # Tests correct arguments are passed and Gpt image is correctly
+        # identified.
         image = "/foo/image"
         part_info_mock = self.PatchObject(
             image_lib, "GetImageDiskPartitionInfo"

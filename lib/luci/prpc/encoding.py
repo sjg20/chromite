@@ -2,13 +2,15 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# This file is heavily based off of LUCI encoding.py.
+"""This file is heavily based off of LUCI encoding.py."""
 
 from chromite.third_party.google.protobuf import json_format
 from chromite.third_party.google.protobuf import text_format
 
 
 class Encoding(object):
+    """Encoding enum-ish class."""
+
     BINARY = (0, "application/prpc; encoding=binary")
     JSON = (1, "application/json")
     TEXT = (2, "application/prpc; encoding=text")
@@ -22,12 +24,12 @@ def get_decoder(encoding):
     """Returns the appropriate decoder for content type.
 
     Args:
-      encoding: A value from the Encoding enum.
+        encoding: A value from the Encoding enum.
 
     Returns:
-      a callable which takes an encoded string and an empty protobuf message, and
-          populates the given protobuf with data from the string. Each decoder
-          may raise exceptions of its own based on incorrectly formatted data.
+        A callable which takes an encoded string and an empty protobuf message,
+        and populates the given protobuf with data from the string. Each decoder
+        may raise exceptions of its own based on incorrectly formatted data.
     """
     if encoding == Encoding.BINARY:
         return lambda string, proto: proto.ParseFromString(string)
@@ -45,11 +47,12 @@ def get_encoder(encoding):
     """Returns the appropriate encoder for the Accept content type.
 
     Args:
-      encoding: A value from the Encoding enum.
+        encoding: A value from the Encoding enum.
 
     Returns:
-      a callable which takes an initialized protobuf message, and returns a string
-          representing its data. Each encoder may raise exceptions of its own.
+        A callable which takes an initialized protobuf message, and returns a
+        string representing its data. Each encoder may raise exceptions of its
+        own.
     """
     if encoding == Encoding.BINARY:
         return lambda proto: proto.SerializeToString()

@@ -109,7 +109,7 @@ def test_package_info_eq_invalid_types():
 
 
 def _compare_unequal_packages(lesser, greater):
-    """Run through the comparison operators for the two given package strings."""
+    """Execute all comparison operators for the two given package strings."""
     b_str = greater
     b_cpv = package_info.SplitCPV(b_str)
     a = package_info.parse(lesser)

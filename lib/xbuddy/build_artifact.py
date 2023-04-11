@@ -105,31 +105,30 @@ class Artifact(object, metaclass=ArtifactMeta):
     between a glob (full name string match) and a regex (partial match).
 
     Class members:
-      fetcher: An object which knows how to fetch the artifact.
-      name: Name given for artifact; in fact, it is a pattern that captures the
-            names of files contained in the artifact. This can either be an
+        fetcher: An object which knows how to fetch the artifact.
+        name: Name given for artifact; in fact, it is a pattern that captures
+            the names of files contained in the artifact. This can either be an
             ordinary shell-style glob (the default), or a regular expression (if
             is_regex_name is True).
-      is_regex_name: Whether the name value is a regex (default: glob).
-      build: The version of the build i.e. R26-2342.0.0.
-      marker_name: Name used to define the lock marker for the artifacts to
-                   prevent it from being re-downloaded. By default based on name
-                   but can be overriden by children.
-      exception_file_path: Path to a file containing the serialized exception,
-                           which was raised in Process method. The file is located
-                           in the parent folder of install_dir, since the
-                           install_dir will be deleted if the build does not
-                           existed.
-      install_path: Path to artifact.
-      install_subdir: Directory within install_path where the artifact is actually
-                      stored.
-      install_dir: The final location where the artifact should be staged to.
-      single_name: If True the name given should only match one item. Note, if not
-                   True, self.name will become a list of items returned.
-      installed_files: A list of files that were the final result of downloading
-                       and setting up the artifact.
-      store_installed_files: Whether the list of installed files is stored in the
-                             marker file.
+        is_regex_name: Whether the name value is a regex (default: glob).
+        build: The version of the build i.e. R26-2342.0.0.
+        marker_name: Name used to define the lock marker for the artifacts to
+            prevent it from being re-downloaded. By default, based on name but
+            can be overriden by children.
+        exception_file_path: Path to a file containing the serialized exception,
+            which was raised in Process method. The file is located in the
+            parent folder of install_dir, since the install_dir will be deleted
+            if the build does not exist.
+        install_path: Path to artifact.
+        install_subdir: Directory within install_path where the artifact is
+            actually stored.
+        install_dir: The final location where the artifact should be staged to.
+        single_name: If True the name given should only match one item. Note, if
+            not True, self.name will become a list of items returned.
+        installed_files: A list of files that were the final result of
+            downloading and setting up the artifact.
+        store_installed_files: Whether the list of installed files is stored in
+            the marker file.
     """
 
     def __init__(
@@ -145,17 +144,18 @@ class Artifact(object, metaclass=ArtifactMeta):
         """Constructor.
 
         Args:
-          install_dir: Where to install the artifact.
-          name: Identifying name to be used to find/store the artifact.
-          build: The name of the build e.g. board/release.
-          install_subdir: Directory within install_path where the artifact is
-                          actually stored.
-          is_regex_name: Whether the name pattern is a regex (default: glob).
-          optional_name: An alternative name to find the artifact, which can lead
-            to faster download. Unlike |name|, there is no guarantee that an
-            artifact named |optional_name| is/will be on Google Storage. If it
-            exists, we download it. Otherwise, we fall back to wait for |name|.
-          alt_name: Name to use for anonymous callers to download artifacts.
+            install_dir: Where to install the artifact.
+            name: Identifying name to be used to find/store the artifact.
+            build: The name of the build e.g. board/release.
+            install_subdir: Directory within install_path where the artifact is
+                actually stored.
+            is_regex_name: Whether the name pattern is a regex (default: glob).
+            optional_name: An alternative name to find the artifact, which can
+                lead to faster download. Unlike |name|, there is no guarantee
+                that an artifact named |optional_name| is/will be on Google
+                Storage. If it exists, we download it. Otherwise, we fall back
+                to wait for |name|.
+            alt_name: Name to use for anonymous callers to download artifacts.
         """
         super().__init__()
 
@@ -194,13 +194,14 @@ class Artifact(object, metaclass=ArtifactMeta):
     def _SanitizeName(name):
         """Sanitizes name to be used for creating a file on the filesystem.
 
-        '.','/' and '*' have special meaning in FS lingo. Replace them with words.
+        '.','/' and '*' have special meaning in FS lingo. Replace them with
+        words.
 
         Args:
-          name: A file name/path.
+            name: A file name/path.
 
         Returns:
-          The sanitized name/path.
+            The sanitized name/path.
         """
         return (
             name.replace("*", "STAR").replace(".", "DOT").replace("/", "SLASH")
@@ -210,11 +211,11 @@ class Artifact(object, metaclass=ArtifactMeta):
         """Returns True if artifact is already staged.
 
         This checks for (1) presence of the artifact marker file, and (2) the
-        presence of each installed file listed in this marker. Both must hold for
-        the artifact to be considered staged. Note that this method is safe for use
-        even if the artifacts were not stageed by this instance, as it is assumed
-        that any Artifact instance that did the staging wrote the list of
-        files actually installed into the marker.
+        presence of each installed file listed in this marker. Both must hold
+        for the artifact to be considered staged. Note that this method is safe
+        for use even if the artifacts were not staged by this instance, as it is
+        assumed that any Artifact instance that did the staging wrote the list
+        of files actually installed into the marker.
         """
         marker_file = os.path.join(self.install_dir, self.marker_name)
 
@@ -223,13 +224,15 @@ class Artifact(object, metaclass=ArtifactMeta):
             logging.error("No marker file, %s is not staged.", self)
             return False
 
-        # We want to ensure that every file listed in the marker is actually there.
+        # We want to ensure that every file listed in the marker is actually
+        # there.
         if self.store_installed_files:
             with open(marker_file, encoding="utf-8") as f:
                 files = [line.strip() for line in f]
 
-            # Check to see if any of the purportedly installed files are missing, in
-            # which case the marker is outdated and should be removed.
+            # Check to see if any of the purportedly installed files are
+            # missing, in which case the marker is outdated and should be
+            # removed.
             missing_files = [
                 fname for fname in files if not os.path.exists(fname)
             ]
@@ -270,9 +273,9 @@ class Artifact(object, metaclass=ArtifactMeta):
         self.name = names[0]
 
     def _Setup(self):
-        """Process the downloaded content, update the list of installed files."""
-        # In this primitive case, what was downloaded (has to be a single file) is
-        # what's installed.
+        """Process downloaded content, update the list of installed files."""
+        # In this primitive case, what was downloaded (has to be a single file)
+        # is what's installed.
         self.installed_files = [self.install_path]
 
     def _ClearException(self):
@@ -284,7 +287,7 @@ class Artifact(object, metaclass=ArtifactMeta):
         """Save the exception and traceback to a file for downloader.IsStaged.
 
         Args:
-          e: Exception object to be saved.
+            e: Exception object to be saved.
         """
         with open(self.exception_file_path, "wb") as f:
             pickle.dump("%s\n%s" % (e, str(traceback.format_exc())), f)
@@ -293,8 +296,9 @@ class Artifact(object, metaclass=ArtifactMeta):
         """Retrieve any exception that was raised in Process method.
 
         Returns:
-          An Exception object that was raised when trying to process the artifact.
-          Return None if no exception was found.
+            Exception: The exception that was raised when trying to process the
+                artifact.
+            None: if no exception was found.
         """
         if not os.path.exists(self.exception_file_path):
             return None
@@ -304,28 +308,29 @@ class Artifact(object, metaclass=ArtifactMeta):
     def Process(self, downloader, no_wait):
         """Main call point to all artifacts. Downloads and Stages artifact.
 
-        Downloads and Stages artifact from Google Storage to the install directory
-        specified in the constructor. It multi-thread safe and does not overwrite
-        the artifact if it's already been downloaded or being downloaded. After
-        processing, leaves behind a marker to indicate to future invocations that
-        the artifact has already been staged based on the name of the artifact.
+        Downloads and Stages artifact from Google Storage to the install
+        directory specified in the constructor. It multi-thread safe and does
+        not overwrite the artifact if it's already been downloaded or being
+        downloaded. After processing, leaves behind a marker to indicate to
+        future invocations that the artifact has already been staged based on
+        the name of the artifact.
 
-        Do not override as it modifies important private variables, ensures thread
-        safety, and maintains cache semantics.
+        Do not override as it modifies important private variables, ensures
+        thread safety, and maintains cache semantics.
 
         Note: this may be a blocking call when the artifact is already in the
         process of being staged.
 
         Args:
-          downloader: A downloader instance containing the logic to download
-                      artifacts.
-          no_wait: If True, don't block waiting for artifact to exist if we fail to
-                   immediately find it.
+            downloader: A downloader instance containing the logic to download
+                artifacts.
+            no_wait: If True, don't block waiting for artifact to exist if we
+                fail to immediately find it.
 
         Raises:
-          ArtifactDownloadError: If the artifact fails to download from Google
-                                 Storage for any reason or that the regexp
-                                 defined by name is not specific enough.
+            ArtifactDownloadError: If the artifact fails to download from Google
+                Storage for any reason or that the regexp defined by name is not
+                specific enough.
         """
         if not self._process_lock:
             self._process_lock = _build_artifact_locks.lock(
@@ -342,8 +347,8 @@ class Artifact(object, metaclass=ArtifactMeta):
                 if self.optional_name:
                     try:
                         # Check if the artifact named |optional_name| exists.
-                        # Because this artifact may not always exist, don't bother
-                        # to wait for it (set timeout=1).
+                        # Because this artifact may not always exist, don't
+                        # bother to wait for it (set timeout=1).
                         new_names = downloader.Wait(
                             self.optional_name,
                             self.is_regex_name,
@@ -362,8 +367,8 @@ class Artifact(object, metaclass=ArtifactMeta):
                         found_artifact = True
 
                 try:
-                    # If the artifact should already have been uploaded, don't waste
-                    # cycles waiting around for it to exist.
+                    # If the artifact should already have been uploaded, don't
+                    # waste cycles waiting around for it to exist.
                     if not found_artifact:
                         timeout = 1 if no_wait else 10
                         new_names = downloader.Wait(
@@ -387,10 +392,12 @@ class Artifact(object, metaclass=ArtifactMeta):
                     self._Setup()
                     self._MarkArtifactStaged()
                 except Exception as e:
-                    # Convert an unknown exception into an ArtifactDownloadError.
+                    # Convert an unknown exception into an
+                    # ArtifactDownloadError.
                     if not isinstance(e, ArtifactDownloadError):
                         e = ArtifactDownloadError(e)
-                    # Save the exception to a file for downloader.IsStaged to retrieve.
+                    # Save the exception to a file for downloader.IsStaged to
+                    # retrieve.
                     self._SaveException(e)
                     raise e
 
@@ -436,9 +443,9 @@ class BundledArtifact(Artifact):
         Args:
           *args: See Artifact documentation.
           **kwargs: See Artifact documentation.
-          files_to_extract: A list of files to extract. If set to None, extract
-                            all files.
-          exclude: A list of files to exclude. If None, no files are excluded.
+            files_to_extract: A list of files to extract. If set to None,
+                extract all files.
+            exclude: A list of files to exclude. If None, no files are excluded.
         """
         self._files_to_extract = kwargs.pop("files_to_extract", None)
         self._exclude = kwargs.pop("exclude", None)
@@ -467,8 +474,8 @@ class BundledArtifact(Artifact):
         return files
 
     def _RunUnzip(self, list_only):
-        # Unzip is weird. It expects its args before any excludes and expects its
-        # excludes in a list following the -x.
+        # Unzip is weird. It expects its args before any excludes and expects
+        # its excludes in a list following the -x.
         cmd = ["unzip", "-qql" if list_only else "-o", self.install_path]
         if not list_only:
             cmd += ["-d", self.install_dir]
@@ -601,16 +608,16 @@ def _CreateNewArtifact(tag, base, name, *fixed_args, **fixed_kwargs):
     """Get a data wrapper that describes an artifact's implementation.
 
     Args:
-      tag: Tag of the artifact, defined in artifact_info.
-      base: Class of the artifact, e.g., BundledArtifact.
-      name: Name of the artifact, e.g., image.zip.
-      *fixed_args: Fixed arguments that are additional to the one used in base
-                   class.
-      **fixed_kwargs: Fixed keyword arguments that are additional to the one used
-                      in base class.
+        tag: Tag of the artifact, defined in artifact_info.
+        base: Class of the artifact, e.g., BundledArtifact.
+        name: Name of the artifact, e.g., image.zip.
+        *fixed_args: Fixed arguments that are additional to the one used in base
+            class.
+        **fixed_kwargs: Fixed keyword arguments that are additional to the one
+            used in base class.
 
     Returns:
-      A data wrapper that describes an artifact's implementation.
+        A data wrapper that describes an artifact's implementation.
     """
 
     # pylint: disable=bad-option-value,super-on-old-class
@@ -868,20 +875,20 @@ class BaseArtifactFactory(object):
         build,
         requested_to_optional_map,
     ):
-        """Initalizes the member variables for the factory.
+        """Initializes the member variables for the factory.
 
         Args:
-          artifact_map: A map from artifact names to ImplDescription objects.
-          download_dir: A directory to which artifacts are downloaded.
-          artifacts: List of artifacts to stage. These artifacts must be
-                     defined in artifact_info.py and have a mapping in the
-                     ARTIFACT_IMPLEMENTATION_MAP.
-          files: List of files to stage. These files are just downloaded and staged
-                 as files into the download_dir.
-          build: The name of the build.
-          requested_to_optional_map: A map between an artifact X to a list of
-                  artifacts Y. If X is requested, all items in Y should also get
-                  triggered for download.
+            artifact_map: A map from artifact names to ImplDescription objects.
+            download_dir: A directory to which artifacts are downloaded.
+            artifacts: List of artifacts to stage. These artifacts must be
+                defined in artifact_info.py and have a mapping in the
+                ARTIFACT_IMPLEMENTATION_MAP.
+            files: List of files to stage. These files are just downloaded and
+                staged as files into the download_dir.
+            build: The name of the build.
+            requested_to_optional_map: A map between an artifact X to a list of
+                artifacts Y. If X is requested, all items in Y should also get
+                triggered for download.
         """
         self.artifact_map = artifact_map
         self.download_dir = download_dir
@@ -893,19 +900,20 @@ class BaseArtifactFactory(object):
     def _Artifacts(self, names, is_artifact):
         """Returns the Artifacts from |names|.
 
-        If is_artifact is true, then these names define artifacts that must exist in
-        the ARTIFACT_IMPLEMENTATION_MAP. Otherwise, treat as filenames to stage as
-        basic BuildArtifacts.
+        If is_artifact is true, then these names define artifacts that must
+        exist in the ARTIFACT_IMPLEMENTATION_MAP. Otherwise, treat as filenames
+        to stage as basic BuildArtifacts.
 
         Args:
-          names: A sequence of artifact names.
-          is_artifact: Whether this is a named (True) or file (False) artifact.
+            names: A sequence of artifact names.
+            is_artifact: Whether this is a named (True) or file (False)
+                artifact.
 
         Returns:
-          An iterable of Artifacts.
+            An iterable of Artifacts.
 
         Raises:
-          KeyError: if artifact doesn't exist in the artifact map.
+            KeyError: if artifact doesn't exist in the artifact map.
         """
         if is_artifact:
             classes = itertools.chain(
@@ -921,10 +929,10 @@ class BaseArtifactFactory(object):
         """Returns BuildArtifacts for the factory's artifacts.
 
         Returns:
-          An iterable of BuildArtifacts.
+            An iterable of BuildArtifacts.
 
         Raises:
-          KeyError: if artifact doesn't exist in ARTIFACT_IMPLEMENTATION_MAP.
+            KeyError: if artifact doesn't exist in ARTIFACT_IMPLEMENTATION_MAP.
         """
         artifacts = []
         if self.artifacts:
@@ -938,12 +946,12 @@ class BaseArtifactFactory(object):
         """Returns BuildArtifacts that should be cached.
 
         Returns:
-          An iterable of BuildArtifacts.
+            An iterable of BuildArtifacts.
 
         Raises:
-          KeyError: if an optional artifact doesn't exist in
-                    ARTIFACT_IMPLEMENTATION_MAP yet defined in
-                    artifact_info.REQUESTED_TO_OPTIONAL_MAP.
+            KeyError: if an optional artifact doesn't exist in
+                ARTIFACT_IMPLEMENTATION_MAP yet defined in
+                artifact_info.REQUESTED_TO_OPTIONAL_MAP.
         """
         optional_names = set()
         for (

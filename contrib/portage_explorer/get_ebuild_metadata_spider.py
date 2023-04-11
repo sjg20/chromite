@@ -15,11 +15,11 @@ def execute(output: spiderlib.SpiderOutput):
     """Get all the ebuild metadata for all the ebuilds.
 
     Get the EAPI, DESCRIPTION, HOMEPAGE, LICENSE, SLOT, SRC_URI, RESTRICT,
-    DEPEND, RDEPEND, BDEPEND, PDEPEND, IUSE, and the eclasses inherited for every
-    ebuild by reading it's md5-cache if it has one.
+    DEPEND, RDEPEND, BDEPEND, PDEPEND, IUSE, and the eclasses inherited for
+    every ebuild by reading its md5-cache if it has one.
 
     Args:
-      output: SpiderOutput representing the final output from all the spiders.
+        output: SpiderOutput representing the final output from all the spiders.
     """
     for overlay in output.overlays:
         for ebuild in overlay.ebuilds:

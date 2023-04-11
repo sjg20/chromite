@@ -60,7 +60,8 @@ class xBuddyTest(cros_test_lib.TestCase):
     gs://chromeos-releases/stable-channel/parrot/3912.79.0/
     gs://chromeos-releases/stable-channel/parrot/3912.79.1/"""
 
-        mock_data2 = """gs://chromeos-image-archive/parrot-release/R26-3912.101.0
+        mock_data2 = """\
+    gs://chromeos-image-archive/parrot-release/R26-3912.101.0
     gs://chromeos-image-archive/parrot-release/R27-3912.101.0
     gs://chromeos-image-archive/parrot-release/R28-3912.101.0"""
 
@@ -85,7 +86,10 @@ class xBuddyTest(cros_test_lib.TestCase):
             ls_mock.assert_called_with("url2", list_subdirectory=True)
 
     def testLookupOfficial(self):
-        """Basic test of _LookupOfficial. Checks that a given suffix is handled."""
+        """Basic test of _LookupOfficial.
+
+        Checks that a given suffix is handled.
+        """
         with mock.patch.object(
             gs.GSContext, "Cat", return_value="v"
         ) as cat_mock:
@@ -102,7 +106,10 @@ class xBuddyTest(cros_test_lib.TestCase):
         side_effect=["4100.68.0", "R28-4100.68.0"],
     )
     def testLookupChannel(self, version_mock):
-        """Basic test of _LookupChannel. Checks that a given suffix is handled."""
+        """Basic test of _LookupChannel.
+
+        Checks that a given suffix is handled.
+        """
         self.assertEqual(
             self.mock_xb._LookupChannel("b", "-release"),
             "b-release/R28-4100.68.0",
@@ -157,7 +164,7 @@ class xBuddyTest(cros_test_lib.TestCase):
 
     @mock.patch.object(xbuddy.XBuddy, "_LookupOfficial")
     def testResolveVersionToBuildIdAndChannel_Official(self, lookup_mock):
-        """Check _ResolveVersionToBuildIdAndChannel support for official build."""
+        """Test _ResolveVersionToBuildIdAndChannel works for official build."""
         board = "chell"
         suffix = "-s"
 

@@ -234,7 +234,7 @@ class BasePaygenBuildLibTestWithBuilds(
         )
 
     def testGetFlagURI(self):
-        """Validate the helper method to create flag URIs for our current build."""
+        """Validate helper method to create flag URIs for our current build."""
         paygen = self._GetPaygenBuildInstance()
 
         self.assertEqual(
@@ -245,7 +245,7 @@ class BasePaygenBuildLibTestWithBuilds(
     def testFilterHelpers(self):
         """Test _FilterForMp helper method."""
 
-        # All of the filter helpers should handle empty list.
+        # All the filter helpers should handle empty list.
         self.assertEqual(paygen_build_lib._FilterForMp([]), [])
         self.assertEqual(paygen_build_lib._FilterForPremp([]), [])
         self.assertEqual(paygen_build_lib._FilterForBasic([]), [])
@@ -277,7 +277,7 @@ class BasePaygenBuildLibTestWithBuilds(
         # TODO
 
     def testValidateExpectedBuildImages(self):
-        """Test a function that validates expected images are found on a build."""
+        """Test function that validates expected images are found on a build."""
         paygen = self._GetPaygenBuildInstance()
 
         # Test with basic mp image only.
@@ -382,8 +382,8 @@ class BasePaygenBuildLibTestWithBuilds(
         self.assertEqual(
             result,
             "gs://crt/stable-channel/x86-alex-he/3590.0.0/payloads/"
-            "chromeos_3588.0.0-3590.0.0_x86-alex-he_stable-channel_delta_mp-v3.bin-"
-            "abc123.signed",
+            "chromeos_3588.0.0-3590.0.0_x86-alex-he_stable-channel_delta_mp-v3"
+            ".bin-abc123.signed",
         )
 
 
@@ -577,8 +577,8 @@ class TestPaygenBuildLibTestGSSearch(BasePaygenBuildLibTestWithBuilds):
         )
         self.assertCountEqual(results, [])
 
-        # It's totally legal for a build to be signed for both PreMP and MP at the
-        # same time. If that happens we generate:
+        # It's totally legal for a build to be signed for both PreMP and MP at
+        # the same time. If that happens we generate:
         # MP -> MP, PreMP -> PreMP, test -> test.
         results = paygen._DiscoverRequiredDeltasBuildToBuild(
             [self.prev_image, self.prev_premp_image, self.prev_test_image],
@@ -636,8 +636,8 @@ class TestPaygenBuildLibTestGSSearch(BasePaygenBuildLibTestWithBuilds):
         paygen = self._GetPaygenBuildInstance()
         self.mockUriList.return_value = [
             (
-                "gs://crt/foo-channel/foo-board/1.2.3/dlc/sample-dlc/sample-package/"
-                "dlc.img"
+                "gs://crt/foo-channel/foo-board/1.2.3/dlc/sample-dlc/"
+                "sample-package/dlc.img"
             )
         ]
         dlc_module_images = paygen._DiscoverDLCImages(self.target_build)
@@ -656,7 +656,7 @@ class TestPaygenBuildLibTestGSSearch(BasePaygenBuildLibTestWithBuilds):
 
 
 class MockImageDiscoveryHelper(BasePaygenBuildLibTest):
-    """Tests DiscoverRequiredPayloads using a fixed paygen.json from testdata."""
+    """Test DiscoverRequiredPayloads using a fixed paygen.json from testdata."""
 
     def setUp(self):
         # We want to use a dict as dict key, but can't.
@@ -795,7 +795,7 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
         )
 
     def testImagesNotReady(self):
-        """See that we do the right thing if there are no images for the build."""
+        """Verify we do the right thing if there are no images for the build."""
         target_build = gspaths.Build(
             bucket="crt",
             channel="canary-channel",
@@ -922,8 +922,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image,
             uri=(
                 "gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9999.0.0-9999.0.0_auron-yuna_canary-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9999.0.0-9999.0.0_auron-yuna_canary-channel_"
+                "delta_test.bin-<random>"
             ),
         )
         n2n_delta_minios = gspaths.Payload(
@@ -950,8 +950,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=prev_premp_image,
             uri=(
                 "gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_premp"
-                ".bin-<random>.signed"
+                "chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel"
+                "_delta_premp.bin-<random>.signed"
             ),
         )
         mp_delta_minios = gspaths.Payload(
@@ -979,8 +979,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=prev_test_image,
             uri=(
                 "gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_minios = gspaths.Payload(
@@ -996,16 +996,16 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
         dlc_full = gspaths.Payload(
             tgt_image=dlc_image,
             uri=(
-                "gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/dlc/%s/%s/"
-                "dlc_%s_%s_9999.0.0_auron-yuna_canary-channel_full.bin"
+                "gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/dlc/%s/"
+                "%s/dlc_%s_%s_9999.0.0_auron-yuna_canary-channel_full.bin"
                 "-<random>.signed" % (dlc_id, dlc_package, dlc_id, dlc_package)
             ),
         )
         dlc_delta = gspaths.Payload(
             tgt_image=dlc_image,
             src_image=prev_dlc_image,
-            uri="gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/dlc/%s/%s/"
-            "dlc_%s_%s_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta.bin"
+            uri="gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/dlc/%s/"
+            "%s/dlc_%s_%s_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta.bin"
             "-<random>.signed" % (dlc_id, dlc_package, dlc_id, dlc_package),
         )
 
@@ -1081,7 +1081,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
         paygen = self._GetPaygenBuildInstance(target_build)
         payloads, tests = paygen._DiscoverRequiredPayloads()
 
-        # Define the expected payloads. Test delta from prev, but no signed ones.
+        # Define the expected payloads. Test delta from prev, but no signed
+        # ones.
         mp_full = gspaths.Payload(
             tgt_image=mp_image,
             uri=(
@@ -1121,8 +1122,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image,
             uri=(
                 "gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9999.0.0-9999.0.0_auron-yuna_canary-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9999.0.0-9999.0.0_auron-yuna_canary-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         n2n_delta_minios = gspaths.Payload(
@@ -1140,8 +1141,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=prev_test_image,
             uri=(
                 "gs://crt/canary-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9756.0.0-9999.0.0_auron-yuna_canary-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_minios = gspaths.Payload(
@@ -1221,7 +1222,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
         )
         payloads, tests = paygen._DiscoverRequiredPayloads()
 
-        # Define the expected payloads. Test delta from prev, but no signed ones.
+        # Define the expected payloads. Test delta from prev, but no signed
+        # ones.
         mp_full = gspaths.Payload(
             tgt_image=mp_image,
             uri=(
@@ -1389,7 +1391,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
         paygen = self._GetPaygenBuildInstance(target_build)
         payloads, tests = paygen._DiscoverRequiredPayloads()
 
-        # Define the expected payloads. Test delta from prev, but no signed ones.
+        # Define the expected payloads. Test delta from prev, but no signed
+        # ones.
         mp_full = gspaths.Payload(
             tgt_image=mp_image,
             uri=(
@@ -1429,8 +1432,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9999.0.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9999.0.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         n2n_delta_minios = gspaths.Payload(
@@ -1470,8 +1473,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image_8530,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_8530.96.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_8530.96.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_8530_minios = gspaths.Payload(
@@ -1508,8 +1511,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image_8743,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_8743.85.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_8743.85.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_8743_minios = gspaths.Payload(
@@ -1546,8 +1549,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image_8872,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_8872.76.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_8872.76.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_8872_minios = gspaths.Payload(
@@ -1584,8 +1587,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image_9000,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9000.91.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9000.91.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_9000_minios = gspaths.Payload(
@@ -1622,8 +1625,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image_9202,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9202.64.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9202.64.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_9202_minios = gspaths.Payload(
@@ -1660,8 +1663,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image_9334,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9334.72.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9334.72.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_9334_minios = gspaths.Payload(
@@ -1698,8 +1701,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image_9460,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9460.60.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9460.60.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_9460_minios = gspaths.Payload(
@@ -1736,8 +1739,8 @@ class TestPaygenBuildLibDiscoverRequiredPayloads(
             src_image=test_image_9460_67,
             uri=(
                 "gs://crt/stable-channel/auron-yuna/9999.0.0/payloads/"
-                "chromeos_9460.67.0-9999.0.0_auron-yuna_stable-channel_delta_test"
-                ".bin-<random>"
+                "chromeos_9460.67.0-9999.0.0_auron-yuna_stable-channel"
+                "_delta_test.bin-<random>"
             ),
         )
         test_delta_9460_67_minios = gspaths.Payload(
@@ -2075,7 +2078,7 @@ class TestCreatePayloads(BasePaygenBuildLibTestWithBuilds):
             paygen.CreatePayloads()
 
     def testCreatePayloadsBuildNotReady(self):
-        """Test paygen_build_lib._GeneratePayloads if not all images are there."""
+        """Test paygen_build_lib._GeneratePayloads with missing images."""
         self.mockDiscover.side_effect = paygen_build_lib.BuildNotReady
 
         paygen = self._GetPaygenBuildInstance()
@@ -2086,7 +2089,7 @@ class TestCreatePayloads(BasePaygenBuildLibTestWithBuilds):
         self.assertEqual(self.mockCleanup.call_args_list, [mock.call()])
 
     def testCreatePayloadsCreateFailed(self):
-        """Test paygen_build_lib._GeneratePayloads if payload generation failed."""
+        """Test paygen_build_lib._GeneratePayloads if payload gen failed."""
         mockException = Exception
 
         self.mockGenerate.side_effect = mockException
@@ -2289,12 +2292,12 @@ class TestAutotestPayloadsPayloads(BasePaygenBuildLibTestWithBuilds):
                 b"""target_payload_uri = 'None'""",
                 b"""SUITE = 'paygen_au_foo'""",
                 b"""source_payload_uri = 'foo-channel_1.0.0_uri'""",
-                b"""source_archive_uri = 'gs://crt/foo-channel/foo-board/1.0.0'""",
+                b"""source_archive_uri = 'gs://crt/foo-channel/foo-board/1.0.0'""",  # pylint: disable=line-too-long
                 b"""payload_type = 'OMAHA'""",
-                b"""NAME = "autoupdate_EndToEndTest_paygen_au_foo_delta_1.0.0_omaha""",
+                b"""NAME = "autoupdate_EndToEndTest_paygen_au_foo_delta_1.0.0_omaha""",  # pylint: disable=line-too-long
             ]
 
-            # Only check that the fields exist to avoid the very long doc string.
+            # Only check that the fields exist to avoid the long doc string.
             for field in required_fields:
                 self.assertIn(field, delta_contents)
 
@@ -2306,12 +2309,12 @@ class TestAutotestPayloadsPayloads(BasePaygenBuildLibTestWithBuilds):
                 b"""target_payload_uri = 'None'""",
                 b"""SUITE = 'paygen_au_foo'""",
                 b"""source_payload_uri = 'foo-channel_1.2.3_uri'""",
-                b"""source_archive_uri = 'gs://crt/foo-channel/foo-board/1.2.3'""",
+                b"""source_archive_uri = 'gs://crt/foo-channel/foo-board/1.2.3'""",  # pylint: disable=line-too-long
                 b"""payload_type = 'N2N'""",
-                b"""NAME = "autoupdate_EndToEndTest_paygen_au_foo_full_1.2.3_n2n""",
+                b"""NAME = "autoupdate_EndToEndTest_paygen_au_foo_full_1.2.3_n2n""",  # pylint: disable=line-too-long
             ]
 
-            # Only check that the fields exist to avoid the very long doc string.
+            # Only check that the fields exist to avoid the long doc string.
             for field in full_required_fields:
                 self.assertIn(field, full_contents)
 
@@ -2355,7 +2358,9 @@ class HWTest(cros_test_lib.MockTestCase):
                             "name": "autoupdate_EndToEndTest",
                             "allowRetries": True,
                             "maxRetries": 1,
-                            "executionEnvironment": "EXECUTION_ENVIRONMENT_SERVER",
+                            "executionEnvironment": (
+                                "EXECUTION_ENVIRONMENT_SERVER"
+                            ),
                         },
                         "displayName": "sample-build/sample-suite/"
                         + "autoupdate_EndToEndTest_"

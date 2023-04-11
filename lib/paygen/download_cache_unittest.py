@@ -162,7 +162,7 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
         self.assertTrue(lock_dir_contents.issubset(file_dir_contents))
 
     def testCacheFileNames(self):
-        """Make sure that some of the files we create have the expected names."""
+        """Ensure that some of the files we create have the expected names."""
         cache = download_cache.DownloadCache(self.cache_dir)
 
         expected_cache_lock = os.path.join(self.cache_dir, "cache.lock")
@@ -326,16 +326,17 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
         once.
         """
         with multiprocessing.Pool(processes=10) as pool:
-            # Create a tuple of the three args we want to pass to inProcess test,
-            # use map semantics as a convenient way to run in parallel.
+            # Create a tuple of the three args we want to pass to inProcess
+            # test, use map semantics as a convenient way to run in parallel.
             results = pool.map(
                 _inProcessFetchIntoCache,
                 [(self.uri_large, self.cache_dir)] * 20,
             )
 
-            # Results contains a list of booleans showing which instances actually
-            # performed the download. Exactly one of them should have. The list could
-            # also contain exceptions if one of the downloads failed.
+            # Results contains a list of booleans showing which instances
+            # actually performed the download. Exactly one of them should have.
+            # The list could also contain exceptions if one of the downloads
+            # failed.
             results.sort()
             self.assertEqual(results, [False] * 19 + [True])
 
@@ -346,8 +347,8 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
         Ensure all processes complete, and return the same local file.
         """
         with multiprocessing.Pool(processes=10) as pool:
-            # Create a tuple of the three args we want to pass to inProcess test,
-            # use map semantics as a convenient way to run in parallel.
+            # Create a tuple of the three args we want to pass to inProcess
+            # test, use map semantics as a convenient way to run in parallel.
             results = pool.map(
                 _inProcessGetFile, [(self.uri_a, self.cache_dir)] * 20
             )
@@ -370,8 +371,8 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
         Ensure all processes complete, and return the right local file.
         """
         with multiprocessing.Pool(processes=20) as pool:
-            # Create a tuple of the three args we want to pass to inProcess test,
-            # use map semantics as a convenient way to run in parallel.
+            # Create a tuple of the three args we want to pass to inProcess
+            # test, use map semantics as a convenient way to run in parallel.
             results = pool.map(
                 _inProcessGetFile,
                 [(self.uri_a, self.cache_dir), (self.uri_b, self.cache_dir)]
@@ -407,8 +408,8 @@ class DownloadCacheTest(cros_test_lib.TempDirTestCase):
                 (None, self.cache_dir),
             ] * 10
 
-            # Create a tuple of the three args we want to pass to inProcess test,
-            # use map semantics as a convenient way to run in parallel.
+            # Create a tuple of the three args we want to pass to inProcess
+            # test, use map semantics as a convenient way to run in parallel.
             results = pool.map(_inProcessGetFile, requests)
 
             # Fetch it ourselves and verify the results.

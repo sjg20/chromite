@@ -79,14 +79,14 @@ class MiniOSException(PayloadGenerationSkippedException):
 
 
 class NoMiniOSPartitionException(MiniOSException):
-    """Raised when generating a miniOS payload for an img with no miniOS part."""
+    """When generating a miniOS payload for an img with no miniOS part."""
 
     def return_code(self):
         return payload_pb2.GenerationResponse.NOT_MINIOS_COMPATIBLE
 
 
 class MiniOSPatritionMismatchException(MiniOSException):
-    """Raised when there is a mismatch in recovery key count for source and target."""
+    """When there is a mismatch in recovery key count for source and target."""
 
     def return_code(self):
         return payload_pb2.GenerationResponse.MINIOS_COUNT_MISMATCH
@@ -119,23 +119,23 @@ class PaygenSigner(object):
             and self._payload_build.bucket == gspaths.ChromeosReleases.BUCKET
         ):
             logging.info("Using GCS signer.")
-            # We are using the official buckets, so sign it with official signers.
+            # Using the official buckets, so sign it with official signers.
             self._signer = (
                 signer_payloads_client.SignerPayloadsClientGoogleStorage(
                     self._payload_build, self._work_dir
                 )
             )
-            # We set the private key to None so we don't accidentally use a valid
-            # passed private key to verify the image.
+            # We set the private key to None, so we don't accidentally use a
+            # valid passed private key to verify the image.
             if self._private_key:
                 logging.warning(
-                    "A private key should not be passed for offical builds."
+                    "A private key should not be passed for official builds."
                 )
             self._private_key = None
         else:
             logging.info("Using local private key.")
-            # Otherwise use a private key for signing and verifying the payload. If
-            # no private_key was provided, use a test key.
+            # Otherwise use a private key for signing and verifying the payload.
+            # If no private_key was provided, use a test key.
             if not self._private_key:
                 self._private_key = (
                     constants.CHROMITE_DIR / "ssh_keys" / "testing_rsa"
@@ -233,8 +233,8 @@ class PaygenPayload(object):
         ]
         self.signer = signer
 
-        # This cache dir will be shared with other processes, but we need our own
-        # instance of the cache manager to properly coordinate.
+        # This cache dir will be shared with other processes, but we need our
+        # own instance of the cache manager to properly coordinate.
         cache_dir = cache_dir or self._FindCacheDir()
         self._cache = download_cache.DownloadCache(
             cache_dir, cache_size=PaygenPayload.CACHE_SIZE
@@ -282,7 +282,7 @@ class PaygenPayload(object):
         return uri + ".log"
 
     def _JsonUri(self, uri):
-        """Given a payload uri, find the uri for the json payload description."""
+        """Given a payload uri, find the json payload description uri."""
         return uri + ".json"
 
     def _FindCacheDir(self):
@@ -297,12 +297,12 @@ class PaygenPayload(object):
         """Returns parameters related to target and source DLC images.
 
         Args:
-          tgt_image: The target image.
-          src_image: The source image.
+            tgt_image: The target image.
+            src_image: The source image.
 
         Returns:
-          A tuple of three parameters that was discovered from the image: The DLC
-          ID, The DLC package and its release AppID.
+            A tuple of three parameters that was discovered from the image: The
+            DLC ID, The DLC package and its release AppID.
         """
 
         def _GetImageParams(image):
@@ -366,24 +366,25 @@ class PaygenPayload(object):
     def _GetPlatformImageParams(self, image):
         """Returns parameters related to target or source platform images.
 
-        Since this function is mounting a GPT image, if the mount (for reasons like
-        a bug, etc), changes the bits on the image, then the image cannot be trusted
-        after this call.
+        Since this function is mounting a GPT image, if the mount (for reasons
+        like a bug, etc.), changes the bits on the image, then the image cannot
+        be trusted after this call.
 
         Args:
-          image: The input image.
+            image: The input image.
 
         Returns:
-          The release APPID of the image and the minor version.
+            The release APPID of the image and the minor version.
         """
         # Mount the ROOT-A partition of the image. The reason we don't mount the
-        # extracted partition directly is that if by mistake/bug the mount changes
-        # the bits on the partition, then we will create a payload for a changed
-        # partition which is not equivalent to the original partition. So just mount
-        # the partition of the GPT image and even if it changes, then who cares.
+        # extracted partition directly is that if by mistake/bug the mount
+        # changes the bits on the partition, then we will create a payload for a
+        # changed partition which is not equivalent to the original partition.
+        # So just mount the partition of the GPT image and even if it changes,
+        # then who cares.
         #
-        # TODO(crbug.com/925203): Replace this with image_lib.LoopbackPartition()
-        # once the mentioned bug is resolved.
+        # TODO(crbug.com/925203): Replace this with
+        #   image_lib.LoopbackPartition() once the mentioned bug is resolved.
         with osutils.TempDir(base_dir=self.work_dir) as mount_point:
             with image_lib.LoopbackPartitions(
                 image,
@@ -420,7 +421,8 @@ class PaygenPayload(object):
                         minor_version = utils.ReadMinorVersion(sysroot_dir)
                         if not minor_version:
                             raise Error(
-                                "Unable to extract minor version from source image"
+                                "Unable to extract minor version from source "
+                                "image"
                             )
                         logging.info(
                             "Minor version extracted from source: %s",
@@ -432,15 +434,16 @@ class PaygenPayload(object):
         """Raises an exception if paygen should be skipped for some reason.
 
         Raises:
-          NoMiniOSPartitionException: If a miniOS payload is requested when either
-              the source or target image has no miniOS payload.
+            NoMiniOSPartitionException: If a miniOS payload is requested when
+                either the source or target image has no miniOS payload.
         """
         if self.payload.minios:
             try:
                 self._CheckEitherImageIsMissingMiniOSPayload()
             except Error as e:
                 logging.warning(
-                    "Caught exception checking whether images have miniOS parts: %s",
+                    "Caught exception checking whether images have miniOS "
+                    "parts: %s",
                     e,
                 )
             return True
@@ -449,11 +452,11 @@ class PaygenPayload(object):
     def _CheckEitherImageIsMissingMiniOSPayload(self):
         """Determines whether the source or target image has no miniOS parts.
 
-        If this is a full payload, then there is no src image. In that case, only
-        the tgt image will be evaluated.
+        If this is a full payload, then there is no src image. In that case,
+        only the tgt image will be evaluated.
 
         Raises:
-          MiniOSException: One of several miniOS errors.
+            MiniOSException: One of several miniOS errors.
         """
         try:
             self._CheckImageHasMiniOSPartition(self.tgt_image_file)
@@ -549,8 +552,8 @@ class PaygenPayload(object):
                     partition_lib.ExtractKernel(
                         self.src_image_file, self.src_partitions[1]
                     )
-                # Makes sure we have generated postinstall config for major version 2
-                # and platform image.
+                # Makes sure we have generated postinstall config for major
+                # version 2 and platform image.
                 self._GeneratePostinstConfig(True)
 
             # This step should be done after extracting partitions, look at the
@@ -560,8 +563,8 @@ class PaygenPayload(object):
                     self.src_image_file
                 )
             else:
-                # Full payloads do not need the minor version and should use the target
-                # image.
+                # Full payloads do not need the minor version and should use the
+                # target image.
                 self._appid, _ = self._GetPlatformImageParams(
                     self.tgt_image_file
                 )
@@ -587,21 +590,21 @@ class PaygenPayload(object):
         """Wrapper for run in chroot.
 
         Run the given command inside the chroot. It will automatically log the
-        command output. Note that the command's stdout and stderr are combined into
-        a single string.
+        command output. Note that the command's stdout and stderr are combined
+        into a single string.
 
         For context on why this is so complex see: crbug.com/1035799
 
         Args:
-          cmd: Program and argument list in a list. ['delta_generator', '--help']
-          squawk_wrap: Optionally run the cros_build_lib command in a thread to
-            avoid being killed by the ProcessSilentTimeout during quiet periods of
-            delta_gen.
+            cmd: Program and argument list in a list.
+                ['delta_generator', '--help']
+            squawk_wrap: Optionally run the cros_build_lib command in a thread
+                to avoid being killed by the ProcessSilentTimeout during quiet
+                periods of delta_gen.
 
         Raises:
-          cros_build_lib.RunCommandError if the command exited without success.
+            cros_build_lib.RunCommandError if the command did not succeed.
         """
-
         response_queue = deque()
 
         # The later thread's start() function.
@@ -661,33 +664,33 @@ class PaygenPayload(object):
 
     @staticmethod
     def _BuildArg(flag, dict_obj, key, default=None):
-        """Returns a command-line argument iff its value is present in a dictionary.
+        """Return a command-line argument if its value is present in |dict_obj|.
 
         Args:
-          flag: the flag name to use with the argument value, e.g. --foo; if None or
-            an empty string, no flag will be used
-          dict_obj: a dictionary mapping possible keys to values
-          key: the key of interest; e.g. 'foo'
-          default: a default value to use if key is not in dict_obj (optional)
+            flag: the flag name to use with the argument value, e.g. --foo; if
+                None or an empty string, no flag will be used.
+            dict_obj: A dictionary mapping possible keys to values.
+            key: The key of interest; e.g. 'foo'.
+            default: Optional default value to use if key is not in dict_obj.
 
         Returns:
-          If dict_obj[key] contains a non-False value or default is non-False,
-          returns a string representing the flag and value arguments
-          (e.g. '--foo=bar')
+            If dict_obj[key] contains a non-False value or default is non-False,
+            returns a string representing the flag and value arguments (e.g.
+            '--foo=bar')
         """
         val = dict_obj.get(key) or default
         return "%s=%s" % (flag, str(val))
 
     def _PrepareImage(self, image, image_file):
-        """Download an prepare an image for delta generation.
+        """Download and prepare an image for delta generation.
 
-        Preparation includes downloading, extracting and converting the image into
-        an on-disk format, as necessary.
+        Preparation includes downloading, extracting and converting the image
+        into an on-disk format, as necessary.
 
         Args:
-          image: an object representing the image we're processing, either
-            UnsignedImageArchive or Image type from gspaths module.
-          image_file: file into which the prepared image should be copied.
+            image: an object representing the image we're processing, either
+                UnsignedImageArchive or Image type from gspaths module.
+            image_file: file into which the prepared image should be copied.
         """
 
         logging.info("Preparing image from %s as %s", image.uri, image_file)
@@ -709,7 +712,7 @@ class PaygenPayload(object):
         else:
             raise Error("Unknown image type %s" % type(image))
 
-        # Are we donwloading an archive that contains the image?
+        # Are we downloading an archive that contains the image?
         if extract_file:
             # Archive will be downloaded to a temporary location.
             with tempfile.NamedTemporaryFile(
@@ -722,9 +725,9 @@ class PaygenPayload(object):
         else:
             download_file = image_file
 
-        # Download the image file or archive. If it was just a local file, ignore
-        # caching and do a simple copy. TODO(crbug.com/926034): Add a caching
-        # mechanism for local files.
+        # Download the image file or archive. If it was just a local file,
+        # ignore caching and do a simple copy. TODO(crbug.com/926034): Add a
+        # caching mechanism for local files.
         if urilib.GetUriType(image.uri) == urilib.TYPE_LOCAL:
             filelib.Copy(image.uri, download_file)
         else:
@@ -751,7 +754,7 @@ class PaygenPayload(object):
         Args:
           run_postinst: Whether the updater should run postinst or not.
         """
-        # In major version 2 we need to explicity mark the postinst on the root
+        # In major version 2 we need to explicitly mark the postinst on the root
         # partition to run.
         osutils.WriteFile(
             self._postinst_config_file,
@@ -860,7 +863,7 @@ class PaygenPayload(object):
                 len(hashes),
             )
 
-        # Make sure that the results we get back the expected number of signatures.
+        # Verify the results we get back the expected number of signatures.
         for hash_sigs in hashes_sigs:
             # Make sure each hash has the right number of signatures.
             if len(hash_sigs) != len(self.PAYLOAD_SIGNATURE_SIZES_BYTES):
@@ -905,7 +908,7 @@ class PaygenPayload(object):
     def _InsertSignaturesIntoPayload(
         self, payload_signatures, metadata_signatures
     ):
-        """Put payload and metadta signatures into the payload we sign.
+        """Put payload and metadata signatures into the payload we sign.
 
         Args:
           payload_signatures: List of signatures as bytes for the payload.
@@ -947,7 +950,8 @@ class PaygenPayload(object):
         """
         if len(signatures) != 1:
             self._GenerateSignerResultsError(
-                "Received %d metadata signatures, only a single signature supported.",
+                "Received %d metadata signatures, only a single signature "
+                "supported.",
                 len(signatures),
             )
 
@@ -963,22 +967,22 @@ class PaygenPayload(object):
     def GetPayloadPropertiesMap(self, payload_path):
         """Returns the payload's properties attributes in dictionary.
 
-        The payload description contains a dictionary of key/values describing the
-        characteristics of the payload. Look at
+        The payload description contains a dictionary of key/values describing
+        the characteristics of the payload. Look at
         update_engine/payload_generator/payload_properties.cc for the basic
         description of these values.
 
-        In addition we add the following three keys to description file:
+        In addition, we add the following three keys to description file:
 
         "appid": The APP ID associated with this payload.
         "public_key": The public key the payload was signed with.
 
         Args:
-          payload_path: The path to the payload file.
+            payload_path: The path to the payload file.
 
         Returns:
-          A map of payload properties that can be directly used to create the
-          payload.json file.
+            A map of payload properties that can be directly used to create the
+            payload.json file.
         """
         try:
             payload_path = path_util.ToChrootPath(payload_path)
@@ -1003,9 +1007,10 @@ class PaygenPayload(object):
         with open(props_file, "rb") as f:
             props_map = json.load(f)
 
-        # delta_generator assigns empty string for signatures when the payload is
-        # not signed. Replace it with 'None' so the json.dumps() writes 'null' as
-        # the value to be consistent with the current scheme and not break GE.
+        # delta_generator assigns empty string for signatures when the payload
+        # is not signed. Replace it with 'None' so the json.dumps() writes
+        # 'null' as the value to be consistent with the current scheme and not
+        # break GE.
         key = "metadata_signature"
         if not props_map[key]:
             props_map[key] = None
@@ -1048,12 +1053,12 @@ class PaygenPayload(object):
         if self.signer:
             payload_file = self.signed_payload_file
 
-        # Currently we have no way of getting the appid from the payload itself. So
-        # just put what we got from the image itself (if any).
+        # Currently we have no way of getting the appid from the payload itself.
+        # So just put what we got from the image itself (if any).
         props_map = self.GetPayloadPropertiesMap(payload_file)
 
-        # Check that the calculated metadata signature is the same as the one on the
-        # payload.
+        # Check that the calculated metadata signature is the same as the one on
+        # the payload.
         if metadata_signatures:
             if len(metadata_signatures) != 1:
                 self._GenerateSignerResultsError(
@@ -1097,10 +1102,10 @@ class PaygenPayload(object):
         Returns:
           List of payload signatures, List of metadata signatures.
         """
-        # Create hashes to sign or even if signing not needed.  TODO(ahassani): In
-        # practice we don't need to generate hashes if we are not signing, so when
-        # devserver stopped depending on cros_generate_update_payload. this can be
-        # reverted.
+        # Create hashes to sign or even if signing not needed.
+        # TODO(ahassani): In practice we don't need to generate hashes if we are
+        #   not signing, so when devserver stopped depending on
+        #   cros_generate_update_payload. this can be reverted.
         payload_hash, metadata_hash = self._GenerateHashes()
 
         if not self.signer:
@@ -1131,7 +1136,7 @@ class PaygenPayload(object):
 
         Raises:
             PayloadGenerationSkippedException: If paygen was skipped for any
-              reason.
+                reason.
         """
 
         logging.info(
@@ -1140,21 +1145,23 @@ class PaygenPayload(object):
             self.payload,
         )
 
-        # TODO(lamontjones): Trial test of wrapping the downloads in the semaphore
-        # in addition to the actual generation of the unsigned payload.  See if the
-        # running of several gsutil cp commands in parallel is increasing the
-        # likelihood of EAGAIN from spawning a thread.  See crbug.com/1016555
+        # TODO(lamontjones): Trial test of wrapping the downloads in the
+        #   semaphore in addition to the actual generation of the unsigned
+        #   payload.  See if the running of several gsutil cp commands in
+        #   parallel is increasing the likelihood of EAGAIN from spawning a
+        #   thread.  See crbug.com/1016555.
         #
-        # Run delta_generator for the purpose of generating an unsigned payload with
-        # considerations for available memory. This is an adaption of the previous
-        # version which used a simple semaphore. This was highly limiting because
-        # while delta_generator is parallel there are single threaded portions
-        # of it that were taking a very long time (i.e. long poles).
+        # Run delta_generator for the purpose of generating an unsigned payload
+        # with considerations for available memory. This is an adaption of the
+        # previous version which used a simple semaphore. This was highly
+        # limiting because while delta_generator is parallel there are single
+        # threaded portions of it that were taking a very long time (i.e. long
+        # poles).
         #
-        # Sometimes if a process cannot acquire the lock for a long
-        # period of time, the builder kills the process for not outputting any
-        # logs. So here we try to acquire the lock with a timeout of ten minutes in
-        # a loop and log some output so not to be killed by the builder.
+        # Sometimes if a process cannot acquire the lock for a long period of
+        # time, the builder kills the process for not outputting any logs. So
+        # here we try to acquire the lock with a timeout of ten minutes in a
+        # loop and log some output so not to be killed by the builder.
         while True:
             acq_result = _mem_semaphore.acquire(timeout=self._SEMAPHORE_TIMEOUT)
             if acq_result.result:
@@ -1180,8 +1187,8 @@ class PaygenPayload(object):
             # Check if payload generation should proceed.
             self._MaybeSkipPayloadGeneration()
 
-            # Setup parameters about the payload like whether it is a DLC or not. Or
-            # parameters like the APPID, etc.
+            # Setup parameters about the payload like whether it is a DLC or
+            # not. Or parameters like the APPID, etc.
             self._PreparePartitions(part_a)
 
             # Generate the unsigned payload.
@@ -1367,9 +1374,10 @@ def CreateAndUploadPayload(payload, sign=True, verify=True):
     Mainly can be used as a single function to help with parallelism.
 
     Args:
-      payload: An instance of gspaths.Payload describing the payload to generate.
-      sign: Boolean saying if the payload should be signed (normally, you do).
-      verify: whether the payload should be verified (default: True)
+        payload: An instance of gspaths.Payload describing the payload to
+            generate.
+        sign: Whether the payload should be signed (normally, you do).
+        verify: Whether the payload should be verified (default: True).
     """
     # We need to create a temp directory inside the chroot so be able to access
     # from both inside and outside the chroot.
@@ -1395,18 +1403,20 @@ def GenerateUpdatePayload(
     """Generates output payload and verifies its integrity if needed.
 
     Args:
-      tgt_image: The path (or uri) to the image.
-      payload: The path (or uri) to the output payload
-      src_image: The path (or uri) to the source image. If passed, a delta payload
-        is generated.
-      work_dir: A working directory inside the chroot. The None, caller has the
-        responsibility to cleanup this directory after this function returns.
-      private_key: The private key to sign the payload.
-      check: If True, it will check the integrity of the generated payload.
-      minios: If True, extract the minios partition instead of root and kernel.
+        tgt_image: The path (or uri) to the image.
+        payload: The path (or uri) to the output payload
+        src_image: The path (or uri) to the source image. If passed, a delta
+            payload is generated.
+        work_dir: A working directory inside the chroot. The None, caller has
+            the responsibility to clean up this directory after this function
+            returns.
+        private_key: The private key to sign the payload.
+        check: If True, it will check the integrity of the generated payload.
+        minios: If True, extract the minios partition instead of root and
+            kernel.
 
     Returns:
-      Returns a Boolean indicating if the payload was generated or not.
+        Returns a Boolean indicating if the payload was generated or not.
     """
     if path_util.DetermineCheckout().type != path_util.CHECKOUT_TYPE_REPO:
         raise Error("Need a chromeos checkout to generate payloads.")
@@ -1437,9 +1447,9 @@ def GenerateUpdatePayloadPropertiesFile(payload, output=None):
     """Generates the update payload's properties file.
 
     Args:
-      payload: The path to the input payload.
-      output: The path to the output properties json file. If None, the file will
-        be placed by appending '.json' to the payload file itself.
+        payload: The path to the input payload.
+        output: The path to the output properties json file. If None, the file
+            will be placed by appending '.json' to the payload file itself.
     """
     if not output:
         output = payload + ".json"

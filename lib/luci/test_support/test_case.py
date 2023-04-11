@@ -26,9 +26,9 @@ class TestCase(auto_stub.TestCase):
     def set_up(self):
         """Initializes the commonly used stubs.
 
-        Using init_all_stubs() costs ~10ms more to run all the tests so only enable
-        the ones known to be required. Test cases requiring more stubs can enable
-        them in their setUp() function.
+        Using init_all_stubs() costs ~10ms more to run all the tests so only
+        enable the ones known to be required. Test cases requiring more stubs
+        can enable them in their setUp() function.
         """
         super().setUp()
 

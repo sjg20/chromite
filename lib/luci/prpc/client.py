@@ -171,8 +171,8 @@ def include_auth():
 class Client(object):
     """A client of a pRPC service.
 
-    For each RPC method, a client has an instance method. For example, for an RPC
-    "Ping", the class will have method Ping.
+    For each RPC method, a client has an instance method. For example, for an
+    RPC "Ping", the class will have method Ping.
 
     The methods accept arguments:
       request: the request message.
@@ -234,8 +234,8 @@ class Client(object):
 
             if credentials:
                 assert hasattr(credentials, "__call__"), (
-                    "credentials must be created using credentials functions in "
-                    "components.prpc.client module"
+                    "credentials must be created using credentials functions "
+                    "in components.prpc.client module"
                 )
                 prpc_req = credentials(prpc_req)
 

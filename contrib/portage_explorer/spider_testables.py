@@ -15,18 +15,18 @@ from chromite.lib.parser import package_info
 def create_overlays(
     tmp_path: Path, name: str
 ) -> Tuple[cr.test.Overlay, spiderlib.Overlay]:
-    """Create test overlays for unittesting spiders.
+    """Create test overlays for unit testing spiders.
 
     Create the cr.test.Overlay and spiderlib.Overlay versions of the overlays to
     replicate in the temporary path.
 
     Args:
-      tmp_path: Temporary path to put mock data in
-      name: Name of overlay
+        tmp_path: Temporary path to put mock data in
+        name: Name of overlay
 
     Returns:
-      A tuple containing the cr.test.Overlay and spiderlib.Overlay version of the
-      overlay
+        A tuple containing the cr.test.Overlay and spiderlib.Overlay version of
+        the overlay
     """
     overlay_path = tmp_path / f"src/overlay-{name}"
     test_overlay = cr.test.Overlay(overlay_path, name)
@@ -45,24 +45,26 @@ def create_profiles(
     Dict[str, spiderlib.Profile],
     Dict[str, spiderlib.Profile],
 ]:
-    """Create test profiles for unittesting spiders.
+    """Create test profiles for unit testing spiders.
 
-    Create the unpopulated and populated versions of the profiles for the overlay
-    to represent the before and after of running the spider against the mock data.
+    Create the unpopulated and populated versions of the profiles for the
+    overlay to represent the before and after of running the spider against the
+    mock data.
 
     Args:
-      tmp_path: Temporary path to put mock data in
-      test_overlay: cr.test.Overlay instance to create a profile within
-      profile_names: List of strings representing profile names for this overlay
-      parent_profiles: Dict of profile names matched to corresponding
-          portage_testables profile.
-      make_defaults: Dict of profile names matched to corresponding make_defaults
-          from portage_testables when creating profiles, which is a dict of the
-          variable and its value.
+        tmp_path: Temporary path to put mock data in.
+        test_overlay: cr.test.Overlay instance to create a profile within.
+        profile_names: List of strings representing profile names for this
+            overlay.
+        parent_profiles: Dict of profile names matched to corresponding
+            portage_testables profile.
+        make_defaults: Dict of profile names matched to corresponding
+            make_defaults from portage_testables when creating profiles, which
+            is a dict of the variable and its value.
 
     Returns:
-      A tuple containing the cr.test.Profiles, the profiles to run through the
-      spider, and the profiles to compare the the output against
+        A tuple containing the cr.test.Profiles, the profiles to run through the
+        spider, and the profiles to compare the output against
     """
     test_profiles = {}
     unpopulated_profiles = {}
@@ -112,7 +114,7 @@ def create_ebuilds(
     test_overlay: cr.test.Overlay,
     packages: Dict[str, spiderlib.TestEbuild],
 ):
-    """Create test ebuilds for unittesting spiders.
+    """Create test ebuilds for unit testing spiders.
 
     Create the unpopulated and populated versions of ebuilds for the overlay to
     represent the before and after of running the spider against mock data.
@@ -120,14 +122,14 @@ def create_ebuilds(
     Populated ebuilds contain information after sourcing the ebuild.
 
     Args:
-      tmp_path: Temporary path to put mock data in
-      test_overlay: cr.test.Overlay instance to create ebuilds in
-      packages: Dict of cpv to the metadata associated with the ebuild in that
-      cpv.
+        tmp_path: Temporary path to put mock data in
+        test_overlay: cr.test.Overlay instance to create ebuilds in
+        packages: Dict of cpv to the metadata associated with the ebuild in that
+            cpv.
 
     Returns:
-      A tuple containing the cr.test.Packages, the unpopulated ebuilds, and
-      populated ebuilds.
+        A tuple containing the cr.test.Packages, the unpopulated ebuilds, and
+        populated ebuilds.
     """
     test_packages = []
     unpopulated_ebuilds = []
@@ -198,17 +200,17 @@ def create_ebuilds(
 def create_eclasses(
     tmp_path: Path, test_overlay: cr.test.Overlay, eclasses: List[str]
 ):
-    """Create test eclasses in tmp dir for unittesting spiders.
+    """Create test eclasses in tmp dir for unit testing spiders.
 
     Args:
-      tmp_path: Temporary path to put mock data in.
-      test_overlay: The test overlay to create these eclasses for.
-      eclasses: List of eclass names.
+        tmp_path: Temporary path to put mock data in.
+        test_overlay: The test overlay to create these eclasses for.
+        eclasses: List of eclass names.
 
     Returns:
-      A tuple of a list of unpopulated spiderlib.Eclass instances (just src_path
-      and name filled in) and a list of populated spiderlib.Eclass instances for
-      inheritance.
+        A tuple of a list of unpopulated spiderlib.Eclass instances (just
+        src_path and name filled in) and a list of populated spiderlib.Eclass
+        instances for inheritance.
     """
     eclass_folder = test_overlay.path / "eclass"
     eclass_folder.mkdir(parents=True, exist_ok=True)

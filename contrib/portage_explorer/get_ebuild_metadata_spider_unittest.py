@@ -12,9 +12,9 @@ from chromite.contrib.portage_explorer import spiderlib
 def test_execute(monkeypatch, tmp_path):
     """Test the get_ebuild_metadata_spider's execute function.
 
-    Ensure that we are getting all the metadata that we're looking for and filling
-    out the spiderlib.Ebuild correctly. Ensure that the use flags and inherited
-    eclasses are sorted as well.
+    Ensure that we are getting all the metadata that we're looking for and
+    filling out the spiderlib.Ebuild correctly. Ensure that the use flags and
+    inherited eclasses are sorted as well.
     """
     test_elm, overlay_elm = spider_testables.create_overlays(tmp_path, "elm")
     test_brya, overlay_brya = spider_testables.create_overlays(tmp_path, "brya")

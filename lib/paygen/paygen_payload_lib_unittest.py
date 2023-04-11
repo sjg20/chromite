@@ -538,8 +538,8 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         postinst_mock.assert_called_once_with(True)
         # Checks we mounted the image and read the lsb-release file correctly.
         platform_params_mock.assert_called_once_with(tgt_image_file)
-        # Make sure the tgt_image_file variable is set to None so no one can use it
-        # again.
+        # Make sure the tgt_image_file variable is set to None so no one can use
+        # it again.
         self.assertIsNone(gen.tgt_image_file)
 
     def testPreparePartitionsGptDelta(self):
@@ -566,8 +566,8 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         gen._PreparePartitions()
 
         # Check extract partition functions are called correctly. Two times each
-        # partition (kernel, rootfs), once for source partition and once for target
-        # partition.
+        # partition (kernel, rootfs), once for source partition and once for
+        # target partition.
         self.assertEqual(root_ext_mock.call_count, 2)
         self.assertEqual(kern_ext_mock.call_count, 2)
 
@@ -626,8 +626,8 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         )
         # Checks we mounted the image and read the lsb-release file correctly.
         params_mock.assert_called_once_with(tgt_image_file)
-        # Make sure the tgt_image_file variable is set to None so no one can use it
-        # again.
+        # Make sure the tgt_image_file variable is set to None so no one can use
+        # it again.
         self.assertIsNone(gen.tgt_image_file)
 
     def testPreparePartitionsMiniOSDelta(self):
@@ -1288,8 +1288,8 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         """Test calculating the location of the cache directory."""
         gen = self._GetStdGenerator(work_dir="/foo")
 
-        # The correct result is based on the system cache directory, which changes.
-        # Ensure it ends with the right directory name.
+        # The correct result is based on the system cache directory, which
+        # changes. Ensure it ends with the right directory name.
         self.assertEqual(os.path.basename(gen._FindCacheDir()), "paygen_cache")
 
     def testGetPayloadPropertiesMap(self):
@@ -1360,7 +1360,7 @@ class PaygenPayloadLibBasicTest(PaygenLibTest):
         )
 
     def testGetPayloadPropertiesMapSigned(self):
-        """Tests getting the payload properties as a dict for signed payloads."""
+        """Test getting the payload properties as a dict for signed payloads."""
         gen = self._GetStdGenerator()
 
         props_file = os.path.join(self.tempdir, "properties.json")

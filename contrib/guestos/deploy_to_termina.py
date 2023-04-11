@@ -47,17 +47,17 @@ def get_deployment_plan(board: str, packages: List[str]) -> List[FileSet]:
       packages: A list of packages (as understood by equery)
 
     Returns:
-      A list of FileSets which describe the source root, destination image, and a
-      list of file paths which should be copied (relative to the source root) to
-      that location within the destination image.
+      A list of FileSets which describe the source root, destination image, and
+      a list of file paths which should be copied (relative to the source root)
+      to that location within the destination image.
     """
-    # TODO(crbug/1222489): We should validate user input. At the moment ambiguous
-    # packages deploy files from every package (fine), an unmatched package gives
-    # an exception (all right), and an unmatched package in a list with packages
-    # that exist skips the missing package e.g. `deploy tremlin sommelier
-    # will only deploy Sommelier with no warnings (less fine).
-    # It's messy to do so without having extra chroot enters, and slower if we do,
-    # so leave that for a separate task.
+    # TODO(crbug/1222489): We should validate user input. At the moment
+    # ambiguous packages deploy files from every package (fine), an unmatched
+    # package gives an exception (all right), and an unmatched package in a list
+    # with packages that exist skips the missing package e.g. `deploy tremlin
+    # sommelier will only deploy Sommelier with no warnings (less fine).
+    # It's messy to do so without having extra chroot enters, and slower if we
+    # do, so leave that for a separate task.
     files = cros_build_lib.run(
         [f"qlist-{board}"] + packages,
         enter_chroot=True,
@@ -102,7 +102,7 @@ def deploy_into_remote_dlc(
         command = "restart vm_concierge " if restart_services else ""
         # We unpack the dlc disk image, add an extra 200M of empty space to each
         # inner image to fit whatever we're about to copy over, then mount the
-        # images. Run the the entire thing inside set -e so a failure of any step
+        # images. Run the entire thing inside set -e so a failure of any step
         # causes the entire command to fail, which then turns into an exception.
         command += textwrap.dedent(
             f"""
@@ -141,10 +141,11 @@ def deploy_into_remote_dlc(
                 )
 
         logging.notice("Repacking DLC")
-        # Unmount the inner images, shrink them back to minimum size (so we don't
-        # constantly grow the image by 200M every time we run) then repack the DLC
-        # image. Run the the entire thing inside set -e so a failure of any step
-        # causes the entire command to fail, which then turns into an exception.
+        # Unmount the inner images, shrink them back to minimum size (so we
+        # don't constantly grow the image by 200M every time we run) then repack
+        # the DLC image. Run the entire thing inside set -e so a failure of any
+        # step causes the entire command to fail, which then turns into an
+        # exception.
         command = textwrap.dedent(
             f"""
         (set -e

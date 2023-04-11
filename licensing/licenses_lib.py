@@ -273,7 +273,7 @@ inherit() {
 
 
 class PackageLicenseError(Exception):
-    """Thrown if something fails while getting license information for a package.
+    """Thrown for failures while getting license information for a package.
 
     This will cause the processing to error in the end.
     """
@@ -319,7 +319,8 @@ class PackageInfo(object):
             )
 
         #
-        # These fields hold license information used to generate the credits page.
+        # These fields hold license information used to generate the credits
+        # page.
         #
 
         # This contains licenses names for this package.
@@ -372,17 +373,17 @@ class PackageInfo(object):
         )
 
     def _GetOverrideLicense(self):
-        """Look in COPYRIGHT_ATTRIBUTION_DIR for license with copyright attribution.
+        """Check COPYRIGHT_ATTRIBUTION_DIR for license w/ copyright attribution.
 
         For dev-util/bsdiff-4.3-r5, the code will look for
         dev-util/bsdiff-4.3-r5
         dev-util/bsdiff-4.3
         dev-util/bsdiff
 
-        It is ok to have more than one bsdiff license file, and an empty file acts
-        as a rubout (i.e. an empty dev-util/bsdiff-4.4 will shadow dev-util/bsdiff
-        and tell the licensing code to look in the package source for a license
-        instead of using dev-util/bsdiff as an override).
+        It is ok to have more than one bsdiff license file, and an empty file
+        acts as a rubout (i.e. an empty dev-util/bsdiff-4.4 will shadow
+        dev-util/bsdiff and tell the licensing code to look in the package
+        source for a license instead of using dev-util/bsdiff as an override).
 
         Returns:
             False (no license found) or a multiline license string.
@@ -402,7 +403,7 @@ class PackageInfo(object):
             )
             if os.path.exists(file_path):
                 # Turn
-                # /.../chromiumos/src/third_party/chromiumos-overlay/../dev-util/bsdiff
+                # SRC_ROOT/CHROMIUMOS_OVERLAY_DIR/../dev-util/bsdiff
                 # into
                 # chromiumos-overlay/../dev-util/bsdiff
                 short_dir_path = os.path.join(
@@ -425,11 +426,12 @@ class PackageInfo(object):
         or one of them is BSD/MIT like which forces us to look for a file with
         copyright attribution in the source code itself.
 
-        First, we have a shortcut where we scan COPYRIGHT_ATTRIBUTION_DIR to see if
-        we find a license for this package. If so, we use that.
-        Typically it'll be used if the unpacked source does not have the license
-        that we're required to display for copyright attribution (in some cases it's
-        plain absent, in other cases, it could be in a filename we don't look for).
+        First, we have a shortcut where we scan COPYRIGHT_ATTRIBUTION_DIR to see
+        if we find a license for this package. If so, we use that.
+        Typically, it'll be used if the unpacked source does not have the
+        license that we're required to display for copyright attribution (in
+        some cases it's plain absent, in other cases, it could be in a filename
+        we don't look for).
 
         Otherwise, we scan the unpacked source code for what looks like license
         files as defined in LICENSE_NAMES_REGEX.
@@ -448,6 +450,8 @@ class PackageInfo(object):
             self._RunEbuildPhases(self.ebuild_path, ["clean", "fetch"])
             raw_output = self._RunEbuildPhases(self.ebuild_path, ["unpack"])
             output = raw_output.stdout.splitlines()
+            # pylint: disable=line-too-long
+            #
             # Output is spammy, it looks like this:
             #  * gc-7.2d.tar.gz RMD160 SHA1 SHA256 size ;-) ...                 [ ok ]
             #  * checking gc-7.2d.tar.gz ;-) ...                                [ ok ]
@@ -461,6 +465,8 @@ class PackageInfo(object):
             # >>> Unpacking gc-7.2d.tar.gz to /build/x86-alex/tmp/po/[...]ps-7.2d/work
             # >>> Source unpacked in /build/x86-alex/tmp/portage/[...]ops-7.2d/work
             # So we only keep the last 2 lines, the others we don't care about.
+            #
+            # pylint: enable=line-too-long
             output = [
                 line
                 for line in output
@@ -481,12 +487,16 @@ class PackageInfo(object):
                     % (self.fullnamerev, src_dir)
                 )
 
+        # pylint: disable=line-too-long
+        #
         # You may wonder how deep should we go?
         # In case of packages with sub-packages, it could be deep.
         # Let's just be safe and get everything we can find.
         # In the case of libatomic_ops, it's actually required to look deep
         # to find the MIT license:
         # dev-libs/libatomic_ops-7.2d/work/gc-7.2/libatomic_ops/doc/LICENSING.txt
+        #
+        # pylint: enable=line-too-long
         args = ["find", src_dir, "-type", "f"]
         result = cros_build_lib.run(args, stdout=True, encoding="utf-8")
         # Truncate results to look like this: swig-2.0.4/COPYRIGHT
@@ -495,8 +505,8 @@ class PackageInfo(object):
         ]
         license_files = []
         for name in files:
-            # When we scan a source tree managed by git, this can contain license
-            # files that are not part of the source. Exclude those.
+            # When we scan a source tree managed by git, this can contain
+            # license files that are not part of the source. Exclude those.
             # (e.g. .git/refs/heads/licensing)
             if ".git/" in name:
                 continue
@@ -541,11 +551,13 @@ to assign.  Once you've found it, copy the entire license file to:
                     google_bsd_msg,
                 )
                 raise PackageLicenseError(
-                    f"Missing copyright attribution for {need_copyright_attribution}"
+                    "Missing copyright attribution for "
+                    f"{need_copyright_attribution}"
                 )
             else:
-                # We can get called for a license like as-is where it's preferable
-                # to find a better one in the source, but not fatal if we didn't.
+                # We can get called for a license like as-is where it's
+                # preferable to find a better one in the source, but not fatal
+                # if we didn't.
                 logging.info(
                     "Was not able to find a better license for %s "
                     "in %s to replace the more generic one from ebuild",
@@ -567,8 +579,9 @@ to assign.  Once you've found it, copy the entire license file to:
             "License(s) for %s: %s", self.fullnamerev, " ".join(license_files)
         )
         for license_file in sorted(license_files):
-            # Joy and pink ponies. Some license_files are encoded as latin1 while
-            # others are utf-8 and of course you can't know but only guess.
+            # Joy and pink ponies. Some license_files are encoded as latin1
+            # while others are utf-8 and of course you can't know but only
+            # guess.
             license_path = os.path.join(src_dir, license_file)
             license_txt = ReadUnknownEncodedFile(license_path, "Adding License")
 
@@ -595,7 +608,8 @@ to assign.  Once you've found it, copy the entire license file to:
             )
             self.skip = True
 
-        # TODO(dgarrett): There are additional reasons that should be handled here.
+        # TODO(dgarrett): There are additional reasons that should be handled
+        #   here.
 
         return self.skip
 
@@ -642,8 +656,8 @@ to assign.  Once you've found it, copy the entire license file to:
         Some packages have static license mappings applied to them that get
         retrieved from the ebuild.
 
-        For others, we figure out whether the package source should be scanned to
-        add licenses found there.
+        For others, we figure out whether the package source should be scanned
+        to add licenses found there.
 
         Args:
             build_info_dir: Path to the build_info for the ebuild. This can be
@@ -656,7 +670,8 @@ to assign.  Once you've found it, copy the entire license file to:
             AssertionError: on runtime errors
             PackageLicenseError: couldn't find license in ebuild and source.
         """
-        # If the total size installed is zero, we installed no content to license.
+        # If the total size installed is zero, we installed no content to
+        # license.
         if _BuildInfo(build_info_dir, "SIZE").strip() == "0":
             # Allow for license generation for the exempt empty packages.
             if self.fullname not in SIZE_EXEMPT_PACKAGES:
@@ -715,10 +730,10 @@ to assign.  Once you've found it, copy the entire license file to:
             logging.error(
                 "%s: no license found in ebuild. FIXME!", self.fullnamerev
             )
-            # In a bind, you could comment this out. I'm making the output fail to
-            # get your attention since this error really should be fixed, but if you
-            # comment out the next line, the script will try to find a license inside
-            # the source.
+            # In a bind, you could comment this out. I'm making the output fail
+            # to get your attention since this error really should be fixed, but
+            # if you comment out the next line, the script will try to find a
+            # license inside the source.
             raise PackageLicenseError()
 
         need_copyright_attribution = set()
@@ -738,8 +753,8 @@ to assign.  Once you've found it, copy the entire license file to:
                 scan_source_for_licenses = True
             else:
                 self.license_names.add(license_name)
-                # We can't display just 2+ because it only contains text that says to
-                # read v2 or v3.
+                # We can't display just 2+ because it only contains text that
+                # says to read v2 or v3.
                 if license_name == "GPL-2+":
                     self.license_names.add("GPL-2")
                 if license_name == "LGPL-2+":
@@ -805,7 +820,7 @@ to assign.  Once you've found it, copy the entire license file to:
             self._AssertVirtualIsMetapackage(build_info_dir, ebuild_path)
 
     def _AssertMetapackageNoContent(self, build_info_dir):
-        """_AssertMetapackageNoContent ensures metapackages do not install files.
+        """Ensures metapackages do not install files.
 
         Args:
             build_info_dir: Path to the build_info for the ebuild. This can be
@@ -827,7 +842,7 @@ to assign.  Once you've found it, copy the entire license file to:
                 )
 
     def _AssertVirtualIsMetapackage(self, build_info_dir, ebuild_path):
-        """_AssertVirtualIsMetapackage ensures that virtual pkgs are metapackages.
+        """Ensures that virtual pkgs are metapackages.
 
         Args:
             ebuild_path: Path to the ebuild.
@@ -1029,10 +1044,11 @@ class Licensing(object):
 
         self.entry_template = None
 
-        # We need to have a dict for the list of packages objects, index by package
-        # fullnamerev, so that when we scan our licenses at the end, and find out
-        # some shared licenses are only used by one package, we can access that
-        # package object by name, and add the license directly in that object.
+        # We need to have a dict for the list of packages objects, index by
+        # package fullnamerev, so that when we scan our licenses at the end, and
+        # find out some shared licenses are only used by one package, we can
+        # access that package object by name, and add the license directly in
+        # that object.
         self.packages = {}
         self._package_fullnames = package_fullnames
 
@@ -1063,8 +1079,9 @@ class Licensing(object):
     def ProcessPackageLicenses(self):
         """Iterate through all packages provided and gather their licenses.
 
-        GetLicenses will scrape licenses from the code and/or gather stock license
-        names. We gather the list of stock and custom ones for later processing.
+        GetLicenses will scrape licenses from the code and/or gather stock
+        license names. We gather the list of stock and custom ones for later
+        processing.
 
         Do not call this after adding virtual packages with AddExtraPkg.
         """
@@ -1075,7 +1092,8 @@ class Licensing(object):
                 logging.debug("Package %s is in skip list", package_name)
                 continue
 
-            # Other skipped packages get dumped with incomplete info and the skip flag
+            # Other skipped packages get dumped with incomplete info and the
+            # skip flag
             if not os.path.exists(pkg.license_dump_path):
                 if not self.gen_licenses:
                     logging.error(
@@ -1099,13 +1117,14 @@ class Licensing(object):
                 # We dump packages where licensing failed too.
                 pkg.SaveLicenseDump(pkg.license_dump_path)
 
-            # Load the pre-cached version, if the in-memory version is incomplete.
+            # Load the pre-cached version, if the in-memory version is
+            # incomplete.
             if not pkg.license_names:
                 logging.debug("loading dump for %s", pkg.fullnamerev)
                 self._LoadLicenseDump(pkg)
 
-            # Store all tainted packages to print at the top of generated license.
-            # If any package is tainted, the whole thing is tainted.
+            # Store all tainted packages to print at the top of generated
+            # license. If any package is tainted, the whole thing is tainted.
             if pkg.tainted:
                 self.tainted_pkgs.append(package_name)
 
@@ -1142,9 +1161,9 @@ class Licensing(object):
     ):
         """Says if a license is stock Gentoo, custom, tainted, or doesn't exist.
 
-        Will check the old, static locations by default, but supplying either the
-        overlay directory or sysroot allows searching in the overlay hierarchy.
-        Ignores the overlay_path if sysroot is provided.
+        Will check the old, static locations by default, but supplying either
+        the overlay directory or sysroot allows searching in the overlay
+        hierarchy. Ignores the overlay_path if sysroot is provided.
 
         Args:
             license_name: The license name
@@ -1236,7 +1255,7 @@ after fixing the license."""
 
     @staticmethod
     def EvaluateTemplate(template, env):
-        """Expand a template with vars like {{foo}} using a dict of expansions."""
+        """Expand |template| with vars like {{foo}} using |env| expansions."""
         # TODO switch to stock python templates.
         for key, val in env.items():
             template = template.replace("{{%s}}" % key, val)
@@ -1245,8 +1264,8 @@ after fixing the license."""
     def _GeneratePackageLicenseHTML(self, pkg, license_text):
         """Concatenate all licenses related to a pkg in HTML format.
 
-        This means a combination of ebuild shared licenses and licenses read from
-        the pkg source tree, if any.
+        This means a combination of ebuild shared licenses and licenses read
+        from the pkg source tree, if any.
 
         Args:
             pkg: PackageInfo object
@@ -1266,9 +1285,10 @@ after fixing the license."""
                 license_type = self.FindLicenseType(sln, sysroot=self.sysroot)
             except Exception as e:
                 logging.error(
-                    "Failed to find the type of %s license, used by %s package. "
-                    "If this license is not used anymore, it may be still cached as a "
-                    "binpkg—run emerge on the package to rebuild. See more info at "
+                    "Failed to find the type of %s license, used by %s "
+                    "package. If this license is not used anymore, it may be "
+                    "still cached as a binpkg—run emerge on the package to "
+                    "rebuild. See more info at "
                     "https://dev.chromium.org/chromium-os/licensing",
                     sln,
                     pkg.fullnamerev,
@@ -1298,8 +1318,8 @@ after fixing the license."""
     def _GeneratePackageLicenseText(self, pkg):
         """Concatenate all licenses related to a pkg.
 
-        This means a combination of ebuild shared licenses and licenses read from
-        the pkg source tree, if any.
+        This means a combination of ebuild shared licenses and licenses read
+        from the pkg source tree, if any.
 
         Args:
             pkg: PackageInfo object
@@ -1324,9 +1344,9 @@ after fixing the license."""
             for sln in pkg.license_names:
                 self.licenses.setdefault(sln, []).append(pkg.fullnamerev)
 
-        # Find licenses only used once, and roll them in the package that uses them.
-        # We use list() because licenses is modified in the loop, so we can't use
-        # an iterator.
+        # Find licenses only used once, and roll them in the package that uses
+        # them. We use list() because licenses is modified in the loop, so we
+        # can't use an iterator.
         for sln in list(self.licenses):
             if len(self.licenses[sln]) == 1:
                 pkg_fullnamerev = self.licenses[sln][0]
@@ -1473,21 +1493,23 @@ def ListInstalledPackages(sysroot, all_packages=False):
         emerge = cros_build_lib.run(
             args, encoding="utf-8", stdout=True
         ).stdout.splitlines()
-        # Another option which we've decided not to use, is bdeps=n.  This outputs
-        # just the packages we ship, but does not packages that were used to build
-        # them, including a package like flex which generates a .a that is included
-        # and shipped in ChromeOS.
-        # We've decided to credit build packages, even if we're not legally required
-        # to (it's always nice to do), and that way we get corner case packages like
-        # flex. This is why we use bdep=y and not bdep=n.
+        # Another option which we've decided not to use, is bdeps=n.  This
+        # outputs just the packages we ship, but not packages that were used to
+        # build them, including a package like flex which generates a .a that is
+        # included and shipped in ChromeOS.
+        # We've decided to credit build packages, even if we're not legally
+        # required to (it's always nice to do), and that way we get corner case
+        # packages like flex. This is why we use bdep=y and not bdep=n.
 
         packages = []
         bad_packages = []
         # [binary   R    ] x11-libs/libva-1.1.1 to /build/x86-alex/
         pkg_rgx = re.compile(r"\[[^]]+R[^]]+\] (.+) to /build/.*")
+        # pylint: disable=line-too-long
         # If we match something else without the 'R' like
         # [binary     U  ] chromeos-base/some-package-13.0.0.133-r1 [12.0.0.77-r1]
-        # this is bad and we should die on this.
+        # this is bad, and we should die on this.
+        # pylint: enable=line-too-long
         pkg_rgx2 = re.compile(r"(\[[^]]+\] .+) to /build/.*")
         for line in emerge:
             match = pkg_rgx.search(line)
@@ -1551,11 +1573,11 @@ def _BuildInfo(build_info_path, filename):
     """Fetch contents of a file from portage build_info directory.
 
     Portage maintains a build_info directory that exists both during the process
-    of emerging an ebuild, and (in a different location) after the ebuild has been
-    emerged.
+    of emerging an ebuild, and (in a different location) after the ebuild has
+    been emerged.
 
     Various useful data files exist there like:
-     'CATEGORY', 'PF', 'SIZE', 'HOMEPAGE', 'LICENSE'
+        'CATEGORY', 'PF', 'SIZE', 'HOMEPAGE', 'LICENSE'
 
     Args:
         build_info_path: Path to the build_info directory to read from.

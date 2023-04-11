@@ -275,7 +275,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
             self.assertEqual(installed_files, f.read().splitlines())
 
     def testBundledArtifactTypes(self):
-        """Tests that all known bundled artifacts are either zip or tar files."""
+        """Verify all known bundled artifacts are either zip or tar files."""
         known_names = ["zip", ".tgz", ".tar", "tar.bz2", "tar.xz", "tar.gz"]
         # pylint: disable=dict-values-not-iterating
         for d in itertools.chain(
@@ -412,7 +412,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
 
     @cros_test_lib.pytestmark_network_test
     def testAUFullPayloadArtifact(self):
-        """Tests downloading the full update payload payload."""
+        """Tests downloading the full update payload."""
         factory = build_artifact.ChromeOSArtifactFactory(
             self.work_dir, [artifact_info.FULL_PAYLOAD], [], _VERSION
         )
@@ -435,7 +435,7 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
 
     @cros_test_lib.pytestmark_network_test
     def testAUDeltaPayloadArtifact(self):
-        """Tests downloading the delta update payload payload."""
+        """Tests downloading the delta update payload."""
         factory = build_artifact.ChromeOSArtifactFactory(
             self.work_dir, [artifact_info.DELTA_PAYLOAD], [], _VERSION
         )

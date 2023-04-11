@@ -52,13 +52,13 @@ def _SplitPV(pv, strict=True):
     Deprecated, use parse() instead.
 
     Args:
-      pv: Package name and version.
-      strict: If True, returns None if version or package name is missing.
-        Otherwise, only package name is mandatory.
+        pv: Package name and version.
+        strict: If True, returns None if version or package name is missing.
+            Otherwise, only package name is mandatory.
 
     Returns:
-      A collection with named members:
-        pv, package, version, version_no_rev, rev
+        A collection with named members:
+            pv, package, version, version_no_rev, rev
     """
     m = _pvr_re.match(pv)
 
@@ -85,13 +85,13 @@ def SplitCPV(cpv, strict=True):
     Deprecated, use parse() instead.
 
     Args:
-      cpv: Category, package name, and version of a package.
-      strict: If True, returns None if any of the components is missing.
-        Otherwise, only package name is mandatory.
+        cpv: Category, package name, and version of a package.
+        strict: If True, returns None if any of the components is missing.
+            Otherwise, only package name is mandatory.
 
     Returns:
-      A collection with named members:
-        category, pv, package, version, version_no_rev, rev
+        A collection with named members:
+            category, pv, package, version, version_no_rev, rev
     """
     chunks = cpv.split("/")
     if len(chunks) > 2:
@@ -122,13 +122,13 @@ def parse(cpv: Union[str, Path, CPV, "PackageInfo"]):
     """Parse a package to a PackageInfo object.
 
     Args:
-      cpv: Any package type. This function can parse strings, translate CPVs to a
-        PackageInfo instance, and will simply return the argument if given a
-        PackageInfo instance.  If given a Path, this will treat the path as the
-        path to an ebuild.
+        cpv: Any package type. This function can parse strings, translate CPVs
+            to a PackageInfo instance, and will simply return the argument if
+            given a PackageInfo instance.  If given a Path, this will treat the
+            path as the path to an ebuild.
 
     Returns:
-      PackageInfo
+        PackageInfo
     """
     if isinstance(cpv, Path):
         if not cpv.suffix == ".ebuild":
@@ -246,7 +246,8 @@ class PackageInfo(object):
         The format |spec| is a format string containing any combination of:
         {c}, {p}, {v}, or {r} for the package's category, package name, version,
         or revision, respectively, or any of the class' {attribute}s.
-        e.g. {c}/{p} or {atom} for a package's atom (i.e. category/package_name).
+        e.g. {c}/{p} or {atom} for a package's atom (i.e.
+        category/package_name).
         """
         fmtter = string.Formatter()
         base_dict = {
@@ -314,7 +315,8 @@ class PackageInfo(object):
     def pvr(self):
         """This is PF in Gentoo variable definitions.
 
-        From Gentoo docs: PF - Full package name. e.g. 'vim-6.3-r1' or 'vim-6.3'.
+        From Gentoo docs: PF - Full package name. e.g. 'vim-6.3-r1' or
+            'vim-6.3'.
         """
         return format(self, "{pv}-r{r}") or self.pv
 
@@ -322,8 +324,8 @@ class PackageInfo(object):
     def vr(self):
         """This is PVR in Gentoo variable definitions.
 
-        From Gentoo docs: PVR - Package version and revision (if any). e.g. '6.3'
-        or '6.3-r1'.
+        From Gentoo docs: PVR - Package version and revision (if any). e.g.
+            '6.3' or '6.3-r1'.
         """
         return format(self, "{v}-r{r}") or self.version
 
@@ -350,7 +352,7 @@ class PackageInfo(object):
         """Get a CPV instance of this PackageInfo.
 
         This method is provided only to allow compatibility with functions that
-        have not yet been converted to use PackageInfo objects. This function will
-        be removed when the CPV namedtuple is removed.
+        have not yet been converted to use PackageInfo objects. This function
+        will be removed when the CPV namedtuple is removed.
         """
         return SplitCPV(self.cpvr)

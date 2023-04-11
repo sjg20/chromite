@@ -110,7 +110,7 @@ class CommonUtilTest(cros_test_lib.TestCase):
         )
 
     def testGetLatestBuildVersionUnknownBuild(self):
-        """Test that we raise CommonUtilError when a build dir does not exist."""
+        """Verify we raise CommonUtilError when a build dir does not exist."""
         self.assertRaises(
             common_util.CommonUtilError,
             common_util.GetLatestBuildVersion,

@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-# This file is heavily based off of LUCI test_support/auto_stub.py.
+"""This file is heavily based off of LUCI test_support/auto_stub.py."""
 
 import collections
 import inspect

@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+"""Unit tests for client.py."""
 # pylint: disable=unused-argument
 
 import contextlib
@@ -24,6 +25,8 @@ test_env.setup_test_env()
 
 
 class PRPCClientTestCase(test_case.TestCase):
+    """Tests for Client."""
+
     def make_test_client(self):
         return prpc_client.Client(
             "localhost", test_prpc_pb2.TestServiceDescription

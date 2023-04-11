@@ -31,9 +31,9 @@ class CommonUtilError(Exception):
 def MkDirP(directory):
     """Thread-safely create a directory like mkdir -p.
 
-    If the directory already exists, call chown on the directory and its subfiles
-    recursively with current user and group to make sure current process has full
-    access to the directory.
+    If the directory already exists, call chown on the directory and its
+    subfiles recursively with current user and group to make sure current
+    process has full access to the directory.
     """
     if os.path.isdir(directory):
         # Fix permissions and ownership of the directory and its subfiles by
@@ -55,20 +55,20 @@ def GetLatestBuildVersion(static_dir, target, milestone=None):
     version number currently available locally.
 
     Args:
-      static_dir: Directory where builds are served from.
-      target: The build target, typically a combination of the board and the
-          type of build e.g. x86-mario-release.
-      milestone: For latest build set to None, for builds only in a specific
-          milestone set to a str of format Rxx (e.g. R16). Default: None.
+        static_dir: Directory where builds are served from.
+        target: The build target, typically a combination of the board and the
+            type of build e.g. x86-mario-release.
+        milestone: For latest build set to None, for builds only in a specific
+            milestone set to a str of format Rxx (e.g. R16). Default: None.
 
     Returns:
-      If latest found, a full build string is returned e.g. R17-1234.0.0-a1-b983.
-      If no latest is found for some reason or another a '' string is returned.
+        If latest found, a full build string is returned e.g.
+        R17-1234.0.0-a1-b983. If no latest is found an empty string is returned.
 
     Raises:
-      CommonUtilError: If for some reason the latest build cannot be
-          deteremined, this could be due to the dir not existing or no builds
-          being present after filtering on milestone.
+        CommonUtilError: If for some reason the latest build cannot be
+            determined, this could be due to the dir not existing or no builds
+            being present after filtering on milestone.
     """
     target_path = os.path.join(static_dir, target)
     if not os.path.isdir(target_path):
@@ -95,11 +95,11 @@ def PathInDir(directory, path):
     """Returns True if the path is in directory.
 
     Args:
-      directory: Directory where the path should be in.
-      path: Path to check.
+        directory: Directory where the path should be in.
+        path: Path to check.
 
     Returns:
-      True if path is in static_dir, False otherwise
+        True if path is in static_dir, False otherwise
     """
     directory = os.path.realpath(directory)
     path = os.path.realpath(path)
@@ -110,15 +110,16 @@ def GetControlFile(static_dir, build, control_path):
     """Attempts to pull the requested control file from the Dev Server.
 
     Args:
-      static_dir: Directory where builds are served from.
-      build: Fully qualified build string; e.g. R17-1234.0.0-a1-b983.
-      control_path: Path to control file on Dev Server relative to Autotest root.
+        static_dir: Directory where builds are served from.
+        build: Fully qualified build string; e.g. R17-1234.0.0-a1-b983.
+        control_path: Path to control file on Dev Server relative to Autotest
+            root.
 
     Returns:
-      Content of the requested control file.
+        Content of the requested control file.
 
     Raises:
-      CommonUtilError: If lock can't be acquired.
+        CommonUtilError: If lock can't be acquired.
     """
     # Be forgiving if the user passes in the control_path with a leading /
     control_path = control_path.lstrip("/")
@@ -142,16 +143,16 @@ def GetControlFileListForSuite(static_dir, build, suite_name):
     GetControlFileList.
 
     Args:
-      static_dir: Directory where builds are served from.
-      build: Fully qualified build string; e.g. R17-1234.0.0-a1-b983.
-      suite_name: Name of the suite for which we require control files.
+        static_dir: Directory where builds are served from.
+        build: Fully qualified build string; e.g. R17-1234.0.0-a1-b983.
+        suite_name: Name of the suite for which we require control files.
 
     Returns:
-      String of each control file separated by a newline.
+        String of each control file separated by a newline.
 
     Raises:
-      CommonUtilError: If the suite_to_control_file_map isn't found in
-          the specified build's staged directory.
+        CommonUtilError: If the suite_to_control_file_map isn't found in
+            the specified build's staged directory.
     """
     suite_to_control_map = os.path.join(
         static_dir,
@@ -183,14 +184,14 @@ def GetControlFileList(static_dir, build):
     """List all control|control. files in the specified board/build path.
 
     Args:
-      static_dir: Directory where builds are served from.
-      build: Fully qualified build string; e.g. R17-1234.0.0-a1-b983.
+        static_dir: Directory where builds are served from.
+        build: Fully qualified build string; e.g. R17-1234.0.0-a1-b983.
 
     Returns:
-      String of each file separated by a newline.
+        String of each file separated by a newline.
 
     Raises:
-      CommonUtilError: If path is outside of sandbox.
+        CommonUtilError: If path is outside of sandbox.
     """
     autotest_dir = os.path.join(static_dir, build, "autotest/")
     if not PathInDir(static_dir, autotest_dir):
@@ -222,13 +223,13 @@ def GetFileHashes(file_path, do_sha256=False, do_md5=False):
     """Computes and returns a list of requested hashes.
 
     Args:
-      file_path: path to file to be hashed
-      do_sha256: whether or not to compute a SHA256 hash
-      do_md5: whether or not to compute a MD5 hash
+        file_path: Path to file to be hashed.
+        do_sha256: Whether to compute a SHA256 hash.
+        do_md5: Whether to compute a MD5 hash.
 
     Returns:
-      A dictionary containing binary hash values, keyed by 'sha1', 'sha256' and
-      'md5', respectively.
+        A dictionary containing binary hash values, keyed by 'sha1', 'sha256'
+        and 'md5', respectively.
     """
     hashes = {}
     if any((do_sha256, do_md5)):
@@ -285,14 +286,14 @@ def SymlinkFile(target, link):
         link_base = link_fd.name
 
         # Use the unique link_base filename to create a symlink, but on the same
-        # directory as the required |link| to ensure the created symlink is in the
-        # same file system as |link|.
+        # directory as the required |link| to ensure the created symlink is in
+        # the same file system as |link|.
         link_name = os.path.join(
             os.path.dirname(link), os.path.basename(link_base) + "-link"
         )
 
-        # Create the symlink and then rename it to the final position. This ensures
-        # the symlink creation is atomic.
+        # Create the symlink and then rename it to the final position. This
+        # ensures the symlink creation is atomic.
         os.symlink(target, link_name)
         os.rename(link_name, link)
 
@@ -303,10 +304,10 @@ class LockDict(object):
     This class provides a thread-safe store of threading.Lock objects, which can
     be used to regulate access to any set of hashable resources.  Usage:
 
-      foo_lock_dict = LockDict()
-      ...
-      with foo_lock_dict.lock('bar'):
-        # Critical section for 'bar'
+        foo_lock_dict = LockDict()
+        ...
+        with foo_lock_dict.lock('bar'):
+            # Critical section for 'bar'
     """
 
     def __init__(self):
@@ -345,10 +346,10 @@ def IsAnonymousCaller(error):
     Check if |error| is a GSCommandError due to a lack of credentials.
 
     Args:
-      error: Exception raised.
+        error: Exception raised.
 
     Returns:
-      True if we're an anonymous caller.
+        True if we're an anonymous caller.
     """
     if not isinstance(error, gs.GSCommandError):
         return False
