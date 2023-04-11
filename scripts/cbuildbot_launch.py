@@ -101,10 +101,10 @@ def PrependPath(prepend):
     """Generate path with new directory at the beginning.
 
     Args:
-      prepend: Directory to add at the beginning of the path.
+        prepend: Directory to add at the beginning of the path.
 
     Returns:
-      Extended path as a string.
+        Extended path as a string.
     """
     return os.pathsep.join([prepend, os.environ.get("PATH", os.defpath)])
 
@@ -113,10 +113,10 @@ def PreParseArguments(argv):
     """Extract the branch name from cbuildbot command line arguments.
 
     Args:
-      argv: The command line arguments to parse.
+        argv: The command line arguments to parse.
 
     Returns:
-      Branch as a string ('main' if nothing is specified).
+        Branch as a string ('main' if nothing is specified).
     """
     parser = cbuildbot.CreateParser()
     options = cbuildbot.ParseCommandLine(parser, argv)
@@ -139,11 +139,11 @@ def GetCurrentBuildState(options, branch):
     """Extract information about the current build state from command-line args.
 
     Args:
-      options: A parsed options object from a cbuildbot parser.
-      branch: The name of the branch this builder was called with.
+        options: A parsed options object from a cbuildbot parser.
+        branch: The name of the branch this builder was called with.
 
     Returns:
-      A BuildSummary object describing the current build.
+        A BuildSummary object describing the current build.
     """
     build_state = build_summary.BuildSummary(
         status=constants.BUILDER_STATUS_INFLIGHT,
@@ -162,14 +162,14 @@ def GetCurrentBuildState(options, branch):
 def GetLastBuildState(root):
     """Fetch the state of the last build run from |root|.
 
-    If the saved state file can't be read or doesn't contain valid JSON, a default
-    state will be returned.
+    If the saved state file can't be read or doesn't contain valid JSON, a
+    default state will be returned.
 
     Args:
-      root: Root of the working directory tree as a string.
+        root: Root of the working directory tree as a string.
 
     Returns:
-      A BuildSummary object representing the previous build.
+        A BuildSummary object representing the previous build.
     """
     state_file = os.path.join(root, BUILDER_STATE_FILENAME)
 
@@ -202,8 +202,8 @@ def SetLastBuildState(root, new_state):
     """Save the state of the last build under |root|.
 
     Args:
-      root: Root of the working directory tree as a string.
-      new_state: BuildSummary object containing the state to be saved.
+        root: Root of the working directory tree as a string.
+        new_state: BuildSummary object containing the state to be saved.
     """
     state_file = os.path.join(root, BUILDER_STATE_FILENAME)
     osutils.WriteFile(state_file, new_state.to_json())
@@ -217,12 +217,12 @@ def _MaybeCleanDistfiles(cache_dir, distfiles_ts):
     """Cleans the distfiles directory if too old.
 
     Args:
-      cache_dir: Directory of the cache, as a string.
-      distfiles_ts: A timestamp str for the last time distfiles was cleaned. May
-      be None.
+        cache_dir: Directory of the cache, as a string.
+        distfiles_ts: A timestamp str for the last time distfiles was cleaned.
+            May be None.
 
     Returns:
-      The new distfiles_ts to persist in state.
+        The new distfiles_ts to persist in state.
     """
     # distfiles_ts can be None for a fresh environment, which means clean.
     if distfiles_ts is None:
@@ -251,7 +251,7 @@ def SanitizeCacheDir(cache_dir):
     """Make certain the .cache directory is valid.
 
     Args:
-      cache_dir: Directory of the cache, as a string.
+        cache_dir: Directory of the cache, as a string.
     """
     logging.info("Cleaning up cache dir at %s", cache_dir)
     # Verify that .cache is writable by the current user.
@@ -281,13 +281,13 @@ def CleanBuildRoot(root, repo, cache_dir, build_state, source_cache=False):
     assorted state that cannot be safely reused from the previous build.
 
     Args:
-      root: Root directory owned by cbuildbot_launch.
-      repo: repository.RepoRepository instance.
-      cache_dir: Cache directory.
-      build_state: BuildSummary object containing the current build state that
-          will be saved into the cleaned root.  The distfiles_ts property will
-          be updated if the distfiles cache is cleaned.
-      source_cache: Bool whether to use source cache mounts.
+        root: Root directory owned by cbuildbot_launch.
+        repo: repository.RepoRepository instance.
+        cache_dir: Cache directory.
+        build_state: BuildSummary object containing the current build state that
+            will be saved into the cleaned root.  The distfiles_ts property will
+            be updated if the distfiles cache is cleaned.
+        source_cache: Bool whether to use source cache mounts.
     """
     previous_state = GetLastBuildState(root)
     SetLastBuildState(root, build_state)
@@ -342,14 +342,14 @@ def CleanBuildRoot(root, repo, cache_dir, build_state, source_cache=False):
                 )
 
     try:
-        # If there is any failure doing the cleanup, wipe everything.
-        # The previous run might have been killed in the middle leaving stale git
+        # If there is any failure doing the cleanup, wipe everything. The
+        # previous run might have been killed in the middle leaving stale git
         # locks. Clean those up, first.
         if not source_cache:
             repo.PreLoad()
 
         # If the previous build didn't exit normally, run an expensive step to
-        # cleanup abandoned git locks.
+        # clean up abandoned git locks.
         if previous_state.status not in (
             constants.BUILDER_STATUS_FAILED,
             constants.BUILDER_STATUS_PASSED,
@@ -377,18 +377,18 @@ def CleanBuildRoot(root, repo, cache_dir, build_state, source_cache=False):
 def InitialCheckout(repo, options):
     """Preliminary ChromeOS checkout.
 
-    Perform a complete checkout of ChromeOS on the specified branch. This does NOT
-    match what the build needs, but ensures the buildroot both has a 'hot'
-    checkout, and is close enough that the branched cbuildbot can successfully get
-    the right checkout.
+    Perform a complete checkout of ChromeOS on the specified branch. This does
+    NOT match what the build needs, but ensures the buildroot both has a 'hot'
+    checkout, and is close enough that the branched cbuildbot can successfully
+    get the right checkout.
 
     This checks out full ChromeOS, even if a ChromiumOS build is going to be
     performed. This is because we have no knowledge of the build config to be
     used.
 
     Args:
-      repo: repository.RepoRepository instance.
-      options: A parsed options object from a cbuildbot parser.
+        repo: repository.RepoRepository instance.
+        options: A parsed options object from a cbuildbot parser.
     """
     cbuildbot_alerts.PrintBuildbotStepText("Branch: %s" % repo.branch)
     if not options.source_cache:
@@ -432,10 +432,10 @@ def _ShouldDowngradeRepo(options):
     repo to a known working version.
 
     Args:
-      options: A parsed options object from a cbuildbot parser.
+        options: A parsed options object from a cbuildbot parser.
 
     Returns:
-      bool of whether to downgrade repo version based on branch.
+        bool of whether to downgrade repo version based on branch.
     """
     try:
         branch = options.branch or ""
@@ -456,12 +456,12 @@ def Cbuildbot(buildroot, depot_tools_path, argv):
     """Start cbuildbot in specified directory with all arguments.
 
     Args:
-      buildroot: Directory to be passed to cbuildbot with --buildroot.
-      depot_tools_path: Directory for depot_tools to be used by cbuildbot.
-      argv: Command line options passed to cbuildbot_launch.
+        buildroot: Directory to be passed to cbuildbot with --buildroot.
+        depot_tools_path: Directory for depot_tools to be used by cbuildbot.
+        argv: Command line options passed to cbuildbot_launch.
 
     Returns:
-      Return code of cbuildbot as an integer.
+        Return code of cbuildbot as an integer.
     """
     logging.info("Bootstrap cbuildbot in: %s", buildroot)
 
@@ -505,10 +505,10 @@ def Cbuildbot(buildroot, depot_tools_path, argv):
 
 @StageDecorator
 def CleanupChroot(buildroot):
-    """Unmount/clean up an image-based chroot without deleting the backing image.
+    """Unmount/cleanup an image-based chroot without deleting the backing image.
 
     Args:
-      buildroot: Directory containing the chroot to be cleaned up.
+        buildroot: Directory containing the chroot to be cleaned up.
     """
     chroot_dir = os.path.join(buildroot, constants.DEFAULT_CHROOT_DIR)
     logging.info("Cleaning up chroot at %s", chroot_dir)
@@ -528,9 +528,10 @@ def CleanupChroot(buildroot):
             )
 
     # NB: We ignore errors at this point because this stage runs last.  If the
-    # chroot failed to unmount, we're going to reboot the system once we're done,
-    # and that will implicitly take care of cleaning things up.  If the bots stop
-    # rebooting after every run, we'll need to make this fatal all the time.
+    # chroot failed to unmount, we're going to reboot the system once we're
+    # done, and that will implicitly take care of cleaning things up.  If the
+    # bots stop rebooting after every run, we'll need to make this fatal all the
+    # time.
     #
     # TODO(crbug.com/1000034): This should be fatal all the time.
 
@@ -567,11 +568,11 @@ def _main(options, argv):
     """main method of script.
 
     Args:
-      options: preparsed options object for the build.
-      argv: All command line arguments to pass as list of strings.
+        options: preparsed options object for the build.
+        argv: All command line arguments to pass as list of strings.
 
     Returns:
-      Return code of cbuildbot as an integer.
+        Return code of cbuildbot as an integer.
     """
     branchname = options.branch or "main"
     root = options.buildroot
@@ -615,12 +616,14 @@ def _main(options, argv):
                     options.source_cache,
                 )
 
-            # Get a checkout close enough to the branch that cbuildbot can handle it.
+            # Get a checkout close enough to the branch that cbuildbot can
+            # handle it.
             if options.sync:
                 with metrics.SecondsTimer(METRIC_INITIAL):
                     InitialCheckout(repo, options)
 
-        # Run cbuildbot inside the full ChromeOS checkout, on the specified branch.
+        # Run cbuildbot inside the full ChromeOS checkout, on the specified
+        # branch.
         with metrics.SecondsTimer(
             METRIC_CBUILDBOT
         ), metrics.SecondsInstanceTimer(METRIC_CBUILDBOT_INSTANCE):

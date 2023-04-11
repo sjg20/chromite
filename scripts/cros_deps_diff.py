@@ -91,8 +91,8 @@ def GetDivergentSet(version_map, count):
     divergent_set = set()
     for pkg, value in version_map.items():
         if len(value.keys()) != count or len(set(value.values())) > 1:
-            # The package doesn't exist for at least one ot the input, or there are
-            # more than 2 versions.
+            # The package doesn't exist for at least one ot the input, or there
+            # are more than 2 versions.
             divergent_set.add(pkg)
     return divergent_set
 

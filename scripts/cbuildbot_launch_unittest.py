@@ -34,7 +34,7 @@ class CbuildbotLaunchTest(cros_test_lib.MockTestCase):
     """Tests for cbuildbot_launch script."""
 
     def testPreParseArguments(self):
-        """Test that we can correctly extract branch values from cbuildbot args."""
+        """Test we can correctly extract branch values from cbuildbot args."""
         CASES = (
             (
                 ["--buildroot", "/buildroot", "daisy-incremental"],
@@ -402,9 +402,9 @@ class RunTests(cros_test_lib.RunCommandTestCase):
                 "--buildnumber",
                 "314",
                 "--previous-build-state",
-                "eyJicmFuY2giOiJicmFuY2giLCJidWlsZF9udW1iZXIiOjMxMywiYnVpbGRyb290X"
-                "2xheW91dCI6MiwibWFzdGVyX2J1aWxkX2lkIjoxMjMxMjMxMjMsInN0YXR1cyI6Im"
-                "ZhaWwifQ==",
+                "eyJicmFuY2giOiJicmFuY2giLCJidWlsZF9udW1iZXIiOjMxMywiYnVpbGRy"
+                "b290X2xheW91dCI6MiwibWFzdGVyX2J1aWxkX2lkIjoxMjMxMjMxMjMsInN0"
+                "YXR1cyI6ImZhaWwifQ==",
                 "--workspace",
                 "/root/workspace",
                 "--cache-dir",
@@ -685,7 +685,7 @@ class CleanBuildRootTest(cros_test_lib.MockTempDirTestCase):
         )
 
     def testBuildrootDistfilesRecentCache(self):
-        """Test CleanBuildRoot does not delete distfiles when cache is recent."""
+        """Test CleanBuildRoot skips distfiles when cache is recent."""
         seed_distfiles_ts = time.time() - 60
         old_build_state = build_summary.BuildSummary(
             status=constants.BUILDER_STATUS_PASSED,

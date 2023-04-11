@@ -7,6 +7,7 @@
 import functools
 import logging
 import os
+from typing import Optional
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
@@ -22,8 +23,8 @@ _DEFAULT_PROFILE = "base"
 def PathPrefixDecorator(f):
     """Add a prefix to the path or paths returned by the decorated function.
 
-    Will not prepend the prefix if the path already starts with the prefix, so the
-    decorator may be applied to functions that have mixed sources that may
+    Will not prepend the prefix if the path already starts with the prefix, so
+    the decorator may be applied to functions that have mixed sources that may
     or may not already have applied them. This is especially useful for allowing
     tests and CLI args a little more leniency in how paths are provided.
     """
@@ -100,8 +101,8 @@ def ChooseProfile(board, profile):
 
     current_profile = None
     if os.path.exists(board.make_profile):
-        # Only try to read if it exists; we only want it to raise an error when the
-        # path exists and is not a link.
+        # Only try to read if it exists; we only want it to raise an error when
+        # the path exists and is not a link.
         try:
             current_profile = os.readlink(board.make_profile)
         except OSError:
@@ -116,9 +117,9 @@ def ChooseProfile(board, profile):
         # It exists and is changing, emit warning.
         fmt = {"board": board.board_variant, "profile": profile.name}
         msg = (
-            "You are switching profiles for a board that is already setup. This "
-            "can cause trouble for Portage. If you experience problems with "
-            "build_packages you may need to run:\n"
+            "You are switching profiles for a board that is already setup. "
+            "This can cause trouble for Portage. If you experience problems "
+            "with build_packages you may need to run:\n"
             "\t'setup_board --board %(board)s --force --profile %(profile)s'\n"
             "\nAlternatively, you can correct the dependency graph by using "
             "'emerge-%(board)s -c' or 'emerge-%(board)s -C <ebuild>'."
@@ -162,8 +163,8 @@ def _GetProfile(opts, board):
         profile = override
 
     if profile_directory is None:
-        # Build profile directories in reverse order so we can search from most to
-        # least specific.
+        # Build profile directories in reverse order, so we can search from most
+        # to least specific.
         profile_dirs = [
             "%s/profiles/%s" % (overlay, profile)
             for overlay in reversed(board.overlays)
@@ -188,21 +189,26 @@ class Board(object):
     # Files located on the board.
     MAKE_PROFILE = "%(board_root)s/etc/portage/make.profile"
 
-    def __init__(self, board=None, variant=None, board_root=None):
+    def __init__(
+        self,
+        board: Optional[str] = None,
+        variant: Optional[str] = None,
+        board_root: Optional[str] = None,
+    ):
         """Board constructor.
 
         board [+ variant] is given preference when both board and board_root are
         provided.
 
         Preconditions:
-          Either board and build_root are not None, or board_root is not None.
-            With board + build_root [+ variant] we can construct the board root.
-            With the board root we can have the board[_variant] directory.
+            Either board and build_root are not None, or board_root is not None.
+                With board + build_root we can construct the board root.
+                With the board root we can have the board directory.
 
         Args:
-          board: str|None - The board name.
-          variant: str|None - The variant name.
-          board_root: str|None - The boards fully qualified build directory path.
+            board: The board name.
+            variant: The variant name. TODO: Deprecate?
+            board_root: The boards fully qualified build directory path.
         """
         if not board and not board_root:
             # Enforce preconditions.
@@ -231,8 +237,8 @@ class Board(object):
             self.board_variant = self.board
 
         self.make_profile = self.MAKE_PROFILE % {"board_root": self.root}
-        # This must come after the arguments required to build each variant of the
-        # build root have been processed.
+        # This must come after the arguments required to build each variant of
+        # the build root have been processed.
         self._sysroot_config = sysroot_lib.Sysroot(self.root)
 
     @property

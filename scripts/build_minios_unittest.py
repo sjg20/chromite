@@ -88,7 +88,7 @@ class BuildMiniosTest(cros_test_lib.RunCommandTempDirTestCase):
         )
 
     def testOverridenArguments(self):
-        """Test that overridden arguments of build_minios are formatted correct."""
+        """Test overridden arguments of build_minios are formatted correctly."""
         test_board = "test-board"
         test_version = "1.0.0.0"
         test_image = "/some/image/path"

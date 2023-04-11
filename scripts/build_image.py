@@ -10,9 +10,9 @@ the following:
 base - Pristine Chromium OS image. As similar to Chrome OS as possible.
 dev [default] - Developer image. Like base but with additional dev packages.
 test - Like dev, but with additional test specific packages and can be easily
-  used for automated testing using scripts like test_that, etc.
+    used for automated testing using scripts like test_that, etc.
 factory_install - Install shim for bootstrapping the factory test process.
-  Cannot be built along with any other image.
+    Cannot be built along with any other image.
 
 Examples:
 
@@ -69,13 +69,14 @@ def build_shell_bool_style_args(
     --noarg_A in case 2.
 
     Args:
-      parser: The parser to update.
-      name: The input argument name. This will be used as 'dest' variable name.
-      default_val: The default value to assign.
-      help_str: The help string for the input argument.
-      deprecation_note: A deprecation note to use.
-      alternate_name: Alternate argument to be used after deprecation.
-      additional_neg_options: Additional negative alias options to use.
+        parser: The parser to update.
+        name: The input argument name. This will be used as 'dest' variable
+            name.
+        default_val: The default value to assign.
+        help_str: The help string for the input argument.
+        deprecation_note: A deprecation note to use.
+        alternate_name: Alternate argument to be used after deprecation.
+        additional_neg_options: Additional negative alias options to use.
     """
     arg = f"--{name}"
     shell_narg = f"--no{name}"
@@ -144,12 +145,13 @@ def build_shell_string_style_args(
     """Build the shell string input argument equivalent.
 
     Args:
-      parser: The parser to update.
-      name: The input argument name. This will be used as 'dest' variable name.
-      default_val: The default value to assign.
-      help_str: The help string for the input argument.
-      deprecation_note: A deprecation note to use.
-      alternate_name: Alternate argument to be used after deprecation.
+        parser: The parser to update.
+        name: The input argument name. This will be used as 'dest' variable
+            name.
+        default_val: The default value to assign.
+        help_str: The help string for the input argument.
+        deprecation_note: A deprecation note to use.
+        alternate_name: Alternate argument to be used after deprecation.
     """
     default_val_str = (
         f"{help_str} (Default: %(default)s)." if default_val else help_str
@@ -172,7 +174,7 @@ def get_parser() -> commandline.ArgumentParser:
     """Creates the cmdline argparser, populates the options and description.
 
     Returns:
-      Argument parser.
+        Argument parser.
     """
     deprecation_note = "Argument will be removed January, 2023. Use %s instead."
     parser = commandline.ArgumentParser(description=__doc__)
@@ -378,12 +380,12 @@ def parse_args(
     """Parse and validate CLI arguments.
 
     Args:
-      argv: Arguments passed via CLI.
+        argv: Arguments passed via CLI.
 
     Returns:
-      Tuple having the below two,
-      Argument Parser
-      Validated argument namespace.
+        Tuple having the below two,
+        Argument Parser
+        Validated argument namespace.
     """
     parser = get_parser()
     opts = parser.parse_args(argv)
@@ -416,9 +418,9 @@ def inner_main(argv: Optional[List[str]] = None):
     """Inner main that processes building the image."""
     parser, opts = parse_args(argv)
 
-    # If the opts.board is not set, then it means user hasn't specified a default
-    # board in 'src/scripts/.default_board' and didn't specify it as input
-    # argument.
+    # If the opts.board is not set, then it means user hasn't specified a
+    # default board in 'src/scripts/.default_board' and didn't specify it as
+    # input argument.
     if not opts.board:
         parser.error("--board is required")
 

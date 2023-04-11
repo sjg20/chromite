@@ -873,9 +873,9 @@ def _FinishParsing(options):
 
     patches = bool(options.gerrit_patches)
 
-    # When running in release mode, make sure we are running with checked-in code.
-    # We want checked-in cbuildbot/scripts to prevent errors, and we want to build
-    # a release image with checked-in code for CrOS packages.
+    # When running in release mode, make sure we are running with checked-in
+    # code. We want checked-in cbuildbot/scripts to prevent errors, and we want
+    # to build a release image with checked-in code for CrOS packages.
     if options.buildbot and patches and not options.debug:
         cros_build_lib.Die(
             "Cannot provide patches when running with --buildbot!"
@@ -1051,8 +1051,8 @@ def _SetupConnections(options, build_config):
     # 1) Based on options and build_config, decide whether we are a production
     # run, debug run, or standalone run.
     # 2) Set up cidb instance accordingly.
-    # 3) Update topology info from cidb, so that any other service set up can use
-    # topology.
+    # 3) Update topology info from cidb, so that any other service set up can
+    # use topology.
     # 4) Set up any other services.
     run_type = _GetRunEnvironment(options, build_config)
 
@@ -1203,10 +1203,11 @@ def main(argv):
         # Preserve chromite; we might be running from there!
         options.preserve_paths = set(["chromite"])
         if log_file is not None:
-            # We don't want the critical section to try to clean up the tee process,
-            # so we run Tee (forked off) outside of it. This prevents a deadlock
-            # because the Tee process only exits when its pipe is closed, and the
-            # critical section accidentally holds on to that file handle.
+            # We don't want the critical section to try to clean up the tee
+            # process, so we run Tee (forked off) outside of it. This prevents a
+            # deadlock because the Tee process only exits when its pipe is
+            # closed, and the critical section accidentally holds on to that
+            # file handle.
             stack.Add(tee.Tee, log_file)
             options.preserve_paths.add(_DEFAULT_LOG_DIR)
 
@@ -1261,5 +1262,6 @@ def main(argv):
         try:
             _RunBuildStagesWrapper(options, site_config, build_config)
         except failures_lib.ExitEarlyException as ex:
-            # This build finished successfully. Do not re-raise ExitEarlyException.
+            # This build finished successfully. Do not re-raise
+            # ExitEarlyException.
             logging.info("One stage exited early: %s", ex)

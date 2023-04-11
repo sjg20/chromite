@@ -91,8 +91,9 @@ def _ParseArgs(argv, router):
         )
 
     if opts.service_method not in methods:
-        # Unknown method, try to match against known methods and make a suggestion.
-        # This is just for developer assistance, e.g. misspellings when testing.
+        # Unknown method, try to match against known methods and make a
+        # suggestion. This is just for developer assistance, e.g. misspellings
+        # when testing.
         matched = matching.GetMostLikelyMatchedObject(
             methods, opts.service_method, matched_score_threshold=0.6
         )
@@ -165,7 +166,8 @@ def main(argv):
     router = router_lib.GetRouter()
     opts = _ParseArgs(argv, router)
 
-    # For build_image, make sure we run with network disabled to prevent leakage.
+    # For build_image, make sure we run with network disabled to prevent
+    # leakage.
     if (
         cros_build_lib.IsInsideChroot()
         and opts.service_method == "chromite.api.ImageService/Create"
@@ -184,9 +186,9 @@ def main(argv):
         logging.warning("Ignoring $BUILD_API_TEE_LOG_FILE env var")
 
     if opts.config.mock_invalid:
-        # --mock-invalid handling. We print error messages, but no output is ever
-        # set for validation errors, so we can handle it by just giving back the
-        # correct return code here.
+        # --mock-invalid handling. We print error messages, but no output is
+        # ever set for validation errors, so we can handle it by just giving
+        # back the correct return code here.
         return controller.RETURN_CODE_INVALID_INPUT
 
     input_handler, output_handlers = _get_io_handlers(opts)
@@ -201,6 +203,6 @@ def main(argv):
             opts.config_handler,
         )
     except router_lib.Error as e:
-        # Handle router_lib.Error derivatives nicely, but let anything else bubble
-        # up.
+        # Handle router_lib.Error derivatives nicely, but let anything else
+        # bubble up.
         cros_build_lib.Die(e)

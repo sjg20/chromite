@@ -57,7 +57,7 @@ def GetParser():
 
 
 def _GetUpstreamBranch(project):
-    """Return a best guess at the project's upstream branch name."""
+    """Return the best guess at the project's upstream branch name."""
     branch = project.upstream
     if branch and branch.startswith(BRANCH_REF_PREFIX):
         branch = branch[len(BRANCH_REF_PREFIX) :]
@@ -88,10 +88,11 @@ def _MakeUniqueRef(project, base_ref, used_refs):
     """Return a git ref for project that isn't in used_refs.
 
     Args:
-      project: The Project object to create a ref for.
-      base_ref: A base ref name; this may be appended to to generate a unique ref.
-      used_refs: A set of ref names to uniquify against. It is updated with the
-        newly generated ref.
+        project: The Project object to create a ref for.
+        base_ref: A base ref name; this may be appended to, to generate a unique
+            ref.
+        used_refs: A set of ref names to uniquify against. It is updated with
+            the newly generated ref.
     """
     ref = base_ref
 
@@ -170,8 +171,9 @@ def main(argv):
         processes=options.jobs,
     ) as queue:
         for projects in snapshot_projects.values():
-            # Since some projects (e.g. chromiumos/third_party/kernel) are checked out
-            # multiple places, we may need to push each checkout to a unique ref.
+            # Since some projects (e.g. chromiumos/third_party/kernel) are
+            # checked out multiple places, we may need to push each checkout to
+            # a unique ref.
             need_unique_refs = len(projects) > 1
             used_refs = set()
             for project in projects:

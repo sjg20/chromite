@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Command to extract the dependancy tree for a given package.
+"""Command to extract the dependency tree for a given package.
 
 This produces JSON output for other tools to process.
 """
@@ -60,13 +60,13 @@ def FlattenDepTree(deptree, pkgtable=None, parentcpv=None, get_cpe=False):
       }
     }
 
-      Args:
+    Args:
         deptree: The dependency tree.
         pkgtable: The package table to update. If None, create a new one.
         parentcpv: The parent CPV.
         get_cpe: If set True, include CPE in the flattened dependency tree.
 
-      Returns:
+    Returns:
         A flattened dependency tree.
     """
     if pkgtable is None:
@@ -111,13 +111,13 @@ def GetCPEFromCPV(category, package, version):
     """Look up the CPE for a specified Portage package.
 
     Args:
-      category: The Portage package's category, e.g. "net-misc"
-      package: The Portage package's name, e.g. "curl"
-      version: The Portage version, e.g. "7.30.0"
+        category: The Portage package's category, e.g. "net-misc"
+        package: The Portage package's name, e.g. "curl"
+        version: The Portage version, e.g. "7.30.0"
 
     Returns:
-      A list of CPE Name strings, e.g.
-      ["cpe:/a:curl:curl:7.30.0", "cpe:/a:curl:libcurl:7.30.0"]
+        A list of CPE Name strings, e.g.
+        ["cpe:/a:curl:curl:7.30.0", "cpe:/a:curl:libcurl:7.30.0"]
     """
     equery_cmd = ["equery", "m", "-U", "%s/%s" % (category, package)]
     lines = cros_build_lib.run(
@@ -159,27 +159,27 @@ def GenerateCPEList(deps_list, sysroot):
     """Generate all CPEs for the packages included in deps_list and SDK packages
 
     Args:
-      deps_list: A flattened dependency tree (cros_extract_deps format).
-      sysroot: The board directory to use when finding SDK packages.
+        deps_list: A flattened dependency tree (cros_extract_deps format).
+        sysroot: The board directory to use when finding SDK packages.
 
     Returns:
-      A list of CPE info for packages in deps_list and SDK packages, e.g.
-      [
-        {
-          "ComponentName": "app-admin/sudo",
-          "Repository": "cros",
-          "Targets": [
-            "cpe:/a:todd_miller:sudo:1.8.19p2"
-          ]
-        },
-        {
-          "ComponentName": "sys-libs/glibc",
-          "Repository": "cros",
-          "Targets": [
-            "cpe:/a:gnu:glibc:2.23"
-          ]
-        }
-      ]
+        A list of CPE info for packages in deps_list and SDK packages, e.g.
+        [
+            {
+                "ComponentName": "app-admin/sudo",
+                "Repository": "cros",
+                "Targets": [
+                    "cpe:/a:todd_miller:sudo:1.8.19p2"
+                ]
+            },
+            {
+                "ComponentName": "sys-libs/glibc",
+                "Repository": "cros",
+                "Targets": [
+                    "cpe:/a:gnu:glibc:2.23"
+                ]
+            }
+        ]
     """
     cpe_dump = []
 
@@ -205,7 +205,7 @@ def GenerateCPEList(deps_list, sysroot):
         else:
             logging.warning("No CPE entry for %s", pkg_info.cpvr)
 
-    # Generage CPEs for packages in deps_list.
+    # Generate CPEs for packages in deps_list.
     for cpv, record in sorted(deps_list.items()):
         if record["cpes"]:
             name = "%s/%s" % (record["category"], record["name"])
@@ -247,7 +247,7 @@ def FilterObsoleteDeps(package_deps):
     """Remove all the packages that are to be uninstalled from |package_deps|.
 
     Returns:
-      None since this method mutates |package_deps| directly.
+        None since this method mutates |package_deps| directly.
     """
     obsolete_package_deps = []
     for k, v in package_deps.items():
@@ -276,23 +276,24 @@ def ExtractDeps(
     execution of any binaries produced by packages in |package_list|."
 
     Args:
-      sysroot: the path (string) to the root directory into which the package is
-        pretend to be merged. This value is also used for setting
-        PORTAGE_CONFIGROOT.
-      package_list: the list of packages (CP string) to extract their dependencies
-        from.
-      formatting: can either be 'deps' or 'cpe'. For 'deps', see the return
-        format in docstring of FlattenDepTree, for 'cpe', see the return format in
-        docstring of GenerateCPEList.
-      include_bdepend: Controls whether BDEPEND packages that would be installed
-        to BROOT (usually "/" instead of ROOT) are included in the output.
-      backtrack: Setting to False disables backtracking in Portage's dependency
-        solver. If the highest available version of dependencies doesn't produce
-        a solvable graph Portage will give up and return an error instead of
-        trying other candidates.
+        sysroot: the path (string) to the root directory into which the package
+            is pretend to be merged. This value is also used for setting
+            PORTAGE_CONFIGROOT.
+        package_list: the list of packages (CP string) to extract their
+            dependencies from.
+        formatting: can either be 'deps' or 'cpe'. For 'deps', see the return
+            format in docstring of FlattenDepTree, for 'cpe', see the return
+            format in docstring of GenerateCPEList.
+        include_bdepend: Controls whether BDEPEND packages that would be
+            installed to BROOT (usually "/" instead of ROOT) are included in the
+            output.
+        backtrack: Setting to False disables backtracking in Portage's
+            dependency solver. If the highest available version of dependencies
+            doesn't produce a solvable graph Portage will give up and return an
+            error instead of trying other candidates.
 
     Returns:
-      A JSON-izable object that either follows 'deps' or 'cpe' format.
+        A JSON-izable object that either follows 'deps' or 'cpe' format.
     """
     lib_argv = ["--quiet", "--pretend", "--emptytree"]
     if include_bdepend:
@@ -312,8 +313,8 @@ def ExtractDeps(
         FlattenDepTree(tree, get_cpe=(formatting == "cpe")) for tree in trees
     )
 
-    # Workaround: since emerge doesn't honor the --emptytree flag, for now we need
-    # to manually filter out packages that are obsolete (meant to be
+    # Workaround: since emerge doesn't honor the --emptytree flag, for now we
+    # need to manually filter out packages that are obsolete (meant to be
     # uninstalled by emerge)
     # TODO(crbug.com/938605): remove this work around once
     # https://bugs.gentoo.org/681308 is addressed.

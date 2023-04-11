@@ -23,7 +23,7 @@ HASHTAG = "chrome-lkgm"
 
 
 class LKGMNotValid(Exception):
-    """Raised if the LKGM version is unset or not newer than the current value."""
+    """The LKGM version is unset or not newer than the current value."""
 
 
 class LKGMFileNotFound(Exception):
@@ -34,8 +34,8 @@ class ChromeLKGMCleaner:
     """Responsible for cleaning up the existing LKGM CLs if necessary.
 
     In Particular, this class does:
-     - abandoning the obsolete CLs
-     - rebasing the merge-coflicted CLs
+        - abandoning the obsolete CLs
+        - rebasing the merge-conflicted CLs
     """
 
     def __init__(
@@ -178,7 +178,7 @@ class ChromeLKGMCleaner:
 
 
 class ChromeLKGMCommitter:
-    """Committer object responsible for obtaining a new LKGM and committing it."""
+    """Committer object responsible for obtaining and committing a new LKGM."""
 
     # The list of trybots we require LKGM updates to run and pass on before
     # landing. Since they're internal trybots, the CQ won't automatically
@@ -192,7 +192,7 @@ class ChromeLKGMCommitter:
     )
     # Files needed in a local checkout to successfully update the LKGM. The
     # OWNERS file allows the --tbr-owners mechanism to select an appropriate
-    # OWNER to TBR. TRANSLATION_OWNERS is necesssary to parse CHROMEOS_OWNERS
+    # OWNER to TBR. TRANSLATION_OWNERS is necessary to parse CHROMEOS_OWNERS
     # file since it has the reference.
     _NEEDED_FILES = (
         constants.PATH_TO_CHROME_CHROMEOS_OWNERS,
@@ -311,13 +311,13 @@ class ChromeLKGMCommitter:
 def GetCurrentLKGM(branch: str) -> chromeos_version.VersionInfo:
     """Returns the current LKGM version on the branch.
 
-    On the first call, this method retrieves the LKGM version from Gltlies
+    On the first call, this method retrieves the LKGM version from Gitiles
     server and returns it. On subsequent calls, this method returns the
     cached LKGM version.
 
     Raises:
-      LKGMNotValid: if the retrieved LKGM version from the repository is
-      invalid.
+        LKGMNotValid: if the retrieved LKGM version from the repository is
+        invalid.
     """
     current_lkgm = gob_util.GetFileContents(
         constants.CHROMIUM_GOB_URL,
@@ -337,10 +337,10 @@ def GetOpts(argv):
     """Returns a dictionary of parsed options.
 
     Args:
-      argv: raw command line.
+        argv: raw command line.
 
     Returns:
-      Dictionary of parsed options.
+        Dictionary of parsed options.
     """
     parser = commandline.ArgumentParser(description=__doc__, add_help=False)
     parser.add_argument(

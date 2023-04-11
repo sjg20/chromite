@@ -68,15 +68,15 @@ def GetStalePackageNames(change_list, autotest_sysroot):
     modified and for whom any existing bzipped test packages may now be stale.
 
     Args:
-      change_list: A list of ItemizedChange objects corresponding to changed
-                   or modified files.
-      autotest_sysroot: Absolute path of autotest in the sysroot,
-                        e.g. '/build/lumpy/usr/local/build/autotest'
+        change_list: A list of ItemizedChange objects corresponding to changed
+            or modified files.
+        autotest_sysroot: Absolute path of autotest in the sysroot,
+            e.g. '/build/lumpy/usr/local/build/autotest'
 
     Returns:
-      A list of test package names, eg ['factory_Leds', 'login_UserPolicyKeys'].
-      May contain duplicate entries if multiple files within a test directory
-      were modified.
+        A list of test package names, e.g. ['factory_Leds',
+        'login_UserPolicyKeys']. May contain duplicate entries if multiple files
+        within a test directory were modified.
     """
     exp = os.path.abspath(autotest_sysroot) + r"/client/site_tests/(.*?)/.*"
     matches = [re.match(exp, change.absolute_path) for change in change_list]
@@ -84,18 +84,18 @@ def GetStalePackageNames(change_list, autotest_sysroot):
 
 
 def ItemizeChangesFromRsyncOutput(rsync_output, destination_path):
-    """Convert the output of an rsync with `-i` to a ItemizedChangeReport object.
+    """Convert output of an rsync with `-i` to a ItemizedChangeReport object.
 
     Args:
-      rsync_output: String stdout of rsync command that was run with `-i` option.
-      destination_path: String absolute path of the destination directory for the
-                        rsync operations. This argument is necessary because
-                        rsync's output only gives the relative path of
-                        touched/added files.
+        rsync_output: String stdout of rsync command that was run with `-i`
+            option.
+        destination_path: String absolute path of the destination directory for
+            the rsync operations. This argument is necessary because rsync's
+            output only gives the relative path of touched/added files.
 
     Returns:
-      ItemizedChangeReport object giving the absolute paths of files that were
-      created or modified by rsync.
+        ItemizedChangeReport object giving the absolute paths of files that were
+        created or modified by rsync.
     """
     modified_matches = re.findall(r"([.>]f[^+]{9}) (.*)", rsync_output)
     new_matches = re.findall(r"(>f\+{9}) (.*)", rsync_output)
@@ -129,11 +129,11 @@ def GetPackageAPI(portage_root, package_cp):
     """Gets portage API handles for the given package.
 
     Args:
-      portage_root: Root directory of portage tree. Eg '/' or '/build/lumpy'
-      package_cp: A string similar to 'chromeos-base/autotest-tests'.
+        portage_root: Root directory of portage tree. Eg '/' or '/build/lumpy'
+        package_cp: A string similar to 'chromeos-base/autotest-tests'.
 
     Returns:
-      Returns (package, vartree) tuple, where
+        Returns (package, vartree) tuple, where
         package is of type portage.dbapi.vartree.dblink
         vartree is of type portage.dbapi.vartree.vartree
     """
@@ -180,18 +180,19 @@ def DowngradePackageVersion(portage_root, package_cp, downgrade_to_version="0"):
     """Downgrade the specified portage package version.
 
     Args:
-      portage_root: Root directory of portage tree. Eg '/' or '/build/lumpy'
-      package_cp: A string similar to 'chromeos-base/autotest-tests'.
-      downgrade_to_version: String version to downgrade to. Default: '0'
+        portage_root: Root directory of portage tree. Eg '/' or '/build/lumpy'
+        package_cp: A string similar to 'chromeos-base/autotest-tests'.
+        downgrade_to_version: String version to downgrade to. Default: '0'
 
     Returns:
-      True on success. False on failure (nonzero return code from `mv` command).
+        bool: True on success. False on failure (nonzero return code from `mv`
+            command).
     """
     try:
         package, _ = GetPackageAPI(portage_root, package_cp)
     except PortagePackageAPIError:
         # Unable to fetch a corresponding portage package API for this
-        # package_cp (either no such package, or name ambigious and matches).
+        # package_cp (either no such package, or name ambiguous and matches).
         # So, just fail out.
         return False
 
@@ -214,12 +215,12 @@ def UpdatePackageContents(change_report, package_cp, portage_root=None):
     considered owned by that package.
 
     Args:
-      change_report: ItemizedChangeReport object for the changes to be
-                     made to the package.
-      package_cp: A string similar to 'chromeos-base/autotest-tests' giving
-                  the package category and name of the package to be altered.
-      portage_root: Portage root path, corresponding to the board that
-                    we are working on. Defaults to '/'
+        change_report: ItemizedChangeReport object for the changes to be
+            made to the package.
+        package_cp: A string similar to 'chromeos-base/autotest-tests' giving
+            the package category and name of the package to be altered.
+        portage_root: Portage root path, corresponding to the board that
+            we are working on. Defaults to '/'.
     """
     package, vartree = GetPackageAPI(portage_root, package_cp)
 
@@ -239,8 +240,8 @@ def RemoveBzipPackages(autotest_sysroot):
     """Remove all bzipped test/dep/profiler packages from sysroot autotest.
 
     Args:
-      autotest_sysroot: Absolute path of autotest in the sysroot,
-                        e.g. '/build/lumpy/usr/local/build/autotest'
+        autotest_sysroot: Absolute path of autotest in the sysroot,
+            e.g. '/build/lumpy/usr/local/build/autotest'
     """
     osutils.RmDir(
         os.path.join(autotest_sysroot, "packages"), ignore_missing=True
@@ -257,21 +258,22 @@ def RsyncQuickmerge(
 ):
     """Run rsync quickmerge command, with specified arguments.
 
-    Command will take form `rsync -a [options] --exclude=**.pyc
-                           --exclude=**.pyo
-                           [optional --include-from include_pattern_file]
-                           --exclude=* [source_path] [sysroot_autotest_path]`
+    Command will take form:
+        `rsync -a [options] --exclude=**.pyc --exclude=**.pyo
+        [optional --include-from include_pattern_file]
+        --exclude=* [source_path] [sysroot_autotest_path]`
 
     Args:
-      source_path: Directory to rsync from.
-      sysroot_autotest_path: Directory to rsync too.
-      include_pattern_file: Optional pattern of files to include in rsync.
-      pretend: True to use the '-n' option to rsync, to perform dry run.
-      overwrite: True to omit '-u' option, overwrite all files in sysroot,
-                 not just older files.
+        source_path: Directory to rsync from.
+        sysroot_autotest_path: Directory to rsync too.
+        include_pattern_file: Optional pattern of files to include in rsync.
+        pretend: True to use the '-n' option to rsync, to perform dry run.
+        overwrite: True to omit '-u' option, overwrite all files in sysroot,
+            not just older files.
 
     Returns:
-      The cros_build_lib.CompletedProcess object resulting from the rsync command.
+        The cros_build_lib.CompletedProcess object resulting from the rsync
+        command.
     """
     command = ["rsync", "-a"]
 
@@ -322,7 +324,7 @@ def ParseArguments(argv):
     """Parse command line arguments
 
     Returns:
-      parsed arguments.
+        parsed arguments.
     """
     parser = commandline.ArgumentParser(
         description="Perform a fast approximation to emerge-$board "
@@ -349,9 +351,9 @@ def ParseArguments(argv):
     )
     parser.add_argument("--force", action="store_true", help=argparse.SUPPRESS)
 
-    # Used only if test_that is calling autotest_quickmerge and has detected that
-    # the sysroot autotest path is still in usr/local/autotest (ie the build
-    # pre-dates https://chromium-review.googlesource.com/#/c/62880/ )
+    # Used only if test_that is calling autotest_quickmerge and has detected
+    # that the sysroot autotest path is still in usr/local/autotest (ie the
+    # build pre-dates https://chromium-review.googlesource.com/#/c/62880/ )
     parser.add_argument(
         "--legacy_path", action="store_true", help=argparse.SUPPRESS
     )
