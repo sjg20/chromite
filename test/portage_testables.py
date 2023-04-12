@@ -6,9 +6,10 @@
 
 from __future__ import division
 
+import hashlib
 import itertools
 import os
-import pathlib
+from pathlib import Path
 from typing import Dict, Iterable, Tuple, Union
 
 from chromite.lib import constants
@@ -20,6 +21,27 @@ from chromite.lib.parser import package_info
 __all__ = ["Overlay", "Package", "Profile", "Sysroot"]
 
 _EXCLUDED_OVERLAYS = ("chromiumos", "portage-stable")
+_MD5CACHE_VARS = (
+    "BDEPEND",
+    "DEPEND",
+    "DESCRIPTION",
+    "EAPI",
+    "IUSE",
+    "KEYWORDS",
+    "LICENSE",
+    "RDEPEND",
+    "SLOT",
+)
+
+# We don't know the md5sum for eclasses we don't have, so use a garbage value.
+_FAKE_MD5 = "deadbeef" * 4
+
+
+def _md5(path: Path):
+    """Helper to md5sum a file, for the md5-cache files."""
+    digest = hashlib.md5()
+    digest.update(path.read_bytes())
+    return digest.hexdigest()
 
 
 def _dict_to_conf(dictionary):
@@ -42,6 +64,11 @@ def _dict_to_ebuild(dictionary):
     return "\n".join(output)
 
 
+def _dict_to_md5cache(dictionary):
+    """Helper to format a dictionary into a md5-cache file."""
+    return "".join(f"{key}={value}\n" for key, value in dictionary.items())
+
+
 class Overlay(object):
     """Portage overlay object, responsible for all writes to its directory."""
 
@@ -55,7 +82,7 @@ class Overlay(object):
     )
 
     def __init__(self, root_path, name, parent_overlays=None):
-        self.path = pathlib.Path(root_path)
+        self.path = Path(root_path)
         self.name = str(name)
         self.parent_overlays = (
             tuple(parent_overlays) if parent_overlays else None
@@ -130,14 +157,11 @@ class Overlay(object):
             "KEYWORDS": pkg.keywords,
             "SLOT": pkg.slot,
         }
+        base_conf.update(pkg.variables)
 
         osutils.WriteFile(
             ebuild_path, _dict_to_ebuild(base_conf), makedirs=True
         )
-
-        # Write additional miscellaneous variables declared in the Package object.
-        for k, v in pkg.variables.items():
-            osutils.WriteFile(ebuild_path, f'{k}="{v}"\n', mode="a")
 
         # Write an eclass inheritance line, if needed.
         if pkg.format_eclass_line():
@@ -150,6 +174,25 @@ class Overlay(object):
 
         osutils.WriteFile(ebuild_path, _dict_to_ebuild(extra_conf), mode="a")
 
+        md5cache_path = (
+            self.path / "metadata" / "md5-cache" / pkg.package_info.cpvr
+        )
+        md5cache_vars = {}
+        for var in _MD5CACHE_VARS:
+            if var in base_conf:
+                md5cache_vars[var] = base_conf[var]
+            elif var in extra_conf:
+                md5cache_vars[var] = extra_conf[var]
+
+        md5cache_vars["_md5_"] = _md5(ebuild_path)
+        md5cache_vars["_eclasses_"] = "\t".join(
+            f"{x}\t{_FAKE_MD5}" for x in pkg.inherit
+        )
+
+        osutils.WriteFile(
+            md5cache_path, _dict_to_md5cache(md5cache_vars), makedirs=True
+        )
+
     def create_profile(
         self, path=None, profile_parents=None, make_defaults=None
     ):
@@ -158,7 +201,7 @@ class Overlay(object):
         Creates a profile with the given settings and writes the profile with those
         settings to the Overlay's directory.
         """
-        path = pathlib.Path(path) if path else pathlib.Path("base")
+        path = Path(path) if path else Path("base")
         if path in self.profiles:
             raise KeyError("A profile with that path already exists!")
 
