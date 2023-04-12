@@ -532,6 +532,119 @@ virtual/python-enum34-1
         )
 
 
+class CreateChromePackageIndexTest(cros_test_lib.MockTempDirTestCase):
+    """Unittests for CreateChromePackageIndex."""
+
+    def setUp(self):
+        self.chroot_path = self.tempdir / "chroot"
+        self.sysroot_path = self.chroot_path / "build" / "foo"
+        self.chroot = chroot_lib.Chroot(self.chroot_path)
+        self.pkgs_dir = self.sysroot_path / "packages"
+        self.sysroot = sysroot_lib.Sysroot(self.sysroot_path)
+
+        packages_content = """\
+ARCH: amd64
+TTL: 0
+
+CPV: package/exclude-1
+
+CPV: chromeos-base/chromeos-chrome-100.0.0-r1
+
+CPV: chromeos-base/chromeos-lacros-100.0.0-r1
+
+CPV: chromeos-base/chrome-icu-100.0.0-r1
+
+CPV: package/exclude-2
+    """
+        package_index_file_path = self.pkgs_dir / "Packages"
+        osutils.Touch(package_index_file_path, makedirs=True)
+        osutils.WriteFile(package_index_file_path, packages_content)
+
+        self.PatchObject(os.path, "exists", return_value=True)
+        self.fake_packages = [
+            portage_util.InstalledPackage(
+                None, "", category="package", pf="exclude-1"
+            ),
+            portage_util.InstalledPackage(
+                None,
+                "",
+                category=constants.CHROME_CN,
+                pf="chromeos-chrome-100.0.0-r1",
+            ),
+            portage_util.InstalledPackage(
+                None,
+                "",
+                category=constants.CHROME_CN,
+                pf="chromeos-lacros-100.0.0-r1",
+            ),
+            portage_util.InstalledPackage(
+                None,
+                "",
+                category=constants.CHROME_CN,
+                pf="chrome-icu-100.0.0-r1",
+            ),
+            portage_util.InstalledPackage(
+                None, "", category="package", pf="exclude-2"
+            ),
+        ]
+        self.PatchObject(
+            portage_util.PortageDB,
+            "InstalledPackages",
+            return_value=self.fake_packages,
+        )
+
+        self.upload_dir = self.chroot_path / "upload_dir"
+        osutils.SafeMakedirs(self.upload_dir)
+        self.upload_packages_file = self.upload_dir / "Packages"
+
+    def testCreateChromePackageIndex(self):
+        """CreateChromePackageIndex writes updated file to disk."""
+        actual_packages = binhost.CreateChromePackageIndex(
+            self.chroot,
+            self.sysroot,
+            self.upload_packages_file,
+            "gs://chromeos-prebuilt",
+            "target/",
+        )
+        actual_packages_content = osutils.ReadFile(
+            self.upload_packages_file
+        ).splitlines()
+
+        self.assertEqual(
+            [
+                "chromeos-base/chromeos-chrome-100.0.0-r1.tbz2",
+                "chromeos-base/chromeos-lacros-100.0.0-r1.tbz2",
+                "chromeos-base/chrome-icu-100.0.0-r1.tbz2",
+            ],
+            actual_packages,
+        )
+        self.assertIn(
+            "CPV: chromeos-base/chromeos-chrome-100.0.0-r1",
+            actual_packages_content,
+        )
+        self.assertIn(
+            "PATH: target/chromeos-base/chromeos-chrome-100.0.0-r1.tbz2",
+            actual_packages_content,
+        )
+        self.assertIn(
+            "CPV: chromeos-base/chromeos-lacros-100.0.0-r1",
+            actual_packages_content,
+        )
+        self.assertIn(
+            "PATH: target/chromeos-base/chromeos-lacros-100.0.0-r1.tbz2",
+            actual_packages_content,
+        )
+        self.assertIn(
+            "CPV: chromeos-base/chrome-icu-100.0.0-r1", actual_packages_content
+        )
+        self.assertIn(
+            "PATH: target/chromeos-base/chrome-icu-100.0.0-r1.tbz2",
+            actual_packages_content,
+        )
+        self.assertNotIn("CPV: package/exclude-1", actual_packages_content)
+        self.assertNotIn("CPV: package/exclude-2", actual_packages_content)
+
+
 @pytest.mark.parametrize(
     "uri,expected",
     [

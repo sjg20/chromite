@@ -455,6 +455,60 @@ def ReadDevInstallFilesToCreatePackageIndex(
     return upload_targets_list
 
 
+def CreateChromePackageIndex(
+    chroot: "chroot_lib.Chroot",
+    sysroot: "sysroot_lib.Sysroot",
+    package_index_path: str,
+    gs_bucket: str,
+    upload_path: str,
+) -> List[str]:
+    """Create Chrome package index specified by package_index_path.
+
+    The current Packages file is read and a new Packages file is created based
+    on the subset of Chrome packages.
+
+    Args:
+        chroot: The chroot where the sysroot lives.
+        sysroot: The sysroot.
+        package_index_path: Path to the Packages file to be created.
+        gs_bucket: The GS bucket where prebuilts will be uploaded.
+        upload_path: The path from the GS bucket for the prebuilts.
+
+    Returns:
+        The list of packages contained in package_index_path, where each package
+            string is a category/file.
+    """
+    # Get the list of Chrome packages to filter by.
+    installed_packages = portage_util.PortageDB(
+        chroot.full_path(sysroot.path)
+    ).InstalledPackages()
+    chrome_packages = []
+    for pkg in installed_packages:
+        if pkg.category == constants.CHROME_CN and any(
+            pn in pkg.pf
+            for pn in (constants.CHROME_PN, constants.LACROS_PN, "chrome-icu")
+        ):
+            chrome_packages.append(pkg.package_info.cpvr)
+
+    # Read the Packages file, remove packages not in the packages list.
+    packages_path = chroot.full_path(sysroot.path, "packages")
+    CreateFilteredPackageIndex(
+        packages_path,
+        chrome_packages,
+        package_index_path,
+        ConvertGsUploadUri(gs_bucket),
+        upload_path,
+        sudo=True,
+    )
+
+    # We have the list of packages, create the full path and verify each one.
+    upload_targets_list = GetPrebuiltsForPackages(
+        packages_path, chrome_packages
+    )
+
+    return upload_targets_list
+
+
 def ConvertGsUploadUri(upload_uri: str) -> str:
     """Convert a GS URI to the equivalent https:// URI.
 
@@ -534,7 +588,5 @@ def GetPrebuiltsForPackages(
         upload_targets_list.append(zip_target)
         full_pkg_path = os.path.join(package_root, pkg) + ".tbz2"
         if not os.path.exists(full_pkg_path):
-            raise LookupError(
-                "DevInstall archive %s does not exist" % full_pkg_path
-            )
+            raise LookupError("Archive %s does not exist" % full_pkg_path)
     return upload_targets_list
