@@ -12,6 +12,7 @@ from chromite.api.controller import binhost
 from chromite.api.gen.chromite.api import binhost_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import binpkg
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -610,4 +611,88 @@ CPV: virtual/python-enum34-1
         with self.assertRaises(ValueError):
             binhost.PrepareDevInstallBinhostUploads(
                 input_proto, self.response, self.api_config
+            )
+
+
+class PrepareChromeBinhostUploadsTest(
+    cros_test_lib.MockTempDirTestCase, api_config.ApiConfigMixin
+):
+    """Tests for BinhostService/PrepareChromeBinhostUploads."""
+
+    def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+        self.create_chrome_package_index_mock = self.PatchObject(
+            binhost_service, "CreateChromePackageIndex"
+        )
+
+        self.chroot_path = self.tempdir / "chroot"
+        self.sysroot_path = "build/target"
+        self.uploads_dir = self.tempdir / "uploads_dir"
+        self.input_proto = binhost_pb2.PrepareChromeBinhostUploadsRequest()
+        self.input_proto.uri = "gs://chromeos-prebuilt/target"
+        self.input_proto.chroot.path = str(self.chroot_path)
+        self.input_proto.sysroot.path = self.sysroot_path
+        self.input_proto.uploads_dir = str(self.uploads_dir)
+        self.response = binhost_pb2.PrepareChromeBinhostUploadsResponse()
+
+        self.packages_path = self.chroot_path / self.sysroot_path / "packages"
+        self.chrome_packages_path = self.packages_path / constants.CHROME_CN
+        osutils.Touch(
+            self.chrome_packages_path / "chromeos-chrome-100-r1.tbz2",
+            makedirs=True,
+        )
+        osutils.Touch(
+            self.chrome_packages_path / "chrome-icu-100-r1.tbz2",
+            makedirs=True,
+        )
+        osutils.Touch(
+            self.chrome_packages_path / "chromeos-lacros-100-r1.tbz2",
+            makedirs=True,
+        )
+
+    def testValidateOnly(self):
+        """Check that a validate only call does not execute any logic."""
+        binhost.PrepareChromeBinhostUploads(
+            self.input_proto, self.response, self.validate_only_config
+        )
+
+        self.create_chrome_package_index_mock.assert_not_called()
+
+    def testMockCall(self):
+        """Test a mock call does not execute logic, returns mocked value."""
+        binhost.PrepareChromeBinhostUploads(
+            self.input_proto, self.response, self.mock_call_config
+        )
+
+        self.assertEqual(len(self.response.upload_targets), 4)
+        self.assertEqual(self.response.upload_targets[3].path, "Packages")
+        self.create_chrome_package_index_mock.assert_not_called()
+
+    def testChromeUpload(self):
+        """Test uploads of Chrome prebuilts."""
+        expected_upload_targets = [
+            "chromeos-base/chromeos-chrome-100-r1.tbz2",
+            "chromeos-base/chrome-icu-100-r1.tbz2",
+            "chromeos-base/chromeos-lacros-100-r1.tbz2",
+        ]
+        self.create_chrome_package_index_mock.return_value = (
+            expected_upload_targets
+        )
+
+        binhost.PrepareChromeBinhostUploads(
+            self.input_proto, self.response, self.api_config
+        )
+
+        self.assertCountEqual(
+            [target.path for target in self.response.upload_targets],
+            expected_upload_targets + ["Packages"],
+        )
+
+    def testPrepareBinhostUploadsNonGsUri(self):
+        """PrepareBinhostUploads dies when URI does not point to GS."""
+        self.input_proto.uri = "https://foo.bar"
+
+        with self.assertRaises(ValueError):
+            binhost.PrepareChromeBinhostUploads(
+                self.input_proto, self.response, self.api_config
             )

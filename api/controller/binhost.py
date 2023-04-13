@@ -18,6 +18,7 @@ from chromite.lib import binpkg
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import gs
+from chromite.lib import osutils
 from chromite.lib import sysroot_lib
 from chromite.service import binhost
 
@@ -222,6 +223,79 @@ def PrepareDevInstallBinhostUploads(
         target_dir = os.path.join(input_proto.uploads_dir, category)
         if not os.path.exists(target_dir):
             os.makedirs(target_dir)
+        full_src_pkg_path = os.path.join(package_dir, upload_target)
+        full_target_src_path = os.path.join(
+            input_proto.uploads_dir, upload_target
+        )
+        shutil.copyfile(full_src_pkg_path, full_target_src_path)
+        output_proto.upload_targets.add().path = upload_target
+    output_proto.upload_targets.add().path = "Packages"
+
+
+def _PrepareChromeBinhostUploadsResponse(_input_proto, output_proto, _config):
+    """Add fake binhost files to a successful response."""
+    output_proto.upload_targets.add().path = (
+        "chromeos-base/chromeos-chrome-100-r1.tbz2"
+    )
+    output_proto.upload_targets.add().path = (
+        "chromeos-base/chrome-icu-100-r1.tbz2"
+    )
+    output_proto.upload_targets.add().path = (
+        "chromeos-base/chromeos-lacros-100-r1.tbz2"
+    )
+    output_proto.upload_targets.add().path = "Packages"
+
+
+@faux.success(_PrepareChromeBinhostUploadsResponse)
+@faux.empty_error
+@validate.require("uploads_dir", "uri", "sysroot.path")
+@validate.validation_complete
+def PrepareChromeBinhostUploads(
+    input_proto: binhost_pb2.PrepareChromeBinhostUploadsRequest,
+    output_proto: binhost_pb2.PrepareChromeBinhostUploadsResponse,
+    config: "api_config.ApiConfig",
+):
+    """Return a list of Chrome files to upload to the binhost.
+
+    The files will also be copied to the uploads_dir.
+    See BinhostService documentation in api/proto/binhost.proto.
+
+    Args:
+        input_proto: The input proto.
+        output_proto: The output proto.
+        config: The API call config.
+    """
+    if config.validate_only:
+        return controller.RETURN_CODE_VALID_INPUT
+
+    chroot = controller_util.ParseChroot(input_proto.chroot)
+    sysroot = sysroot_lib.Sysroot(input_proto.sysroot.path)
+
+    uri = input_proto.uri
+    # For now, we enforce that all input URIs are Google Storage buckets.
+    if not gs.PathIsGs(uri):
+        raise ValueError("Upload URI %s must be Google Storage." % uri)
+    parsed_uri = urllib.parse.urlparse(uri)
+    gs_bucket = gs.GetGsURL(parsed_uri.netloc, for_gsutil=True).rstrip("/")
+    upload_path = parsed_uri.path.lstrip("/")
+
+    # Determine the filename for the to-be-created Packages file, which will
+    # contain only Chrome packages.
+    chrome_package_index_path = os.path.join(
+        input_proto.uploads_dir, "Packages"
+    )
+    upload_targets_list = binhost.CreateChromePackageIndex(
+        chroot, sysroot, chrome_package_index_path, gs_bucket, upload_path
+    )
+
+    package_dir = chroot.full_path(sysroot.path, "packages")
+    for upload_target in upload_targets_list:
+        # Copy each package to uploads_dir/category/package
+        upload_target = upload_target.strip("/")
+        category = upload_target.split("/")[0]
+        target_dir = os.path.join(input_proto.uploads_dir, category)
+        if not os.path.exists(target_dir):
+            osutils.SafeMakedirs(target_dir)
         full_src_pkg_path = os.path.join(package_dir, upload_target)
         full_target_src_path = os.path.join(
             input_proto.uploads_dir, upload_target
