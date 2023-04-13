@@ -8,6 +8,7 @@ import fnmatch
 import functools
 import importlib
 import itertools
+import json
 import logging
 import os
 from pathlib import Path
@@ -392,11 +393,15 @@ def _UpstartLintFile(path, _output_format, _debug, relaxed: bool, commit: str):
 
 def _DirMdLintFile(path, _output_format, debug, _relaxed: bool, _commit: str):
     """Run the dirmd linter."""
-    return _ToolRunCommand(
-        [constants.DEPOT_TOOLS_DIR / "dirmd", "validate", path],
+    ret = _ToolRunCommand(
+        [constants.DEPOT_TOOLS_DIR / "dirmd", "parse", path],
         debug,
-        capture_output=not debug,
+        stdout=True,
     )
+    if ret.returncode:
+        results = json.loads(ret.stdout)
+        print(results[str(path)]["error"])
+    return ret
 
 
 def _OwnersLintFile(path, _output_format, _debug, _relaxed: bool, commit: str):
