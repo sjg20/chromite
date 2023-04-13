@@ -391,16 +391,18 @@ def _UpstartLintFile(path, _output_format, _debug, relaxed: bool, commit: str):
     return ret
 
 
-def _DirMdLintFile(path, _output_format, debug, _relaxed: bool, _commit: str):
+def _DirMdLintFile(path, _output_format, debug, _relaxed: bool, commit: str):
     """Run the dirmd linter."""
+    data = _get_file_data(path, commit)
     ret = _ToolRunCommand(
-        [constants.DEPOT_TOOLS_DIR / "dirmd", "parse", path],
+        [constants.DEPOT_TOOLS_DIR / "dirmd", "parse"],
         debug,
+        input=data,
         stdout=True,
     )
     if ret.returncode:
         results = json.loads(ret.stdout)
-        print(results[str(path)]["error"])
+        print(path, results["stdin"]["error"])
     return ret
 
 
