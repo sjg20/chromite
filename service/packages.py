@@ -502,6 +502,7 @@ def uprev_drivefs(_build_targets, refs, chroot):
 
 
 @uprevs_versioned_package("chromeos-base/perfetto")
+@uprevs_versioned_package("dev-go/perfetto-protos")
 def uprev_perfetto(_build_targets, refs, chroot):
     """Updates Perfetto ebuilds.
 
@@ -514,9 +515,14 @@ def uprev_perfetto(_build_targets, refs, chroot):
     result = uprev_lib.UprevVersionedPackageResult()
 
     PERFETTO_REFS_PREFIX = "refs/tags/v"
-    PERFETTO_PATH = os.path.join(
-        constants.CHROMIUMOS_OVERLAY_DIR, "chromeos-base/perfetto"
-    )
+
+    perfetto_ebuilds = ["chromeos-base/perfetto", "dev-go/perfetto-protos"]
+    perfetto_paths = [
+        os.path.join(constants.CHROMIUMOS_OVERLAY_DIR, e)
+        for e in perfetto_ebuilds
+    ]
+    # chromeos-base/perfetto is the primary ebuild.
+    primary_ebuild_path = perfetto_paths[0]
 
     # Decide the version number to uprev to:
     # * If |refs| contains refs/tags/v*, get the latest from them.
@@ -524,31 +530,34 @@ def uprev_perfetto(_build_targets, refs, chroot):
     # * Or if |refs| contains only the latest trunk revisions, use the current
     #   stable ebuild version for a revision bump.
     if refs and not perfetto_version:
-        perfetto_version = uprev_lib.get_stable_ebuild_version(PERFETTO_PATH)
+        perfetto_version = uprev_lib.get_stable_ebuild_version(
+            primary_ebuild_path
+        )
 
     if not perfetto_version:
         # No valid Perfetto version is identified.
         return result
 
-    # Attempt to uprev perfetto package.
-    # |perfetto_version| is only used in determining the ebuild version. The
-    # package is always updated to the latest HEAD.
-    uprev_result = uprev_lib.uprev_workon_ebuild_to_version(
-        PERFETTO_PATH,
-        perfetto_version,
-        chroot,
-        allow_downrev=False,
-        # Use default ref="HEAD"
-    )
+    for path in perfetto_paths:
+        # Attempt to uprev perfetto package.
+        # |perfetto_version| is only used in determining the ebuild version. The
+        # package is always updated to the latest HEAD.
+        uprev_result = uprev_lib.uprev_workon_ebuild_to_version(
+            path,
+            perfetto_version,
+            chroot,
+            allow_downrev=False,
+            # Use default ref="HEAD"
+        )
 
-    if not uprev_result:
-        return result
+        if not uprev_result:
+            return result
 
-    # Include short git sha hash in the uprev commit message.
-    # Use 9 digits to match the short hash length in `perfetto --version`.
-    short_revision = refs[-1].revision[0:9]
-    version_and_rev = f"{perfetto_version}-{short_revision}"
-    result.add_result(version_and_rev, uprev_result.changed_files)
+        # Include short git sha hash in the uprev commit message.
+        # Use 9 digits to match the short hash length in `perfetto --version`.
+        short_revision = refs[-1].revision[0:9]
+        version_and_rev = f"{perfetto_version}-{short_revision}"
+        result.add_result(version_and_rev, uprev_result.changed_files)
 
     return result
 

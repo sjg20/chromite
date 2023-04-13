@@ -2198,16 +2198,30 @@ class UprevPerfettoTest(cros_test_lib.MockTestCase):
     def setUp(self):
         self.refs = [GitRef(path="/foo", ref="refs/tags/v12.0", revision="123")]
         self.MOCK_PERFETTO_EBUILD_PATH = "perfetto-12.0-r1.ebuild"
+        self.MOCK_PERFETTO_PROTO_EBUILD_PATH = "perfetto-protos-12.0-r1.ebuild"
 
-    def revisionBumpOutcome(self, ebuild_path):
-        return uprev_lib.UprevResult(
-            uprev_lib.Outcome.REVISION_BUMP, [ebuild_path]
-        )
+    def revisionBumpOutcome(self):
+        return [
+            uprev_lib.UprevResult(
+                uprev_lib.Outcome.REVISION_BUMP,
+                [self.MOCK_PERFETTO_EBUILD_PATH],
+            ),
+            uprev_lib.UprevResult(
+                uprev_lib.Outcome.REVISION_BUMP,
+                [self.MOCK_PERFETTO_PROTO_EBUILD_PATH],
+            ),
+        ]
 
-    def majorBumpOutcome(self, ebuild_path):
-        return uprev_lib.UprevResult(
-            uprev_lib.Outcome.VERSION_BUMP, [ebuild_path]
-        )
+    def majorBumpOutcome(self):
+        return [
+            uprev_lib.UprevResult(
+                uprev_lib.Outcome.VERSION_BUMP, [self.MOCK_PERFETTO_EBUILD_PATH]
+            ),
+            uprev_lib.UprevResult(
+                uprev_lib.Outcome.VERSION_BUMP,
+                [self.MOCK_PERFETTO_PROTO_EBUILD_PATH],
+            ),
+        ]
 
     def newerVersionOutcome(self):
         return uprev_lib.UprevResult(uprev_lib.Outcome.NEWER_VERSION_EXISTS)
@@ -2252,27 +2266,35 @@ class UprevPerfettoTest(cros_test_lib.MockTestCase):
 
     def test_revision_bump_perfetto_package(self):
         """Test perfetto package uprev."""
-        perfetto_outcome = self.revisionBumpOutcome(
-            self.MOCK_PERFETTO_EBUILD_PATH
-        )
         self.PatchObject(
             uprev_lib,
             "uprev_workon_ebuild_to_version",
-            side_effect=[perfetto_outcome],
+            side_effect=self.revisionBumpOutcome(),
         )
         output = packages.uprev_perfetto(None, self.refs, None)
         self.assertTrue(output.uprevved)
+        self.assertEqual(
+            output.modified[0].files, [self.MOCK_PERFETTO_EBUILD_PATH]
+        )
+        self.assertEqual(
+            output.modified[1].files, [self.MOCK_PERFETTO_PROTO_EBUILD_PATH]
+        )
 
     def test_major_bump_perfetto_package(self):
         """Test perfetto package uprev."""
-        perfetto_outcome = self.majorBumpOutcome(self.MOCK_PERFETTO_EBUILD_PATH)
         self.PatchObject(
             uprev_lib,
             "uprev_workon_ebuild_to_version",
-            side_effect=[perfetto_outcome],
+            side_effect=self.majorBumpOutcome(),
         )
         output = packages.uprev_perfetto(None, self.refs, None)
         self.assertTrue(output.uprevved)
+        self.assertEqual(
+            output.modified[0].files, [self.MOCK_PERFETTO_EBUILD_PATH]
+        )
+        self.assertEqual(
+            output.modified[1].files, [self.MOCK_PERFETTO_PROTO_EBUILD_PATH]
+        )
 
     def test_revision_bump_trunk(self):
         """Test revision bump on receiving non-versioned trunk refs."""
@@ -2281,20 +2303,25 @@ class UprevPerfettoTest(cros_test_lib.MockTestCase):
                 path="/foo", ref="refs/heads/main", revision="0123456789abcdef"
             )
         ]
-        perfetto_outcome = self.revisionBumpOutcome(
-            self.MOCK_PERFETTO_EBUILD_PATH
-        )
         self.PatchObject(
             uprev_lib, "get_stable_ebuild_version", return_value="12.0"
         )
         self.PatchObject(
             uprev_lib,
             "uprev_workon_ebuild_to_version",
-            side_effect=[perfetto_outcome],
+            side_effect=self.revisionBumpOutcome(),
         )
         output = packages.uprev_perfetto(None, refs, None)
+
         self.assertTrue(output.uprevved)
+        self.assertEqual(
+            output.modified[0].files, [self.MOCK_PERFETTO_EBUILD_PATH]
+        )
         self.assertEqual(output.modified[0].new_version, "12.0-012345678")
+        self.assertEqual(
+            output.modified[1].files, [self.MOCK_PERFETTO_PROTO_EBUILD_PATH]
+        )
+        self.assertEqual(output.modified[1].new_version, "12.0-012345678")
 
 
 class UprevLacrosTest(cros_test_lib.MockTestCase):
