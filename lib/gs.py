@@ -827,8 +827,9 @@ wheel: <
             env["BOTO_CONFIG"] = self.boto_file
 
         cmd = self._gsutil_bin + self.gsutil_flags + ["cat", path]
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env)
 
-        def read_content(proc):
+        def read_content():
             try:
                 while True:
                     data = proc.stdout.read(chunksize)
@@ -849,8 +850,7 @@ wheel: <
                     proc.stdout.close()
                     proc.terminate()
 
-        with subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env) as proc:
-            return read_content(proc)
+        return read_content()
 
     def CopyInto(self, local_path, remote_dir, filename=None, **kwargs):
         """Upload a local file into a directory in google storage.
