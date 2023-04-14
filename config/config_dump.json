@@ -8318,7 +8318,6 @@
     "boards": [
       "endeavour"
     ],
-    "important": false,
     "models": [
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"endeavour\",\n  \"name\": \"endeavour\",\n  \"test_suites\": []\n}"
     ],
