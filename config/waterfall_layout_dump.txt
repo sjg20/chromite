@@ -210,6 +210,7 @@
     kukui-release
     lars-release
     majolica-release
+    midna-release
     nami-kernelnext-release
     nami-release
     nautilus-release
@@ -1075,6 +1076,7 @@
     kukui-release-tryjob
     lars-release-tryjob
     majolica-release-tryjob
+    midna-release-tryjob
     nami-kernelnext-release-tryjob
     nami-release-tryjob
     nautilus-release-tryjob
@@ -1131,6 +1133,7 @@
     zork-connectivitynext-release-tryjob
     zork-kernelnext-release-tryjob
     zork-release-tryjob
+  midna-release-tryjob
   mistral-factory-mistral-12361.B-factorybranch-tryjob
   mistral-master-factorybranch-tryjob
   nami-factory-nami-10715.B-factorybranch-tryjob
