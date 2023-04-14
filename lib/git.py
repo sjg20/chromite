@@ -145,7 +145,7 @@ def IsSHA1(value, full=True):
     l = len(value)
     if full:
         return l == 40
-    return l >= 6 and l <= 40
+    return 6 <= l <= 40
 
 
 def IsRefsTags(value):

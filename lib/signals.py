@@ -79,7 +79,7 @@ def StrSignal(sig_num):
         A string of the signal name(s)
     """
     # Handle realtime signals first since they are unnamed.
-    if sig_num >= signal.SIGRTMIN and sig_num < signal.SIGRTMAX:
+    if signal.SIGRTMIN <= sig_num < signal.SIGRTMAX:
         return "SIGRT_%i" % sig_num
 
     # Probe the module looking for matching signal constant.

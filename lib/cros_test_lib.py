@@ -386,7 +386,7 @@ class TruthTable(object):
         Returns:
           Tuple of bools representing one line of inputs.
         """
-        if inputs_index >= 0 and inputs_index < self.num_lines:
+        if 0 <= inputs_index < self.num_lines:
             line_values = []
 
             # Iterate through each column in truth table.  Any order will
