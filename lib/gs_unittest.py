@@ -447,7 +447,9 @@ class UnMockedGetCreationTimeSinceTest(cros_test_lib.TempDirTestCase):
         ctx = gs.GSContext()
         with gs.TemporaryURL("testGetCreationTime") as url:
             with self.assertRaises(gs.GSNoSuchKey):
-                self.assertRaises(gs.GSNoSuchKey, ctx.GetCreationTimeSince, url)
+                self.assertRaises(
+                    gs.GSNoSuchKey, ctx.GetCreationTimeSince, url, NOW_RAW
+                )
                 ctx.GetCreationTimeSince(url, NOW_RAW)
 
             ctx.CreateWithContents(url, "test file contents")
