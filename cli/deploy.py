@@ -1294,21 +1294,37 @@ def _DeployDLCImage(device, sysroot, board, dlc_id, dlc_package):
         #   keeping the stale digests when developers are testing.
 
         # Copy the LoadPin dm-verity digests to device.
-        loadpin = dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS
-        dst_loadpin = Path("/") / dlc_lib.DLC_META_DIR / loadpin
-        src_loadpin = temp_rootfs / dlc_lib.DLC_META_DIR / loadpin
-        if src_loadpin.exists():
-            digests = set(osutils.ReadFile(src_loadpin).split())
-            try:
-                digests.update(device.CatFile(dst_loadpin).split())
-            except remote_access.CatFileError:
-                pass
+        _DeployDLCLoadPin(temp_rootfs, device)
 
-            with tempfile.NamedTemporaryFile(dir=temp_rootfs) as f:
-                osutils.WriteFile(f.name, "\n".join(digests))
-                device.CopyToDevice(
-                    f.name, dst_loadpin, mode="rsync", remote_sudo=True
-                )
+
+def _DeployDLCLoadPin(
+    rootfs: os.PathLike, device: remote_access.ChromiumOSDevice
+):
+    """Deploy DLC LoadPin from temp rootfs to device.
+
+    Args:
+        rootfs: Path to rootfs.
+        device: A device object.
+    """
+    loadpin = dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS
+    dst_loadpin = Path("/") / dlc_lib.DLC_META_DIR / loadpin
+    src_loadpin = rootfs / dlc_lib.DLC_META_DIR / loadpin
+    if src_loadpin.exists():
+        digests = set(osutils.ReadFile(src_loadpin).splitlines())
+        digests.discard(dlc_lib.DLC_LOADPIN_FILE_HEADER)
+        try:
+            device_digests = set(device.CatFile(dst_loadpin).splitlines())
+            device_digests.discard(dlc_lib.DLC_LOADPIN_FILE_HEADER)
+            digests.update(device_digests)
+        except remote_access.CatFileError:
+            pass
+
+        with tempfile.NamedTemporaryFile(dir=rootfs) as f:
+            osutils.WriteFile(f.name, dlc_lib.DLC_LOADPIN_FILE_HEADER + "\n")
+            osutils.WriteFile(f.name, "\n".join(digests) + "\n", mode="a")
+            device.CopyToDevice(
+                f.name, dst_loadpin, mode="rsync", remote_sudo=True
+            )
 
 
 def _GetDLCInfo(device, pkg_path, from_dut):

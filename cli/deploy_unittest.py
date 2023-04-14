@@ -15,6 +15,7 @@ from chromite.cli import deploy
 from chromite.lib import build_target_lib
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
+from chromite.lib import dlc_lib
 from chromite.lib import osutils
 from chromite.lib import remote_access
 from chromite.lib import sysroot_lib
@@ -32,6 +33,17 @@ if cros_build_lib.IsInsideChroot():
 # pylint: disable=protected-access
 
 
+# Example DLC LoadPin digests to test with.
+LOADPIN_TRUSTED_VERITY_ROOT_DIGESTS = """# LOADPIN_TRUSTED_VERITY_ROOT_DIGESTS
+75a799de83eee0ef0f028ea94643d1b2021261e77b8f76fee1d5749847fef431
+"""
+
+# An example LoadPin digest.
+DLC_LOADPIN_DIGEST = (
+    "feeddeadc0de0000000000000000000000000000000000000000000000000000"
+)
+
+
 class ChromiumOSDeviceFake(object):
     """Fake for device."""
 
@@ -44,6 +56,8 @@ class ChromiumOSDeviceFake(object):
         self.cmds = []
         self.work_dir = "/testdir/"
         self.selinux_available = False
+        self.copy_store = None
+        self.cat_file_output = ""
 
     def MountRootfsReadWrite(self):
         return True
@@ -58,7 +72,12 @@ class ChromiumOSDeviceFake(object):
         self.cmds.append(cmd)
 
     def CopyToDevice(self, _src, _dest, _mode="rsync", **_kwargs):
+        if os.path.exists(_src):
+            self.copy_store = osutils.ReadFile(_src)
         return True
+
+    def CatFile(self, _src):
+        return self.cat_file_output
 
 
 class ChromiumOSDeviceHandlerFake(object):
@@ -428,6 +447,47 @@ class TestDeploy(
         deploy.Deploy(None, ["package"], force=True, clean_binpkg=False)
         # Check that dlcservice is restarted (DLC modules are deployed).
         self.assertTrue(["restart", "dlcservice"] in self.device.device.cmds)
+
+    def testDeployDLCLoadPinMissingDeviceDigests(self):
+        """Test that _DeployDLCLoadPin works with missing device digests."""
+        osutils.WriteFile(
+            self.tempdir
+            / dlc_lib.DLC_META_DIR
+            / dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS,
+            LOADPIN_TRUSTED_VERITY_ROOT_DIGESTS,
+            makedirs=True,
+        )
+        with self.device as d:
+            deploy._DeployDLCLoadPin(self.tempdir, d)
+        self.assertEqual(
+            d.copy_store.splitlines()[0], dlc_lib.DLC_LOADPIN_FILE_HEADER
+        )
+        self.assertFalse(DLC_LOADPIN_DIGEST in d.copy_store.splitlines())
+        self.assertTrue(
+            "75a799de83eee0ef0f028ea94643d1b2021261e77b8f76fee1d5749847fef431"
+            in d.copy_store.splitlines()
+        )
+
+    def testDeployDLCLoadPinFeedNewDigests(self):
+        """Test that _DeployDLCLoadPin works with digest format file."""
+        osutils.WriteFile(
+            self.tempdir
+            / dlc_lib.DLC_META_DIR
+            / dlc_lib.DLC_LOADPIN_TRUSTED_VERITY_DIGESTS,
+            LOADPIN_TRUSTED_VERITY_ROOT_DIGESTS,
+            makedirs=True,
+        )
+        with self.device as d:
+            d.cat_file_output = DLC_LOADPIN_DIGEST
+            deploy._DeployDLCLoadPin(self.tempdir, d)
+        self.assertEqual(
+            d.copy_store.splitlines()[0], dlc_lib.DLC_LOADPIN_FILE_HEADER
+        )
+        self.assertTrue(DLC_LOADPIN_DIGEST in d.copy_store.splitlines())
+        self.assertTrue(
+            "75a799de83eee0ef0f028ea94643d1b2021261e77b8f76fee1d5749847fef431"
+            in d.copy_store.splitlines()
+        )
 
     def testDeployEmergeSELinux(self):
         """Test deploy progress when the device has SELinux"""
