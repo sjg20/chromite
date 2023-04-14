@@ -62,8 +62,8 @@ class ExportToCloudTraceTest(cros_test_lib.MockTempDirTestCase):
         with self._SendSpansThread() as (_, client):
             pass
 
-        # Even though MIN_BATCH_SIZE is 2, we will send a smaller batch if we run
-        # out of time.
+        # Even though MIN_BATCH_SIZE is 2, we will send a smaller batch if we
+        # run out of time.
         self.assertEqual(client.projects().patchTraces.call_count, 1)
 
     def testSendBatches(self):
@@ -74,9 +74,9 @@ class ExportToCloudTraceTest(cros_test_lib.MockTempDirTestCase):
         with self._SendSpansThread() as (_, client):
             pass
 
-        # MIN_BATCH_SIZE=2, but the second batch has 3 elements, and gets sent as
-        # one batch.
+        # MIN_BATCH_SIZE=2, but the second batch has 3 elements, and gets sent
+        # as one batch.
         self.assertEqual(client.projects().patchTraces.call_count, 2)
-        # We log an error on metrics emission when the span does not have required
-        # fields (endTime, startTime and name).
+        # We log an error on metrics emission when the span does not have
+        # required fields (endTime, startTime and name).
         self.assertEqual(0, error_log.call_count)

@@ -13,13 +13,13 @@ def GetPackagesLicensesFromHtml(html_file):
     """Get the list of packages and licenses in a ChromeOS license file.
 
     Args:
-      html_file: which html license file to scan for packages.
+        html_file: which html license file to scan for packages.
 
     Returns:
-      tuple of dictionary of packages and version numbers and set of licenses.
+        tuple of dictionary of packages and version numbers and set of licenses.
 
     Raises:
-      AssertionError: if regex failed.
+        AssertionError: if regex failed.
     """
 
     packages = {}
@@ -31,10 +31,12 @@ def GetPackagesLicensesFromHtml(html_file):
     license_rgx1 = re.compile(r"Scanned (Source License .+):", re.IGNORECASE)
     license_rgx2 = re.compile(r"(Custom License .+):", re.IGNORECASE)
     license_rgx3 = re.compile(r"(Copyright Attribution .+):", re.IGNORECASE)
+    # pylint: disable=line-too-long
     # This regex isn't as tight because it has to match these:
     # Gentoo Package Stock License BZIP2:
     # <a ... class="title">Gentoo Package Provided Stock License public-domain</a>
     # <a ... class="title">Gentoo Package Stock License public-domain</a>
+    # pylint: enable=line-too-long
     license_rgx4 = re.compile(r"(Stock License [^<:]+)", re.IGNORECASE)
     license_rgx5 = re.compile(
         r'class="title">(Custom License .+)</a>', re.IGNORECASE
@@ -71,11 +73,11 @@ def ComparePkgLists(pkg_list1, pkg_list2):
     """Compare the package list in 2 dictionaries and output the differences.
 
     Args:
-      pkg_list1: dict from GetPackagesLicensesFromHtml.
-      pkg_list2: dict from GetPackagesLicensesFromHtml.
+        pkg_list1: dict from GetPackagesLicensesFromHtml.
+        pkg_list2: dict from GetPackagesLicensesFromHtml.
 
     Returns:
-      N/A (outputs result on stdout).
+        N/A (outputs result on stdout).
     """
 
     for removed_package in sorted(set(pkg_list1) - set(pkg_list2)):
@@ -105,11 +107,11 @@ def CompareLicenseSets(set1, set2):
     """Compare the license list in 2 sets and output the differences.
 
     Args:
-      set1: set from GetPackagesLicensesFromHtml.
-      set2: set from GetPackagesLicensesFromHtml.
+        set1: set from GetPackagesLicensesFromHtml.
+        set2: set from GetPackagesLicensesFromHtml.
 
     Returns:
-      N/A (outputs result on stdout).
+        N/A (outputs result on stdout).
     """
 
     for removed_license in sorted(set1 - set2):

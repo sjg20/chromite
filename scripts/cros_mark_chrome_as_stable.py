@@ -59,10 +59,10 @@ _REV_TYPES_FOR_LINKS = [
 
 
 def _GetVersionContents(chrome_version_info):
-    """Returns the current Chromium version, from the contents of a VERSION file.
+    """Get the current Chromium version, from the contents of a VERSION file.
 
     Args:
-      chrome_version_info: The contents of a chromium VERSION file.
+        chrome_version_info: The contents of a chromium VERSION file.
     """
     chrome_version_array = []
     for line in chrome_version_info.splitlines():
@@ -75,10 +75,10 @@ def _GetSpecificVersionUrl(git_url, revision, time_to_wait=600):
     """Returns the Chromium version, from a repository URL and version.
 
     Args:
-      git_url: Repository URL for chromium.
-      revision: the git revision we want to use.
-      time_to_wait: the minimum period before abandoning our wait for the
-        desired revision to be present.
+        git_url: Repository URL for chromium.
+        revision: the git revision we want to use.
+        time_to_wait: the minimum period before abandoning our wait for the
+            desired revision to be present.
     """
     parsed_url = urllib.parse.urlparse(git_url)
     host = parsed_url[1]
@@ -109,7 +109,7 @@ def _GetTipOfTrunkVersionFile(root):
     """Returns the current Chromium version, from a file in a checkout.
 
     Args:
-      root: path to the root of the chromium checkout.
+        root: path to the root of the chromium checkout.
     """
     version_file = os.path.join(root, "src", "chrome", "VERSION")
     try:
@@ -131,10 +131,10 @@ def CheckIfChromeRightForOS(deps_content):
     then it chooses that DEPS.
 
     Args:
-      deps_content: Content of release buildspec DEPS file.
+        deps_content: Content of release buildspec DEPS file.
 
     Returns:
-      True if DEPS is the right Chrome for Chrome OS.
+        True if DEPS is the right Chrome for Chrome OS.
     """
     platforms_search = re.search(r"buildspec_platforms.*\s.*\s", deps_content)
 
@@ -150,17 +150,17 @@ def GetLatestRelease(git_url, branch=None):
     """Gets the latest release version from the release tags in the repository.
 
     Args:
-      git_url: URL of git repository.
-      branch: If set, gets the latest release for branch, otherwise latest
-        release.
+        git_url: URL of git repository.
+        branch: If set, gets the latest release for branch, otherwise latest
+            release.
 
     Returns:
-      Latest version string.
+        Latest version string.
     """
-    # TODO(szager): This only works for public release buildspecs in the chromium
-    # src repository.  Internal buildspecs are tracked differently.  At the time
-    # of writing, I can't find any callers that use this method to scan for
-    # internal buildspecs.  But there may be something lurking...
+    # TODO(szager): This only works for public release buildspecs in the
+    # chromium src repository.  Internal buildspecs are tracked differently.  At
+    # the time of writing, I can't find any callers that use this method to scan
+    # for internal buildspecs.  But there may be something lurking...
 
     parsed_url = urllib.parse.urlparse(git_url)
     path = parsed_url[2].rstrip("/") + "/+refs/tags?format=JSON"
@@ -225,13 +225,13 @@ def FindChromeCandidates(package_dir):
     """Return a tuple of chrome's unstable ebuild and stable ebuilds.
 
     Args:
-      package_dir: The path to where the package ebuild is stored.
+        package_dir: The path to where the package ebuild is stored.
 
     Returns:
-      Tuple [unstable_ebuild, stable_ebuilds].
+        Tuple [unstable_ebuild, stable_ebuilds].
 
     Raises:
-      Exception: if no unstable ebuild exists for Chrome.
+        Exception: if no unstable ebuild exists for Chrome.
     """
     stable_ebuilds = []
     unstable_ebuilds = []
@@ -265,14 +265,14 @@ def FindChromeUprevCandidate(stable_ebuilds, chrome_rev, sticky_branch):
     that case we want to find it to delete it.
 
     Args:
-      stable_ebuilds: A list of stable ebuilds.
-      chrome_rev: The chrome_rev designating which candidate to find.
-      sticky_branch: The the branch that is currently sticky with Major/Minor
-        components.  For example: 9.0.553. Can be None but not if chrome_rev
-        is CHROME_REV_STICKY.
+        stable_ebuilds: A list of stable ebuilds.
+        chrome_rev: The chrome_rev designating which candidate to find.
+        sticky_branch: The branch that is currently sticky with Major/Minor
+            components.  For example: 9.0.553. Can be None but not if chrome_rev
+            is CHROME_REV_STICKY.
 
     Returns:
-      The EBuild, otherwise None if none found.
+        The EBuild, otherwise None if none found.
     """
     candidates = []
     if chrome_rev in [
@@ -309,15 +309,15 @@ def FindChromeUprevCandidate(stable_ebuilds, chrome_rev, sticky_branch):
 def GetChromeRevisionLinkFromVersions(old_chrome_version, chrome_version):
     """Return appropriately formatted link to revision info, given versions
 
-    Given two chrome version strings (e.g. 9.0.533.0), generate a link to a
+    Given two Chrome version strings (e.g. 9.0.533.0), generate a link to a
     page that prints the Chromium revisions between those two versions.
 
     Args:
-      old_chrome_version: version to diff from
-      chrome_version: version to which to diff
+        old_chrome_version: version to diff from
+        chrome_version: version to which to diff
 
     Returns:
-      The desired URL.
+        The desired URL.
     """
     return _CHROME_VERSION_URL % {
         "old": old_chrome_version,
@@ -333,12 +333,12 @@ def GetChromeRevisionListLink(old_chrome, new_chrome, chrome_rev):
     revisions, inclusive.
 
     Args:
-      old_chrome: ebuild for the version to diff from
-      new_chrome: ebuild for the version to which to diff
-      chrome_rev: one of constants.VALID_CHROME_REVISIONS
+        old_chrome: ebuild for the version to diff from
+        new_chrome: ebuild for the version to which to diff
+        chrome_rev: one of constants.VALID_CHROME_REVISIONS
 
     Returns:
-      The desired URL.
+        The desired URL.
     """
     assert chrome_rev in _REV_TYPES_FOR_LINKS
     return GetChromeRevisionLinkFromVersions(
@@ -360,33 +360,33 @@ def MarkChromeEBuildAsStable(
     to its new version.
 
     Args:
-      stable_candidate: ebuild that corresponds to the stable ebuild we are
-        revving from.  If None, builds the a new ebuild given the version
-        and logic for chrome_rev type with revision set to 1.
-      unstable_ebuild: ebuild corresponding to the unstable ebuild for chrome.
-      chrome_pn: package name.
-      chrome_rev: one of constants.VALID_CHROME_REVISIONS or LOCAL
-        constants.CHROME_REV_SPEC -  Requires commit value.  Revs the ebuild for
-          the specified version and uses the portage suffix of _alpha.
-        constants.CHROME_REV_TOT -  Requires commit value.  Revs the ebuild for
-          the TOT version and uses the portage suffix of _alpha.
-        constants.CHROME_REV_LOCAL - Requires a chrome_root. Revs the ebuild for
-          the local version and uses the portage suffix of _alpha.
-        constants.CHROME_REV_LATEST - This uses the portage suffix of _rc as they
-          are release candidates for the next sticky version.
-        constants.CHROME_REV_STICKY -  Revs the sticky version.
-      chrome_version: The \d.\d.\d.\d version of Chrome.
-      package_dir: Path to the chromeos-chrome package dir.
+        stable_candidate: ebuild that corresponds to the stable ebuild we are
+            revving from.  If None, builds a new ebuild given the version
+            and logic for chrome_rev type with revision set to 1.
+        unstable_ebuild: ebuild corresponding to the unstable ebuild for chrome.
+        chrome_pn: package name.
+        chrome_rev: one of constants.VALID_CHROME_REVISIONS or LOCAL
+            constants.CHROME_REV_SPEC -  Requires commit value.  Revs the ebuild
+                for the specified version and uses the portage suffix of _alpha.
+            constants.CHROME_REV_TOT -  Requires commit value.  Revs the ebuild
+                for the TOT version and uses the portage suffix of _alpha.
+            constants.CHROME_REV_LOCAL - Requires a chrome_root. Revs the ebuild
+                for the local version and uses the portage suffix of _alpha.
+            constants.CHROME_REV_LATEST - This uses the portage suffix of _rc as
+                they are release candidates for the next sticky version.
+            constants.CHROME_REV_STICKY -  Revs the sticky version.
+        chrome_version: The \d.\d.\d.\d version of Chrome.
+        package_dir: Path to the chromeos-chrome package dir.
 
     Returns:
-      Full portage version atom (including rc's, etc) that was revved.
+        Full portage version atom (including rc's, etc) that was revved.
     """
 
     def IsTheNewEBuildRedundant(new_ebuild, stable_ebuild):
         """Returns True if the new ebuild is redundant.
 
-        This is True if there if the current stable ebuild is the exact same copy
-        of the new one.
+        This is True if the current stable ebuild is an exact copy of the new
+        one.
         """
         if not stable_ebuild:
             return False

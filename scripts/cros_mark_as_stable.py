@@ -39,9 +39,9 @@ def CleanStalePackages(srcroot, boards, package_atoms):
     """Cleans up stale package info from a previous build.
 
     Args:
-      srcroot: Root directory of the source tree.
-      boards: Boards to clean the packages from.
-      package_atoms: A list of package atoms to unmerge.
+        srcroot: Root directory of the source tree.
+        boards: Boards to clean the packages from.
+        package_atoms: A list of package atoms to unmerge.
     """
     if package_atoms:
         logging.info("Cleaning up stale packages %s.", package_atoms)
@@ -111,14 +111,14 @@ def PushChange(
     In that case, the local repository will be left on the merge branch.
 
     Args:
-      stable_branch: The local branch with commits we want to push.
-      tracking_branch: The tracking branch of the local branch.
-      dryrun: Use git push --dryrun to emulate a push.
-      cwd: The directory to run commands in.
-      staging_branch: The staging branch to push for a failed PFQ run
+        stable_branch: The local branch with commits we want to push.
+        tracking_branch: The tracking branch of the local branch.
+        dryrun: Use git push --dryrun to emulate a push.
+        cwd: The directory to run commands in.
+        staging_branch: The staging branch to push for a failed PFQ run.
 
     Raises:
-      OSError: Error occurred while pushing.
+        OSError: Error occurred while pushing.
     """
     if not git.DoesCommitExistInRepo(cwd, stable_branch):
         logging.debug("No branch created for %s.  Exiting", cwd)
@@ -132,7 +132,7 @@ def PushChange(
     # just tested and pushed during the CommitQueueCompletion stage. Sync
     # and rebase our local branch on top of the remote commits.
     remote_ref = git.GetTrackingBranch(cwd, branch=stable_branch, for_push=True)
-    # SyncPushBranch rebases HEAD onto the updated remote. We need to checkout
+    # SyncPushBranch rebases HEAD onto the updated remote. We need to check out
     # stable_branch here in order to update it.
     git.RunGit(cwd, ["checkout", stable_branch])
     git.SyncPushBranch(cwd, remote_ref.remote, remote_ref.ref)
@@ -216,9 +216,9 @@ class GitBranch(object):
         """Sets up variables but does not create the branch.
 
         Args:
-          branch_name: The name of the branch.
-          tracking_branch: The associated tracking branch.
-          cwd: The git repository to work in.
+            branch_name: The name of the branch.
+            tracking_branch: The associated tracking branch.
+            cwd: The git repository to work in.
         """
         self.branch_name = branch_name
         self.tracking_branch = tracking_branch
@@ -385,14 +385,14 @@ def main(argv):
 
 
 def _WorkOnPush(options, overlay_tracking_branch, git_project_overlays):
-    """Push uprevs of overlays belonging to differet git projects in parallel.
+    """Push uprevs of overlays belonging to different git projects in parallel.
 
     Args:
-      options: The options object returned by the argument parser.
-      overlay_tracking_branch: A dict mapping from each overlay to its tracking
-        branch.
-      git_project_overlays: A dict mapping from each git repository to a list of
-        its overlays.
+        options: The options object returned by the argument parser.
+        overlay_tracking_branch: A dict mapping from each overlay to its
+            tracking branch.
+        git_project_overlays: A dict mapping from each git repository to a list
+            of its overlays.
     """
     inputs = [
         [options, overlays_per_project, overlay_tracking_branch]
@@ -405,10 +405,10 @@ def _PushOverlays(options, overlays, overlay_tracking_branch):
     """Push uprevs for overlays in sequence.
 
     Args:
-      options: The options object returned by the argument parser.
-      overlays: A list of overlays to push uprevs in sequence.
-      overlay_tracking_branch: A dict mapping from each overlay to its tracking
-        branch.
+        options: The options object returned by the argument parser.
+        overlays: A list of overlays to push uprevs in sequence.
+        overlay_tracking_branch: A dict mapping from each overlay to its
+            tracking branch.
     """
     for overlay in overlays:
         if not os.path.isdir(overlay):
@@ -433,19 +433,19 @@ def _WorkOnCommit(
     manifest,
     package_list,
 ):
-    """Commit uprevs of overlays belonging to different git projects in parallel.
+    """Commit uprevs of overlays in different git projects in parallel.
 
     Args:
-      options: The options object returned by the argument parser.
-      overlays: A list of overlays to work on.
-      overlay_tracking_branch: A dict mapping from each overlay to its tracking
-        branch.
-      git_project_overlays: A dict mapping from each git repository to a list of
-        its overlays.
-      manifest: The manifest of the given source root.
-      package_list: A list of packages passed from commandline to work on.
+        options: The options object returned by the argument parser.
+        overlays: A list of overlays to work on.
+        overlay_tracking_branch: A dict mapping from each overlay to its
+            tracking branch.
+        git_project_overlays: A dict mapping from each git repository to a list
+            of its overlays.
+        manifest: The manifest of the given source root.
+        package_list: A list of packages passed from commandline to work on.
     """
-    # We cleaned up self referential ebuilds by this version, but don't enforce
+    # We cleaned up self-referential ebuilds by this version, but don't enforce
     # the check on older ones to avoid breaking factory/firmware branches.
     root_version = chromeos_version.VersionInfo.from_repo(options.buildroot)
     no_self_repos_version = chromeos_version.VersionInfo("13099.0.0")
@@ -488,12 +488,12 @@ def _GetOverlayToEbuildsMap(options, overlays, package_list):
     """Get ebuilds for overlays.
 
     Args:
-      options: The options object returned by the argument parser.
-      overlays: A list of overlays to work on.
-      package_list: A list of packages passed from commandline to work on.
+        options: The options object returned by the argument parser.
+        overlays: A list of overlays to work on.
+        package_list: A list of packages passed from commandline to work on.
 
     Returns:
-      A dict mapping each overlay to a list of ebuilds belonging to it.
+        A dict mapping each overlay to a list of ebuilds belonging to it.
     """
     root_version = chromeos_version.VersionInfo.from_repo(options.buildroot)
     subdir_removal = chromeos_version.VersionInfo("10363.0.0")
@@ -532,16 +532,16 @@ def _CommitOverlays(
     """Commit uprevs for overlays in sequence.
 
     Args:
-      options: The options object returned by the argument parser.
-      manifest: The manifest of the given source root.
-      overlays: A list over overlays to commit.
-      overlay_tracking_branch: A dict mapping from each overlay to its tracking
-        branch.
-      overlay_ebuilds: A dict mapping overlays to their ebuilds.
-      revved_packages: A shared list of revved packages.
-      new_package_atoms: A shared list of new package atoms.
-      reject_self_repo: Whether to abort if the ebuild lives in the same git
-          repo as it is tracking for uprevs.
+        options: The options object returned by the argument parser.
+        manifest: The manifest of the given source root.
+        overlays: A list over overlays to commit.
+        overlay_tracking_branch: A dict mapping from each overlay to its
+            tracking branch.
+        overlay_ebuilds: A dict mapping overlays to their ebuilds.
+        revved_packages: A shared list of revved packages.
+        new_package_atoms: A shared list of new package atoms.
+        reject_self_repo: Whether to abort if the ebuild lives in the same git
+            repo as it is tracking for uprevs.
     """
     for overlay in overlays:
         if not os.path.isdir(overlay):
@@ -639,17 +639,17 @@ def _WorkOnEbuild(
     """Work on a single ebuild.
 
     Args:
-      overlay: The overlay where the ebuild belongs to.
-      ebuild: The ebuild to work on.
-      manifest: The manifest of the given source root.
-      options: The options object returned by the argument parser.
-      ebuild_paths_to_add: New stable ebuild paths to add to git.
-      ebuild_paths_to_remove: Old ebuild paths to remove from git.
-      messages: A share list of commit messages.
-      revved_packages: A shared list of revved packages.
-      new_package_atoms: A shared list of new package atoms.
-      reject_self_repo: Whether to abort if the ebuild lives in the same git
-          repo as it is tracking for uprevs.
+        overlay: The overlay where the ebuild belongs to.
+        ebuild: The ebuild to work on.
+        manifest: The manifest of the given source root.
+        options: The options object returned by the argument parser.
+        ebuild_paths_to_add: New stable ebuild paths to add to git.
+        ebuild_paths_to_remove: Old ebuild paths to remove from git.
+        messages: A share list of commit messages.
+        revved_packages: A shared list of revved packages.
+        new_package_atoms: A shared list of new package atoms.
+        reject_self_repo: Whether to abort if the ebuild lives in the same git
+            repo as it is tracking for uprevs.
     """
     if options.verbose:
         logging.info(

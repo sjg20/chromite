@@ -15,7 +15,7 @@ from chromite.lib import osutils
 
 
 class LocalManifest(object):
-    """Class which provides an abstraction for manipulating the local manifest."""
+    """Abstraction for manipulating the local manifest."""
 
     @classmethod
     def FromPath(cls, path, empty_if_missing=False):
@@ -44,7 +44,7 @@ class LocalManifest(object):
         """Accessor method for getting a project node from the manifest tree.
 
         Returns:
-          project element node from ElementTree, otherwise, None
+            project element node from ElementTree, otherwise, None
         """
         if path is None:
             # Use a unique value that can't ever match.
@@ -88,7 +88,7 @@ def _AddProjectsToManifestGroups(options, new_group):
     # Per repo behaviour, enforce an appropriate platform group if
     # we're converting from a default manifest group to a limited one.
     # Finally, note we reprocess the existing groups; this is to allow
-    # us to cleanup any user screwups, or our own screwups.
+    # us to clean up any user screwups, or our own screwups.
     requested_groups = (
         ["minilayout", "platform-%s" % (platform.system().lower(),)]
         + enabled_groups
@@ -210,9 +210,11 @@ def main(argv):
 
     elif main_element:
         if options.remote is not None:
-            # Likely this project wasn't meant to be remote, so workon main element
+            # Likely this project wasn't meant to be remote, so workon main
+            # element.
             print(
-                "Project already exists in manifest. Using that as workon project."
+                "Project already exists in manifest. "
+                "Using that as workon project."
             )
             _AddProjectsToManifestGroups(
                 options, [checkout["name"] for checkout in main_element]

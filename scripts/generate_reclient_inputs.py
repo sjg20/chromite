@@ -102,7 +102,8 @@ def ParseArgs(argv: Optional[List[str]]) -> argparse.Namespace:
     parser.add_argument(
         "--output",
         default="remote_toolchain_inputs",
-        help="Name of remote toolchain file relative to clang binary directory.",
+        help="Name of remote toolchain file relative to clang binary "
+        "directory.",
     )
     parser.add_argument(
         "--clang",

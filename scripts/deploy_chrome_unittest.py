@@ -413,8 +413,8 @@ class TestMountTarget(DeployTest):
     def testMountTargetUmountFailure(self):
         """Test error being thrown if umount fails.
 
-        Test that 'lsof' is run on mount-dir and 'mount -rbind' command is not run
-        if 'umount' cmd fails.
+        Test that 'lsof' is run on mount-dir and 'mount -rbind' command is not
+        run if 'umount' cmd fails.
         """
         mount_dir = self.deploy.options.mount_dir
         target_dir = self.deploy.options.target_dir
@@ -615,7 +615,7 @@ class StagingTest(cros_test_lib.MockTempDirTestCase):
 
 
 class DeployTestBuildDir(cros_test_lib.MockTempDirTestCase):
-    """Set up a deploy object with a build-dir for use in deployment type tests"""
+    """Set up a deploy object with a build-dir for use in deployment tests"""
 
     def _GetDeployChrome(self, args):
         options = _ParseCommandLine(args)
@@ -728,7 +728,8 @@ class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
         return test_binaries
 
     def _AssertBinariesInStagingDir(self, test_binaries):
-        # Ensure the binaries were placed in the staging dir used to copy them over.
+        # Ensure the binaries were placed in the staging dir used to copy them
+        # over.
         staging_dir = os.path.join(
             self.tempdir, os.path.basename(deploy_chrome._CHROME_TEST_BIN_DIR)
         )
@@ -753,8 +754,8 @@ class TestDeployTestBinaries(cros_test_lib.RunCommandTempDirTestCase):
     def testRetrySuccess(self):
         """Ensure that a transient exception still results in success."""
 
-        # Raises a RunCommandError on its first invocation, but passes on subsequent
-        # calls.
+        # Raises a RunCommandError on its first invocation, but passes on
+        # subsequent calls.
         def SideEffect(*args, **kwargs):
             # pylint: disable=unused-argument
             if not SideEffect.called:
@@ -817,8 +818,8 @@ class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
             options, self.tempdir, os.path.join(self.tempdir, "staging")
         )
 
-        # These methods being mocked are all side effects expected for a --lacros
-        # deploy.
+        # These methods being mocked are all side effects expected for a
+        # --lacros deploy.
         self.deploy._EnsureTargetDir = mock.Mock()
         self.deploy._GetDeviceInfo = mock.Mock()
         self.deploy._CheckConnection = mock.Mock()
@@ -838,8 +839,8 @@ class LacrosPerformTest(cros_test_lib.RunCommandTempDirTestCase):
         """When the conf file is modified we restart chrome."""
         self.prepareDeploy()
 
-        # We intentionally add '\n' to MODIFIED_CONF_FILE to simulate echo adding a
-        # newline when invoked in the shell.
+        # We intentionally add '\n' to MODIFIED_CONF_FILE to simulate echo
+        # adding a newline when invoked in the shell.
         self.rc.AddCmdResult(
             partial_mock.In(deploy_chrome.ENABLE_LACROS_VIA_CONF_COMMAND),
             stdout=deploy_chrome.MODIFIED_CONF_FILE + "\n",

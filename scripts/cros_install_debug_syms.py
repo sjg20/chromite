@@ -46,7 +46,7 @@ CACHE_VERSION = "1"
 
 
 class DebugSymbolsInstaller(object):
-    """Container for enviromnent objects, needed to make multiprocessing work."""
+    """Container for environment objects, needed for multiprocessing."""
 
     def __init__(self, vartree, gs_context, sysroot, stdout_to_null):
         self._vartree = vartree
@@ -72,10 +72,10 @@ class DebugSymbolsInstaller(object):
         used later.
 
         Args:
-          cpv: the cpv of the package to build. This assumes that the cpv is
-            installed in the sysroot.
-          url: url of the debug symbols archive. This could be a Google Storage url
-            or a local path.
+            cpv: the cpv of the package to build. This assumes that the cpv is
+                installed in the sysroot.
+            url: url of the debug symbols archive. This could be a Google
+                Storage url or a local path.
         """
         archive = os.path.join(
             self._vartree.settings["PKGDIR"], cpv + DEBUG_SYMS_EXT
@@ -119,12 +119,12 @@ def ShouldGetSymbols(cpv, vardb, remote_symbols):
     a GS request is more expensive than checking locally.
 
     Args:
-      cpv: cpv of the package
-      vardb: a vartree dbapi
-      remote_symbols: a mapping from cpv to debug symbols url
+        cpv: cpv of the package
+        vardb: a vartree dbapi
+        remote_symbols: a mapping from cpv to debug symbols url
 
     Returns:
-      True if |cpv|'s debug symbols are not installed and are available
+        True if |cpv|'s debug symbols are not installed and are available
     """
     features, contents = vardb.aux_get(cpv, ["FEATURES", "CONTENTS"])
 
@@ -142,12 +142,12 @@ def RemoteSymbols(vartree, binhost_cache=None):
     highest priority one.
 
     Args:
-      vartree: a vartree
-      binhost_cache: a cache containing the cpv to debug symbols url for all
-        known binhosts. None if we are not caching binhosts.
+        vartree: a vartree
+        binhost_cache: a cache containing the cpv to debug symbols url for all
+            known binhosts. None if we are not caching binhosts.
 
     Returns:
-      a dictionary mapping the cpv to a remote debug symbols gsurl.
+        a dictionary mapping the cpv to a remote debug symbols gsurl.
     """
     symbols_mapping = {}
     for binhost in vartree.settings["PORTAGE_BINHOST"].split():
@@ -162,11 +162,11 @@ def GetPackageIndex(binhost, binhost_cache=None):
     If a cache is provided, use it to a cache remote packages index.
 
     Args:
-      binhost: a portage binhost, local, google storage or http.
-      binhost_cache: a cache for the remote packages index.
+        binhost: a portage binhost, local, google storage or http.
+        binhost_cache: a cache for the remote packages index.
 
     Returns:
-      A PackageIndex object.
+        A PackageIndex object.
     """
     key = binhost.split("://")[-1]
     key = key.rstrip("/").split("/")
@@ -185,8 +185,8 @@ def GetPackageIndex(binhost, binhost_cache=None):
     elif pkgindex is None:
         urlparts = urllib.parse.urlsplit(binhost)
         if urlparts.scheme not in ("file", ""):
-            # Don't fail the build on network errors. Print a warning message and
-            # continue.
+            # Don't fail the build on network errors. Print a warning message
+            # and continue.
             logging.warning("Could not get package index %s", binhost)
             return None
 
@@ -206,12 +206,12 @@ def ListBinhost(binhost, binhost_cache=None):
     cost of gsutil every time.
 
     Args:
-      binhost: a portage binhost, local or on google storage.
-      binhost_cache: a cache containing mappings cpv to debug symbols url for a
-        given binhost (None if we don't want to cache).
+        binhost: a portage binhost, local or on google storage.
+        binhost_cache: a cache containing mappings cpv to debug symbols url for
+            a given binhost (None if we don't want to cache).
 
     Returns:
-      A cpv to debug symbols url mapping.
+        A cpv to debug symbols url mapping.
     """
 
     symbols = {}
@@ -234,11 +234,11 @@ def GetMatchingCPV(package, vardb):
     """Return the cpv of the installed package matching |package|.
 
     Args:
-      package: package name
-      vardb: a vartree dbapi
+        package: package name
+        vardb: a vartree dbapi
 
     Returns:
-      The cpv of the installed package whose name matchex |package|.
+        The cpv of the installed package whose name matches |package|.
     """
     matches = vardb.match(package)
     if not matches:
@@ -285,7 +285,7 @@ def GetInstallArgs(options, sysroot):
     See: GetVartree
 
     Returns:
-      list[(pkg, binhost_url)]
+        list[(pkg, binhost_url)]
     """
     vartree = GetVartree(sysroot)
     symbols_mapping = RemoteSymbols(vartree, GetBinhostCache(options))
@@ -428,8 +428,8 @@ def main(argv):
     logging.debug("installation done, updating packages index file")
     packages_dir = os.path.join(sysroot, "packages")
     packages_file = os.path.join(packages_dir, "Packages")
-    # binpkg will set DEBUG_SYMBOLS automatically if it detects the debug symbols
-    # in the packages dir.
+    # binpkg will set DEBUG_SYMBOLS automatically if it detects the debug
+    # symbols in the packages dir.
     pkgindex = binpkg.GrabLocalPackageIndex(packages_dir)
     with open(packages_file, "w", encoding="utf-8") as p:
         pkgindex.Write(p)

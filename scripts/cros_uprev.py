@@ -116,9 +116,9 @@ def CleanStalePackages(
     """Cleans up stale package info from a previous build.
 
     Args:
-      boards: Boards to clean the packages from.
-      package_atoms: A list of package atoms to unmerge.
-      chroot: The chroot path.
+        boards: Boards to clean the packages from.
+        package_atoms: A list of package atoms to unmerge.
+        chroot: The chroot path.
     """
     if package_atoms:
         logging.info("Cleaning up stale packages %s.", package_atoms)
@@ -174,13 +174,13 @@ def _WorkOnCommit(
     manifest: git.ManifestCheckout,
     package_list: Optional[List[str]],
 ) -> None:
-    """Commit uprevs of overlays belonging to different git projects in parallel.
+    """Commit uprevs of overlays in different git projects in parallel.
 
     Args:
-      options: The options object returned by the argument parser.
-      overlays: A list of overlays to work on.
-      manifest: The manifest of the given source root.
-      package_list: A list of packages passed from commandline to work on.
+        options: The options object returned by the argument parser.
+        overlays: A list of overlays to work on.
+        manifest: The manifest of the given source root.
+        package_list: A list of packages passed from commandline to work on.
     """
     overlay_ebuilds = _GetOverlayToEbuildsMap(
         overlays, package_list, options.force
@@ -231,12 +231,12 @@ def _GetOverlayToEbuildsMap(
     """Get ebuilds for overlays.
 
     Args:
-      overlays: A list of overlays to work on.
-      package_list: A list of packages passed from commandline to work on.
-      force: Whether to use packages even if in manual uprev list.
+        overlays: A list of overlays to work on.
+        package_list: A list of packages passed from commandline to work on.
+        force: Whether to use packages even if in manual uprev list.
 
     Returns:
-      A dict mapping each overlay to a list of ebuilds belonging to it.
+        A dict mapping each overlay to a list of ebuilds belonging to it.
     """
     root_version = chromeos_version.VersionInfo.from_repo(constants.SOURCE_ROOT)
     subdir_removal = chromeos_version.VersionInfo("10363.0.0")
@@ -270,14 +270,14 @@ def _UprevOverlays(
     """Execute uprevs for overlays in sequence.
 
     Args:
-      manifest: The manifest of the given source root.
-      overlays: A list over overlays to commit.
-      overlay_ebuilds: A dict mapping overlays to their ebuilds.
-      revved_packages: A shared list of revved packages.
-      new_package_atoms: A shared list of new package atoms.
-      new_ebuild_files: New stable ebuild paths.
-      removed_ebuild_files: Old ebuild paths that were removed.
-      options: The options object returned by the argument parser.
+        manifest: The manifest of the given source root.
+        overlays: A list over overlays to commit.
+        overlay_ebuilds: A dict mapping overlays to their ebuilds.
+        revved_packages: A shared list of revved packages.
+        new_package_atoms: A shared list of new package atoms.
+        new_ebuild_files: New stable ebuild paths.
+        removed_ebuild_files: Old ebuild paths that were removed.
+        options: The options object returned by the argument parser.
     """
     for overlay in overlays:
         if not os.path.isdir(overlay):
@@ -323,15 +323,15 @@ def _WorkOnEbuild(
     """Work on a single ebuild.
 
     Args:
-      overlay: The overlay where the ebuild belongs to.
-      ebuild: The ebuild to work on.
-      manifest: The manifest of the given source root.
-      new_ebuild_files: New stable ebuild paths that were created.
-      removed_ebuild_files: Old ebuild paths that were removed.
-      messages: A share list of commit messages.
-      revved_packages: A shared list of revved packages.
-      new_package_atoms: A shared list of new package atoms.
-      options: The options object returned by the argument parser.
+        overlay: The overlay where the ebuild belongs to.
+        ebuild: The ebuild to work on.
+        manifest: The manifest of the given source root.
+        new_ebuild_files: New stable ebuild paths that were created.
+        removed_ebuild_files: Old ebuild paths that were removed.
+        messages: A share list of commit messages.
+        revved_packages: A shared list of revved packages.
+        new_package_atoms: A shared list of new package atoms.
+        options: The options object returned by the argument parser.
     """
     logging.debug(
         "Working on %s, info %s", ebuild.package, ebuild.cros_workon_vars

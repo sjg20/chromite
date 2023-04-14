@@ -12,26 +12,25 @@ Note that this script is best used from within an existing checkout of
 Chromium OS that already has the changes you want merged to the branch in it
 i.e. if you want to push changes to crosutils.git, you must have src/scripts
 checked out. If this isn't true e.g. you are running this script from a
-minilayout or trying to upload an internal change from a non internal checkout,
+minilayout or trying to upload an internal change from a non-internal checkout,
 you must specify some extra options: use the --nomirror option and use -e to
-specify your email address. This tool will then checkout the git repo fresh
+specify your email address. This tool will then check out the git repo fresh
 using the credentials for the -e/email you specified and upload the change. Note
 you can always use this method but it's slower than the "mirrored" method and
 requires more typing :(.
 
 Examples:
-  cros_merge_to_branch 32027 32030 32031 release-R22.2723.B
+    cros_merge_to_branch 32027 32030 32031 release-R22.2723.B
 
 This will create changes for 32027, 32030 and 32031 on the R22 branch. To look
 up the name of a branch, go into a git sub-dir and type 'git branch -a' and the
 find the branch you want to merge to. If you want to upload internal changes
 from gerrit-int, you must prefix the gerrit change number with a * e.g.
 
-  cros_merge_to_branch *26108 release-R22.2723.B
+    cros_merge_to_branch *26108 release-R22.2723.B
 
 For more information on how to do this yourself you can go here:
-https://dev.chromium.org/chromium-os/how-tos-and-troubleshooting/working-on-a-br\
-anch
+https://dev.chromium.org/chromium-os/how-tos-and-troubleshooting/working-on-a-branch
 """
 
 import errno
@@ -86,21 +85,22 @@ def _GetParser():
 
 
 def _UploadChangeToBranch(work_dir, patch, branch, draft, dryrun):
-    """Creates a new change from GerritPatch |patch| to |branch| from |work_dir|.
+    """Create a new change from GerritPatch |patch| to |branch| from |work_dir|.
 
     Args:
-      patch: Instance of GerritPatch to upload.
-      branch: Branch to upload to.
-      work_dir: Local directory where repository is checked out in.
-      draft: If True, upload to refs/draft/|branch| rather than refs/for/|branch|.
-      dryrun: Don't actually upload a change but go through all the steps up to
-        and including git push --dry-run.
+        patch: Instance of GerritPatch to upload.
+        branch: Branch to upload to.
+        work_dir: Local directory where repository is checked out in.
+        draft: If True, upload to refs/draft/|branch| rather than
+            refs/for/|branch|.
+        dryrun: Don't actually upload a change but go through all the steps up
+            to and including git push --dry-run.
 
     Returns:
-      A list of all the gerrit URLs found.
+        A list of all the gerrit URLs found.
     """
     upload_type = "drafts" if draft else "for"
-    # Download & setup the patch if need be.
+    # Download & set up the patch if need be.
     patch.Fetch(work_dir)
     # Apply the actual change.
     patch.CherryPick(work_dir, inflight=True, leave_dirty=True)
@@ -182,7 +182,7 @@ def _SetupWorkDirectoryForPatch(work_dir, patch, branch, manifest, email):
     reference = None
     if manifest:
         # Get the path to the first checkout associated with this change. Since
-        # all of the checkouts share git objects, it doesn't matter which checkout
+        # all the checkouts share git objects, it doesn't matter which checkout
         # we pick.
         path = manifest.FindCheckouts(patch.project)[0]["path"]
 
@@ -190,7 +190,7 @@ def _SetupWorkDirectoryForPatch(work_dir, patch, branch, manifest, email):
         if not os.path.isdir(reference):
             logging.error("Unable to locate git checkout: %s", reference)
             logging.error("Did you mean to use --nomirror?")
-            # This will do an "raise OSError" with the right values.
+            # This will do a "raise OSError" with the right values.
             os.open(reference, os.O_DIRECTORY)
         # Use the email if email wasn't specified.
         if not email:
@@ -226,8 +226,8 @@ def _ManifestContainsAllPatches(manifest, patches):
     """Returns true if the given manifest contains all the patches.
 
     Args:
-      manifest: an instance of git.Manifest
-      patches: a collection of GerritPatch objects.
+        manifest: an instance of git.Manifest
+        patches: a collection of GerritPatch objects.
     """
     for patch in patches:
         if not manifest.FindCheckouts(patch.project):
@@ -296,8 +296,8 @@ def main(argv):
                     work_dir, patch, branch, manifest, options.email
                 )
 
-            # Now that we have the project checked out, let's apply our change and
-            # create a new change on Gerrit.
+            # Now that we have the project checked out, let's apply our change
+            # and create a new change on Gerrit.
             logging.notice("Uploading change %s to branch %s", change, branch)
             urls = _UploadChangeToBranch(
                 work_dir, patch, branch, options.draft, options.dryrun
@@ -328,8 +328,8 @@ def main(argv):
                 "Successfully uploaded change(s) %s", " ".join(good_changes)
             )
 
-        # Printing out the error here so that we can see exactly what failed. This
-        # is especially useful to debug without using --debug.
+        # Printing out the error here so that we can see exactly what failed.
+        # This is especially useful to debug without using --debug.
         logging.error("Upload failed with %s", str(e).strip())
         if not options.wipe:
             logging.error(

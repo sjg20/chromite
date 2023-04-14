@@ -102,7 +102,7 @@ class CrosMarkChromeAsStable(cros_test_lib.MockTempDirTestCase):
         self.assertEqual(candidate.ebuild_path, self.tot_stable)
 
     def testLatestFindChromeUprevCandidate(self):
-        """Tests if we can find latest uprev candidate from our mock dir data."""
+        """Test if we can find latest uprev candidate from our mock dir data."""
         stable_ebuilds = self._GetStableEBuilds()
 
         candidate = cros_mark_chrome_as_stable.FindChromeUprevCandidate(
@@ -112,7 +112,7 @@ class CrosMarkChromeAsStable(cros_test_lib.MockTempDirTestCase):
         self.assertEqual(candidate.ebuild_path, self.latest_stable)
 
     def testStickyFindChromeUprevCandidate(self):
-        """Tests if we can find sticky uprev candidate from our mock dir data."""
+        """Test if we can find sticky uprev candidate from our mock dir data."""
         stable_ebuilds = self._GetStableEBuilds()
 
         candidate = cros_mark_chrome_as_stable.FindChromeUprevCandidate(
@@ -198,7 +198,7 @@ class CrosMarkChromeAsStable(cros_test_lib.MockTempDirTestCase):
         self.assertEqual("7.0.224.1", release)
 
     def testGetLatestStickyRelease(self):
-        """Tests if we can find the latest sticky release from our mock url data."""
+        """Test we can find the latest sticky release from our mock url data."""
         TEST_HOST = "sores.chromium.org"
         TEST_URL = "phthp://%s/tqs" % TEST_HOST
         TEST_TAGS = [
@@ -273,11 +273,11 @@ class CrosMarkChromeAsStable(cros_test_lib.MockTempDirTestCase):
         with the specified args.
 
         Args:
-          chrome_rev: standard chrome_rev argument
-          new_version: version we are revving up to
-          old_ebuild_path: path to the stable ebuild
-          new_ebuild_path: path to the to be created path
-          commit_string_indicator: a string that the commit message must contain
+            chrome_rev: standard chrome_rev argument
+            new_version: version we are revving up to
+            old_ebuild_path: path to the stable ebuild
+            new_ebuild_path: path to the to be created path
+            commit_string_indicator: a string the commit message must contain
         """
         self.PatchObject(
             cros_build_lib, "run", side_effect=Exception("should not be called")
@@ -315,7 +315,7 @@ class CrosMarkChromeAsStable(cros_test_lib.MockTempDirTestCase):
         )
 
     def testStickyMarkAsStable(self):
-        """Tests to see if we can mark chrome as stable for a new sticky release."""
+        """Test we can mark chrome as stable for a new sticky release."""
         self._CommonMarkAsStableTest(
             constants.CHROME_REV_STICKY,
             self.sticky_new_rc_version,

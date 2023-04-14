@@ -163,7 +163,7 @@ class PortageManipulationsTest(cros_test_lib.MockTestCase):
     """Test usage of autotest_quickmerge.portage."""
 
     def testUpdatePackageContents(self):
-        """Test that UpdatePackageContents makes the correct calls to portage."""
+        """Test UpdatePackageContents makes the correct calls to portage."""
         autotest_quickmerge.portage = mock.MagicMock()
         portage = autotest_quickmerge.portage
 

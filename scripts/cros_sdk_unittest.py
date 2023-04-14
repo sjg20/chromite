@@ -22,7 +22,8 @@ class CrosSdkUtilsTest(cros_test_lib.MockTempDirTestCase):
         """Basic test of GetArchStageTarballs."""
         self.assertCountEqual(
             [
-                "https://storage.googleapis.com/chromiumos-sdk/cros-sdk-123.tar.xz",
+                "https://storage.googleapis.com/chromiumos-sdk/"
+                "cros-sdk-123.tar.xz",
             ],
             cros_sdk.GetArchStageTarballs("123"),
         )

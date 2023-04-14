@@ -141,10 +141,10 @@ class DeployChrome(object):
         """Initialize the class.
 
         Args:
-          options: options object.
-          tempdir: Scratch space for the class.  Caller has responsibility to clean
-            it up.
-          staging_dir: Directory to stage the files to.
+            options: options object.
+            tempdir: Scratch space for the class.  Caller has responsibility to
+                clean it up.
+            staging_dir: Directory to stage the files to.
         """
         self.tempdir = tempdir
         self.options = options
@@ -239,8 +239,8 @@ class DeployChrome(object):
         logging.info(
             "Removing rootfs verification from %s", self.options.device
         )
-        # Running in VMs cause make_dev_ssd's firmware confidence checks to fail.
-        # Use --force to bypass the checks.
+        # Running in VMs cause make_dev_ssd's firmware confidence checks to
+        # fail. Use --force to bypass the checks.
         cmd = (
             "/usr/share/vboot/bin/make_dev_ssd.sh --partitions %d "
             "--remove_rootfs_verification --force"
@@ -288,8 +288,8 @@ class DeployChrome(object):
     def _KillAshChromeIfNeeded(self):
         """This method kills ash-chrome on the device, if it's running.
 
-        This method calls 'stop ui', and then also manually pkills both ash-chrome
-        and the session manager.
+        This method calls 'stop ui', and then also manually pkills both
+        ash-chrome and the session manager.
         """
         if self._CheckUiJobStarted():
             logging.info("Shutting down Chrome...")
@@ -343,7 +343,7 @@ class DeployChrome(object):
         sets self._root_dir_is_still_readonly.
 
         Args:
-          check: See remote.RemoteAccess.RemoteSh for details.
+            check: See remote.RemoteAccess.RemoteSh for details.
         """
         # TODO: Should migrate to use the remount functions in remote_access.
         result = self.device.run(
@@ -355,13 +355,14 @@ class DeployChrome(object):
     def _EnsureTargetDir(self):
         """Ensures that the target directory exists on the remote device."""
         target_dir = self.options.target_dir
-        # Any valid /opt directory should already exist so avoid the remote call.
+        # Any valid /opt directory should already exist so avoid the remote
+        # call.
         if os.path.commonprefix([target_dir, "/opt"]) == "/opt":
             return
         self.device.run(["mkdir", "-p", "--mode", "0775", target_dir])
 
     def _GetDeviceInfo(self):
-        """Returns the disk space used and available for the target diectory."""
+        """Get the disk space used and available for the target directory."""
         steps = [
             functools.partial(self._GetRemoteDirSize, self.options.target_dir),
             functools.partial(
@@ -375,7 +376,7 @@ class DeployChrome(object):
         """See if target device has enough space for Chrome.
 
         Args:
-          device_info: A DeviceInfo named tuple.
+            device_info: A DeviceInfo named tuple.
         """
         effective_free = (
             device_info.target_dir_size + device_info.target_fs_free
@@ -425,8 +426,8 @@ class DeployChrome(object):
             verbose=self.options.verbose,
         )
 
-        # Set the security context on the default Chrome dir if that's where it's
-        # getting deployed, and only on SELinux supported devices.
+        # Set the security context on the default Chrome dir if that's where
+        # it's getting deployed, and only on SELinux supported devices.
         if (
             not self.options.lacros
             and self.device.IsSELinuxAvailable()
@@ -456,10 +457,10 @@ class DeployChrome(object):
         if self.options.compressed_ash:
             self.device.run(["start", COMPRESSED_ASH_SERVICE])
 
-        # Send SIGHUP to dbus-daemon to tell it to reload its configs. This won't
-        # pick up major changes (bus type, logging, etc.), but all we care about is
-        # getting the latest policy from /opt/google/chrome/dbus so that Chrome will
-        # be authorized to take ownership of its service names.
+        # Send SIGHUP to dbus-daemon to tell it to reload its configs. This
+        # won't pick up major changes (bus type, logging, etc.), but all we care
+        # about is getting the latest policy from /opt/google/chrome/dbus so
+        # that Chrome will be authorized to take ownership of its service names.
         self.device.run(DBUS_RELOAD_COMMAND, check=False)
 
         if self.options.startui and self._stopped_ui:
@@ -488,9 +489,9 @@ class DeployChrome(object):
     def _DeployTestBinaries(self):
         """Deploys any local test binary to _CHROME_TEST_BIN_DIR on the device.
 
-        There could be several binaries located in the local build dir, so compare
-        what's already present on the device in _CHROME_TEST_BIN_DIR , and copy
-        over any that we also built ourselves.
+        There could be several binaries located in the local build dir, so
+        compare what's already present on the device in _CHROME_TEST_BIN_DIR ,
+        and copy over any that we also built ourselves.
         """
         r = self.device.run(_FIND_TEST_BIN_CMD, check=False)
         if r.returncode != 0:
@@ -549,7 +550,7 @@ class DeployChrome(object):
         if self.options.build_dir:
 
             def BinaryExists(filename):
-                """Checks if the passed-in file is present in the build directory."""
+                """Checks if |filename| is present in the build directory."""
                 return os.path.exists(
                     os.path.join(self.options.build_dir, filename)
                 )
@@ -582,7 +583,8 @@ class DeployChrome(object):
             )
         except cros_build_lib.RunCommandError as e:
             logging.error("Failed to umount %s", self.options.mount_dir)
-            # If there is a failure, check if some processs is using the mount_dir.
+            # If there is a failure, check if some process is using the
+            # mount_dir.
             result = self.device.run(
                 LSOF_COMMAND % (self.options.mount_dir,),
                 check=False,
@@ -614,10 +616,10 @@ class DeployChrome(object):
             self._PrepareStagingDir()
             return 0
 
-        # Check that the build matches the device. Lacros-chrome skips this check as
-        # it's currently board independent. This means that it's possible to deploy
-        # a build of lacros-chrome with a mismatched architecture. We don't try to
-        # prevent this developer foot-gun.
+        # Check that the build matches the device. Lacros-chrome skips this
+        # check as it's currently board independent. This means that it's
+        # possible to deploy a build of lacros-chrome with a mismatched
+        # architecture. We don't try to prevent this developer foot-gun.
         if not self.options.lacros:
             self._CheckBoard()
 
@@ -634,7 +636,8 @@ class DeployChrome(object):
 
         restart_ui = True
         if self.options.lacros:
-            # If this is a lacros build, we only want to restart ash-chrome if needed.
+            # If this is a lacros build, we only want to restart ash-chrome if
+            # needed.
             restart_ui = False
             steps.append(self._KillLacrosChrome)
             if self.options.reset_lacros:
@@ -653,15 +656,15 @@ class DeployChrome(object):
 
         # If the root dir is not writable, try disabling rootfs verification.
         # (We always do this by default so that developers can write to
-        # /etc/chriome_dev.conf and other directories in the rootfs).
+        # /etc/chrome_dev.conf and other directories in the rootfs).
         if self._root_dir_is_still_readonly.is_set():
             if self.options.noremove_rootfs_verification:
                 logging.warning("Skipping disable rootfs verification.")
             elif not self._DisableRootfsVerification():
                 logging.warning("Failed to disable rootfs verification.")
 
-            # If the target dir is still not writable (i.e. the user opted out or the
-            # command failed), abort.
+            # If the target dir is still not writable (i.e. the user opted out
+            # or the command failed), abort.
             if not self.device.IsDirWritable(self.options.target_dir):
                 if self.options.startui and self._stopped_ui:
                     logging.info("Restarting Chrome...")
@@ -682,8 +685,8 @@ class DeployChrome(object):
         """Modifies the /etc/chrome_dev.conf file for lacros-chrome.
 
         Returns:
-          True if the file is modified, and the return value is usually used to
-          determine whether restarting ash-chrome is needed.
+            True if the file is modified, and the return value is usually used
+            to determine whether restarting ash-chrome is needed.
         """
         assert (
             self.options.lacros
@@ -946,8 +949,8 @@ def _CreateParser():
     )
 
     # GN_ARGS (args.gn) used to build Chrome. Influences which files are staged
-    # when --build-dir is set. Defaults to reading from the GN_ARGS env variable.
-    # CURRENLY IGNORED, ADDED FOR FORWARD COMPATABILITY.
+    # when --build-dir is set. Defaults to reading from the GN_ARGS env
+    # variable. CURRENTLY IGNORED, ADDED FOR FORWARD COMPATIBILITY.
     parser.add_argument(
         "--gn-args", default=None, type=ValidateGnArgs, help=argparse.SUPPRESS
     )
@@ -1063,7 +1066,7 @@ def _PostParseCheck(options):
     """Perform some usage validation (after we've parsed the arguments).
 
     Args:
-      options: The options object returned by the cli parser.
+        options: The options object returned by the cli parser.
     """
     if options.local_pkg_path and not os.path.isfile(options.local_pkg_path):
         cros_build_lib.Die("%s is not a file.", options.local_pkg_path)
@@ -1090,7 +1093,7 @@ def _FetchChromePackage(cache_dir, tempdir, gs_path):
     """Get the chrome prebuilt tarball from GS.
 
     Returns:
-      Path to the fetched chrome tarball.
+        Path to the fetched chrome tarball.
     """
     gs_ctx = gs.GSContext(cache_dir=cache_dir, init_boto=True)
     files = gs_ctx.LS(gs_path)
@@ -1108,7 +1111,8 @@ def _FetchChromePackage(cache_dir, tempdir, gs_path):
         #   stripped and unstripped chrome available, use the stripped chrome
         #   package.
         # - Stripped chrome pkg is chromeos-chrome-<version>.tar.gz
-        # - Unstripped chrome pkg is chromeos-chrome-<version>-unstripped.tar.gz.
+        # - Unstripped chrome pkg is
+        #   chromeos-chrome-<version>-unstripped.tar.gz.
         files = [f for f in files if not "unstripped" in f]
         assert len(files) == 1
         logging.warning("Multiple chrome packages found.  Using %s", files[0])
@@ -1158,9 +1162,9 @@ def _UploadStagingDir(
     """Uploads the compressed staging directory.
 
     Args:
-      options: options object.
-      tempdir: Scratch space.
-      staging_dir: Directory staging chrome files.
+        options: options object.
+        tempdir: Scratch space.
+        staging_dir: Directory staging chrome files.
     """
     staging_tarball_path = os.path.join(
         tempdir, _CHROME_DIR_STAGING_TARBALL_ZSTD
@@ -1194,9 +1198,9 @@ def _PrepareStagingDir(
 ):
     """Place the necessary files in the staging directory.
 
-    The staging directory is the directory used to rsync the build artifacts over
-    to the device.  Only the necessary Chrome build artifacts are put into the
-    staging directory.
+    The staging directory is the directory used to rsync the build artifacts
+    over to the device.  Only the necessary Chrome build artifacts are put into
+    the staging directory.
     """
     if chrome_dir is None:
         chrome_dir = LACROS_DIR if options.lacros else _CHROME_DIR
@@ -1228,8 +1232,8 @@ def _PrepareStagingDir(
 
         assert pkg_path
         logging.info("Extracting %s...", pkg_path)
-        # Extract only the ./opt/google/chrome contents, directly into the staging
-        # dir, collapsing the directory hierarchy.
+        # Extract only the ./opt/google/chrome contents, directly into the
+        # staging dir, collapsing the directory hierarchy.
         if pkg_path[-4:] == ".zip":
             cros_build_lib.dbg_run(
                 [

@@ -58,8 +58,8 @@ class GconvModules(object):
 
     Each charset is involved on some transformation between that charset and an
     internal representation. This transformation is defined on a .so file loaded
-    dynamically with dlopen(3) when the charset defined in this file is requested
-    to iconv_open(3).
+    dynamically with dlopen(3) when the charset defined in this file is
+    requested to iconv_open(3).
 
     See the comments on gconv-modules file for syntax details.
     """
@@ -68,19 +68,19 @@ class GconvModules(object):
         """Initialize the class.
 
         Args:
-          gconv_modules_file: Path to gconv/gconv-modules file.
+            gconv_modules_file: Path to gconv/gconv-modules file.
         """
         self._filename = gconv_modules_file
 
         # An alias map of charsets. The key (fromcharset) is the alias name and
-        # the value (tocharset) is the real charset name. We also support a value
-        # that is an alias for another charset.
+        # the value (tocharset) is the real charset name. We also support a
+        # value that is an alias for another charset.
         self._alias = {}
 
-        # The modules dict goes from charset to module names (the filenames without
-        # the .so extension). Since several transformations involving the same
-        # charset could be defined in different files, the values of this dict are
-        # a set of module names.
+        # The modules dict goes from charset to module names (the filenames
+        # without the .so extension). Since several transformations involving
+        # the same charset could be defined in different files, the values of
+        # this dict are a set of module names.
         self._modules = {}
 
     def Load(self):
@@ -104,7 +104,8 @@ class GconvModules(object):
                     _, fromset, toset = lst
                     fromset = fromset.rstrip("/")
                     toset = toset.rstrip("/")
-                    # Warn if the same charset is defined as two different aliases.
+                    # Warn if the same charset is defined as two different
+                    # aliases.
                     if self._alias.get(fromset, toset) != toset:
                         logging.error(
                             'charset "%s" already defined as "%s".',
@@ -123,7 +124,8 @@ class GconvModules(object):
         )
         charsets = sorted(list(self._alias) + list(self._modules))
         # Remove the 'INTERNAL' charset from the list, since it is not a charset
-        # but an internal representation used to convert to and from other charsets.
+        # but an internal representation used to convert to and from other
+        # charsets.
         if "INTERNAL" in charsets:
             charsets.remove("INTERNAL")
         return charsets
@@ -132,9 +134,9 @@ class GconvModules(object):
         """Rewrite gconv-modules file with only the used charsets.
 
         Args:
-          used_charsets: A list of used charsets. This should be a subset of the
-                         list returned by Load().
-          dryrun: Whether this function should not change any file.
+            used_charsets: A list of used charsets. This should be a subset of
+                the list returned by Load().
+            dryrun: Whether this function should not change any file.
         """
 
         # Compute the used modules.
@@ -162,7 +164,8 @@ class GconvModules(object):
             if "needed" not in deps:
                 continue
             for lib in deps["needed"]:
-                # Ignore the libs without a path defined (outside the modules_dir).
+                # Ignore the libs without a path defined (outside the
+                # modules_dir).
                 if deps["libs"][lib]["path"]:
                     libdeps[lib] = libdeps.get(lib, set()).union([module])
 
@@ -235,12 +238,12 @@ def MultipleStringMatch(patterns, corpus):
     """Search a list of strings in a corpus string.
 
     Args:
-      patterns: A list of strings.
-      corpus: The text where to search for the strings.
+        patterns: A list of strings.
+        corpus: The text where to search for the strings.
 
     Returns:
-      A list of Booleans stating whether each pattern string was found in the
-      corpus or not.
+        A list of Booleans stating whether each pattern string was found in the
+        corpus or not.
     """
     result = [False] * len(patterns)
 
@@ -259,10 +262,10 @@ def GconvStrip(opts):
     """Process gconv-modules and remove unused modules.
 
     Args:
-      opts: The command-line args passed to the script.
+        opts: The command-line args passed to the script.
 
     Returns:
-      The exit code number indicating whether the process succeeded.
+        The exit code number indicating whether the process succeeded.
     """
     root_st = os.lstat(opts.root)
     if not stat.S_ISDIR(root_st.st_mode):
@@ -309,13 +312,13 @@ def GconvStrip(opts):
     files = set(result.stdout.splitlines())
     logging.debug("Symbols %s found on %d files.", symbols, len(files))
 
-    # The charsets are represented as nul-terminated strings in the binary files,
-    # so we append the '\0' to each string. This prevents some false positives
-    # when the name of the charset is a substring of some other string. It doesn't
-    # prevent false positives when the charset name is the suffix of another
-    # string, for example a binary with the string "DON'T DO IT\0" will match the
-    # 'IT' charset. Empirical test on ChromeOS images suggests that only 4
-    # charsets could fall in category.
+    # The charsets are represented as nul-terminated strings in the binary
+    # files, so we append the '\0' to each string. This prevents some false
+    # positives when the name of the charset is a substring of some other
+    # string. It doesn't prevent false positives when the charset name is the
+    # suffix of another string, for example a binary with the string "DON'T DO
+    # IT\0" will match the 'IT' charset. Empirical test on ChromeOS images
+    # suggests that only 4 charsets could fall in category.
     strings = [s.encode("utf-8") + b"x\00" for s in charsets]
     logging.info(
         "Will search for %d strings in %d files", len(strings), len(files)
@@ -326,8 +329,8 @@ def GconvStrip(opts):
     unknown_sticky_modules = set(STICKY_MODULES) - set(charsets)
     if unknown_sticky_modules:
         logging.warning(
-            "The following charsets were explicitly requested in STICKY_MODULES "
-            "even though they don't exist: %s",
+            "The following charsets were explicitly requested in "
+            "STICKY_MODULES even though they don't exist: %s",
             ", ".join(unknown_sticky_modules),
         )
     global_used = [charset in STICKY_MODULES for charset in charsets]
@@ -340,7 +343,7 @@ def GconvStrip(opts):
         global_used = [
             operator.or_(*x) for x in zip(global_used, used_filenames)
         ]
-        # Check the debug flag to avoid running an useless loop.
+        # Check the debug flag to avoid running a useless loop.
         if opts.debug and any(used_filenames):
             logging.debug("File %s:", filename)
             for i, used_filename in enumerate(used_filenames):

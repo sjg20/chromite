@@ -13,16 +13,18 @@ from chromite.lib import dlc_lib
 def GetParser():
     """Creates an argument parser and returns it."""
     parser = commandline.ArgumentParser(description=__doc__)
-    # This script is used both for building an individual DLC or copying all final
-    # DLCs images to their final destination nearby chromiumos_test_image.bin,
-    # etc. These two arguments are required in both cases.
+    # This script is used both for building an individual DLC or copying all
+    # final DLCs images to their final destination nearby
+    # chromiumos_test_image.bin, etc. These two arguments are required in both
+    # cases.
     parser.add_argument(
         "--sysroot",
         type="path",
         metavar="DIR",
         help="The root path to the board's build root, e.g. " "/build/eve",
     )
-    # TODO(andrewlassalle): Remove src-dir in the future(2021?) if nobody uses it.
+    # TODO(andrewlassalle): Remove src-dir in the future(2021?) if nobody uses
+    #  it.
     parser.add_argument(
         "--src-dir",
         type="path",

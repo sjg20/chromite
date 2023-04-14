@@ -31,17 +31,17 @@ def parse_packages(
     """Parse packages and insert the category if none is given.
 
     Args:
-      build_target: build_target to find ebuild for
-      packages: user input package names to parse
+        build_target: build_target to find ebuild for
+        packages: user input package names to parse
 
     Returns:
-      A list of parsed PackageInfo objects
+        A list of parsed PackageInfo objects
     """
     package_infos: List[package_info.PackageInfo] = []
     for package in packages:
         parsed = package_info.parse(package)
         if not parsed.category:
-            # If a category is not specified, we can get it from the ebuild path.
+            # If a category is not specified, get it from the ebuild path.
             if build_target.is_host():
                 ebuild_path = portage_util.FindEbuildForPackage(
                     package, build_target.root
@@ -57,7 +57,7 @@ def parse_packages(
 
 
 def format_lint(lint: toolchain.LinterFinding) -> Text:
-    """Formats a lint for human readable printing.
+    """Formats a lint for human-readable printing.
 
     Example output:
     [ClangTidy] In 'path/to/file.c' on line 36:
@@ -66,10 +66,10 @@ def format_lint(lint: toolchain.LinterFinding) -> Text:
       You did something bad, don't do it.
 
     Args:
-      lint: A linter finding from the toolchain service.
+        lint: A linter finding from the toolchain service.
 
     Returns:
-      A correctly formatted string ready to be displayed to the user.
+        A correctly formatted string ready to be displayed to the user.
     """
 
     color = terminal.Color(True)
@@ -165,7 +165,8 @@ def get_arg_parser() -> commandline.ArgumentParser:
     parser.add_argument(
         "--fetch-only",
         action="store_true",
-        help="Fetch lints from previous run without reseting or calling emerge.",
+        help="Fetch lints from previous run without resetting or calling "
+        "emerge.",
     )
     parser.add_argument(
         "--differential",

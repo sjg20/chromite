@@ -35,9 +35,9 @@ def locate_all_package_ebuilds(
     overlays.
     """
     for overlay in overlays:
-        # Note that portage_util.GetOverlayEBuilds can't be used here, since that
-        # specifically only searches for cros_workon candidates. We care about
-        # everything we can possibly build.
+        # Note that portage_util.GetOverlayEBuilds can't be used here, since
+        # that specifically only searches for cros_workon candidates. We care
+        # about everything we can possibly build.
         for package_dir in overlay.glob("*/*"):
             ebuilds = list(package_dir.glob("*.ebuild"))
             if ebuilds:

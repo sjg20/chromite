@@ -107,8 +107,9 @@ def FindSymbols(firmware_dir, board):
     if not firmware_dir:
         # Unified builds have the format
         # /build/<board|family>/firmware/<build_target|model>/. The board in
-        # depthcharge corresponds to the build_target in unified builds. For this
-        # reason we need to glob all boards to find the correct build_target.
+        # depthcharge corresponds to the build_target in unified builds. For
+        # this reason we need to glob all boards to find the correct
+        # build_target.
         unified_build_dirs = glob.glob("/build/*/firmware/%s" % board)
         if len(unified_build_dirs) == 1:
             firmware_dir = unified_build_dirs[0]
@@ -148,7 +149,7 @@ def FindSymbols(firmware_dir, board):
 # critical should all have their own timeouts now, though, so it's questionable
 # whether the delay here is even needed at all anymore.
 def ReadAll(fd, wait=0.03):
-    """Read from |fd| until no more data has come for at least |wait| seconds."""
+    """Read from |fd| until no data has come for at least |wait| seconds."""
     data = []
     try:
         while True:
@@ -173,7 +174,7 @@ def GdbChecksum(message):
 
 
 def TestConnection(fd):
-    """Return True iff there is a resposive GDB stub on the other end of 'fd'."""
+    """Return True if there's a responsive GDB stub on the other end of |fd|."""
     cmd = b"vUnknownCommand"
     for _ in range(3):
         os.write(fd, b"$%s#%s\n" % (cmd, GdbChecksum(cmd)))
@@ -225,7 +226,8 @@ def main(argv):
                 )
                 raise
 
-            # Throw away old data to avoid confusion from messages before the reboot
+            # Throw away old data to avoid confusion from messages before the
+            # reboot.
             data = b""
             msg = "Could not reboot into depthcharge!"
             with timeout_util.Timeout(10, msg):
@@ -234,13 +236,14 @@ def main(argv):
 
             msg = (
                 "Could not enter GDB mode with CTRL+G! "
-                '(Confirm that you flashed an "image.dev.bin" image to this DUT, '
-                "and that you have GBB_FLAG_FORCE_DEV_SWITCH_ON (0x8) set.)"
+                '(Confirm that you flashed an "image.dev.bin" image to this '
+                "DUT, and that you have GBB_FLAG_FORCE_DEV_SWITCH_ON (0x8) "
+                "set.)"
             )
             with timeout_util.Timeout(5, msg):
                 while not re.search(_PTRN_GDB, data):
-                    # Some delay to avoid spamming the console too hard while not being
-                    # long enough to cause a user-visible slowdown.
+                    # Some delay to avoid spamming the console too hard while
+                    # not being long enough to cause a user-visible slowdown.
                     time.sleep(0.5)
                     # Send a CTRL+G to tell depthcharge to trap into GDB.
                     logging.debug("[Ctrl+G]")
@@ -264,7 +267,7 @@ def main(argv):
                 "running in GDB mode on %s." % opts.tty
             )
 
-        # Eat up leftover data or it will spill back to terminal
+        # Eat up leftover data or it will spill back to terminal.
         ReadAll(fd)
         os.close(fd)
 

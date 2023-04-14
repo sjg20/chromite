@@ -80,7 +80,8 @@ def main(argv):
 
     # Emerge args:
     #   g: use binpkgs (needed to find if we have one)
-    #   u: update packages to latest version (want updates to invalidate binpkgs)
+    #   u: update packages to the latest version (want updates to invalidate
+    #       binpkgs)
     #   D: deep -- consider full tree rather that just immediate deps
     #     (changes in dependencies and transitive deps can invalidate a binpkg)
     #   N: Packages with changed use flags should be considered

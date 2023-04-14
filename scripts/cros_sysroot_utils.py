@@ -88,7 +88,8 @@ def main(argv):
         return
 
     # This short script is using |output| for the whole duration, thus we are
-    # not concerned with leaking it, and `with` is awkward to use with sys.stdout.
+    # not concerned with leaking it, and `with` is awkward to use with
+    # sys.stdout.
     # pylint: disable=consider-using-with
     output = sys.stdout
     if opts.out_file:

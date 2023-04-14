@@ -455,16 +455,17 @@ class CpuTestBase(cros_test_lib.MockTempDirTestCase):
     def _SetUpPlayground(self, ebuilds=None, installed=None, world=None):
         """Prepare the temporary ebuild playground.
 
-        This used to leverage portage.tests.resolver.ResolverPlayground, but that
-        module isn't installed anymore.  So we do some of our own ad-hoc setup in
-        place of the portage code.  This works for some unittests, but needs to
-        fill out the playground more for others.  See the unittest.skip tests for
-        the ones we've disabled for now.
+        This used to leverage portage.tests.resolver.ResolverPlayground, but
+        that module isn't installed anymore.  So we do some of our own ad-hoc
+        setup in place of the portage code.  This works for some unittests, but
+        needs to fill out the playground more for others.  See the unittest.skip
+        tests for the ones we've disabled for now.
 
         Args:
-          ebuilds: A list of hashes representing ebuild files in a portdir.
-          installed: A list of hashes representing ebuilds files already installed.
-          world: A list of lines to simulate in the world file.
+            ebuilds: A list of hashes representing ebuild files in a portdir.
+            installed: A list of hashes representing ebuilds files already
+                installed.
+            world: A list of lines to simulate in the world file.
         """
         # It's safe to use these globals as we treat these dicts are read-only.
         if ebuilds is None:
@@ -577,13 +578,14 @@ class CopyUpstreamTest(CpuTestBase):
         """Hack to insert an eclass into the playground source.
 
         Args:
-          eclass: Name of eclass to create (without .eclass suffix).  Will be
-            created as an empty file unless |content| is specified.
-          content: Text to put into created eclass.
-          ebuilds: List of ebuilds to put inherit line into.  Should be path
-            to ebuild from playground portdir.
-          missing: If True, do not actually create the eclass file.  Only makes
-            sense if |ebuilds| is non-empty, presumably to test inherit failure.
+            eclass: Name of eclass to create (without .eclass suffix).  Will be
+                created as an empty file unless |content| is specified.
+            content: Text to put into created eclass.
+            ebuilds: List of ebuilds to put inherit line into.  Should be path
+                to ebuild from playground portdir.
+            missing: If True, do not actually create the eclass file.  Only
+                makes sense if |ebuilds| is non-empty, presumably to test
+                inherit failure.
         """
         if ebuilds is None:
             ebuilds = []
@@ -769,7 +771,8 @@ class CopyUpstreamTest(CpuTestBase):
             if existing_files:
 
                 def git_rm(cwd, cmd, **_kwargs):
-                    # Identify file that psuedo-git is to remove, then remove it.
+                    # Identify file that pseudo-git is to remove, then remove
+                    # it.
                     self.assertEqual("rm", cmd[0])
                     self.assertEqual("-rf", cmd[1])
 
@@ -781,7 +784,8 @@ class CopyUpstreamTest(CpuTestBase):
                     for path in paths:
                         os.remove(os.path.join(cwd, path))
 
-                    # As with real "git rm", if the dir is then empty remove that.
+                    # As with real "git rm", if the dir is then empty remove
+                    # that.
                     try:
                         os.rmdir(cwd)
                         os.rmdir(os.path.dirname(cwd))
@@ -992,9 +996,9 @@ class EmergeableTest(CpuTestBase):
         """Test the Upgrader._AreEmergeable method.
 
         Args:
-          cpvlist: Passed to _AreEmergeable.
-          expect: Expected boolean return value of _AreEmergeable.
-          world: List of lines to override default world contents.
+            cpvlist: Passed to _AreEmergeable.
+            expect: Expected boolean return value of _AreEmergeable.
+            world: List of lines to override default world contents.
         """
         # It's safe to use these globals as we treat these dicts are read-only.
         if world is None:
@@ -1168,7 +1172,7 @@ class CPVUtilTest(cros_test_lib.TestCase):
 
 
 class PortageStableTest(CpuTestBase):
-    """Test Upgrader methods _SaveStatusOnStableRepo, _CheckStableRepoOnBranch"""
+    """Test Upgrader.{_SaveStatusOnStableRepo, _CheckStableRepoOnBranch}."""
 
     STATUS_MIX = {
         "path1/file1": "M",
@@ -2651,7 +2655,8 @@ class CommitTest(CpuTestBase):
 
         # In this test, it should not recognize the existing old_upgrade_lines
         # as a previous commit message from this script.  So it should give a
-        # warning and push those lines to the end (grouped with remaining_lines).
+        # warning and push those lines to the end (grouped with
+        # remaining_lines).
         remaining_lines = old_upgrade_lines + [""] + remaining_lines
         self._TestAmendCommitMessage(
             new_upgrade_lines, [], remaining_lines, git_show_output
@@ -2720,7 +2725,8 @@ class CommitTest(CpuTestBase):
         result = self._TestCreateCommitMessage(upgrade_lines)
 
         # Commit message should have:
-        # - Summary that mentions 'efg, pqr, uvw' and ends in "packages" (plural).
+        # - Summary that mentions 'efg, pqr, uvw' and ends in "packages"
+        #   (plural).
         # - Body corresponding to upgrade_lines.
         # - BUG= line (with space after '=' to invalidate it).
         # - TEST= line (with space after '=' to invalidate it).

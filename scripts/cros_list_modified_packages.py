@@ -13,7 +13,7 @@ A workon package is treated as changed if any of the below are true:
 Some caveats:
   - We do not look at eclasses. This replicates the existing behavior of the
     commit queue, which also does not look at eclass changes.
-  - We do not try to fallback to the non-workon package if the local tree is
+  - We do not try to fall back to the non-workon package if the local tree is
     unmodified. This is probably a good thing, since developers who are
     "working on" a package want to compile it locally.
   - Portage only stores the time that a package finished building, so we
@@ -47,8 +47,8 @@ class ModificationTimeMonitor(object):
     the latest mtime among them will be returned.
 
     Attributes:
-      _tasks: A list of (key, path) pairs to check.
-      _result_queue: A queue populated with corresponding (key, mtime) pairs.
+        _tasks: A list of (key, path) pairs to check.
+        _result_queue: A queue populated with corresponding (key, mtime) pairs.
     """
 
     def __init__(self, key_path_pairs):
@@ -88,11 +88,11 @@ class WorkonPackageInfo(object):
     """Class for getting information about workon packages.
 
     Attributes:
-      cp: The package name (e.g. chromeos-base/power_manager).
-      mtime: The modification time of the installed package.
-      projects: The project(s) associated with the package.
-      full_srcpaths: The brick source path(s) associated with the package.
-      src_ebuild_mtime: The modification time of the source ebuild.
+        cp: The package name (e.g. chromeos-base/power_manager).
+        pkg_mtime: The modification time of the installed package.
+        projects: The project(s) associated with the package.
+        full_srcpaths: The brick source path(s) associated with the package.
+        src_ebuild_mtime: The modification time of the source ebuild.
     """
 
     def __init__(self, cp, mtime, projects, full_srcpaths, src_ebuild_mtime):
@@ -107,8 +107,8 @@ def ListWorkonPackages(sysroot, all_opt=False):
     """List the packages that are currently being worked on.
 
     Args:
-      sysroot: sysroot_lib.Sysroot object.
-      all_opt: Pass --all to cros_workon. For testing purposes.
+        sysroot: sysroot_lib.Sysroot object.
+        all_opt: Pass --all to cros_workon. For testing purposes.
     """
     helper = workon_helper.WorkonHelper(sysroot.path)
     return helper.ListAtoms(use_all=all_opt)
@@ -118,10 +118,10 @@ def ListWorkonPackagesInfo(sysroot):
     """Find the specified workon packages for the specified board.
 
     Args:
-      sysroot: sysroot_lib.Sysroot object.
+        sysroot: sysroot_lib.Sysroot object.
 
     Returns:
-      A list of WorkonPackageInfo objects for unique packages being worked on.
+        A list of WorkonPackageInfo objects for unique packages being worked on.
     """
     packages = ListWorkonPackages(sysroot)
     if not packages:
@@ -146,8 +146,9 @@ def ListWorkonPackagesInfo(sysroot):
             cp = "%s/%s" % (category, pn)
             cpv = "%s/%s" % (category, p)
 
-            # Get the time the package finished building. TODO(build): Teach Portage
-            # to store the time the package started building and use that here.
+            # Get the time the package finished building. TODO(build): Teach
+            # Portage to store the time the package started building and use
+            # that here.
             pkg_mtime_file = os.path.join(vdb_path, cpv, "BUILD_TIME")
             try:
                 pkg_mtime = int(osutils.ReadFile(pkg_mtime_file))
@@ -156,7 +157,7 @@ def ListWorkonPackagesInfo(sysroot):
                     raise
                 pkg_mtime = 0
 
-            # Get the modificaton time of the ebuild in the overlay.
+            # Get the modification time of the ebuild in the overlay.
             src_ebuild_mtime = os.lstat(
                 os.path.join(overlay, filename)
             ).st_mtime
@@ -199,7 +200,7 @@ def ListModifiedWorkonPackages(sysroot):
     """List the workon packages that need to be rebuilt.
 
     Args:
-      sysroot: sysroot_lib.Sysroot object.
+        sysroot: sysroot_lib.Sysroot object.
     """
     packages = ListWorkonPackagesInfo(sysroot)
     if not packages:

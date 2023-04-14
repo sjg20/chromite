@@ -43,7 +43,7 @@ def _GetCrosTargetRank(target):
     All valid rankings are greater than zero.
 
     Returns:
-      Valid ranking for target or a false value if target is unrecognized.
+        Valid ranking for target or a false value if target is unrecognized.
     """
     for ix, targ in enumerate(CHROMEOS_TARGET_ORDER):
         if target == targ:
@@ -99,7 +99,7 @@ def MergeTables(tables):
     """Merge all |tables| into one merged table.  Return table."""
 
     def TargetMerger(_col, val, other_val):
-        """Function to merge two values in Root Target column from two tables."""
+        """Merge two values in Root Target column from two tables."""
         targets = []
         if val:
             targets.extend(val.split())

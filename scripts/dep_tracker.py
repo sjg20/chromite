@@ -54,8 +54,8 @@ def ParseELFWithArgs(args):
     This wrapper is required to use multiprocessing.Pool.map function.
 
     Returns:
-      A 2-tuple with the passed relative path and the result of ParseELF(). On
-      error, when ParseELF() returns None, this function returns None.
+        A 2-tuple with the passed relative path and the result of ParseELF(). On
+        error, when ParseELF() returns None, this function returns None.
     """
     elf = parseelf.ParseELF(*args)
     if elf is None:
@@ -80,8 +80,8 @@ class DepTracker(object):
         self._file_type_decoder = filetype.FileTypeDecoder(root)
 
         # A wrapper to the multiprocess map function. We avoid launching a pool
-        # of processes when jobs is 1 so python exceptions kill the main process,
-        # useful for debugging.
+        # of processes when jobs is 1 so python exceptions kill the main
+        # process, useful for debugging.
         if jobs > 1:
             # Pool is close()d in DepTracker's destructor.
             # pylint: disable=consider-using-with
@@ -121,8 +121,8 @@ class DepTracker(object):
                 # Track symlinks.
                 if stat.S_ISLNK(st.st_mode):
                     link_path = os.readlink(full_path)
-                    # lddtree's normpath handles a little more cases than the os.path
-                    # version. In particular, it handles the '//' case.
+                    # lddtree's normpath handles a little more cases than the
+                    # os.path version. In particular, it handles the '//' case.
                     self._symlinks[rel_path] = (
                         link_path.lstrip("/")
                         if link_path and link_path[0] == "/"
@@ -142,7 +142,7 @@ class DepTracker(object):
         """Save the computed information to a JSON file.
 
         Args:
-          filename: The destination JSON file.
+            filename: The destination JSON file.
         """
         data = {
             "files": self._files,
@@ -154,12 +154,13 @@ class DepTracker(object):
     def ComputeEbuildDeps(self, sysroot):
         """Compute the dependencies between ebuilds and files.
 
-        Iterates over the list of ebuilds in the database and annotates the files
-        with the ebuilds they are in. For each ebuild installing a file in the root,
-        also compute the direct dependencies. Stores the information internally.
+        Iterates over the list of ebuilds in the database and annotates the
+        files with the ebuilds they are in. For each ebuild installing a file in
+        the root, also compute the direct dependencies. Stores the information
+        internally.
 
         Args:
-          sysroot: The path to the sysroot, for example "/build/link".
+            sysroot: The path to the sysroot, for example "/build/link".
         """
         portage_db = portage_util.PortageDB(sysroot)
         if not os.path.exists(portage_db.db_path):
@@ -176,8 +177,8 @@ class DepTracker(object):
                 # We ignore other entries like for example "dir".
                 if not typ in (pkg.OBJ, pkg.SYM):
                     continue
-                # We ignore files installed in the SYSROOT that weren't copied to the
-                # image.
+                # We ignore files installed in the SYSROOT that weren't copied
+                # to the image.
                 if not rel_path in self._files:
                     continue
                 pkg_files.append(rel_path)
@@ -208,13 +209,14 @@ class DepTracker(object):
         Computes the dependencies between the files in the root directory passed
         during construction. The dependencies are inferred for ELF files.
         The list of dependencies for each file in the passed rootfs as a dict().
-        The result's keys are the relative path of the files and the value of each
-        file is a list of dependencies. A dependency is a tuple (dep_path,
-        dep_type) where the dep_path is relative path from the passed root to the
-        dependent file and dep_type is one the following strings stating how the
-        dependency was discovered:
-          'ldd': The dependent ELF file is listed as needed in the dynamic section.
-          'symlink': The dependent file is a symlink to the depending.
+        The result's keys are the relative path of the files and the value of
+        each file is a list of dependencies. A dependency is a tuple (dep_path,
+        dep_type) where the dep_path is relative path from the passed root to
+        the dependent file and dep_type is one of the following strings stating
+        how the dependency was discovered:
+            'ldd': The dependent ELF file is listed as needed in the dynamic
+                section.
+            'symlink': The dependent file is a symlink to the depending.
         If there are dependencies of a given type whose target file wasn't
         determined, a tuple (None, dep_type) is included. This is the case for
         example is a program uses library that wasn't found.
@@ -243,8 +245,8 @@ class DepTracker(object):
 
         for rel_path, elf in elfs.items():
             file_data = self._files[rel_path]
-            # Fill in the ftype if not set yet. We complete this value at this point
-            # to avoid re-parsing the ELF file later.
+            # Fill in the ftype if not set yet. We complete this value at this
+            # point to avoid re-parsing the ELF file later.
             if not "ftype" in file_data:
                 ftype = self._file_type_decoder.GetType(rel_path, elf=elf)
                 if ftype:
@@ -286,7 +288,8 @@ def ParseArgs(argv):
         "--sysroot",
         type="path",
         metavar="SYSROOT",
-        help="parse portage DB for ebuild information from the provided sysroot.",
+        help="parse portage DB for ebuild information from the provided "
+        "sysroot.",
     )
     parser.add_argument(
         "--json", type="path", help="store information in JSON file."

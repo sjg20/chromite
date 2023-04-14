@@ -29,9 +29,9 @@ class ListModifiedWorkonPackagesTest(cros_test_lib.MockTestCase):
             side_effect=_ListWorkonPackagesPatch,
         ):
             # ListModifiedWorkonPackages returns a generator object and doesn't
-            # actually do any work automatically. We have to extract the elements
-            # from it to get it to exercise the code, and we can do that by turning
-            # it into a list.
+            # actually do any work automatically. We have to extract the
+            # elements from it to get it to exercise the code, and we can do
+            # that by turning it into a list.
             with parallel_unittest.ParallelMock():
                 list(
                     cros_list_modified_packages.ListModifiedWorkonPackages(
