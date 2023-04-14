@@ -257,7 +257,10 @@ generated-members=REQUEST,acl_users,aq_parent,AndRaise,AndReturn,InAnyOrder,Mult
 # import them.
 #
 # pytest: Made available by our testing virtualenv and can be assumed exists.
-ignored-modules=pytest
+ignored-modules=
+    psutil,
+    pytest,
+    opentelemetry,
 
 [BASIC]
 
@@ -483,7 +486,9 @@ known-third-party=
     magic,
     mock,
     oauth2client,
+    opentelemetry,
     portage,
+    psutil,
     pylint,
     pytest,
     requests,

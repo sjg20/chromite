@@ -5,11 +5,11 @@
 """Unittests for SpanExporter classes."""
 
 import datetime
-import sys
-from unittest import mock
+import time
 import urllib.request
 
-from chromite.third_party.google.protobuf import json_format
+from opentelemetry.sdk import trace
+from opentelemetry.sdk.trace.export import SpanExportResult
 
 from chromite.api.gen.chromite.telemetry import clientanalytics_pb2
 from chromite.api.gen.chromite.telemetry import trace_span_pb2
@@ -33,27 +33,46 @@ class MockResponse(object):
         return self._text
 
 
-def test_export_to_console_contents(capsys):
-    """Test ConsoleSpanExporter to export to sys.stdout."""
-    span = trace_span_pb2.TraceSpan()
-    span.name = "name"
-    expected = json_format.MessageToJson(span)
-
-    e = exporter.ConsoleSpanExporter(out=sys.stdout)
-    assert e.export([span])
-    result = capsys.readouterr().out
-    assert result == expected
+tracer = trace.TracerProvider().get_tracer(__name__)
 
 
-@mock.patch("sys.stdout.flush")
-def test_export_to_console_flush(flush_mocker):
-    """Test ConsoleSpanExporter to export to sys.stdout."""
-    span = trace_span_pb2.TraceSpan()
-    span.name = "name"
+def test_otel_span_translation(monkeypatch):
+    """Test ClearcutSpanExporter to translate otel spans to TraceSpan."""
+    requests = []
 
-    e = exporter.ConsoleSpanExporter(out=sys.stdout)
-    assert e.export([span])
-    flush_mocker.assert_called_once()
+    def mock_urlopen(request, timeout=0):
+        requests.append((request, timeout))
+        resp = clientanalytics_pb2.LogResponse()
+        resp.next_request_wait_millis = 1
+        body = resp.SerializeToString()
+        return MockResponse(200, body)
+
+    monkeypatch.setattr(urllib.request, "urlopen", mock_urlopen)
+
+    span = tracer.start_span("name")
+    span.end()
+
+    e = exporter.ClearcutSpanExporter()
+
+    assert e.export([span]) == SpanExportResult.SUCCESS
+    req, _ = requests[0]
+    log_request = clientanalytics_pb2.LogRequest()
+    log_request.ParseFromString(req.data)
+
+    assert log_request.request_time_ms <= int(time.time() * 1000)
+    assert len(log_request.log_event) == 1
+
+    # The following constants are defined in chromite.utils.telemetry.exporter
+    # as _CLIENT_TYPE and _LOG_SOURCE respectively.
+    assert log_request.client_info.client_type == 33
+    assert log_request.log_source == 2044
+
+    tspan = trace_span_pb2.TraceSpan()
+    tspan.ParseFromString(log_request.log_event[0].source_extension)
+
+    assert tspan.name == span.name
+    assert tspan.start_time_millis == int(span.start_time / 10e6)
+    assert tspan.end_time_millis == int(span.end_time / 10e6)
 
 
 def test_export_to_http_api(monkeypatch):
@@ -69,8 +88,8 @@ def test_export_to_http_api(monkeypatch):
 
     monkeypatch.setattr(urllib.request, "urlopen", mock_urlopen)
 
-    span = trace_span_pb2.TraceSpan()
-    span.name = "name"
+    span = tracer.start_span("name")
+    span.end()
     endpoint = "http://domain.com/path"
 
     e = exporter.ClearcutSpanExporter(endpoint=endpoint, timeout=7)
@@ -96,8 +115,8 @@ def test_export_to_http_api_throttle(monkeypatch):
 
     monkeypatch.setattr(urllib.request, "urlopen", mock_urlopen)
 
-    span = trace_span_pb2.TraceSpan()
-    span.name = "name"
+    span = tracer.start_span("name")
+    span.end()
 
     e = exporter.ClearcutSpanExporter()
 

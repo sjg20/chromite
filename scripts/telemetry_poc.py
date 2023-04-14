@@ -9,7 +9,6 @@ import time
 from typing import List, Optional
 
 from chromite.lib import commandline
-from chromite.utils.telemetry import exporter
 from chromite.utils.telemetry import trace
 
 
@@ -37,16 +36,13 @@ def parse_arguments(argv: List) -> argparse.Namespace:
     return opts
 
 
+tracer = trace.get_tracer(__name__)
+
+
 def main(argv: Optional[List[str]]) -> Optional[int]:
     """Main."""
     opts = parse_arguments(argv)
-
-    clearcut = exporter.ClearcutSpanExporter()
-    tracer = trace.PocTracer()
-    tracer.exporters.append(clearcut)
-    with tracer:
-        with tracer.start_as_current_span("test") as span:
-            time.sleep(opts.time / 2)
-            span.add_event(name="mid-sleep-event", attrs={"attr": "val"})
-            time.sleep(opts.time / 2)
-        span.set_status(code=0)
+    with tracer.start_as_current_span("test") as span:
+        time.sleep(opts.time / 2)
+        span.add_event(name="mid-sleep-event", attributes={"attr": "val"})
+        time.sleep(opts.time / 2)

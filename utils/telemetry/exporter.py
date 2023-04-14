@@ -4,16 +4,28 @@
 
 """Defines span exporters to be used with tracer."""
 
-import abc
 import datetime
 import logging
-import sys
 import time
-from typing import IO, Sequence
+from typing import Dict, Sequence
 import urllib.request
 
-from chromite.third_party.google.protobuf import json_format
 from chromite.third_party.google.protobuf import message as proto_msg
+from chromite.third_party.google.protobuf import struct_pb2
+from opentelemetry import trace as trace_api
+from opentelemetry.sdk.resources import PROCESS_RUNTIME_DESCRIPTION
+from opentelemetry.sdk.resources import PROCESS_RUNTIME_NAME
+from opentelemetry.sdk.resources import PROCESS_RUNTIME_VERSION
+from opentelemetry.sdk.resources import TELEMETRY_SDK_LANGUAGE
+from opentelemetry.sdk.resources import TELEMETRY_SDK_NAME
+from opentelemetry.sdk.resources import TELEMETRY_SDK_VERSION
+from opentelemetry.sdk.trace import ReadableSpan
+from opentelemetry.sdk.trace import StatusCode
+from opentelemetry.sdk.trace.export import SpanExporter
+from opentelemetry.sdk.trace.export import SpanExportResult
+from opentelemetry.trace import Span
+from opentelemetry.trace import SpanContext
+from opentelemetry.util import types
 
 # Required due to incomplete proto support in chromite. This proto usage is not
 # tied to the Build API, so delegating the proto handling to api/ does not make
@@ -21,55 +33,27 @@ from chromite.third_party.google.protobuf import message as proto_msg
 # example, live somewhere in utils/ instead.
 from chromite.api.gen.chromite.telemetry import clientanalytics_pb2
 from chromite.api.gen.chromite.telemetry import trace_span_pb2
+from chromite.utils.telemetry.detector import CPU_ARCHITECTURE
+from chromite.utils.telemetry.detector import CPU_NAME
+from chromite.utils.telemetry.detector import OS_DESCRIPTION
+from chromite.utils.telemetry.detector import OS_NAME
+from chromite.utils.telemetry.detector import OS_TYPE
+from chromite.utils.telemetry.detector import PROCESS_COMMAND
+from chromite.utils.telemetry.detector import PROCESS_COMMAND_ARGS
+from chromite.utils.telemetry.detector import PROCESS_EXECUTABLE_NAME
+from chromite.utils.telemetry.detector import PROCESS_EXECUTABLE_PATH
+from chromite.utils.telemetry.detector import PROCESS_OWNER
+from chromite.utils.telemetry.detector import PROCESS_PID
+from chromite.utils.telemetry.detector import PROCESS_RUNTIME_API_VERSION
 
 
 DEFAULT_ENDPOINT = "https://play.googleapis.com/log"
 DEFAULT_TIMEOUT = 5
 _DEFAULT_FLUSH_TIMEOUT = 30000
 # Preallocated in Clearcut proto to Build.
-_DEFAULT_LOG_SOURCE = 2044
+_LOG_SOURCE = 2044
 # Preallocated in Clearcut proto to Python clients.
 _CLIENT_TYPE = 33
-
-
-class SpanExporter(abc.ABC):
-    """Export the generated spans."""
-
-    @abc.abstractmethod
-    def export(self, spans: Sequence[trace_span_pb2.TraceSpan]) -> bool:
-        """Export the batch of spans."""
-
-    @abc.abstractmethod
-    def shutdown(self) -> None:
-        """Shutdown any open resources."""
-
-    @abc.abstractmethod
-    def force_flush(self, timeout_millis: int = _DEFAULT_FLUSH_TIMEOUT) -> bool:
-        """Force flush all received spans.
-
-        This is a hint to ensure that any received spans should be exported
-        as soon as possible, preferably before returning this method.
-        """
-
-
-class ConsoleSpanExporter(SpanExporter):
-    """Exports the spans to stdout."""
-
-    def __init__(self, out: IO = sys.stdout):
-        self._out = out
-
-    def export(self, spans: Sequence[trace_span_pb2.TraceSpan]) -> bool:
-        for span in spans:
-            self._out.write(json_format.MessageToJson(span))
-
-        self._out.flush()
-        return True
-
-    def shutdown(self) -> None:
-        pass
-
-    def force_flush(self, timeout_millis: int = 30000) -> bool:
-        return True
 
 
 class ClearcutSpanExporter(SpanExporter):
@@ -82,10 +66,194 @@ class ClearcutSpanExporter(SpanExporter):
     ):
         self._endpoint = endpoint
         self._timeout = timeout
-        self._log_source = _DEFAULT_LOG_SOURCE
+        self._log_source = _LOG_SOURCE
         self._next_request_dt = datetime.datetime.now()
 
-    def export(self, spans: Sequence[trace_span_pb2.TraceSpan]) -> bool:
+    def export(self, spans: Sequence[ReadableSpan]) -> SpanExportResult:
+        translated_spans = [self._translate_span(s) for s in spans]
+        if self._export(translated_spans):
+            return SpanExportResult.SUCCESS
+
+        return SpanExportResult.FAILURE
+
+    def shutdown(self) -> None:
+        pass
+
+    def force_flush(self, timeout_millis: int = 30000) -> bool:
+        _ = timeout_millis
+        return True
+
+    def _translate_context(
+        self, data: SpanContext
+    ) -> trace_span_pb2.TraceSpan.Context:
+        ctx = trace_span_pb2.TraceSpan.Context()
+        ctx.trace_id = f"0x{trace_api.format_trace_id(data.trace_id)}"
+        ctx.span_id = f"0x{trace_api.format_span_id(data.span_id)}"
+        ctx.trace_state = repr(data.trace_state)
+        return ctx
+
+    def _translate_attributes(
+        self, data: types.Attributes
+    ) -> struct_pb2.Struct:
+        struct = struct_pb2.Struct()
+        struct.update(data)
+        return struct
+
+    def _translate_span_attributes(
+        self, data: ReadableSpan
+    ) -> struct_pb2.Struct:
+        return self._translate_attributes(data.attributes)
+
+    def _translate_links(
+        self, data: ReadableSpan
+    ) -> trace_span_pb2.TraceSpan.Link:
+        links = []
+
+        for d in data.links:
+            link = trace_span_pb2.TraceSpan.Link()
+            link.context.MergeFrom(self._translate_context(d.context))
+            link.attributes.MergeFrom(self._translate_attributes(d.attributes))
+            links.append(link)
+
+        return links
+
+    def _translate_events(
+        self, data: ReadableSpan
+    ) -> trace_span_pb2.TraceSpan.Event:
+        events = []
+        for e in data.events:
+            event = trace_span_pb2.TraceSpan.Event()
+            event.event_time_millis = int(e.timestamp / 1000)
+            event.name = e.name
+            event.attributes.MergeFrom(self._translate_attributes(e.attributes))
+            events.append(event)
+        return events
+
+    def _translate_instrumentation_scope(
+        self, data: ReadableSpan
+    ) -> trace_span_pb2.TraceSpan.InstrumentationScope:
+        s = data.instrumentation_scope
+        scope = trace_span_pb2.TraceSpan.InstrumentationScope()
+        scope.name = s.name
+        scope.version = s.version
+        return scope
+
+    def _translate_env(self, data: Dict[str, str]):
+        environ = {}
+        for k, v in data.items():
+            if k.startswith("process.env."):
+                key = k.split("process.env.")[1]
+                environ[key] = v
+        return environ
+
+    def _translate_resource(
+        self, data: ReadableSpan
+    ) -> trace_span_pb2.TraceSpan.Resource:
+        attrs = dict(data.resource.attributes)
+        resource = trace_span_pb2.TraceSpan.Resource()
+        resource.system.cpu = attrs.pop(CPU_NAME, "")
+        resource.system.host_architecture = attrs.pop(CPU_ARCHITECTURE, "")
+        resource.system.os_name = attrs.pop(OS_NAME, "")
+        resource.system.os_version = attrs.pop(OS_DESCRIPTION, "")
+        resource.system.os_type = attrs.pop(OS_TYPE, "")
+        resource.process.pid = str(attrs.pop(PROCESS_PID, ""))
+        resource.process.executable_name = attrs.pop(
+            PROCESS_EXECUTABLE_NAME, ""
+        )
+        resource.process.executable_path = attrs.pop(
+            PROCESS_EXECUTABLE_PATH, ""
+        )
+        resource.process.command = attrs.pop(PROCESS_COMMAND, "")
+        resource.process.command_args.extend(
+            attrs.pop(PROCESS_COMMAND_ARGS, [])
+        )
+        resource.process.owner_is_root = attrs.pop(PROCESS_OWNER, 9999) == 0
+        resource.process.runtime_name = attrs.pop(PROCESS_RUNTIME_NAME, "")
+        resource.process.runtime_version = attrs.pop(
+            PROCESS_RUNTIME_VERSION, ""
+        )
+        resource.process.runtime_description = attrs.pop(
+            PROCESS_RUNTIME_DESCRIPTION, ""
+        )
+        resource.process.api_version = str(
+            attrs.pop(PROCESS_RUNTIME_API_VERSION, "")
+        )
+        resource.process.env.update(self._translate_env(attrs))
+        resource.attributes.MergeFrom(self._translate_attributes(attrs))
+        return resource
+
+    def _translate_status(
+        self, data: ReadableSpan
+    ) -> trace_span_pb2.TraceSpan.Status:
+        status = trace_span_pb2.TraceSpan.Status()
+
+        if data.status.status_code == StatusCode.ERROR:
+            status.status_code = (
+                trace_span_pb2.TraceSpan.Status.StatusCode.STATUS_CODE_ERROR
+            )
+        else:
+            status.status_code = (
+                trace_span_pb2.TraceSpan.Status.StatusCode.STATUS_CODE_OK
+            )
+
+        if data.status.description:
+            status.message = data.status.description
+
+        return status
+
+    def _translate_sdk(
+        self, data: ReadableSpan
+    ) -> trace_span_pb2.TraceSpan.TelemetrySdk:
+        attrs = data.resource.attributes
+        sdk = trace_span_pb2.TraceSpan.TelemetrySdk()
+        sdk.name = attrs.get(TELEMETRY_SDK_NAME)
+        sdk.version = attrs.get(TELEMETRY_SDK_VERSION)
+        sdk.language = attrs.get(TELEMETRY_SDK_LANGUAGE)
+        return sdk
+
+    def _translate_kind(
+        self, data: trace_api.SpanKind
+    ) -> trace_span_pb2.TraceSpan.SpanKind:
+        if data == trace_api.SpanKind.INTERNAL:
+            return trace_span_pb2.TraceSpan.SpanKind.SPAN_KIND_INTERNAL
+        elif data == trace_api.SpanKind.CLIENT:
+            return trace_span_pb2.TraceSpan.SpanKind.SPAN_KIND_CLIENT
+        elif data == trace_api.SpanKind.SERVER:
+            return trace_span_pb2.TraceSpan.SpanKind.SPAN_KIND_SERVER
+        return trace_span_pb2.TraceSpan.SpanKind.SPAN_KIND_UNSPECIFIED
+
+    def _translate_span(self, data: ReadableSpan) -> trace_span_pb2.TraceSpan:
+        span = trace_span_pb2.TraceSpan()
+        span.name = data.name
+        span.context.MergeFrom(self._translate_context(data.get_span_context()))
+
+        if data.parent is not None:
+            if isinstance(data.parent, Span):
+                ctx = data.parent.context
+                span.parent_span_id = (
+                    f"0x{trace_api.format_span_id(ctx.span_id)}"
+                )
+            elif isinstance(data.parent, SpanContext):
+                span.parent_span_id = (
+                    f"0x{trace_api.format_span_id(data.parent.span_id)}"
+                )
+
+        span.start_time_millis = int(data.start_time / 10e6)
+        span.end_time_millis = int(data.end_time / 10e6)
+        span.span_kind = self._translate_kind(data.kind)
+        span.instrumentation_scope.MergeFrom(
+            self._translate_instrumentation_scope(data)
+        )
+        span.events.extend(self._translate_events(data))
+        span.links.extend(self._translate_links(data))
+        span.attributes.MergeFrom(self._translate_span_attributes(data))
+        span.status.MergeFrom(self._translate_status(data))
+        span.resource.MergeFrom(self._translate_resource(data))
+        span.telemetry_sdk.MergeFrom(self._translate_sdk(data))
+
+        return span
+
+    def _export(self, spans: Sequence[trace_span_pb2.TraceSpan]) -> bool:
         """Export the spans to clearcut via http api."""
         while True:
             wait_delta = self._next_request_dt - datetime.datetime.now()
@@ -119,12 +287,6 @@ class ClearcutSpanExporter(SpanExporter):
             )
             self._next_request_dt = now + delta
             return True
-
-    def shutdown(self) -> None:
-        pass
-
-    def force_flush(self, timeout_millis: int = 30000) -> bool:
-        return True
 
     def _prepare_request_body(self, spans) -> clientanalytics_pb2.LogRequest:
         log_request = clientanalytics_pb2.LogRequest()

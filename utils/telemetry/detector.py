@@ -4,83 +4,72 @@
 
 """Defines the ResourceDetector to capture resource properties."""
 
-import abc
 import os
 import platform
 import sys
-from typing import Dict
+from typing import Sequence
 
-from chromite.utils.telemetry import psutil
+from opentelemetry.sdk.resources import OS_DESCRIPTION
+from opentelemetry.sdk.resources import OS_TYPE
+from opentelemetry.sdk.resources import PROCESS_COMMAND
+from opentelemetry.sdk.resources import PROCESS_COMMAND_ARGS
+from opentelemetry.sdk.resources import PROCESS_EXECUTABLE_NAME
+from opentelemetry.sdk.resources import PROCESS_EXECUTABLE_PATH
+from opentelemetry.sdk.resources import PROCESS_OWNER
+from opentelemetry.sdk.resources import PROCESS_PID
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.resources import ResourceDetector
+import psutil
 
 
-CPU_NAME = "cpu.name"
 CPU_ARCHITECTURE = "cpu.architecture"
+CPU_NAME = "cpu.name"
 PROCESS_CWD = "process.cwd"
-PROCESS_EXECUTABLE_NAME = "process.executable.name"
-PROCESS_EXECUTABLE_PATH = "process.executabe.path"
-PROCESS_COMMAND_NAME = "process.command.name"
-PROCESS_COMMAND_ARGS = "process.command.args"
-PROCESS_PID = "process.pid"
-PROCESS_OWNER = "process.owner"
-PROCESS_RUNTIME_NAME = "process.runtime.name"
-PROCESS_RUNTIME_DESCRIPTION = "process.runtime.description"
-PROCESS_RUNTIME_VERSION = "process.runtime.version"
 PROCESS_RUNTIME_API_VERSION = "process.runtime.apiversion"
+PROCESS_ENV = "process.env"
 OS_NAME = "os.name"
-OS_TYPE = "os.type"
-OS_DESCRIPTION = "os.description"
-
-
-class ResourceDetector(abc.ABC):
-    """The primary interface for resource detectors."""
-
-    @abc.abstractmethod
-    def detect(self) -> Dict:
-        """Captures and returns the information about the resource."""
-
-        raise NotImplementedError()
 
 
 class ProcessDetector(ResourceDetector):
     """ResourceDetector to capture information about the process."""
 
-    def __init__(self):
-        self._resource = {}
+    def __init__(self, allowed_env: Sequence[str] = None):
+        self._allowed_env = allowed_env or ["USE"]
 
-    def detect(self) -> Dict:
-        if not self._resource:
-            p = psutil.Process()
-            self._resource = {
-                PROCESS_PID: os.getpid(),
-                PROCESS_CWD: os.getcwd(),
-                PROCESS_OWNER: os.geteuid(),
-                PROCESS_RUNTIME_NAME: platform.python_implementation(),
-                PROCESS_RUNTIME_VERSION: platform.python_version(),
-                PROCESS_RUNTIME_DESCRIPTION: sys.version,
-                PROCESS_RUNTIME_API_VERSION: sys.api_version,
-                PROCESS_EXECUTABLE_NAME: p.name(),
-                PROCESS_EXECUTABLE_PATH: p.exe(),
-                PROCESS_COMMAND_NAME: sys.argv[0],
-                PROCESS_COMMAND_ARGS: p.cmdline(),
+    def detect(self) -> Resource:
+        p = psutil.Process()
+        env = p.environ()
+        resource = {
+            PROCESS_PID: p.pid,
+            PROCESS_CWD: p.cwd(),
+            PROCESS_OWNER: p.uids().effective,
+            PROCESS_RUNTIME_API_VERSION: sys.api_version,
+            PROCESS_EXECUTABLE_NAME: p.name(),
+            PROCESS_EXECUTABLE_PATH: p.exe(),
+            PROCESS_COMMAND: p.cmdline()[0],
+            PROCESS_COMMAND_ARGS: p.cmdline()[1:],
+        }
+        resource.update(
+            {
+                f"{PROCESS_ENV}.{k}": env[k]
+                for k in self._allowed_env
+                if k in env
             }
+        )
 
-        return self._resource.copy()
+        return Resource(resource)
 
 
 class SystemDetector(ResourceDetector):
     """ResourceDetector to capture information about system."""
 
-    def __init__(self):
-        self._resource = {}
+    def detect(self) -> Resource:
+        resource = {
+            OS_NAME: os.name,
+            OS_TYPE: platform.system(),
+            OS_DESCRIPTION: platform.platform(),
+            CPU_ARCHITECTURE: platform.machine(),
+            CPU_NAME: platform.processor(),
+        }
 
-    def detect(self) -> Dict:
-        if not self._resource:
-            self._resource = {
-                OS_NAME: platform.system(),
-                OS_TYPE: platform.system(),
-                OS_DESCRIPTION: platform.platform(),
-                CPU_ARCHITECTURE: platform.machine(),
-                CPU_NAME: platform.processor(),
-            }
-
-        return self._resource.copy()
+        return Resource(resource)
