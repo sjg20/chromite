@@ -128,12 +128,10 @@ enable=
 # TODO: Re-enable consider-using-set-comprehension.
 # TODO: Re-enable consider-using-in.
 # TODO: Re-enable try-except-raise.
-# TODO: Re-enable chained-comparison.
 # ungrouped-imports: We let isort handle this.
 # wrong-import-order: We let isort handle this.
 disable=
     broad-except,
-    chained-comparison,
     consider-iterating-dictionary,
     consider-using-dict-comprehension,
     consider-using-in,
