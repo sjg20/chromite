@@ -107,6 +107,7 @@ To install the debug symbols for all available packages, run:
         cgdb_flag,
         ping,
         binary,
+        gdb_binary,
     ):
         self.board = board
         self.sysroot = None
@@ -129,7 +130,7 @@ To install the debug symbols for all available packages, run:
         self.framework = "auto"
         self.qemu = None
         self.device = None
-        self.cross_gdb = None
+        self.cross_gdb = gdb_binary
         self.ping = ping
         self.binary = binary
         self.in_chroot = None
@@ -210,7 +211,8 @@ To install the debug symbols for all available packages, run:
         if self.in_chroot:
             self.sysroot = build_target_lib.get_default_sysroot_path(self.board)
             self.inf_cmd = self.RemoveSysrootPrefix(self.inf_cmd)
-            self.cross_gdb = self.GetCrossGdb()
+            if not self.cross_gdb:
+                self.cross_gdb = self.GetCrossGdb()
         else:
             self.chrome_path = os.path.realpath(
                 os.path.join(
@@ -219,7 +221,8 @@ To install the debug symbols for all available packages, run:
             )
             self.sdk_path = path_util.FindCacheDir()
             self.sysroot = self.SimpleChromeSysroot()
-            self.cross_gdb = self.SimpleChromeGdb()
+            if not self.cross_gdb:
+                self.cross_gdb = self.SimpleChromeGdb()
 
         if self.remote:
             # If given remote process name, find pid & inf_cmd on remote device.
@@ -641,6 +644,11 @@ def main(argv):
 
     parser.add_argument("--board", default=None, help="board to debug for")
     parser.add_argument(
+        "--gdb",
+        type="file_exists",
+        help="Path to gdb binary. Default is that gdb binary is auto detected.",
+    )
+    parser.add_argument(
         "-g",
         "--gdb_args",
         action="append",
@@ -777,6 +785,7 @@ def main(argv):
         options.cgdb,
         options.ping,
         options.binary,
+        options.gdb,
     )
 
     try:
