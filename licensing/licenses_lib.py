@@ -1372,6 +1372,7 @@ after fixing the license."""
         output_template=TMPL,
         entry_template=ENTRY_TMPL,
         license_template=SHARED_LICENSE_TMPL,
+        compress_output=False,
     ):
         """Generate the combined html license file.
 
@@ -1380,6 +1381,7 @@ after fixing the license."""
             output_template: template for the entire HTML file.
             entry_template: template for per package entries.
             license_template: template for shared license entries.
+            compress_output: whether to compress based on suffix of output_file.
         """
         self.entry_template = ReadUnknownEncodedFile(entry_template)
         license_txts = self.GenerateLicenseText()
@@ -1437,11 +1439,16 @@ after fixing the license."""
             "entries": "\n".join(sorted_license_txt),
             "licenses": "\n".join(licenses_txt),
         }
-        osutils.WriteFile(
-            output_file,
-            self.EvaluateTemplate(file_template, env).encode("utf-8"),
-            mode="wb",
-        )
+        contents = self.EvaluateTemplate(file_template, env).encode("utf-8")
+        if not compress_output:
+            # Just write it.
+            osutils.WriteFile(output_file, contents, mode="wb")
+        else:
+            # Write to a temp file, then compress it to the final destination,
+            # using the file extension specified to determine compression type.
+            with cros_build_lib.UnbufferedNamedTemporaryFile() as f:
+                osutils.WriteFile(f.name, contents, mode="wb")
+                cros_build_lib.CompressFile(f.name, output_file)
 
 
 def ListInstalledPackages(sysroot, all_packages=False):

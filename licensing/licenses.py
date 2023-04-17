@@ -77,6 +77,7 @@ import os
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
+from chromite.lib import cros_build_lib
 from chromite.licensing import licenses_lib
 
 
@@ -156,6 +157,13 @@ def get_parser() -> commandline.ArgumentParser:
         type="path",
         help="which html file to create with output",
     )
+    parser.add_argument(
+        "-c",
+        "--compress-output",
+        action="store_true",
+        help="whether to compress the html output. If true, output must end in "
+        "an appropriate extension.",
+    )
     return parser
 
 
@@ -177,9 +185,23 @@ def main(args):
     ):
         parser.error(f"--output must point to a file: {opts.output}")
 
+    if opts.compress_output:
+        if not opts.output:
+            parser.error("--compress-output requires --output")
+        if (
+            cros_build_lib.CompressionExtToType(opts.output)
+            == cros_build_lib.CompressionType.NONE
+        ):
+            parser.error(
+                "if --compress-output is specified, --output must end in "
+                f"appropriate compression format but is: {opts.output}"
+            )
+
     licensing = LoadPackageInfo(
         sysroot, opts.all_packages, opts.gen_licenses, opts.packages
     )
 
     if opts.output:
-        licensing.GenerateHTMLLicenseOutput(opts.output)
+        licensing.GenerateHTMLLicenseOutput(
+            opts.output, compress_output=opts.compress_output
+        )
