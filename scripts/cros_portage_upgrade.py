@@ -992,7 +992,7 @@ class Upgrader(object):
             depslist = sorted(deps_entry["needs"].keys())  # dependencies
             depsstr = " ".join(depslist)
             usedset = deps_entry["provides"]  # used by
-            usedlist = sorted([p for p in usedset])
+            usedlist = sorted(p for p in usedset)
             usedstr = " ".join(usedlist)
 
         stable_up_ver = Upgrader._GetVerRevFromCpv(pinfo.stable_upstream_cpv)

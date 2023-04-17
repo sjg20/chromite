@@ -134,7 +134,7 @@ class KernelArgListTest(cros_test_lib.TestCase):
         kl = kernel_cmdline.KernelArgList('a b= c=d e.f="d e" a -- x y= z=zz y')
         self.assertEqual(kl, expected)
         self.assertEqual(len(expected), len(kl))
-        self.assertEqual(expected, [x for x in kl])
+        self.assertEqual(expected, list(kl))
 
     def testSetDefaultValue(self):
         """Test that we can create an instance with no value given."""
@@ -161,7 +161,7 @@ class KernelArgListTest(cros_test_lib.TestCase):
         # Test len().
         self.assertEqual(2, len(kl))
         # Test __iter__().
-        self.assertEqual(expected, [x for x in kl])
+        self.assertEqual(expected, list(kl))
 
     def testRejectsInvalidInput(self):
         """Test that invalid command line strings are rejected."""

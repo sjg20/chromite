@@ -1631,13 +1631,12 @@ class PrepareForBuildHandler(_CommonPrepareBundle):
         if self.arch == "arm":
             profile_var_name = "ARM_AFDO_PROFILE_VERSION"
 
-        cwp_locs = [
-            x
-            for x in self.input_artifacts.get(
+        cwp_locs = list(
+            self.input_artifacts.get(
                 "UnverifiedKernelCwpAfdoFile",
                 [os.path.join(profile_url, kernel_version)],
             )
-        ]
+        )
         afdo_path = self._FindLatestAFDOArtifact(
             cwp_locs, _RankValidCWPProfiles
         )

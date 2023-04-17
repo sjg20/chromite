@@ -1351,9 +1351,7 @@ class FindOverlaysTest(cros_test_lib.MockTempDirTestCase):
             "test", self.PUBLIC, self.PUB_PRIV, self.tempdir
         )
         read_overlays = [x[0][0][:-5] for x in m.call_args_list]
-        overlays = [
-            x for x in reversed(self.overlays[self.PUB_PRIV][self.PUBLIC])
-        ]
+        overlays = list(reversed(self.overlays[self.PUB_PRIV][self.PUBLIC]))
         self.assertEqual(read_overlays, overlays)
 
     def testFindOverlayFile(self):

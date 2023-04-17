@@ -573,7 +573,7 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
         ks0 = self._get_keyset()
         ks1 = ks0.GetBuildKeyset("ACME")
 
-        expected_keys = {name: k for name, k in ks0.keys.items()}
+        expected_keys = dict(ks0.keys.items())
         for name, k in ks0._root_of_trust_keys[
             ks0.root_of_trust_map["ACME"]
         ].items():
@@ -581,7 +581,7 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
             k1 = k.Copy()
             k1.name = name
             expected_keys[name] = k1
-        actual_keys = {name: k for name, k in ks1.keys.items()}
+        actual_keys = dict(ks1.keys.items())
         self.assertEqual(expected_keys, actual_keys)
         self.assertEqual(ks1._root_of_trust_keys, {})
 
