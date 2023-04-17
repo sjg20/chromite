@@ -670,11 +670,12 @@ def main(argv):
         help="Process ID of the (already) running process on the"
         " remote device to which to attach.",
     )
+    # TODO(build): Delete in Jan 2024.
     parser.add_argument(
         "--remote_pid",
         dest="pid",
-        default="",
-        help="Deprecated alias for --pid.",
+        help=argparse.SUPPRESS,
+        deprecated="Use --pid instead.",
     )
     parser.add_argument(
         "--no-ping",

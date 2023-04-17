@@ -148,7 +148,7 @@ To debug a process by its pid:
         logging.info(
             "Ready to debug process %d on device %s", pid, self.ssh_hostname
         )
-        cros_build_lib.run(self.gdb_cmd + ["--remote_pid", str(pid)])
+        cros_build_lib.run(self.gdb_cmd + ["--pid", str(pid)])
 
     def _ReadOptions(self):
         """Process options and set variables."""
