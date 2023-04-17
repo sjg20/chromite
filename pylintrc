@@ -124,7 +124,6 @@ enable=
 # TODO: Re-enable useless-object-inheritance once we're on Python 3-only and
 #       we update the style guide.
 # TODO: Re-enable import-outside-toplevel.
-# TODO: Re-enable consider-using-dict-comprehension.
 # TODO: Re-enable consider-using-set-comprehension.
 # TODO: Re-enable try-except-raise.
 # ungrouped-imports: We let isort handle this.
@@ -132,7 +131,6 @@ enable=
 disable=
     broad-except,
     consider-iterating-dictionary,
-    consider-using-dict-comprehension,
     consider-using-set-comprehension,
     fixme,
     file-ignored,
