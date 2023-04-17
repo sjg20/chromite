@@ -701,7 +701,9 @@ def FindDataCollectorArtifacts(
     for arch in _ARCHES:
         for build_type in _BUILD_TYPES:
             for binary_translation_type in _BINARY_TRANSLATION_TYPES:
-                if "x86" in arch and binary_translation_type == "native":
+                if ("x86" in arch and binary_translation_type == "native") or (
+                    "arm" in arch and binary_translation_type != "native"
+                ):
                     # Ignore invalid format combinations.
                     continue
 
