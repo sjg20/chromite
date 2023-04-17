@@ -27,26 +27,36 @@ def cmd_downstream(opts):
     site_params = config_lib.GetSiteParams()
     cros = gerrit.GetGerritHelper(site_params.EXTERNAL_REMOTE)
 
-    cls_to_downstream = cros.Query(
-        topic="zephyr-downstream", status="open", raw=True
-    )
-    cls_to_downstream.sort(key=lambda patch: patch["number"])
+    all_cls = cros.Query(topic="zephyr-downstream", status="open", raw=True)
+
+    if not all_cls:
+        logging.info("No Zephyr CLs to downstream!")
+
+    arbitrary_change_number = all_cls[0]["number"]
+
+    # We use GetRelatedChanges because it guarantees commit/dependency order.
+    cls_to_downstream = [
+        # Despite the underscore, this is an official part of the API.
+        x["_change_number"]
+        for x in cros.GetRelatedChangesInfo(arbitrary_change_number)["changes"]
+    ]
+
+    # CL dependencies come in with newest first, so do reverse.
+    cls_to_downstream.reverse()
 
     if opts.limit:
         cls_to_downstream = cls_to_downstream[: opts.limit]
 
     logging.info(
         "Downstreaming the following CLs:\n%s",
-        "\n".join((patch["number"] for patch in cls_to_downstream)),
+        "\n".join(str(change_num) for change_num in cls_to_downstream),
     )
 
     cq_level = "1" if opts.cq_dry_run else "2"
 
     stop_at = opts.stop_at
-    # TODO(aaronmassey): Investigate bulk changes from Gerrit lib API instead.
-    for i, patch in enumerate(cls_to_downstream):
-        change_num = patch["number"]
-
+    # TODO(b/278748163): Investigate bulk changes instead.
+    for i, change_num in enumerate(cls_to_downstream):
         if stop_at and stop_at == change_num:
             logging.info(
                 "Matched change: %s, stop processing other changes", change_num
@@ -121,7 +131,7 @@ def cmd_clear_attention(opts):
 
 def main(args):
     """Main entry point for CLI"""
-    # TODO(aaronmassey): Add option to rebase CLs.
+    # TODO(b/278748731): Add option to rebase CLs.
     parser = commandline.ArgumentParser(__doc__)
     parser.add_argument(
         "--dry-run", action="store_true", help="Dry run, no updates to Gerrit."
