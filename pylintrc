@@ -124,7 +124,6 @@ enable=
 # TODO: Re-enable useless-object-inheritance once we're on Python 3-only and
 #       we update the style guide.
 # TODO: Re-enable import-outside-toplevel.
-# TODO: Re-enable unnecessary-comprehension.
 # TODO: Re-enable consider-using-dict-comprehension.
 # TODO: Re-enable consider-using-set-comprehension.
 # TODO: Re-enable consider-using-in.
@@ -171,7 +170,6 @@ disable=
     too-many-statements,
     try-except-raise,
     ungrouped-imports,
-    unnecessary-comprehension,
     useless-object-inheritance,
     wrong-import-order,
 # Temporary disables to allow old style and new style to both pass linting.
