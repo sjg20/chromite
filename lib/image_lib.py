@@ -354,7 +354,7 @@ class LoopbackPartitions(object):
             the partition table is returned.
         """
         for part in self._gpt_table:
-            if part_id == part.name or part_id == part.number:
+            if part_id in (part.name, part.number):
                 return part
         raise KeyError(repr(part_id))
 
@@ -385,7 +385,7 @@ class LoopbackPartitions(object):
         ret = []
         for part_id in part_ids:
             for part in self._gpt_table:
-                if part_id == part.name or part_id == part.number:
+                if part_id in (part.name, part.number):
                     ret.append(self._Mount(part, mount_opts))
                     break
             else:
@@ -400,7 +400,7 @@ class LoopbackPartitions(object):
         """
         for part_id in part_ids:
             for part in self._gpt_table:
-                if part_id == part.name or part_id == part.number:
+                if part_id in (part.name, part.number):
                     self._Unmount(part)
                     break
             else:

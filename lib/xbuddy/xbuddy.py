@@ -1131,7 +1131,7 @@ def InterpretPath(
     version = default_version or LATEST
     if len(path_list) == 1:
         path = path_list.pop(0)
-        if board == path or version == path:
+        if path in (board, version):
             pass
         # Treat this as a version if it's one we know (contains default or
         # latest), or we were given an actual default board.

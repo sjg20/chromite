@@ -707,7 +707,7 @@ def SelectActiveToolchains(targets, root="/"):
             # Do not reconfig when the current is live or nothing needs to be
             # done.
             extra_env = {"ROOT": root} if root != "/" else None
-            if current != desired and current != "9999":
+            if current not in (desired, "9999"):
                 cmd = [package + "-config", desired]
                 cros_build_lib.run(cmd, print_cmd=False, extra_env=extra_env)
 

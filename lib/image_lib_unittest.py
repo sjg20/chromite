@@ -162,7 +162,7 @@ class LoopbackPartitionsTest(cros_test_lib.MockTempDirTestCase):
             expected_calls = []
             for part_id in part_ids:
                 for part in LOOP_PARTITION_INFO:
-                    if part.name == part_id or part.number == part_id:
+                    if part_id in (part.name, part.number):
                         expected_mounts.add(part)
                         expected_calls.append(
                             mock.call(

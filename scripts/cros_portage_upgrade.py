@@ -913,10 +913,10 @@ class Upgrader(object):
 
         # Convention is that anything not in portage overlay has been altered.
         overlay = pinfo.overlay
-        locally_patched = (
-            overlay != NOT_APPLICABLE
-            and overlay != self.UPSTREAM_OVERLAY_NAME
-            and overlay != self.STABLE_OVERLAY_NAME
+        locally_patched = overlay not in (
+            NOT_APPLICABLE,
+            self.UPSTREAM_OVERLAY_NAME,
+            self.STABLE_OVERLAY_NAME,
         )
         locally_duplicated = locally_patched and cpv_exists_upstream
 
@@ -1814,10 +1814,10 @@ class Upgrader(object):
                         ovrly_col, arch
                     )
                     ovrly = row[ovrly_col]
-                    if (
-                        ovrly != NOT_APPLICABLE
-                        and ovrly != self.UPSTREAM_OVERLAY_NAME
-                        and ovrly != self.STABLE_OVERLAY_NAME
+                    if ovrly not in (
+                        NOT_APPLICABLE,
+                        self.UPSTREAM_OVERLAY_NAME,
+                        self.STABLE_OVERLAY_NAME,
                     ):
                         pkg_overlays[pkg] = ovrly
 

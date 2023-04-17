@@ -422,7 +422,7 @@ To install the debug symbols for all available packages, run:
                 )
                 non_main_chrome_pids = set(device.GetRunningPids("type="))
                 pids = list(all_chrome_pids - non_main_chrome_pids)
-            elif pname == "renderer" or pname == "gpu-process":
+            elif pname in ("renderer", "gpu-process"):
                 pids = device.GetRunningPids("type=%s" % pname)
             else:
                 pids = device.GetRunningPids(pname)

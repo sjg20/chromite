@@ -625,7 +625,7 @@ def GetPaladinDeps(commit_message):
     matches = PALADIN_DEPENDENCY_RE.findall(commit_message)
     dependencies = []
     for prefix, match in matches:
-        if prefix == EXPECTED_PREFIX or prefix == WARNING_PREFIX:
+        if prefix in (EXPECTED_PREFIX, WARNING_PREFIX):
             if prefix == WARNING_PREFIX:
                 logging.warning(
                     "You are using deprecated CQ-DEPEND syntax that is not"

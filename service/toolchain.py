@@ -639,7 +639,8 @@ class BuildLinter:
                     line_end = int(match.group("end"))
                 elif mode == "list":
                     include_list.append(line)
-                if mode == "add" or mode == "remove":
+
+                if mode in ("add", "remove"):
                     location = CodeLocation(
                         filepath=self._clean_file_path(current_file),
                         line_start=line_start,

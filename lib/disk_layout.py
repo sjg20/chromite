@@ -388,7 +388,7 @@ class DiskLayout(object):
             )
             for layout_name, layout in config.get("layouts", {}).items():
                 # Don't apply on yourself.
-                if layout_name == COMMON_LAYOUT or layout_name == "_comment":
+                if layout_name in (COMMON_LAYOUT, "_comment"):
                     continue
 
                 # Need to copy a list of dicts so make a deep copy.

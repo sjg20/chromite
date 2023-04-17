@@ -413,7 +413,7 @@ def _MountImagePartition(
         gpt_table = image_lib.GetImageDiskPartitionInfo(image_file)
 
     for part in gpt_table:
-        if part_id == part.name or part_id == part.number:
+        if part_id in (part.name, part.number):
             break
     else:
         part = None
