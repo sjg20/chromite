@@ -23,12 +23,10 @@ def _frozen_ge_set(ge_build_config, values, extras=None):
         config_lib.GeBuildConfigAllBoards(ge_build_config)
     )
     unified_builds = config_lib.GetUnifiedBuildConfigAllBuilds(ge_build_config)
-    unified_board_names = set(
-        [
-            b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
-            for b in unified_builds
-        ]
-    )
+    unified_board_names = {
+        b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
+        for b in unified_builds
+    }
     board_names = separate_board_names | unified_board_names
     return frozenset(x for x in values if x in board_names).union(
         extras or frozenset()
@@ -625,12 +623,10 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
         config_lib.GeBuildConfigAllBoards(ge_build_config)
     )
     unified_builds = config_lib.GetUnifiedBuildConfigAllBuilds(ge_build_config)
-    unified_board_names = set(
-        [
-            b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
-            for b in unified_builds
-        ]
-    )
+    unified_board_names = {
+        b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
+        for b in unified_builds
+    }
     board_names = separate_board_names | unified_board_names
 
     # TODO(crbug.com/648473): Remove these after GE adds them to their data set.
@@ -1238,12 +1234,10 @@ def ReleaseBuilders(site_config, boards_dict, ge_build_config):
     )
 
     unified_builds = config_lib.GetUnifiedBuildConfigAllBuilds(ge_build_config)
-    unified_board_names = set(
-        [
-            b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
-            for b in unified_builds
-        ]
-    )
+    unified_board_names = {
+        b[config_lib.CONFIG_TEMPLATE_REFERENCE_BOARD_NAME]
+        for b in unified_builds
+    }
 
     def _CreateMasterConfig(
         name, template=site_config.templates.release, schedule="  0 12 * * *"

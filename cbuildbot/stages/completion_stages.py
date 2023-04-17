@@ -777,22 +777,20 @@ class PublishUprevChangesStage(generic_stages.BuilderStage):
             and self.buildstore.AreClientsReady()
         ):
             slave_configs = self._GetSlaveConfigs()
-            important_set = set([slave["name"] for slave in slave_configs])
+            important_set = {slave["name"] for slave in slave_configs}
 
             stages = self.buildstore.GetBuildsStages(
                 buildbucket_ids=self.GetScheduledSlaveBuildbucketIds()
             )
 
-            passed_set = set(
-                [
-                    s["build_config"]
-                    for s in stages
-                    if (
-                        s["name"] == stage_name
-                        and s["status"] == constants.BUILDER_STATUS_PASSED
-                    )
-                ]
-            )
+            passed_set = {
+                s["build_config"]
+                for s in stages
+                if (
+                    s["name"] == stage_name
+                    and s["status"] == constants.BUILDER_STATUS_PASSED
+                )
+            }
 
             if passed_set.issuperset(important_set):
                 logging.info("All the important slaves passed %s", stage_name)

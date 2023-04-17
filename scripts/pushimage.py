@@ -34,13 +34,7 @@ TEST_SIGN_BUCKET_BASE = "gs://chromeos-throw-away-bucket/signer-tests"
 
 # Keysets that are only valid in the above test bucket.
 TEST_KEYSET_PREFIX = "test-keys"
-TEST_KEYSETS = set(
-    (
-        "mp",
-        "premp",
-        "nvidia-premp",
-    )
-)
+TEST_KEYSETS = {"mp", "premp", "nvidia-premp"}
 
 # Supported image types for signing.
 _SUPPORTED_IMAGE_TYPES = (
@@ -386,10 +380,7 @@ def PushImage(
         tbs_base = gs_base = os.path.join(
             constants.TRASH_BUCKET, "pushimage-tests", getpass.getuser()
         )
-    elif (
-        set(["%s-%s" % (TEST_KEYSET_PREFIX, x) for x in TEST_KEYSETS])
-        & force_keysets
-    ):
+    elif {f"{TEST_KEYSET_PREFIX}-{x}" for x in TEST_KEYSETS} & force_keysets:
         logging.info("Upload mode: test; signers will process test keys")
         # We need the tbs_base to be in the place the signer will actually scan.
         tbs_base = TEST_SIGN_BUCKET_BASE
@@ -774,9 +765,7 @@ def main(argv):
     opts = parser.parse_args(argv)
     opts.Freeze()
 
-    force_keysets = set(
-        ["%s-%s" % (TEST_KEYSET_PREFIX, x) for x in opts.test_sign]
-    )
+    force_keysets = {f"{TEST_KEYSET_PREFIX}-{x}" for x in opts.test_sign}
 
     # If we aren't using mock or test or dry run mode, then let's prompt the user
     # to make sure they actually want to do this.  It's rare that people want to

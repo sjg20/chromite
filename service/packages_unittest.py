@@ -1880,7 +1880,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
         self.assertTrue(result.builds_chrome)
         self.assertTrue(result.packages)
         self.assertEqual(
-            set([p.atom for p in result.packages]), {constants.CHROME_CP}
+            {p.atom for p in result.packages}, {constants.CHROME_CP}
         )
         self.assertTrue(result.missing_chrome_prebuilt)
         self.assertFalse(result.missing_follower_prebuilt)
@@ -1907,7 +1907,7 @@ class NeedsChromeSourceTest(cros_test_lib.MockTestCase):
         self.assertFalse(result.builds_chrome)
         self.assertTrue(result.packages)
         self.assertEqual(
-            set([p.atom for p in result.packages]),
+            {p.atom for p in result.packages},
             set(constants.OTHER_CHROME_PACKAGES),
         )
         self.assertFalse(result.missing_chrome_prebuilt)

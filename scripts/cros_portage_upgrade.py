@@ -1223,13 +1223,11 @@ class Upgrader(object):
 
         upgraded_pinfos = [pinfo for pinfo in pinfolist if pinfo.upgraded_cpv]
         upgraded_cpvs = [pinfo.upgraded_cpv for pinfo in upgraded_pinfos]
-        masked_cpvs = set(
-            [
-                pinfo.upgraded_cpv
-                for pinfo in upgraded_pinfos
-                if not pinfo.upgraded_unmasked
-            ]
-        )
+        masked_cpvs = {
+            pinfo.upgraded_cpv
+            for pinfo in upgraded_pinfos
+            if not pinfo.upgraded_unmasked
+        }
 
         (ok, cmd, output) = self._AreEmergeable(upgraded_cpvs)
 

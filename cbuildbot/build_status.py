@@ -365,13 +365,11 @@ class SlaveStatus(object):
             if info.status in constants.BUILDER_COMPLETED_STATUSES
         )
 
-        return set(
-            [
-                bb_id
-                for (name, bb_id, time) in experimental_slaves
-                if name not in completed_experimental_builds
-            ]
-        )
+        return {
+            bb_id
+            for (name, bb_id, time) in experimental_slaves
+            if name not in completed_experimental_builds
+        }
 
     def _ShouldFailForBuilderStartTimeout(self, current_time):
         """Decides if we should fail if a build hasn't started within 5 mins.

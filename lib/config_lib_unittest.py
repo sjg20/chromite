@@ -291,7 +291,7 @@ class BuildConfigClassTest(cros_test_lib.TestCase):
         test1 = ["foo", "bar", ["hey"]]
         tests = [
             test1,
-            set([tuple(x) for x in test1]),
+            {tuple(x) for x in test1},
             dict(zip([tuple(x) for x in test1], test1)),
             _CustomObject(test1),
             _CustomObjectWithSlots(test1),

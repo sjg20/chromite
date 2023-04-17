@@ -613,7 +613,7 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
 
         ks0.Prune()
         # Only our keepers should have survived.
-        self.assertEqual(key_keep, set([k.name for k in ks0.keys.values()]))
+        self.assertEqual(key_keep, {k.name for k in ks0.keys.values()})
         for key_name, key in ks0.keys.items():
             self.assertTrue(key.Exists(), msg="All keys should exist")
             self.assertIn(
