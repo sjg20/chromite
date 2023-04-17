@@ -565,6 +565,25 @@ def GetChangeMergeable(host, change, revision=None) -> Optional[Dict[str, Any]]:
     return FetchUrlJson(host, path)
 
 
+def GetRelatedChanges(host, change, revision=None) -> Optional[Dict[str, Any]]:
+    """Get changes that depend on or are dependencies for a given change.
+
+    Args:
+        host: The Gerrit host to interact with.
+        change: The Gerrit change ID.
+        revision: The Gerrit change revision, default is "current".
+
+    Returns:
+        A JSON response dict repesenting a RelatedChangesInfo entity.
+    """
+    if revision is None:
+        revision = "current"
+
+    path = "%s/revisions/%s/related" % (_GetChangePath(change), revision)
+
+    return FetchUrlJson(host, path)
+
+
 def GetChangeReviewers(host, change):
     """Get information about all reviewers attached to a change.
 

@@ -208,6 +208,18 @@ class GerritHelper(object):
             self.host, change_num, o_params=o_params
         )
 
+    def GetRelatedChangesInfo(self, change_num):
+        """Returns a python dict that represents a gerrit API RelatedChangesInfo entity.
+
+        Args:
+          change_num: A gerrit change number.
+
+        Returns:
+            A dict representing a RelatedChangesInfo entity.
+        """
+
+        return gob_util.GetRelatedChanges(self.host, change_num)
+
     def GrabPatchFromGerrit(self, project, change, commit, must_match=True):
         """Return a cros_patch.GerritPatch representing a gerrit change.
 
