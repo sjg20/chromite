@@ -706,8 +706,8 @@ def RestoreChange(host, change, msg=""):
     return FetchUrlJson(host, path, reqtype="POST", body=body, ignore_404=False)
 
 
-def DeleteDraft(host, change):
-    """Delete a gerrit draft change."""
+def Delete(host, change):
+    """Delete a gerrit change."""
     path = _GetChangePath(change)
     FetchUrl(host, path, reqtype="DELETE", expect=204, ignore_404=False)
 

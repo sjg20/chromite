@@ -696,12 +696,12 @@ class GerritHelper(object):
             return
         gob_util.RestoreChange(self.host, self._to_changenum(change))
 
-    def DeleteDraft(self, change, dryrun=False):
-        """Delete a gerrit change iff all its revisions are drafts."""
+    def Delete(self, change, dryrun=False):
+        """Delete a gerrit change."""
         if dryrun:
-            logging.info("Would have deleted draft change %s", change)
+            logging.info("Would have deleted change %s", change)
             return
-        gob_util.DeleteDraft(self.host, self._to_changenum(change))
+        gob_util.Delete(self.host, self._to_changenum(change))
 
     def CherryPick(
         self, change, branch, rev="current", msg="", dryrun=False, notify=None

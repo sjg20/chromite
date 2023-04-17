@@ -948,15 +948,15 @@ class ActionSethashtags(UserAction):
         helper.SetHashtags(cl, add, remove, dryrun=opts.dryrun)
 
 
-class ActionDeletedraft(_ActionSimpleParallelCLs):
-    """Delete draft CLs"""
+class ActionDelete(_ActionSimpleParallelCLs):
+    """Delete CLs"""
 
-    COMMAND = "deletedraft"
+    COMMAND = "delete"
 
     @staticmethod
     def _process_one(helper, cl, opts):
         """Use |helper| to process the single |cl|."""
-        helper.DeleteDraft(cl, dryrun=opts.dryrun)
+        helper.Delete(cl, dryrun=opts.dryrun)
 
 
 class ActionReviewed(_ActionSimpleParallelCLs):
