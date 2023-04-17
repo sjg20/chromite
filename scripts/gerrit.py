@@ -231,7 +231,7 @@ def GetGerrit(opts, cl=None):
 
 def GetApprovalSummary(_opts, cls):
     """Return a dict of the most important approvals"""
-    approvs = dict([(x, "") for x in GERRIT_SUMMARY_CATS])
+    approvs = {x: "" for x in GERRIT_SUMMARY_CATS}
     for approver in cls.get("currentPatchSet", {}).get("approvals", []):
         cats = GERRIT_APPROVAL_MAP.get(approver["type"])
         if not cats:

@@ -1742,9 +1742,7 @@ class LocalPatch(GitRepoPatch):
                 % (self.project, self.ref, self.sha1),
             )
 
-        extra_env = dict(
-            [(field, field_value[field]) for field, _ in transfer_fields]
-        )
+        extra_env = {field: field_value[field] for field, _ in transfer_fields}
 
         # Reset the commit date to a value that can't conflict; if we leave this
         # to git, it's possible for a fast moving set of commit/uploads to all

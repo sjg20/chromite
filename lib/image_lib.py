@@ -412,9 +412,9 @@ class LoopbackPartitions(object):
         Returns:
             A dictionary of partition_names:mount_path.
         """
-        return dict(
-            (x.name, self._GetMountPointAndSymlink(x)[0]) for x in self._mounted
-        )
+        return {
+            x.name: self._GetMountPointAndSymlink(x)[0] for x in self._mounted
+        }
 
     def _IsExt2(self, part_id, offset=0):
         """Is the given partition an ext2 file system?"""

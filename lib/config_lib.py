@@ -1102,9 +1102,7 @@ def GerritInstanceParameters(name, instance):
         gerrit_url,
     ]
 
-    return dict(
-        [("%s%s" % (name, pn), p) for pn, p in zip(param_names, params)]
-    )
+    return {f"{name}{pn}": p for pn, p in zip(param_names, params)}
 
 
 def DefaultSiteParameters():

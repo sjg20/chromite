@@ -342,7 +342,7 @@ class WorkonHelper(object):
         Returns:
           list of ebuilds corresponding to those atoms.
         """
-        atoms_to_ebuilds = dict([(atom, None) for atom in atoms])
+        atoms_to_ebuilds = {atom: None for atom in atoms}
 
         for overlay in self._overlays:
             ebuild_paths = glob.glob(
