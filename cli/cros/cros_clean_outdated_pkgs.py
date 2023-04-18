@@ -29,12 +29,16 @@ IGNORED_REPOSITORIES = frozenset(["crossdev", "toolchains"])
 
 # TODO: better detect all packages that are part of "system profile" or are
 # otherwise crucial, and must never be removed, like bash, portage or awk.
+# Note that this list works by substring matching, so "dev-lang/python" also
+# matches "dev-lang/python-exec-conf".
+# This list only applies to SDK packages.
 SYSTEM_PACKAGES = {
     "app-admin/",
     "app-arch/",
     "app-misc/ca-certificates",
     "app-misc/pax-utils",
     "app-shells/",
+    "dev-lang/python",
     "dev-libs/",
     "dev-vcs/",
     "net-misc/",
