@@ -31,6 +31,7 @@ def cmd_downstream(opts):
 
     if not all_cls:
         logging.info("No Zephyr CLs to downstream!")
+        return 0
 
     arbitrary_change_number = all_cls[0]["number"]
 
