@@ -3,9 +3,12 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""CR and CQ +2 Zephyr commits for downstreaming.
+"""CR and CQ +2 copybot project commits for downstreaming.
+
+See go/copybot
 
 For Zephyr Downstreaming Rotation: go/zephyr-downstreaming-guide
+For coreboot Downstreaming Rotation: go/coreboot:downstreaming
 """
 
 import logging
@@ -21,16 +24,18 @@ MAX_GERRIT_CHANGES = 225
 
 
 def cmd_downstream(opts):
-    """Downstream Zephyr CLs."""
+    """Downstream copybot project CLs."""
     dry_run = opts.dry_run
 
     site_params = config_lib.GetSiteParams()
     cros = gerrit.GetGerritHelper(site_params.EXTERNAL_REMOTE)
 
-    all_cls = cros.Query(topic="zephyr-downstream", status="open", raw=True)
+    all_cls = cros.Query(
+        topic=f"{opts.project}-downstream", status="open", raw=True
+    )
 
     if not all_cls:
-        logging.info("No Zephyr CLs to downstream!")
+        logging.info("No %s CLs to downstream!", opts.project)
         return 0
 
     arbitrary_change_number = all_cls[0]["number"]
@@ -99,7 +104,10 @@ def cmd_clear_attention(opts):
     cros = gerrit.GetGerritHelper(site_params.EXTERNAL_REMOTE)
 
     cls_to_modify = cros.Query(
-        topic="zephyr-downstream", status="merged", attention="me", raw=True
+        topic=f"{opts.project}-downstream",
+        status="merged",
+        attention="me",
+        raw=True,
     )
     cls_to_modify.sort(key=lambda patch: patch["number"])
 
@@ -148,6 +156,9 @@ def main(args):
     )
     parser.add_argument(
         "--stop-at", type=str, help="Stop at the specified change number."
+    )
+    parser.add_argument(
+        "--project", type=str, default="zephyr", help="Project to downstream."
     )
 
     #
