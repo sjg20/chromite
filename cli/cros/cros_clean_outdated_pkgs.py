@@ -119,22 +119,34 @@ class CleanOutdatedCommand(command.CliCommand):
                     continue
 
             # Find the folder with ebuilds.
-            package_src_path = (
-                Path(overlay_paths.repo_to_path(pkg.repository))
-                / pkg.category
-                / pkg.package
-            )
+
+            try:
+                path_to_overlay = Path(
+                    overlay_paths.repo_to_path(pkg.repository)
+                )
+            except KeyError:
+                logging.debug(
+                    "Cannot find overlay %s. Deleting package %s/%s.",
+                    pkg.repository,
+                    pkg.category,
+                    pkg.package,
+                )
+                outdated_CPs.append(pkg.package_info.cpf)
+                continue
+            package_src_path = path_to_overlay / pkg.category / pkg.package
 
             versions_available_as_ebuild = []
             ebuild_paths = []
             # Enumerate all available ebuilds, if they still exist.
             if not package_src_path.is_dir():
                 logging.debug(
-                    "Package %s was removed from repository %s",
+                    "Cannot find package %s/%s in overlay %s. Deleting.",
+                    pkg.category,
                     pkg.package,
                     pkg.repository,
                 )
                 installed_version = None
+                outdated_CPs.append(pkg.package_info.cpf)
             else:
                 ebuild_paths = list(portage_util.EBuild.List(package_src_path))
                 installed_version = pkg.version
