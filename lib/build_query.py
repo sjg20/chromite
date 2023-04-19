@@ -334,6 +334,33 @@ class Profile(QueryTarget):
         _, flags_unset = self._use_flag_changes()
         return flags_unset
 
+    @functools.cached_property
+    def _use_mask_contents(self) -> List[str]:
+        """The parsed contents of use.mask."""
+        file_path = self.path / "use.mask"
+        if not file_path.is_file():
+            return []
+        contents = file_path.read_text(encoding="utf-8")
+        return [tokens[0] for tokens in portage_profile_conf.parse(contents)]
+
+    @property
+    def masked_use_flags(self) -> Set[str]:
+        """The resolved set of masked USE flags for this profile."""
+        result = set()
+
+        def _rec(profile):
+            for parent in profile.parents:
+                _rec(parent)
+            # pylint: disable=protected-access
+            for flag in profile._use_mask_contents:
+                if flag.startswith("-"):
+                    result.discard(flag[1:])
+                else:
+                    result.add(flag)
+
+        _rec(self)
+        return result
+
     @property
     def use_flags(self) -> Set[str]:
         """A set of the fully-resolved USE flags for this profile."""
@@ -343,6 +370,8 @@ class Profile(QueryTarget):
             expansions = self.resolve_var_incremental(var.upper())
             for val in expansions:
                 use_flags.add(f"{var.lower()}_{val}")
+
+        use_flags.difference_update(self.masked_use_flags)
 
         # The architecture becomes a USE flag.
         use_flags.add(self.arch)

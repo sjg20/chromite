@@ -27,10 +27,11 @@ def fake_overlays(tmp_path):
     baseboard_fake.create_profile(
         make_defaults={
             "ARCH": "amd64",
-            "USE": "some another",
+            "USE": "some another masked not_masked",
             "USE_EXPAND": "SOME_VAR",
             "SOME_VAR": "baseboard_val",
-        }
+        },
+        use_mask=["masked", "not_masked"],
     )
 
     overlay_fake = portage_testables.Overlay(
@@ -46,6 +47,7 @@ def fake_overlays(tmp_path):
             "USE_EXPAND": "ANOTHER_VAR",
         },
         profile_parents=[baseboard_fake.profiles[Path("base")]],
+        use_mask=["-not_masked"],
     )
     overlay_fake.add_package(
         portage_testables.Package(
@@ -192,6 +194,7 @@ def test_use_flags(fake_overlays):
     assert boards[0].use_flags == {
         "amd64",
         "board_use_fake",
+        "not_masked",
         "some",
         "fake",
         "internal",
@@ -214,6 +217,8 @@ def test_use_flags_set(fake_overlays):
         "amd64",
         "some",
         "another",
+        "masked",
+        "not_masked",
         "some_var_baseboard_val",
     }
 
@@ -231,6 +236,12 @@ def test_use_flags_unset(fake_overlays):
         "baseboard_fake_private",
         "some_var_*",
     }
+
+
+def test_masked_use_flags(fake_overlays):
+    """Test getting the masked_use_flags on a profile."""
+    board = build_query.Query(build_query.Board).one()
+    assert board.top_level_profile.masked_use_flags == {"masked"}
 
 
 def test_query_one(fake_overlays):
