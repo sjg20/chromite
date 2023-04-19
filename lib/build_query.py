@@ -26,6 +26,7 @@ from chromite.lib import constants
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
 from chromite.utils.parser import make_defaults
+from chromite.utils.parser import portage_profile_conf
 
 
 # We use docstrings in this file frequently for property documentation, which
@@ -346,26 +347,29 @@ class Profile(QueryTarget):
 
         parents = []
         parent_file_contents = parent_file.read_text(encoding="utf-8")
-        for line in parent_file_contents.splitlines():
-            line, _, _ = line.partition("#")
-            line = line.strip()
-            if not line:
+        for tokens in portage_profile_conf.parse(parent_file_contents):
+            if len(tokens) != 1:
+                logging.warning(
+                    "Profile %r has invalid parent configuration: %r",
+                    self,
+                    tokens,
+                )
                 continue
-            if ":" in line:
-                repo_name, _, profile_name = line.partition(":")
+            if ":" in tokens[0]:
+                repo_name, _, profile_name = tokens[0].partition(":")
                 overlays = _get_all_overlays_by_name()
                 overlay = overlays.get(repo_name)
                 if not overlay:
                     logging.warning(
                         "Profile %r has parent %r, but %r isn't an overlay.",
                         self,
-                        line,
+                        tokens[0],
                         repo_name,
                     )
                     continue
                 profile = overlay.get_profile(profile_name)
             else:
-                path = (self.path / Path(line)).resolve()
+                path = (self.path / Path(tokens[0])).resolve()
                 path = path.relative_to(self.overlay.profiles_dir)
                 profile = self.overlay.get_profile(path)
             if not profile:
