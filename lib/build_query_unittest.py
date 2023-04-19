@@ -40,7 +40,7 @@ def fake_overlays(tmp_path):
     )
     overlay_fake.create_profile(
         make_defaults={
-            "USE": "fake -another",
+            "USE": "fake -another -baseboard_fake_private",
             "SOME_VAR": "-* board_val",
             "ANOTHER_VAR": "one_val another_val",
             "USE_EXPAND": "ANOTHER_VAR",
@@ -67,6 +67,16 @@ def fake_overlays(tmp_path):
         )
     )
 
+    baseboard_fake_private = portage_testables.Overlay(
+        root_path=tmp_path / "baseboard-fake-private",
+        name="baseboard-fake-private",
+        parent_overlays=[baseboard_fake],
+    )
+    baseboard_fake_private.create_profile(
+        make_defaults={"USE": "baseboard_fake_private"},
+        profile_parents=[baseboard_fake.profiles[Path("base")]],
+    )
+
     overlay_fake_private = portage_testables.Overlay(
         root_path=tmp_path / "overlay-fake-private",
         name="fake-private",
@@ -74,7 +84,10 @@ def fake_overlays(tmp_path):
     )
     overlay_fake_private.create_profile(
         make_defaults={"USE": "internal", "SOME_VAR": "private_val"},
-        profile_parents=[overlay_fake.profiles[Path("base")]],
+        profile_parents=[
+            baseboard_fake_private.profiles[Path("base")],
+            overlay_fake.profiles[Path("base")],
+        ],
     )
     overlay_fake_private.add_package(
         portage_testables.Package(
@@ -99,6 +112,7 @@ def fake_overlays(tmp_path):
     overlays = [
         baseboard_fake,
         overlay_fake,
+        baseboard_fake_private,
         overlay_fake_private,
     ]
     with mock.patch(
@@ -117,9 +131,12 @@ def test_query_overlays(fake_overlays):
     assert overlays[1].name == "fake"
     assert overlays[1].board_name == "fake"
     assert overlays[1].is_private is False
-    assert overlays[2].name == "fake-private"
-    assert overlays[2].board_name == "fake"
+    assert overlays[2].name == "baseboard-fake-private"
+    assert overlays[2].board_name is None
     assert overlays[2].is_private is True
+    assert overlays[3].name == "fake-private"
+    assert overlays[3].board_name == "fake"
+    assert overlays[3].is_private is True
 
 
 def test_query_profiles(fake_overlays):
@@ -131,9 +148,12 @@ def test_query_profiles(fake_overlays):
     assert profiles[1].overlay.name == "fake"
     assert profiles[1].name == "base"
     assert profiles[1].parents == [profiles[0]]
-    assert profiles[2].overlay.name == "fake-private"
+    assert profiles[2].overlay.name == "baseboard-fake-private"
     assert profiles[2].name == "base"
-    assert profiles[2].parents == [profiles[1]]
+    assert profiles[2].parents == [profiles[0]]
+    assert profiles[3].overlay.name == "fake-private"
+    assert profiles[3].name == "base"
+    assert profiles[3].parents == [profiles[2], profiles[1]]
 
 
 def test_query_boards(fake_overlays):
@@ -208,6 +228,7 @@ def test_use_flags_unset(fake_overlays):
     profile = overlay.profiles[0]
     assert profile.use_flags_unset == {
         "another",
+        "baseboard_fake_private",
         "some_var_*",
     }
 

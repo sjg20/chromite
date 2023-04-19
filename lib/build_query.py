@@ -260,20 +260,24 @@ class Profile(QueryTarget):
             The resolved variable, as a set of the tokens.
         """
         result = set()
-        tokens = self.make_defaults_vars.get(var, "").split()
-        if "-*" not in tokens:
-            for profile in self.parents:
-                result.update(profile.resolve_var_incremental(var))
-        for token in tokens:
-            if not token:
-                # Variable was unset, empty, or just whitespace.
-                continue
-            if token == "-*":
-                result.clear()
-            elif token.startswith("-"):
-                result.discard(token[1:])
-            else:
-                result.add(token)
+
+        def _rec(profile):
+            tokens = profile.make_defaults_vars.get(var, "").split()
+            if "-*" not in tokens:
+                for parent in profile.parents:
+                    _rec(parent)
+            for token in tokens:
+                if not token:
+                    # Variable was unset, empty, or just whitespace.
+                    continue
+                if token == "-*":
+                    result.clear()
+                elif token.startswith("-"):
+                    result.discard(token[1:])
+                else:
+                    result.add(token)
+
+        _rec(self)
         return result
 
     @property
