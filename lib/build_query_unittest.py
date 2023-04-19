@@ -171,6 +171,7 @@ def test_use_flags(fake_overlays):
     assert len(boards) == 1
     assert boards[0].use_flags == {
         "amd64",
+        "board_use_fake",
         "some",
         "fake",
         "internal",

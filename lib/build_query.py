@@ -535,9 +535,10 @@ class Board(QueryTarget):
     @property
     def use_flags(self) -> Set[str]:
         """The fully-evaluated USE flags for this board."""
+        result = {f"board_use_{self.name}"}
         if self.top_level_profile:
-            return self.top_level_profile.use_flags
-        return set()
+            result.update(self.top_level_profile.use_flags)
+        return result
 
     @property
     def arch(self) -> str:
