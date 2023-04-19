@@ -170,6 +170,7 @@ def test_use_flags(fake_overlays):
     boards = list(build_query.Board.find_all())
     assert len(boards) == 1
     assert boards[0].use_flags == {
+        "amd64",
         "some",
         "fake",
         "internal",
@@ -189,6 +190,7 @@ def test_use_flags_set(fake_overlays):
     )
     profile = overlay.profiles[0]
     assert profile.use_flags_set == {
+        "amd64",
         "some",
         "another",
         "some_var_baseboard_val",

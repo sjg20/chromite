@@ -313,6 +313,9 @@ class Profile(QueryTarget):
             for val in self.make_defaults_vars.get(var.upper(), "").split():
                 _process_flag(val, prefix=f"{var.lower()}_")
 
+        if "ARCH" in self.make_defaults_vars:
+            flags_set.add(self.make_defaults_vars["ARCH"])
+
         return flags_set, flags_unset
 
     @property
@@ -336,6 +339,10 @@ class Profile(QueryTarget):
             expansions = self.resolve_var_incremental(var.upper())
             for val in expansions:
                 use_flags.add(f"{var.lower()}_{val}")
+
+        # The architecture becomes a USE flag.
+        use_flags.add(self.arch)
+
         return use_flags
 
     @functools.cached_property
