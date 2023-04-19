@@ -288,14 +288,30 @@ class Profile(QueryTarget):
         """
         flags_set = set()
         flags_unset = set()
-        for flag in self.make_defaults_vars.get("USE", "").split():
+
+        def _process_flag(flag, prefix=""):
+            flag_set = True
+            if not flag:
+                return
             if flag.startswith("-"):
                 flag = flag[1:]
-                flags_set.discard(flag)
-                flags_unset.add(flag)
-            else:
+                flag_set = False
+            flag = prefix + flag
+            if flag_set:
                 flags_unset.discard(flag)
                 flags_set.add(flag)
+            else:
+                flags_unset.add(flag)
+                flags_set.discard(flag)
+
+        for flag in self.make_defaults_vars.get("USE", "").split():
+            _process_flag(flag)
+
+        use_expand = self.resolve_var_incremental("USE_EXPAND")
+        for var in use_expand:
+            for val in self.make_defaults_vars.get(var.upper(), "").split():
+                _process_flag(val, prefix=f"{var.lower()}_")
+
         return flags_set, flags_unset
 
     @property
@@ -313,8 +329,13 @@ class Profile(QueryTarget):
     @property
     def use_flags(self) -> Set[str]:
         """A set of the fully-resolved USE flags for this profile."""
-        # TODO(jrosenth): Deal with USE_EXPAND.
-        return self.resolve_var_incremental("USE")
+        use_flags = set(self.resolve_var_incremental("USE"))
+        use_expand = self.resolve_var_incremental("USE_EXPAND")
+        for var in use_expand:
+            expansions = self.resolve_var_incremental(var.upper())
+            for val in expansions:
+                use_flags.add(f"{var.lower()}_{val}")
+        return use_flags
 
     @functools.cached_property
     def parents(self) -> List[Profile]:

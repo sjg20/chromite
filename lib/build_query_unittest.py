@@ -28,6 +28,7 @@ def fake_overlays(tmp_path):
         make_defaults={
             "ARCH": "amd64",
             "USE": "some another",
+            "USE_EXPAND": "SOME_VAR",
             "SOME_VAR": "baseboard_val",
         }
     )
@@ -38,7 +39,12 @@ def fake_overlays(tmp_path):
         parent_overlays=[baseboard_fake],
     )
     overlay_fake.create_profile(
-        make_defaults={"USE": "fake -another", "SOME_VAR": "-* board_val"},
+        make_defaults={
+            "USE": "fake -another",
+            "SOME_VAR": "-* board_val",
+            "ANOTHER_VAR": "one_val another_val",
+            "USE_EXPAND": "ANOTHER_VAR",
+        },
         profile_parents=[baseboard_fake.profiles[Path("base")]],
     )
     overlay_fake.add_package(
@@ -163,7 +169,44 @@ def test_use_flags(fake_overlays):
     """Test getting the USE flags on a board."""
     boards = list(build_query.Board.find_all())
     assert len(boards) == 1
-    assert boards[0].use_flags == {"some", "fake", "internal"}
+    assert boards[0].use_flags == {
+        "some",
+        "fake",
+        "internal",
+        "some_var_board_val",
+        "some_var_private_val",
+        "another_var_one_val",
+        "another_var_another_val",
+    }
+
+
+def test_use_flags_set(fake_overlays):
+    """Test querying the flags set by a profile."""
+    overlay = (
+        build_query.Query(build_query.Overlay)
+        .filter(lambda overlay: overlay.name == "baseboard-fake")
+        .one()
+    )
+    profile = overlay.profiles[0]
+    assert profile.use_flags_set == {
+        "some",
+        "another",
+        "some_var_baseboard_val",
+    }
+
+
+def test_use_flags_unset(fake_overlays):
+    """Test querying the flags unset by a profile."""
+    overlay = (
+        build_query.Query(build_query.Overlay)
+        .filter(lambda overlay: overlay.name == "fake")
+        .one()
+    )
+    profile = overlay.profiles[0]
+    assert profile.use_flags_unset == {
+        "another",
+        "some_var_*",
+    }
 
 
 def test_query_one(fake_overlays):
