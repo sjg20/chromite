@@ -296,11 +296,11 @@ class Profile(QueryTarget):
         """
         result = set()
 
-        def _rec(profile):
-            tokens = profile.make_defaults_vars.get(var, "").split()
-            if "-*" not in tokens:
-                for parent in profile.parents:
-                    _rec(parent)
+        # portage_testables creates recursive overlays.  We don't technically
+        # need to track visited overlays for well-formed overlays.
+        visited_overlays = set()
+
+        def _process_tokens(tokens):
             for token in tokens:
                 if not token:
                     # Variable was unset, empty, or just whitespace.
@@ -312,7 +312,26 @@ class Profile(QueryTarget):
                 else:
                     result.add(token)
 
-        _rec(self)
+        def _rec_profile(profile):
+            tokens = profile.make_defaults_vars.get(var, "").split()
+            if "-*" not in tokens:
+                for parent in profile.parents:
+                    _rec_profile(parent)
+            _process_tokens(tokens)
+
+        def _rec_overlay(overlay):
+            if overlay.name in visited_overlays:
+                return
+            visited_overlays.add(overlay.name)
+
+            for parent in overlay.parents:
+                _rec_overlay(parent)
+
+            tokens = overlay.make_conf_vars.get(var, "").split()
+            _process_tokens(tokens)
+
+        _rec_profile(self)
+        _rec_overlay(self.overlay)
         return result
 
     @property

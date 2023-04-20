@@ -92,10 +92,13 @@ def fake_overlays(tmp_path):
         root_path=tmp_path / "overlay-fake-private",
         name="fake-private",
         parent_overlays=[overlay_fake],
-        make_conf={"CHOST": "x86_64-pc-linux-gnu"},
+        make_conf={
+            "CHOST": "x86_64-pc-linux-gnu",
+            "USE": "internal",
+        },
     )
     overlay_fake_private.create_profile(
-        make_defaults={"USE": "internal", "SOME_VAR": "private_val"},
+        make_defaults={"SOME_VAR": "private_val"},
         profile_parents=[
             baseboard_fake_private.profiles[Path("base")],
             overlay_fake.profiles[Path("base")],
@@ -206,7 +209,10 @@ def test_make_conf_vars(fake_overlays):
         .filter(lambda overlay: overlay.name == "fake-private")
         .one()
     )
-    assert overlay.make_conf_vars == {"CHOST": "x86_64-pc-linux-gnu"}
+    assert overlay.make_conf_vars == {
+        "CHOST": "x86_64-pc-linux-gnu",
+        "USE": "internal",
+    }
 
 
 def test_overlay_parents(fake_overlays):
