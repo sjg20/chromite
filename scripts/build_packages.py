@@ -16,6 +16,7 @@ For the fastest builds, use --nowithautotest --noworkon.
 """
 
 import argparse
+import getpass
 import logging
 import os
 from typing import List, Optional, Tuple
@@ -499,7 +500,10 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
                 run_configs=opts.setup_board_run_config,
             )
 
-        if os.path.isfile(chromite_config.AUTO_COP_CONFIG):
+        if (
+            os.path.isfile(chromite_config.AUTO_COP_CONFIG)
+            or getpass.getuser() == "chrome-bot"
+        ):
             cop_command = [
                 "cros",
                 "clean-outdated-pkgs",
