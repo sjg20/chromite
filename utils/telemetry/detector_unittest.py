@@ -32,9 +32,13 @@ def test_process_info_capture():
 
 def test_system_info_captured():
     """Test that SystemDetector captures the correct system info."""
+
     d = detector.SystemDetector()
     attrs = d.detect().attributes
 
+    assert attrs[detector.CPU_COUNT] == psutil.cpu_count()
+    assert attrs[detector.MEMORY_TOTAL] == psutil.virtual_memory().total
+    assert attrs[detector.MEMORY_SWAP_TOTAL] == psutil.swap_memory().total
     assert attrs[detector.OS_NAME] == os.name
     assert attrs[resources.OS_TYPE] == platform.system()
     assert attrs[resources.OS_DESCRIPTION] == platform.platform()

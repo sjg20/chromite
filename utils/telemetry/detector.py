@@ -15,6 +15,9 @@ import psutil
 
 CPU_ARCHITECTURE = "cpu.architecture"
 CPU_NAME = "cpu.name"
+CPU_COUNT = "cpu.count"
+MEMORY_SWAP_TOTAL = "memory.swap.total"
+MEMORY_TOTAL = "memory.total"
 PROCESS_CWD = "process.cwd"
 PROCESS_RUNTIME_API_VERSION = "process.runtime.apiversion"
 PROCESS_ENV = "process.env"
@@ -31,10 +34,10 @@ class ProcessDetector(resources.ResourceDetector):
         p = psutil.Process()
         env = p.environ()
         resource = {
-            resources.PROCESS_PID: p.pid,
             PROCESS_CWD: p.cwd(),
-            resources.PROCESS_OWNER: p.uids().effective,
             PROCESS_RUNTIME_API_VERSION: sys.api_version,
+            resources.PROCESS_PID: p.pid,
+            resources.PROCESS_OWNER: p.uids().effective,
             resources.PROCESS_EXECUTABLE_NAME: p.name(),
             resources.PROCESS_EXECUTABLE_PATH: p.exe(),
             resources.PROCESS_COMMAND: p.cmdline()[0],
@@ -56,11 +59,14 @@ class SystemDetector(resources.ResourceDetector):
 
     def detect(self) -> resources.Resource:
         resource = {
+            CPU_ARCHITECTURE: platform.machine(),
+            CPU_COUNT: psutil.cpu_count(),
+            CPU_NAME: platform.processor(),
+            MEMORY_SWAP_TOTAL: psutil.swap_memory().total,
+            MEMORY_TOTAL: psutil.virtual_memory().total,
             OS_NAME: os.name,
             resources.OS_TYPE: platform.system(),
             resources.OS_DESCRIPTION: platform.platform(),
-            CPU_ARCHITECTURE: platform.machine(),
-            CPU_NAME: platform.processor(),
         }
 
         return resources.Resource(resource)
