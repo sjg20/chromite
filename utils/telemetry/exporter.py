@@ -13,18 +13,9 @@ import urllib.request
 from chromite.third_party.google.protobuf import message as proto_msg
 from chromite.third_party.google.protobuf import struct_pb2
 from opentelemetry import trace as trace_api
-from opentelemetry.sdk.resources import PROCESS_RUNTIME_DESCRIPTION
-from opentelemetry.sdk.resources import PROCESS_RUNTIME_NAME
-from opentelemetry.sdk.resources import PROCESS_RUNTIME_VERSION
-from opentelemetry.sdk.resources import TELEMETRY_SDK_LANGUAGE
-from opentelemetry.sdk.resources import TELEMETRY_SDK_NAME
-from opentelemetry.sdk.resources import TELEMETRY_SDK_VERSION
-from opentelemetry.sdk.trace import ReadableSpan
-from opentelemetry.sdk.trace import StatusCode
-from opentelemetry.sdk.trace.export import SpanExporter
-from opentelemetry.sdk.trace.export import SpanExportResult
-from opentelemetry.trace import Span
-from opentelemetry.trace import SpanContext
+from opentelemetry.sdk import resources
+from opentelemetry.sdk import trace
+from opentelemetry.sdk.trace import export
 from opentelemetry.util import types
 
 # Required due to incomplete proto support in chromite. This proto usage is not
@@ -33,22 +24,11 @@ from opentelemetry.util import types
 # example, live somewhere in utils/ instead.
 from chromite.api.gen.chromite.telemetry import clientanalytics_pb2
 from chromite.api.gen.chromite.telemetry import trace_span_pb2
-from chromite.utils.telemetry.detector import CPU_ARCHITECTURE
-from chromite.utils.telemetry.detector import CPU_NAME
-from chromite.utils.telemetry.detector import OS_DESCRIPTION
-from chromite.utils.telemetry.detector import OS_NAME
-from chromite.utils.telemetry.detector import OS_TYPE
-from chromite.utils.telemetry.detector import PROCESS_COMMAND
-from chromite.utils.telemetry.detector import PROCESS_COMMAND_ARGS
-from chromite.utils.telemetry.detector import PROCESS_EXECUTABLE_NAME
-from chromite.utils.telemetry.detector import PROCESS_EXECUTABLE_PATH
-from chromite.utils.telemetry.detector import PROCESS_OWNER
-from chromite.utils.telemetry.detector import PROCESS_PID
-from chromite.utils.telemetry.detector import PROCESS_RUNTIME_API_VERSION
+from chromite.utils.telemetry import detector
 
 
-DEFAULT_ENDPOINT = "https://play.googleapis.com/log"
-DEFAULT_TIMEOUT = 5
+_DEFAULT_ENDPOINT = "https://play.googleapis.com/log"
+_DEFAULT_TIMEOUT = 5
 _DEFAULT_FLUSH_TIMEOUT = 30000
 # Preallocated in Clearcut proto to Build.
 _LOG_SOURCE = 2044
@@ -56,25 +36,27 @@ _LOG_SOURCE = 2044
 _CLIENT_TYPE = 33
 
 
-class ClearcutSpanExporter(SpanExporter):
+class ClearcutSpanExporter(export.SpanExporter):
     """Exports the spans to google http endpoint."""
 
     def __init__(
         self,
-        endpoint: str = DEFAULT_ENDPOINT,
-        timeout: int = DEFAULT_TIMEOUT,
+        endpoint: str = _DEFAULT_ENDPOINT,
+        timeout: int = _DEFAULT_TIMEOUT,
     ):
         self._endpoint = endpoint
         self._timeout = timeout
         self._log_source = _LOG_SOURCE
         self._next_request_dt = datetime.datetime.now()
 
-    def export(self, spans: Sequence[ReadableSpan]) -> SpanExportResult:
+    def export(
+        self, spans: Sequence[trace.ReadableSpan]
+    ) -> export.SpanExportResult:
         translated_spans = [self._translate_span(s) for s in spans]
         if self._export(translated_spans):
-            return SpanExportResult.SUCCESS
+            return export.SpanExportResult.SUCCESS
 
-        return SpanExportResult.FAILURE
+        return export.SpanExportResult.FAILURE
 
     def shutdown(self) -> None:
         pass
@@ -84,7 +66,7 @@ class ClearcutSpanExporter(SpanExporter):
         return True
 
     def _translate_context(
-        self, data: SpanContext
+        self, data: trace_api.SpanContext
     ) -> trace_span_pb2.TraceSpan.Context:
         ctx = trace_span_pb2.TraceSpan.Context()
         ctx.trace_id = f"0x{trace_api.format_trace_id(data.trace_id)}"
@@ -100,12 +82,12 @@ class ClearcutSpanExporter(SpanExporter):
         return struct
 
     def _translate_span_attributes(
-        self, data: ReadableSpan
+        self, data: trace.ReadableSpan
     ) -> struct_pb2.Struct:
         return self._translate_attributes(data.attributes)
 
     def _translate_links(
-        self, data: ReadableSpan
+        self, data: trace.ReadableSpan
     ) -> trace_span_pb2.TraceSpan.Link:
         links = []
 
@@ -118,19 +100,19 @@ class ClearcutSpanExporter(SpanExporter):
         return links
 
     def _translate_events(
-        self, data: ReadableSpan
+        self, data: trace.ReadableSpan
     ) -> trace_span_pb2.TraceSpan.Event:
         events = []
         for e in data.events:
             event = trace_span_pb2.TraceSpan.Event()
-            event.event_time_millis = int(e.timestamp / 1000)
+            event.event_time_millis = int(e.timestamp / 10e6)
             event.name = e.name
             event.attributes.MergeFrom(self._translate_attributes(e.attributes))
             events.append(event)
         return events
 
     def _translate_instrumentation_scope(
-        self, data: ReadableSpan
+        self, data: trace.ReadableSpan
     ) -> trace_span_pb2.TraceSpan.InstrumentationScope:
         s = data.instrumentation_scope
         scope = trace_span_pb2.TraceSpan.InstrumentationScope()
@@ -147,47 +129,53 @@ class ClearcutSpanExporter(SpanExporter):
         return environ
 
     def _translate_resource(
-        self, data: ReadableSpan
+        self, data: trace.ReadableSpan
     ) -> trace_span_pb2.TraceSpan.Resource:
         attrs = dict(data.resource.attributes)
         resource = trace_span_pb2.TraceSpan.Resource()
-        resource.system.cpu = attrs.pop(CPU_NAME, "")
-        resource.system.host_architecture = attrs.pop(CPU_ARCHITECTURE, "")
-        resource.system.os_name = attrs.pop(OS_NAME, "")
-        resource.system.os_version = attrs.pop(OS_DESCRIPTION, "")
-        resource.system.os_type = attrs.pop(OS_TYPE, "")
-        resource.process.pid = str(attrs.pop(PROCESS_PID, ""))
+        resource.system.cpu = attrs.pop(detector.CPU_NAME, "")
+        resource.system.host_architecture = attrs.pop(
+            detector.CPU_ARCHITECTURE, ""
+        )
+        resource.system.os_name = attrs.pop(detector.OS_NAME, "")
+        resource.system.os_version = attrs.pop(resources.OS_DESCRIPTION, "")
+        resource.system.os_type = attrs.pop(resources.OS_TYPE, "")
+        resource.process.pid = str(attrs.pop(resources.PROCESS_PID, ""))
         resource.process.executable_name = attrs.pop(
-            PROCESS_EXECUTABLE_NAME, ""
+            resources.PROCESS_EXECUTABLE_NAME, ""
         )
         resource.process.executable_path = attrs.pop(
-            PROCESS_EXECUTABLE_PATH, ""
+            resources.PROCESS_EXECUTABLE_PATH, ""
         )
-        resource.process.command = attrs.pop(PROCESS_COMMAND, "")
+        resource.process.command = attrs.pop(resources.PROCESS_COMMAND, "")
         resource.process.command_args.extend(
-            attrs.pop(PROCESS_COMMAND_ARGS, [])
+            attrs.pop(resources.PROCESS_COMMAND_ARGS, [])
         )
-        resource.process.owner_is_root = attrs.pop(PROCESS_OWNER, 9999) == 0
-        resource.process.runtime_name = attrs.pop(PROCESS_RUNTIME_NAME, "")
+        resource.process.owner_is_root = (
+            attrs.pop(resources.PROCESS_OWNER, 9999) == 0
+        )
+        resource.process.runtime_name = attrs.pop(
+            resources.PROCESS_RUNTIME_NAME, ""
+        )
         resource.process.runtime_version = attrs.pop(
-            PROCESS_RUNTIME_VERSION, ""
+            resources.PROCESS_RUNTIME_VERSION, ""
         )
         resource.process.runtime_description = attrs.pop(
-            PROCESS_RUNTIME_DESCRIPTION, ""
+            resources.PROCESS_RUNTIME_DESCRIPTION, ""
         )
         resource.process.api_version = str(
-            attrs.pop(PROCESS_RUNTIME_API_VERSION, "")
+            attrs.pop(detector.PROCESS_RUNTIME_API_VERSION, "")
         )
         resource.process.env.update(self._translate_env(attrs))
         resource.attributes.MergeFrom(self._translate_attributes(attrs))
         return resource
 
     def _translate_status(
-        self, data: ReadableSpan
+        self, data: trace.ReadableSpan
     ) -> trace_span_pb2.TraceSpan.Status:
         status = trace_span_pb2.TraceSpan.Status()
 
-        if data.status.status_code == StatusCode.ERROR:
+        if data.status.status_code == trace.StatusCode.ERROR:
             status.status_code = (
                 trace_span_pb2.TraceSpan.Status.StatusCode.STATUS_CODE_ERROR
             )
@@ -202,13 +190,13 @@ class ClearcutSpanExporter(SpanExporter):
         return status
 
     def _translate_sdk(
-        self, data: ReadableSpan
+        self, data: trace.ReadableSpan
     ) -> trace_span_pb2.TraceSpan.TelemetrySdk:
         attrs = data.resource.attributes
         sdk = trace_span_pb2.TraceSpan.TelemetrySdk()
-        sdk.name = attrs.get(TELEMETRY_SDK_NAME)
-        sdk.version = attrs.get(TELEMETRY_SDK_VERSION)
-        sdk.language = attrs.get(TELEMETRY_SDK_LANGUAGE)
+        sdk.name = attrs.get(resources.TELEMETRY_SDK_NAME)
+        sdk.version = attrs.get(resources.TELEMETRY_SDK_VERSION)
+        sdk.language = attrs.get(resources.TELEMETRY_SDK_LANGUAGE)
         return sdk
 
     def _translate_kind(
@@ -222,18 +210,20 @@ class ClearcutSpanExporter(SpanExporter):
             return trace_span_pb2.TraceSpan.SpanKind.SPAN_KIND_SERVER
         return trace_span_pb2.TraceSpan.SpanKind.SPAN_KIND_UNSPECIFIED
 
-    def _translate_span(self, data: ReadableSpan) -> trace_span_pb2.TraceSpan:
+    def _translate_span(
+        self, data: trace.ReadableSpan
+    ) -> trace_span_pb2.TraceSpan:
         span = trace_span_pb2.TraceSpan()
         span.name = data.name
         span.context.MergeFrom(self._translate_context(data.get_span_context()))
 
         if data.parent is not None:
-            if isinstance(data.parent, Span):
+            if isinstance(data.parent, trace_api.Span):
                 ctx = data.parent.context
                 span.parent_span_id = (
                     f"0x{trace_api.format_span_id(ctx.span_id)}"
                 )
-            elif isinstance(data.parent, SpanContext):
+            elif isinstance(data.parent, trace_api.SpanContext):
                 span.parent_span_id = (
                     f"0x{trace_api.format_span_id(data.parent.span_id)}"
                 )

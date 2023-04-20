@@ -9,7 +9,7 @@ import time
 import urllib.request
 
 from opentelemetry.sdk import trace
-from opentelemetry.sdk.trace.export import SpanExportResult
+from opentelemetry.sdk.trace import export
 
 from chromite.api.gen.chromite.telemetry import clientanalytics_pb2
 from chromite.api.gen.chromite.telemetry import trace_span_pb2
@@ -54,7 +54,7 @@ def test_otel_span_translation(monkeypatch):
 
     e = exporter.ClearcutSpanExporter()
 
-    assert e.export([span]) == SpanExportResult.SUCCESS
+    assert e.export([span]) == export.SpanExportResult.SUCCESS
     req, _ = requests[0]
     log_request = clientanalytics_pb2.LogRequest()
     log_request.ParseFromString(req.data)

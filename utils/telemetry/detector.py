@@ -9,16 +9,7 @@ import platform
 import sys
 from typing import Sequence
 
-from opentelemetry.sdk.resources import OS_DESCRIPTION
-from opentelemetry.sdk.resources import OS_TYPE
-from opentelemetry.sdk.resources import PROCESS_COMMAND
-from opentelemetry.sdk.resources import PROCESS_COMMAND_ARGS
-from opentelemetry.sdk.resources import PROCESS_EXECUTABLE_NAME
-from opentelemetry.sdk.resources import PROCESS_EXECUTABLE_PATH
-from opentelemetry.sdk.resources import PROCESS_OWNER
-from opentelemetry.sdk.resources import PROCESS_PID
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.resources import ResourceDetector
+from opentelemetry.sdk import resources
 import psutil
 
 
@@ -30,24 +21,24 @@ PROCESS_ENV = "process.env"
 OS_NAME = "os.name"
 
 
-class ProcessDetector(ResourceDetector):
+class ProcessDetector(resources.ResourceDetector):
     """ResourceDetector to capture information about the process."""
 
     def __init__(self, allowed_env: Sequence[str] = None):
         self._allowed_env = allowed_env or ["USE"]
 
-    def detect(self) -> Resource:
+    def detect(self) -> resources.Resource:
         p = psutil.Process()
         env = p.environ()
         resource = {
-            PROCESS_PID: p.pid,
+            resources.PROCESS_PID: p.pid,
             PROCESS_CWD: p.cwd(),
-            PROCESS_OWNER: p.uids().effective,
+            resources.PROCESS_OWNER: p.uids().effective,
             PROCESS_RUNTIME_API_VERSION: sys.api_version,
-            PROCESS_EXECUTABLE_NAME: p.name(),
-            PROCESS_EXECUTABLE_PATH: p.exe(),
-            PROCESS_COMMAND: p.cmdline()[0],
-            PROCESS_COMMAND_ARGS: p.cmdline()[1:],
+            resources.PROCESS_EXECUTABLE_NAME: p.name(),
+            resources.PROCESS_EXECUTABLE_PATH: p.exe(),
+            resources.PROCESS_COMMAND: p.cmdline()[0],
+            resources.PROCESS_COMMAND_ARGS: p.cmdline()[1:],
         }
         resource.update(
             {
@@ -57,19 +48,19 @@ class ProcessDetector(ResourceDetector):
             }
         )
 
-        return Resource(resource)
+        return resources.Resource(resource)
 
 
-class SystemDetector(ResourceDetector):
+class SystemDetector(resources.ResourceDetector):
     """ResourceDetector to capture information about system."""
 
-    def detect(self) -> Resource:
+    def detect(self) -> resources.Resource:
         resource = {
             OS_NAME: os.name,
-            OS_TYPE: platform.system(),
-            OS_DESCRIPTION: platform.platform(),
+            resources.OS_TYPE: platform.system(),
+            resources.OS_DESCRIPTION: platform.platform(),
             CPU_ARCHITECTURE: platform.machine(),
             CPU_NAME: platform.processor(),
         }
 
-        return Resource(resource)
+        return resources.Resource(resource)

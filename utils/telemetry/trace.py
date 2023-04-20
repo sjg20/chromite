@@ -4,43 +4,41 @@
 
 """The tracing library that provides the Tracer."""
 
-from logging import ERROR
-from logging import getLogger
+import logging
 from typing import Optional
 
 
 # Disable warning log messages in opentelemetry
-getLogger("opentelemetry.util._time").setLevel(ERROR)
+logging.getLogger("opentelemetry.util._time").setLevel(logging.ERROR)
 
 
 _GET_TRACER_DELEGATE = None
 
 
 if not _GET_TRACER_DELEGATE:
-    from opentelemetry import trace
-    from opentelemetry.sdk.resources import get_aggregated_resources
-    from opentelemetry.sdk.resources import OTELResourceDetector
-    from opentelemetry.sdk.resources import ProcessResourceDetector
-    from opentelemetry.sdk.trace import TracerProvider
-    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+    from opentelemetry import trace as otel_trace_api
+    from opentelemetry.sdk import resources as otel_resources
+    from opentelemetry.sdk import trace as otel_trace
+    from opentelemetry.sdk.trace import export as otel_export
 
-    from chromite.utils.telemetry.detector import ProcessDetector
-    from chromite.utils.telemetry.detector import SystemDetector
-    from chromite.utils.telemetry.exporter import ClearcutSpanExporter
+    from chromite.utils.telemetry import detector
+    from chromite.utils.telemetry import exporter
 
-    resource = get_aggregated_resources(
+    resource = otel_resources.get_aggregated_resources(
         [
-            ProcessResourceDetector(),
-            OTELResourceDetector(),
-            ProcessDetector(),
-            SystemDetector(),
+            otel_resources.ProcessResourceDetector(),
+            otel_resources.OTELResourceDetector(),
+            detector.ProcessDetector(),
+            detector.SystemDetector(),
         ]
     )
-    trace.set_tracer_provider(TracerProvider(resource=resource))
-    trace.get_tracer_provider().add_span_processor(
-        BatchSpanProcessor(ClearcutSpanExporter())
+    otel_trace_api.set_tracer_provider(
+        otel_trace.TracerProvider(resource=resource)
     )
-    _GET_TRACER_DELEGATE = trace.get_tracer
+    otel_trace_api.get_tracer_provider().add_span_processor(
+        otel_export.BatchSpanProcessor(exporter.ClearcutSpanExporter())
+    )
+    _GET_TRACER_DELEGATE = otel_trace_api.get_tracer
 
 
 def get_tracer(
