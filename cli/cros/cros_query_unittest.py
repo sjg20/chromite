@@ -20,6 +20,17 @@ def test_compile_filter():
     assert not flt(board_bar)
 
 
+def test_filter_globals():
+    """Test compiled filters have access to a limited set of globals."""
+    board_foo = build_query.Board("foo")
+    board_bar = build_query.Board("bar")
+    board_foobar = build_query.Board("foobar")
+    flt = cros_query.compile_filter("any(x == 'o' for x in name)")
+    assert flt(board_foo)
+    assert not flt(board_bar)
+    assert flt(board_foobar)
+
+
 class FakeProfile(build_query.Profile):
     """Fake profile for testing purposes."""
 

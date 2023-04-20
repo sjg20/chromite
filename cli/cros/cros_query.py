@@ -60,7 +60,11 @@ class ObjectMapping(collections.abc.Mapping):
         self._obj = obj
 
     def __getitem__(self, item):
-        return getattr(self._obj, item)
+        try:
+            return getattr(self._obj, item)
+        except AttributeError as e:
+            # The contract for __getitem__ expects a KeyError.  Translate.
+            raise KeyError from e
 
     def __iter__(self):
         return iter(dir(self._obj))
