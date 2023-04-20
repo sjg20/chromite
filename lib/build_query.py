@@ -25,6 +25,7 @@ from typing import (
 from chromite.lib import constants
 from chromite.lib import portage_util
 from chromite.lib.parser import package_info
+from chromite.utils import key_value_store
 from chromite.utils.parser import make_defaults
 from chromite.utils.parser import portage_profile_conf
 
@@ -73,8 +74,33 @@ class Overlay(QueryTarget):
             yield cls(overlay_path)
 
     def tree(self):
-        yield from self.ebuilds
-        yield from self.profiles
+        yield from self.parents
+
+    @functools.cached_property
+    def layout_conf(self) -> Dict[str, str]:
+        """The layout.conf variables."""
+        return key_value_store.LoadFile(
+            self.path / "metadata" / "layout.conf", ignore_missing=True
+        )
+
+    @functools.cached_property
+    def parents(self) -> Iterator[Overlay]:
+        """The Portage masters of this overlay.  Note the COIL rename."""
+        all_overlays = _get_all_overlays_by_name()
+        for name in self.layout_conf.get("masters", "").split():
+            if name:
+                yield all_overlays[name]
+
+        # portage_util implicitly adds chromeos-overlay and chromeos-*-overlay
+        # if found.  Mimic that here by considering them implicit parents of
+        # board-level overlays.
+        if self.board_name:
+            if "chromeos" in all_overlays:
+                yield all_overlays["chromeos"]
+            for path in (
+                Path(constants.SOURCE_ROOT) / "src" / "private-overlays"
+            ).glob("chromeos-*-overlay"):
+                yield Overlay(path)
 
     @functools.cached_property
     def name(self) -> str:

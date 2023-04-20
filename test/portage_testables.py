@@ -115,7 +115,7 @@ class Overlay(object):
         layout_conf_path = self.path / "metadata" / "layout.conf"
         parent_names = " ".join(m.name for m in self.parent_overlays or [])
         conf = {
-            "masters": "portage-stable chromiumos eclass-overlay"
+            "masters": "portage-stable chromiumos eclass-overlay "
             + parent_names,
             "profile-formats": "portage-2 profile-default-eapi",
             "profile_eapi_when_unspecified": "5-progress",

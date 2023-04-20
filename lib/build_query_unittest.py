@@ -20,6 +20,15 @@ from chromite.test import portage_testables
 
 @pytest.fixture
 def fake_overlays(tmp_path):
+    portage_stable = portage_testables.Overlay(
+        root_path=tmp_path / "portage-stable", name="portage-stable"
+    )
+    chromiumos_overlay = portage_testables.Overlay(
+        root_path=tmp_path / "chromiumos-overlay", name="chromiumos"
+    )
+    eclass_overlay = portage_testables.Overlay(
+        root_path=tmp_path / "eclass-overlay", name="eclass-overlay"
+    )
     baseboard_fake = portage_testables.Overlay(
         root_path=tmp_path / "baseboard-fake",
         name="baseboard-fake",
@@ -113,6 +122,9 @@ def fake_overlays(tmp_path):
     )
 
     overlays = [
+        portage_stable,
+        chromiumos_overlay,
+        eclass_overlay,
         baseboard_fake,
         overlay_fake,
         baseboard_fake_private,
@@ -122,24 +134,23 @@ def fake_overlays(tmp_path):
         "chromite.lib.portage_util.FindOverlays",
         return_value=[str(x.path) for x in overlays],
     ):
+        # We just changed the overlays with our mock, we need to clear the cache.
+        # pylint: disable=protected-access
+        build_query._get_all_overlays_by_name.cache_clear()
         yield overlays
 
 
 def test_query_overlays(fake_overlays):
     """Test listing all overlays."""
-    overlays = list(build_query.Overlay.find_all())
-    assert overlays[0].name == "baseboard-fake"
-    assert overlays[0].board_name is None
-    assert overlays[0].is_private is False
-    assert overlays[1].name == "fake"
-    assert overlays[1].board_name == "fake"
-    assert overlays[1].is_private is False
-    assert overlays[2].name == "baseboard-fake-private"
-    assert overlays[2].board_name is None
-    assert overlays[2].is_private is True
-    assert overlays[3].name == "fake-private"
-    assert overlays[3].board_name == "fake"
-    assert overlays[3].is_private is True
+    overlays = {x.name: x for x in build_query.Overlay.find_all()}
+    assert overlays["baseboard-fake"].board_name is None
+    assert overlays["baseboard-fake"].is_private is False
+    assert overlays["fake"].board_name == "fake"
+    assert overlays["fake"].is_private is False
+    assert overlays["baseboard-fake-private"].board_name is None
+    assert overlays["baseboard-fake-private"].is_private is True
+    assert overlays["fake-private"].board_name == "fake"
+    assert overlays["fake-private"].is_private is True
 
 
 def test_query_profiles(fake_overlays):
@@ -196,6 +207,16 @@ def test_make_conf_vars(fake_overlays):
         .one()
     )
     assert overlay.make_conf_vars == {"CHOST": "x86_64-pc-linux-gnu"}
+
+
+def test_overlay_parents(fake_overlays):
+    overlays = {x.name: x for x in build_query.Overlay.find_all()}
+    assert list(overlays["baseboard-fake-private"].parents) == [
+        overlays["portage-stable"],
+        overlays["chromiumos"],
+        overlays["eclass-overlay"],
+        overlays["baseboard-fake"],
+    ]
 
 
 def test_use_flags(fake_overlays):
