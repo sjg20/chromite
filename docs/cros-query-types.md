@@ -30,6 +30,7 @@
 **Attributes:**
 
 * `arch` (`str`): The machine architecture of this profile.
+* `forced_use_flags` (`Set[str]`): The resolved set of forced USE flags for this profile.
 * `make_defaults_vars` (`Dict[str, str]`): A dictionary of the raw make.defaults variables.
 * `masked_use_flags` (`Set[str]`): The resolved set of masked USE flags for this profile.
 * `parents` (`List[Profile]`): A list of the immediate parent profiles of this profile.

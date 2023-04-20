@@ -201,7 +201,12 @@ class Overlay(object):
         )
 
     def create_profile(
-        self, path=None, profile_parents=None, make_defaults=None, use_mask=()
+        self,
+        path=None,
+        profile_parents=None,
+        make_defaults=None,
+        use_mask=(),
+        use_force=(),
     ):
         """Create a profile in this overlay.
 
@@ -218,6 +223,7 @@ class Overlay(object):
             parents=profile_parents,
             make_defaults=make_defaults,
             use_mask=use_mask,
+            use_force=use_force,
         )
 
         self._write_profile(prof)
@@ -246,6 +252,11 @@ class Overlay(object):
             osutils.WriteFile(
                 self.path / "profiles" / profile.path / "use.mask",
                 "\n".join(profile.use_mask) + "\n",
+            )
+        if profile.use_force:
+            osutils.WriteFile(
+                self.path / "profiles" / profile.path / "use.force",
+                "\n".join(profile.use_force) + "\n",
             )
 
 
@@ -347,6 +358,7 @@ class Profile(object):
         parents=None,
         make_defaults=None,
         use_mask=(),
+        use_force=(),
     ):
         self.overlay = overlay.name
         self.path = path
@@ -354,6 +366,7 @@ class Profile(object):
         self.parents = tuple(parents) if parents else None
         self.make_defaults = make_defaults if make_defaults else {"USE": ""}
         self.use_mask = tuple(use_mask)
+        self.use_force = tuple(use_force)
 
 
 class Package(object):

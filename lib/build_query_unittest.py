@@ -41,6 +41,7 @@ def fake_overlays(tmp_path):
             "SOME_VAR": "baseboard_val",
         },
         use_mask=["masked", "not_masked"],
+        use_force=["amd64"],
     )
 
     overlay_fake = portage_testables.Overlay(

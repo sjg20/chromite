@@ -371,8 +371,8 @@ class Profile(QueryTarget):
             for val in self.make_defaults_vars.get(var.upper(), "").split():
                 _process_flag(val, prefix=f"{var.lower()}_")
 
-        if "ARCH" in self.make_defaults_vars:
-            flags_set.add(self.make_defaults_vars["ARCH"])
+        flags_set.update(self.forced_use_flags)
+        flags_unset.difference_update(self.forced_use_flags)
 
         return flags_set, flags_unset
 
@@ -388,25 +388,24 @@ class Profile(QueryTarget):
         _, flags_unset = self._use_flag_changes()
         return flags_unset
 
-    @functools.cached_property
-    def _use_mask_contents(self) -> List[str]:
-        """The parsed contents of use.mask."""
-        file_path = self.path / "use.mask"
+    @functools.lru_cache(maxsize=None)
+    def _parse_conf(self, name: str) -> List[str]:
+        """Parse a basic conf file, such as parent, use.mask, or use.force."""
+        file_path = self.path / name
         if not file_path.is_file():
             return []
         contents = file_path.read_text(encoding="utf-8")
-        return [tokens[0] for tokens in portage_profile_conf.parse(contents)]
+        return list(portage_profile_conf.parse(contents))
 
-    @property
-    def masked_use_flags(self) -> Set[str]:
-        """The resolved set of masked USE flags for this profile."""
+    def _resolve_use_conf(self, name: str) -> Set[str]:
+        """Resolve a use.mask or use.force file."""
         result = set()
 
         def _rec(profile):
             for parent in profile.parents:
                 _rec(parent)
             # pylint: disable=protected-access
-            for flag in profile._use_mask_contents:
+            for (flag,) in profile._parse_conf(name):
                 if flag.startswith("-"):
                     result.discard(flag[1:])
                 else:
@@ -414,6 +413,16 @@ class Profile(QueryTarget):
 
         _rec(self)
         return result
+
+    @property
+    def masked_use_flags(self) -> Set[str]:
+        """The resolved set of masked USE flags for this profile."""
+        return self._resolve_use_conf("use.mask")
+
+    @property
+    def forced_use_flags(self) -> Set[str]:
+        """The resolved set of forced USE flags for this profile."""
+        return self._resolve_use_conf("use.force")
 
     @property
     def use_flags(self) -> Set[str]:
@@ -426,22 +435,15 @@ class Profile(QueryTarget):
                 use_flags.add(f"{var.lower()}_{val}")
 
         use_flags.difference_update(self.masked_use_flags)
-
-        # The architecture becomes a USE flag.
-        use_flags.add(self.arch)
+        use_flags.update(self.forced_use_flags)
 
         return use_flags
 
     @functools.cached_property
     def parents(self) -> List[Profile]:
         """A list of the immediate parent profiles of this profile."""
-        parent_file = self.path / "parent"
-        if not parent_file.is_file():
-            return []
-
         parents = []
-        parent_file_contents = parent_file.read_text(encoding="utf-8")
-        for tokens in portage_profile_conf.parse(parent_file_contents):
+        for tokens in self._parse_conf("parent"):
             if len(tokens) != 1:
                 logging.warning(
                     "Profile %r has invalid parent configuration: %r",
