@@ -79,6 +79,7 @@
             exist.
 
 * `is_private` (`bool`): True if the overlay appears to be private, false otherwise.
+* `make_conf_vars` (`Dict[str, str]`): The variables defined in make.conf.
 * `md5_cache_dir` (`Path`): The md5-cache directory for this overlay.
 * `metadata_dir` (`Path`): The metadata directory for this overlay.
 * `name` (`str`): The repo-name in metadata/layout.conf.

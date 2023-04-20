@@ -173,6 +173,15 @@ class Overlay(QueryTarget):
         for ebuild_path in self.path.glob("*/*/*.ebuild"):
             yield Ebuild(ebuild_file=ebuild_path, overlay=self)
 
+    @functools.cached_property
+    def make_conf_vars(self) -> Dict[str, str]:
+        """The variables defined in make.conf."""
+        make_conf_path = self.path / "make.conf"
+        if make_conf_path.is_file():
+            contents = make_conf_path.read_text(encoding="utf-8")
+            return make_defaults.parse(contents)
+        return {}
+
     def __repr__(self):
         return str(self.path)
 

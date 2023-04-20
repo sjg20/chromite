@@ -81,7 +81,7 @@ class Overlay(object):
         "board-private",
     )
 
-    def __init__(self, root_path, name, parent_overlays=None):
+    def __init__(self, root_path, name, parent_overlays=None, make_conf=None):
         self.path = Path(root_path)
         self.name = str(name)
         self.parent_overlays = (
@@ -90,8 +90,10 @@ class Overlay(object):
         self.packages = []
         self.profiles = dict()
         self.categories = set()
+        self.make_conf = make_conf or {}
 
         self._write_layout_conf()
+        self._write_make_conf()
 
     def __contains__(
         self, item: Union[package_info.CPV, package_info.PackageInfo]
@@ -123,6 +125,11 @@ class Overlay(object):
         }
 
         osutils.WriteFile(layout_conf_path, _dict_to_conf(conf), makedirs=True)
+
+    def _write_make_conf(self):
+        """Write the make.conf as a part of this Overlay's initialization."""
+        make_conf_path = self.path / "make.conf"
+        osutils.WriteFile(make_conf_path, _dict_to_ebuild(self.make_conf))
 
     def add_package(self, pkg):
         """Add a package to this overlay.
