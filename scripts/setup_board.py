@@ -220,6 +220,7 @@ def _ParseArgs(args):
 
 
 def main(argv):
+    commandline.RunInsideChroot()
     opts = _ParseArgs(argv)
     try:
         sysroot.SetupBoard(
