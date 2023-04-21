@@ -124,11 +124,12 @@ class DbApiFake(object):
 
     def __init__(self, pkgs):
         self.pkg_db = {}
-        for cpv, slot, rdeps_raw, build_time in pkgs:
+        for cpv, slot, rdeps_raw, build_time, use in pkgs:
             self.pkg_db[cpv] = {
                 "SLOT": slot,
                 "RDEPEND": rdeps_raw,
                 "BUILD_TIME": build_time,
+                "USE": use,
             }
 
     def cpv_all(self):
@@ -148,9 +149,16 @@ class PackageScannerFake(object):
         self.listed = []
         self.num_updates = 0
         self.pkgs_attrs = pkgs_attrs
+        self.warnings_shown = False
 
     def Run(self, _device, _root, _packages, _update, _deep, _deep_rev):
-        return self.cpvs, self.listed, self.num_updates, self.pkgs_attrs
+        return (
+            self.cpvs,
+            self.listed,
+            self.num_updates,
+            self.pkgs_attrs,
+            self.warnings_shown,
+        )
 
 
 class PortageTreeFake(object):
@@ -166,10 +174,22 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
     _BOARD = "foo_board"
     _BUILD_ROOT = "/build/%s" % _BOARD
     _VARTREE = [
-        ("foo/app1-1.2.3-r4", "0", "foo/app2 !foo/app3", "1413309336"),
-        ("foo/app2-4.5.6-r7", "0", "", "1413309336"),
-        ("foo/app4-2.0.0-r1", "0", "foo/app1 foo/app5", "1413309336"),
-        ("foo/app5-3.0.7-r3", "0", "", "1413309336"),
+        (
+            "foo/app1-1.2.3-r4",
+            "0",
+            "foo/app2 !foo/app3",
+            "1413309336",
+            "cros-debug",
+        ),
+        ("foo/app2-4.5.6-r7", "0", "", "1413309336", "cros-debug"),
+        (
+            "foo/app4-2.0.0-r1",
+            "0",
+            "foo/app1 foo/app5",
+            "1413309336",
+            "cros-debug",
+        ),
+        ("foo/app5-3.0.7-r3", "0", "", "1413309336", "cros-debug"),
     ]
 
     def setUp(self):
@@ -178,6 +198,9 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         self.device = ChromiumOSDeviceHandlerFake()
         self.scanner = deploy._InstallPackageScanner(self._BUILD_ROOT)
         self.PatchObject(deploy, "_GetDLCInfo", return_value=(None, None))
+        self.PatchObject(
+            deploy, "_ConfirmUpdateDespiteWarnings", return_value=True
+        )
 
     def SetupVartree(self, vartree_pkgs):
         self.device.agent.remote_sh_output = json.dumps(vartree_pkgs)
@@ -201,27 +224,52 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         app1 = "foo/app1-1.2.5-r4"
         self.SetupBintree(
             [
-                (app1, "0", "foo/app2 !foo/app3", "1413309336"),
-                ("foo/app2-4.5.6-r7", "0", "", "1413309336"),
+                (app1, "0", "foo/app2 !foo/app3", "1413309336", "cros-debug"),
+                ("foo/app2-4.5.6-r7", "0", "", "1413309336", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(installs, [app1])
         self.ValidatePkgs(listed, [app1])
         self.assertEqual(num_updates, 1)
 
+    def testRunUpdatedVersionWithUseMismatch(self):
+        self.SetupVartree(self._VARTREE)
+        app1 = "foo/app1-1.2.5-r4"
+        # Setup the bintree with packages that don't have USE=cros-debug.
+        self.SetupBintree(
+            [
+                (app1, "0", "foo/app2 !foo/app3", "1413309336", ""),
+                ("foo/app2-4.5.6-r7", "0", "", "1413309336", ""),
+            ]
+        )
+        with self.assertLogs(level="WARN") as cm:
+            installs, listed, num_updates, _, _ = self.scanner.Run(
+                self.device, "/", ["app1"], True, True, True
+            )
+            self.ValidatePkgs(installs, [app1])
+            self.ValidatePkgs(listed, [app1])
+            self.assertEqual(num_updates, 1)
+            testline = "USE flags for package foo/app1 do not match"
+            matching_logs = [
+                logline for logline in cm.output if testline in logline
+            ]
+            self.assertTrue(
+                matching_logs, "Failed to detect USE flag mismatch."
+            )
+
     def testRunUpdatedBuildTime(self):
         self.SetupVartree(self._VARTREE)
         app1 = "foo/app1-1.2.3-r4"
         self.SetupBintree(
             [
-                (app1, "0", "foo/app2 !foo/app3", "1413309350"),
-                ("foo/app2-4.5.6-r7", "0", "", "1413309336"),
+                (app1, "0", "foo/app2 !foo/app3", "1413309350", "cros-debug"),
+                ("foo/app2-4.5.6-r7", "0", "", "1413309336", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(installs, [app1])
@@ -234,11 +282,11 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         app2 = "foo/app2-4.5.8-r3"
         self.SetupBintree(
             [
-                (app1, "0", "foo/app2 !foo/app3", "1413309350"),
-                (app2, "0", "", "1413309350"),
+                (app1, "0", "foo/app2 !foo/app3", "1413309350", "cros-debug"),
+                (app2, "0", "", "1413309350", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(installs, [app1, app2], constraints=[(app1, app2)])
@@ -251,12 +299,18 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         app6 = "foo/app6-1.0.0-r1"
         self.SetupBintree(
             [
-                (app1, "0", "foo/app2 !foo/app3 foo/app6", "1413309350"),
-                ("foo/app2-4.5.6-r7", "0", "", "1413309336"),
-                (app6, "0", "", "1413309350"),
+                (
+                    app1,
+                    "0",
+                    "foo/app2 !foo/app3 foo/app6",
+                    "1413309350",
+                    "cros-debug",
+                ),
+                ("foo/app2-4.5.6-r7", "0", "", "1413309336", "cros-debug"),
+                (app6, "0", "", "1413309350", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(installs, [app1, app6], constraints=[(app1, app6)])
@@ -269,12 +323,12 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         app4 = "foo/app4-2.0.1-r3"
         self.SetupBintree(
             [
-                (app1, "0", "foo/app2 !foo/app3", "1413309350"),
-                (app4, "0", "foo/app1 foo/app5", "1413309350"),
-                ("foo/app5-3.0.7-r3", "0", "", "1413309336"),
+                (app1, "0", "foo/app2 !foo/app3", "1413309350", "cros-debug"),
+                (app4, "0", "foo/app1 foo/app5", "1413309350", "cros-debug"),
+                ("foo/app5-3.0.7-r3", "0", "", "1413309336", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(installs, [app1, app4], constraints=[(app4, app1)])
@@ -287,11 +341,11 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         app6 = "foo/app6-1.0.0-r1"
         self.SetupBintree(
             [
-                (app1, "0", "foo/app2 !foo/app3", "1413309350"),
-                (app6, "0", "foo/app1", "1413309350"),
+                (app1, "0", "foo/app2 !foo/app3", "1413309350", "cros-debug"),
+                (app6, "0", "foo/app1", "1413309350", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(installs, [app1])
@@ -306,13 +360,13 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         app5 = "foo/app5-3.0.8-r2"
         self.SetupBintree(
             [
-                (app1, "0", "foo/app2 !foo/app3", "1413309350"),
-                (app2, "0", "", "1413309350"),
-                (app4, "0", "foo/app1 foo/app5", "1413309350"),
-                (app5, "0", "", "1413309350"),
+                (app1, "0", "foo/app2 !foo/app3", "1413309350", "cros-debug"),
+                (app2, "0", "", "1413309350", "cros-debug"),
+                (app4, "0", "foo/app1 foo/app5", "1413309350", "cros-debug"),
+                (app5, "0", "", "1413309350", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(
@@ -328,11 +382,17 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         app1 = "foo/app1-1.2.5-r2"
         self.SetupBintree(
             [
-                (app1, "0", "|| ( foo/app6 foo/app2 ) !foo/app3", "1413309350"),
-                ("foo/app2-4.5.6-r7", "0", "", "1413309336"),
+                (
+                    app1,
+                    "0",
+                    "|| ( foo/app6 foo/app2 ) !foo/app3",
+                    "1413309350",
+                    "cros-debug",
+                ),
+                ("foo/app2-4.5.6-r7", "0", "", "1413309336", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(installs, [app1])
@@ -345,11 +405,17 @@ class TestInstallPackageScanner(cros_test_lib.MockOutputTestCase):
         app7 = "foo/app7-1.0.0-r1"
         self.SetupBintree(
             [
-                (app1, "0", "|| ( foo/app6 foo/app7 ) !foo/app3", "1413309350"),
-                (app7, "0", "", "1413309350"),
+                (
+                    app1,
+                    "0",
+                    "|| ( foo/app6 foo/app7 ) !foo/app3",
+                    "1413309350",
+                    "cros-debug",
+                ),
+                (app7, "0", "", "1413309350", "cros-debug"),
             ]
         )
-        installs, listed, num_updates, _ = self.scanner.Run(
+        installs, listed, num_updates, _, _ = self.scanner.Run(
             self.device, "/", ["app1"], True, True, True
         )
         self.ValidatePkgs(installs, [app1, app7], constraints=[(app1, app7)])
