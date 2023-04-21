@@ -4,7 +4,6 @@
 
 """Sysroot service unittest."""
 
-import datetime
 from operator import attrgetter
 import os
 from pathlib import Path
@@ -20,7 +19,6 @@ from chromite.lib import cpupower_helper
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import goma_lib
-from chromite.lib import gs
 from chromite.lib import osutils
 from chromite.lib import partial_mock
 from chromite.lib import portage_util
@@ -707,13 +705,6 @@ class BuildPackagesTest(
         self.clean_outdated_binpkgs_mock = self.PatchObject(
             portage_util, "CleanOutdatedBinaryPackages"
         )
-        # Prevent the test from performing gsutil actions.
-        self.get_creation_time_since_mock = self.PatchObject(
-            gs.GSContext,
-            "GetCreationTimeSince",
-            return_value=datetime.timedelta(days=10),
-        )
-        self.PatchObject(gs.GSContext, "InitializeCache")
 
     def testSuccess(self):
         """Test successful run."""
@@ -753,34 +744,6 @@ class BuildPackagesTest(
             self.AssertLogsContain(logs, "Rebuilding Portage cache.")
             self.AssertLogsContain(logs, "Cleaning stale binpkgs.")
             self.AssertLogsContain(logs, "Merging board packages now.")
-
-    def testLogBinhostAge(self):
-        """Test the log output from _LogBinhostAge."""
-        config = sysroot.BuildPackagesRunConfig()
-
-        with cros_test_lib.LoggingCapturer() as logs:
-            # check for when the binhost was created within the threshold
-            sysroot.BuildPackages(self.target, self.sysroot, config)
-            self.AssertLogsContain(
-                logs,
-                "PORTAGE_BINHOST gs://fake/binhost was created 10 days ago.",
-            )
-
-            # check for when the binhost was created outside of the threshold
-            self.get_creation_time_since_mock.return_value = datetime.timedelta(
-                days=31
-            )
-            sysroot.BuildPackages(self.target, self.sysroot, config)
-            self.AssertLogsContain(
-                logs,
-                "PORTAGE_BINHOST gs://fake/binhost was created more"
-                " than 30 days ago. Please repo sync for the latest build"
-                " artifacts.",
-            )
-            self.AssertLogsContain(
-                logs,
-                "PORTAGE_BINHOST gs://fake/binhost was created 31 days ago.",
-            )
 
     def testEcleanBinpkgs(self):
         """Test that eclean is called with the expected packages."""
