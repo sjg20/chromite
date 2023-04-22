@@ -51,59 +51,11 @@ EXPECTED_POOR_SYMBOLIZATION_FILES = ALLOWED_DEBUG_ONLY_FILES | {
     "usr/bin/git-upload-pack",
     # Prebuild Android binary
     "build/rootfs/opt/google/vms/android/etc/bin/XkbToKcmConverter",
+    "build/rootfs/opt/google/containers/android/etc/bin/XkbToKcmConverter",
     # Pulled from
     # https://skia.googlesource.com/buildbot/+/refs/heads/main/gold-client/, no
     # need to resymbolize.
     "usr/bin/goldctl",
-    # TODO(b/273620044): The following 44 binaries are from
-    # app-benchmarks/lmbench; they hardcode some compiler options which prevent
-    # us from generating STACK records. Fix the package.
-    "usr/bin/lat_unix",
-    "usr/bin/lat_select",
-    "usr/bin/line.lmbench",
-    "usr/bin/lat_rpc",
-    "usr/bin/hello",
-    "usr/bin/lmhttp",
-    "usr/bin/lat_syscall",
-    "usr/bin/par_mem",
-    "usr/bin/lat_http",
-    "usr/bin/lat_proc",
-    "usr/bin/stream.lmbench",
-    "usr/bin/enough",
-    "usr/bin/lat_mem_rd",
-    "usr/bin/mhz",
-    "usr/bin/lat_fs",
-    "usr/bin/lat_sem",
-    "usr/bin/lmdd",
-    "usr/bin/lat_fcntl",
-    "usr/bin/lat_pipe",
-    "usr/bin/lat_mmap",
-    "usr/bin/bw_file_rd",
-    "usr/bin/bw_unix",
-    "usr/bin/lat_tcp",
-    "usr/bin/flushdisk",
-    "usr/bin/bw_pipe",
-    "usr/bin/msleep",
-    "usr/bin/bw_mmap_rd",
-    "usr/bin/bw_tcp",
-    "usr/bin/lat_ops",
-    "usr/bin/loop_o",
-    "usr/bin/bw_mem",
-    "usr/bin/lat_pagefault",
-    "usr/bin/lat_connect",
-    "usr/bin/timing_o",
-    "usr/bin/lat_ctx",
-    "usr/bin/tlb",
-    "usr/bin/lat_fifo",
-    "usr/bin/disk",
-    "usr/bin/lat_unix_connect",
-    "usr/bin/par_ops",
-    "usr/bin/lat_sig",
-    "usr/bin/lat_udp",
-    "usr/bin/lat_ops",
-    "usr/bin/memsize",
-    # This is complete for --board=eve and --board=kevin
-    # TODO(b/241470012): Complete for other boards.
 }
 
 # Allowlist of patterns for ELF files that symbolize (dump_syms exits with
@@ -117,6 +69,14 @@ ALLOWLIST_NO_SYMBOL_FILE_VALIDATION = {
     # TODO(b/273543528): Investigate why this doesn't have stack records on
     # kevin builds.
     "build/rootfs/dlc-scaled/screen-ai/package/root/libchromescreenai.so",
+    # TODO(b/279645511): Investigate why this doesn't have STACK records on
+    # jacuzzi, scarlet, kukui, etc.
+    "usr/bin/rma_reset",
+    # Virtual dynamic shared object, not expected to have STACK records.
+    "opt/google/containers/android/ndk_translation/lib/arm/libndk_translation_vdso.so",
+    # TODO(b/279665879): Figure out why this ndk_translation libraries is not
+    # getting STACK records.
+    "opt/google/containers/android/ndk_translation/lib/arm/libdexfile.so",
 }
 # Same but patterns not exact paths.
 ALLOWLIST_NO_SYMBOL_FILE_VALIDATION_RE = tuple(
@@ -156,6 +116,15 @@ ALLOWLIST_NO_SYMBOL_FILE_VALIDATION_RE = tuple(
         # TODO(b/273607289): Figure out why libgrpc++_error_details.so.1.43.0 is
         # not getting STACK records on kevin.
         r"usr/lib[^/]*/libgrpc\+\+_error_details\.so\.[0-9.]+",
+        # linux-gate.so is system call wrappers which don't always have enough
+        # code to get STACK entries.
+        r"lib/modules/[^/]+/vdso/linux-gate\.so",
+        # TODO(b/280503615): Figure out why libGLESv2.so.2.0.0 doesn't have
+        # STACK records on amd64-generic or betty-pi-arc.
+        r"usr/lib[^/]*/libGLESv[0-9]+\.so.*",
+        # This is just a backwards compatibility stub if ENABLE_HLSL is defined,
+        # see https://github.com/KhronosGroup/glslang/blob/main/hlsl/stub.cpp
+        r"usr/lib[^/]*/libHLSL.so",
     )
 )
 
@@ -202,6 +171,12 @@ ALL_EXPECTED_FILES = frozenset(
         ExpectedFiles.LIBMETRICS,
     )
 )
+
+
+# Regular expression for ChromeOS's libc.so. Note that some containers have
+# their own libc.so file; we don't want to do the extra validation on those.
+# (They are often subsets of the full libc and will not pass STACK count tests.)
+LIBC_REGEX = re.compile(r"lib[^/]*/libc\.so\.[0-9.]+")
 
 
 class SymbolFileLineCounts:
@@ -260,12 +235,11 @@ class SymbolFileLineCounts:
                     line_type = "line number"
                 elif line_type == "PUBLIC":
                     self.public_lines += 1
-                    expected_words_min = 4
-                    if os.path.basename(elf_file).startswith("libc.so"):
-                        # TODO(b/251003272): libc.so sometimes produces PUBLIC
-                        # records with no symbol name. This is an error but is
-                        # not affecting our ability to decode stacks.
-                        expected_words_min = 3
+                    # TODO(b/251003272): expected_words_min should be 4;
+                    # however, dump_syms sometimes produces PUBLIC records with
+                    # no symbol name. This is an error but is not affecting our
+                    # ability to decode stacks.
+                    expected_words_min = 3
                     # No max, function parameter lists can have spaces.
                 elif line_type == "STACK":
                     self.stack_lines += 1
@@ -424,7 +398,7 @@ def ValidateSymbolFile(
     # can't be validated here.
     # TODO(b/273836486): Add similar logic to the code that generates Lacros
     # symbols.
-    elif os.path.basename(relative_path).startswith("libc.so"):
+    elif LIBC_REGEX.fullmatch(relative_path):
         _AddFoundFile(found_files, ExpectedFiles.LIBC)
         if counts.public_lines < 100:
             logging.warning(
@@ -703,7 +677,11 @@ def GenerateBreakpadSymbol(
         cmd_args = [elf_file, os.path.dirname(debug_file)]
         result = _DumpIt(cmd_args)
         if result.returncode:
-            _CrashCheck(result, [elf_file, debug_file], "unexpected failure")
+            _CrashCheck(
+                result,
+                [elf_file, debug_file],
+                "unexpected symbol generation failure",
+            )
             return SymbolGenerationResult.UNEXPECTED_FAILURE
 
         # TODO(b/270240549): Remove try/except, allow exceptions to just
