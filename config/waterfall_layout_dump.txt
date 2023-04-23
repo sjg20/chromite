@@ -157,6 +157,7 @@
     coral-release
     corsola-kernelnext-release
     corsola-release
+    dedede-pvs-release
     dedede-release
     draco-release
     drallion-kernelnext-release
@@ -516,6 +517,7 @@
   dedede-llvm-next-toolchain-tryjob
   dedede-llvm-toolchain-tryjob
   dedede-payloads-tryjob
+  dedede-pvs-release-tryjob
   dedede-release-tryjob
   deltaur-full-tryjob
   deltaur-llvm-next-toolchain-tryjob
@@ -1023,6 +1025,7 @@
     coral-release-tryjob
     corsola-kernelnext-release-tryjob
     corsola-release-tryjob
+    dedede-pvs-release-tryjob
     dedede-release-tryjob
     draco-release-tryjob
     drallion-kernelnext-release-tryjob
