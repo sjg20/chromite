@@ -165,13 +165,6 @@ BAD_LICENSE_PATTERNS = {
     "as-is",
 }
 
-# This used to provide overrides. I can't find a valid reason to add any more
-# here, though.
-PACKAGE_HOMEPAGES = {
-    # Example:
-    # 'x11-proto/glproto': ['http://www.x.org/'],
-}
-
 # List of overlays that must use 'metapackage' license for virtual packages.
 # Throw error for those, print a warning for others.
 OVERLAYS_METAPACKAGES_MUST_USE_VIRTUAL = [
@@ -716,9 +709,6 @@ to assign.  Once you've found it, copy the entire license file to:
 
         if self.skip:
             return
-
-        if self.fullname in PACKAGE_HOMEPAGES:
-            self.homepages = PACKAGE_HOMEPAGES[self.fullname]
 
         logging.info(
             "Read licenses for %s: %s",
