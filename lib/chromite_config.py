@@ -32,6 +32,8 @@ AUTO_SET_GOV_CONFIG = DIR / "autosetgov"
 
 AUTO_COP_CONFIG = DIR / "autocop"
 
+TELEMETRY_CONFIG = DIR / "telemetry.cfg"
+
 
 def initialize():
     """Initialize the config dir for use.
