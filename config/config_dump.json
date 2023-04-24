@@ -1003,7 +1003,6 @@
     "boards": [
       "ambassador"
     ],
-    "important": false,
     "models": [
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"ambassador\",\n  \"name\": \"ambassador\",\n  \"test_suites\": []\n}",
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"ambassador\",\n  \"name\": \"genesis\",\n  \"test_suites\": []\n}",
@@ -9136,7 +9135,6 @@
     "boards": [
       "excelsior"
     ],
-    "important": false,
     "models": [
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"excelsior\",\n  \"name\": \"excelsior\",\n  \"test_suites\": []\n}"
     ],
@@ -15262,7 +15260,6 @@
     "boards": [
       "kalista-cfm"
     ],
-    "important": false,
     "models": [
       "{\n  \"enable_skylab\": true,\n  \"lab_board_name\": \"kalista\",\n  \"name\": \"karma\",\n  \"test_suites\": []\n}"
     ],
