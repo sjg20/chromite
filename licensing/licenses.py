@@ -77,17 +77,12 @@ import os
 
 from chromite.lib import build_target_lib
 from chromite.lib import commandline
-from chromite.lib import osutils
 from chromite.licensing import licenses_lib
 
 
-EXTRA_LICENSES_DIR = os.path.join(
-    licenses_lib.SCRIPT_DIR, "extra_package_licenses"
-)
-
 # These packages exist as workarounds....
 EXTRA_PACKAGES = (
-    ("sys-kernel/Linux-2.6", ["http://www.kernel.org/"], ["GPL-2"], []),
+    ("sys-kernel/Linux-2.6", ["https://www.kernel.org/"], ["GPL-2"]),
 )
 
 
@@ -121,14 +116,8 @@ def LoadPackageInfo(sysroot, all_packages, generateMissing, packages):
     licensing.ProcessPackageLicenses()
     if detect_packages:
         # If we detected 'all' packages, we have to add in these extras.
-        for fullnamewithrev, homepages, names, files in EXTRA_PACKAGES:
-            license_texts = [
-                osutils.ReadFile(os.path.join(EXTRA_LICENSES_DIR, f))
-                for f in files
-            ]
-            licensing.AddExtraPkg(
-                fullnamewithrev, homepages, names, license_texts
-            )
+        for fullnamewithrev, homepages, names in EXTRA_PACKAGES:
+            licensing.AddExtraPkg(fullnamewithrev, homepages, names, [])
 
     return licensing
 
