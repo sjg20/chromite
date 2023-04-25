@@ -526,6 +526,45 @@ class TestPathResolver(cros_test_lib.MockTestCase):
     @mock.patch(
         "chromite.lib.cros_build_lib.IsInsideChroot", return_value=False
     )
+    def testCurrentDir(self, _):
+        """Tests chroot translation with the current dir."""
+        # Current directory is "out" directory.
+        self.SetChrootPath(
+            constants.SOURCE_ROOT, CUSTOM_CHROOT_PATH, out_path=Path(".")
+        )
+        resolver = path_util.ChrootPathResolver(
+            chroot_path=self.chroot_path,
+            out_path=self.out_path,
+        )
+
+        self.assertEqual(
+            "foo",
+            resolver.FromChroot(constants.CHROOT_OUT_ROOT / "foo"),
+        )
+        self.assertEqual(
+            str(constants.CHROOT_OUT_ROOT / "foo"),
+            resolver.ToChroot("foo"),
+        )
+
+        # Current directory is "chroot" directory.
+        self.SetChrootPath(constants.SOURCE_ROOT, ".", out_path=CUSTOM_OUT_PATH)
+        resolver = path_util.ChrootPathResolver(
+            chroot_path=self.chroot_path,
+            out_path=self.out_path,
+        )
+
+        self.assertEqual(
+            ".",
+            resolver.FromChroot("/"),
+        )
+        self.assertEqual(
+            "/",
+            resolver.ToChroot("."),
+        )
+
+    @mock.patch(
+        "chromite.lib.cros_build_lib.IsInsideChroot", return_value=False
+    )
     def testOutsideChrootOutdir(self, _):
         """Tests {To,From}Chroot() call from outside the chroot, with an out_dir."""
         self.SetChrootPath(constants.SOURCE_ROOT)

@@ -184,16 +184,19 @@ class ChrootPathResolver(object):
                 None, which means we don't have sufficient information to do the
                 translation.
         """
-        if src_root and not osutils.IsSubPath(path, src_root):
+        if not src_root:
+            raise ValueError("No source root to translate path from")
+        if not osutils.IsSubPath(path, src_root):
             return None
         dst_root = (
             dst_root_input() if callable(dst_root_input) else dst_root_input
         )
         if dst_root is None:
             raise ValueError("No target root to translate path to")
-        return os.path.join(
-            dst_root, path[len(str(src_root)) :].lstrip(os.path.sep)
-        ).rstrip(os.path.sep)
+        return str(
+            dst_root
+            / Path(path).absolute().relative_to(Path(src_root).absolute())
+        )
 
     def _GetChrootPath(self, path) -> str:
         """Translates a fully-expanded host |path| into a chroot equivalent.
@@ -277,7 +280,7 @@ class ChrootPathResolver(object):
 
         if new_path is None:
             # If no known root was identified, just prepend the chroot path.
-            new_path = self._TranslatePath(path, "", self._chroot_path)
+            new_path = self._TranslatePath(path, "/", self._chroot_path)
         else:
             # Check whether the resolved path happens to point back at the
             # chroot, in which case trim the chroot path or link prefix and
