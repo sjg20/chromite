@@ -80,12 +80,6 @@ from chromite.lib import commandline
 from chromite.licensing import licenses_lib
 
 
-# These packages exist as workarounds....
-EXTRA_PACKAGES = (
-    ("sys-kernel/Linux-2.6", ["https://www.kernel.org/"], ["GPL-2"]),
-)
-
-
 def LoadPackageInfo(sysroot, all_packages, generateMissing, packages):
     """Do the work when we're not called as a hook."""
     logging.info("Processing sysroot %s", sysroot)
@@ -114,10 +108,6 @@ def LoadPackageInfo(sysroot, all_packages, generateMissing, packages):
         ),
     )
     licensing.ProcessPackageLicenses()
-    if detect_packages:
-        # If we detected 'all' packages, we have to add in these extras.
-        for fullnamewithrev, homepages, names in EXTRA_PACKAGES:
-            licensing.AddExtraPkg(fullnamewithrev, homepages, names, [])
 
     return licensing
 
