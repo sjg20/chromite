@@ -93,9 +93,15 @@ class ChrootPathResolver(object):
             self._chroot_path = self._GetSourcePathChroot(
                 self._source_path, self._custom_chroot_path
             )
-            self._out_path = (
-                constants.DEFAULT_OUT_PATH if out_path is None else out_path
-            )
+            if out_path is not None:
+                self._out_path = out_path
+            elif self._source_path is not None:
+                self._out_path = (
+                    Path(self._source_path) / constants.DEFAULT_OUT_DIR
+                )
+            else:
+                self._out_path = constants.DEFAULT_OUT_PATH
+
             # The chroot link allows us to resolve paths when the chroot is
             # symlinked to the default location. This is generally not used, but
             # it is useful for CI for optimization purposes. We will trust them
