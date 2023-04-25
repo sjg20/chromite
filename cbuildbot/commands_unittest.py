@@ -1844,7 +1844,10 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
         for d in ("libexec/tast", "share/tast"):
             os.makedirs(os.path.join(self._cwd, d))
 
-        chroot = chroot_lib.Chroot(os.path.join(self._buildroot, "chroot"))
+        chroot = chroot_lib.Chroot(
+            os.path.join(self._buildroot, "chroot"),
+            out_path=self._buildroot / constants.DEFAULT_OUT_DIR,
+        )
         sysroot = sysroot_lib.Sysroot(os.path.join("/build", self._board))
         patch = self.PatchObject(
             artifacts_service, "BundleTastFiles", return_value=expected_tarball

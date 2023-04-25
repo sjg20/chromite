@@ -183,6 +183,7 @@ class ChrootTest(cros_test_lib.MockTempDirTestCase):
     def testEqual(self):
         """__eq__ method check."""
         path = "/chroot/path"
+        out_path = "/out/path"
         cache_dir = "/cache/dir"
         chrome_root = "/chrome/root"
         env = {"USE": "useflag", "FEATURES": "feature"}
@@ -194,7 +195,12 @@ class ChrootTest(cros_test_lib.MockTempDirTestCase):
         )
         chroot3 = chroot_lib.Chroot(path=path)
         chroot4 = chroot_lib.Chroot(path=path)
+        chroot5 = chroot_lib.Chroot(out_path=out_path)
+        chroot6 = chroot_lib.Chroot(out_path=out_path)
 
         self.assertEqual(chroot1, chroot2)
         self.assertEqual(chroot3, chroot4)
+        self.assertEqual(chroot5, chroot6)
         self.assertNotEqual(chroot1, chroot3)
+        self.assertNotEqual(chroot1, chroot5)
+        self.assertNotEqual(chroot3, chroot5)

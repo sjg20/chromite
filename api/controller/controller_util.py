@@ -52,7 +52,11 @@ def ParseChroot(chroot_message: common_pb2.Chroot) -> chroot_lib.Chroot:
     path = chroot_message.path or constants.DEFAULT_CHROOT_PATH
     cache_dir = chroot_message.cache_dir
     chrome_root = chroot_message.chrome_dir
-    out_path = Path(chroot_message.out_path) or constants.DEFAULT_OUT_PATH
+    out_path = (
+        Path(chroot_message.out_path)
+        if chroot_message.out_path
+        else constants.DEFAULT_OUT_PATH
+    )
 
     use_flags = [u.flag for u in chroot_message.env.use_flags]
     features = [f.feature for f in chroot_message.env.features]

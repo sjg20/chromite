@@ -74,6 +74,7 @@ class Chroot(object):
         if self.__class__ is other.__class__:
             return (
                 self.path == other.path
+                and self.out_path == other.out_path
                 and self.cache_dir == other.cache_dir
                 and self.chrome_root == other.chrome_root
                 and self.env == other.env
