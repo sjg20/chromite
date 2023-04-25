@@ -89,9 +89,7 @@ def IsSubPath(path, other):
     """Returns whether |path| is a sub path of |other|."""
     path = os.path.abspath(path)
     other = os.path.abspath(other)
-    if path == other:
-        return True
-    return path.startswith(other + os.sep)
+    return os.path.commonpath((path, other)) == other
 
 
 def AllocateFile(

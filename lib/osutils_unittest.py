@@ -28,6 +28,9 @@ class TestOsutils(cros_test_lib.TempDirTestCase):
     """General unittests for the osutils module."""
 
     def testIsSubPath(self):
+        self.assertTrue(osutils.IsSubPath("/a", "/"))
+        self.assertTrue(osutils.IsSubPath("/", "/"))
+
         self.assertTrue(osutils.IsSubPath("/a", "/a"))
         self.assertTrue(osutils.IsSubPath("/a", "/a/"))
 
