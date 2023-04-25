@@ -523,6 +523,31 @@ class TestPathResolver(cros_test_lib.MockTestCase):
             "/some/path", resolver.ToChroot("/another/path/some/path")
         )
 
+    @mock.patch(
+        "chromite.lib.cros_build_lib.IsInsideChroot", return_value=False
+    )
+    def testOutsideChrootOutdir(self, _):
+        """Tests {To,From}Chroot() call from outside the chroot, with an out_dir."""
+        self.SetChrootPath(constants.SOURCE_ROOT)
+        resolver = path_util.ChrootPathResolver()
+
+        self.assertEqual(
+            os.path.join(constants.SOURCE_ROOT, "out/foo"),
+            resolver.FromChroot(os.path.join(constants.CHROOT_OUT_ROOT, "foo")),
+        )
+        self.assertEqual(
+            os.path.join(constants.CHROOT_OUT_ROOT, "foo"),
+            resolver.ToChroot(os.path.join(constants.SOURCE_ROOT, "out/foo")),
+        )
+        self.assertEqual(
+            os.path.join(constants.SOURCE_ROOT, "out"),
+            resolver.FromChroot(constants.CHROOT_OUT_ROOT),
+        )
+        self.assertEqual(
+            str(constants.CHROOT_OUT_ROOT),
+            resolver.ToChroot(os.path.join(constants.SOURCE_ROOT, "out")),
+        )
+
 
 def test_normalize_paths_to_source_root_collapsing_sub_paths():
     """Test normalize removes sub paths."""
