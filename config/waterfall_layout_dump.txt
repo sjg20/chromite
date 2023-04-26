@@ -122,7 +122,6 @@
     adlnrvp-release
     adlrvp-release
     ambassador-release
-    asuka-release
     asurada-connectivitynext-release
     asurada-release
     atlas-connectivitynext-release
@@ -148,9 +147,6 @@
     brya-zephyr-release
     bubs-release
     caroline-ndktranslation-release
-    caroline-release
-    cave-release
-    chell-release
     cherry-release
     cherry64-release
     constitution-release
@@ -209,7 +205,6 @@
     kukui-arc-r-release
     kukui-kernelnext-release
     kukui-release
-    lars-release
     majolica-release
     midna-release
     nami-kernelnext-release
@@ -241,7 +236,6 @@
     sarien-release
     scarlet-release
     senor-release
-    sentry-release
     skyrim-chausie-release
     skyrim-kernelnext-release
     skyrim-release
@@ -322,11 +316,6 @@
   arm64-llvmpipe-llvm-next-toolchain-tryjob
   arm64-llvmpipe-llvm-toolchain-tryjob
   asuka-factory-glados-7828.B-factorybranch-tryjob
-  asuka-full-tryjob
-  asuka-llvm-next-toolchain-tryjob
-  asuka-llvm-toolchain-tryjob
-  asuka-payloads-tryjob
-  asuka-release-tryjob
   asurada-connectivitynext-full-tryjob
   asurada-connectivitynext-llvm-next-toolchain-tryjob
   asurada-connectivitynext-llvm-toolchain-tryjob
@@ -451,30 +440,15 @@
   bubs-payloads-tryjob
   bubs-release-tryjob
   caroline-factory-glados-7828.B-factorybranch-tryjob
-  caroline-full-tryjob
-  caroline-llvm-next-toolchain-tryjob
-  caroline-llvm-toolchain-tryjob
   caroline-ndktranslation-full-tryjob
   caroline-ndktranslation-llvm-next-toolchain-tryjob
   caroline-ndktranslation-llvm-toolchain-tryjob
   caroline-ndktranslation-payloads-tryjob
   caroline-ndktranslation-release-tryjob
-  caroline-payloads-tryjob
-  caroline-release-tryjob
   cave-factory-glados-7828.B-factorybranch-tryjob
-  cave-full-tryjob
-  cave-llvm-next-toolchain-tryjob
-  cave-llvm-toolchain-tryjob
-  cave-payloads-tryjob
-  cave-release-tryjob
   chell-chrome-no-afdo-uprev-pre-flight-branch-tryjob
   chell-factory-glados-7657.B-factorybranch-tryjob
   chell-factory-glados-7828.B-factorybranch-tryjob
-  chell-full-tryjob
-  chell-llvm-next-toolchain-tryjob
-  chell-llvm-toolchain-tryjob
-  chell-payloads-tryjob
-  chell-release-tryjob
   cherry-factory-cherry-14455.B-factorybranch-tryjob
   cherry-full-tryjob
   cherry-llvm-next-toolchain-tryjob
@@ -938,11 +912,6 @@
   kukui-payloads-tryjob
   kukui-release-tryjob
   lars-factory-glados-7828.B-factorybranch-tryjob
-  lars-full-tryjob
-  lars-llvm-next-toolchain-tryjob
-  lars-llvm-toolchain-tryjob
-  lars-payloads-tryjob
-  lars-release-tryjob
   littlejoe-full-tryjob
   littlejoe-llvm-next-toolchain-tryjob
   littlejoe-llvm-toolchain-tryjob
@@ -990,7 +959,6 @@
     adlnrvp-release-tryjob
     adlrvp-release-tryjob
     ambassador-release-tryjob
-    asuka-release-tryjob
     asurada-connectivitynext-release-tryjob
     asurada-release-tryjob
     atlas-connectivitynext-release-tryjob
@@ -1016,9 +984,6 @@
     brya-zephyr-release-tryjob
     bubs-release-tryjob
     caroline-ndktranslation-release-tryjob
-    caroline-release-tryjob
-    cave-release-tryjob
-    chell-release-tryjob
     cherry-release-tryjob
     cherry64-release-tryjob
     constitution-release-tryjob
@@ -1077,7 +1042,6 @@
     kukui-arc-r-release-tryjob
     kukui-kernelnext-release-tryjob
     kukui-release-tryjob
-    lars-release-tryjob
     majolica-release-tryjob
     midna-release-tryjob
     nami-kernelnext-release-tryjob
@@ -1109,7 +1073,6 @@
     sarien-release-tryjob
     scarlet-release-tryjob
     senor-release-tryjob
-    sentry-release-tryjob
     skyrim-chausie-release-tryjob
     skyrim-kernelnext-release-tryjob
     skyrim-release-tryjob
@@ -1309,11 +1272,6 @@
   senor-payloads-tryjob
   senor-release-tryjob
   sentry-factory-glados-7828.B-factorybranch-tryjob
-  sentry-full-tryjob
-  sentry-llvm-next-toolchain-tryjob
-  sentry-llvm-toolchain-tryjob
-  sentry-payloads-tryjob
-  sentry-release-tryjob
   skyrim-chausie-full-tryjob
   skyrim-chausie-llvm-next-toolchain-tryjob
   skyrim-chausie-llvm-toolchain-tryjob
