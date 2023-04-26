@@ -45,6 +45,7 @@ def cmd_downstream(opts):
         # Despite the underscore, this is an official part of the API.
         x["_change_number"]
         for x in cros.GetRelatedChangesInfo(arbitrary_change_number)["changes"]
+        if x["status"] == "NEW"
     ]
 
     # CL dependencies come in with newest first, so do reverse.
