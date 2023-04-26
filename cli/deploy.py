@@ -18,7 +18,7 @@ import logging
 import os
 from pathlib import Path
 import tempfile
-from typing import Dict, List, Set, Tuple
+from typing import Dict, List, NamedTuple, Set, Tuple
 
 from chromite.cli import command
 from chromite.lib import build_target_lib
@@ -57,6 +57,16 @@ _DLC_PACKAGE = "DLC_PACKAGE"
 _DLC_ENABLED = "DLC_ENABLED"
 _ENVIRONMENT_FILENAME = "environment.bz2"
 _DLC_INSTALL_ROOT = "/var/cache/dlc"
+
+
+class CpvInfo(NamedTuple):
+    """Holds a CPV and its associated information that we care about"""
+
+    cpv: Dict[str, package_info.CPV]
+    slot: str
+    rdep_raw: str
+    build_time: int
+    use: str
 
 
 class DeployError(Exception):
@@ -352,7 +362,7 @@ print(json.dumps(pkg_info))
 
     def _BuildDB(
         self,
-        cpv_info: List[Tuple[Dict[str, package_info.CPV], str, str, int, str]],
+        cpv_info: List[CpvInfo],
         process_rdeps: bool,
         process_rev_rdeps: bool,
         installed_db: Dict[str, Dict[str, PkgInfo]] = None,
@@ -360,7 +370,7 @@ print(json.dumps(pkg_info))
         """Returns a database of packages given a list of CPV info.
 
         Args:
-            cpv_info: A list of tuples containing package CPV and attributes.
+            cpv_info: A list of CpvInfos containing package CPV and attributes.
             process_rdeps: Whether to populate forward dependencies.
             process_rev_rdeps: Whether to populate reverse dependencies.
             installed_db: A database of installed packages for filtering
@@ -464,7 +474,9 @@ print(json.dumps(pkg_info))
 
         try:
             self.target_db = self._BuildDB(
-                json.loads(result.stdout), process_rdeps, process_rev_rdeps
+                [CpvInfo(*cpv_info) for cpv_info in json.loads(result.stdout)],
+                process_rdeps,
+                process_rev_rdeps,
             )
         except ValueError as e:
             raise self.VartreeError(str(e))
@@ -482,7 +494,7 @@ print(json.dumps(pkg_info))
             slot, rdep_raw, build_time, use = bintree.dbapi.aux_get(
                 cpv, ["SLOT", "RDEPEND", "BUILD_TIME", "USE"]
             )
-            binpkgs_info.append((cpv, slot, rdep_raw, build_time, use))
+            binpkgs_info.append(CpvInfo(cpv, slot, rdep_raw, build_time, use))
 
         try:
             self.binpkgs_db = self._BuildDB(
