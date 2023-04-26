@@ -14,7 +14,7 @@ For coreboot Downstreaming Rotation: go/coreboot:downstreaming
 from collections import defaultdict
 import logging
 import re
-from typing import Dict, List
+from typing import Dict, List, NamedTuple
 
 from chromite.lib import commandline
 from chromite.lib import config_lib
@@ -25,8 +25,155 @@ from chromite.lib import gerrit
 # for dependencies from the platform/ec repo.
 MAX_GERRIT_CHANGES = 225
 
+
+class PathDomains(NamedTuple):
+    """A filepath and the domains that must review it."""
+
+    path: str
+    domains: List[str]
+
+
 site_params = config_lib.GetSiteParams()
 gerrit_helper = gerrit.GetGerritHelper(site_params.EXTERNAL_REMOTE)
+
+REVIEWER_KEY_TEXT = "Original-Reviewed-by"
+
+
+def project_passed_googler_review_paths_check(
+    cl: dict, paths: List[str]
+) -> List[str]:
+    """Check paths that require further Googler review.
+
+    * Require additional review from any paths specified by paths.
+
+    Args:
+        cl: gerrit CL dict for use in parsing.
+        paths: paths to check for this project.
+
+    Returns:
+        warning_strings a list of strings to be printed for this CL.
+            * This must match the expected prototype used in check_func_dict.
+    """
+    warning_strings = []
+    revision = cl["revisions"][cl["current_revision"]]
+    for path in paths:
+        if any(path in s for s in revision["files"]):
+            warning_strings.append(
+                f"Found filepath({path}) which requires Googler review"
+            )
+    return warning_strings
+
+
+def project_passed_domain_restricted_paths_check(
+    cl: dict, path_domains: List[PathDomains]
+) -> List[str]:
+    """Check paths that require further Googler review.
+
+    * Require additional review if changes to paths specified by paths
+        are not reviewed by anyone in the domain list specified by paths.
+
+    Args:
+        cl: gerrit CL dict for use in parsing.
+        path_domains: list of tuples(path, restricted_domains), where path is the path to
+            be restricted, and restricted_domains is a list of domains that should
+            have been a part of the review.
+
+    Returns:
+        warning_strings a list of strings to be printed for this CL.
+            * This must match the expected prototype used in check_func_dict.
+    """
+    warning_strings = []
+    revision = cl["revisions"][cl["current_revision"]]
+    reviewers = []
+    for line in revision["commit"]["message"].splitlines():
+        if REVIEWER_KEY_TEXT in line:
+            reviewers.append(line[(len(REVIEWER_KEY_TEXT) + 1) :])
+    for path_domain in path_domains:
+        if any(path_domain[0] in s for s in revision["files"]):
+            reviewer_found = False
+            for domain in path_domain[1]:
+                if any(domain in s for s in reviewers):
+                    reviewer_found = True
+            if not reviewer_found:
+                warning_strings.append(
+                    f"Found filepath({path_domain[0]}) which requires Googler review from domain(s) {str(path_domain[1])}"
+                )
+    return warning_strings
+
+
+def check_commit_message(cl: dict, args: List[str]) -> List[str]:
+    """Check commit message for keywords.
+
+    * Throw warning if keywords found in commit message.
+        This can be useful for banned words as well as logistical issues
+            such as CL's with CQ-Depend.
+
+    Args:
+        cl: gerrit CL dict for use in parsing.
+        args: list of keywords to flag.
+
+    Returns:
+        warning_strings a list of strings to be printed for this CL.
+            * This must match the expected prototype used in check_func_dict.
+    """
+    warning_strings = []
+    for banned_term in args:
+        if re.search(
+            banned_term,
+            cl["revisions"][cl["current_revision"]]["commit"]["message"],
+        ):
+            printable_term = "".join(banned_term.splitlines())
+            warning_strings.append(f"Found {printable_term} in change!")
+    return warning_strings
+
+
+def check_hashtags(cl: dict, args: List[str]) -> List[str]:
+    """Check hashtags for keywords.
+
+    * Throw warning if keywords found in hashtags..
+
+    Args:
+        cl: gerrit CL dict for use in parsing.
+        args: list of keywords to flag.
+
+    Returns:
+        warning_strings a list of strings to be printed for this CL.
+            * This must match the expected prototype used in check_func_dict.
+    """
+    warning_strings = []
+    for banned_hashtag in args:
+        if banned_hashtag in cl["hashtags"]:
+            warning_strings.append(
+                f"Change marked with hashtag {banned_hashtag}"
+            )
+    return warning_strings
+
+
+# Map of function pointers to be called when the project in the key is encountered.
+#
+#    Map format:
+#       Key:
+#           project name
+#       Value:
+#           List of tuples(function pointer, list of arguments) where the format of the list
+#               can vary across functions.
+#
+#    Functions should take a CL and perform any additional checks required by the project
+#    prior to downstreaming.
+#
+#    Args:
+#        gerrit CL dict for use in parsing
+#        dynamic args for use in parsing
+#    Returns:
+#        List of warning strings to be printed for this CL
+check_func_dict = {
+    "test": [
+        [project_passed_googler_review_paths_check, [".md"]],
+        [project_passed_domain_restricted_paths_check, [(".md", ["@md.com"])]],
+        [check_commit_message, ["\nC[Qq]-Depend:.*"]],
+        [check_hashtags, ["copybot-skip"]],
+    ],
+}
 
 
 def _find_cls_to_downstream(project: str) -> List[Dict]:
@@ -50,13 +197,12 @@ def _find_cls_to_downstream(project: str) -> List[Dict]:
     return copybot_downstream_cls
 
 
-def _check_cl(
-    downstream_candidate_cl: Dict,
-) -> List[str]:
+def _check_cl(downstream_candidate_cl: Dict, project: str) -> List[str]:
     """Check whether the given CL is OK to downstream.
 
     Args:
         downstream_candidate_cl: Dict representing the CL that we want to downstream.
+        project: The name of the project.
 
     Returns:
         warnings: A list of warning strings stating problems with the CL.
@@ -68,15 +214,10 @@ def _check_cl(
         "change info:\n\t%s",
         "\n\t".join(f"{k}:{v}" for k, v in downstream_candidate_cl.items()),
     )
-    if "copybot-skip" in downstream_candidate_cl["hashtags"]:
-        warnings.append("Change marked with copybot-skip")
-    if re.search(
-        "\nC[Qq]-Depend:",
-        downstream_candidate_cl["revisions"][
-            downstream_candidate_cl["current_revision"]
-        ]["commit"]["message"],
-    ):
-        warnings.append("Found Cq-Depend in change!")
+    for check_func in check_func_dict.get(project, []):
+        tmp_warnings = check_func[0](downstream_candidate_cl, check_func[1])
+        if tmp_warnings:
+            warnings.extend(tmp_warnings)
 
     return warnings
 
@@ -224,7 +365,7 @@ def cmd_downstream(opts):
             cls_to_downstream.append(related_change_number)
 
     for change in full_cl_list:
-        warnings = _check_cl(change)
+        warnings = _check_cl(change, opts.project)
         if warnings:
             all_warnings[change["_number"]] = warnings
 
