@@ -567,11 +567,18 @@ class ManifestCheckout(Manifest):
         # The include dir is always the manifest repo, not where the manifest
         # file happens to live.
         manifest_include_dir = os.path.join(self.root, ".repo", "manifests")
-        self.manifest_branch = self._GetManifestsBranch(self.root)
         self._content_merging = {}
         Manifest.__init__(
             self, self.manifest_path, manifest_include_dir=manifest_include_dir
         )
+
+    @property
+    def manifest_branch(self):
+        # TODO: use functools.cached_property once min Python version is 3.8.
+        if not hasattr(self, "_manifest_branch"):
+            # pylint: disable=attribute-defined-outside-init
+            self._manifest_branch = self._GetManifestsBranch(self.root)
+        return self._manifest_branch
 
     @staticmethod
     def _NormalizeArgs(path, manifest_path=None, search=True):
