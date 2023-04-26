@@ -226,12 +226,17 @@ def parse_tidy_fixes_file(
         # Sometimes tidy will give us empty file names; they don't map to any file,
         # and are generally issues it has with CFLAGS, etc. File offsets don't
         # matter in those, so use an empty map.
+        offsets = LineOffsetMap(())
         if file_path:
-            offsets = LineOffsetMap.for_text(
-                file_path.read_text(encoding="utf-8")
-            )
-        else:
-            offsets = LineOffsetMap(())
+            try:
+                offsets = LineOffsetMap.for_text(
+                    file_path.read_text(encoding="utf-8")
+                )
+            except FileNotFoundError:
+                logging.warning(
+                    "Cannot get offsets for %r since file does not exist.",
+                    file_path,
+                )
         cached_line_offsets[file_path] = offsets
         return offsets
 
