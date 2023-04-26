@@ -1,33 +1,14 @@
-# Copyright 2023 The ChromiumOS Authors
+# Copyright 2022 The ChromiumOS Authors
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-"""Hades configs."""
+"""Draco configs."""
 
 from chromite.lib.firmware import servo_lib
 
 
-_COMMON_PACKAGES = (
-    "chromeos-ec",
-    "coreboot",
-    "depthcharge",
-    "libpayload",
-    "vboot_reference",
-)
-
-BUILD_WORKON_PACKAGES = _COMMON_PACKAGES + (
-    "coreboot-private-files-baseboard-brya",
-)
-
-BUILD_PACKAGES = _COMMON_PACKAGES + (
-    "chromeos-bootimage",
-    "coreboot-private-files",
-    "intel-adlfsp",
-)
-
-
 def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
-    """Get DUT controls and programmer argument to flash Hades.
+    """Get DUT controls and programmer argument to flash Draco.
 
     Each board needs specific config including the voltage for Vref, to turn
     on and turn off the SPI flash. get_config() returns servo_lib.ServoConfig
@@ -53,11 +34,19 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
     # Sleep to ensure the SoC rails get chance to discharge enough.
     dut_control_on.append(["sleep:5"])
     # Block power sequence (PG_PP3300_S5_OD) in order to
-    # prevent leakage to the AP on the SPI pins - b:226438219
-    dut_control_on.append(["ec_uart_cmd:blockseq on"])
-    dut_control_off.append(["ec_uart_cmd:blockseq off"])
+    dut_control_on.append(["ec_uart_cmd:gpioset PG_PP3300_S5_OD 0"])
+    # Turning on AP but it'll stay in S5 because PG_PP3300_S5 is blocked.
+    # This allows AP to set BIOS SPI pins to high-z, preventing leakage.
+    dut_control_on.append(["ec_uart_cmd:gpioset EN_S5_RAILS 1"])
+    # Undo the changes on exit.
+    dut_control_off.append(["ec_uart_cmd:gpioset EN_S5_RAILS 0"])
+    dut_control_off.append(["ec_uart_cmd:gpioset PG_PP3300_S5_OD 1"])
 
-    if servo.is_c2d2:
+    if servo.is_micro:
+        dut_control_on.append(["ap_flash_select:off"])
+        # Supply power to PP3300_BIOS (via PP3300_SERVO_PCH_SPI).
+        dut_control_on.append(["spi2_vref:pp3300"])
+        dut_control_off.append(["spi2_vref:off"])
         programmer = "raiden_debug_spi:serial=%s" % servo.serial
     elif servo.is_ccd:
         dut_control_off.append(["power_state:reset"])
