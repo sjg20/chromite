@@ -306,6 +306,7 @@ class GerritHelper(object):
         start=None,
         bypass_cache=True,
         verbose=False,
+        convert_results=True,
         **kwargs,
     ):
         """Free-form query for gerrit changes.
@@ -325,6 +326,8 @@ class GerritHelper(object):
             start: Offset in the result set to start at.
             bypass_cache: Query each change to make sure data is up to date.
             verbose: Whether to get all revisions and details about a change.
+            convert_results: Whether to convert the results from the new json
+                schema to the old SQL schema.
             **kwargs: A dict of query parameters, as described here:
                 https://gerrit-review.googlesource.com/Documentation/rest-api-changes.html#list-changes
 
@@ -343,6 +346,16 @@ class GerritHelper(object):
         o_params = ["DETAILED_ACCOUNTS", "ALL_REVISIONS", "DETAILED_LABELS"]
         if current_patch:
             o_params.extend(["CURRENT_COMMIT", "CURRENT_REVISION"])
+        elif verbose and not convert_results:
+            o_params = [
+                "ALL_REVISIONS",
+                "ALL_FILES",
+                "ALL_COMMITS",
+                "DETAILED_LABELS",
+                "MESSAGES",
+                "DOWNLOAD_COMMANDS",
+                "CHECK",
+            ]
 
         if change and cros_patch.ParseGerritNumber(change) and not query_kwds:
             if dryrun:
@@ -428,11 +441,11 @@ class GerritHelper(object):
             result = self.GetMultipleChangeDetail(
                 [x["_number"] for x in result], verbose=verbose
             )
-
-        result = [
-            cros_patch.GerritPatch.ConvertQueryResults(x, self.host)
-            for x in result
-        ]
+        if convert_results:
+            result = [
+                cros_patch.GerritPatch.ConvertQueryResults(x, self.host)
+                for x in result
+            ]
         if sort:
             result = sorted(result, key=operator.itemgetter(sort))
         if raw:
