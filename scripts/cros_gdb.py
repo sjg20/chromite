@@ -651,11 +651,18 @@ def main(argv):
     )
     parser.add_argument(
         "-g",
-        "--gdb_args",
+        "--gdb-args",
         action="append",
         default=[],
         help="Arguments to gdb itself.  If multiple arguments are"
         " passed, each argument needs a separate '-g' flag.",
+    )
+    # TODO(build): Delete by Jan 2024.
+    parser.add_argument(
+        "--gdb_args",
+        action="append",
+        deprecated="Use --gdb-args instead",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--remote",
