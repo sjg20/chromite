@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto2',
   serialized_options=b'Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x1c\x63hromite/api/build_api.proto\x1a google/protobuf/descriptor.proto\"\x86\x01\n\x16\x42uildApiServiceOptions\x12\x0e\n\x06module\x18\x01 \x02(\t\x12/\n\x15service_chroot_assert\x18\x02 \x01(\x0e\x32\x10.ChrootAssertion\x12+\n\x12service_visibility\x18\x03 \x01(\x0e\x32\x0f.ListVisibility\"\x90\x01\n\x15\x42uildApiMethodOptions\x12\x1b\n\x13implementation_name\x18\x01 \x01(\t\x12.\n\x14method_chroot_assert\x18\x02 \x01(\x0e\x32\x10.ChrootAssertion\x12*\n\x11method_visibility\x18\x03 \x01(\x0e\x32\x0f.ListVisibility*<\n\x0f\x43hrootAssertion\x12\x10\n\x0cNO_ASSERTION\x10\x00\x12\n\n\x06INSIDE\x10\x01\x12\x0b\n\x07OUTSIDE\x10\x02*E\n\x0eListVisibility\x12\x14\n\x10LV_NOT_SPECIFIED\x10\x00\x12\x0e\n\nLV_VISIBLE\x10\x01\x12\r\n\tLV_HIDDEN\x10\x02:S\n\x0fservice_options\x12\x1f.google.protobuf.ServiceOptions\x18\xd8\xad\x03 \x01(\x0b\x32\x17.BuildApiServiceOptions:P\n\x0emethod_options\x12\x1e.google.protobuf.MethodOptions\x18\xd8\xad\x03 \x01(\x0b\x32\x16.BuildApiMethodOptionsB8Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api'
+  serialized_pb=b'\n\x1c\x63hromite/api/build_api.proto\x1a google/protobuf/descriptor.proto\"\xbe\x01\n\x16\x42uildApiServiceOptions\x12\x0e\n\x06module\x18\x01 \x02(\t\x12/\n\x15service_chroot_assert\x18\x02 \x01(\x0e\x32\x10.ChrootAssertion\x12+\n\x12service_visibility\x18\x03 \x01(\x0e\x32\x0f.ListVisibility\x12\x36\n\x1aservice_branched_execution\x18\x04 \x01(\x0e\x32\x12.BranchedExecution\"\xc7\x01\n\x15\x42uildApiMethodOptions\x12\x1b\n\x13implementation_name\x18\x01 \x01(\t\x12.\n\x14method_chroot_assert\x18\x02 \x01(\x0e\x32\x10.ChrootAssertion\x12*\n\x11method_visibility\x18\x03 \x01(\x0e\x32\x0f.ListVisibility\x12\x35\n\x19method_branched_execution\x18\x04 \x01(\x0e\x32\x12.BranchedExecution*<\n\x0f\x43hrootAssertion\x12\x10\n\x0cNO_ASSERTION\x10\x00\x12\n\n\x06INSIDE\x10\x01\x12\x0b\n\x07OUTSIDE\x10\x02*E\n\x0eListVisibility\x12\x14\n\x10LV_NOT_SPECIFIED\x10\x00\x12\x0e\n\nLV_VISIBLE\x10\x01\x12\r\n\tLV_HIDDEN\x10\x02*U\n\x11\x42ranchedExecution\x12\x19\n\x15\x45XECUTE_NOT_SPECIFIED\x10\x00\x12\x14\n\x10\x45XECUTE_BRANCHED\x10\x01\x12\x0f\n\x0b\x45XECUTE_TOT\x10\x02:S\n\x0fservice_options\x12\x1f.google.protobuf.ServiceOptions\x18\xd8\xad\x03 \x01(\x0b\x32\x17.BuildApiServiceOptions:P\n\x0emethod_options\x12\x1e.google.protobuf.MethodOptions\x18\xd8\xad\x03 \x01(\x0b\x32\x16.BuildApiMethodOptionsB8Z6go.chromium.org/chromiumos/infra/proto/go/chromite/api'
   ,
   dependencies=[google_dot_protobuf_dot_descriptor__pb2.DESCRIPTOR,])
 
@@ -50,8 +50,8 @@ _CHROOTASSERTION = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=350,
-  serialized_end=410,
+  serialized_start=461,
+  serialized_end=521,
 )
 _sym_db.RegisterEnumDescriptor(_CHROOTASSERTION)
 
@@ -81,18 +81,52 @@ _LISTVISIBILITY = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   serialized_options=None,
-  serialized_start=412,
-  serialized_end=481,
+  serialized_start=523,
+  serialized_end=592,
 )
 _sym_db.RegisterEnumDescriptor(_LISTVISIBILITY)
 
 ListVisibility = enum_type_wrapper.EnumTypeWrapper(_LISTVISIBILITY)
+_BRANCHEDEXECUTION = _descriptor.EnumDescriptor(
+  name='BranchedExecution',
+  full_name='BranchedExecution',
+  filename=None,
+  file=DESCRIPTOR,
+  create_key=_descriptor._internal_create_key,
+  values=[
+    _descriptor.EnumValueDescriptor(
+      name='EXECUTE_NOT_SPECIFIED', index=0, number=0,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='EXECUTE_BRANCHED', index=1, number=1,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+    _descriptor.EnumValueDescriptor(
+      name='EXECUTE_TOT', index=2, number=2,
+      serialized_options=None,
+      type=None,
+      create_key=_descriptor._internal_create_key),
+  ],
+  containing_type=None,
+  serialized_options=None,
+  serialized_start=594,
+  serialized_end=679,
+)
+_sym_db.RegisterEnumDescriptor(_BRANCHEDEXECUTION)
+
+BranchedExecution = enum_type_wrapper.EnumTypeWrapper(_BRANCHEDEXECUTION)
 NO_ASSERTION = 0
 INSIDE = 1
 OUTSIDE = 2
 LV_NOT_SPECIFIED = 0
 LV_VISIBLE = 1
 LV_HIDDEN = 2
+EXECUTE_NOT_SPECIFIED = 0
+EXECUTE_BRANCHED = 1
+EXECUTE_TOT = 2
 
 SERVICE_OPTIONS_FIELD_NUMBER = 55000
 service_options = _descriptor.FieldDescriptor(
@@ -141,6 +175,13 @@ _BUILDAPISERVICEOPTIONS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='service_branched_execution', full_name='BuildApiServiceOptions.service_branched_execution', index=3,
+      number=4, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -154,7 +195,7 @@ _BUILDAPISERVICEOPTIONS = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=67,
-  serialized_end=201,
+  serialized_end=257,
 )
 
 
@@ -187,6 +228,13 @@ _BUILDAPIMETHODOPTIONS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='method_branched_execution', full_name='BuildApiMethodOptions.method_branched_execution', index=3,
+      number=4, type=14, cpp_type=8, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
   ],
   extensions=[
   ],
@@ -199,18 +247,21 @@ _BUILDAPIMETHODOPTIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=204,
-  serialized_end=348,
+  serialized_start=260,
+  serialized_end=459,
 )
 
 _BUILDAPISERVICEOPTIONS.fields_by_name['service_chroot_assert'].enum_type = _CHROOTASSERTION
 _BUILDAPISERVICEOPTIONS.fields_by_name['service_visibility'].enum_type = _LISTVISIBILITY
+_BUILDAPISERVICEOPTIONS.fields_by_name['service_branched_execution'].enum_type = _BRANCHEDEXECUTION
 _BUILDAPIMETHODOPTIONS.fields_by_name['method_chroot_assert'].enum_type = _CHROOTASSERTION
 _BUILDAPIMETHODOPTIONS.fields_by_name['method_visibility'].enum_type = _LISTVISIBILITY
+_BUILDAPIMETHODOPTIONS.fields_by_name['method_branched_execution'].enum_type = _BRANCHEDEXECUTION
 DESCRIPTOR.message_types_by_name['BuildApiServiceOptions'] = _BUILDAPISERVICEOPTIONS
 DESCRIPTOR.message_types_by_name['BuildApiMethodOptions'] = _BUILDAPIMETHODOPTIONS
 DESCRIPTOR.enum_types_by_name['ChrootAssertion'] = _CHROOTASSERTION
 DESCRIPTOR.enum_types_by_name['ListVisibility'] = _LISTVISIBILITY
+DESCRIPTOR.enum_types_by_name['BranchedExecution'] = _BRANCHEDEXECUTION
 DESCRIPTOR.extensions_by_name['service_options'] = service_options
 DESCRIPTOR.extensions_by_name['method_options'] = method_options
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
