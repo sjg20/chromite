@@ -38,6 +38,7 @@ from chromite.api.gen.chromite.api import sdk_pb2
 from chromite.api.gen.chromite.api import sysroot_pb2
 from chromite.api.gen.chromite.api import test_pb2
 from chromite.api.gen.chromite.api import toolchain_pb2
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import osutils
 from chromite.utils import memoize
@@ -77,6 +78,10 @@ class ControllerModuleNotDefinedError(Error):
 
 class ServiceControllerNotFoundError(Error):
     """Error raised when the service's controller cannot be imported."""
+
+
+class TotSdkError(Error):
+    """When attempting to run a ToT endpoint inside the SDK."""
 
 
 # API Method Errors.
@@ -245,6 +250,24 @@ class Router(object):
             MethodNotFoundError when the method cannot be retrieved from the
                 module.
         """
+        # Fetch the method options for chroot and method name overrides.
+        method_options = self._get_method_options(service_name, method_name)
+
+        # Check the chroot settings before running.
+        service_options = self._get_service_options(service_name, method_name)
+
+        if self._needs_branch_reexecution(
+            service_options, method_options, config
+        ):
+            logging.info("Re-executing the endpoint on the branched BAPI.")
+            return self._reexecute_branched(
+                input_handler,
+                output_handlers,
+                config_handler,
+                service_name,
+                method_name,
+            )
+
         input_msg = self.get_input_message_instance(service_name, method_name)
         input_handler.read_into(input_msg)
 
@@ -253,15 +276,18 @@ class Router(object):
             service_name, method_name
         )
 
-        # Fetch the method options for chroot and method name overrides.
-        method_options = self._get_method_options(service_name, method_name)
+        chroot_reexec = self._needs_chroot_reexecution(
+            service_options, method_options, config
+        )
 
-        # Check the chroot settings before running.
-        service_options = self._get_service_options(service_name, method_name)
-        if self._ChrootCheck(service_options, method_options, config):
-            # Run inside the chroot instead.
+        if chroot_reexec and not constants.IS_BRANCHED_CHROMITE:
+            # Can't run inside the SDK with ToT chromite.
+            raise TotSdkError(
+                f"Cannot run ToT {service_name}/{method_name} inside the SDK."
+            )
+        elif chroot_reexec:
             logging.info("Re-executing the endpoint inside the chroot.")
-            return self._ReexecuteInside(
+            return self._reexecute_inside(
                 input_msg,
                 output_msg,
                 config,
@@ -292,7 +318,35 @@ class Router(object):
 
         return return_code
 
-    def _ChrootCheck(
+    def _needs_branch_reexecution(
+        self,
+        service_options: "google.protobuf.Message",
+        method_options: "google.protobuf.Message",
+        config: "api_config.ApiConfig",
+    ) -> bool:
+        """Check if the call needs to be re-executed on the branched BAPI."""
+        if not config.run_endpoint:
+            # Do not re-exec for validate only and mock calls.
+            return False
+
+        if method_options.HasField("method_branched_execution"):
+            # Prefer the method option when set.
+            branched_exec = method_options.method_branched_execution
+        elif service_options.HasField("service_branched_execution"):
+            # Fall back to the service option.
+            branched_exec = service_options.service_branched_execution
+        else:
+            branched_exec = build_api_pb2.EXECUTE_BRANCHED
+
+        if branched_exec in (
+            build_api_pb2.EXECUTE_NOT_SPECIFIED,
+            build_api_pb2.EXECUTE_BRANCHED,
+        ):
+            return not constants.IS_BRANCHED_CHROMITE
+
+        return False
+
+    def _needs_chroot_reexecution(
         self,
         service_options: "google.protobuf.Message",
         method_options: "google.protobuf.Message",
@@ -332,7 +386,58 @@ class Router(object):
 
         return False
 
-    def _ReexecuteInside(
+    def _reexecute_branched(
+        self,
+        input_handler: "message_util.MessageHandler",
+        output_handlers: List["message_util.MessageHandler"],
+        config_handler: "message_util.MessageHandler",
+        service_name: str,
+        method_name: str,
+    ):
+        """Re-execute the call on the branched BAPI.
+
+        Args:
+            input_handler: Input message handler.
+            output_handlers: Output message handlers.
+            config_handler: Config message handler.
+            service_name: The name of the service to run.
+            method_name: The name of the method to run.
+        """
+        cmd = [
+            constants.BRANCHED_CHROMITE_DIR / "bin" / "build_api",
+            f"{service_name}/{method_name}",
+            input_handler.input_arg,
+            input_handler.path,
+            config_handler.config_arg,
+            config_handler.path,
+            "--debug",
+        ]
+        for output_handler in output_handlers:
+            cmd += [
+                output_handler.output_arg,
+                output_handler.path,
+            ]
+
+        try:
+            result = cros_build_lib.run(
+                cmd,
+                check=False,
+            )
+        except cros_build_lib.RunCommandError:
+            # A non-zero return code will not result in an error, but one
+            # is still thrown when the command cannot be run in the first
+            # place. This is known to happen at least when the PATH does
+            # not include the chromite bin dir.
+            raise CrosSdkNotRunError("Unable to execute the branched BAPI.")
+
+        logging.info(
+            "Endpoint execution completed, return code: %d",
+            result.returncode,
+        )
+
+        return result.returncode
+
+    def _reexecute_inside(
         self,
         input_msg: "google.protobuf.Message",
         output_msg: "google.protobuf.Message",

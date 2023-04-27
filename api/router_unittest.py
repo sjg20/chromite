@@ -14,6 +14,7 @@ from chromite.api import message_util
 from chromite.api import router
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.lib import chroot_lib
+from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
@@ -484,6 +485,101 @@ class RouterTest(
         empty_msg = build_api_test_pb2.TestResultMessage()
         self.binary_output_handler.read_into(output_msg)
         self.assertEqual(empty_msg, output_msg)
+
+    def test_tot_service_tot_method(self):
+        """Test no re-exec for ToT->ToT."""
+        self.PatchObject(
+            self.router,
+            "_GetMethod",
+            return_value=self._mock_callable(expect_called=True),
+        )
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+        self.PatchObject(constants, "IS_BRANCHED_CHROMITE", new=False)
+
+        self.router.Route(
+            "chromite.api.TotExecutionService",
+            "TotServiceTotMethod",
+            self.api_config,
+            self.binary_input_handler,
+            [self.binary_output_handler],
+            self.binary_config_handler,
+        )
+
+    def test_tot_service_tot_method_inside(self):
+        """Test error raised when method runs ToT & inside the SDK."""
+        self.PatchObject(
+            self.router,
+            "_GetMethod",
+            return_value=self._mock_callable(expect_called=False),
+        )
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+        self.PatchObject(constants, "IS_BRANCHED_CHROMITE", new=False)
+
+        with self.assertRaises(router.TotSdkError):
+            self.router.Route(
+                "chromite.api.TotExecutionService",
+                "TotServiceTotMethodInside",
+                self.api_config,
+                self.binary_input_handler,
+                [self.binary_output_handler],
+                self.binary_config_handler,
+            )
+
+    def test_tot_service_branched_method(self):
+        """Re-execute branched BAPI."""
+        self.PatchObject(
+            self.router,
+            "_GetMethod",
+            return_value=self._mock_callable(expect_called=False),
+        )
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+        self.PatchObject(constants, "IS_BRANCHED_CHROMITE", new=False)
+        self.PatchObject(constants, "BRANCHED_CHROMITE_DIR", new=self.tempdir)
+
+        service = "chromite.api.TotExecutionService"
+        method = "TotServiceBranchedMethod"
+        self.router.Route(
+            service,
+            method,
+            self.api_config,
+            self.binary_input_handler,
+            [self.binary_output_handler],
+            self.binary_config_handler,
+        )
+
+        self.assertCommandContains(
+            [self.tempdir / "bin" / "build_api", f"{service}/{method}"]
+        )
+
+    def test_tot_service_branched_method_inside(self):
+        """Re-execute branched BAPI.
+
+        Chroot handling delegated to the branched BAPI, so should be identical
+        to the branched method case above.
+        """
+        self.PatchObject(
+            self.router,
+            "_GetMethod",
+            return_value=self._mock_callable(expect_called=False),
+        )
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+        self.PatchObject(constants, "IS_BRANCHED_CHROMITE", new=False)
+        self.PatchObject(constants, "BRANCHED_CHROMITE_DIR", new=self.tempdir)
+
+        service = "chromite.api.TotExecutionService"
+        method = "TotServiceBranchedMethodInside"
+        self.router.Route(
+            service,
+            method,
+            self.api_config,
+            self.binary_input_handler,
+            [self.binary_output_handler],
+            self.binary_config_handler,
+        )
+
+        self.assertCommandContains(
+            [self.tempdir / "bin" / "build_api", f"{service}/{method}"]
+        )
 
     def testInvalidService(self):
         """Test invalid service call."""
