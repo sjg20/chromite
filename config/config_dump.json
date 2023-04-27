@@ -22727,7 +22727,6 @@
       "staryu"
     ],
     "chrome_sdk_build_chrome": false,
-    "important": false,
     "vm_tests_override": null
   },
   "staryu-release-tryjob": {
