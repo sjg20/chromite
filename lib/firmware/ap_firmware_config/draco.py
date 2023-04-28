@@ -36,9 +36,15 @@ def get_config(servo: servo_lib.Servo) -> servo_lib.ServoConfig:
     # Block power sequence (PG_PP3300_S5_OD) in order to
     # prevent leakage to the AP on the SPI pins - b:226438219
     dut_control_on.append(["ec_uart_cmd:blockseq on"])
+    dut_control_on.append(["ec_uart_cmd:gpioset EN_S5_RAILS 1"])
+    # Undo the changes.
+    dut_control_off.append(["ec_uart_cmd:gpioset EN_S5_RAILS 0"])
     dut_control_off.append(["ec_uart_cmd:blockseq off"])
 
     if servo.is_c2d2:
+        dut_control_on.append(["ap_flash_select:off"])
+        dut_control_on.append(["spi2_vref:pp3300"])
+        dut_control_off.append(["spi2_vref:off"])
         programmer = "raiden_debug_spi:serial=%s" % servo.serial
     elif servo.is_ccd:
         dut_control_off.append(["power_state:reset"])
