@@ -146,6 +146,7 @@
     brya-release
     brya-zephyr-release
     bubs-release
+    buddy-cfm-release
     caroline-ndktranslation-release
     cherry-release
     cherry64-release
@@ -177,6 +178,7 @@
     grunt-arc-r-release
     grunt-kernelnext-release
     grunt-release
+    guado-cfm-release
     guado-macrophage-release
     guado_labstation-release
     guybrush-kernelnext-release
@@ -231,6 +233,7 @@
     reven-release
     reven-vmtest-release
     rex-release
+    rikku-cfm-release
     sand-release
     sarien-kernelnext-release
     sarien-release
@@ -439,6 +442,11 @@
   bubs-llvm-toolchain-tryjob
   bubs-payloads-tryjob
   bubs-release-tryjob
+  buddy-cfm-full-tryjob
+  buddy-cfm-llvm-next-toolchain-tryjob
+  buddy-cfm-llvm-toolchain-tryjob
+  buddy-cfm-payloads-tryjob
+  buddy-cfm-release-tryjob
   caroline-factory-glados-7828.B-factorybranch-tryjob
   caroline-ndktranslation-full-tryjob
   caroline-ndktranslation-llvm-next-toolchain-tryjob
@@ -755,6 +763,11 @@
   grunt-payloads-tryjob
   grunt-release-basic-tryjob
   grunt-release-tryjob
+  guado-cfm-full-tryjob
+  guado-cfm-llvm-next-toolchain-tryjob
+  guado-cfm-llvm-toolchain-tryjob
+  guado-cfm-payloads-tryjob
+  guado-cfm-release-tryjob
   guado-macrophage-full-tryjob
   guado-macrophage-llvm-next-toolchain-tryjob
   guado-macrophage-llvm-toolchain-tryjob
@@ -983,6 +996,7 @@
     brya-release-tryjob
     brya-zephyr-release-tryjob
     bubs-release-tryjob
+    buddy-cfm-release-tryjob
     caroline-ndktranslation-release-tryjob
     cherry-release-tryjob
     cherry64-release-tryjob
@@ -1014,6 +1028,7 @@
     grunt-arc-r-release-tryjob
     grunt-kernelnext-release-tryjob
     grunt-release-tryjob
+    guado-cfm-release-tryjob
     guado-macrophage-release-tryjob
     guado_labstation-release-tryjob
     guybrush-kernelnext-release-tryjob
@@ -1068,6 +1083,7 @@
     reven-release-tryjob
     reven-vmtest-release-tryjob
     rex-release-tryjob
+    rikku-cfm-release-tryjob
     sand-release-tryjob
     sarien-kernelnext-release-tryjob
     sarien-release-tryjob
@@ -1238,6 +1254,11 @@
   rex-llvm-toolchain-tryjob
   rex-payloads-tryjob
   rex-release-tryjob
+  rikku-cfm-full-tryjob
+  rikku-cfm-llvm-next-toolchain-tryjob
+  rikku-cfm-llvm-toolchain-tryjob
+  rikku-cfm-payloads-tryjob
+  rikku-cfm-release-tryjob
   sand-factory-reef-8811.B-factorybranch-tryjob
   sand-full-tryjob
   sand-llvm-next-toolchain-tryjob
