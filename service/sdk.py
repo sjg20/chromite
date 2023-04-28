@@ -338,7 +338,7 @@ def Update(arguments: UpdateArguments) -> Optional[int]:
     return GetChrootVersion()
 
 
-def _GetRemoteLatestFileValue(key: str) -> str:
+def _get_remote_latest_file_value(key: str) -> str:
     """Return a value from the remote latest SDK file on GS://, if it exists.
 
     Returns:
@@ -363,39 +363,82 @@ def _GetRemoteLatestFileValue(key: str) -> str:
     return contents_dict[key]
 
 
-def GetLatestVersion() -> str:
+def get_latest_version() -> str:
     """Return the latest SDK version according to GS://."""
-    return _GetRemoteLatestFileValue("LATEST_SDK")
+    return _get_remote_latest_file_value("LATEST_SDK")
 
 
-def GetLatestUprevTargetVersion() -> str:
+def get_latest_uprev_target_version() -> str:
     """Return the latest-built target version for SDK uprevs form GS://."""
-    return _GetRemoteLatestFileValue("LATEST_SDK_UPREV_TARGET")
+    return _get_remote_latest_file_value("LATEST_SDK_UPREV_TARGET")
 
 
-def _UprevLocalSdkVersionFile(
-    source_root: Path,
+def _uprev_local_sdk_version_file(
     new_sdk_version: str,
 ) -> bool:
     """Update the local SDK version file (but don't commit the change).
 
     Args:
-        source_root: The root directory of the ChromiumOS checkout.
         new_sdk_version: The SDK version to update to.
 
     Returns:
         True if changes were made, else False.
     """
-    sdk_version_filepath = source_root / constants.SDK_VERSION_FILE
+    sdk_version_filepath = (
+        Path(constants.SOURCE_ROOT) / constants.SDK_VERSION_FILE
+    )
     logging.info("Updating SDK version file (%s)", sdk_version_filepath)
     return key_value_store.UpdateKeyInLocalFile(
         sdk_version_filepath, "SDK_LATEST_VERSION", new_sdk_version
     )
 
 
-def UprevSdkAndPrebuilts(
-    source_root: Path,
-    binhost_gs_bucket: str,  # pylint: disable=unused-argument
+def _get_local_host_prebuilt_file() -> Path:
+    """Return the absolute local path for the amd64-host prebuilt.conf."""
+    return (
+        Path(constants.SOURCE_ROOT)
+        / "src"
+        / "overlays"
+        / "overlay-amd64-host"
+        / "prebuilt.conf"
+    )
+
+
+def _uprev_local_host_prebuilts_file(
+    binhost_gs_bucket: str, target_version: str
+) -> bool:
+    """Update the local amd64-host prebuilt file (but don't commit the change).
+
+    Args:
+        binhost_gs_bucket: The bucket containing prebuilt files (including
+            the "gs://" prefix).
+        target_version: The prebuilts version to sync to. Typically this is
+            identical to an SDK version (ex. "chroot-2023.03.14.159265"), since
+            the host prebuilts are typically created during SDK uprevs.
+
+    Returns:
+        True if changes were made, else False.
+    """
+    if not gs.PathIsGs(binhost_gs_bucket):
+        raise ValueError(
+            "binhost_gs_bucket doesn't look like a gs path: %s"
+            % binhost_gs_bucket
+        )
+    prebuilt_filepath = _get_local_host_prebuilt_file()
+    logging.info("Updating amd64-host prebuilt file (%s)", prebuilt_filepath)
+    new_binhost = "%(bucket)s/board/amd64-host/%(version)s/packages/" % {
+        "bucket": binhost_gs_bucket.rstrip("/"),
+        "version": target_version,
+    }
+    return key_value_store.UpdateKeyInLocalFile(
+        prebuilt_filepath,
+        "FULL_BINHOST",
+        new_binhost,
+    )
+
+
+def uprev_sdk_and_prebuilts(
+    binhost_gs_bucket: str,
     version: str,
 ) -> List[Path]:
     """Uprev the SDK version and prebuilt conf files on the local filesystem.
@@ -406,8 +449,12 @@ def UprevSdkAndPrebuilts(
         List of absolute paths to modified files.
     """
     modified_paths = []
-    if _UprevLocalSdkVersionFile(source_root, version):
-        modified_paths.append(source_root / constants.SDK_VERSION_FILE)
+    if _uprev_local_sdk_version_file(version):
+        modified_paths.append(
+            Path(constants.SOURCE_ROOT) / constants.SDK_VERSION_FILE
+        )
+    if _uprev_local_host_prebuilts_file(binhost_gs_bucket, version):
+        modified_paths.append(_get_local_host_prebuilt_file())
     return modified_paths
 
 

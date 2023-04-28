@@ -8,6 +8,7 @@ import contextlib
 import errno
 import io
 import os
+from pathlib import Path
 import re
 from typing import Dict, Generator, Optional, Tuple, Union
 
@@ -123,7 +124,9 @@ def LoadFile(
     return {}
 
 
-def UpdateKeyInLocalFile(filepath: str, key: str, value: str) -> bool:
+def UpdateKeyInLocalFile(
+    filepath: Union[Path, str], key: str, value: str
+) -> bool:
     """Update a key in a local key-value store file with the value passed.
 
     File format:
@@ -232,6 +235,10 @@ def UpdateKeyInLocalFile(filepath: str, key: str, value: str) -> bool:
         made_changes = True
         new_lines.append(new_keyval_line)
 
+    # End the file with a single newline, but don't add one if one exists.
+    if new_lines[-1]:
+        new_lines.append("")
+
     # Write out new file.
-    osutils.WriteFile(filepath, "\n".join(new_lines) + "\n")
+    osutils.WriteFile(filepath, "\n".join(new_lines))
     return made_changes

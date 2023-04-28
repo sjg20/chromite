@@ -11,7 +11,7 @@ from pathlib import Path
 THIS_FILE = Path(__file__).resolve()
 
 
-def _FindSourceRoot():
+def _FindSourceRoot() -> str:
     """Try and find the root check out of the chromiumos tree"""
     source_root = path = os.path.realpath(
         os.path.join(os.path.abspath(__file__), "..", "..", "..")

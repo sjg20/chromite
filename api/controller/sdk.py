@@ -5,7 +5,6 @@
 """SDK chroot operations."""
 
 import os
-import pathlib
 from typing import Dict, Union
 
 from chromite.api import controller
@@ -179,9 +178,7 @@ def Update(
 
 
 @faux.all_empty
-@validate.require("source_root")
 @validate.require("binhost_gs_bucket")
-@validate.eq("source_root.location", common_pb2.Path.Location.OUTSIDE)
 @validate.validation_complete
 def Uprev(input_proto, output_proto, _config):
     """Update SDK version file and prebuilt files to point to the latest SDK.
@@ -191,11 +188,12 @@ def Uprev(input_proto, output_proto, _config):
     # If the UprevRequest did not specify a target version,
     # check the remote SDK version file on Google Cloud Storage for the latest
     # uprev target.
-    target_version = input_proto.version or sdk.GetLatestUprevTargetVersion()
+    target_version = (
+        input_proto.version or sdk.get_latest_uprev_target_version()
+    )
 
     # The main uprev logic occurs in service/sdk.py.
-    modified_files = sdk.UprevSdkAndPrebuilts(
-        pathlib.Path(input_proto.source_root.path),
+    modified_files = sdk.uprev_sdk_and_prebuilts(
         binhost_gs_bucket=input_proto.binhost_gs_bucket,
         version=target_version,
     )

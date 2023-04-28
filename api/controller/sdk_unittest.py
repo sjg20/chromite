@@ -553,33 +553,27 @@ class BuildSdkToolchainTest(
         )
 
 
-class UprevTestCase(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
+class uprev_test(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
     """Test case for SdkService/Uprev() endpoint."""
 
-    _source_root = pathlib.Path("/path/to/checkout/")
     _binhost_gs_bucket = "gs://chromiumos-prebuilts/"
     _latest_uprev_target_version = "2023.02.19.112358"
 
     def setUp(self):
         """Set up the test case."""
-        self._source_root_pb2 = common_pb2.Path(
-            path=str(self._source_root),
-            location=common_pb2.Path.Location.OUTSIDE,
-        )
         self.PatchObject(
             sdk_service,
-            "GetLatestUprevTargetVersion",
+            "get_latest_uprev_target_version",
             return_value=self._latest_uprev_target_version,
         )
         self._uprev_patch = self.PatchObject(
             sdk_service,
-            "UprevSdkAndPrebuilts",
+            "uprev_sdk_and_prebuilts",
         )
 
     def NewRequest(self, version: str = ""):
         """Return a new UprevRequest with standard inputs."""
         return sdk_pb2.UprevRequest(
-            source_root=self._source_root_pb2,
             binhost_gs_bucket=self._binhost_gs_bucket,
             version=version,
         )
@@ -600,7 +594,6 @@ class UprevTestCase(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         response = self.NewResponse()
         sdk_controller.Uprev(request, response, self.api_config)
         self._uprev_patch.assert_called_with(
-            self._source_root,
             binhost_gs_bucket=self._binhost_gs_bucket,
             version=specified_version,
         )
@@ -617,7 +610,6 @@ class UprevTestCase(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         response = self.NewResponse()
         sdk_controller.Uprev(request, response, self.api_config)
         self._uprev_patch.assert_called_with(
-            self._source_root,
             binhost_gs_bucket=self._binhost_gs_bucket,
             version=self._latest_uprev_target_version,
         )

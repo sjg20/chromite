@@ -203,8 +203,8 @@ class UpdateArgumentsTest(cros_test_lib.TestCase):
         )
 
 
-class GetLatestVersionTest(cros_test_lib.MockTestCase):
-    """Test case for GetLatestVersion()."""
+class get_latest_version_test(cros_test_lib.MockTestCase):
+    """Test case for get_latest_version()."""
 
     def testSuccess(self):
         """Test an ordinary, successful call."""
@@ -215,7 +215,7 @@ class GetLatestVersionTest(cros_test_lib.MockTestCase):
             "Cat",
             return_value=file_contents,
         )
-        returned_version = sdk.GetLatestVersion()
+        returned_version = sdk.get_latest_version()
         self.assertEqual(expected_latest_version, returned_version)
         cat_patch.assert_called_with("gs://chromiumos-sdk/cros-sdk-latest.conf")
 
@@ -224,7 +224,7 @@ class GetLatestVersionTest(cros_test_lib.MockTestCase):
         file_contents = b"Latest SDK version: 1970.01.01.000000"
         self.PatchObject(gs.GSContext, "Cat", return_value=file_contents)
         with self.assertRaises(ValueError):
-            sdk.GetLatestVersion()
+            sdk.get_latest_version()
 
 
 class UnmountTest(
@@ -482,3 +482,92 @@ class BuildSdkToolchainTest(cros_test_lib.RunCommandTestCase):
             ],
         )
         self.assertEqual(found_files, self._ExpectedFoundFiles())
+
+
+class uprev_sdk_and_prebuilts_test(cros_test_lib.MockTestCase):
+    """Test case for sdk.UprevSdkAndPrebuilts()."""
+
+    # The old version, which applies to both the SDK and prebuilt.
+    _old_version = "2021.01.01.111111"
+
+    # Values interpolated into the old SDK version file.
+    # Note: The "%(target)s" here is expected in the actual SDK version file.
+    _old_tc_path = "2021/01/%(target)s-2021.01.01.111111"
+    _old_bootstrap_version = "2020.00.00.000000"
+
+    # Contents of the SDK version file. Intended to be %-interpolated.
+    _sdk_version_file_template = """# Copyright 2022 The ChromiumOS Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The latest version of the SDK that we built & tested.
+SDK_LATEST_VERSION="%(sdk_version)s"
+
+# How to find the standalone toolchains from the above sdk.
+TC_PATH = "%(tc_path)s"
+
+# Frozen version of SDK used for bootstrapping.
+# If unset, SDK_LATEST_VERSION will be used for bootstrapping.
+BOOTSTRAP_FROZEN_VERSION = "%(bootstrap_version)s"
+"""
+
+    # Contents of the host prebuilt file. Intended to be %-interpolated.
+    _prebuilt_file_template = (
+        'FULL_BINHOST="gs://chromeos-prebuilt/board/amd64-host/%(version)s/'
+        'packages/"\n'
+    )
+
+    def setUp(self):
+        self._write_file_patch = self.PatchObject(osutils, "WriteFile")
+
+        def _read_file_response(filepath: str) -> str:
+            """Mock responses for osutils.ReadFile based on input filepath."""
+            self.assertIn(filepath.name, ("sdk_version.conf", "prebuilt.conf"))
+            if filepath.name == "sdk_version.conf":
+                return self._sdk_version_file_template % {
+                    "sdk_version": self._old_version,
+                    "tc_path": self._old_tc_path,
+                    "bootstrap_version": self._old_bootstrap_version,
+                }
+            if filepath.name == "prebuilt.conf":
+                return self._prebuilt_file_template % {
+                    "version": self._old_version
+                }
+            raise ValueError(f"Unexpected path in mock ReadFile: {filepath}")
+
+        self.PatchObject(osutils, "ReadFile", side_effect=_read_file_response)
+
+    def test_noop(self):
+        """Test trying to update to the existing version."""
+        modified_paths = sdk.uprev_sdk_and_prebuilts(
+            "gs://chromeos-prebuilt", self._old_version
+        )
+        self.assertEqual(modified_paths, [])
+
+    def test_update(self):
+        """Test making a genuine update."""
+        new_version = "2022.02.02.222222"
+        modified_paths = sdk.uprev_sdk_and_prebuilts(
+            "gs://chromeos-prebuilt/", new_version
+        )
+        sdk_version_path, prebuilt_path = [
+            Path(constants.SOURCE_ROOT)
+            / "src/third_party/chromiumos-overlay/chromeos/binhost"
+            "/host/sdk_version.conf",
+            Path(constants.SOURCE_ROOT)
+            / "src/overlays/overlay-amd64-host/prebuilt.conf",
+        ]
+        self.assertCountEqual(modified_paths, [sdk_version_path, prebuilt_path])
+        self._write_file_patch.assert_any_call(
+            sdk_version_path,
+            self._sdk_version_file_template
+            % {
+                "sdk_version": new_version,
+                "tc_path": self._old_tc_path,
+                "bootstrap_version": self._old_bootstrap_version,
+            },
+        )
+        self._write_file_patch.assert_any_call(
+            prebuilt_path,
+            self._prebuilt_file_template % {"version": new_version},
+        )
