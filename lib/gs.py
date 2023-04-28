@@ -827,7 +827,9 @@ wheel: <
             env["BOTO_CONFIG"] = self.boto_file
 
         cmd = self._gsutil_bin + self.gsutil_flags + ["cat", path]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env)
+        proc = subprocess.Popen(  # pylint: disable=consider-using-with
+            cmd, stdout=subprocess.PIPE, env=env
+        )
 
         def read_content():
             try:
