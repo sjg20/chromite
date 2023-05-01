@@ -2402,21 +2402,10 @@ def BranchScheduleConfig():
             [],
             config_lib.LUCI_BUILDER_LEGACY_RELEASE,
         ),
-        # LTS branch, please do not delete. Contact: cros-lts-team@google.com.
-        # BOT-TAG:NO_PRUNE
-        (
-            "release-R102-14695.B",
-            [],
-            "chell-chrome-no-afdo-uprev-pre-flight-branch",
-            [],
-            [],
-            config_lib.LUCI_BUILDER_LTS_RELEASE,
-        ),
     ]
     # BOT-TAG:RELEASES_END
 
     PFQ_SCHEDULE = [
-        "0 2,6,10,14,18,22 * * *",
         "0 2,6,10,14,18,22 * * *",
         "0 2,6,10,14,18,22 * * *",
     ]
