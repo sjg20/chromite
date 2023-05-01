@@ -106,14 +106,10 @@ def Create(
     """
     replace = not input_proto.flags.no_replace
     bootstrap = input_proto.flags.bootstrap
+    chroot = controller_util.ParseChroot(input_proto.chroot)
 
-    chroot_path = input_proto.chroot.path
-    cache_dir = input_proto.chroot.cache_dir
     sdk_version = input_proto.sdk_version
     skip_chroot_upgrade = input_proto.skip_chroot_upgrade
-
-    if chroot_path and not os.path.isabs(chroot_path):
-        cros_build_lib.Die("The chroot path must be absolute.")
 
     if config.validate_only:
         return controller.RETURN_CODE_VALID_INPUT
@@ -121,8 +117,7 @@ def Create(
     args = sdk.CreateArguments(
         replace=replace,
         bootstrap=bootstrap,
-        cache_dir=cache_dir,
-        chroot_path=chroot_path,
+        chroot=chroot,
         sdk_version=sdk_version,
         skip_chroot_upgrade=skip_chroot_upgrade,
     )

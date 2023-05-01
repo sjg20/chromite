@@ -9,10 +9,11 @@ import logging
 import os
 from pathlib import Path
 import tempfile
-from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple
 
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import binpkg
+from chromite.lib import chroot_lib
 from chromite.lib import constants
 from chromite.lib import cros_build_lib
 from chromite.lib import cros_sdk_lib
@@ -21,10 +22,6 @@ from chromite.lib import osutils
 from chromite.lib import portage_util
 from chromite.lib import sdk_builder_lib
 from chromite.utils import key_value_store
-
-
-if TYPE_CHECKING:
-    from chromite.lib import chroot_lib
 
 
 # Version of the Manifest file being generated for SDK artifacts. Should be
@@ -66,8 +63,7 @@ class CreateArguments(object):
         self,
         replace: bool = False,
         bootstrap: bool = False,
-        chroot_path: Optional[str] = None,
-        cache_dir: Optional[str] = None,
+        chroot: Optional["chroot_lib.Chroot"] = None,
         sdk_version: Optional[str] = None,
         skip_chroot_upgrade: Optional[bool] = False,
     ):
@@ -76,16 +72,15 @@ class CreateArguments(object):
         Args:
             replace: Whether an existing chroot should be deleted.
             bootstrap: Whether to build the SDK from source.
-            chroot_path: Path to where the chroot should reside.
-            cache_dir: Alternative directory to use as a cache for the chroot.
+            chroot: chroot_lib.Chroot object representing the paths for the
+                chroot to create.
             sdk_version: Specific SDK version to use, e.g. 2022.01.20.073008.
             skip_chroot_upgrade: Whether to skip any chroot upgrades (using
                 the --skip-chroot-upgrade arg to cros_sdk).
         """
         self.replace = replace
         self.bootstrap = bootstrap
-        self.chroot_path = chroot_path
-        self.cache_dir = cache_dir
+        self.chroot = chroot or chroot_lib.Chroot()
         self.sdk_version = sdk_version
         self.skip_chroot_upgrade = skip_chroot_upgrade
 
@@ -105,11 +100,11 @@ class CreateArguments(object):
         if self.bootstrap:
             args.append("--bootstrap")
 
-        if self.cache_dir:
-            args.extend(["--cache-dir", self.cache_dir])
+        if self.chroot.cache_dir:
+            args.extend(["--cache-dir", self.chroot.cache_dir])
 
-        if self.chroot_path:
-            args.extend(["--chroot", self.chroot_path])
+        args.extend(["--chroot", self.chroot.path])
+        args.extend(["--out-dir", str(self.chroot.out_path)])
 
         if self.sdk_version:
             args.extend(["--sdk-version", self.sdk_version])
@@ -193,6 +188,7 @@ def Clean(
     cmd = ["cros", "clean", "--debug"]
     if chroot:
         cmd.extend(["--sdk-path", chroot.path])
+        cmd.extend(["--out-path", chroot.out_path])
     if safe:
         cmd.append("--safe")
     if images:
@@ -229,7 +225,7 @@ def Create(arguments: CreateArguments) -> Optional[int]:
 
     cros_build_lib.run(cmd)
 
-    version = GetChrootVersion(arguments.chroot_path)
+    version = GetChrootVersion(arguments.chroot.path)
     if not arguments.replace:
         # Force replace scenarios. Only needed when we're not already replacing
         # it.
@@ -239,19 +235,19 @@ def Create(arguments: CreateArguments) -> Optional[int]:
             logging.notice("Replacing broken chroot.")
             arguments.replace = True
             return Create(arguments)
-        elif not cros_sdk_lib.IsChrootVersionValid(arguments.chroot_path):
+        elif not cros_sdk_lib.IsChrootVersionValid(arguments.chroot.path):
             # Force replace when the version is not valid, i.e. ahead of the
             # chroot version hooks.
             logging.notice("Replacing chroot ahead of current checkout.")
             arguments.replace = True
             return Create(arguments)
-        elif not cros_sdk_lib.IsChrootDirValid(arguments.chroot_path):
+        elif not cros_sdk_lib.IsChrootDirValid(arguments.chroot.path):
             # Force replace when the permissions or owner are not correct.
             logging.notice("Replacing chroot with invalid permissions.")
             arguments.replace = True
             return Create(arguments)
 
-    return GetChrootVersion(arguments.chroot_path)
+    return GetChrootVersion(arguments.chroot.path)
 
 
 def Delete(
@@ -270,6 +266,7 @@ def Delete(
         cmd.extend(["--force"])
     if chroot:
         cmd.extend(["--chroot", chroot.path])
+        cmd.extend(["--out-dir", chroot.out_path])
 
     cros_build_lib.run(cmd)
 
@@ -594,6 +591,8 @@ def UploadPrebuiltPackages(
             constants.SOURCE_ROOT,
             "--chroot",
             chroot.path,
+            "--out-dir",
+            chroot.out_path,
             "--board",
             "amd64-host",
             "--set-version",

@@ -100,8 +100,7 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         args_patch.assert_called_with(
             replace=True,
             bootstrap=False,
-            chroot_path=mock.ANY,
-            cache_dir=mock.ANY,
+            chroot=mock.ANY,
             sdk_version=mock.ANY,
             skip_chroot_upgrade=mock.ANY,
         )
@@ -123,8 +122,7 @@ class SdkCreateTest(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         args_patch.assert_called_with(
             replace=False,
             bootstrap=True,
-            chroot_path=mock.ANY,
-            cache_dir=mock.ANY,
+            chroot=mock.ANY,
             sdk_version="foo",
             skip_chroot_upgrade=True,
         )

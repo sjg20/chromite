@@ -106,6 +106,10 @@ class CreateArgumentsTest(cros_test_lib.MockTestCase):
         self.assertListEqual(
             [
                 "--create",
+                "--chroot",
+                constants.DEFAULT_CHROOT_PATH,
+                "--out-dir",
+                str(constants.DEFAULT_OUT_PATH),
                 "--sdk-version",
                 "foo",
                 "--skip-chroot-upgrade",
@@ -119,7 +123,14 @@ class CreateArgumentsTest(cros_test_lib.MockTestCase):
         )
 
         self.assertListEqual(
-            ["--create", "--bootstrap"],
+            [
+                "--create",
+                "--bootstrap",
+                "--chroot",
+                constants.DEFAULT_CHROOT_PATH,
+                "--out-dir",
+                str(constants.DEFAULT_OUT_PATH),
+            ],
             self._GetArgsList(replace=False, bootstrap=True),
         )
 
@@ -271,7 +282,10 @@ class CreateTest(cros_test_lib.RunCommandTempDirTestCase):
     def testCreate(self):
         """Test the create function builds the command correctly."""
         arguments = sdk.CreateArguments(replace=True)
-        arguments.chroot_path = os.path.join(self.tempdir, "chroot")
+        arguments.chroot = chroot_lib.Chroot(
+            path=self.tempdir / "chroot",
+            out_path=self.tempdir / "out",
+        )
         expected_args = ["--arg", "--other", "--with-value", "value"]
         expected_version = 1
 
