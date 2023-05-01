@@ -449,6 +449,13 @@ class CleanLlvmFileNamesTest(cros_test_lib.TempDirTestCase):
                         "/include/activity_log.h"
                     )
                 },
+                {
+                    "filename": (
+                        "/build/brya/usr/lib/cros_rust_registry/"
+                        "store/time-0.3.14/[REGISTRY]/time-0.3.14"
+                        "/src/time.rs"
+                    )
+                },
             ]
         )
         source_root = self.tempdir
@@ -486,7 +493,7 @@ class CleanLlvmFileNamesTest(cros_test_lib.TempDirTestCase):
         )
 
         coverage_data = cleaned_json["data"][0]["files"]
-        print(coverage_data)
+        self.assertEqual(len(coverage_data), 2)
         cleaned_shill_time_file = extractCovDataForFile(
             SHILL_FILE, coverage_data
         )

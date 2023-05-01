@@ -311,6 +311,10 @@ def CleanLlvmFileNames(
     result_coverage_data = []
 
     for entry in coverage_data:
+        # Don't handle rust file dependencies from the registry.
+        if "cros_rust_registry" in entry["filename"]:
+            continue
+
         cleaned_file_name = _CleanLlvmFileName(
             entry["filename"], path_mapping_list, source_root, exclude_dirs
         )
