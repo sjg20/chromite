@@ -4,22 +4,14 @@
 
 """The tracing library that provides the Tracer."""
 
-import logging
-import os
 from typing import Optional
 
+from opentelemetry import trace as otel_trace
 from opentelemetry.context.context import Context
 from opentelemetry.propagators import textmap
 from opentelemetry.trace.propagation.tracecontext import (
     TraceContextTextMapPropagator,
 )
-
-
-# Disable warning log messages in opentelemetry
-logging.getLogger("opentelemetry.util._time").setLevel(logging.ERROR)
-
-
-_GET_TRACER_DELEGATE = None
 
 
 def get_tracer(
@@ -47,7 +39,7 @@ def get_tracer(
         An instance of tracer.
     """
 
-    return _GET_TRACER_DELEGATE(
+    return otel_trace.get_tracer(
         instrumenting_module_name,
         instrumenting_library_version,
     )
@@ -115,35 +107,3 @@ def inject_context(
             on the carrier.
     """
     TraceContextTextMapPropagator().inject(carrier, context, setter)
-
-
-if not _GET_TRACER_DELEGATE:
-    from opentelemetry import context as otel_context_api
-    from opentelemetry import trace as otel_trace_api
-    from opentelemetry.sdk import resources as otel_resources
-    from opentelemetry.sdk import trace as otel_trace
-    from opentelemetry.sdk.trace import export as otel_export
-
-    from chromite.utils.telemetry import detector
-    from chromite.utils.telemetry import exporter
-
-    resource = otel_resources.get_aggregated_resources(
-        [
-            otel_resources.ProcessResourceDetector(),
-            otel_resources.OTELResourceDetector(),
-            detector.ProcessDetector(),
-            detector.SystemDetector(),
-        ]
-    )
-    otel_trace_api.set_tracer_provider(
-        otel_trace.TracerProvider(resource=resource)
-    )
-    otel_trace_api.get_tracer_provider().add_span_processor(
-        otel_export.BatchSpanProcessor(exporter.ClearcutSpanExporter())
-    )
-
-    if "traceparent" in os.environ:
-        ctx = extract_context(os.environ)
-        otel_context_api.attach(ctx)
-
-    _GET_TRACER_DELEGATE = otel_trace_api.get_tracer
