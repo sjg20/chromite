@@ -286,8 +286,6 @@ class GenerateSymbolsTest(cros_test_lib.MockTempDirTestCase):
 class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
     """Test GenerateBreakpadSymbol."""
 
-    _DUMP_SYMS_BASE_CMD = ["dump_syms", "-v", "-d", "-m"]
-
     def setUp(self):
         self.elf_file = os.path.join(self.tempdir, "elf")
         osutils.Touch(self.elf_file)
@@ -332,7 +330,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertEqual(ret, self.sym_file)
         self.assertEqual(self.rc.call_count, 2)
         self.assertCommandArgs(
-            1, self._DUMP_SYMS_BASE_CMD + [self.elf_file, self.debug_dir]
+            1, ["dump_syms", "-v", self.elf_file, self.debug_dir]
         )
         self.assertExists(self.sym_file)
 
@@ -348,9 +346,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         self.assertEqual(ret, self.sym_file)
         self.assertEqual(num_errors.value, 0)
-        self.assertCommandArgs(
-            1, self._DUMP_SYMS_BASE_CMD + ["-c", self.elf_file]
-        )
+        self.assertCommandArgs(1, ["dump_syms", "-v", "-c", self.elf_file])
         self.assertEqual(self.rc.call_count, 2)
         self.assertExists(self.sym_file)
 
@@ -360,7 +356,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
             self.elf_file, breakpad_dir=self.breakpad_dir
         )
         self.assertEqual(ret, self.sym_file)
-        self.assertCommandArgs(1, self._DUMP_SYMS_BASE_CMD + [self.elf_file])
+        self.assertCommandArgs(1, ["dump_syms", "-v", self.elf_file])
         self.assertEqual(self.rc.call_count, 2)
         self.assertExists(self.sym_file)
 
@@ -373,14 +369,13 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
             )
         self.assertEqual(ret, self.sym_file)
         self.assertCommandArgs(
-            1, ["sudo", "--"] + self._DUMP_SYMS_BASE_CMD + [self.elf_file]
+            1, ["sudo", "--", "dump_syms", "-v", self.elf_file]
         )
 
     def testLargeDebugFail(self):
         """Running w/large .debug failed, but retry worked"""
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + [self.elf_file, self.debug_dir],
-            returncode=1,
+            ["dump_syms", "-v", self.elf_file, self.debug_dir], returncode=1
         )
         ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
             self.elf_file, self.debug_file, self.breakpad_dir
@@ -388,30 +383,26 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertEqual(ret, self.sym_file)
         self.assertEqual(self.rc.call_count, 4)
         self.assertCommandArgs(
-            1, self._DUMP_SYMS_BASE_CMD + [self.elf_file, self.debug_dir]
+            1, ["dump_syms", "-v", self.elf_file, self.debug_dir]
         )
         # The current fallback from _DumpExpectingSymbols() to
         # _DumpAllowingBasicFallback() causes the first dump_sums command to get
         # repeated.
         self.assertCommandArgs(
-            2, self._DUMP_SYMS_BASE_CMD + [self.elf_file, self.debug_dir]
+            2, ["dump_syms", "-v", self.elf_file, self.debug_dir]
         )
         self.assertCommandArgs(
-            3,
-            self._DUMP_SYMS_BASE_CMD
-            + ["-c", "-r", self.elf_file, self.debug_dir],
+            3, ["dump_syms", "-v", "-c", "-r", self.elf_file, self.debug_dir]
         )
         self.assertExists(self.sym_file)
 
     def testDebugFail(self):
         """Running w/.debug always failed, but works w/out"""
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + [self.elf_file, self.debug_dir],
-            returncode=1,
+            ["dump_syms", "-v", self.elf_file, self.debug_dir], returncode=1
         )
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD
-            + ["-c", "-r", self.elf_file, self.debug_dir],
+            ["dump_syms", "-v", "-c", "-r", self.elf_file, self.debug_dir],
             returncode=1,
         )
         ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
@@ -420,20 +411,18 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertEqual(ret, self.sym_file)
         self.assertEqual(self.rc.call_count, 5)
         self.assertCommandArgs(
-            1, self._DUMP_SYMS_BASE_CMD + [self.elf_file, self.debug_dir]
+            1, ["dump_syms", "-v", self.elf_file, self.debug_dir]
         )
         # The current fallback from _DumpExpectingSymbols() to
         # _DumpAllowingBasicFallback() causes the first dump_sums command to get
         # repeated.
         self.assertCommandArgs(
-            2, self._DUMP_SYMS_BASE_CMD + [self.elf_file, self.debug_dir]
+            2, ["dump_syms", "-v", self.elf_file, self.debug_dir]
         )
         self.assertCommandArgs(
-            3,
-            self._DUMP_SYMS_BASE_CMD
-            + ["-c", "-r", self.elf_file, self.debug_dir],
+            3, ["dump_syms", "-v", "-c", "-r", self.elf_file, self.debug_dir]
         )
-        self.assertCommandArgs(4, self._DUMP_SYMS_BASE_CMD + [self.elf_file])
+        self.assertCommandArgs(4, ["dump_syms", "-v", self.elf_file])
         self.assertExists(self.sym_file)
 
     def testCompleteFail(self):
@@ -456,11 +445,10 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         ko_file = os.path.join(self.tempdir, "elf.ko")
         osutils.Touch(ko_file)
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + [ko_file, self.debug_dir],
-            returncode=1,
+            ["dump_syms", "-v", ko_file, self.debug_dir], returncode=1
         )
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + ["-c", "-r", ko_file, self.debug_dir],
+            ["dump_syms", "-v", "-c", "-r", ko_file, self.debug_dir],
             returncode=1,
         )
         ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
@@ -470,14 +458,11 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertEqual(self.rc.call_count, 3)
         # Only one call (at the beginning of _DumpAllowingBasicFallback())
         # to "dump_syms -v"
+        self.assertCommandArgs(0, ["dump_syms", "-v", ko_file, self.debug_dir])
         self.assertCommandArgs(
-            0, self._DUMP_SYMS_BASE_CMD + [ko_file, self.debug_dir]
+            1, ["dump_syms", "-v", "-c", "-r", ko_file, self.debug_dir]
         )
-        self.assertCommandArgs(
-            1,
-            self._DUMP_SYMS_BASE_CMD + ["-c", "-r", ko_file, self.debug_dir],
-        )
-        self.assertCommandArgs(2, self._DUMP_SYMS_BASE_CMD + [ko_file])
+        self.assertCommandArgs(2, ["dump_syms", "-v", ko_file])
         self.assertExists(self.sym_file)
 
     def testGoBinary(self):
@@ -498,15 +483,14 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         self.rc.AddCmdResult(["/usr/bin/file", go_binary], stdout=FILE_OUT_GO)
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + [go_binary, self.debug_dir],
+            ["dump_syms", "-v", go_binary, self.debug_dir], returncode=1
+        )
+        self.rc.AddCmdResult(
+            ["dump_syms", "-v", "-c", "-r", go_binary, self.debug_dir],
             returncode=1,
         )
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + ["-c", "-r", go_binary, self.debug_dir],
-            returncode=1,
-        )
-        self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + [go_binary],
+            ["dump_syms", "-v", go_binary],
             returncode=1,
             stderr=(
                 f"{go_binary}: file contains no debugging information "
@@ -523,13 +507,12 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         # Only one call (at the beginning of _DumpAllowingBasicFallback())
         # to "dump_syms -v"
         self.assertCommandArgs(
-            1, self._DUMP_SYMS_BASE_CMD + [go_binary, self.debug_dir]
+            1, ["dump_syms", "-v", go_binary, self.debug_dir]
         )
         self.assertCommandArgs(
-            2,
-            self._DUMP_SYMS_BASE_CMD + ["-c", "-r", go_binary, self.debug_dir],
+            2, ["dump_syms", "-v", "-c", "-r", go_binary, self.debug_dir]
         )
-        self.assertCommandArgs(3, self._DUMP_SYMS_BASE_CMD + [go_binary])
+        self.assertCommandArgs(3, ["dump_syms", "-v", go_binary])
         self.assertNotExists(self.sym_file)
         self.assertEqual(num_errors.value, 0)
 
@@ -541,14 +524,14 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         osutils.Touch(debug_file, makedirs=True)
         self.rc.AddCmdResult(["/usr/bin/file", binary], stdout=self.FILE_OUT)
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + [binary, debug_dir], returncode=1
+            ["dump_syms", "-v", binary, debug_dir], returncode=1
         )
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + ["-c", "-r", binary, debug_dir],
+            ["dump_syms", "-v", "-c", "-r", binary, debug_dir],
             returncode=1,
         )
         self.rc.AddCmdResult(
-            self._DUMP_SYMS_BASE_CMD + [binary],
+            ["dump_syms", "-v", binary],
             returncode=1,
             stderr=(
                 f"{binary}: file contains no debugging information "
@@ -564,13 +547,11 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         self.assertCommandArgs(0, ["/usr/bin/file", binary])
         # Only one call (at the beginning of _DumpAllowingBasicFallback())
         # to "dump_syms -v"
+        self.assertCommandArgs(1, ["dump_syms", "-v", binary, debug_dir])
         self.assertCommandArgs(
-            1, self._DUMP_SYMS_BASE_CMD + [binary, debug_dir]
+            2, ["dump_syms", "-v", "-c", "-r", binary, debug_dir]
         )
-        self.assertCommandArgs(
-            2, self._DUMP_SYMS_BASE_CMD + ["-c", "-r", binary, debug_dir]
-        )
-        self.assertCommandArgs(3, self._DUMP_SYMS_BASE_CMD + [binary])
+        self.assertCommandArgs(3, ["dump_syms", "-v", binary])
         self.assertNotExists(self.sym_file)
         self.assertEqual(num_errors.value, 0)
 
