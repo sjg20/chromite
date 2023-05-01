@@ -4,7 +4,9 @@
 
 """Defines the ResourceDetector to capture resource properties."""
 
+import getpass
 import os
+from pathlib import Path
 import platform
 import sys
 from typing import Sequence
@@ -16,12 +18,16 @@ import psutil
 CPU_ARCHITECTURE = "cpu.architecture"
 CPU_NAME = "cpu.name"
 CPU_COUNT = "cpu.count"
+HOST_TYPE = "host.type"
 MEMORY_SWAP_TOTAL = "memory.swap.total"
 MEMORY_TOTAL = "memory.total"
 PROCESS_CWD = "process.cwd"
 PROCESS_RUNTIME_API_VERSION = "process.runtime.apiversion"
 PROCESS_ENV = "process.env"
 OS_NAME = "os.name"
+DMI_PATH = Path("/sys/class/dmi/id/product_name")
+GCE_DMI = "Google Compute Engine"
+CROS_BOT_USER = "chromeos-bot"
 
 
 class ProcessDetector(resources.ResourceDetector):
@@ -58,10 +64,19 @@ class SystemDetector(resources.ResourceDetector):
     """ResourceDetector to capture information about system."""
 
     def detect(self) -> resources.Resource:
+        host_type = "UNKNOWN"
+
+        if DMI_PATH.exists():
+            host_type = DMI_PATH.read_text(encoding="utf-8")
+
+        if host_type == GCE_DMI and getpass.getuser() == CROS_BOT_USER:
+            host_type = "chromeos-bot"
+
         resource = {
             CPU_ARCHITECTURE: platform.machine(),
             CPU_COUNT: psutil.cpu_count(),
             CPU_NAME: platform.processor(),
+            HOST_TYPE: host_type,
             MEMORY_SWAP_TOTAL: psutil.swap_memory().total,
             MEMORY_TOTAL: psutil.virtual_memory().total,
             OS_NAME: os.name,
