@@ -95,7 +95,7 @@ class Chroot(object):
 
     def exists(self) -> bool:
         """Checks if the chroot exists."""
-        return os.path.exists(self.path)
+        return os.path.exists(self.path) and self.out_path.exists()
 
     @property
     def tmp(self) -> str:

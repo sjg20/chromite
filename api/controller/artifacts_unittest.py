@@ -91,6 +91,7 @@ class BundleTestCase(
             self.chroot_path, self.sysroot_path.lstrip(os.sep)
         )
         osutils.SafeMakedirs(full_sysroot_path)
+        osutils.SafeMakedirs(self.chroot_out_path)
 
         # All requests use same response type.
         self.response = artifacts_pb2.BundleResponse()
