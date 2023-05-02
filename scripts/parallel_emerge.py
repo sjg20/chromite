@@ -39,8 +39,8 @@ def ParallelEmergeArgParser():
     emerge.
 
     Returns:
-      commandline.ArgumentParser that captures arguments specific to
-      parallel_emerge
+        commandline.ArgumentParser that captures arguments specific to
+        parallel_emerge.
     """
     parser = commandline.ArgumentParser(description=__doc__, dryrun=True)
 
@@ -99,9 +99,9 @@ def ParallelEmergeArgParser():
     parser.add_argument(
         "--eventlogfile",
         help=argparse.SUPPRESS,
-        deprecated="parallel_emerge no longer records failed packages. Set CROS_METRICS_DIR "
-        "in the system environment to get a log of failed packages and which "
-        "phase they failed in.",
+        deprecated="parallel_emerge no longer records failed packages. Set "
+        "CROS_METRICS_DIR in the system environment to get a log of failed "
+        "packages and which phase they failed in.",
     )
     parser.add_argument(
         "--show-output",
@@ -132,24 +132,23 @@ def main(argv):
 
     if parsed_args.get("workon"):
         emerge_args.append(
-            "--reinstall-atoms=%s" % " ".join(parsed_args["workon"])
+            f"--reinstall-atoms={' '.join(parsed_args['workon'])}"
         )
         emerge_args.append(
-            "--usepkg-exclude=%s" % " ".join(parsed_args["workon"])
+            f"--usepkg-exclude={' '.join(parsed_args['workon'])}"
         )
 
     if parsed_args.get("force_remote_binary"):
         emerge_args.append(
-            "--useoldpkg-atoms=%s"
-            % " ".join(parsed_args["force_remote_binary"])
+            f"--useoldpkg-atoms={' '.join(parsed_args['force_remote_binary'])}"
         )
 
     if parsed_args.get("root_deps") is not None:
-        emerge_args.append("--root-deps=%s" % parsed_args["root_deps"])
+        emerge_args.append(f"--root-deps={parsed_args['root_deps']}")
     else:
         emerge_args.append("--root-deps")
 
-    emerge_args.append("--jobs=%s" % parsed_args["jobs"])
+    emerge_args.append(f"--jobs={parsed_args['jobs']}")
 
     # The -v/--verbose flag gets eaten by the commandline.ArgumentParser to
     # set the log_level, but it was almost certainly meant to be passed through
