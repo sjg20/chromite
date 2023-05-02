@@ -2385,30 +2385,10 @@ def BranchScheduleConfig():
 
     # Do not remove BOT-TAG:* comments. They are used to help parse config.
     # BOT-TAG:RELEASES_START
-    RELEASES = [
-        (
-            "release-R107-15117.B",
-            [],
-            "",
-            [],
-            [],
-            config_lib.LUCI_BUILDER_LEGACY_RELEASE,
-        ),
-        (
-            "release-R106-15054.B",
-            [],
-            "",
-            [],
-            [],
-            config_lib.LUCI_BUILDER_LEGACY_RELEASE,
-        ),
-    ]
+    RELEASES = []
     # BOT-TAG:RELEASES_END
 
-    PFQ_SCHEDULE = [
-        "0 2,6,10,14,18,22 * * *",
-        "0 2,6,10,14,18,22 * * *",
-    ]
+    PFQ_SCHEDULE = []
 
     ORDERFILE_SCHEDULES = [
         "0 8/12 * * *",
