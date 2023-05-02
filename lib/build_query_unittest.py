@@ -66,6 +66,7 @@ def fake_overlays(tmp_path):
             version="0.0.1-r256",
             IUSE="another internal +static",
             inherit=["cros-workon", "chromeos-bsp"],
+            keywords="*",
         )
     )
     overlay_fake.add_package(
@@ -75,7 +76,7 @@ def fake_overlays(tmp_path):
             version="9999",
             IUSE="another internal +static",
             inherit=["cros-workon", "chromeos-bsp"],
-            keywords="-*",
+            keywords="~*",
         )
     )
 
@@ -112,6 +113,7 @@ def fake_overlays(tmp_path):
             version="0.0.1",
             IUSE="another internal +static",
             inherit=["cros-workon", "chromeos-bsp"],
+            keywords="-* ~amd64",
         )
     )
     overlay_fake_private.add_package(
@@ -121,7 +123,7 @@ def fake_overlays(tmp_path):
             version="9999",
             IUSE="another internal +static",
             inherit=["cros-workon", "chromeos-bsp"],
-            keywords="-*",
+            keywords="~* amd64",
         )
     )
 
@@ -201,6 +203,51 @@ def test_query_ebuilds(fake_overlays):
     assert all(x.eclasses == ["cros-workon", "chromeos-bsp"] for x in ebuilds)
     assert all(x.iuse == {"another", "internal", "static"} for x in ebuilds)
     assert all(x.iuse_default == {"static"} for x in ebuilds)
+
+
+@pytest.mark.parametrize(
+    ["cpvr", "arch", "expected_stability"],
+    [
+        (
+            "chromeos-base/chromeos-bsp-fake-0.0.1-r256",
+            "amd64",
+            build_query.Stability.STABLE,
+        ),
+        (
+            "chromeos-base/chromeos-bsp-fake-9999",
+            "amd64",
+            build_query.Stability.UNSTABLE,
+        ),
+        (
+            "chromeos-base/chromeos-bsp-fake-private-0.0.1",
+            "amd64",
+            build_query.Stability.UNSTABLE,
+        ),
+        (
+            "chromeos-base/chromeos-bsp-fake-private-0.0.1",
+            "arm",
+            build_query.Stability.BAD,
+        ),
+        (
+            "chromeos-base/chromeos-bsp-fake-private-9999",
+            "arm",
+            build_query.Stability.UNSTABLE,
+        ),
+        (
+            "chromeos-base/chromeos-bsp-fake-private-9999",
+            "amd64",
+            build_query.Stability.STABLE,
+        ),
+    ],
+)
+def test_ebuild_stability(fake_overlays, cpvr, arch, expected_stability):
+    """Test the ebuild stability evaluator."""
+    ebuild = (
+        build_query.Query(build_query.Ebuild)
+        .filter(lambda ebuild: ebuild.package_info.cpvr == cpvr)
+        .one()
+    )
+    assert ebuild.get_stability(arch) == expected_stability
 
 
 def test_make_conf_vars(fake_overlays):

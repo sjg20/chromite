@@ -26,11 +26,15 @@ from chromite.lib import constants
 # from users excuting code on their own machine.  So our only goal here is
 # to limit the API boundary of things that you might normally do.
 _GLOBALS = {
+    "BAD": build_query.Stability.BAD,
     "Board": build_query.Board,
     "Ebuild": build_query.Ebuild,
     "Overlay": build_query.Overlay,
     "Profile": build_query.Profile,
     "Query": build_query.Query,
+    "STABLE": build_query.Stability.STABLE,
+    "UNSPECIFIED": build_query.Stability.UNSPECIFIED,
+    "UNSTABLE": build_query.Stability.UNSTABLE,
     "__builtins__": {},
     "all": all,
     "any": any,

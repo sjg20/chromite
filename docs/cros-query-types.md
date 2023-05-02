@@ -18,6 +18,14 @@
 
 * `eapi` (`int`): The EAPI for the package.
 * `eclasses` (`List[str]`): A list of the eclasses inherited by this package and its eclasses.
+* `get_stability(arch: str) -> Stability`: Get the stability of this package on a given architecture.
+
+        Args:
+            arch: The architecture to consider for stability.
+
+        Returns:
+            The stability on this architecture.
+
 * `iuse` (`Set[str]`): A set of the flags in IUSE.
 * `iuse_default` (`Set[str]`): A set of the flags enabled by default in IUSE.
 * `keywords` (`List[str]`): The KEYWORDS of this package.

@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import abc
+import enum
 import functools
 import logging
 from pathlib import Path
@@ -34,6 +35,21 @@ from chromite.utils.parser import portage_profile_conf
 # doesn't follow the traditional format of leaving the second line blank used
 # with traditional functions/methods.
 # pylint: disable=docstring-second-line-blank
+
+
+class Stability(enum.Enum):
+    """Enumeration for package stability.
+
+    UNSPECIFIED: The stability for this architecture was not listed in KEYWORDS.
+    STABLE: The package is well tested on this architecture.
+    UNSTABLE: The package may not have complete testing on this architecture.
+    BAD: The package has known issues with this architecture.
+    """
+
+    UNSPECIFIED = enum.auto()
+    STABLE = enum.auto()
+    UNSTABLE = enum.auto()
+    BAD = enum.auto()
 
 
 class QueryTarget(abc.ABC):
@@ -567,6 +583,27 @@ class Ebuild(QueryTarget):
         if not keywords:
             return []
         return keywords.split()
+
+    def get_stability(self, arch: str) -> Stability:
+        """Get the stability of this package on a given architecture.
+
+        Args:
+            arch: The architecture to consider for stability.
+
+        Returns:
+            The stability on this architecture.
+        """
+        stability = Stability.UNSPECIFIED
+        for keyword in self.keywords:
+            stability = {
+                arch: Stability.STABLE,
+                "*": Stability.STABLE,
+                f"~{arch}": Stability.UNSTABLE,
+                "~*": Stability.UNSTABLE,
+                f"-{arch}": Stability.BAD,
+                "-*": Stability.BAD,
+            }.get(keyword, stability)
+        return stability
 
     def __repr__(self):
         return f"{self.package_info.cpvr}::{self.overlay.name}"
