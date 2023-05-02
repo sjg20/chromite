@@ -8,9 +8,10 @@ import argparse
 import time
 from typing import List, Optional
 
+from opentelemetry import trace
+
 from chromite.lib import commandline
 from chromite.utils import telemetry
-from chromite.utils.telemetry import trace
 
 
 telemetry.initialize()
