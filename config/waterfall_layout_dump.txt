@@ -187,6 +187,7 @@
     hana-arc64-release
     hana-kernelnext-release
     hana-release
+    hatch-arc-r-release
     hatch-arc-r-userdebug-release
     hatch-arc-t-release
     hatch-connectivitynext-release
@@ -811,6 +812,11 @@
   hana-llvm-toolchain-tryjob
   hana-payloads-tryjob
   hana-release-tryjob
+  hatch-arc-r-full-tryjob
+  hatch-arc-r-llvm-next-toolchain-tryjob
+  hatch-arc-r-llvm-toolchain-tryjob
+  hatch-arc-r-payloads-tryjob
+  hatch-arc-r-release-tryjob
   hatch-arc-r-userdebug-full-tryjob
   hatch-arc-r-userdebug-llvm-next-toolchain-tryjob
   hatch-arc-r-userdebug-llvm-toolchain-tryjob
@@ -1038,6 +1044,7 @@
     hana-arc64-release-tryjob
     hana-kernelnext-release-tryjob
     hana-release-tryjob
+    hatch-arc-r-release-tryjob
     hatch-arc-r-userdebug-release-tryjob
     hatch-arc-t-release-tryjob
     hatch-connectivitynext-release-tryjob
