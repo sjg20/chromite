@@ -16,7 +16,6 @@ For the fastest builds, use --nowithautotest --noworkon.
 """
 
 import argparse
-import getpass
 import logging
 import os
 from typing import List, Optional, Tuple
@@ -24,7 +23,6 @@ import urllib.error
 import urllib.request
 
 from chromite.lib import build_target_lib
-from chromite.lib import chromite_config
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib
 from chromite.lib import sysroot_lib
@@ -498,22 +496,6 @@ def main(argv: Optional[List[str]] = None) -> Optional[int]:
                 build_target,
                 accept_licenses=opts.accept_licenses,
                 run_configs=opts.setup_board_run_config,
-            )
-
-        if (
-            os.path.isfile(chromite_config.AUTO_COP_CONFIG)
-            or getpass.getuser() == "chrome-bot"
-        ):
-            cop_command = [
-                "cros",
-                "clean-outdated-pkgs",
-                f"--board={opts.board}",
-            ]
-            # Set check=False to allow cop to fail.
-            cros_build_lib.sudo_run(
-                cop_command,
-                preserve_env=True,
-                check=False,
             )
 
         sysroot.BuildPackages(build_target, board_root, opts.build_run_config)
