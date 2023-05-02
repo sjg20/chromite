@@ -29,10 +29,19 @@ class RouterTest(
         self.router = router.Router()
         self.router.Register(build_api_test_pb2)
 
-        self.chroot_dir = os.path.join(self.tempdir, "chroot")
-        chroot_tmp = os.path.join(self.chroot_dir, "tmp")
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
+        self.chroot_dir = self.tempdir / "chroot"
+        self.out_dir = self.tempdir / "out"
+        chroot = chroot_lib.Chroot(
+            path=self.chroot_dir,
+            out_path=self.out_dir,
+        )
+        # Make sure basic path structures exist.
+        osutils.SafeMakedirs(self.chroot_dir)
+        osutils.SafeMakedirs(self.out_dir)
         # Make the tmp dir for the re-exec inside chroot input/output files.
-        osutils.SafeMakedirs(chroot_tmp)
+        osutils.SafeMakedirs(chroot.tmp)
 
         # Build the input/output/config paths we'll be using in the tests.
         self.json_input_file = os.path.join(self.tempdir, "input.json")
@@ -66,7 +75,8 @@ class RouterTest(
         self.expected_id = "input id"
         input_msg = build_api_test_pb2.TestRequestMessage()
         input_msg.id = self.expected_id
-        input_msg.chroot.path = self.chroot_dir
+        input_msg.chroot.path = str(self.chroot_dir)
+        input_msg.chroot.out_path = str(self.out_dir)
 
         # Write out base input and config messages.
         osutils.WriteFile(
