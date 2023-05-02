@@ -157,9 +157,9 @@ def main(argv):
     if "-v" in argv or "--verbose" in argv:
         emerge_args.append("--verbose")
 
-    emerge_args.append("--rebuild-exclude=chromeos-base/chromeos-chrome")
-    for pkg in constants.OTHER_CHROME_PACKAGES:
-        emerge_args.append("--rebuild-exclude=%s" % pkg)
+    emerge_args.append(
+        f"--rebuild-exclude={' '.join(constants.ALL_CHROME_PACKAGES)}"
+    )
 
     cmd = ["emerge"] + emerge_args
     cmd_str = cros_build_lib.CmdToStr(cmd)

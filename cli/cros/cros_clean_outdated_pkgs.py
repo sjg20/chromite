@@ -48,11 +48,6 @@ SYSTEM_PACKAGES = {
     "sys-process/procps",
     "chromeos-base/chromite-sdk",
 }
-
-CHROME_PACKAGES = [
-    "chromeos-base/chromeos-chrome"
-] + constants.OTHER_CHROME_PACKAGES
-
 # pylint: disable=protected-access
 
 
@@ -376,7 +371,7 @@ class CleanOutdatedCommand(command.CliCommand):
         if not self.options.chrome_packages:
             # Filter out Chrome packages, if asked, for both SDK and DUT.
             pkgs_before = len(pkgs)
-            for chrome_pkg in CHROME_PACKAGES:
+            for chrome_pkg in constants.ALL_CHROME_PACKAGES:
                 pkgs = [pkg for pkg in pkgs if chrome_pkg not in pkg]
 
             pkgs_after = len(pkgs)
