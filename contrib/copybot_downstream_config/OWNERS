@@ -1,3 +1,5 @@
+# copybot downstreaming configuration files
+
 # downstream argparser
 per-file downstream_argparser.py = jpmurphy@google.com
 per-file downstream_argparser.py = aaronmassey@google.com

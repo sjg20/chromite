@@ -1,2 +1,4 @@
-# Zephyr downstreaming utility script and its wrapper
+# copybot downstreaming utility script and its wrapper
 per-file copybot-downstream* = aaronmassey@google.com
+per-file copybot-downstream* = jpmurphy@google.com
+per-file copybot-downstream* = honscheid@google.com
