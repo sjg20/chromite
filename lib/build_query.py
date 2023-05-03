@@ -674,6 +674,17 @@ class Board(QueryTarget):
         """The machine architecture of this board."""
         return self.top_level_profile.arch
 
+    @property
+    def is_variant(self) -> bool:
+        """True if this board has another board's top level overlay in its
+        overlays parents.
+        """
+        if self.top_level_overlay:
+            for overlay in self.top_level_overlay.parents:
+                if overlay.board_name and overlay.board_name != self.name:
+                    return True
+        return False
+
     def __repr__(self):
         return self.name
 

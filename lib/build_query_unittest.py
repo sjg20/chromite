@@ -127,6 +127,22 @@ def fake_overlays(tmp_path):
         )
     )
 
+    overlay_faux_private = portage_testables.Overlay(
+        root_path=tmp_path / "overlay-faux-private",
+        name="faux-private",
+        parent_overlays=[
+            baseboard_fake,
+            overlay_fake,
+            baseboard_fake_private,
+            overlay_fake_private,
+        ],
+    )
+    overlay_faux_private.create_profile(
+        profile_parents=[
+            overlay_fake_private.profiles[Path("base")],
+        ],
+    )
+
     overlays = [
         portage_stable,
         chromiumos_overlay,
@@ -135,6 +151,7 @@ def fake_overlays(tmp_path):
         overlay_fake,
         baseboard_fake_private,
         overlay_fake_private,
+        overlay_faux_private,
     ]
     with mock.patch(
         "chromite.lib.portage_util.FindOverlays",
@@ -178,14 +195,16 @@ def test_query_profiles(fake_overlays):
 
 def test_query_boards(fake_overlays):
     """Test listing all boards."""
-    boards = list(build_query.Board.find_all())
-    assert len(boards) == 1
-    assert boards[0].name == "fake"
-    assert boards[0].arch == "amd64"
-    assert boards[0].top_level_overlay.path == fake_overlays[-1].path
+    board = (
+        build_query.Query(build_query.Board)
+        .filter(lambda x: x.name == "fake")
+        .one()
+    )
+    assert board.arch == "amd64"
+    overlay = [x for x in fake_overlays if x.name == "fake-private"][0]
+    assert board.top_level_overlay.path == overlay.path
     assert (
-        boards[0].top_level_profile.path
-        == fake_overlays[-1].profiles[Path("base")].full_path
+        board.top_level_profile.path == overlay.profiles[Path("base")].full_path
     )
 
 
@@ -203,6 +222,23 @@ def test_query_ebuilds(fake_overlays):
     assert all(x.eclasses == ["cros-workon", "chromeos-bsp"] for x in ebuilds)
     assert all(x.iuse == {"another", "internal", "static"} for x in ebuilds)
     assert all(x.iuse_default == {"static"} for x in ebuilds)
+
+
+@pytest.mark.parametrize(
+    ["board_name", "is_variant"],
+    [
+        ("fake", False),
+        ("faux", True),
+    ],
+)
+def test_is_variant(fake_overlays, board_name, is_variant):
+    """Test the is_variant property of boards."""
+    board = (
+        build_query.Query(build_query.Board)
+        .filter(lambda x: x.name == board_name)
+        .one()
+    )
+    assert board.is_variant == is_variant
 
 
 @pytest.mark.parametrize(
@@ -275,9 +311,12 @@ def test_overlay_parents(fake_overlays):
 
 def test_use_flags(fake_overlays):
     """Test getting the USE flags on a board."""
-    boards = list(build_query.Board.find_all())
-    assert len(boards) == 1
-    assert boards[0].use_flags == {
+    board = (
+        build_query.Query(build_query.Board)
+        .filter(lambda x: x.name == "fake")
+        .one()
+    )
+    assert board.use_flags == {
         "amd64",
         "board_use_fake",
         "not_masked",
@@ -326,13 +365,21 @@ def test_use_flags_unset(fake_overlays):
 
 def test_masked_use_flags(fake_overlays):
     """Test getting the masked_use_flags on a profile."""
-    board = build_query.Query(build_query.Board).one()
+    board = (
+        build_query.Query(build_query.Board)
+        .filter(lambda x: x.name == "fake")
+        .one()
+    )
     assert board.top_level_profile.masked_use_flags == {"masked"}
 
 
 def test_query_one(fake_overlays):
     """Test .one() on a query which yields one result."""
-    board = build_query.Query(build_query.Board).one()
+    board = (
+        build_query.Query(build_query.Board)
+        .filter(lambda x: x.name == "fake")
+        .one()
+    )
     assert board.name == "fake"
 
 
@@ -363,12 +410,16 @@ def test_query_one_or_none(fake_overlays):
 def test_query_all(fake_overlays):
     """Test .all() on a query."""
     boards = build_query.Query(build_query.Board).all()
-    assert boards == [build_query.Board("fake")]
+    assert boards == [build_query.Board("fake"), build_query.Board("faux")]
 
 
 def test_resolve_incremental_variable(fake_overlays):
     """Test correctness Profile.resolve_incremental_variable."""
-    board = build_query.Query(build_query.Board).one()
+    board = (
+        build_query.Query(build_query.Board)
+        .filter(lambda x: x.name == "fake")
+        .one()
+    )
     assert board.top_level_profile.resolve_var_incremental("SOME_VAR") == {
         "board_val",
         "private_val",
