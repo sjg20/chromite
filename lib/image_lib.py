@@ -1055,19 +1055,8 @@ def GetBuildImageEnvvars(
         env_var_init["CHROME_BRANCH"] = version_info.chrome_branch
         env_var_init["CHROMEOS_BUILD"] = version_info.build_number
         env_var_init["CHROMEOS_BRANCH"] = version_info.branch_build_number
-        # Official builds (CHROMEOS_OFFICIAL == "1"), will increment the version
-        # number and hence version string will be different between builds.
-        # Local builds wont increment the version, but appends date and time to
-        # the patch number to differentiate the version string between builds.
-        # The 'patch_number_with_date_time' will append the date and time only
-        # for local builds and has just the patch number for official builds. So its
-        # safe to use that content.
-        env_var_init[
-            "CHROMEOS_PATCH"
-        ] = version_info.patch_number_with_date_time
-        env_var_init[
-            "CHROMEOS_VERSION_STRING"
-        ] = version_info.VersionStringWithDateTime()
+        env_var_init["CHROMEOS_PATCH"] = version_info.patch_number
+        env_var_init["CHROMEOS_VERSION_STRING"] = version_info.VersionString()
 
     # TODO(rchandrasekar): Remove 'BUILD_DIR' and 'OUTPUT_DIR' env variables
     #   after image creation is moved out of build_image.sh script.
