@@ -47,6 +47,10 @@ tracer = trace.get_tracer(__name__)
 def main(argv: Optional[List[str]]) -> Optional[int]:
     """Main."""
     opts = parse_arguments(argv)
+
+    if opts.debug:
+        telemetry.export_to_console()
+
     with tracer.start_as_current_span("test") as span:
         time.sleep(opts.time / 2)
         span.add_event(name="mid-sleep-event", attributes={"attr": "val"})

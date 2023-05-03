@@ -36,3 +36,14 @@ def initialize():
         otel_trace_api.get_tracer_provider().add_span_processor(
             otel_export.BatchSpanProcessor(exporter.ClearcutSpanExporter())
         )
+
+
+def export_to_console():
+    """Add a span exporter to print spans to console."""
+
+    cfg = config.Config(chromite_config.TELEMETRY_CONFIG)
+
+    if cfg.trace_config.enabled:
+        otel_trace_api.get_tracer_provider().add_span_processor(
+            otel_export.BatchSpanProcessor(otel_export.ConsoleSpanExporter())
+        )
