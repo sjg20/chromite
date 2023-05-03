@@ -100,23 +100,26 @@ class Overlay(QueryTarget):
         )
 
     @functools.cached_property
-    def parents(self) -> Iterator[Overlay]:
+    def parents(self) -> List[Overlay]:
         """The Portage masters of this overlay.  Note the COIL rename."""
         all_overlays = _get_all_overlays_by_name()
+        parents = []
         for name in self.layout_conf.get("masters", "").split():
             if name:
-                yield all_overlays[name]
+                parents.append(all_overlays[name])
 
         # portage_util implicitly adds chromeos-overlay and chromeos-*-overlay
         # if found.  Mimic that here by considering them implicit parents of
         # board-level overlays.
         if self.board_name:
             if "chromeos" in all_overlays:
-                yield all_overlays["chromeos"]
+                parents.append(all_overlays["chromeos"])
             for path in (
                 Path(constants.SOURCE_ROOT) / "src" / "private-overlays"
             ).glob("chromeos-*-overlay"):
-                yield Overlay(path)
+                parents.append(Overlay(path))
+
+        return parents
 
     @functools.cached_property
     def name(self) -> str:

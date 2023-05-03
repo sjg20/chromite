@@ -93,6 +93,6 @@
 * `md5_cache_dir` (`Path`): The md5-cache directory for this overlay.
 * `metadata_dir` (`Path`): The metadata directory for this overlay.
 * `name` (`str`): The repo-name in metadata/layout.conf.
-* `parents` (`Iterator[Overlay]`): The Portage masters of this overlay.  Note the COIL rename.
+* `parents` (`List[Overlay]`): The Portage masters of this overlay.  Note the COIL rename.
 * `profiles` (`List[Profile]`): A list of all profiles defined in this overlay.
 * `profiles_dir` (`Path`): The profiles directory for this overlay.
