@@ -74,16 +74,6 @@ def _GetPylintrc(path: Path) -> Path:
     return constants.CHROMITE_DIR / "pylintrc"
 
 
-def _GetPylintGroups(paths):
-    """Return a dictionary mapping pylintrc files to lists of paths."""
-    groups = {}
-    for path in paths:
-        pylintrc = _GetPylintrc(path)
-        if pylintrc:
-            groups.setdefault(pylintrc, []).append(path)
-    return groups
-
-
 def _GetPythonPath():
     """Return the set of Python library paths to use."""
     # Carry through custom PYTHONPATH that the host env has set.

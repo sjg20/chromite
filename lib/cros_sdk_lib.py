@@ -320,25 +320,6 @@ def FindVolumeGroupForDevice(chroot_path, chroot_dev):
     return None
 
 
-def _DeviceFromFile(chroot_image):
-    """Finds the loopback device associated with |chroot_image|.
-
-    Returns:
-      The path to a loopback device (e.g. /dev/loop0) attached to |chroot_image|
-      if one is found, or None if no device is found.
-    """
-    chroot_dev = None
-    cmd = ["losetup", "-j", chroot_image]
-    result = cros_build_lib.sudo_run(
-        cmd, capture_output=True, check=False, print_cmd=False, encoding="utf-8"
-    )
-    if result.returncode == 0:
-        match = re.match(r"/dev/loop\d+", result.stdout)
-        if match:
-            chroot_dev = match.group(0)
-    return chroot_dev
-
-
 FileSystemDebugInfo = collections.namedtuple(
     "FileSystemDebugInfo", ("fuser", "lsof", "ps")
 )
