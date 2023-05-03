@@ -33,7 +33,7 @@ IGNORED_REPOSITORIES = frozenset(["crossdev", "toolchains"])
 # matches "dev-lang/python-exec-conf".
 # This list only applies to SDK packages.
 SYSTEM_PACKAGES = {
-    "app-admin/",
+    "app-admin/sudo",
     "app-arch/",
     "app-misc/ca-certificates",
     "app-misc/pax-utils",
@@ -45,7 +45,7 @@ SYSTEM_PACKAGES = {
     "sys-apps/",
     "sys-devel/",
     "sys-libs/",
-    "sys-process/",
+    "sys-process/procps",
     "chromeos-base/chromite-sdk",
 }
 
