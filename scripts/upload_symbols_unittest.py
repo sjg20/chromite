@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# TODO: We removed --network integration tests.
+
 """Unittests for upload_symbols.py"""
 
 import errno
@@ -48,7 +50,6 @@ del third_party
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import parallel
 from chromite.lib import remote_access
 from chromite.scripts import cros_generate_breakpad_symbols
 from chromite.scripts import upload_symbols
@@ -714,16 +715,3 @@ class UploadSymbolsTest(SymbolsTestBase):
         self.assertEqual(result, 1)
         self.assertEqual(upload_mock.call_count, 7)
         self.assertEqual(osutils.ReadFile(self.failure_file), "fail.sym\n")
-
-
-# TODO: We removed --network integration tests.
-
-
-def main(_argv):
-    # pylint: disable=protected-access
-    # Set timeouts small so that if the unit test hangs, it won't hang for long.
-    parallel._BackgroundTask.STARTUP_TIMEOUT = 5
-    parallel._BackgroundTask.EXIT_TIMEOUT = 5
-
-    # Run the tests.
-    cros_test_lib.main(level="info", module=__name__)

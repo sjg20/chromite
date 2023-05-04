@@ -14,7 +14,6 @@ from unittest import mock
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
-from chromite.lib import parallel
 from chromite.lib import parallel_unittest
 from chromite.lib import partial_mock
 from chromite.scripts import cros_generate_breakpad_symbols
@@ -1223,13 +1222,3 @@ class UtilsTest(cros_test_lib.TestCase):
         expected = "/build/blah/usr/lib/debug"
         result = cros_generate_breakpad_symbols.FindDebugDir("blah")
         self.assertEqual(expected, result)
-
-
-def main(_argv):
-    # pylint: disable=protected-access
-    # Set timeouts small so that if the unit test hangs, it won't hang for long.
-    parallel._BackgroundTask.STARTUP_TIMEOUT = 5
-    parallel._BackgroundTask.EXIT_TIMEOUT = 5
-
-    # Run the tests.
-    cros_test_lib.main(level="info", module=__name__)

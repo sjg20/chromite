@@ -655,7 +655,3 @@ class TestExitWithParent(cros_test_lib.TestCase):
             20,
             period=0.05,
         )
-
-
-def main(_argv):
-    cros_test_lib.main(level="info", module=__name__)
