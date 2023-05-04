@@ -331,6 +331,7 @@ def _handle_checks_results(
                 "Warnings detected in this run.  Please address them.\n\t\tTo ignore the listed warnings, rerun with --ignore-warnings"
             )
             return 1
+    return 0
 
 
 def cmd_downstream(opts):
