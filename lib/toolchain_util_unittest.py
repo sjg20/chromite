@@ -2131,7 +2131,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
                 reduced_temp,
                 "-output",
                 self.chroot.chroot_path(output_path),
-                "-compbinary",
+                "--extbinary",
             ],
         ]
         self.runProcessAFDOProfileOnce(
@@ -2141,7 +2141,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
             redact=True,
             remove=True,
             reduce_functions=reduce_functions,
-            compbinary=True,
+            extbinary=True,
         )
 
     def testCreateReleaseChromeAFDO(self):
@@ -2190,7 +2190,7 @@ class ReleaseChromeAFDOProfileTest(PrepareBundleTest):
             redact=True,
             remove=True,
             reduce_functions=20000,
-            compbinary=True,
+            extbinary=True,
         )
 
 
@@ -2448,7 +2448,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             redact=False,
             remove=True,
             reduce_functions=70000,
-            compbinary=False,
+            extbinary=False,
         )
 
     def testCreateAndUploadMergedAFDOProfileRedactsProfileOnArm(self):
@@ -2465,7 +2465,7 @@ class CreateAndUploadMergedAFDOProfileTest(PrepBundLatestAFDOArtifactTest):
             redact=True,
             remove=True,
             reduce_functions=70000,
-            compbinary=False,
+            extbinary=False,
         )
 
     def testCreateAndUploadMergedAFDOProfileWorksInTheHappyCase(self):

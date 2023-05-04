@@ -1016,13 +1016,13 @@ class _CommonPrepareBundle(object):
             redact=True,
             remove=True,
             reduce_functions=20000,
-            compbinary=True,
+            extbinary=True,
         )
 
         return redacted_path
 
     def _MergeAFDOProfiles(
-        self, profile_list, output_profile, use_compbinary=False
+        self, profile_list, output_profile, use_extbinary=False
     ):
         """Merges the given profile list.
 
@@ -1035,7 +1035,7 @@ class _CommonPrepareBundle(object):
                 Profile_weight is an int that tells us how to weight the profile
                 relative to everything else.
             output_profile: where to store the result profile.
-            use_compbinary: whether to use the new compressed binary AFDO
+            use_extbinary: whether to use the new extensible binary AFDO
                 profile format.
         """
         if not profile_list:
@@ -1057,8 +1057,8 @@ class _CommonPrepareBundle(object):
         ]
 
         # Here only because this was copied from afdo.py
-        if use_compbinary:
-            merge_command.append("-compbinary")
+        if use_extbinary:
+            merge_command.append("--extbinary")
         cros_build_lib.run(merge_command, enter_chroot=True, print_cmd=True)
 
     def _ProcessAFDOProfile(
@@ -1068,7 +1068,7 @@ class _CommonPrepareBundle(object):
         redact=False,
         remove=False,
         reduce_functions=None,
-        compbinary=False,
+        extbinary=False,
     ):
         """Process the AFDO profile with different editings.
 
@@ -1087,14 +1087,14 @@ class _CommonPrepareBundle(object):
             remove: Remove indirect call targets from the given profile.
             reduce_functions: Remove the cold functions in the profile until the
                 given number is met.
-            compbinary: Whether to convert the final profile into compbinary
+            extbinary: Whether to convert the final profile into extbinary
                 type.
 
         Raises:
             BundleArtifactsHandlerError: If the output profile is empty.
         """
         profdata_command_base = ["llvm-profdata", "merge", "-sample"]
-        # Convert the compbinary profiles to text profiles.
+        # Convert the extbinary profiles to text profiles.
         input_to_text_temp = input_path + ".text.temp"
         cmd_to_text = profdata_command_base + [
             "-text",
@@ -1155,10 +1155,10 @@ class _CommonPrepareBundle(object):
             "-output",
             self.chroot.chroot_path(output_path),
         ]
-        if compbinary:
-            # Using `compbinary` profiles saves us hundreds of MB of RAM per
+        if extbinary:
+            # Using `extbinary` profiles saves us hundreds of MB of RAM per
             # compilation, since it allows profiles to be lazily loaded.
-            cmd_to_binary.append("-compbinary")
+            cmd_to_binary.append("--extbinary")
         cros_build_lib.run(cmd_to_binary, enter_chroot=True, print_cmd=True)
 
         profile_size = os.path.getsize(output_path)
@@ -1350,7 +1350,7 @@ class _CommonPrepareBundle(object):
             redact=redact,
             remove=remove,
             reduce_functions=reduce_functions,
-            compbinary=False,
+            extbinary=False,
         )
 
         result_basename = os.path.basename(profile_to_upload_path)
