@@ -14,7 +14,7 @@ For coreboot Downstreaming Rotation: go/coreboot:downstreaming
 from collections import defaultdict
 import logging
 import re
-from typing import Dict, List, NamedTuple
+from typing import Dict, List, NamedTuple, Optional
 
 from chromite.lib import commandline
 from chromite.lib import config_lib
@@ -223,7 +223,7 @@ def _check_cl(downstream_candidate_cl: Dict, project: str) -> List[str]:
 
 
 def _filter_cls(
-    cls_to_downstream: List[Dict], limit: int = None, stop_at: str = None
+    cls_to_downstream: List[Dict], limit: Optional[int] = 0, stop_at: str = None
 ) -> List[Dict]:
     """Filter full CL list based on the limit and/or CL the chain should stop at.
 
@@ -237,7 +237,7 @@ def _filter_cls(
         cls_to_downstream: Ordered list of filtered CLs to be downstreamed.
     """
     filtered_cls = []
-    if limit > MAX_GERRIT_CHANGES or not limit:
+    if limit is None or limit > MAX_GERRIT_CHANGES:
         logging.info(
             "Limiting to maximum Gerrit changes (%d)", MAX_GERRIT_CHANGES
         )
