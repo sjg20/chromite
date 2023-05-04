@@ -929,7 +929,27 @@ def RunLinters(name, gndata, settings=None):
     return issues
 
 
-def CheckGnData(data: str, gnfile: "Path"):
+def ParseAst(data: str) -> dict:
+    """Extract the abstract syntax tree from the data of a gn file.
+
+    Args:
+        data: The GN data to parse AST from.
+
+    Returns:
+        The parsed AST as a dict.
+    """
+    gn_path = formatters.gn._find_gn()  # pylint: disable=protected-access
+
+    result = cros_build_lib.dbg_run(
+        [gn_path, "format", "--dump-tree=json", "/dev/stdin"],
+        stderr=subprocess.STDOUT,
+        stdout=True,
+        input=data,
+    )
+    return json.loads(result.stdout)
+
+
+def CheckGnData(data: str, gnfile: "Path") -> List:
     """Check |gnfile| for common mistakes.
 
     Args:
@@ -943,16 +963,8 @@ def CheckGnData(data: str, gnfile: "Path"):
     settings = ParseOptions(OPTIONS_RE.findall(data))
     issues += settings.issues
 
-    # Parse and check.
-    gn_path = formatters.gn._find_gn()  # pylint: disable=protected-access
-
     try:
-        result = cros_build_lib.dbg_run(
-            [gn_path, "format", "--dump-tree=json", "/dev/stdin"],
-            stderr=subprocess.STDOUT,
-            stdout=True,
-            input=data,
-        )
+        ast = ParseAst(data)
     except cros_build_lib.RunCommandError as e:
         issues.append(
             LintResult(
@@ -964,9 +976,6 @@ def CheckGnData(data: str, gnfile: "Path"):
             )
         )
         return issues
-
-    try:
-        data = json.loads(result.stdout)
     except Exception as e:
         issues.append(
             LintResult(
@@ -978,7 +987,8 @@ def CheckGnData(data: str, gnfile: "Path"):
             )
         )
         return issues
-    issues += RunLinters(gnfile, data, settings)
+
+    issues += RunLinters(gnfile, ast, settings)
     return issues
 
 
