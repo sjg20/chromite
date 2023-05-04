@@ -26,7 +26,7 @@ import multiprocessing
 import os
 from pathlib import Path
 import tempfile
-from typing import Optional
+from typing import Optional, Tuple
 
 from chromite.cbuildbot import cbuildbot_alerts
 from chromite.cbuildbot import commands
@@ -813,7 +813,7 @@ class _AddSlaveProfileAction(argparse.Action):
         namespace.slave_targets[-1].profile = values
 
 
-def ParseOptions(argv):
+def ParseOptions(argv) -> Tuple[argparse.Namespace, Optional[BuildTarget]]:
     """Returns options given by the user and the target specified.
 
     Args:
@@ -931,6 +931,7 @@ def ParseOptions(argv):
     parser.add_argument(
         "--sync-remote-latest-sdk-file",
         action="store_true",
+        default=True,
         help="Sync the remote latest SDK file on GS://. (Default)",
     )
     parser.add_argument(

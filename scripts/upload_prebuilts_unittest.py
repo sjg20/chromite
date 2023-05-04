@@ -7,7 +7,10 @@
 import copy
 import multiprocessing
 import os
+from typing import List
 from unittest import mock
+
+import pytest
 
 from chromite.lib import binpkg
 from chromite.lib import cros_test_lib
@@ -786,3 +789,47 @@ LATEST_SDK_UPREV_TARGET=\"2000\""""
         self.testSdkUpload(
             tc_tarballs=tc_tarballs, tc_upload_path=tc_upload_path
         )
+
+
+@pytest.mark.parametrize(
+    "extra_args,expected_sync",
+    [
+        ([], True),
+        (["--sync-remote-latest-sdk-file"], True),
+        (["--no-sync-remote-latest-sdk-file"], False),
+        (
+            [
+                "--no-sync-remote-latest-sdk-file",
+                "--sync-remote-latest-sdk-file",
+            ],
+            True,
+        ),
+        (
+            [
+                "--sync-remote-latest-sdk-file",
+                "--no-sync-remote-latest-sdk-file",
+            ],
+            False,
+        ),
+    ],
+)
+def test_parse_options_sync_remote_latest_file(
+    extra_args: List[str],
+    expected_sync: bool,
+):
+    """Test --sync-remote-latest-file and --no-sync-remote-latest-file.
+
+    Desired behavior:
+    *   If either of those args is given, take the last one.
+    *   If neither is given, default to True.
+
+    Args:
+        extra_args: Command-line args to pass into parse_options() besides the
+            bare minimum.
+        expected_sync: Whether options.sync_remote_latest_file should be True.
+    """
+    # Bare minimum args to run upload_prebuilts
+    args = ["--build-path", "/foo", "-u", "gs://foo/bar"]
+    args.extend(extra_args)
+    options, _ = prebuilt.ParseOptions(args)
+    assert options.sync_remote_latest_sdk_file == expected_sync
