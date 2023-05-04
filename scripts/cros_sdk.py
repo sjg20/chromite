@@ -655,7 +655,7 @@ def main(argv):
     # Turn on strict sudo checks.
     cros_build_lib.STRICT_SUDO = True
     conf = key_value_store.LoadFile(
-        os.path.join(constants.SOURCE_ROOT, constants.SDK_VERSION_FILE),
+        constants.SDK_VERSION_FILE_FULL_PATH,
         ignore_missing=True,
     )
     sdk_latest_version = conf.get("SDK_LATEST_VERSION", "<unknown>")

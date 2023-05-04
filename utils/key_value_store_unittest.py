@@ -108,7 +108,7 @@ ttt"
 
 
 class TestUpdateFile(cros_test_lib.TempDirTestCase):
-    """Tests for the UpdateKeyInLocalFile function."""
+    """Tests for UpdateKeyInLocalFile and UpdateKeysInLocalFile."""
 
     def setUp(self) -> None:
         """Set up vars that will be used in unit tests."""
@@ -227,3 +227,29 @@ class TestUpdateFile(cros_test_lib.TempDirTestCase):
         new_value = "new_value"
         key_value_store.UpdateKeyInLocalFile(self.version_file, key, new_value)
         self._check_key_value(key, new_value)
+
+    def testUpdateKeysEmptyDict(self):
+        """Test UpdateKeys with an empty input dict."""
+        self._initialize_file()
+        result = key_value_store.UpdateKeysInLocalFile(self.version_file, {})
+        self.assertFalse(result)
+
+    def testUpdateTwoKeysButOnlyOneChange(self):
+        """Test UpdateKeys with multiple key-value pairs but only one change."""
+        self._initialize_file()
+        d = {
+            "PKGDIR": "/var/lib/portage/pkgs",
+            "PORTAGE_BINHOST": "different_value",
+        }
+        result = key_value_store.UpdateKeysInLocalFile(self.version_file, d)
+        self.assertTrue(result)
+
+    def testUpdateTwoKeysButNoChange(self):
+        """Test UpdateKeys with multiple key-value pairs but no change."""
+        self._initialize_file()
+        d = {
+            "PKGDIR": "/var/lib/portage/pkgs",
+            "PORTAGE_BINHOST": "http://no.thanks.com",
+        }
+        result = key_value_store.UpdateKeysInLocalFile(self.version_file, d)
+        self.assertFalse(result)

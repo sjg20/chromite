@@ -242,3 +242,22 @@ def UpdateKeyInLocalFile(
     # Write out new file.
     osutils.WriteFile(filepath, "\n".join(new_lines))
     return made_changes
+
+
+def UpdateKeysInLocalFile(
+    filepath: Union[Path, str], keys_values: Dict[str, str]
+) -> bool:
+    """Update any number of key-value pairs in a local key-value store file.
+
+    Args:
+        filepath: The local path to the key-value store file.
+        keys_values: Dict of {key: value} for all new values.
+
+    Returns:
+        True if any changes were made to the file.
+    """
+    changed = False
+    for key, value in keys_values.items():
+        if UpdateKeyInLocalFile(filepath, key, value):
+            changed = True
+    return changed

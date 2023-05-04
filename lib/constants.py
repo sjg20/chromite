@@ -653,6 +653,8 @@ PUBLIC_BINHOST_CONF_DIR = os.path.join(
 PRIVATE_BINHOST_CONF_DIR = os.path.join(
     CHROMEOS_PARTNER_OVERLAY_DIR, "chromeos/binhost"
 )
+HOST_PREBUILT_CONF_FILE = "src/overlays/overlay-amd64-host/prebuilt.conf"
+HOST_PREBUILT_CONF_FILE_FULL_PATH = Path(SOURCE_ROOT) / HOST_PREBUILT_CONF_FILE
 
 VERSION_FILE = os.path.join(
     CHROMIUMOS_OVERLAY_DIR, "chromeos/config/chromeos_version.sh"
@@ -660,6 +662,7 @@ VERSION_FILE = os.path.join(
 SDK_VERSION_FILE = os.path.join(
     PUBLIC_BINHOST_CONF_DIR, "host/sdk_version.conf"
 )
+SDK_VERSION_FILE_FULL_PATH = Path(SOURCE_ROOT) / SDK_VERSION_FILE
 SDK_GS_BUCKET = "chromiumos-sdk"
 RELEASE_GS_BUCKET = "chromeos-build-release-console"
 

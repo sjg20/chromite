@@ -569,11 +569,14 @@ class uprev_test(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
             "uprev_sdk_and_prebuilts",
         )
 
-    def NewRequest(self, version: str = ""):
+    def NewRequest(
+        self, version: str = "", toolchain_tarball_template: str = ""
+    ):
         """Return a new UprevRequest with standard inputs."""
         return sdk_pb2.UprevRequest(
             binhost_gs_bucket=self._binhost_gs_bucket,
             version=version,
+            toolchain_tarball_template=toolchain_tarball_template,
         )
 
     @staticmethod
@@ -588,12 +591,17 @@ class uprev_test(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         version specified in the UprevRequest.
         """
         specified_version = "1970.01.01.000000"
-        request = self.NewRequest(version=specified_version)
+        toolchain_tarball_template = "path/to/%(version)s/toolchain"
+        request = self.NewRequest(
+            version=specified_version,
+            toolchain_tarball_template=toolchain_tarball_template,
+        )
         response = self.NewResponse()
         sdk_controller.Uprev(request, response, self.api_config)
         self._uprev_patch.assert_called_with(
             binhost_gs_bucket=self._binhost_gs_bucket,
             version=specified_version,
+            toolchain_tarball_template=toolchain_tarball_template,
         )
 
     def testWithoutVersion(self):
@@ -604,10 +612,21 @@ class uprev_test(cros_test_lib.MockTestCase, api_config.ApiConfigMixin):
         fetched via sdk_controller.GetLatestUprevTargetVersionVersion
         (mocked here in setUp()).
         """
-        request = self.NewRequest()
+        toolchain_tarball_template = "path/to/%(version)s/toolchain"
+        request = self.NewRequest(
+            toolchain_tarball_template=toolchain_tarball_template
+        )
         response = self.NewResponse()
         sdk_controller.Uprev(request, response, self.api_config)
         self._uprev_patch.assert_called_with(
             binhost_gs_bucket=self._binhost_gs_bucket,
             version=self._latest_uprev_target_version,
+            toolchain_tarball_template=toolchain_tarball_template,
         )
+
+    def testWithoutToolchainTarballTemplate(self):
+        """Test the endpoint with `toolchain_tarball_template` not specified."""
+        request = self.NewRequest(version="1234")
+        response = self.NewResponse()
+        with self.assertRaises(cros_build_lib.DieSystemExit):
+            sdk_controller.Uprev(request, response, self.api_config)

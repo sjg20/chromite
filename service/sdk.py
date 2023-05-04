@@ -372,32 +372,34 @@ def get_latest_uprev_target_version() -> str:
 
 def _uprev_local_sdk_version_file(
     new_sdk_version: str,
+    new_toolchain_tarball_template: str,
 ) -> bool:
     """Update the local SDK version file (but don't commit the change).
 
     Args:
         new_sdk_version: The SDK version to update to.
+        new_toolchain_tarball_template: The new value for the TC_PATH
 
     Returns:
         True if changes were made, else False.
+
+    Raises:
+        ValueError: If the toolchain tarball template is malformatted.
     """
-    sdk_version_filepath = (
-        Path(constants.SOURCE_ROOT) / constants.SDK_VERSION_FILE
+    if "%(target)s" not in new_toolchain_tarball_template:
+        raise ValueError(
+            "Toolchain tarball template doesn't contain %(target)s: "
+            + new_toolchain_tarball_template
+        )
+    logging.info(
+        "Updating SDK version file (%s)", constants.SDK_VERSION_FILE_FULL_PATH
     )
-    logging.info("Updating SDK version file (%s)", sdk_version_filepath)
-    return key_value_store.UpdateKeyInLocalFile(
-        sdk_version_filepath, "SDK_LATEST_VERSION", new_sdk_version
-    )
-
-
-def _get_local_host_prebuilt_file() -> Path:
-    """Return the absolute local path for the amd64-host prebuilt.conf."""
-    return (
-        Path(constants.SOURCE_ROOT)
-        / "src"
-        / "overlays"
-        / "overlay-amd64-host"
-        / "prebuilt.conf"
+    return key_value_store.UpdateKeysInLocalFile(
+        constants.SDK_VERSION_FILE_FULL_PATH,
+        {
+            "SDK_LATEST_VERSION": new_sdk_version,
+            "TC_PATH": new_toolchain_tarball_template,
+        },
     )
 
 
@@ -421,37 +423,42 @@ def _uprev_local_host_prebuilts_file(
             "binhost_gs_bucket doesn't look like a gs path: %s"
             % binhost_gs_bucket
         )
-    prebuilt_filepath = _get_local_host_prebuilt_file()
-    logging.info("Updating amd64-host prebuilt file (%s)", prebuilt_filepath)
+    logging.info(
+        "Updating amd64-host prebuilt file (%s)",
+        constants.HOST_PREBUILT_CONF_FILE_FULL_PATH,
+    )
     new_binhost = "%(bucket)s/board/amd64-host/%(version)s/packages/" % {
         "bucket": binhost_gs_bucket.rstrip("/"),
         "version": target_version,
     }
     return key_value_store.UpdateKeyInLocalFile(
-        prebuilt_filepath,
+        constants.HOST_PREBUILT_CONF_FILE_FULL_PATH,
         "FULL_BINHOST",
         new_binhost,
     )
 
 
 def uprev_sdk_and_prebuilts(
-    binhost_gs_bucket: str,
-    version: str,
+    binhost_gs_bucket: str, version: str, toolchain_tarball_template: str
 ) -> List[Path]:
     """Uprev the SDK version and prebuilt conf files on the local filesystem.
 
-    TODO(b/259445595): Uprev prebuilt conf files, too.
+    Args:
+        binhost_gs_bucket: The bucket to which prebuilts get uploaded, including
+            the "gs://" prefix. Example: "gs://chromeos-prebuilt/"
+        version: The SDK version to uprev to, which is also the prebuilt version
+            to uprev to. Example: "2023.02.12.144623
+        toolchain_tarball_template: The new TC_PATH value for the SDK version
+            file.
 
     Returns:
         List of absolute paths to modified files.
     """
     modified_paths = []
-    if _uprev_local_sdk_version_file(version):
-        modified_paths.append(
-            Path(constants.SOURCE_ROOT) / constants.SDK_VERSION_FILE
-        )
+    if _uprev_local_sdk_version_file(version, toolchain_tarball_template):
+        modified_paths.append(constants.SDK_VERSION_FILE_FULL_PATH)
     if _uprev_local_host_prebuilts_file(binhost_gs_bucket, version):
-        modified_paths.append(_get_local_host_prebuilt_file())
+        modified_paths.append(constants.HOST_PREBUILT_CONF_FILE_FULL_PATH)
     return modified_paths
 
 

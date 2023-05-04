@@ -174,6 +174,7 @@ def Update(
 
 @faux.all_empty
 @validate.require("binhost_gs_bucket")
+@validate.require("toolchain_tarball_template")
 @validate.validation_complete
 def Uprev(input_proto, output_proto, _config):
     """Update SDK version file and prebuilt files to point to the latest SDK.
@@ -191,6 +192,7 @@ def Uprev(input_proto, output_proto, _config):
     modified_files = sdk.uprev_sdk_and_prebuilts(
         binhost_gs_bucket=input_proto.binhost_gs_bucket,
         version=target_version,
+        toolchain_tarball_template=input_proto.toolchain_tarball_template,
     )
 
     # Populate the UprevResponse object with the modified files.

@@ -554,15 +554,20 @@ BOOTSTRAP_FROZEN_VERSION = "%(bootstrap_version)s"
     def test_noop(self):
         """Test trying to update to the existing version."""
         modified_paths = sdk.uprev_sdk_and_prebuilts(
-            "gs://chromeos-prebuilt", self._old_version
+            "gs://chromeos-prebuilt",
+            self._old_version,
+            self._old_tc_path,
         )
         self.assertEqual(modified_paths, [])
 
     def test_update(self):
         """Test making a genuine update."""
         new_version = "2022.02.02.222222"
+        new_tc_path = "path/to/%(target)s/toolchain.tar.xz"
         modified_paths = sdk.uprev_sdk_and_prebuilts(
-            "gs://chromeos-prebuilt/", new_version
+            "gs://chromeos-prebuilt/",
+            new_version,
+            new_tc_path,
         )
         sdk_version_path, prebuilt_path = [
             Path(constants.SOURCE_ROOT)
