@@ -155,27 +155,6 @@ class FindTargetTests(cros_test_lib.TempDirTestCase):
         self.gen_script(prog)
         self._run_tests(prog)
 
-    def testUnittests(self):
-        """Allow direct execution of unittests."""
-        prog = self.chromite_dir / "subdir" / "prog_unittest"
-        prog.parent.mkdir(parents=True, exist_ok=True)
-        path = prog.with_suffix(".py")
-        path.write_text(
-            'import sys; print("hi", sys.argv[1:])\n', encoding="utf-8"
-        )
-        prog.symlink_to(self.wrapper)
-        self._run_tests(prog)
-
-    def testTests(self):
-        """Allow direct execution of tests."""
-        prog = self.chromite_dir / "subdir" / "prog_unittest"
-        prog.parent.mkdir(parents=True, exist_ok=True)
-        prog.symlink_to(self.wrapper)
-        prog.with_suffix(".py").write_text(
-            'import sys; print("hi", sys.argv[1:])\n', encoding="utf-8"
-        )
-        self._run_tests(prog)
-
     def testWrapper(self):
         """Fail quickly when running the wrapper directly."""
         verify = lambda result: self.assertEqual(result.returncode, 100)

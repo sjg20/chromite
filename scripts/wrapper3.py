@@ -186,12 +186,6 @@ def FindTarget(target):
     if main:
         return main
 
-    # Is this a unittest?
-    if target[-1].rsplit("_", 1)[-1] in ("test", "unittest"):
-        from chromite.lib import cros_test_lib
-
-        return lambda _argv: cros_test_lib.main(module=module)
-
     # Is this a package?  Import it like `python -m...` does.
     if target != "wrapper3.py":
         mod_name = ".".join(target + ["__main__"])
