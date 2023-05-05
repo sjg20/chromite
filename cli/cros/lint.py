@@ -113,6 +113,9 @@ def _PylintrcConfig(config_file, section, opts):
         name = section
         options = opts
 
+        def set_current_module(self, config_file):
+            """Ignore - read_config_file() invokes this for stats."""
+
     cfg = ConfigReader(config_file=config_file)
     cfg.read_config_file()
     cfg.load_config_file()
@@ -1020,7 +1023,7 @@ class SourceChecker(pylint.checkers.BaseChecker):
         ),
         "R9205": (
             'File encoding should be "utf-8"',
-            ("bad-file-encoding"),
+            ("old-bad-file-encoding"),
             _MessageR9205,
         ),
         "R9206": (

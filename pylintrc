@@ -125,10 +125,12 @@ enable=
 #       we update the style guide.
 # TODO: Re-enable import-outside-toplevel.
 # TODO: Re-enable try-except-raise.
+# TODO(b/236161656): Re-enable consider-using-f-string.
 # ungrouped-imports: We let isort handle this.
 # wrong-import-order: We let isort handle this.
 disable=
     broad-except,
+    consider-using-f-string,
     consider-iterating-dictionary,
     fixme,
     file-ignored,
