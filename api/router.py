@@ -477,7 +477,7 @@ class Router(object):
                 field_handler.copy_paths_in(
                     input_msg,
                     chroot.tmp,
-                    prefix=chroot.path,
+                    chroot=chroot,
                 )
             )
             # The sync-directories context manager to handle SyncedDir messages.
@@ -485,7 +485,7 @@ class Router(object):
                 field_handler.sync_dirs(
                     input_msg,
                     sync_tempdir,
-                    prefix=chroot.path,
+                    chroot=chroot,
                 )
             )
 

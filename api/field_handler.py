@@ -13,17 +13,14 @@ import functools
 import logging
 import os
 import shutil
-from typing import Iterator, List, Optional, TYPE_CHECKING
+from typing import Iterator, List, Optional
 
 from chromite.third_party.google.protobuf import message as protobuf_message
 
 from chromite.api.controller import controller_util
 from chromite.api.gen.chromiumos import common_pb2
+from chromite.lib import chroot_lib
 from chromite.lib import osutils
-
-
-if TYPE_CHECKING:
-    from chromite.lib import chroot_lib
 
 
 class Error(Exception):
@@ -120,7 +117,7 @@ class PathHandler(object):
         field: common_pb2.Path,
         destination: str,
         delete: bool,
-        prefix: Optional[str] = None,
+        chroot: Optional[chroot_lib.Chroot] = None,
         reset: Optional[bool] = True,
     ) -> None:
         """Path handler initialization.
@@ -129,9 +126,10 @@ class PathHandler(object):
             field: The Path message.
             destination: The destination base path.
             delete: Whether the copied file(s) should be deleted on cleanup.
-            prefix: A path prefix to remove from the destination path when
-                moving files inside the chroot, or to add to the source paths
-                when moving files out of the chroot.
+            chroot: Chroot object to use for translating the paths in/out of
+                the chroot as necessary -- modifying the destination path when
+                moving files into the chroot, or modifying the source path when
+                moving files outside.
             reset: Whether to reset the state on cleanup.
         """
         assert isinstance(field, common_pb2.Path)
@@ -140,7 +138,7 @@ class PathHandler(object):
 
         self.field = field
         self.destination = destination
-        self.prefix = "" if prefix is None else str(prefix)
+        self.chroot = chroot
         self.delete = delete
         self.tempdir = None
         self.reset = reset
@@ -176,10 +174,8 @@ class PathHandler(object):
             destination = self.destination
 
         source = self.field.path
-        if direction == self.OUTSIDE and self.prefix:
-            # When we're extracting files, we need /tmp/result to be
-            # /path/to/chroot/tmp/result.
-            source = os.path.join(self.prefix, source.lstrip(os.sep))
+        if direction == self.OUTSIDE and self.chroot:
+            source = self.chroot.full_path(source)
 
         if os.path.isfile(source):
             # File - use the old file name, just copy it into the destination.
@@ -197,8 +193,8 @@ class PathHandler(object):
 
         # Clean up the destination path for returning, if applicable.
         return_path = dest_path
-        if direction == self.INSIDE and return_path.startswith(self.prefix):
-            return_path = return_path[len(self.prefix) :]
+        if direction == self.INSIDE and self.chroot:
+            return_path = self.chroot.chroot_path(return_path)
 
         self.field.path = return_path
         self.field.location = direction
@@ -217,9 +213,14 @@ class PathHandler(object):
 class SyncedDirHandler(object):
     """Handler for syncing directories across the chroot boundary."""
 
-    def __init__(self, field, destination, prefix):
+    def __init__(
+        self,
+        field: common_pb2.SyncedDir,
+        destination: str,
+        chroot: chroot_lib.Chroot,
+    ):
         self.field = field
-        self.prefix = prefix
+        self.chroot = chroot
 
         self.source = self.field.dir
         if not self.source.endswith(os.sep):
@@ -242,7 +243,7 @@ class SyncedDirHandler(object):
     def sync_in(self):
         """Sync files from the source directory to the destination directory."""
         self._sync(self.source, self.destination)
-        self.field.dir = "/%s" % os.path.relpath(self.destination, self.prefix)
+        self.field.dir = self.chroot.chroot_path(self.destination)
 
     def sync_out(self):
         """Sync files from the destination directory to the source directory."""
@@ -255,7 +256,7 @@ def copy_paths_in(
     message: protobuf_message.Message,
     destination: str,
     delete: Optional[bool] = True,
-    prefix: Optional[str] = None,
+    chroot: Optional[chroot_lib.Chroot] = None,
 ) -> Iterator[List[PathHandler]]:
     """Context manager function to transfer and cleanup all Path messages.
 
@@ -263,8 +264,8 @@ def copy_paths_in(
         message: A message whose Path messages should be transferred.
         destination: The base destination path.
         delete: Whether the file(s) should be deleted.
-        prefix: A prefix path to remove from the final destination path in the
-            Path message (i.e. remove the chroot path).
+        chroot: Chroot object to use for translating the final destination path
+            into the chroot.
 
     Yields:
         list[PathHandler]: The path handlers.
@@ -272,7 +273,7 @@ def copy_paths_in(
     assert destination
 
     handlers = _extract_handlers(
-        message, destination, prefix, delete=delete, reset=True
+        message, destination, chroot, delete=delete, reset=True
     )
 
     for handler in handlers:
@@ -287,7 +288,9 @@ def copy_paths_in(
 
 @contextlib.contextmanager
 def sync_dirs(
-    message: protobuf_message.Message, destination: str, prefix: str
+    message: protobuf_message.Message,
+    destination: str,
+    chroot: chroot_lib.Chroot,
 ) -> Iterator[SyncedDirHandler]:
     """Context manager function to handle SyncedDir messages.
 
@@ -299,8 +302,8 @@ def sync_dirs(
     Args:
         message: A message whose SyncedPath messages should be synced.
         destination: The destination path.
-        prefix: A prefix path to remove from the final destination path in the
-            Path message (i.e. remove the chroot path).
+        chroot: Chroot object to use for translating the final destination path
+            into the chroot.
 
     Yields:
         The handlers.
@@ -310,7 +313,7 @@ def sync_dirs(
     handlers = _extract_handlers(
         message,
         destination,
-        prefix=prefix,
+        chroot=chroot,
         delete=False,
         reset=True,
         message_type=common_pb2.SyncedDir,
@@ -351,7 +354,7 @@ def extract_results(
 
     destination = result_path_message.path.path
     handlers = _extract_handlers(
-        response_message, destination, chroot.path, delete=False, reset=False
+        response_message, destination, chroot=chroot, delete=False, reset=False
     )
 
     for handler in handlers:
@@ -362,7 +365,7 @@ def extract_results(
 def _extract_handlers(
     message,
     destination,
-    prefix,
+    chroot,
     delete=False,
     reset=False,
     field_name=None,
@@ -387,7 +390,7 @@ def _extract_handlers(
             return []
 
         handler = PathHandler(
-            message, destination, delete=delete, prefix=prefix, reset=reset
+            message, destination, delete=delete, chroot=chroot, reset=reset
         )
         return [handler]
     elif is_synced_target and isinstance(message, common_pb2.SyncedDir):
@@ -397,7 +400,7 @@ def _extract_handlers(
             )
             return []
 
-        handler = SyncedDirHandler(message, destination, prefix)
+        handler = SyncedDirHandler(message, destination, chroot)
         return [handler]
 
     # Iterate through each field and recurse.
@@ -415,7 +418,7 @@ def _extract_handlers(
                 _extract_handlers(
                     field,
                     destination,
-                    prefix,
+                    chroot,
                     delete,
                     reset,
                     field_name=new_field_name,
@@ -435,7 +438,7 @@ def _extract_handlers(
                     _extract_handlers(
                         element,
                         destination,
-                        prefix,
+                        chroot,
                         delete,
                         reset,
                         field_name=new_field_name,

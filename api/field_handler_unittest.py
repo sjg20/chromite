@@ -10,6 +10,7 @@ from chromite.api import field_handler
 from chromite.api.gen.chromite.api import build_api_test_pb2
 from chromite.api.gen.chromiumos import common_pb2
 from chromite.lib import chroot_lib
+from chromite.lib import cros_build_lib
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils
 from chromite.lib import remoteexec_util
@@ -104,14 +105,22 @@ class HandleRemoteexec(cros_test_lib.TempDirTestCase):
         self.assertIsNone(field_handler.handle_remoteexec(message))
 
 
-class CopyPathInTest(cros_test_lib.TempDirTestCase):
+class CopyPathInTest(cros_test_lib.MockTempDirTestCase):
     """PathHandler tests."""
 
     def setUp(self):
-        self.source_dir = os.path.join(self.tempdir, "source")
-        self.dest_dir = os.path.join(self.tempdir, "destination")
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
+        self.chroot = chroot_lib.Chroot(
+            path=self.tempdir / "chroot",
+            out_path=self.tempdir / "out",
+        )
+
+        self.source_dir = os.path.join(self.chroot.path, "source")
+        self.dest_dir = os.path.join(self.chroot.path, "destination")
         osutils.SafeMakedirs(self.source_dir)
         osutils.SafeMakedirs(self.dest_dir)
+        osutils.SafeMakedirs(self.chroot.out_path)
 
         self.source_file1 = os.path.join(self.source_dir, "file1")
         self.file1_contents = "file 1"
@@ -208,27 +217,28 @@ class CopyPathInTest(cros_test_lib.TempDirTestCase):
         # even with delete=True.
         self.assertExists(self.source_file1)
 
-    def test_prefix_inside(self):
-        """Test the transfer inside prefix handling."""
+    def test_inside_chroot(self):
+        """Test the transfer inside chroot handling."""
         message = build_api_test_pb2.TestRequestMessage()
         message.path.path = self.source_dir
         message.path.location = common_pb2.Path.OUTSIDE
 
         with field_handler.copy_paths_in(
-            message, self.dest_dir, prefix=self.tempdir
+            message, self.dest_dir, chroot=self.chroot
         ):
             new_path = message.path.path
             # The prefix should be removed.
             self.assertFalse(new_path.startswith(str(self.tempdir)))
 
 
-class SyncDirsTest(cros_test_lib.TempDirTestCase):
+class SyncDirsTest(cros_test_lib.MockTempDirTestCase):
     """Tests for sync_dirs."""
 
     def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
         D = cros_test_lib.Directory
         filesystem = (
-            D("chroot", (D("tmp", (D("tempdir", ()),)),)),
             D(
                 "sources",
                 (
@@ -251,9 +261,13 @@ class SyncDirsTest(cros_test_lib.TempDirTestCase):
         )
         cros_test_lib.CreateOnDiskHierarchy(self.tempdir, filesystem)
 
-        self.chroot = os.path.join(self.tempdir, "chroot")
-        self.chroot_tmp = os.path.join(self.chroot, "tmp")
-        self.destination = os.path.join(self.chroot_tmp, "tempdir")
+        self.chroot = chroot_lib.Chroot(
+            path=self.tempdir / "chroot",
+            out_path=self.tempdir / "out",
+        )
+        self.destination = os.path.join(self.chroot.tmp, "tempdir")
+        osutils.SafeMakedirs(self.chroot.path)
+        osutils.SafeMakedirs(self.destination)
         self.inside_path = "/tmp/tempdir"
 
         self.single_file_src = os.path.join(
@@ -384,10 +398,12 @@ class SyncDirsTest(cros_test_lib.TempDirTestCase):
         self.assertEqual(file_content, osutils.ReadFile(self.sf_src_file))
 
 
-class ExtractResultsTest(cros_test_lib.TempDirTestCase):
+class ExtractResultsTest(cros_test_lib.MockTempDirTestCase):
     """Tests for extract_results."""
 
     def setUp(self):
+        self.PatchObject(cros_build_lib, "IsInsideChroot", return_value=False)
+
         # Setup the directories.
         self.chroot_dir = os.path.join(self.tempdir, "chroot")
         self.source_dir = "/source"
@@ -424,7 +440,10 @@ class ExtractResultsTest(cros_test_lib.TempDirTestCase):
         self.request.result_path.path.path = self.dest_dir
         self.request.result_path.path.location = common_pb2.Path.OUTSIDE
         self.response = build_api_test_pb2.TestResultMessage()
-        self.chroot = chroot_lib.Chroot(path=self.chroot_dir)
+        self.chroot = chroot_lib.Chroot(
+            path=self.chroot_dir, out_path=self.tempdir / "out"
+        )
+        osutils.SafeMakedirs(self.chroot.tmp)
 
     def _path_checks(self, path, destination, contents=None):
         self.assertTrue(path)
@@ -448,6 +467,24 @@ class ExtractResultsTest(cros_test_lib.TempDirTestCase):
             self.response.artifact.path,
             self.dest_dir,
             contents=self.file1_contents,
+        )
+
+    def test_tmp_file(self):
+        """Test a file in chroot's /tmp."""
+        contents = "tmpfile contents"
+        tmpfile = os.path.join(self.chroot.tmp, "file")
+        tmpfile_inside = "/tmp/file"
+        osutils.WriteFile(tmpfile, contents)
+
+        self.response.artifact.path = tmpfile_inside
+        self.response.artifact.location = common_pb2.Path.INSIDE
+
+        field_handler.extract_results(self.request, self.response, self.chroot)
+
+        self._path_checks(
+            self.response.artifact.path,
+            self.dest_dir,
+            contents=contents,
         )
 
     def test_single_directory(self):
