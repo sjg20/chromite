@@ -156,8 +156,6 @@ class TryjobTestParsing(TryjobTest):
         """Tests flow for an interactive session."""
         self.SetupCommandMock(["eve-full-tryjob"])
         options = self.cmd_mock.inst.options
-
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
     def testComplexParsingRemote(self):
@@ -227,8 +225,6 @@ class TryjobTestParsing(TryjobTest):
                 "build_configs": ["eve-full-tryjob", "eve-release"],
             }
         )
-
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
     def testComplexParsingLocal(self):
@@ -301,8 +297,6 @@ class TryjobTestParsing(TryjobTest):
                 "build_configs": ["eve-full", "eve-release"],
             }
         )
-
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
     def testComplexParsingCbuildbot(self):
@@ -373,8 +367,6 @@ class TryjobTestParsing(TryjobTest):
                 "build_configs": ["eve-full-tryjob", "eve-release"],
             }
         )
-
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
     def testPayloadsParsing(self):
@@ -390,8 +382,6 @@ class TryjobTestParsing(TryjobTest):
                 "build_configs": ["eve-payloads"],
             }
         )
-
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(vars(options).items(), self.expected.items())
 
 

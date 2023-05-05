@@ -6,7 +6,7 @@
 
 import os
 import platform
-import xml.etree.ElementTree as ElementTree
+from xml.etree import ElementTree
 
 from chromite.lib import commandline
 from chromite.lib import cros_build_lib

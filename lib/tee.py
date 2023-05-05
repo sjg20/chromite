@@ -156,6 +156,8 @@ class _TeeProcess(multiprocessing.Process):
             # https://bugs.python.org/issue17404.
             output_files = [os.fdopen(sys.stdout.fileno(), "w")]
             for filename in self._output_filenames:
+                # TODO(b/236161656): Fix.
+                # pylint: disable-next=consider-using-with
                 output_files.append(open(filename, "w", encoding="utf-8"))
 
             # Send all data from the one input to all the outputs.

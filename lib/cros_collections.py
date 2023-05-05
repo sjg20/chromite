@@ -20,7 +20,7 @@ def GroupByKey(input_iter, key):
         was encountered in |input_iter| to a list of entries that had
         that value.
     """
-    split_dict = dict()
+    split_dict = {}
     for entry in input_iter:
         split_dict.setdefault(entry.get(key), []).append(entry)
     return split_dict

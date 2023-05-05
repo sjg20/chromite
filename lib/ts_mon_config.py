@@ -25,9 +25,11 @@ try:
     from chromite.third_party.infra_libs.ts_mon import config
     from chromite.third_party.infra_libs.ts_mon import IntegerField
     from chromite.third_party.infra_libs.ts_mon import StringField
-except (ImportError, RuntimeError) as e:
+except (ImportError, RuntimeError) as import_error:
     config = None
-    logging.warning("Failed to import ts_mon, monitoring is disabled: %s", e)
+    logging.warning(
+        "Failed to import ts_mon, monitoring is disabled: %s", import_error
+    )
 
 
 _WasSetup = False

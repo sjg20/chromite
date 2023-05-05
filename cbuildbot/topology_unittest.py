@@ -43,7 +43,6 @@ class FakeFetchTopologyTest(cros_test_lib.TestCase):
     def testFakeTopology(self):
         data = {1: "one", 2: "two", 3: "three"}
         FakeFetchTopology(data)
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(topology.topology.items(), data.items())
 
     def testFakeTopologyEmpty(self):

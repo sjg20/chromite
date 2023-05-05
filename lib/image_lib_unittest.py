@@ -708,6 +708,8 @@ class GetImagesToBuildTests(cros_test_lib.MockTestCase):
 
     def testExpectedInput(self):
         """Pass in all expected image types and check expected image names."""
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for k in constants.IMAGE_TYPE_TO_NAME:
             image = image_lib.GetImagesToBuild([k])
             self.assertEqual(len(image), 1)

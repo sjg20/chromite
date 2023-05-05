@@ -2756,6 +2756,8 @@ class GetUpdatedFilesTest(cros_test_lib.MockTempDirTestCase):
             new_afdo_versions[self.kernel_key_name]["name"],
             self.afdo_sorted_by_freshness[2],
         )
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for k in self.afdo_versions:
             # Make sure other fields are not changed
             if k != self.kernel_key_name:

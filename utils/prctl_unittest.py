@@ -20,7 +20,7 @@ class PrctlTests(cros_test_lib.TestCase):
         self.assertEqual(
             0, prctl.prctl(prctl.Option.SET_PDEATHSIG, signal.SIGQUIT)
         )
-        arg2 = ctypes.c_int()
+        arg2 = ctypes.c_int(0)
         self.assertEqual(
             0, prctl.prctl(prctl.Option.GET_PDEATHSIG, ctypes.byref(arg2))
         )

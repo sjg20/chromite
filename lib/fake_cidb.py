@@ -296,6 +296,8 @@ class FakeCIDBConnection(object):
         build_statuses = {
             b["id"]: b for b in self.buildTable if b["id"] in build_ids
         }
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for _id in self.buildStageTable:
             build_id = self.buildStageTable[_id]["build_id"]
             if build_id in build_ids:
@@ -313,6 +315,8 @@ class FakeCIDBConnection(object):
             for b in self.buildTable
             if b["buildbucket_id"] in buildbucket_ids
         }
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for _id in self.buildStageTable:
             build_id = self.buildStageTable[_id]["build_id"]
             if build_id in build_statuses:

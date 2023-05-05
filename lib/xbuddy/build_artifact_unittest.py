@@ -277,7 +277,6 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
     def testBundledArtifactTypes(self):
         """Verify all known bundled artifacts are either zip or tar files."""
         known_names = ["zip", ".tgz", ".tar", "tar.bz2", "tar.xz", "tar.gz"]
-        # pylint: disable=dict-values-not-iterating
         for d in itertools.chain(
             *build_artifact.chromeos_artifact_map.values()
         ):
@@ -555,7 +554,10 @@ class BuildArtifactTest(cros_test_lib.MockTestCase):
         saved_exception = artifact.GetException()
         # saved_exception has traceback info - strip it.
         self.assertEqual(
-            str(expected_exception), str(saved_exception).split("\n")[0]
+            # TODO(b/236161656): Fix.
+            # pylint: disable=used-before-assignment,use-maxsplit-arg
+            str(expected_exception),
+            str(saved_exception).split("\n")[0],
         )
 
     @cros_test_lib.pytestmark_network_test

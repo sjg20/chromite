@@ -554,6 +554,8 @@ class TestKeyset(cros_test_lib.TempDirTestCase):
         expected_keys = ks0.GetRootOfTrustKeys("root_key")
         expected = {
             k: ks0._root_of_trust_keys[k]["root_key"]
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=consider-using-dict-items
             for k in ks0._root_of_trust_keys.keys()
         }
         self.assertDictEqual(expected, expected_keys)

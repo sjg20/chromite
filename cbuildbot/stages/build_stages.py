@@ -686,6 +686,8 @@ class BuildPackagesStage(
         # rebuilds in the SDK. The SDK rebuilds sometimes hit build critical
         # packages causing races & build failures.
         clean_build = (
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=consider-using-in
             self._run.config.build_type == constants.CANARY_TYPE
             or self._run.config.build_type == constants.FULL_TYPE
             or self._run.config.build_type == constants.TOOLCHAIN_TYPE

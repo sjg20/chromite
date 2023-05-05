@@ -565,7 +565,7 @@ def clean(build_target: build_target_lib.BuildTarget, dry_run: bool = False):
             check=False,
             dryrun=dry_run,
         ).stdout
-    except cros_build_lib.RunCommandError as e:
+    except cros_build_lib.RunCommandError:
         raise CleanError(
             "qfile for target board %s is not present; board may "
             "not have been set up." % build_target.name

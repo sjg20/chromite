@@ -742,7 +742,7 @@ class ManifestCheckout(Manifest):
             "failing due to that." % (root,),
         )
 
-    # pylint: disable=arguments-differ
+    # pylint: disable=arguments-renamed
     @classmethod
     def Cached(cls, path, manifest_path=None, search=True):
         """Return an instance, reusing an existing one if possible.

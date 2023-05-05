@@ -79,11 +79,15 @@ class TestPathForVbootSigningScripts(cros_test_lib.MockTestCase):
     def testDefault(self):
         """Test default value for path works."""
         path = imagefile._PathForVbootSigningScripts()
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=use-maxsplit-arg
         self.assertEqual(DEFAULT_VB_PATH, path["PATH"].split(":")[0])
 
     def testPathPassed(self):
         """Test that passed path is used."""
         path = imagefile._PathForVbootSigningScripts(path="F/G")
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=use-maxsplit-arg
         self.assertEqual("F/G", path["PATH"].split(":")[0])
 
     def testDefaultPathAlreadyPresent(self):

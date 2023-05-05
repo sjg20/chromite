@@ -312,11 +312,9 @@ def _RgbColorGrade(green: int, blue: int, rate=51) -> Tuple[str, int, int]:
         value for the blue component.
     """
 
-    if green not in range(
-        0, 256
-    ):  # pylint: disable=range-builtin-not-iterating
+    if green not in range(0, 256):
         raise ValueError(f"green({green}) must be in [0, 255]")
-    if blue not in range(0, 256):  # pylint: disable=range-builtin-not-iterating
+    if blue not in range(0, 256):
         raise ValueError(f"blue({blue}) must be in [0, 255]")
 
     green = max(green - rate, 0)

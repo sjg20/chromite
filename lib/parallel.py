@@ -101,6 +101,8 @@ def _get_sync_manager():
     # broken and E_NOENT or E_PIPE errors are thrown from various places. We
     # can just ignore SIGINT in the SyncManager and things will close properly
     # when the enclosing with-statement exits.
+    # TODO(b/236161656): Fix.
+    # pylint: disable-next=consider-using-with
     m.start(IgnoreSigintAndSigterm)
     return m
 

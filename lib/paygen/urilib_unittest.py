@@ -27,6 +27,8 @@ class TestUrilib(cros_test_lib.MockTempDirTestCase):
             None: ["foo/bar", "/foo/bar", "://garbage/path"],
         }
 
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for protocol in tests:
             for uri in tests[protocol]:
                 self.assertEqual(protocol, urilib.ExtractProtocol(uri))
@@ -38,6 +40,8 @@ class TestUrilib(cros_test_lib.MockTempDirTestCase):
             "file": ["foo/bar", "/foo/bar", "://garbage/path", "/cnsfoo/bar"],
         }
 
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for uri_type in tests:
             for uri in tests[uri_type]:
                 self.assertEqual(uri_type, urilib.GetUriType(uri))

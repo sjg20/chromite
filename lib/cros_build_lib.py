@@ -511,7 +511,7 @@ class _Popen(subprocess.Popen):
     """
 
     # Pylint seems to be buggy with the send_signal signature detection.
-    # pylint: disable=arguments-differ
+    # pylint: disable=arguments-renamed
     def send_signal(self, sig):
         if self.returncode is not None:
             # The original implementation in Popen would allow signaling
@@ -775,7 +775,6 @@ def run(
         # first.
         #
         # Linter can't see that we're using |input| as a var, not a builtin.
-        # pylint: disable=input-builtin
         if encoding and isinstance(input, str):
             input = input.encode(encoding, errors)
         elif not encoding and isinstance(input, str):

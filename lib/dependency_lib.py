@@ -238,6 +238,8 @@ def get_source_path_mapping(
             os.path.join(x, "scripts") for x in overlay_directories
         ]
 
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for package in results:
             results[package].extend(profile_directories)
             results[package].extend(make_conf_paths)
@@ -249,7 +251,11 @@ def get_source_path_mapping(
 
         # chromiumos-overlay specifies default settings for every target in
         # chromeos/config  and so can potentially affect every board.
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for package in results:
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=modified-iterating-dict
             results[package].append(
                 os.path.join(
                     constants.CHROOT_SOURCE_ROOT,
@@ -260,6 +266,8 @@ def get_source_path_mapping(
             )
 
     for p in results:
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=modified-iterating-dict
         results[p] = path_util.normalize_paths_to_source_root(results[p])
 
     return results

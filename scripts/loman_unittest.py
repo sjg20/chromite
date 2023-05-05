@@ -5,7 +5,7 @@
 """Unittests for loman.py"""
 
 import os
-import xml.etree.ElementTree as ElementTree
+from xml.etree import ElementTree
 
 from chromite.lib import cros_test_lib
 from chromite.lib import osutils

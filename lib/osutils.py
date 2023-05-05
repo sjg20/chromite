@@ -263,9 +263,13 @@ def WriteFile(
         # We have the right permissions, simply write the file in python.
         write_path = path
         if atomic:
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=consider-using-with
             write_path = tempfile.NamedTemporaryFile(
                 prefix=path, delete=False
             ).name
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-with,unspecified-encoding
         with open(write_path, mode) as f:
             f.writelines(
                 write_wrapper(cros_build_lib.iflatten_instance(content))

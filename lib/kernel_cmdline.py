@@ -270,7 +270,7 @@ class KernelArgList(
                 return idx
         return None
 
-    def insert(self, index, obj):  # pylint: disable=arguments-differ
+    def insert(self, index, obj):  # pylint: disable=arguments-renamed
         """Insert |obj| before |index|.
 
         Args:
@@ -538,12 +538,16 @@ class DmDevice(object):
             key: Key to update if found.  Passed to KernelArg().
             value: Passed to KernelArg().
         """
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-enumerate
         for idx in range(len(self.rows)):
             if (
                 self.rows[idx].target_type == "verity"
                 and key in self.rows[idx].args
             ):
                 self.rows[idx].args[key] = KernelArg(key, value)
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-enumerate
         for idx in range(len(self.rows)):
             if self.rows[idx].target_type == "verity":
                 self.rows[idx].args[key] = KernelArg(key, value)

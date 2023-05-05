@@ -331,9 +331,9 @@ obj /file bd1b4ffa168f50b0d45571dae51eefc7 1611355468""",
             )
             osutils.WriteFile(file_loc, content)
 
-        for name, ebuild in self.ebuilds.items():
+        for _, ebuild in self.ebuilds.items():
             content = ebuild_template % {"license": ebuild["license"]}
-            self.ebuilds[name]["content"] = content
+            ebuild["content"] = content
             osutils.WriteFile(
                 os.path.join(self.tempdir, ebuild["dir"]), content
             )

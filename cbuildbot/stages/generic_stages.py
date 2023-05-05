@@ -755,15 +755,14 @@ class BuilderStage(object):
         else:
             self._BeginStepForBuildbot()
 
+        # Set default values
+        result = None
+        cidb_result = None
+        description = None
+        board = ""
+        elapsed_time = None
+        start_time = time.time()
         try:
-            # Set default values
-            result = None
-            cidb_result = None
-            description = None
-            board = ""
-            elapsed_time = None
-            start_time = time.time()
-
             if skip_stage:
                 self._StartBuildStageInCIDB()
                 self.HandleSkip()

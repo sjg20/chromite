@@ -65,6 +65,8 @@ class TrybotPatchPool(object):
         """
 
         def AttributeFilter(patch):
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=consider-using-dict-items
             for key in kwargs:
                 if getattr(patch, key, object()) != kwargs[key]:
                     return False

@@ -226,7 +226,6 @@ class PartialFileReaderTest(cros_test_lib.TempDirTestCase):
         """Tests the main run() function with cat."""
         # Create a data file to read.  Pick a stride that doesn't repeat at the
         # same offsets that we're reading.
-        # pylint: disable=range-builtin-not-iterating
         data = bytes(range(250)) * 512
         path = self.tempdir / "foo.bin"
         path.write_bytes(data)
@@ -248,7 +247,6 @@ class PartialFileReaderTest(cros_test_lib.TempDirTestCase):
         """Tests the main run() function with a "compressor"."""
         # Create a data file to read.  Pick a stride that doesn't repeat at the
         # same offsets that we're reading.
-        # pylint: disable=range-builtin-not-iterating
         data = bytes(range(250)) * 512
         path = self.tempdir / "foo.bin"
         path.write_bytes(data)

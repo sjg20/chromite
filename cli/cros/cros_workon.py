@@ -162,7 +162,7 @@ Examples:
         chroot_args = []
         try:
             chroot_args += ["--working-dir", path_util.ToChrootPath(Path.cwd())]
-        except ValueError as e:
+        except ValueError:
             logging.warning("Unable to translate CWD to a chroot path.")
         commandline.RunInsideChroot(self, chroot_args=chroot_args)
 

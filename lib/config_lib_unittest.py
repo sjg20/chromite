@@ -515,8 +515,9 @@ class SiteConfigTest(cros_test_lib.TestCase):
 
         # Make sure each one contains
         self.longMessage = True
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for name in expected:
-            # pylint: disable=dict-items-not-iterating
             self.assertGreaterEqual(
                 self.site_config[name].items(), expected[name].items(), name
             )
@@ -525,7 +526,6 @@ class SiteConfigTest(cros_test_lib.TestCase):
 
         children = self.site_config["parent"].child_configs
         self.assertEqual(len(children), 2)
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(
             children[0].items(),
             {

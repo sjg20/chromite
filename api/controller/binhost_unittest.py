@@ -527,6 +527,8 @@ CPV: virtual/python-enum34-1
         for package in self.dev_install_packages:
             # Since a package has a category, such as app-arch/zip-3.0-r3, we
             # need to create the packages_dir / category dir as needed.
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=use-maxsplit-arg
             category = package.split(os.sep)[0]
             osutils.SafeMakedirs(os.path.join(packages_dir, category))
             package_tbz2_file = os.path.join(packages_dir, package) + ".tbz2"

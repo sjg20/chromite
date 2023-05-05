@@ -1594,6 +1594,8 @@ class MockPatchFactory(object):
     ):
         """Helper function to create mock GerritPatch objects."""
         if change_id is None:
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=assignment-from-no-return
             change_id = self._patch_counter()
         subject = f"PatchSet: {change_id}"
         gerrit_number = str(change_id)
@@ -1601,6 +1603,8 @@ class MockPatchFactory(object):
         change_id = "I%s" % change_id.rjust(40, "0")
         sha1 = hex(_GetNumber())[2:].rstrip("L").lower().rjust(40, "0")
         if patch_number is None:
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=assignment-from-no-return
             patch_number = _GetNumber()
         fake_url = "http://foo/bar"
         if not approvals:

@@ -1674,6 +1674,8 @@ class InstalledPackage(object):
             return []
 
         result = []
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-with
         for line in open(path, encoding="utf-8"):
             line = line.strip()
             # Line format is: "type file_path [more space-separated fields]".

@@ -305,6 +305,8 @@ class TableTest(cros_test_lib.TempDirTestCase):
             'a,",c': ["a", '",c'],
             'a,"",c': ["a", "", "c"],
         }
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for line in tests:
             vals = table.Table._SplitCSVLine(line)
             self.assertEqual(vals, tests[line])

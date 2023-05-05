@@ -587,6 +587,7 @@ class TestHalting(cros_test_lib.MockOutputTestCase, TestBackgroundWrapper):
         kwargs.setdefault("GDB_COMMANDS", ("detach",))
 
         ex_str = None
+        error_str = None
         with mock.patch.multiple(parallel._BackgroundTask, **kwargs):
             with self.OutputCapturer() as capture:
                 try:

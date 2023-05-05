@@ -807,4 +807,6 @@ def main(argv):
         if options.debug:
             raise
         else:
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=raising-bad-type
             raise cros_build_lib.Die(str(e))

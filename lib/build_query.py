@@ -407,6 +407,8 @@ class Profile(QueryTarget):
         _, flags_unset = self._use_flag_changes()
         return flags_unset
 
+    # TODO(b/236161656): Fix.
+    # pylint: disable-next=cache-max-size-none
     @functools.lru_cache(maxsize=None)
     def _parse_conf(self, name: str) -> List[str]:
         """Parse a basic conf file, such as parent, use.mask, or use.force."""

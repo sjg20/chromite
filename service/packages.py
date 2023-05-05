@@ -5,6 +5,9 @@
 """Package utility functionality."""
 
 import collections
+
+# TODO(b/236161656): Fix.
+# pylint: disable-next=no-name-in-module,import-error
 from distutils.version import LooseVersion
 import fileinput
 import functools

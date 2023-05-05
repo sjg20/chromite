@@ -58,6 +58,8 @@ class TestRetries(cros_test_lib.MockTempDirTestCase):
         source = functools.partial(next, iter(range(5)))
 
         def _TestMain():
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=assignment-from-no-return
             val = source()
             if val < 4:
                 raise ValueError()
@@ -195,6 +197,8 @@ class TestRetries(cros_test_lib.MockTempDirTestCase):
         source = functools.partial(next, iter(range(6)))
 
         def _TestMain():
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=assignment-from-no-return
             val = source()
             if val < 2:
                 raise OSError()

@@ -1244,6 +1244,8 @@ class FindOverlaysTest(cros_test_lib.MockTempDirTestCase):
                 "repo-name": board,
             }
             if "_" in board:
+                # TODO(b/236161656): Fix.
+                # pylint: disable-next=use-maxsplit-arg
                 settings["masters"] += board.split("_")[0]
             osutils.WriteFile(conf_path % settings, conf_data % settings)
 
@@ -1255,6 +1257,8 @@ class FindOverlaysTest(cros_test_lib.MockTempDirTestCase):
                 "repo-name": "%s-private" % board,
             }
             if "_" in board:
+                # TODO(b/236161656): Fix.
+                # pylint: disable-next=use-maxsplit-arg
                 settings["masters"] += board.split("_")[0]
             osutils.WriteFile(conf_path % settings, conf_data % settings)
 
@@ -1504,7 +1508,7 @@ class GetOverlayEBuildsTest(cros_test_lib.MockTempDirTestCase):
         """
         for f in files:
             if f.endswith(".ebuild") and (
-                not "CROS_WORKON_MANUAL_UPREV=1" in osutils.ReadFile(f)
+                "CROS_WORKON_MANUAL_UPREV=1" not in osutils.ReadFile(f)
                 or allow_manual_uprev
             ):
                 pkgdir = os.path.dirname(f)

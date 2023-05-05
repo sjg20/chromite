@@ -74,6 +74,8 @@ def CreateRuntimeTree(sysroot: str, pkg_list: str) -> Dict[str, List[str]]:
     # In those cases we add the given packages so that the output file has
     # something and doesn't appear broken.
     if deps_tree:
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         runtime_tree = {pkg: deps_tree[pkg]["deps"].keys() for pkg in deps_tree}
     else:
         runtime_tree = {pkg: [] for pkg in pkg_list}

@@ -1848,6 +1848,8 @@ class Upgrader(object):
             # meaning they probably require a patch and should not go into
             # portage-stable.
             if pkg_overlays:
+                # TODO(b/236161656): Fix.
+                # pylint: disable-next=consider-using-dict-items
                 lines = ["%s [%s]" % (p, pkg_overlays[p]) for p in pkg_overlays]
                 oper.Warning(
                     "\n"

@@ -404,7 +404,6 @@ class AppendOptionTest(cros_test_lib.TestCase):
     def testNone(self):
         """Test results when no arguments are passed in."""
         result = self.parser.parse_args([])
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(
             vars(result).items(),
             {"flag": None, "value": None, "shared": None}.items(),
@@ -423,7 +422,6 @@ class AppendOptionTest(cros_test_lib.TestCase):
             ]
         )
 
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(
             vars(result).items(),
             {
@@ -452,7 +450,6 @@ class AppendOptionTest(cros_test_lib.TestCase):
             ]
         )
 
-        # pylint: disable=dict-items-not-iterating
         self.assertGreaterEqual(
             vars(result).items(),
             {

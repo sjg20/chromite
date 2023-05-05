@@ -159,7 +159,7 @@ class ScheduleSlavesStage(generic_stages.BuilderStage):
             result.create_time.ToJsonString(),
         )
         cbuildbot_alerts.PrintBuildbotLink(
-            build_name, "{}{}".format(constants.CHROMEOS_MILO_HOST, result.id)
+            build_name, f"{constants.CHROMEOS_MILO_HOST}{result.id}"
         )
 
         return (result.id, result.create_time.ToJsonString())

@@ -28,6 +28,8 @@ class PerfUploadTestCase(cros_test_lib.MockTestCase):
             "_GetPresentationInfo",
             return_value=presentation_info,
         )
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-with
         self.file_name = tempfile.NamedTemporaryFile().name
 
     def tearDown(self):

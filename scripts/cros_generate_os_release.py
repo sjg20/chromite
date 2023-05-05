@@ -52,6 +52,8 @@ def GenerateOsRelease(root, default_params=None):
         for key, value in default_params.items():
             mapping.setdefault(key, value)
 
+    # TODO(b/236161656): Fix.
+    # pylint: disable-next=consider-using-dict-items
     osrelease_content = "\n".join([k + "=" + mapping[k] for k in mapping])
     osrelease_content += "\n"
     osutils.WriteFile(os_release_path, osrelease_content)

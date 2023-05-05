@@ -1819,6 +1819,8 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
             path = os.path.join(self._buildroot, p)
             if not os.path.exists(os.path.dirname(path)):
                 os.makedirs(os.path.dirname(path))
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=consider-using-with
             open(path, "ab").close()
             expected_files.append(path)
 

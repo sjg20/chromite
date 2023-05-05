@@ -357,6 +357,8 @@ def _SendToDashboard(data_obj, dashboard=DASHBOARD_URL):
     encoded = urllib.parse.urlencode(data_obj).encode("utf-8")
     req = urllib.request.Request(upload_url, encoded)
     try:
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-with
         urllib.request.urlopen(req)
     except urllib.error.HTTPError as e:
         raise PerfUploadingError(

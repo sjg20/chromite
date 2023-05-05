@@ -1075,6 +1075,8 @@ class Licensing(object):
 
         Do not call this after adding virtual packages with AddExtraPkg.
         """
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for package_name in self.packages:
             pkg = self.packages[package_name]
 

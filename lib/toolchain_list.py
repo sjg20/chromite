@@ -135,6 +135,8 @@ class ToolchainList(object):
 
         # Now that we've merged all the setting overrides, apply them to
         # defaults.
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for target in targets.keys():
             settings = {
                 "sdk": True,

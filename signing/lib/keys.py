@@ -195,6 +195,8 @@ class KeyVersions(object):
         self._path = filename
         if os.path.exists(filename):
             self.saved = True
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=consider-using-with
             for line in open(filename, "r", encoding="utf-8").readlines():
                 if line.find("=") > 0:
                     k, v = line.strip().split("=")

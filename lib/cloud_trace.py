@@ -175,6 +175,8 @@ class Span(collections.abc.Mapping):
         return len(self.keys())
 
     def __iter__(self):
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         return ((key, self[key]) for key in self.keys())
 
 

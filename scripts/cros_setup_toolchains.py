@@ -227,6 +227,8 @@ class Crossdev(object):
                 if target in TARGET_COMPILER_RT_ENABLED:
                     cmd.extend(CROSSDEV_COMPILER_RT_ARGS)
                 if target in TARGET_LLVM_PKGS_ENABLED:
+                    # TODO(b/236161656): Fix.
+                    # pylint: disable-next=consider-using-dict-items
                     for pkg in LLVM_PKGS_TABLE:
                         cmd.extend(LLVM_PKGS_TABLE[pkg])
                 if target in TARGET_GO_ENABLED:

@@ -85,6 +85,8 @@ def CopyFileSegment(in_file, in_mode, in_len, out_file, out_mode, in_seek=0):
     if "b" not in out_mode:
         raise ValueError('out_mode must contian "b"')
 
+    # TODO(b/236161656): Fix.
+    # pylint: disable-next=unspecified-encoding
     with open(in_file, in_mode) as in_stream, open(
         out_file, out_mode
     ) as out_stream:

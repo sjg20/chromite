@@ -897,6 +897,8 @@ class PaygenPayload(object):
         """
         file_paths = []
         for signature in signatures:
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=consider-using-with
             path = tempfile.NamedTemporaryFile(
                 dir=self.work_dir, delete=False
             ).name

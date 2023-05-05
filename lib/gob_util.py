@@ -209,7 +209,7 @@ def CreateHttpReq(
         except gce.HttpAccessTokenRefreshError as e:
             logging.debug("Failed to retrieve gce access token: %s", e)
         # Not in an Appengine or GCE environment.
-        except httplib2.ServerNotFoundError as e:
+        except httplib2.ServerNotFoundError:
             pass
 
     cookies = GetCookies(host, path)

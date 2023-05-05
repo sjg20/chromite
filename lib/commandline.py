@@ -1395,7 +1395,7 @@ def ScriptWrapperMain(
             file=sys.stderr,
         )
         sys.stderr.flush()
-    except SystemExit as e:
+    except SystemExit:
         # Right now, let this crash through - longer term, we'll update the
         # scripts in question to not use sys.exit, and make this into a flagged
         # error.

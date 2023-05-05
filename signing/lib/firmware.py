@@ -444,6 +444,8 @@ def ResignImageFirmware(image_file, keyset):
     Raises SignerFailedError
     """
     with osutils.TempDir() as rootfs_dir:
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=not-context-manager
         with _MountImagePartition(image_file, "ROOT-A", rootfs_dir):
             sb_file = os.path.join(rootfs_dir, "usr/sbin/chromeos-firmware")
             if os.path.exists(sb_file):

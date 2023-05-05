@@ -237,6 +237,8 @@ class TestRunCommandNoMock(cros_test_lib.TestCase):
         """Verify input argument when it is a file object."""
         result = cros_build_lib.run(
             ["cat"],
+            # TODO(b/236161656): Fix.
+            # pylint: disable-next=consider-using-with
             input=open("/dev/null", encoding="utf-8"),
             capture_output=True,
         )
@@ -481,6 +483,8 @@ class TestRunCommand(cros_test_lib.MockTestCase):
         kwargs.setdefault("env", mock.ANY)
         kwargs["close_fds"] = True
         self.longMessage = True
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-dict-items
         for key in kwargs.keys():
             self.assertEqual(
                 kwargs[key], pkwargs[key], msg="kwargs[%s] mismatch" % key
@@ -532,7 +536,7 @@ class TestRunCommand(cros_test_lib.MockTestCase):
             returncode=self.proc_mock.returncode,
         )
 
-        arg_dict = dict()
+        arg_dict = {}
         for attr in (
             "close_fds",
             "cwd",
@@ -1157,6 +1161,8 @@ class TestContextManagerStack(cros_test_lib.TestCase):
             class foon(object):
                 """Simple context manager which runs checks on __exit__."""
 
+                # TODO(b/236161656): Fix.
+                # pylint: disable-next=assignment-from-no-return
                 marker = counter()
 
                 def __enter__(self):

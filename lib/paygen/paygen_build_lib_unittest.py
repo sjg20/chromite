@@ -713,6 +713,8 @@ class MockImageDiscoveryHelper(BasePaygenBuildLibTest):
 
     def addSignedImage(self, build, key="mp"):
         images = []
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-enumerate
         for i in range(len(self.signedResults)):
             if build == self.signedResults[i][0]:
                 images = self.signedResults[i][1]
@@ -748,6 +750,8 @@ class MockImageDiscoveryHelper(BasePaygenBuildLibTest):
         return image
 
     def addTestImage(self, build):
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-enumerate
         for i in range(len(self.testResults)):
             if build == self.testResults[i][0]:
                 self.testResults.pop(i)
@@ -758,6 +762,8 @@ class MockImageDiscoveryHelper(BasePaygenBuildLibTest):
         return image
 
     def addTestMiniOSImage(self, build):
+        # TODO(b/236161656): Fix.
+        # pylint: disable-next=consider-using-enumerate
         for i in range(len(self.testMiniOSResults)):
             if build == self.testMiniOSResults[i][0]:
                 self.testMiniOSResults.pop(i)

@@ -23,8 +23,6 @@ from chromite.lib import retry_util
 
 # Hopefully cidb will be deleted soon (before Python 3 finalizes), so we don't
 # have to fully port this module.
-# pylint: disable=long-suffix
-
 # pylint: disable=protected-access
 
 
