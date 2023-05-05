@@ -1216,11 +1216,11 @@ def RunHWTestSuite(
                     # providing more information from the RunCommandError we encountered
                     # will be useful in diagnosing the root cause of the failure.
                     json_dump_result = _HWTestParseJSONDump(s)
-                except ValueError as e:
+                except ValueError as err:
                     logging.error(
                         "Failed to parse HWTest JSON dump string, "
                         "subsystem based partial submission will be skipped:  %s",
-                        e,
+                        err,
                     )
             else:
                 for output in outputs:

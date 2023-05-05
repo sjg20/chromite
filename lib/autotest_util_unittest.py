@@ -89,7 +89,7 @@ class BuildTarballTests(cros_test_lib.RunCommandTempDirTestCase):
         )
 
         expected_files = list(file_list)
-        ssp_files = list()
+        ssp_files = []
 
         # Touch chroot Tast paths so they'll be included in the tar command.
         for p in self.builder._TAST_SSP_CHROOT_FILES:

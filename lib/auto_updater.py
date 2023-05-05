@@ -1069,8 +1069,8 @@ class ChromiumOSUpdater(BaseUpdater):
 
         # Loop in case the initial check happens before the reboot.
         while True:
+            start_verify_time = time.time()
             try:
-                start_verify_time = time.time()
                 self._VerifyBootExpectations(
                     self.inactive_kernel,
                     rollback_message="Build %s failed to boot on %s; system "

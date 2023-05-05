@@ -323,7 +323,7 @@ class BuildPackagesStageTest(
         self._release_tag = None
         self._update_metadata = False
         self._mock_configurator = None
-        self.PatchObject(commands, "ExtractDependencies", return_value=dict())
+        self.PatchObject(commands, "ExtractDependencies", return_value={})
         self.fake_db = fake_cidb.FakeCIDBConnection()
         self.buildstore = FakeBuildStore(self.fake_db)
         cidb.CIDBConnectionFactory.SetupMockCidb(self.fake_db)

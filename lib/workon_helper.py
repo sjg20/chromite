@@ -175,9 +175,9 @@ def ListAllWorkedOnAtoms(src_root=constants.CHROOT_SOURCE_ROOT):
     """
     workon_dir = GetWorkonPath(source_root=src_root)
     if not os.path.isdir(workon_dir):
-        return dict()
+        return {}
 
-    system_to_atoms = dict()
+    system_to_atoms = {}
     for file_name in os.listdir(workon_dir):
         if file_name.endswith(".mask"):
             continue

@@ -336,7 +336,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
     def testNormalNoCfi(self):
         """Normal run w/out CFI"""
         # Make sure the num_errors flag works too.
-        num_errors = ctypes.c_int()
+        num_errors = ctypes.c_int(0)
         ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
             self.elf_file,
             breakpad_dir=self.breakpad_dir,
@@ -432,7 +432,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
         )
         self.assertEqual(ret, 1)
         # Make sure the num_errors flag works too.
-        num_errors = ctypes.c_int()
+        num_errors = ctypes.c_int(0)
         ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
             self.elf_file, breakpad_dir=self.breakpad_dir, num_errors=num_errors
         )
@@ -496,7 +496,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
                 '(no ".stab" or ".debug_info" sections)'
             ),
         )
-        num_errors = ctypes.c_int()
+        num_errors = ctypes.c_int(0)
         ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
             go_binary, go_debug_file, self.breakpad_dir
         )
@@ -537,7 +537,7 @@ class GenerateSymbolTest(cros_test_lib.RunCommandTempDirTestCase):
                 '(no ".stab" or ".debug_info" sections)'
             ),
         )
-        num_errors = ctypes.c_int()
+        num_errors = ctypes.c_int(0)
         ret = cros_generate_breakpad_symbols.GenerateBreakpadSymbol(
             binary, debug_file, self.breakpad_dir, sysroot=self.tempdir
         )

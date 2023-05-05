@@ -158,7 +158,7 @@ class BuildConfigClassTest(cros_test_lib.TestCase):
         result = config.derive(self.fooConfig, self.barConfig, a=1, b=2, bar=3)
 
         self.assertIsNot(config, result)
-        self.assertEqual(config, dict())
+        self.assertEqual(config, {})
         self.assertEqual(result, dict(name="bar", foo=1, bar=3, a=1, b=2))
 
     def testApplyCallable(self):

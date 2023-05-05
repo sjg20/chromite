@@ -88,7 +88,7 @@ class ToolchainList(object):
                 toolchain.
         """
         if setting_overrides is None:
-            setting_overrides = dict()
+            setting_overrides = {}
         self._toolchains.append(
             _ToolchainTuple(target=target, setting_overrides=setting_overrides)
         )
@@ -114,7 +114,7 @@ class ToolchainList(object):
         # We might get toolchain setting overrides from a couple different
         # overlays. Merge all these overrides together, disallowing conflicts.
         for toolchain in toolchains:
-            targets.setdefault(toolchain.target, dict())
+            targets.setdefault(toolchain.target, {})
             existing_overrides = targets[toolchain.target]
             for key, value in toolchain.setting_overrides.items():
                 if (

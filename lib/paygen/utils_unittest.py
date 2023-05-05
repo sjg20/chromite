@@ -133,13 +133,13 @@ class TestUtils(cros_test_lib.TempDirTestCase):
 
             _slots = ("foo", "bar", "car", "far")
 
-        a1 = A(foo=dict(), bar=set(), car=list(), far=tuple())
-        a2 = A(car=list(), bar=set(), foo=dict(), far=tuple())
+        a1 = A(foo={}, bar=set(), car=[], far=tuple())
+        a2 = A(car=[], bar=set(), foo={}, far=tuple())
         self.assertEqual(hash(a1), hash(a2))
         self.assertEqual(a1, a2)
 
-        a3 = A(foo=dict(), bar=set(), car=list(), far=tuple())
-        a4 = A(car=1, bar=set(), foo=dict(), far=tuple())
+        a3 = A(foo={}, bar=set(), car=[], far=tuple())
+        a4 = A(car=1, bar=set(), foo={}, far=tuple())
         self.assertNotEqual(hash(a3), hash(a4))
         self.assertNotEqual(a3, a4)
 

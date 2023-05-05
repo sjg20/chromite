@@ -632,7 +632,7 @@ def CreateBoardConfigs(site_config, boards_dict, ge_build_config):
     # TODO(crbug.com/648473): Remove these after GE adds them to their data set.
     board_names = board_names.union(boards_dict["all_boards"])
 
-    result = dict()
+    result = {}
     for board in board_names:
         board_config = config_lib.BuildConfig(boards=[board])
 

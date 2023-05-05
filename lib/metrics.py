@@ -912,7 +912,7 @@ class RuntimeBreakdownTimer(object):
             )
             step_metric.add(percent, fields=self._fields)
 
-            fields = dict(self._fields) if self._fields is not None else dict()
+            fields = dict(self._fields) if self._fields is not None else {}
             fields["step_name"] = name
             # TODO(pprabhu): Convert _GetStepBreakdowns() to return ratios
             # instead of percentage when the old PercentageDistribution

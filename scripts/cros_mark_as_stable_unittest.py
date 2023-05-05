@@ -259,8 +259,8 @@ class MarkAsStableCMDTest(cros_test_lib.MockTempDirTestCase):
             self._overlays,
             self._overlay_tracking_branch,
             overlay_ebuilds,
-            list(),
-            list(),
+            [],
+            [],
         )
         self.assertEqual(3, mock_run_process_pool.call_count)
 

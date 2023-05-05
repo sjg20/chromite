@@ -28,7 +28,7 @@ _SUBCOMMAND_MODULE_DIRECTORY = os.path.join(os.path.dirname(__file__), "cros")
 _SUBCOMMAND_MODULE_PREFIX = "cros_"
 
 
-_commands = dict()
+_commands = {}
 
 
 def UseProgressBar():

@@ -575,7 +575,7 @@ def GenerateBreakpadSymbol(
     """
     assert breakpad_dir
     if num_errors is None:
-        num_errors = ctypes.c_int()
+        num_errors = ctypes.c_int(0)
     debug_file_only = not os.path.exists(elf_file)
 
     cmd_base = [dump_syms_cmd, "-v"]

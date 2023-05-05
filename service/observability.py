@@ -108,7 +108,7 @@ def get_installed_package_data(
     """
     if image_type not in _SUPPORTED_ISCP_PARTITIONS:
         logging.warning("Provided image type is not supported.")
-        return dict()
+        return {}
 
     results = {}
     installed_package_files = []

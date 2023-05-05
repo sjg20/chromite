@@ -389,7 +389,7 @@ print(json.dumps(pkg_info))
         logging.debug("Populating package DB...")
         for cpv, slot, rdeps_raw, build_time, use in cpv_info:
             cp = self._GetCP(cpv)
-            cp_slots = db.setdefault(cp, dict())
+            cp_slots = db.setdefault(cp, {})
             if slot in cp_slots:
                 raise ValueError(
                     "More than one package found for %s"
@@ -631,7 +631,7 @@ print(json.dumps(pkg_info))
             return True, False, False
 
         cp = self._GetCP(cpv)
-        target_pkg_info = self.target_db.get(cp, dict()).get(slot)
+        target_pkg_info = self.target_db.get(cp, {}).get(slot)
         if target_pkg_info is not None:
             attrs = package_info.SplitCPV(cpv)
             target_attrs = package_info.SplitCPV(target_pkg_info.cpv)
@@ -672,7 +672,7 @@ print(json.dumps(pkg_info))
                     target_attr,
                 )
 
-                binpkg_pkg_info = self.binpkgs_db.get(cp, dict()).get(slot)
+                binpkg_pkg_info = self.binpkgs_db.get(cp, {}).get(slot)
                 use_mismatch = binpkg_pkg_info.use != target_pkg_info.use
                 if use_mismatch:
                     logging.warning(
@@ -755,7 +755,7 @@ print(json.dumps(pkg_info))
                 logging.debug("Already updating %s", cp)
                 continue
 
-            cp_slots = self.binpkgs_db.get(cp, dict())
+            cp_slots = self.binpkgs_db.get(cp, {})
             logging.debug(
                 "Checking packages matching %s%s%s...",
                 cp,
@@ -783,7 +783,7 @@ print(json.dumps(pkg_info))
                 if process_rdeps:
                     self._ProcessDeps(pkg_info.rdeps, False)
                 if process_rev_rdeps:
-                    target_pkg_info = self.target_db.get(cp, dict()).get(slot)
+                    target_pkg_info = self.target_db.get(cp, {}).get(slot)
                     if target_pkg_info:
                         self._ProcessDeps(target_pkg_info.rev_rdeps, True)
 

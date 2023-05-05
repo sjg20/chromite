@@ -272,4 +272,4 @@ def test_get_installed_package_data__bad_image_type(tmp_path, caplog):
         constants.IMAGE_TYPE_FACTORY, tmp_path / "chromiumos_factory_image.bin"
     )
     assert "Provided image type is not supported." in caplog.text
-    assert result == dict()
+    assert result == {}

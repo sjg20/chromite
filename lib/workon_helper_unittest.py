@@ -100,7 +100,7 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
 
     def setUp(self):
         """Set up a test environment."""
-        self._valid_atoms = dict()
+        self._valid_atoms = {}
         self._mock_srcdir = os.path.join(self.tempdir, "src")
         workon_dir = workon_helper.GetWorkonPath(source_root=self._mock_srcdir)
         self._sysroot = os.path.join(self.tempdir, "sysroot")
@@ -333,7 +333,7 @@ class WorkonHelperTest(cros_test_lib.MockTempDirTestCase):
         """Check that we can list all worked on atoms across boards."""
         helper = self.CreateHelper()
         self.assertEqual(
-            dict(),
+            {},
             workon_helper.ListAllWorkedOnAtoms(src_root=self._mock_srcdir),
         )
         helper.StartWorkingOnPackages([WORKON_ONLY_ATOM])

@@ -88,7 +88,7 @@ class Overlay(object):
             tuple(parent_overlays) if parent_overlays else None
         )
         self.packages = []
-        self.profiles = dict()
+        self.profiles = {}
         self.categories = set()
         self.make_conf = make_conf or {}
 

@@ -1173,10 +1173,11 @@ class PaygenPayload(object):
                     ", trying again ...",
                     acq_result.reason,
                 )
-        try:
-            # Time the actual paygen operation started.
-            start_time = datetime.datetime.now()
 
+        # Time the actual paygen operation started.
+        start_time = datetime.datetime.now()
+
+        try:
             # Fetch and prepare the tgt image.
             self._PrepareImage(self.payload.tgt_image, self.tgt_image_file)
 
