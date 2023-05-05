@@ -56,6 +56,42 @@ TEST_CASES = (
 </manifest>
 """,
     ),
+    # Comments are indented correctly.
+    (
+        """<?xml version="1.0" encoding="UTF-8"?>
+<!-- yes
+       too much
+no
+\t
+maybe -->
+<!--x-->
+<manifest></manifest>
+""",
+        """<?xml version="1.0" encoding="UTF-8"?>
+<!-- yes
+     too much
+     no
+
+     maybe -->
+<!-- x -->
+<manifest/>
+""",
+    ),
+    (
+        """<?xml version="1.0" encoding="UTF-8"?>
+<!--
+-->
+<!--
+
+-->
+<!-- --><manifest/>""",
+        """<?xml version="1.0" encoding="UTF-8"?>
+<!--  -->
+<!--  -->
+<!--  -->
+<manifest/>
+""",
+    ),
 )
 
 

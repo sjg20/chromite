@@ -171,17 +171,17 @@ def Data(
         for node in _sort_children(root.childNodes):
             if node.nodeType == node.COMMENT_NODE:
                 # Reformat comment nodes.
-                comment = node.data.strip(" ")
-                # If it's a one-liner, leave it as-is.
+                # If the --> was on a line by itself, pull it up.
+                comment = node.data.strip()
                 lines = [x.strip() for x in comment.splitlines()]
+                # If it's a one-liner, leave it as-is.
                 if len(lines) == 1:
-                    comment = comment.strip()
-                else:
-                    comment_indent = "\n" + indent + "     "
-                    # If the --> was on a line by itself, pull it up.
-                    if not lines[-1].strip():
-                        lines.pop()
-                    comment = comment_indent.join(lines)
+                    comment = lines[0]
+                elif lines:
+                    # Indent lines that have content.
+                    comment = f"{lines.pop(0)}\n" + "\n".join(
+                        f"{indent}     {x}" if x else "" for x in lines
+                    )
                 buffer.write(f"{indent}<!-- {comment} -->")
 
                 # For some reason the minidom implementation doesn't generate
