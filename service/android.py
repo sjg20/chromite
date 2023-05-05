@@ -672,10 +672,7 @@ def FindDataCollectorArtifacts(
     gs_context = gs.GSContext()
     variables = {}
 
-    _UREADAHEAD_BUCKET = "ureadahead_pack_host"
     _BUCKETS = (
-        # TODO(b/271894843): Remove _UREADAHEAD_BUCKET once it's no longer used.
-        _UREADAHEAD_BUCKET,
         "packages_reference",
         "gms_core_cache",
         "tts_cache",
@@ -696,6 +693,7 @@ def FindDataCollectorArtifacts(
                         (f"{arch}_{build_type}_{bucket}").upper()
                     ] = f"{root_path}_{version_reference}.tar"
 
+    _UREADAHEAD_BUCKET = "ureadahead_pack_host"
     _BINARY_TRANSLATION_TYPES = ("houdini", "ndk", "native")
     # Special format for _UREADAHEAD_BUCKET.
     for arch in _ARCHES:
