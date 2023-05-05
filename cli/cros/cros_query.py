@@ -23,7 +23,7 @@ from chromite.lib import constants
 # A minimal set of globals for -f expression evaluation.  We want to give people
 # some capabilities, and we cannot stop them from accessing larger sets (eval is
 # not safe), but this command line isn't used in a secure context: the input is
-# from users excuting code on their own machine.  So our only goal here is
+# from users executing code on their own machine.  So our only goal here is
 # to limit the API boundary of things that you might normally do.
 _GLOBALS = {
     "BAD": build_query.Stability.BAD,
@@ -81,11 +81,11 @@ def compile_filter(arg: str) -> Callable[[build_query.QueryTarget], bool]:
     """Take a command-line filter argument and compile it to a function.
 
     Args:
-       arg: A command-line Python string.
+        arg: A command-line Python string.
 
     Returns:
-       A callable which takes a QueryTarget and returns True when the
-       filter accepts, and False when the filter rejects.
+        A callable which takes a QueryTarget and returns True when the
+        filter accepts, and False when the filter rejects.
     """
     code = compile(arg, "<command_line>", "eval")
 
@@ -121,9 +121,7 @@ def format_result(
     return formatter.vformat(fmt, (), ObjectMapping(result))
 
 
-def tree_result(
-    result: build_query.QueryTarget, fmt: Optional[str] = None
-) -> str:
+def tree_result(result: build_query.QueryTarget, fmt: Optional[str] = None):
     """Output a tree of the result.
 
     Args:
