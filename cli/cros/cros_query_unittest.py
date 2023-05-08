@@ -51,6 +51,10 @@ class FakeProfile(build_query.Profile):
         yield CHEETS_PRIVATE
         yield MALTEER_PRIVATE
 
+    def some_method(self, arg):
+        """Fake method for testing output format functionality."""
+        return f"{self.name} {arg}"
+
 
 # Some fake profiles for testing.
 CHIPSET_LAKELAKE = FakeProfile("base", "chipset-lakelake", [])
@@ -74,7 +78,7 @@ MALTEER_PRIVATE = FakeProfile(
 
 def test_tree(capsys):
     """Test the tree_result functionality."""
-    cros_query.tree_result(MALTEER_PRIVATE)
+    cros_query.tree_result(MALTEER_PRIVATE, str)
     captured = capsys.readouterr()
     assert (
         captured.out
@@ -122,15 +126,21 @@ def test_query_profiles_alt_format(capsys, monkeypatch):
     """Test querying profiles with -o formatting argument."""
     monkeypatch.setattr(cros_query, "QUERY_TARGETS", {"profiles": FakeProfile})
     _run_cros_query(
-        ["profiles", "-f", "'malteer' in overlay.name", "-o", "{overlay.name}"]
+        [
+            "profiles",
+            "-f",
+            "'malteer' in overlay.name",
+            "-o",
+            "{overlay.name} {some_method('ohea')}",
+        ]
     )
     captured = capsys.readouterr()
     assert (
         captured.out
         == """\
-baseboard-malteer
-malteer
-baseboard-malteer-private
-malteer-private
+baseboard-malteer base ohea
+malteer base ohea
+baseboard-malteer-private base ohea
+malteer-private base ohea
 """
     )

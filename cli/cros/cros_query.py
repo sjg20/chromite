@@ -11,8 +11,7 @@ those files if you want to see how the guts of the query logic works.
 
 import collections
 import logging
-import string
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 from chromite.cli import command
 from chromite.lib import build_query
@@ -103,38 +102,50 @@ def compile_filter(arg: str) -> Callable[[build_query.QueryTarget], bool]:
     return _result
 
 
-def format_result(
-    result: build_query.QueryTarget, fmt: Optional[str] = None
-) -> str:
-    """Format a result for output.
+def compile_formatter(arg: str) -> Callable[[build_query.QueryTarget], str]:
+    """Take a command-line output format argument and compile it to a function.
 
     Args:
-        result: An object returned from a query.
-        fmt: The format string to use.
+        arg: A command-line Python formatting string.
 
     Returns:
-        A string which can be shown to the user.
+        A callable which takes a QueryTarget and returns a string with the
+        formatted output.
     """
-    if not fmt:
-        return str(result)
-    formatter = string.Formatter()
-    return formatter.vformat(fmt, (), ObjectMapping(result))
+    f_string = f"f{arg!r}"
+    code = compile(f_string, "<command_line>", "eval")
+
+    def _result(query_result: build_query.QueryTarget) -> bool:
+        mapping = ObjectMapping(query_result)
+        try:
+            # pylint: disable=eval-used
+            return eval(code, _GLOBALS, mapping)
+        except Exception:
+            logging.error(
+                "Failed to evaluate f-string %s on %r.", f_string, query_result
+            )
+            raise
+
+    return _result
 
 
-def tree_result(result: build_query.QueryTarget, fmt: Optional[str] = None):
+def tree_result(
+    result: build_query.QueryTarget,
+    fmt: Callable[[build_query.QueryTarget], str],
+):
     """Output a tree of the result.
 
     Args:
         result: An object returned from a query.
-        fmt: The format string to use.
+        fmt: The formatter function to use.
     """
 
     def _rec(item, prefix, indent):
         # If the child is not of the result type, we cannot use the
         # user-provided format string, as it's specific to the output result's
         # type.
-        fmt_item = fmt if isinstance(item, type(result)) else None
-        print(f"{indent[:-len(prefix)]}{prefix}{format_result(item, fmt_item)}")
+        fmt_item = fmt if isinstance(item, type(result)) else str
+        print(f"{indent[:-len(prefix)]}{prefix}{fmt_item(item)}")
         children = list(item.tree())
         if children:
             for child in children[:-1]:
@@ -175,6 +186,8 @@ class QueryCommand(command.CliCommand):
         parser.add_argument(
             "-o",
             "--format",
+            type=compile_formatter,
+            default=str,
             help="Output format.",
         )
         parser.add_argument(
@@ -248,4 +261,4 @@ Show all ebuilds which inherit python-r1 and have EAPI <= 6:
             if self.options.tree:
                 tree_result(result, self.options.format)
             else:
-                print(format_result(result, self.options.format))
+                print(self.options.format(result))
